@@ -79,6 +79,13 @@ pre.tpl{background:#F0F2EE;border:1px solid var(--line);border-radius:8px;paddin
 .modalbox .card{margin:0;box-shadow:0 18px 60px rgba(35,21,18,.35)}
 .linkbox{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
 .pickbox{border:1.5px dashed var(--key);border-radius:10px;padding:12px;margin-top:10px;background:#fff}
+.flags{display:flex;gap:20px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.tgl{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--ink);user-select:none}
+.tgl input{position:absolute;opacity:0;width:0;height:0}
+.tglt{width:38px;height:20px;border-radius:11px;background:#D8C3BD;position:relative;transition:background .15s;flex:0 0 auto}
+.tglt::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .15s}
+.tgl input:checked + .tglt{background:var(--cyan)}
+.tgl input:checked + .tglt::after{transform:translateX(18px)}
 .chip{display:inline-flex;align-items:center}
 #chyba{max-width:700px;margin:60px auto;background:#FFF6ED;border:1px solid #F6CDA9;color:#8A4A12;border-radius:10px;padding:24px;font-size:15px;display:none}
 </style>
@@ -117,6 +124,19 @@ const TECHS = {
   TRS: { name: "Transfer", gm2: 18.0 },
   FIR: { name: "Firing — Low Temperature", gm2: 8.0 },
 };
+// Standardní sítotisková síta (nití/cm – průměr vlákna µm), řada Sefar/Saati dle DF06.
+const SITA = [
+  "32-100","36-100","43-80","48-70","54-64","61-64","68-55","68-64",
+  "77-48","77-55","77-64","90-40","90-48","95-40","100-40","110-40",
+  "120-31","120-34","120-40","130-34","140-31","140-34","150-31","150-34",
+  "165-31","180-31",
+];
+const KRYVOSTI = ["Vysoce krycí", "Standard", "Transparentní"];
+const POVRCHY = [
+  "Aluminium Foil mat","Bílé","Mléčně bílá / přírodní","Stupeň",
+  "Stříbro","transparentní","Černé",
+];
+
 const TECH_MAP = [
   { match: /tampon/i, code: "PDP" },
   { match: /rota.n.\s*s.totisk|rotary\s*screen/i, code: "SCR" },
@@ -408,6 +428,9 @@ function Calc({ products, recipes, setRecipes, links, setLinks }) {
     <div><div class="lbl">Technologie</div><div class="val">${esc(tech)} — ${esc(TECHS[tech] ? TECHS[tech].name : "")}</div></div>
     <div><div class="lbl">Zakázka</div><div class="val">${fmt(n(qty), 0)} ks · ${fmt(n(gm2), 1)} g/m² · ztráty ${fmt(n(loss), 0)} %</div></div>
     <div><div class="lbl">Receptura</div><div class="val">${esc(recipe.name)} · ${esc(recipe.series || "")} · hustota ${fmt(n(recipe.density, 1), 2)} g/ml</div></div>
+    <div><div class="lbl">Síto / kryvost / povrch</div><div class="val">${esc(recipe.mesh || "—")} · ${esc(recipe.opacity || "—")} · ${esc(recipe.surface || "—")}</div></div>
+    <div><div class="lbl">Objednavatel</div><div class="val">${esc(recipe.customer || "—")}</div></div>
+    <div><div class="lbl">Příznaky</div><div class="val">${[recipe.tested ? "otestovaný" : "", recipe.fade ? "odolný vůči vyblednutí" : ""].filter(Boolean).join(" · ") || "—"}</div></div>
   </div>
   <div class="box">
     <div class="lbl">Celkem namíchat${calc.minApplied ? " (uplatněna min. dávka)" : ""}</div>
@@ -543,6 +566,35 @@ function Calc({ products, recipes, setRecipes, links, setLinks }) {
           <span className="swatch" style=${{ background: recipe ? recipe.hex : "#888" }} />
           <span className="note">${recipe ? recipe.name : ""} · ${recipe && recipe.type === "Custom" ? "Custom" : "Pantone standard"} · hustota ${fmt(n(recipe ? recipe.density : 1, 1), 2)} g/ml · ${recipe ? recipe.components.length : 0} komponent${vazRec && recipe && vazRec.id === recipe.id ? " · vázaná na barvu " + (colorSel ? (colorSel.code || colorSel.name || "") : "") : ""}</span>
         </div>
+        ${recipe && html`
+          <div className="frow c3" style=${{ marginTop: 8 }}>
+            <div>
+              <label className="f">Síto</label>
+              <select value=${recipe.mesh || ""} onChange=${(e) => setRecipes((prev) => prev.map((x) => x.id === recipe.id ? Object.assign({}, x, { mesh: e.target.value }) : x))}>
+                <option value="">— nevybráno —</option>
+                ${SITA.map((m) => html`<option key=${m} value=${m}>${m}</option>`)}
+              </select>
+            </div>
+            <div>
+              <label className="f">Kryvost</label>
+              <select value=${recipe.opacity || ""} onChange=${(e) => setRecipes((prev) => prev.map((x) => x.id === recipe.id ? Object.assign({}, x, { opacity: e.target.value }) : x))}>
+                <option value="">— nevybráno —</option>
+                ${KRYVOSTI.map((m) => html`<option key=${m} value=${m}>${m}</option>`)}
+              </select>
+            </div>
+            <div>
+              <label className="f">Povrch</label>
+              <select value=${recipe.surface || ""} onChange=${(e) => setRecipes((prev) => prev.map((x) => x.id === recipe.id ? Object.assign({}, x, { surface: e.target.value }) : x))}>
+                <option value="">— nevybráno —</option>
+                ${POVRCHY.map((m) => html`<option key=${m} value=${m}>${m}</option>`)}
+              </select>
+            </div>
+          </div>
+          <div className="flags">
+            <label className="tgl"><input type="checkbox" checked=${!!recipe.tested} onChange=${(e) => setRecipes((prev) => prev.map((x) => x.id === recipe.id ? Object.assign({}, x, { tested: e.target.checked }) : x))} /><span className="tglt"></span>Otestovaný</label>
+            <label className="tgl"><input type="checkbox" checked=${!!recipe.fade} onChange=${(e) => setRecipes((prev) => prev.map((x) => x.id === recipe.id ? Object.assign({}, x, { fade: e.target.checked }) : x))} /><span className="tglt"></span>Vysoce odolný vůči vyblednutí</label>
+          </div>
+          <p className="note" style=${{ marginTop: 4 }}>Parametry se ukládají přímo k receptuře (i k Pantone standardu).</p>`}
 
         <div className="frow c4" style=${{ marginTop: 16 }}>
           <div>
@@ -980,6 +1032,36 @@ function RecipeForm({ initial, onSave, onCancel }) {
           </div>
         </div>
       </div>
+      <div className="frow c3" style=${{ marginTop: 4 }}>
+        <div>
+          <label className="f">Síto</label>
+          <select value=${r.mesh || ""} onChange=${(e) => setR(Object.assign({}, r, { mesh: e.target.value }))}>
+            <option value="">— nevybráno —</option>
+            ${SITA.map((m) => html`<option key=${m} value=${m}>${m}</option>`)}
+          </select>
+        </div>
+        <div>
+          <label className="f">Kryvost</label>
+          <select value=${r.opacity || ""} onChange=${(e) => setR(Object.assign({}, r, { opacity: e.target.value }))}>
+            <option value="">— nevybráno —</option>
+            ${KRYVOSTI.map((m) => html`<option key=${m} value=${m}>${m}</option>`)}
+          </select>
+        </div>
+        <div>
+          <label className="f">Povrch</label>
+          <select value=${r.surface || ""} onChange=${(e) => setR(Object.assign({}, r, { surface: e.target.value }))}>
+            <option value="">— nevybráno —</option>
+            ${POVRCHY.map((m) => html`<option key=${m} value=${m}>${m}</option>`)}
+          </select>
+        </div>
+      </div>
+      <div className="frow c2" style=${{ marginTop: 4 }}>
+        <div><label className="f">Objednavatel</label><input value=${r.customer || ""} onChange=${(e) => setR(Object.assign({}, r, { customer: e.target.value }))} placeholder="Název zákazníka (nepovinné)" /></div>
+        <div className="flags">
+          <label className="tgl"><input type="checkbox" checked=${!!r.tested} onChange=${(e) => setR(Object.assign({}, r, { tested: e.target.checked }))} /><span className="tglt"></span>Otestovaný</label>
+          <label className="tgl"><input type="checkbox" checked=${!!r.fade} onChange=${(e) => setR(Object.assign({}, r, { fade: e.target.checked }))} /><span className="tglt"></span>Vysoce odolný vůči vyblednutí</label>
+        </div>
+      </div>
       <div className="frow c3">
         <div><label className="f">Řada barvy (Printcolor)</label><input value=${r.series} onChange=${(e) => setR(Object.assign({}, r, { series: e.target.value }))} placeholder="Např. Printcolor 390" /></div>
         <div><label className="f">Hustota (g/ml)</label><input type="number" step="0.01" value=${r.density} onChange=${(e) => setR(Object.assign({}, r, { density: e.target.value }))} /></div>
@@ -1095,6 +1177,8 @@ function csvToRecipes(text) {
     name: idx(/^(n.zev|name|pantone)/), type: idx(/^typ/), series: idx(/^(.ada|rada|series)/),
     density: idx(/^hustota|density/), hex: idx(/^hex|barva|color/),
     comp: idx(/^komponent|component|slozka|složka/), pct: idx(/^(procent|pct|%|pod.l)/),
+    mesh: idx(/^(s.to|sito|mesh)/), opacity: idx(/^(kryvost|opacity)/), surface: idx(/^(povrch|surface)/),
+    customer: idx(/^(objednavatel|customer|z.kazn.k)/), tested: idx(/^(otestovan|tested)/), fade: idx(/^(vyblednut|odolnost|fade)/),
   };
   if (ci.name < 0 || ci.comp < 0 || ci.pct < 0)
     throw new Error("CSV musí obsahovat sloupce: nazev, komponenta, procento (volitelně typ, rada, hustota, hex).");
@@ -1108,6 +1192,12 @@ function csvToRecipes(text) {
         series: ci.series >= 0 ? (r[ci.series] || "") : "",
         density: ci.density >= 0 ? n(r[ci.density], 1.2) : 1.2,
         hex: ci.hex >= 0 && /^#?[0-9a-f]{6}$/i.test(r[ci.hex] || "") ? (r[ci.hex][0] === "#" ? r[ci.hex] : "#" + r[ci.hex]) : "#888888",
+        mesh: ci.mesh >= 0 ? (r[ci.mesh] || "") : "",
+        opacity: ci.opacity >= 0 ? (r[ci.opacity] || "") : "",
+        surface: ci.surface >= 0 ? (r[ci.surface] || "") : "",
+        customer: ci.customer >= 0 ? (r[ci.customer] || "") : "",
+        tested: ci.tested >= 0 ? /^(1|ano|yes|true|x)$/i.test((r[ci.tested] || "").trim()) : false,
+        fade: ci.fade >= 0 ? /^(1|ano|yes|true|x)$/i.test((r[ci.fade] || "").trim()) : false,
         components: [],
       });
     }
