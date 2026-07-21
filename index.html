@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ink Recipe Manager — Printcolor</title>
+<style>
+:root{
+  --bg:#FBF5F3; --paper:#FFFFFF; --ink:#231512; --ink-2:#6B4A43; --line:#EFD8D2;
+  --cyan:#FF1A00; --magenta:#FF5F49; --yellow:#FFAB9C; --key:#9E1200;
+  --ok:#0E8A5F; --warn:#C2410C;
+  --mono:ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --sans:'Segoe UI',system-ui,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink)}
+input,select,button,textarea{font-family:inherit;font-size:14px}
+input,select,textarea{border:1px solid var(--line);border-radius:6px;padding:8px 10px;background:#fff;color:var(--ink);width:100%}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--cyan);outline-offset:1px}
+input[type=number]{font-family:var(--mono)}
+textarea{font-family:var(--mono);font-size:12.5px;min-height:160px;resize:vertical}
+.regbar{display:flex;height:6px}
+.regbar span{flex:1}
+.hdr{background:var(--key);color:#fff;padding:18px 24px 16px}
+.hdr h1{margin:0;font-size:clamp(20px,3vw,28px);font-weight:800;letter-spacing:.01em;text-transform:uppercase}
+.hdr .sub{color:#FFC4B8;font-size:12.5px;margin-top:4px;font-family:var(--mono)}
+.tabs{display:flex;gap:0;background:var(--key);padding:0 24px;flex-wrap:wrap}
+.tabs button{background:none;border:none;color:#FFC4B8;padding:12px 18px;font-weight:600;font-size:13.5px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;border-bottom:3px solid transparent}
+.tabs button.on{color:#fff;border-bottom-color:var(--cyan)}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 24px 64px}
+.grid{display:grid;gap:20px}
+@media(min-width:960px){.grid.calc{grid-template-columns:minmax(0,1fr) 400px}}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:20px;margin-bottom:20px}
+.card h2{margin:0 0 4px;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+.card .hint{color:var(--ink-2);font-size:12.5px;margin:0 0 14px}
+.frow{display:grid;gap:12px;margin-bottom:12px}
+@media(min-width:640px){.frow.c2{grid-template-columns:1fr 1fr}.frow.c3{grid-template-columns:1fr 1fr 1fr}.frow.c4{grid-template-columns:1fr 1fr 1fr 1fr}}
+label.f{display:block;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);margin-bottom:5px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;cursor:pointer;font-weight:600;font-size:13px}
+.chip.on{background:var(--key);color:#fff;border-color:var(--key)}
+.btn{border:none;border-radius:7px;padding:10px 16px;font-weight:700;cursor:pointer;background:var(--key);color:#fff}
+.btn.sec{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:6px 10px;font-size:12.5px}
+.btn.danger{background:#fff;color:#B91C1C;border:1px solid #F1C6C6}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+table.t{width:100%;border-collapse:collapse;font-size:13.5px}
+table.t th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);border-bottom:1.5px solid var(--key);padding:6px 8px}
+table.t td{border-bottom:1px solid var(--line);padding:8px;vertical-align:top}
+td.num,th.num{text-align:right;font-family:var(--mono)}
+.swatch{width:26px;height:26px;border-radius:5px;border:1px solid rgba(0,0,0,.15);display:inline-block;vertical-align:middle}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 7px;border-radius:4px;background:#F7E7E2;color:var(--ink-2)}
+.tag.tech{background:var(--key);color:#fff}
+.result-big{font-family:var(--mono);font-size:34px;font-weight:600;line-height:1.05}
+.result-sub{font-family:var(--mono);color:var(--ink-2);font-size:13px}
+.mixbar{display:flex;height:22px;border-radius:6px;overflow:hidden;border:1px solid var(--line);margin:10px 0 4px}
+.warnbox{background:#FFF6ED;border:1px solid #F6CDA9;color:#8A4A12;border-radius:8px;padding:10px 12px;font-size:13px;margin-top:12px}
+.okbox{background:#EDF7F2;border:1px solid #BCE0CF;color:#0E5C40;border-radius:8px;padding:10px 12px;font-size:13px;margin-top:12px}
+.empty{color:var(--ink-2);font-size:13.5px;padding:18px;text-align:center;border:1.5px dashed var(--line);border-radius:8px}
+.rowline{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+.note{font-size:12px;color:var(--ink-2)}
+.search{max-width:340px}
+pre.tpl{background:#F0F2EE;border:1px solid var(--line);border-radius:8px;padding:12px;font-size:12px;overflow:auto;font-family:var(--mono)}
+.prodphoto{width:128px;height:128px;object-fit:contain;border:1px solid var(--line);border-radius:8px;background:#fff;flex:0 0 auto}
+.poscards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:8px 0 6px}
+.poscard{border:1.5px solid var(--line);border-radius:8px;background:#fff;padding:8px;cursor:pointer;text-align:center}
+.poscard:hover{border-color:#E8A798}
+.poscard.on{border-color:var(--cyan);box-shadow:0 0 0 2px rgba(255,26,0,.2)}
+.poscard img{width:100%;height:92px;object-fit:contain;background:#fff}
+.poscard .nm{font-size:12px;font-weight:700;margin-top:6px;line-height:1.25}
+.poscard .dm{font-family:var(--mono);font-size:11px;color:var(--ink-2);margin-top:3px}
+.noimg{width:100%;height:92px;display:flex;align-items:center;justify-content:center;color:var(--ink-2);font-size:11px;background:#F0F2EE;border-radius:4px;text-align:center;padding:4px}
+.thumb{width:46px;height:46px;object-fit:contain;border:1px solid var(--line);border-radius:6px;background:#fff}
+.wbar{height:14px;background:#F6E3DD;border-radius:7px;overflow:hidden;border:1px solid var(--line)}
+.wbar>span{display:block;height:100%;transition:width .15s}
+.cdot{display:inline-block;width:13px;height:13px;border-radius:3px;margin-right:4px;vertical-align:-2px;border:1px solid rgba(0,0,0,.22)}
+.modalbg{position:fixed;inset:0;background:rgba(35,21,18,.45);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:30px 16px;overflow:auto}
+.modalbox{width:min(860px,100%)}
+.modalbox .card{margin:0;box-shadow:0 18px 60px rgba(35,21,18,.35)}
+.linkbox{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
+.pickbox{border:1.5px dashed var(--key);border-radius:10px;padding:12px;margin-top:10px;background:#fff}
+.flags{display:flex;gap:20px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.tgl{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--ink);user-select:none}
+.tgl input{position:absolute;opacity:0;width:0;height:0}
+.tglt{width:38px;height:20px;border-radius:11px;background:#D8C3BD;position:relative;transition:background .15s;flex:0 0 auto}
+.tglt::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .15s}
+.tgl input:checked + .tglt{background:var(--cyan)}
+.tgl input:checked + .tglt::after{transform:translateX(18px)}
+.chip{display:inline-flex;align-items:center}
+#chyba{max-width:700px;margin:60px auto;background:#FFF6ED;border:1px solid #F6CDA9;color:#8A4A12;border-radius:10px;padding:24px;font-size:15px;display:none}
+</style>
+</head>
+<body>
+<div id="chyba">
+  <b>Aplikaci se nepodařilo spustit.</b><br><br>
+  Nejčastější příčina: ještě nebyl spuštěn skript <code>stahni_obrazky.py</code>, který stáhne
+  potřebné knihovny do složky <code>lib/</code>. Otevřete příkazový řádek ve složce aplikace a spusťte:
+  <pre>python stahni_obrazky.py</pre>
+  Poté tuto stránku načtěte znovu (F5).
+</div>
+<div id="root"></div>
+
+<script src="data.js"></script>
+<script src="lib/react.production.min.js"></script>
+<script>if (!window.React) document.write('<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"><\/script>');</script>
+<script src="lib/react-dom.production.min.js"></script>
+<script>if (!window.ReactDOM) document.write('<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"><\/script>');</script>
+<script src="lib/htm.js"></script>
+<script>if (!window.htm) document.write('<script src="https://unpkg.com/htm@3.1.1/dist/htm.js"><\/script>');</script>
+<script>
+if (!window.React || !window.ReactDOM || !window.htm) {
+  document.getElementById('chyba').style.display = 'block';
+} else {
+(function () {
+"use strict";
+const { useState, useEffect, useMemo, useRef } = React;
+const html = htm.bind(React.createElement);
+
+/* ---------- technologie a výchozí spotřeby (g/m², editovatelné) ---------- */
+const TECHS = {
+  SCR: { name: "Sítotisk (plast, papír) / rotační", gm2: 6.0 },
+  PDP: { name: "Tampontisk", gm2: 2.5 },
+  TXP: { name: "Sítotisk (textil)", gm2: 14.0 },
+  TRS: { name: "Transfer", gm2: 18.0 },
+  FIR: { name: "Firing — Low Temperature", gm2: 8.0 },
+};
+// Standardní sítotisková síta (nití/cm – průměr vlákna µm), řada Sefar/Saati dle DF06.
+const SITA = [
+  "32-100","36-100","43-80","48-70","54-64","61-64","68-55","68-64",
+  "77-48","77-55","77-64","90-40","90-48","95-40","100-40","110-40",
+  "120-31","120-34","120-40","130-34","140-31","140-34","150-31","150-34",
+  "165-31","180-31",
+];
+const KRYVOSTI = ["Vysoce krycí", "Standard", "Transparentní"];
+const POVRCHY = [
+  "Aluminium Foil mat","Bílé","Mléčně bílá / přírodní","Stupeň",
+  "Stříbro","transparentní","Černé",
+];
+
+const TECH_MAP = [
+  { match: /tampon/i, code: "PDP" },
+  { match: /rota.n.\s*s.totisk|rotary\s*screen/i, code: "SCR" },
+  { match: /s.totisk.*textil|screen.*textil|textil.*s.totisk/i, code: "TXP" },
+  { match: /s.totisk|screen\s*print/i, code: "SCR" },
+  { match: /^trf$/i, code: "TRS" },
+  { match: /digit.ln.\s*transfer/i, code: "TRS" },
+  { match: /transfer/i, code: "TRS" },
+  { match: /firing|vypalov/i, code: "FIR" },
+];
+const mapTech = (s) => {
+  if (!s) return null;
+  const t = String(s).trim();
+  if (TECHS[t.toUpperCase()]) return t.toUpperCase();
+  for (const m of TECH_MAP) if (m.match.test(t)) return m.code;
+  return null;
+};
+const REMOTE_BASE = "https://www.stricker-europe.com/fotos/produtos/";
+const toLocalImg = (u) => (u && u.startsWith(REMOTE_BASE)) ? "obrazky/" + u.slice(REMOTE_BASE.length) : (u || "");
+
+const SEED_RECIPES = [
+  { id: "r1", name: "PANTONE 485 C", type: "Pantone", series: "Printcolor 390 (SCR)", density: 1.25, hex: "#DA291C",
+    components: [
+      { id: "c1", name: "Printcolor Warm Red", pct: 62 },
+      { id: "c2", name: "Printcolor Yellow 012", pct: 28 },
+      { id: "c3", name: "Transparentní báze", pct: 10 }] },
+  { id: "r2", name: "PANTONE 286 C", type: "Pantone", series: "Printcolor 752 (PDP)", density: 1.18, hex: "#0032A0",
+    components: [
+      { id: "c1", name: "Printcolor Reflex Blue", pct: 71 },
+      { id: "c2", name: "Printcolor Process Blue", pct: 17 },
+      { id: "c3", name: "Transparentní báze", pct: 12 }] },
+];
+
+const uid = () => Math.random().toString(36).slice(2, 9);
+const n = (v, d = 0) => { const x = parseFloat(String(v).replace(",", ".")); return isNaN(x) ? d : x; };
+const fmt = (v, dec = 1) => v.toLocaleString("cs-CZ", { minimumFractionDigits: dec, maximumFractionDigits: dec });
+
+function loadLS(key, fallback) {
+  try { const s = localStorage.getItem(key); if (s) return JSON.parse(s); } catch (e) {}
+  return fallback;
+}
+function saveLS(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); }
+  catch (e) { console.error("Uložení selhalo:", e); }
+}
+
+function Img({ src, alt, className, fallback = null, errFallback = null }) {
+  const [err, setErr] = useState(false);
+  useEffect(() => { setErr(false); }, [src]);
+  if (!src) return fallback;
+  if (err) return errFallback != null ? errFallback : fallback;
+  return html`<img className=${className} src=${src} alt=${alt || ""} loading="lazy" onError=${() => setErr(true)} />`;
+}
+
+const fixTech = (ps) => (ps || []).map((p) => Object.assign({}, p, {
+  positions: (p.positions || []).map((x) => Object.assign({}, x, { tech: x.tech === "TRF" ? "TRS" : x.tech })),
+}));
+
+/* ============================ APP ============================ */
+function App() {
+  const [tab, setTab] = useState("calc");
+  const dataJsOk = Array.isArray(window.KATALOG) && window.KATALOG.length > 0;
+  const [products, setProducts] = useState(() => {
+    const stored = loadLS("irm-products", null);
+    const base = dataJsOk ? window.KATALOG : [];
+    return fixTech(stored && stored.length ? stored : base);
+  });
+  const [recipes, setRecipes] = useState(() => loadLS("irm-recipes", SEED_RECIPES));
+  const [links, setLinks] = useState(() => loadLS("irm-links", {}));
+  useEffect(() => { saveLS("irm-links", links); }, [links]);
+  const first = useRef(true);
+
+  // Samoléčba: při nové verzi data.js doplní barvy, kódy a fotky do uloženého
+  // katalogu podle ref — ruční produkty a úpravy zůstávají nedotčené.
+  useEffect(() => {
+    const ver = String(window.KATALOG_VERZE || "");
+    if (!dataJsOk || !ver || loadLS("irm-katalog-verze", "") === ver) return;
+    const byRef = new Map(window.KATALOG.map((k) => [String(k.ref), k]));
+    let zmena = false;
+    const obohacene = products.map((p) => {
+      const k = byRef.get(String(p.ref || ""));
+      if (!k) return p;
+      const np = Object.assign({}, p);
+      if (k.colors && k.colors.length) {
+        const stare = JSON.stringify(p.colors || []);
+        if (stare !== JSON.stringify(k.colors)) { np.colors = k.colors; zmena = true; }
+      }
+      if (!np.img && k.img) { np.img = k.img; zmena = true; }
+      if (k.positions && k.positions.length) {
+        np.positions = (np.positions || []).map((pos) => {
+          if (pos.img) return pos;
+          const m = k.positions.find((kp) => kp.name === pos.name && kp.tech === pos.tech) ||
+                    k.positions.find((kp) => kp.tech === pos.tech && n(kp.w) === n(pos.w) && n(kp.h) === n(pos.h));
+          if (m && m.img) { zmena = true; return Object.assign({}, pos, { img: m.img }); }
+          return pos;
+        });
+      }
+      return np;
+    });
+    if (zmena) setProducts(obohacene);
+    saveLS("irm-katalog-verze", ver);
+  }, []);
+
+  useEffect(() => {
+    if (first.current) { first.current = false; return; }
+    saveLS("irm-products", products);
+  }, [products]);
+  useEffect(() => { saveLS("irm-recipes", recipes); }, [recipes]);
+
+  return html`
+    <div>
+      <div className="regbar" aria-hidden="true">
+        <span style=${{ background: "var(--cyan)" }} />
+        <span style=${{ background: "var(--magenta)" }} />
+        <span style=${{ background: "var(--yellow)" }} />
+        <span style=${{ background: "var(--key)" }} />
+      </div>
+      <header className="hdr">
+        <h1>Ink Recipe Manager</h1>
+        <div className="sub">Printcolor · Pantone Matching System · SCR / PDP / TXP / TRS / FIR · lokální verze</div>
+      </header>
+      <nav className="tabs">
+        <button className=${tab === "calc" ? "on" : ""} onClick=${() => setTab("calc")}>Kalkulace</button>
+        <button className=${tab === "prod" ? "on" : ""} onClick=${() => setTab("prod")}>Produkty</button>
+        <button className=${tab === "rec" ? "on" : ""} onClick=${() => setTab("rec")}>Receptury</button>
+        <button className=${tab === "imp" ? "on" : ""} onClick=${() => setTab("imp")}>Import / data</button>
+      </nav>
+      <main className="wrap">
+        ${!dataJsOk && html`
+          <div className="warnbox" style=${{ marginTop: 0, marginBottom: 18 }}>
+            <b>Katalog (soubor data.js) se nenačetl.</b><br />
+            Aplikace musí běžet ze složky, kde leží pohromadě všechny soubory balíčku
+            (index.html, data.js, stahni_obrazky.py, složky lib a obrazky).<br />
+            Nejčastější příčina: index.html byl otevřen přímo ze ZIPu nebo zkopírován jinam samostatně.
+            <b> Rozbalte celý ZIP do jedné složky a otevřete index.html z ní.</b>
+          </div>`}
+        ${tab === "calc" && html`<${Calc} products=${products} recipes=${recipes} setRecipes=${setRecipes} links=${links} setLinks=${setLinks} />`}
+        ${tab === "prod" && html`<${Products} products=${products} setProducts=${setProducts} />`}
+        ${tab === "rec" && html`<${Recipes} recipes=${recipes} setRecipes=${setRecipes} />`}
+        ${tab === "imp" && html`<${Importer} setProducts=${setProducts} setRecipes=${setRecipes} />`}
+      </main>
+    </div>`;
+}
+
+/* ============================ KALKULACE ============================ */
+function Calc({ products, recipes, setRecipes, links, setLinks }) {
+  const [q, setQ] = useState("");
+  const filtered = useMemo(() => {
+    const s = q.trim().toLowerCase();
+    if (!s) return products;
+    return products.filter((p) =>
+      (p.name + " " + (p.ref || "") + " " + (p.material || "")).toLowerCase().includes(s));
+  }, [q, products]);
+
+  const [prodId, setProdId] = useState(products[0] ? products[0].id : "");
+  useEffect(() => {
+    if (filtered.length && !filtered.some((p) => p.id === prodId)) setProdId(filtered[0].id);
+  }, [filtered]);
+  const product = products.find((p) => p.id === prodId);
+
+  const [posId, setPosId] = useState("");
+  useEffect(() => {
+    if (product && !product.positions.some((p) => p.id === posId))
+      setPosId(product.positions[0] ? product.positions[0].id : "");
+  }, [prodId, product]);
+  const colors = (product && product.colors) ? product.colors : [];
+  const [colorIdx, setColorIdx] = useState(0);
+  useEffect(() => { setColorIdx(0); }, [prodId]);
+  const colorSel = colors[colorIdx] || colors[0] || null;
+  const prodPhoto = (colorSel && colorSel.img) ? colorSel.img : (product ? product.img : "");
+
+  // ---- vazba produkt + barva -> receptura ----
+  const linkKey = (p, c) => (p && c) ? String(p.ref || p.id) + "|" + String(c.code || c.name || "") : "";
+  const lk = linkKey(product, colorSel);
+  const vazbaId = lk ? (links[lk] || "") : "";
+  const vazRec = recipes.find((r) => r.id === vazbaId) || null;
+  useEffect(() => {                       // automatické načtení vázané receptury
+    if (lk && links[lk] && recipes.some((r) => r.id === links[lk])) setRecId(links[lk]);
+  }, [prodId, colorIdx]);
+
+  // ---- nástroj odvození receptury ----
+  const [odvod, setOdvod] = useState(null);      // null | {mode:"pick"} | {mode:"edit", initial}
+  const [baseQ, setBaseQ] = useState("");
+  const [baseId, setBaseId] = useState("");
+  const baseList = baseQ.trim()
+    ? recipes.filter((r) => (r.name + " " + (r.series || "")).toLowerCase().includes(baseQ.trim().toLowerCase()))
+    : recipes;
+  const baseSel = recipes.find((r) => r.id === baseId) || null;
+  const odvodit = (base) => {
+    const label = colorSel ? ((colorSel.code ? colorSel.code + " " : "") + (colorSel.name || "")).trim() : "";
+    setOdvod({ mode: "edit", initial: {
+      id: uid(),
+      name: ((product && product.ref ? product.ref + " · " : "") + label + " — " + base.name).trim(),
+      type: "Custom", series: "odvozeno z " + base.name,
+      density: base.density, hex: base.hex,
+      components: base.components.map((c) => ({ id: uid(), name: c.name, pct: c.pct })),
+    }});
+  };
+  const ulozOdvozenou = (r) => {
+    setRecipes((prev) => prev.some((x) => x.id === r.id) ? prev.map((x) => x.id === r.id ? r : x) : prev.concat([r]));
+    if (lk) setLinks(Object.assign({}, links, { [lk]: r.id }));
+    setRecId(r.id);
+    setOdvod(null);
+  };
+  const zrusVazbu = () => {
+    const nl = Object.assign({}, links); delete nl[lk]; setLinks(nl);
+  };
+  const position = product ? product.positions.find((p) => p.id === posId) : null;
+
+  const tech = position ? position.tech : "SCR";
+  const [recId, setRecId] = useState(recipes[0] ? recipes[0].id : "");
+  const recipe = recipes.find((r) => r.id === recId) || recipes[0];
+  const [recQ, setRecQ] = useState("");
+  const pantoneAll = recipes.filter((r) => r.type !== "Custom");
+  const pantoneList = recQ.trim()
+    ? pantoneAll.filter((r) => (r.name + " " + (r.series || "")).toLowerCase().includes(recQ.trim().toLowerCase()))
+    : pantoneAll;
+
+  const [qty, setQty] = useState(500);
+  const [gm2, setGm2] = useState(TECHS[tech] ? TECHS[tech].gm2 : 6);
+  const [loss, setLoss] = useState(15);
+  const [minBatch, setMinBatch] = useState(50);
+  useEffect(() => { setGm2(TECHS[tech] ? TECHS[tech].gm2 : 6); }, [tech]);
+
+  const calc = useMemo(() => {
+    if (!position || !recipe) return null;
+    const areaM2 = (n(position.w) * n(position.h) / 1000000) * (n(position.cover, 100) / 100);
+    const netto = areaM2 * n(qty) * n(gm2);
+    const withLoss = netto * (1 + n(loss) / 100);
+    const totalG = Math.max(withLoss, n(minBatch));
+    const totalMl = totalG / (n(recipe.density, 1) || 1);
+    const pctSum = recipe.components.reduce((s, c) => s + n(c.pct), 0);
+    const comps = recipe.components.map((c) => {
+      const share = pctSum ? n(c.pct) / pctSum : 0;
+      return Object.assign({}, c, { g: totalG * share, ml: totalMl * share, norm: share * 100 });
+    });
+    return { areaM2, netto, totalG, totalMl, comps, pctSum, minApplied: totalG > withLoss + 1e-9 };
+  }, [position, recipe, qty, gm2, loss, minBatch]);
+
+  const esc = (x) => String(x == null ? "" : x).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const tiskLisku = () => {
+    if (!calc || !product || !position || !recipe) return;
+    const d = new Date();
+    const dat = d.toLocaleDateString("cs-CZ") + " " + d.toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" });
+    let kum = 0;
+    const radky = calc.comps.map((c, i) => {
+      kum += c.g;
+      return `<tr>
+        <td class="num">${i + 1}</td>
+        <td>${esc(c.name)}</td>
+        <td class="num">${fmt(c.norm)}</td>
+        <td class="num b">${fmt(c.g)}</td>
+        <td class="num">${fmt(kum)}</td>
+        <td class="num">${fmt(c.ml)}</td>
+        <td class="chk"></td>
+      </tr>`;
+    }).join("");
+    const w = window.open("", "_blank");
+    if (!w) { alert("Prohlížeč zablokoval nové okno — povolte vyskakovací okna pro tuto stránku."); return; }
+    w.document.write(`<!doctype html><html lang="cs"><head><meta charset="utf-8"><title>Míchací lístek — ${esc(recipe.name)}</title>
+<style>
+  body{font-family:Arial,Helvetica,sans-serif;color:#231512;margin:24px;font-size:13px}
+  h1{font-size:19px;margin:0;color:#9E1200;letter-spacing:.5px}
+  .sub{color:#6B4A43;font-size:11px;margin:2px 0 14px}
+  .box{border:1.5px solid #9E1200;border-radius:8px;padding:10px 14px;margin-bottom:12px}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:4px 24px}
+  .lbl{color:#6B4A43;font-size:10px;text-transform:uppercase;letter-spacing:.6px}
+  .val{font-weight:700}
+  .big{font-size:30px;font-weight:800;color:#9E1200;font-family:Consolas,monospace}
+  table{width:100%;border-collapse:collapse;margin-top:6px}
+  th{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#6B4A43;border-bottom:2px solid #9E1200;padding:4px 6px;text-align:left}
+  td{border-bottom:1px solid #E4CFC9;padding:6px}
+  .num{text-align:right;font-family:Consolas,monospace;white-space:nowrap}
+  .b{font-weight:800}
+  .chk{width:34px}
+  .chk::after{content:"";display:block;width:16px;height:16px;border:1.5px solid #9E1200;border-radius:3px;margin:0 auto}
+  tfoot td{border-top:2px solid #9E1200;border-bottom:none;font-weight:800}
+  .pods{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-top:26px}
+  .pods div{border-top:1px solid #231512;padding-top:4px;font-size:11px;color:#6B4A43}
+  .note{font-size:10.5px;color:#6B4A43;margin-top:10px}
+  @media print{ body{margin:10mm} }
+</style></head><body>
+  <h1>MÍCHACÍ LÍSTEK</h1>
+  <div class="sub">INK RECIPE MANAGER · vystaveno ${dat}</div>
+  <div class="box g2">
+    <div><div class="lbl">Produkt</div><div class="val">${esc(product.ref ? product.ref + " · " : "")}${esc(product.name)}</div></div>
+    <div><div class="lbl">Barva produktu</div><div class="val">${colorSel ? esc((colorSel.code ? colorSel.code + " — " : "") + (colorSel.name || (colorSel.code ? "" : "—"))) : "—"}</div></div>
+    <div><div class="lbl">Poloha potisku</div><div class="val">${esc(position.name)} · ${fmt(n(position.w), 0)}×${fmt(n(position.h), 0)} mm · pokrytí ${fmt(n(position.cover, 100), 0)} %</div></div>
+    <div><div class="lbl">Technologie</div><div class="val">${esc(tech)} — ${esc(TECHS[tech] ? TECHS[tech].name : "")}</div></div>
+    <div><div class="lbl">Zakázka</div><div class="val">${fmt(n(qty), 0)} ks · ${fmt(n(gm2), 1)} g/m² · ztráty ${fmt(n(loss), 0)} %</div></div>
+    <div><div class="lbl">Receptura</div><div class="val">${esc(recipe.name)} · ${esc(recipe.series || "")} · hustota ${fmt(n(recipe.density, 1), 2)} g/ml</div></div>
+    <div><div class="lbl">Síto / kryvost / povrch</div><div class="val">${esc(recipe.mesh || "—")} · ${esc(recipe.opacity || "—")} · ${esc(recipe.surface || "—")}</div></div>
+    <div><div class="lbl">Objednavatel</div><div class="val">${esc(recipe.customer || "—")}</div></div>
+    <div><div class="lbl">Příznaky</div><div class="val">${[recipe.tested ? "otestovaný" : "", recipe.fade ? "odolný vůči vyblednutí" : ""].filter(Boolean).join(" · ") || "—"}</div></div>
+  </div>
+  <div class="box">
+    <div class="lbl">Celkem namíchat${calc.minApplied ? " (uplatněna min. dávka)" : ""}</div>
+    <div class="big">${fmt(calc.totalG)} g <span style="font-size:15px;color:#6B4A43">≈ ${fmt(calc.totalMl)} ml</span></div>
+  </div>
+  <table>
+    <thead><tr><th style="text-align:right">#</th><th>Komponenta</th><th style="text-align:right">%</th><th style="text-align:right">navážit g</th><th style="text-align:right">kumulativně g</th><th style="text-align:right">ml</th><th style="text-align:center">✓</th></tr></thead>
+    <tbody>${radky}</tbody>
+    <tfoot><tr><td></td><td>Celkem</td><td class="num">100,0</td><td class="num">${fmt(calc.totalG)}</td><td class="num">${fmt(calc.totalG)}</td><td class="num">${fmt(calc.totalMl)}</td><td></td></tr></tfoot>
+  </table>
+  <div class="note">Kumulativní vážení do jedné nádoby: po každé komponentě má displej váhy ukazovat hodnotu ve sloupci „kumulativně g". Tolerance navážení ±0,5 g, pokud technolog neurčí jinak.</div>
+  <div class="pods"><div>Namíchal/a</div><div>Datum a čas</div><div>Kontrola / šarže</div></div>
+  <script>window.addEventListener("load",function(){setTimeout(function(){window.print()},150)})<\/script>
+</body></html>`);
+    w.document.close();
+  };
+
+  if (!products.length) return html`<div className="empty">Katalog je prázdný — v záložce Import / data obnovte katalog nebo nahrajte soubor.</div>`;
+  if (!recipes.length) return html`<div className="empty">Nejdřív přidejte recepturu v záložce Receptury.</div>`;
+
+  return html`
+    <div className="grid calc">
+      <div className="card" style=${{ margin: 0 }}>
+        <h2>Zadání zakázky</h2>
+        <p className="hint">Vyhledejte produkt (název / ref. číslo), vyberte polohu a recepturu — technologie a rozměry se doplní z katalogu.</p>
+
+        <div className="frow c2">
+          <div>
+            <label className="f">Hledat v katalogu</label>
+            <input className="search" value=${q} onChange=${(e) => setQ(e.target.value)} placeholder="Např. 11101 nebo hrnek…" />
+          </div>
+          <div />
+        </div>
+        <div className="frow">
+          <div>
+            <label className="f">Produkt (${filtered.length})</label>
+            <select value=${prodId} onChange=${(e) => setProdId(e.target.value)}>
+              ${filtered.map((p) => html`<option key=${p.id} value=${p.id}>${p.ref ? p.ref + " · " : ""}${p.name}</option>`)}
+            </select>
+          </div>
+        </div>
+
+        <div className="rowline" style=${{ alignItems: "flex-start", margin: "2px 0 12px" }}>
+          <${Img} className="prodphoto" src=${prodPhoto} alt=${product ? product.name : ""}
+            errFallback=${html`<div className="prodphoto noimg">fotka nenalezena — spusťte stahni_obrazky.py</div>`} />
+          <div style=${{ minWidth: 0 }}>
+            <div style=${{ fontWeight: 800 }}>${product && product.ref ? product.ref + " · " : ""}${product ? product.name : ""}</div>
+            ${product && product.material && html`<div className="note">${product.material}</div>`}
+            <div className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
+              <span className="tag tech">${tech} — ${TECHS[tech] ? TECHS[tech].name : ""}</span>
+              <span className="tag">${position ? position.w : "?"}×${position ? position.h : "?"} mm</span>
+              <span className="tag">pokrytí ${position ? (position.cover != null ? position.cover : 100) : 100} %</span>
+            </div>
+          </div>
+        </div>
+
+        ${colors.length > 0 && html`
+          <div style=${{ margin: "2px 0 12px" }}>
+            <label className="f">Barva produktu (${colors.length})</label>
+            <div className="chips">
+              ${colors.map((c, i) => html`
+                <button key=${i} className=${"chip" + ((colorSel === c) ? " on" : "")}
+                  onClick=${() => setColorIdx(i)} title=${c.name || c.code}>
+                  <span className="cdot" style=${{ background: c.hex || "#CCCCCC" }}></span>${c.code ? c.code + (c.name ? " · " + c.name : "") : (c.name || "?")}
+                </button>`)}
+            </div>
+            ${colorSel && html`<div className="note" style=${{ marginTop: 6 }}>skladem ${colorSel.stock && colorSel.stock !== "--" ? colorSel.stock + " ks" : "— (údaj nedostupný)"}${colorSel.img ? "" : " · tato varianta nemá vlastní fotku, zobrazena společná"}</div>`}
+
+            ${colorSel && html`
+              <div className="linkbox">
+                ${vazRec ? html`
+                  <span className="note">Receptura této barvy: <b style=${{ color: "var(--ink)" }}>${vazRec.name}</b></span>
+                  <button className="btn sec sm" onClick=${() => setOdvod({ mode: "edit", initial: JSON.parse(JSON.stringify(vazRec)) })}>Upravit</button>
+                  <button className="btn danger sm" onClick=${zrusVazbu}>Zrušit vazbu</button>
+                ` : html`
+                  <button className="btn sec sm" onClick=${() => { setBaseId(recipe ? recipe.id : ""); setBaseQ(""); setOdvod({ mode: "pick" }); }}>＋ Receptura pro tuto barvu</button>
+                  <span className="note">odvodí custom recepturu z Pantone databáze a uloží ji k barvě ${colorSel.code || colorSel.name || ""}</span>
+                `}
+              </div>
+              ${odvod && odvod.mode === "pick" && html`
+                <div className="pickbox">
+                  <label className="f">Výchozí receptura (${baseList.length} z ${recipes.length})</label>
+                  <input value=${baseQ} onChange=${(e) => setBaseQ(e.target.value)} placeholder="Filtr: např. 485, Reflex, custom…" style=${{ marginBottom: 6 }} />
+                  <select value=${baseList.some((r) => r.id === baseId) ? baseId : ""} onChange=${(e) => setBaseId(e.target.value)}>
+                    <option value="">— vyberte výchozí recepturu —</option>
+                    ${baseList.slice(0, 400).map((r) => html`<option key=${r.id} value=${r.id}>${r.name} · ${r.series}</option>`)}
+                  </select>
+                  ${baseList.length > 400 && html`<div className="note" style=${{ marginTop: 4 }}>Zobrazeno prvních 400 — upřesněte filtr.</div>`}
+                  <div className="rowline" style=${{ marginTop: 10, marginBottom: 0 }}>
+                    <button className="btn sm" disabled=${!baseSel} onClick=${() => baseSel && odvodit(baseSel)}>Odvodit a upravit →</button>
+                    <button className="btn sec sm" onClick=${() => setOdvod(null)}>Zavřít</button>
+                  </div>
+                </div>`}
+            `}
+          </div>`}
+
+        <label className="f">Možnosti potisku — vyberte polohu</label>
+        <div className="poscards">
+          ${(product ? product.positions : []).map((p) => html`
+            <div key=${p.id} className=${"poscard" + (p.id === posId ? " on" : "")}
+              role="button" tabIndex="0"
+              onClick=${() => setPosId(p.id)}
+              onKeyDown=${(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setPosId(p.id); } }}>
+              <${Img} src=${p.img} alt=${p.name}
+                fallback=${html`<div className="noimg">bez náhledu</div>`}
+                errFallback=${html`<div className="noimg" style=${{ background: "#FFF6ED", color: "#8A4A12" }}>obrázek nenalezen — spusťte stahni_obrazky.py</div>`} />
+              <div className="nm">${p.name}</div>
+              <div className="dm">${p.w}×${p.h} mm · ${p.tech}</div>
+            </div>`)}
+        </div>
+
+        <div className="frow c2">
+          <div>
+            <label className="f">Receptura (Pantone standard) — ${pantoneList.length} z ${pantoneAll.length}</label>
+            <input value=${recQ} onChange=${(e) => setRecQ(e.target.value)} placeholder="Filtr: např. 485 nebo Reflex…" style=${{ marginBottom: 6 }} />
+            <select value=${pantoneList.some((r) => r.id === recId) ? recId : ""}
+              onChange=${(e) => e.target.value && setRecId(e.target.value)}>
+              <option value="">— vyberte Pantone recepturu —</option>
+              ${pantoneList.slice(0, 400).map((r) => html`<option key=${r.id} value=${r.id}>${r.name} · ${r.series}</option>`)}
+            </select>
+            ${pantoneList.length > 400 && html`<div className="note" style=${{ marginTop: 4 }}>Zobrazeno prvních 400 — upřesněte filtr.</div>`}
+          </div>
+          <div>
+            <label className="f">Custom receptura</label>
+            <select value=${recipes.some((r) => r.id === recId && r.type === "Custom") ? recId : ""}
+              onChange=${(e) => e.target.value && setRecId(e.target.value)}>
+              <option value="">— vyberte custom recepturu —</option>
+              ${recipes.filter((r) => r.type === "Custom").map((r) => html`<option key=${r.id} value=${r.id}>${r.name} · ${r.series}</option>`)}
+            </select>
+          </div>
+        </div>
+        <div className="rowline" style=${{ marginTop: 4 }}>
+          <span className="swatch" style=${{ background: recipe ? recipe.hex : "#888" }} />
+          <span className="note">${recipe ? recipe.name : ""} · ${recipe && recipe.type === "Custom" ? "Custom" : "Pantone standard"} · hustota ${fmt(n(recipe ? recipe.density : 1, 1), 2)} g/ml · ${recipe ? recipe.components.length : 0} komponent${vazRec && recipe && vazRec.id === recipe.id ? " · vázaná na barvu " + (colorSel ? (colorSel.code || colorSel.name || "") : "") : ""}</span>
+        </div>
+        ${recipe && html`
+          <div className="frow c3" style=${{ marginTop: 8 }}>
+            <div>
+              <label className="f">Síto</label>
+              <select value=${recipe.mesh || ""} onChange=${(e) => setRecipes((prev) => prev.map((x) => x.id === recipe.id ? Object.assign({}, x, { mesh: e.target.value }) : x))}>
+                <option value="">— nevybráno —</option>
+                ${SITA.map((m) => html`<option key=${m} value=${m}>${m}</option>`)}
+              </select>
+            </div>
+            <div>
+              <label className="f">Kryvost</label>
+              <select value=${recipe.opacity || ""} onChange=${(e) => setRecipes((prev) => prev.map((x) => x.id === recipe.id ? Object.assign({}, x, { opacity: e.target.value }) : x))}>
+                <option value="">— nevybráno —</option>
+                ${KRYVOSTI.map((m) => html`<option key=${m} value=${m}>${m}</option>`)}
+              </select>
+            </div>
+            <div>
+              <label className="f">Povrch</label>
+              <select value=${recipe.surface || ""} onChange=${(e) => setRecipes((prev) => prev.map((x) => x.id === recipe.id ? Object.assign({}, x, { surface: e.target.value }) : x))}>
+                <option value="">— nevybráno —</option>
+                ${POVRCHY.map((m) => html`<option key=${m} value=${m}>${m}</option>`)}
+              </select>
+            </div>
+          </div>
+          <div className="flags">
+            <label className="tgl"><input type="checkbox" checked=${!!recipe.tested} onChange=${(e) => setRecipes((prev) => prev.map((x) => x.id === recipe.id ? Object.assign({}, x, { tested: e.target.checked }) : x))} /><span className="tglt"></span>Otestovaný</label>
+            <label className="tgl"><input type="checkbox" checked=${!!recipe.fade} onChange=${(e) => setRecipes((prev) => prev.map((x) => x.id === recipe.id ? Object.assign({}, x, { fade: e.target.checked }) : x))} /><span className="tglt"></span>Vysoce odolný vůči vyblednutí</label>
+          </div>
+          <p className="note" style=${{ marginTop: 4 }}>Parametry se ukládají přímo k receptuře (i k Pantone standardu).</p>`}
+
+        <div className="frow c4" style=${{ marginTop: 16 }}>
+          <div>
+            <label className="f">Počet kusů</label>
+            <input type="number" min="1" value=${qty} onChange=${(e) => setQty(e.target.value)} />
+          </div>
+          <div>
+            <label className="f">Spotřeba (g/m²)</label>
+            <input type="number" step="0.1" value=${gm2} onChange=${(e) => setGm2(e.target.value)} />
+          </div>
+          <div>
+            <label className="f">Ztráty (%)</label>
+            <input type="number" step="1" value=${loss} onChange=${(e) => setLoss(e.target.value)} />
+          </div>
+          <div>
+            <label className="f">Min. dávka (g)</label>
+            <input type="number" step="10" value=${minBatch} onChange=${(e) => setMinBatch(e.target.value)} />
+          </div>
+        </div>
+        <p className="note">Spotřeba se předvyplňuje dle technologie (${Object.entries(TECHS).map(([k, t]) => k + " " + t.gm2).join(" · ")} g/m²) — upravte podle síta / hloubky leptu klišé a viskozity.</p>
+      </div>
+
+      ${calc && html`
+        <div style=${{ display: "grid", gap: 20, alignContent: "start" }}>
+        <div className="card" style=${{ margin: 0 }}>
+          <h2>Výsledek míchání</h2>
+          <p className="hint">Plocha motivu ${fmt(calc.areaM2 * 10000, 2)} cm² / ks · netto ${fmt(calc.netto)} g${colorSel ? " · barva produktu " + colorSel.code + (colorSel.name ? " — " + colorSel.name : "") : ""}</p>
+
+          <div className="result-big">${fmt(calc.totalG)} g</div>
+          <div className="result-sub">≈ ${fmt(calc.totalMl)} ml při hustotě ${fmt(n(recipe.density, 1), 2)} g/ml</div>
+          ${calc.minApplied && html`<div className="warnbox">Uplatněna minimální dávka ${fmt(n(minBatch), 0)} g (výpočtová potřeba je nižší).</div>`}
+
+          <div className="mixbar" title="Poměr komponent">
+            ${calc.comps.map((c, i) => html`<span key=${c.id} style=${{ width: c.norm + "%", background: i === 0 ? recipe.hex : "hsl(" + ((i * 67) % 360) + " 25% " + (78 - i * 8) + "%)" }} />`)}
+          </div>
+
+          <table className="t" style=${{ marginTop: 8 }}>
+            <thead>
+              <tr><th>Komponenta</th><th className="num">%</th><th className="num">g</th><th className="num">ml</th></tr>
+            </thead>
+            <tbody>
+              ${calc.comps.map((c) => html`
+                <tr key=${c.id}>
+                  <td>${c.name}</td>
+                  <td className="num">${fmt(c.norm)}</td>
+                  <td className="num">${fmt(c.g)}</td>
+                  <td className="num">${fmt(c.ml)}</td>
+                </tr>`)}
+              <tr>
+                <td style=${{ fontWeight: 700 }}>Celkem</td>
+                <td className="num" style=${{ fontWeight: 700 }}>100,0</td>
+                <td className="num" style=${{ fontWeight: 700 }}>${fmt(calc.totalG)}</td>
+                <td className="num" style=${{ fontWeight: 700 }}>${fmt(calc.totalMl)}</td>
+              </tr>
+            </tbody>
+          </table>
+          ${Math.abs(calc.pctSum - 100) > 0.01 && html`<div className="warnbox">Součet receptury je ${fmt(calc.pctSum)} % — poměry byly normalizovány na 100 %.</div>`}
+          <div className="rowline" style=${{ marginTop: 12, marginBottom: 0 }}>
+            <button className="btn" onClick=${tiskLisku}>🖨 Míchací lístek</button>
+            <span className="note">otevře tiskové okno — vytiskněte, nebo uložte jako PDF</span>
+          </div>
+        </div>
+        <${Vazeni} comps=${calc.comps} totalG=${calc.totalG} recipeName=${recipe ? recipe.name : ""} />
+        </div>`}
+
+      ${odvod && odvod.mode === "edit" && html`
+        <div className="modalbg" onClick=${(e) => { if (e.target === e.currentTarget) setOdvod(null); }}>
+          <div className="modalbox">
+            <${RecipeForm} initial=${odvod.initial} onSave=${ulozOdvozenou} onCancel=${() => setOdvod(null)} />
+          </div>
+        </div>`}
+    </div>`;
+}
+
+/* ============================ VÁHA (Web Serial) ============================ */
+/* Čte průběžný výstup digitální váhy připojené přes USB (virtuální COM port).
+   Funguje v Chrome/Edge. Očekává řádky obsahující hmotnost, např. "ST,GS,  12.45 g".
+   Pokud váha vysílá jen na dotaz, doplní se protokol podle konkrétního modelu. */
+function useScale() {
+  const [mode, setMode] = useState("off");      // off | serial | sim
+  const [raw, setRaw] = useState(0);            // hmotnost z váhy (g)
+  const [zero, setZero] = useState(0);          // softwarová tára
+  const [err, setErr] = useState("");
+  const portRef = useRef(null);
+  const readerRef = useRef(null);
+
+  const connect = async (baud) => {
+    setErr("");
+    if (!("serial" in navigator)) {
+      setErr("Tento prohlížeč nepodporuje připojení váhy (Web Serial). Použijte Chrome nebo Edge.");
+      return;
+    }
+    try {
+      const port = await navigator.serial.requestPort();
+      await port.open({ baudRate: n(baud, 9600) });
+      portRef.current = port;
+      const decoder = new TextDecoderStream();
+      port.readable.pipeTo(decoder.writable).catch(() => {});
+      const reader = decoder.readable.getReader();
+      readerRef.current = reader;
+      setMode("serial"); setRaw(0); setZero(0);
+      let buf = "";
+      (async () => {
+        try {
+          for (;;) {
+            const r = await reader.read();
+            if (r.done) break;
+            buf += r.value;
+            const lines = buf.split(/[\r\n]+/);
+            buf = lines.pop();
+            for (const line of lines) {
+              const m = line.match(/(-?\d+(?:[.,]\d+)?)\s*(kg|g)\b/i) || line.match(/(-?\d+(?:[.,]\d+)?)/);
+              if (m) {
+                let v = parseFloat(m[1].replace(",", "."));
+                if (m[2] && m[2].toLowerCase() === "kg") v *= 1000;
+                if (!isNaN(v)) setRaw(v);
+              }
+            }
+          }
+        } catch (e) { setErr("Čtení z váhy selhalo: " + e); }
+      })();
+    } catch (e) {
+      setErr("Připojení se nezdařilo: " + (e && e.message ? e.message : e));
+    }
+  };
+
+  const disconnect = async () => {
+    try { if (readerRef.current) await readerRef.current.cancel(); } catch (e) {}
+    try { if (portRef.current) await portRef.current.close(); } catch (e) {}
+    readerRef.current = null; portRef.current = null;
+    setMode("off"); setRaw(0); setZero(0); setErr("");
+  };
+
+  useEffect(() => () => { disconnect(); }, []);
+
+  return {
+    mode, err, raw, setRaw,
+    weight: raw - zero,
+    tare: () => setZero(raw),
+    connect, disconnect,
+    startSim: () => { setMode("sim"); setRaw(0); setZero(0); setErr(""); },
+  };
+}
+
+function Vazeni({ comps, totalG, recipeName }) {
+  const sc = useScale();
+  const [baud, setBaud] = useState("9600");
+  const [step, setStep] = useState(0);
+  const [tol, setTol] = useState(0.5);
+
+  useEffect(() => { setStep(0); }, [totalG, comps.length, recipeName]);
+
+  // kumulativní cíle: komponenty se váží do jedné nádoby po sobě, bez mezitáry
+  const cum = []; let s = 0;
+  for (const c of comps) { s += c.g; cum.push(s); }
+  const done = step >= comps.length;
+  const cur = done ? null : comps[step];
+  const target = done ? totalG : cum[step];
+  const w = sc.weight;
+  const rem = target - w;
+  const tolerance = Math.max(0.05, n(tol, 0.5));
+  const inTol = Math.abs(rem) <= tolerance;
+  const over = rem < -tolerance;
+  const progress = target > 0 ? Math.max(0, Math.min(100, (w / target) * 100)) : 0;
+
+  return html`
+    <div className="card" style=${{ margin: 0 }}>
+      <h2>Asistent navážení</h2>
+      <p className="hint">Komponenty se váží kumulativně do jedné nádoby. Váha se připojuje přes USB (virtuální COM port) v prohlížeči Chrome/Edge; bez váhy lze postup vyzkoušet v simulaci.</p>
+
+      <div className="rowline">
+        ${sc.mode === "off" && html`
+          <${React.Fragment}>
+            <button className="btn" onClick=${() => sc.connect(baud)}>Připojit váhu (USB)</button>
+            <select style=${{ width: "auto" }} value=${baud} onChange=${(e) => setBaud(e.target.value)} title="Rychlost komunikace (baud)">
+              ${["4800", "9600", "19200", "38400", "115200"].map((b) => html`<option key=${b} value=${b}>${b} Bd</option>`)}
+            </select>
+            <button className="btn sec" onClick=${sc.startSim}>Vyzkoušet v simulaci</button>
+          <//>`}
+        ${sc.mode !== "off" && html`
+          <${React.Fragment}>
+            <span className="tag" style=${{ background: "#EDF7F2", color: "#0E5C40" }}>
+              ${sc.mode === "serial" ? "váha připojena" : "simulace váhy"}
+            </span>
+            <button className="btn sec sm" onClick=${sc.tare}>Tára (0)</button>
+            <button className="btn danger sm" onClick=${sc.disconnect}>Odpojit</button>
+          <//>`}
+      </div>
+      ${sc.err && html`<div className="warnbox">${sc.err}</div>`}
+
+      ${sc.mode !== "off" && html`
+        <${React.Fragment}>
+          <div className="result-big" style=${{ marginTop: 10 }}>${fmt(w, 1)} g</div>
+          <div className="result-sub">na váze · receptura ${recipeName}</div>
+
+          ${sc.mode === "sim" && html`
+            <div style=${{ margin: "10px 0" }}>
+              <label className="f">Simulace — přidávejte barvu posuvníkem</label>
+              <input type="range" min="0" max=${Math.ceil(totalG * 1.15)} step="0.1" value=${sc.raw}
+                onChange=${(e) => sc.setRaw(n(e.target.value))} />
+            </div>`}
+
+          ${!done ? html`
+            <div style=${{ marginTop: 12 }}>
+              <div style=${{ fontWeight: 800 }}>Krok ${step + 1} / ${comps.length}: ${cur.name}</div>
+              <div className="note">přidat ${fmt(cur.g)} g → navážit celkem do ${fmt(target)} g</div>
+              <div className="wbar" style=${{ marginTop: 8 }}>
+                <span style=${{ width: progress + "%", background: over ? "#B91C1C" : (inTol ? "var(--ok)" : "var(--cyan)") }} />
+              </div>
+              <div style=${{ fontFamily: "var(--mono)", fontSize: 20, marginTop: 6, color: over ? "#B91C1C" : (inTol ? "var(--ok)" : "inherit") }}>
+                ${over ? "přelito o " + fmt(-rem, 1) + " g" : (inTol ? "✓ v toleranci" : "zbývá " + fmt(rem, 1) + " g")}
+              </div>
+              <div className="rowline" style=${{ marginTop: 10 }}>
+                <button className="btn" style=${inTol ? { background: "var(--ok)" } : {}} onClick=${() => setStep(step + 1)}>
+                  ${step + 1 === comps.length ? "Dokončit" : "Další komponenta →"}
+                </button>
+                <span className="note">tolerance ±</span>
+                <input type="number" step="0.1" min="0.05" value=${tol} onChange=${(e) => setTol(e.target.value)} style=${{ width: 70 }} />
+                <span className="note">g</span>
+              </div>
+              ${over && html`<div className="warnbox">Přeliv: buď uberte, nebo dorovnejte poměr — ostatní komponenty lze přepočítat navýšením celé dávky.</div>`}
+            </div>` : html`
+            <div className="okbox" style=${{ marginTop: 12 }}>
+              ✓ Všechny komponenty navaženy (${fmt(totalG)} g celkem). Barvu důkladně promíchejte.
+              <div style=${{ marginTop: 8 }}><button className="btn sec sm" onClick=${() => setStep(0)}>Navážit znovu</button></div>
+            </div>`}
+
+          <table className="t" style=${{ marginTop: 14 }}>
+            <thead><tr><th></th><th>Komponenta</th><th className="num">přidat g</th><th className="num">celkem do g</th></tr></thead>
+            <tbody>
+              ${comps.map((c, i) => html`
+                <tr key=${c.id} style=${i === step ? { background: "#FFF1ED" } : (i < step ? { opacity: .55 } : {})}>
+                  <td>${i < step ? "✓" : (i === step ? "▶" : "")}</td>
+                  <td>${c.name}</td>
+                  <td className="num">${fmt(c.g)}</td>
+                  <td className="num">${fmt(cum[i])}</td>
+                </tr>`)}
+            </tbody>
+          </table>
+        <//>`}
+    </div>`;
+}
+
+/* ============================ PRODUKTY ============================ */
+function Products({ products, setProducts }) {
+  const [edit, setEdit] = useState(null);
+  const [q, setQ] = useState("");
+
+  const filtered = useMemo(() => {
+    const s = q.trim().toLowerCase();
+    if (!s) return products;
+    return products.filter((p) =>
+      (p.name + " " + (p.ref || "") + " " + (p.material || "")).toLowerCase().includes(s));
+  }, [q, products]);
+
+  const save = (p) => {
+    setProducts((prev) => {
+      const i = prev.findIndex((x) => x.id === p.id);
+      if (i === -1) return prev.concat([p]);
+      const c = prev.slice(); c[i] = p; return c;
+    });
+    setEdit(null);
+  };
+
+  const exportCsv = () => {
+    const rows = [["ref", "nazev", "material", "poloha", "technologie", "sirka_mm", "vyska_mm", "pokryti_pct"]];
+    for (const p of products)
+      for (const x of p.positions)
+        rows.push([p.ref || "", p.name, p.material || "", x.name, x.tech, x.w, x.h, x.cover != null ? x.cover : 100]);
+    const csv = rows.map((r) => r.map((c) => '"' + String(c).replace(/"/g, '""') + '"').join(";")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "katalog-produktu.csv";
+    a.click();
+  };
+
+  if (edit) return html`<${ProductForm} initial=${edit} onSave=${save} onCancel=${() => setEdit(null)} />`;
+
+  return html`
+    <div className="card">
+      <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 10, flexWrap: "wrap" }}>
+        <h2 style=${{ margin: 0 }}>Katalog produktů (${products.length})</h2>
+        <div style=${{ display: "flex", gap: 8 }}>
+          <button className="btn sec" onClick=${exportCsv}>Export CSV</button>
+          <button className="btn" onClick=${() => setEdit({ id: uid(), ref: "", name: "", material: "", img: "", positions: [{ id: uid(), name: "", w: 50, h: 30, cover: 100, tech: "SCR", img: "" }] })}>+ Nový produkt</button>
+        </div>
+      </div>
+      <input className="search" value=${q} onChange=${(e) => setQ(e.target.value)} placeholder="Hledat produkt / ref…" style=${{ marginBottom: 14 }} />
+      ${!filtered.length ? html`<div className="empty">Nic nenalezeno.</div>` : html`
+        <table className="t">
+          <thead><tr><th /><th>Ref.</th><th>Produkt</th><th>Materiál</th><th>Tiskové polohy</th><th /></tr></thead>
+          <tbody>
+            ${filtered.slice(0, 300).map((p) => html`
+              <tr key=${p.id}>
+                <td><${Img} className="thumb" src=${p.img} alt="" /></td>
+                <td className="num">${p.ref}</td>
+                <td style=${{ fontWeight: 700 }}>${p.name}</td>
+                <td>
+                  ${p.material}
+                  ${p.colors && p.colors.length ? html`
+                    <div style=${{ marginTop: 5 }}>
+                      ${p.colors.slice(0, 10).map((c, i) => html`<span key=${i} className="cdot" title=${(c.code ? c.code + " " : "") + (c.name || "")} style=${{ background: c.hex || "#CCCCCC" }}></span>`)}
+                      ${p.colors.length > 10 ? html`<span className="note"> +${p.colors.length - 10}</span>` : ""}
+                    </div>` : ""}
+                </td>
+                <td>
+                  ${p.positions.map((x) => html`
+                    <div key=${x.id} className="note">
+                      ${x.name} — ${x.w}×${x.h} mm · pokrytí ${x.cover != null ? x.cover : 100} % · <span className="tag tech">${x.tech}</span>
+                    </div>`)}
+                </td>
+                <td style=${{ whiteSpace: "nowrap" }}>
+                  <button className="btn sec sm" onClick=${() => setEdit(JSON.parse(JSON.stringify(p)))}>Upravit</button>${" "}
+                  <button className="btn danger sm" onClick=${() => setProducts((prev) => prev.filter((x) => x.id !== p.id))}>Smazat</button>
+                </td>
+              </tr>`)}
+          </tbody>
+        </table>
+        ${filtered.length > 300 && html`<p className="note">Zobrazeno prvních 300 — upřesněte hledání.</p>`}`}
+    </div>`;
+}
+
+function ProductForm({ initial, onSave, onCancel }) {
+  const [p, setP] = useState(initial);
+  const setPos = (id, k, v) => setP(Object.assign({}, p, { positions: p.positions.map((x) => x.id === id ? Object.assign({}, x, { [k]: v }) : x) }));
+  const valid = p.name.trim() && p.positions.length && p.positions.every((x) => x.name.trim() && n(x.w) > 0 && n(x.h) > 0);
+
+  return html`
+    <div className="card">
+      <h2>${initial.name ? "Upravit produkt" : "Nový produkt"}</h2>
+      <p className="hint">Každá poloha má vlastní rozměr, pokrytí motivu a předurčenou technologii tisku.</p>
+      <div className="frow c3">
+        <div><label className="f">Ref. číslo</label><input value=${p.ref || ""} onChange=${(e) => setP(Object.assign({}, p, { ref: e.target.value }))} placeholder="Např. 11101" /></div>
+        <div><label className="f">Název produktu</label><input value=${p.name} onChange=${(e) => setP(Object.assign({}, p, { name: e.target.value }))} placeholder="Např. hliníkové kuličkové pero" /></div>
+        <div><label className="f">Materiál</label><input value=${p.material} onChange=${(e) => setP(Object.assign({}, p, { material: e.target.value }))} placeholder="Např. keramika, PP, hliník…" /></div>
+      </div>
+
+      <label className="f" style=${{ marginTop: 10 }}>Tiskové polohy</label>
+      ${p.positions.map((x) => html`
+        <div key=${x.id} className="rowline" style=${{ border: "1px solid var(--line)", borderRadius: 8, padding: 10 }}>
+          <input style=${{ flex: "2 1 160px" }} value=${x.name} onChange=${(e) => setPos(x.id, "name", e.target.value)} placeholder="Název polohy" />
+          <input style=${{ flex: "0 1 90px" }} type="number" value=${x.w} onChange=${(e) => setPos(x.id, "w", e.target.value)} title="šířka mm" placeholder="š (mm)" />
+          <span className="note">×</span>
+          <input style=${{ flex: "0 1 90px" }} type="number" value=${x.h} onChange=${(e) => setPos(x.id, "h", e.target.value)} title="výška mm" placeholder="v (mm)" />
+          <input style=${{ flex: "0 1 90px" }} type="number" value=${x.cover} onChange=${(e) => setPos(x.id, "cover", e.target.value)} title="pokrytí %" placeholder="% pokrytí" />
+          <select style=${{ flex: "0 1 130px" }} value=${x.tech} onChange=${(e) => setPos(x.id, "tech", e.target.value)}>
+            ${Object.keys(TECHS).map((t) => html`<option key=${t}>${t}</option>`)}
+          </select>
+          <button className="btn danger sm" onClick=${() => setP(Object.assign({}, p, { positions: p.positions.filter((y) => y.id !== x.id) }))} disabled=${p.positions.length === 1}>✕</button>
+        </div>`)}
+      <button className="btn sec sm" onClick=${() => setP(Object.assign({}, p, { positions: p.positions.concat([{ id: uid(), name: "", w: 50, h: 30, cover: 100, tech: "SCR", img: "" }]) }))}>+ Přidat polohu</button>
+
+      <div style=${{ marginTop: 18, display: "flex", gap: 10 }}>
+        <button className="btn" disabled=${!valid} onClick=${() => onSave(p)}>Uložit produkt</button>
+        <button className="btn sec" onClick=${onCancel}>Zrušit</button>
+      </div>
+    </div>`;
+}
+
+/* ============================ RECEPTURY ============================ */
+function Recipes({ recipes, setRecipes }) {
+  const [edit, setEdit] = useState(null);
+  const [q, setQ] = useState("");
+  const filtered = useMemo(() => {
+    const s = q.trim().toLowerCase();
+    if (!s) return recipes;
+    return recipes.filter((r) => (r.name + " " + r.series + " " + r.type).toLowerCase().includes(s));
+  }, [q, recipes]);
+
+  const save = (r) => {
+    setRecipes((prev) => {
+      const i = prev.findIndex((x) => x.id === r.id);
+      if (i === -1) return prev.concat([r]);
+      const c = prev.slice(); c[i] = r; return c;
+    });
+    setEdit(null);
+  };
+
+  if (edit) return html`<${RecipeForm} initial=${edit} onSave=${save} onCancel=${() => setEdit(null)} />`;
+
+  return html`
+    <div className="card">
+      <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+        <h2 style=${{ margin: 0 }}>Receptury barev (${recipes.length})</h2>
+        <button className="btn" onClick=${() => setEdit({ id: uid(), name: "", type: "Pantone", series: "", density: 1.2, hex: "#888888", components: [{ id: uid(), name: "", pct: 100 }] })}>+ Nová receptura</button>
+      </div>
+      <p className="hint">Pantone standard = formule dle vaší licencované knihovny Printcolor/Pantone. Custom = vlastní vyvzorkovaná směs. Hromadné nahrání: záložka Import / data.</p>
+      <input className="search" value=${q} onChange=${(e) => setQ(e.target.value)} placeholder="Hledat recepturu…" style=${{ marginBottom: 14 }} />
+      ${!filtered.length ? html`<div className="empty">Zatím žádné receptury.</div>` : html`
+        <table className="t">
+          <thead><tr><th /><th>Receptura</th><th>Typ</th><th>Řada</th><th className="num">Hustota g/ml</th><th>Složení</th><th /></tr></thead>
+          <tbody>
+            ${filtered.slice(0, 100).map((r) => {
+              const sum = r.components.reduce((s, c) => s + n(c.pct), 0);
+              return html`
+                <tr key=${r.id}>
+                  <td><span className="swatch" style=${{ background: r.hex }} /></td>
+                  <td style=${{ fontWeight: 700 }}>${r.name}</td>
+                  <td><span className="tag">${r.type === "Pantone" ? "Pantone standard" : "Custom"}</span></td>
+                  <td>${r.series}</td>
+                  <td className="num">${fmt(n(r.density), 2)}</td>
+                  <td>
+                    ${r.components.map((c) => html`<div key=${c.id} className="note">${c.name} — ${fmt(n(c.pct))} %</div>`)}
+                    ${Math.abs(sum - 100) > 0.01 && html`<div className="note" style=${{ color: "var(--warn)" }}>Σ ${fmt(sum)} %</div>`}
+                  </td>
+                  <td style=${{ whiteSpace: "nowrap" }}>
+                    <button className="btn sec sm" onClick=${() => setEdit(JSON.parse(JSON.stringify(r)))}>Upravit</button>${" "}
+                    <button className="btn danger sm" onClick=${() => setRecipes((prev) => prev.filter((x) => x.id !== r.id))}>Smazat</button>
+                  </td>
+                </tr>`;
+            })}
+          </tbody>
+        </table>
+        ${filtered.length > 100 && html`<p className="note">Zobrazeno prvních 100 z ${filtered.length} — upřesněte hledání.</p>`}`}
+    </div>`;
+}
+
+function RecipeForm({ initial, onSave, onCancel }) {
+  const [r, setR] = useState(initial);
+  const setC = (id, k, v) => setR(Object.assign({}, r, { components: r.components.map((x) => x.id === id ? Object.assign({}, x, { [k]: v }) : x) }));
+  const sum = r.components.reduce((s, c) => s + n(c.pct), 0);
+  const valid = r.name.trim() && r.components.length && r.components.every((c) => c.name.trim());
+
+  return html`
+    <div className="card">
+      <h2>${initial.name ? "Upravit recepturu" : "Nová receptura"}</h2>
+      <div className="frow c2">
+        <div><label className="f">Název / Pantone kód</label><input value=${r.name} onChange=${(e) => setR(Object.assign({}, r, { name: e.target.value }))} placeholder="PANTONE 485 C / CUST-014" /></div>
+        <div>
+          <label className="f">Typ receptury</label>
+          <div className="chips">
+            ${["Pantone", "Custom"].map((t) => html`
+              <button key=${t} className=${"chip" + (r.type === t ? " on" : "")} onClick=${() => setR(Object.assign({}, r, { type: t }))}>${t === "Pantone" ? "Pantone standard" : "Custom"}</button>`)}
+          </div>
+        </div>
+      </div>
+      <div className="frow c3" style=${{ marginTop: 4 }}>
+        <div>
+          <label className="f">Síto</label>
+          <select value=${r.mesh || ""} onChange=${(e) => setR(Object.assign({}, r, { mesh: e.target.value }))}>
+            <option value="">— nevybráno —</option>
+            ${SITA.map((m) => html`<option key=${m} value=${m}>${m}</option>`)}
+          </select>
+        </div>
+        <div>
+          <label className="f">Kryvost</label>
+          <select value=${r.opacity || ""} onChange=${(e) => setR(Object.assign({}, r, { opacity: e.target.value }))}>
+            <option value="">— nevybráno —</option>
+            ${KRYVOSTI.map((m) => html`<option key=${m} value=${m}>${m}</option>`)}
+          </select>
+        </div>
+        <div>
+          <label className="f">Povrch</label>
+          <select value=${r.surface || ""} onChange=${(e) => setR(Object.assign({}, r, { surface: e.target.value }))}>
+            <option value="">— nevybráno —</option>
+            ${POVRCHY.map((m) => html`<option key=${m} value=${m}>${m}</option>`)}
+          </select>
+        </div>
+      </div>
+      <div className="frow c2" style=${{ marginTop: 4 }}>
+        <div><label className="f">Objednavatel</label><input value=${r.customer || ""} onChange=${(e) => setR(Object.assign({}, r, { customer: e.target.value }))} placeholder="Název zákazníka (nepovinné)" /></div>
+        <div className="flags">
+          <label className="tgl"><input type="checkbox" checked=${!!r.tested} onChange=${(e) => setR(Object.assign({}, r, { tested: e.target.checked }))} /><span className="tglt"></span>Otestovaný</label>
+          <label className="tgl"><input type="checkbox" checked=${!!r.fade} onChange=${(e) => setR(Object.assign({}, r, { fade: e.target.checked }))} /><span className="tglt"></span>Vysoce odolný vůči vyblednutí</label>
+        </div>
+      </div>
+      <div className="frow c3">
+        <div><label className="f">Řada barvy (Printcolor)</label><input value=${r.series} onChange=${(e) => setR(Object.assign({}, r, { series: e.target.value }))} placeholder="Např. Printcolor 390" /></div>
+        <div><label className="f">Hustota (g/ml)</label><input type="number" step="0.01" value=${r.density} onChange=${(e) => setR(Object.assign({}, r, { density: e.target.value }))} /></div>
+        <div><label className="f">Náhled odstínu</label><input type="color" value=${r.hex} onChange=${(e) => setR(Object.assign({}, r, { hex: e.target.value }))} style=${{ height: 38, padding: 3 }} /></div>
+      </div>
+
+      <label className="f" style=${{ marginTop: 10 }}>Komponenty (%)</label>
+      ${r.components.map((c) => html`
+        <div key=${c.id} className="rowline">
+          <input style=${{ flex: "3 1 200px" }} value=${c.name} onChange=${(e) => setC(c.id, "name", e.target.value)} placeholder="Např. Printcolor Warm Red / transparentní báze" />
+          <input style=${{ flex: "0 1 110px" }} type="number" step="0.1" value=${c.pct} onChange=${(e) => setC(c.id, "pct", e.target.value)} placeholder="%" />
+          <button className="btn danger sm" onClick=${() => setR(Object.assign({}, r, { components: r.components.filter((y) => y.id !== c.id) }))} disabled=${r.components.length === 1}>✕</button>
+        </div>`)}
+      <div className="rowline">
+        <button className="btn sec sm" onClick=${() => setR(Object.assign({}, r, { components: r.components.concat([{ id: uid(), name: "", pct: 0 }]) }))}>+ Přidat komponentu</button>
+        <span className="note" style=${{ color: Math.abs(sum - 100) > 0.01 ? "var(--warn)" : "var(--ok)" }}>Součet: ${fmt(sum)} %</span>
+      </div>
+
+      <div style=${{ marginTop: 18, display: "flex", gap: 10 }}>
+        <button className="btn" disabled=${!valid} onClick=${() => onSave(r)}>Uložit recepturu</button>
+        <button className="btn sec" onClick=${onCancel}>Zrušit</button>
+      </div>
+    </div>`;
+}
+
+/* ============================ IMPORT / DATA ============================ */
+function parseCsv(text) {
+  const delim = ((text.match(/;/g) || []).length >= (text.match(/,/g) || []).length) ? ";" : ",";
+  const lines = text.split(/\r?\n/).filter((l) => l.trim());
+  return lines.map((l) => {
+    const out = []; let cur = ""; let inQ = false;
+    for (let i = 0; i < l.length; i++) {
+      const ch = l[i];
+      if (inQ) {
+        if (ch === '"' && l[i + 1] === '"') { cur += '"'; i++; }
+        else if (ch === '"') inQ = false;
+        else cur += ch;
+      } else if (ch === '"') inQ = true;
+      else if (ch === delim) { out.push(cur); cur = ""; }
+      else cur += ch;
+    }
+    out.push(cur);
+    return out.map((c) => c.trim());
+  });
+}
+
+const HDR = {
+  ref: /^(ref|reference|kod|k.d|sku|cod)/i,
+  name: /^(n.zev|name|produkt|product|nome)/i,
+  material: /^(materi.l|material)/i,
+  pos: /^(poloha|pozice|location|position|area|m.sto)/i,
+  tech: /^(tech|technologie|technika|technique)/i,
+  w: /^(sirka|.{0,2}rka|width|max.?w|w$|w_)/i,
+  h: /^(vyska|v..ka|height|max.?h|h$|h_)/i,
+  cover: /^(pokryti|pokryt.|cover)/i,
+};
+
+function rowsToItems(rows) {
+  const head = rows[0].map((h) => h.toLowerCase());
+  const col = {};
+  for (const k of Object.keys(HDR)) col[k] = head.findIndex((h) => HDR[k].test(h));
+  const items = [];
+  for (const r of rows.slice(1)) {
+    items.push({
+      ref: col.ref >= 0 ? r[col.ref] : "",
+      name: col.name >= 0 ? r[col.name] : "",
+      material: col.material >= 0 ? r[col.material] : "",
+      pimg: "", img: "",
+      pos: col.pos >= 0 ? r[col.pos] : "Tisková plocha",
+      techRaw: col.tech >= 0 ? r[col.tech] : "",
+      w: col.w >= 0 ? n(r[col.w]) : 0,
+      h: col.h >= 0 ? n(r[col.h]) : 0,
+      cover: col.cover >= 0 ? n(r[col.cover], 100) : 100,
+    });
+  }
+  return items;
+}
+
+function jsonToItems(data) {
+  const arr = Array.isArray(data) ? data : (data.products || data.items || []);
+  const items = [];
+  for (const p of arr) {
+    const ref = p.ref || p.reference || p.sku || p.code || "";
+    const name = p.name || p.title || "";
+    const material = p.material || p.materials || "";
+    const pimg = toLocalImg(p.image || p.img || "");
+    const colors = (p.colors || []).map((c) => ({
+      code: String(c.code || ""), name: c.name || "", hex: c.hex || "", stock: c.stock || c.sklad || "",
+      img: toLocalImg(c.img || c.image || "") }));
+    const cust = p.positions || p.customizations || p.printing_areas || [];
+    for (const c of cust) {
+      items.push({
+        ref: String(ref), name: String(name), material: String(material),
+        colors: colors,
+        pimg: pimg, img: toLocalImg(c.image || c.img || ""),
+        pos: c.name || c.location || c.position || "Tisková plocha",
+        techRaw: c.tech || c.technique || "",
+        w: n(c.w != null ? c.w : (c.width != null ? c.width : (c.maxW != null ? c.maxW : c.max_width))),
+        h: n(c.h != null ? c.h : (c.height != null ? c.height : (c.maxH != null ? c.maxH : c.max_height))),
+        cover: n(c.cover, 100),
+      });
+    }
+  }
+  return items;
+}
+
+/* Receptury CSV: nazev;typ;rada;hustota;hex;komponenta;procento (řádek = komponenta) */
+function csvToRecipes(text) {
+  const rows = parseCsv(text);
+  const head = rows[0].map((h) => h.toLowerCase());
+  const idx = (re) => head.findIndex((h) => re.test(h));
+  const ci = {
+    name: idx(/^(n.zev|name|pantone)/), type: idx(/^typ/), series: idx(/^(.ada|rada|series)/),
+    density: idx(/^hustota|density/), hex: idx(/^hex|barva|color/),
+    comp: idx(/^komponent|component|slozka|složka/), pct: idx(/^(procent|pct|%|pod.l)/),
+    mesh: idx(/^(s.to|sito|mesh)/), opacity: idx(/^(kryvost|opacity)/), surface: idx(/^(povrch|surface)/),
+    customer: idx(/^(objednavatel|customer|z.kazn.k)/), tested: idx(/^(otestovan|tested)/), fade: idx(/^(vyblednut|odolnost|fade)/),
+  };
+  if (ci.name < 0 || ci.comp < 0 || ci.pct < 0)
+    throw new Error("CSV musí obsahovat sloupce: nazev, komponenta, procento (volitelně typ, rada, hustota, hex).");
+  const map = new Map();
+  for (const r of rows.slice(1)) {
+    const name = r[ci.name]; if (!name) continue;
+    if (!map.has(name)) {
+      map.set(name, {
+        id: uid(), name: name,
+        type: ci.type >= 0 && /cust/i.test(r[ci.type] || "") ? "Custom" : "Pantone",
+        series: ci.series >= 0 ? (r[ci.series] || "") : "",
+        density: ci.density >= 0 ? n(r[ci.density], 1.2) : 1.2,
+        hex: ci.hex >= 0 && /^#?[0-9a-f]{6}$/i.test(r[ci.hex] || "") ? (r[ci.hex][0] === "#" ? r[ci.hex] : "#" + r[ci.hex]) : "#888888",
+        mesh: ci.mesh >= 0 ? (r[ci.mesh] || "") : "",
+        opacity: ci.opacity >= 0 ? (r[ci.opacity] || "") : "",
+        surface: ci.surface >= 0 ? (r[ci.surface] || "") : "",
+        customer: ci.customer >= 0 ? (r[ci.customer] || "") : "",
+        tested: ci.tested >= 0 ? /^(1|ano|yes|true|x)$/i.test((r[ci.tested] || "").trim()) : false,
+        fade: ci.fade >= 0 ? /^(1|ano|yes|true|x)$/i.test((r[ci.fade] || "").trim()) : false,
+        components: [],
+      });
+    }
+    map.get(name).components.push({ id: uid(), name: r[ci.comp], pct: n(r[ci.pct]) });
+  }
+  return Array.from(map.values());
+}
+
+function Importer({ setProducts, setRecipes }) {
+  const [text, setText] = useState("");
+  const [preview, setPreview] = useState(null);
+  const [recPreview, setRecPreview] = useState(null);
+  const [msg, setMsg] = useState(null);
+  const fileRef = useRef(null);
+  const recFileRef = useRef(null);
+
+  const analyze = (raw) => {
+    setMsg(null); setRecPreview(null);
+    try {
+      let items;
+      const t = raw.trim();
+      if (!t) { setMsg({ warn: "Vložte data nebo nahrajte soubor." }); return; }
+      if (t[0] === "{" || t[0] === "[") items = jsonToItems(JSON.parse(t));
+      else items = rowsToItems(parseCsv(t));
+      const mapped = items.filter((i) => i.name || i.ref).map((i) => Object.assign({}, i, { tech: mapTech(i.techRaw) }));
+      const skipped = mapped.filter((i) => !i.tech);
+      const ok = mapped.filter((i) => i.tech && i.w > 0 && i.h > 0);
+      setPreview({ ok, skipped, badDim: mapped.filter((i) => i.tech && !(i.w > 0 && i.h > 0)), imgs: ok.filter((i) => i.img).length });
+    } catch (e) {
+      setMsg({ warn: "Data se nepodařilo přečíst: " + e.message });
+      setPreview(null);
+    }
+  };
+
+  const doImport = () => {
+    if (!preview || !preview.ok.length) return;
+    setProducts((prev) => {
+      const byKey = new Map(prev.map((p) => [(p.ref || p.name).toLowerCase(), p]));
+      let added = 0, updated = 0;
+      for (const i of preview.ok) {
+        const key = (i.ref || i.name).toLowerCase();
+        const pos = { id: uid(), name: i.pos, w: i.w, h: i.h, cover: i.cover || 100, tech: i.tech, img: i.img || "" };
+        const ex = byKey.get(key);
+        if (ex) {
+          if (i.pimg) ex.img = i.pimg;
+          if (i.colors && i.colors.length) ex.colors = i.colors;
+          if (i.material && !ex.material) ex.material = i.material;
+          const m = ex.positions.find((x) => x.name === pos.name && x.tech === pos.tech);
+          if (m) { m.w = pos.w; m.h = pos.h; m.cover = pos.cover; if (pos.img) m.img = pos.img; updated++; }
+          else { ex.positions = ex.positions.concat([pos]); updated++; }
+        } else {
+          byKey.set(key, { id: uid(), ref: i.ref, name: i.name || i.ref, material: i.material, img: i.pimg || "", colors: i.colors || [], positions: [pos] });
+          added++;
+        }
+      }
+      setMsg({ ok: "Import hotov — nové produkty: " + added + ", aktualizované polohy: " + updated + "." });
+      return Array.from(byKey.values());
+    });
+    setPreview(null); setText("");
+  };
+
+  const analyzeRecipes = (raw) => {
+    setMsg(null); setPreview(null);
+    try {
+      const recs = csvToRecipes(raw);
+      if (!recs.length) { setMsg({ warn: "V souboru nebyly nalezeny žádné receptury." }); return; }
+      setRecPreview(recs);
+    } catch (e) {
+      setMsg({ warn: "Receptury se nepodařilo přečíst: " + e.message });
+      setRecPreview(null);
+    }
+  };
+
+  const doImportRecipes = () => {
+    if (!recPreview) return;
+    setRecipes((prev) => {
+      const byName = new Map(prev.map((r) => [r.name.toLowerCase(), r]));
+      let added = 0, replaced = 0;
+      for (const r of recPreview) {
+        if (byName.has(r.name.toLowerCase())) { replaced++; } else { added++; }
+        byName.set(r.name.toLowerCase(), r);
+      }
+      setMsg({ ok: "Receptury naimportovány — nové: " + added + ", nahrazené: " + replaced + "." });
+      return Array.from(byName.values());
+    });
+    setRecPreview(null); setText("");
+  };
+
+  const readFile = (e, cb) => {
+    const f = e.target.files && e.target.files[0]; if (!f) return;
+    const rd = new FileReader();
+    rd.onload = () => { setText(String(rd.result)); cb(String(rd.result)); };
+    rd.readAsText(f, "utf-8");
+    e.target.value = "";
+  };
+
+  return html`
+    <${React.Fragment}>
+      <div className="card">
+        <h2>Import produktů (katalog)</h2>
+        <p className="hint">CSV nebo JSON. Technologie se mapují automaticky: Tampontisk → PDP · Sítotisk (plast, papír) i rotační → SCR · Sítotisk (textil) → TXP · Transfer → TRS · Firing → FIR. Opakovaný import nic nezdvojí — existující produkty se aktualizují.</p>
+        <div className="rowline">
+          <button className="btn sec" onClick=${() => fileRef.current && fileRef.current.click()}>Nahrát soubor produktů</button>
+          <input ref=${fileRef} type="file" accept=".csv,.json,.txt" style=${{ display: "none" }} onChange=${(e) => readFile(e, analyze)} />
+          <button className="btn sec" onClick=${() => recFileRef.current && recFileRef.current.click()}>Nahrát soubor receptur (CSV)</button>
+          <input ref=${recFileRef} type="file" accept=".csv,.txt" style=${{ display: "none" }} onChange=${(e) => readFile(e, analyzeRecipes)} />
+        </div>
+        <textarea value=${text} onChange=${(e) => setText(e.target.value)} placeholder="…nebo sem vložte obsah souboru a použijte tlačítka Analyzovat níže" />
+        <div className="rowline" style=${{ marginTop: 10 }}>
+          <button className="btn" onClick=${() => analyze(text)}>Analyzovat jako produkty</button>
+          <button className="btn" onClick=${() => analyzeRecipes(text)}>Analyzovat jako receptury</button>
+          ${preview && html`<button className="btn" style=${{ background: "var(--ok)" }} onClick=${doImport} disabled=${!preview.ok.length}>Importovat ${preview.ok.length} poloh</button>`}
+          ${recPreview && html`<button className="btn" style=${{ background: "var(--ok)" }} onClick=${doImportRecipes}>Importovat ${recPreview.length} receptur</button>`}
+        </div>
+        ${msg && msg.warn && html`<div className="warnbox">${msg.warn}</div>`}
+        ${msg && msg.ok && html`<div className="okbox">${msg.ok}</div>`}
+
+        ${preview && html`
+          <${React.Fragment}>
+            ${preview.imgs === 0
+              ? html`<div className="warnbox"><b>Pozor:</b> soubor neobsahuje žádné obrázky náhledů — pravděpodobně stará verze exportu.</div>`
+              : html`<div className="okbox">✓ Soubor obsahuje obrázkové náhledy u ${preview.imgs.toLocaleString("cs-CZ")} z ${preview.ok.length.toLocaleString("cs-CZ")} poloh.</div>`}
+            ${preview.skipped.length > 0 && html`<div className="warnbox">${preview.skipped.length} řádků přeskočeno — nerozpoznaná technologie (např. „${preview.skipped[0].techRaw}").</div>`}
+            ${preview.badDim.length > 0 && html`<div className="warnbox">${preview.badDim.length} řádků přeskočeno — chybí rozměr tiskové plochy.</div>`}
+            <table className="t" style=${{ marginTop: 12 }}>
+              <thead><tr><th>Ref.</th><th>Produkt</th><th>Poloha</th><th>Technologie</th><th className="num">Š×V mm</th></tr></thead>
+              <tbody>
+                ${preview.ok.slice(0, 30).map((i, k) => html`
+                  <tr key=${k}>
+                    <td className="num">${i.ref}</td>
+                    <td>${i.name}</td>
+                    <td>${i.pos}</td>
+                    <td><span className="tag tech">${i.tech}</span> <span className="note">(${i.techRaw})</span></td>
+                    <td className="num">${i.w}×${i.h}</td>
+                  </tr>`)}
+              </tbody>
+            </table>
+            ${preview.ok.length > 30 && html`<p className="note">… a dalších ${preview.ok.length - 30} řádků.</p>`}
+          <//>`}
+
+        ${recPreview && html`
+          <table className="t" style=${{ marginTop: 12 }}>
+            <thead><tr><th /><th>Receptura</th><th>Typ</th><th>Řada</th><th className="num">Hustota</th><th>Komponenty</th><th className="num">Σ %</th></tr></thead>
+            <tbody>
+              ${recPreview.slice(0, 30).map((r) => {
+                const sum = r.components.reduce((s, c) => s + n(c.pct), 0);
+                return html`
+                  <tr key=${r.id}>
+                    <td><span className="swatch" style=${{ background: r.hex }} /></td>
+                    <td style=${{ fontWeight: 700 }}>${r.name}</td>
+                    <td>${r.type}</td>
+                    <td>${r.series}</td>
+                    <td className="num">${fmt(r.density, 2)}</td>
+                    <td>${r.components.map((c) => c.name + " " + fmt(n(c.pct)) + " %").join(" · ")}</td>
+                    <td className="num" style=${{ color: Math.abs(sum - 100) > 0.01 ? "var(--warn)" : "inherit" }}>${fmt(sum)}</td>
+                  </tr>`;
+              })}
+            </tbody>
+          </table>
+          ${recPreview.length > 30 && html`<p className="note">… a dalších ${recPreview.length - 30} receptur.</p>`}`}
+      </div>
+
+      <div className="card">
+        <h2>Formát receptur (CSV)</h2>
+        <p className="hint">Jeden řádek = jedna komponenta; řádky se stejným názvem receptury se sloučí. Tímto formátem nahrajete celou databázi Printcolor, jakmile ji od nich dostanete (jejich Pantone formule jsou licencovaná data, která poskytují zákazníkům).</p>
+        <pre className="tpl">nazev;typ;rada;hustota;hex;komponenta;procento
+PANTONE 485 C;Pantone;Printcolor 390;1,25;DA291C;Printcolor Warm Red;62
+PANTONE 485 C;Pantone;Printcolor 390;1,25;DA291C;Printcolor Yellow 012;28
+PANTONE 485 C;Pantone;Printcolor 390;1,25;DA291C;Transparentní báze;10
+Firemní zelená CUST-014;Custom;Printcolor 390;1,22;0E8A5F;Printcolor Green;48
+Firemní zelená CUST-014;Custom;Printcolor 390;1,22;0E8A5F;Transparentní báze;52</pre>
+      </div>
+
+      <div className="card">
+        <h2>Správa dat</h2>
+        <div className="rowline">
+          <button className="btn sec" onClick=${() => {
+            if (window.confirm("Obnovit katalog produktů z data.js? Vaše ruční úpravy produktů budou zahozeny (receptury zůstanou).")) {
+              setProducts(window.KATALOG || []);
+              setMsg({ ok: "Katalog obnoven z data.js (" + ((window.KATALOG || []).length) + " produktů)." });
+            }
+          }}>Obnovit katalog z data.js</button>
+          <button className="btn danger" onClick=${() => {
+            if (window.confirm("Opravdu vymazat VŠECHNY produkty? (Receptury zůstanou.)")) {
+              setProducts([]);
+              setMsg({ ok: "Katalog produktů vymazán." });
+            }
+          }}>Vymazat katalog produktů</button>
+        </div>
+      </div>
+    <//>`;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(html`<${App} />`);
+})();
+}
+</script>
+</body>
+</html>
