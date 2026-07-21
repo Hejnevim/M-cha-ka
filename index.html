@@ -73,6 +73,13 @@ pre.tpl{background:#F0F2EE;border:1px solid var(--line);border-radius:8px;paddin
 .thumb{width:46px;height:46px;object-fit:contain;border:1px solid var(--line);border-radius:6px;background:#fff}
 .wbar{height:14px;background:#F6E3DD;border-radius:7px;overflow:hidden;border:1px solid var(--line)}
 .wbar>span{display:block;height:100%;transition:width .15s}
+.cdot{display:inline-block;width:13px;height:13px;border-radius:3px;margin-right:4px;vertical-align:-2px;border:1px solid rgba(0,0,0,.22)}
+.modalbg{position:fixed;inset:0;background:rgba(35,21,18,.45);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:30px 16px;overflow:auto}
+.modalbox{width:min(860px,100%)}
+.modalbox .card{margin:0;box-shadow:0 18px 60px rgba(35,21,18,.35)}
+.linkbox{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
+.pickbox{border:1.5px dashed var(--key);border-radius:10px;padding:12px;margin-top:10px;background:#fff}
+.chip{display:inline-flex;align-items:center}
 #chyba{max-width:700px;margin:60px auto;background:#FFF6ED;border:1px solid #F6CDA9;color:#8A4A12;border-radius:10px;padding:24px;font-size:15px;display:none}
 </style>
 </head>
@@ -178,7 +185,40 @@ function App() {
     return fixTech(stored && stored.length ? stored : base);
   });
   const [recipes, setRecipes] = useState(() => loadLS("irm-recipes", SEED_RECIPES));
+  const [links, setLinks] = useState(() => loadLS("irm-links", {}));
+  useEffect(() => { saveLS("irm-links", links); }, [links]);
   const first = useRef(true);
+
+  // Samoléčba: při nové verzi data.js doplní barvy, kódy a fotky do uloženého
+  // katalogu podle ref — ruční produkty a úpravy zůstávají nedotčené.
+  useEffect(() => {
+    const ver = String(window.KATALOG_VERZE || "");
+    if (!dataJsOk || !ver || loadLS("irm-katalog-verze", "") === ver) return;
+    const byRef = new Map(window.KATALOG.map((k) => [String(k.ref), k]));
+    let zmena = false;
+    const obohacene = products.map((p) => {
+      const k = byRef.get(String(p.ref || ""));
+      if (!k) return p;
+      const np = Object.assign({}, p);
+      if (k.colors && k.colors.length) {
+        const stare = JSON.stringify(p.colors || []);
+        if (stare !== JSON.stringify(k.colors)) { np.colors = k.colors; zmena = true; }
+      }
+      if (!np.img && k.img) { np.img = k.img; zmena = true; }
+      if (k.positions && k.positions.length) {
+        np.positions = (np.positions || []).map((pos) => {
+          if (pos.img) return pos;
+          const m = k.positions.find((kp) => kp.name === pos.name && kp.tech === pos.tech) ||
+                    k.positions.find((kp) => kp.tech === pos.tech && n(kp.w) === n(pos.w) && n(kp.h) === n(pos.h));
+          if (m && m.img) { zmena = true; return Object.assign({}, pos, { img: m.img }); }
+          return pos;
+        });
+      }
+      return np;
+    });
+    if (zmena) setProducts(obohacene);
+    saveLS("irm-katalog-verze", ver);
+  }, []);
 
   useEffect(() => {
     if (first.current) { first.current = false; return; }
@@ -213,7 +253,7 @@ function App() {
             Nejčastější příčina: index.html byl otevřen přímo ze ZIPu nebo zkopírován jinam samostatně.
             <b> Rozbalte celý ZIP do jedné složky a otevřete index.html z ní.</b>
           </div>`}
-        ${tab === "calc" && html`<${Calc} products=${products} recipes=${recipes} />`}
+        ${tab === "calc" && html`<${Calc} products=${products} recipes=${recipes} setRecipes=${setRecipes} links=${links} setLinks=${setLinks} />`}
         ${tab === "prod" && html`<${Products} products=${products} setProducts=${setProducts} />`}
         ${tab === "rec" && html`<${Recipes} recipes=${recipes} setRecipes=${setRecipes} />`}
         ${tab === "imp" && html`<${Importer} setProducts=${setProducts} setRecipes=${setRecipes} />`}
@@ -222,7 +262,7 @@ function App() {
 }
 
 /* ============================ KALKULACE ============================ */
-function Calc({ products, recipes }) {
+function Calc({ products, recipes, setRecipes, links, setLinks }) {
   const [q, setQ] = useState("");
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
@@ -242,11 +282,58 @@ function Calc({ products, recipes }) {
     if (product && !product.positions.some((p) => p.id === posId))
       setPosId(product.positions[0] ? product.positions[0].id : "");
   }, [prodId, product]);
+  const colors = (product && product.colors) ? product.colors : [];
+  const [colorIdx, setColorIdx] = useState(0);
+  useEffect(() => { setColorIdx(0); }, [prodId]);
+  const colorSel = colors[colorIdx] || colors[0] || null;
+  const prodPhoto = (colorSel && colorSel.img) ? colorSel.img : (product ? product.img : "");
+
+  // ---- vazba produkt + barva -> receptura ----
+  const linkKey = (p, c) => (p && c) ? String(p.ref || p.id) + "|" + String(c.code || c.name || "") : "";
+  const lk = linkKey(product, colorSel);
+  const vazbaId = lk ? (links[lk] || "") : "";
+  const vazRec = recipes.find((r) => r.id === vazbaId) || null;
+  useEffect(() => {                       // automatické načtení vázané receptury
+    if (lk && links[lk] && recipes.some((r) => r.id === links[lk])) setRecId(links[lk]);
+  }, [prodId, colorIdx]);
+
+  // ---- nástroj odvození receptury ----
+  const [odvod, setOdvod] = useState(null);      // null | {mode:"pick"} | {mode:"edit", initial}
+  const [baseQ, setBaseQ] = useState("");
+  const [baseId, setBaseId] = useState("");
+  const baseList = baseQ.trim()
+    ? recipes.filter((r) => (r.name + " " + (r.series || "")).toLowerCase().includes(baseQ.trim().toLowerCase()))
+    : recipes;
+  const baseSel = recipes.find((r) => r.id === baseId) || null;
+  const odvodit = (base) => {
+    const label = colorSel ? ((colorSel.code ? colorSel.code + " " : "") + (colorSel.name || "")).trim() : "";
+    setOdvod({ mode: "edit", initial: {
+      id: uid(),
+      name: ((product && product.ref ? product.ref + " · " : "") + label + " — " + base.name).trim(),
+      type: "Custom", series: "odvozeno z " + base.name,
+      density: base.density, hex: base.hex,
+      components: base.components.map((c) => ({ id: uid(), name: c.name, pct: c.pct })),
+    }});
+  };
+  const ulozOdvozenou = (r) => {
+    setRecipes((prev) => prev.some((x) => x.id === r.id) ? prev.map((x) => x.id === r.id ? r : x) : prev.concat([r]));
+    if (lk) setLinks(Object.assign({}, links, { [lk]: r.id }));
+    setRecId(r.id);
+    setOdvod(null);
+  };
+  const zrusVazbu = () => {
+    const nl = Object.assign({}, links); delete nl[lk]; setLinks(nl);
+  };
   const position = product ? product.positions.find((p) => p.id === posId) : null;
 
   const tech = position ? position.tech : "SCR";
   const [recId, setRecId] = useState(recipes[0] ? recipes[0].id : "");
   const recipe = recipes.find((r) => r.id === recId) || recipes[0];
+  const [recQ, setRecQ] = useState("");
+  const pantoneAll = recipes.filter((r) => r.type !== "Custom");
+  const pantoneList = recQ.trim()
+    ? pantoneAll.filter((r) => (r.name + " " + (r.series || "")).toLowerCase().includes(recQ.trim().toLowerCase()))
+    : pantoneAll;
 
   const [qty, setQty] = useState(500);
   const [gm2, setGm2] = useState(TECHS[tech] ? TECHS[tech].gm2 : 6);
@@ -268,6 +355,75 @@ function Calc({ products, recipes }) {
     });
     return { areaM2, netto, totalG, totalMl, comps, pctSum, minApplied: totalG > withLoss + 1e-9 };
   }, [position, recipe, qty, gm2, loss, minBatch]);
+
+  const esc = (x) => String(x == null ? "" : x).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const tiskLisku = () => {
+    if (!calc || !product || !position || !recipe) return;
+    const d = new Date();
+    const dat = d.toLocaleDateString("cs-CZ") + " " + d.toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" });
+    let kum = 0;
+    const radky = calc.comps.map((c, i) => {
+      kum += c.g;
+      return `<tr>
+        <td class="num">${i + 1}</td>
+        <td>${esc(c.name)}</td>
+        <td class="num">${fmt(c.norm)}</td>
+        <td class="num b">${fmt(c.g)}</td>
+        <td class="num">${fmt(kum)}</td>
+        <td class="num">${fmt(c.ml)}</td>
+        <td class="chk"></td>
+      </tr>`;
+    }).join("");
+    const w = window.open("", "_blank");
+    if (!w) { alert("Prohlížeč zablokoval nové okno — povolte vyskakovací okna pro tuto stránku."); return; }
+    w.document.write(`<!doctype html><html lang="cs"><head><meta charset="utf-8"><title>Míchací lístek — ${esc(recipe.name)}</title>
+<style>
+  body{font-family:Arial,Helvetica,sans-serif;color:#231512;margin:24px;font-size:13px}
+  h1{font-size:19px;margin:0;color:#9E1200;letter-spacing:.5px}
+  .sub{color:#6B4A43;font-size:11px;margin:2px 0 14px}
+  .box{border:1.5px solid #9E1200;border-radius:8px;padding:10px 14px;margin-bottom:12px}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:4px 24px}
+  .lbl{color:#6B4A43;font-size:10px;text-transform:uppercase;letter-spacing:.6px}
+  .val{font-weight:700}
+  .big{font-size:30px;font-weight:800;color:#9E1200;font-family:Consolas,monospace}
+  table{width:100%;border-collapse:collapse;margin-top:6px}
+  th{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#6B4A43;border-bottom:2px solid #9E1200;padding:4px 6px;text-align:left}
+  td{border-bottom:1px solid #E4CFC9;padding:6px}
+  .num{text-align:right;font-family:Consolas,monospace;white-space:nowrap}
+  .b{font-weight:800}
+  .chk{width:34px}
+  .chk::after{content:"";display:block;width:16px;height:16px;border:1.5px solid #9E1200;border-radius:3px;margin:0 auto}
+  tfoot td{border-top:2px solid #9E1200;border-bottom:none;font-weight:800}
+  .pods{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-top:26px}
+  .pods div{border-top:1px solid #231512;padding-top:4px;font-size:11px;color:#6B4A43}
+  .note{font-size:10.5px;color:#6B4A43;margin-top:10px}
+  @media print{ body{margin:10mm} }
+</style></head><body>
+  <h1>MÍCHACÍ LÍSTEK</h1>
+  <div class="sub">INK RECIPE MANAGER · vystaveno ${dat}</div>
+  <div class="box g2">
+    <div><div class="lbl">Produkt</div><div class="val">${esc(product.ref ? product.ref + " · " : "")}${esc(product.name)}</div></div>
+    <div><div class="lbl">Barva produktu</div><div class="val">${colorSel ? esc((colorSel.code ? colorSel.code + " — " : "") + (colorSel.name || (colorSel.code ? "" : "—"))) : "—"}</div></div>
+    <div><div class="lbl">Poloha potisku</div><div class="val">${esc(position.name)} · ${fmt(n(position.w), 0)}×${fmt(n(position.h), 0)} mm · pokrytí ${fmt(n(position.cover, 100), 0)} %</div></div>
+    <div><div class="lbl">Technologie</div><div class="val">${esc(tech)} — ${esc(TECHS[tech] ? TECHS[tech].name : "")}</div></div>
+    <div><div class="lbl">Zakázka</div><div class="val">${fmt(n(qty), 0)} ks · ${fmt(n(gm2), 1)} g/m² · ztráty ${fmt(n(loss), 0)} %</div></div>
+    <div><div class="lbl">Receptura</div><div class="val">${esc(recipe.name)} · ${esc(recipe.series || "")} · hustota ${fmt(n(recipe.density, 1), 2)} g/ml</div></div>
+  </div>
+  <div class="box">
+    <div class="lbl">Celkem namíchat${calc.minApplied ? " (uplatněna min. dávka)" : ""}</div>
+    <div class="big">${fmt(calc.totalG)} g <span style="font-size:15px;color:#6B4A43">≈ ${fmt(calc.totalMl)} ml</span></div>
+  </div>
+  <table>
+    <thead><tr><th style="text-align:right">#</th><th>Komponenta</th><th style="text-align:right">%</th><th style="text-align:right">navážit g</th><th style="text-align:right">kumulativně g</th><th style="text-align:right">ml</th><th style="text-align:center">✓</th></tr></thead>
+    <tbody>${radky}</tbody>
+    <tfoot><tr><td></td><td>Celkem</td><td class="num">100,0</td><td class="num">${fmt(calc.totalG)}</td><td class="num">${fmt(calc.totalG)}</td><td class="num">${fmt(calc.totalMl)}</td><td></td></tr></tfoot>
+  </table>
+  <div class="note">Kumulativní vážení do jedné nádoby: po každé komponentě má displej váhy ukazovat hodnotu ve sloupci „kumulativně g". Tolerance navážení ±0,5 g, pokud technolog neurčí jinak.</div>
+  <div class="pods"><div>Namíchal/a</div><div>Datum a čas</div><div>Kontrola / šarže</div></div>
+  <script>window.addEventListener("load",function(){setTimeout(function(){window.print()},150)})<\/script>
+</body></html>`);
+    w.document.close();
+  };
 
   if (!products.length) return html`<div className="empty">Katalog je prázdný — v záložce Import / data obnovte katalog nebo nahrajte soubor.</div>`;
   if (!recipes.length) return html`<div className="empty">Nejdřív přidejte recepturu v záložce Receptury.</div>`;
@@ -295,7 +451,7 @@ function Calc({ products, recipes }) {
         </div>
 
         <div className="rowline" style=${{ alignItems: "flex-start", margin: "2px 0 12px" }}>
-          <${Img} className="prodphoto" src=${product ? product.img : ""} alt=${product ? product.name : ""}
+          <${Img} className="prodphoto" src=${prodPhoto} alt=${product ? product.name : ""}
             errFallback=${html`<div className="prodphoto noimg">fotka nenalezena — spusťte stahni_obrazky.py</div>`} />
           <div style=${{ minWidth: 0 }}>
             <div style=${{ fontWeight: 800 }}>${product && product.ref ? product.ref + " · " : ""}${product ? product.name : ""}</div>
@@ -307,6 +463,46 @@ function Calc({ products, recipes }) {
             </div>
           </div>
         </div>
+
+        ${colors.length > 0 && html`
+          <div style=${{ margin: "2px 0 12px" }}>
+            <label className="f">Barva produktu (${colors.length})</label>
+            <div className="chips">
+              ${colors.map((c, i) => html`
+                <button key=${i} className=${"chip" + ((colorSel === c) ? " on" : "")}
+                  onClick=${() => setColorIdx(i)} title=${c.name || c.code}>
+                  <span className="cdot" style=${{ background: c.hex || "#CCCCCC" }}></span>${c.code ? c.code + (c.name ? " · " + c.name : "") : (c.name || "?")}
+                </button>`)}
+            </div>
+            ${colorSel && html`<div className="note" style=${{ marginTop: 6 }}>skladem ${colorSel.stock && colorSel.stock !== "--" ? colorSel.stock + " ks" : "— (údaj nedostupný)"}${colorSel.img ? "" : " · tato varianta nemá vlastní fotku, zobrazena společná"}</div>`}
+
+            ${colorSel && html`
+              <div className="linkbox">
+                ${vazRec ? html`
+                  <span className="note">Receptura této barvy: <b style=${{ color: "var(--ink)" }}>${vazRec.name}</b></span>
+                  <button className="btn sec sm" onClick=${() => setOdvod({ mode: "edit", initial: JSON.parse(JSON.stringify(vazRec)) })}>Upravit</button>
+                  <button className="btn danger sm" onClick=${zrusVazbu}>Zrušit vazbu</button>
+                ` : html`
+                  <button className="btn sec sm" onClick=${() => { setBaseId(recipe ? recipe.id : ""); setBaseQ(""); setOdvod({ mode: "pick" }); }}>＋ Receptura pro tuto barvu</button>
+                  <span className="note">odvodí custom recepturu z Pantone databáze a uloží ji k barvě ${colorSel.code || colorSel.name || ""}</span>
+                `}
+              </div>
+              ${odvod && odvod.mode === "pick" && html`
+                <div className="pickbox">
+                  <label className="f">Výchozí receptura (${baseList.length} z ${recipes.length})</label>
+                  <input value=${baseQ} onChange=${(e) => setBaseQ(e.target.value)} placeholder="Filtr: např. 485, Reflex, custom…" style=${{ marginBottom: 6 }} />
+                  <select value=${baseList.some((r) => r.id === baseId) ? baseId : ""} onChange=${(e) => setBaseId(e.target.value)}>
+                    <option value="">— vyberte výchozí recepturu —</option>
+                    ${baseList.slice(0, 400).map((r) => html`<option key=${r.id} value=${r.id}>${r.name} · ${r.series}</option>`)}
+                  </select>
+                  ${baseList.length > 400 && html`<div className="note" style=${{ marginTop: 4 }}>Zobrazeno prvních 400 — upřesněte filtr.</div>`}
+                  <div className="rowline" style=${{ marginTop: 10, marginBottom: 0 }}>
+                    <button className="btn sm" disabled=${!baseSel} onClick=${() => baseSel && odvodit(baseSel)}>Odvodit a upravit →</button>
+                    <button className="btn sec sm" onClick=${() => setOdvod(null)}>Zavřít</button>
+                  </div>
+                </div>`}
+            `}
+          </div>`}
 
         <label className="f">Možnosti potisku — vyberte polohu</label>
         <div className="poscards">
@@ -325,12 +521,14 @@ function Calc({ products, recipes }) {
 
         <div className="frow c2">
           <div>
-            <label className="f">Receptura (Pantone standard)</label>
-            <select value=${recipes.some((r) => r.id === recId && r.type !== "Custom") ? recId : ""}
+            <label className="f">Receptura (Pantone standard) — ${pantoneList.length} z ${pantoneAll.length}</label>
+            <input value=${recQ} onChange=${(e) => setRecQ(e.target.value)} placeholder="Filtr: např. 485 nebo Reflex…" style=${{ marginBottom: 6 }} />
+            <select value=${pantoneList.some((r) => r.id === recId) ? recId : ""}
               onChange=${(e) => e.target.value && setRecId(e.target.value)}>
               <option value="">— vyberte Pantone recepturu —</option>
-              ${recipes.filter((r) => r.type !== "Custom").map((r) => html`<option key=${r.id} value=${r.id}>${r.name} · ${r.series}</option>`)}
+              ${pantoneList.slice(0, 400).map((r) => html`<option key=${r.id} value=${r.id}>${r.name} · ${r.series}</option>`)}
             </select>
+            ${pantoneList.length > 400 && html`<div className="note" style=${{ marginTop: 4 }}>Zobrazeno prvních 400 — upřesněte filtr.</div>`}
           </div>
           <div>
             <label className="f">Custom receptura</label>
@@ -343,7 +541,7 @@ function Calc({ products, recipes }) {
         </div>
         <div className="rowline" style=${{ marginTop: 4 }}>
           <span className="swatch" style=${{ background: recipe ? recipe.hex : "#888" }} />
-          <span className="note">${recipe ? recipe.name : ""} · ${recipe && recipe.type === "Custom" ? "Custom" : "Pantone standard"} · hustota ${fmt(n(recipe ? recipe.density : 1, 1), 2)} g/ml · ${recipe ? recipe.components.length : 0} komponent</span>
+          <span className="note">${recipe ? recipe.name : ""} · ${recipe && recipe.type === "Custom" ? "Custom" : "Pantone standard"} · hustota ${fmt(n(recipe ? recipe.density : 1, 1), 2)} g/ml · ${recipe ? recipe.components.length : 0} komponent${vazRec && recipe && vazRec.id === recipe.id ? " · vázaná na barvu " + (colorSel ? (colorSel.code || colorSel.name || "") : "") : ""}</span>
         </div>
 
         <div className="frow c4" style=${{ marginTop: 16 }}>
@@ -371,7 +569,7 @@ function Calc({ products, recipes }) {
         <div style=${{ display: "grid", gap: 20, alignContent: "start" }}>
         <div className="card" style=${{ margin: 0 }}>
           <h2>Výsledek míchání</h2>
-          <p className="hint">Plocha motivu ${fmt(calc.areaM2 * 10000, 2)} cm² / ks · netto ${fmt(calc.netto)} g</p>
+          <p className="hint">Plocha motivu ${fmt(calc.areaM2 * 10000, 2)} cm² / ks · netto ${fmt(calc.netto)} g${colorSel ? " · barva produktu " + colorSel.code + (colorSel.name ? " — " + colorSel.name : "") : ""}</p>
 
           <div className="result-big">${fmt(calc.totalG)} g</div>
           <div className="result-sub">≈ ${fmt(calc.totalMl)} ml při hustotě ${fmt(n(recipe.density, 1), 2)} g/ml</div>
@@ -402,8 +600,19 @@ function Calc({ products, recipes }) {
             </tbody>
           </table>
           ${Math.abs(calc.pctSum - 100) > 0.01 && html`<div className="warnbox">Součet receptury je ${fmt(calc.pctSum)} % — poměry byly normalizovány na 100 %.</div>`}
+          <div className="rowline" style=${{ marginTop: 12, marginBottom: 0 }}>
+            <button className="btn" onClick=${tiskLisku}>🖨 Míchací lístek</button>
+            <span className="note">otevře tiskové okno — vytiskněte, nebo uložte jako PDF</span>
+          </div>
         </div>
         <${Vazeni} comps=${calc.comps} totalG=${calc.totalG} recipeName=${recipe ? recipe.name : ""} />
+        </div>`}
+
+      ${odvod && odvod.mode === "edit" && html`
+        <div className="modalbg" onClick=${(e) => { if (e.target === e.currentTarget) setOdvod(null); }}>
+          <div className="modalbox">
+            <${RecipeForm} initial=${odvod.initial} onSave=${ulozOdvozenou} onCancel=${() => setOdvod(null)} />
+          </div>
         </div>`}
     </div>`;
 }
@@ -632,7 +841,14 @@ function Products({ products, setProducts }) {
                 <td><${Img} className="thumb" src=${p.img} alt="" /></td>
                 <td className="num">${p.ref}</td>
                 <td style=${{ fontWeight: 700 }}>${p.name}</td>
-                <td>${p.material}</td>
+                <td>
+                  ${p.material}
+                  ${p.colors && p.colors.length ? html`
+                    <div style=${{ marginTop: 5 }}>
+                      ${p.colors.slice(0, 10).map((c, i) => html`<span key=${i} className="cdot" title=${(c.code ? c.code + " " : "") + (c.name || "")} style=${{ background: c.hex || "#CCCCCC" }}></span>`)}
+                      ${p.colors.length > 10 ? html`<span className="note"> +${p.colors.length - 10}</span>` : ""}
+                    </div>` : ""}
+                </td>
                 <td>
                   ${p.positions.map((x) => html`
                     <div key=${x.id} className="note">
@@ -720,7 +936,7 @@ function Recipes({ recipes, setRecipes }) {
         <table className="t">
           <thead><tr><th /><th>Receptura</th><th>Typ</th><th>Řada</th><th className="num">Hustota g/ml</th><th>Složení</th><th /></tr></thead>
           <tbody>
-            ${filtered.map((r) => {
+            ${filtered.slice(0, 100).map((r) => {
               const sum = r.components.reduce((s, c) => s + n(c.pct), 0);
               return html`
                 <tr key=${r.id}>
@@ -740,7 +956,8 @@ function Recipes({ recipes, setRecipes }) {
                 </tr>`;
             })}
           </tbody>
-        </table>`}
+        </table>
+        ${filtered.length > 100 && html`<p className="note">Zobrazeno prvních 100 z ${filtered.length} — upřesněte hledání.</p>`}`}
     </div>`;
 }
 
@@ -849,10 +1066,14 @@ function jsonToItems(data) {
     const name = p.name || p.title || "";
     const material = p.material || p.materials || "";
     const pimg = toLocalImg(p.image || p.img || "");
+    const colors = (p.colors || []).map((c) => ({
+      code: String(c.code || ""), name: c.name || "", hex: c.hex || "", stock: c.stock || c.sklad || "",
+      img: toLocalImg(c.img || c.image || "") }));
     const cust = p.positions || p.customizations || p.printing_areas || [];
     for (const c of cust) {
       items.push({
         ref: String(ref), name: String(name), material: String(material),
+        colors: colors,
         pimg: pimg, img: toLocalImg(c.image || c.img || ""),
         pos: c.name || c.location || c.position || "Tisková plocha",
         techRaw: c.tech || c.technique || "",
@@ -932,12 +1153,13 @@ function Importer({ setProducts, setRecipes }) {
         const ex = byKey.get(key);
         if (ex) {
           if (i.pimg) ex.img = i.pimg;
+          if (i.colors && i.colors.length) ex.colors = i.colors;
           if (i.material && !ex.material) ex.material = i.material;
           const m = ex.positions.find((x) => x.name === pos.name && x.tech === pos.tech);
           if (m) { m.w = pos.w; m.h = pos.h; m.cover = pos.cover; if (pos.img) m.img = pos.img; updated++; }
           else { ex.positions = ex.positions.concat([pos]); updated++; }
         } else {
-          byKey.set(key, { id: uid(), ref: i.ref, name: i.name || i.ref, material: i.material, img: i.pimg || "", positions: [pos] });
+          byKey.set(key, { id: uid(), ref: i.ref, name: i.name || i.ref, material: i.material, img: i.pimg || "", colors: i.colors || [], positions: [pos] });
           added++;
         }
       }
