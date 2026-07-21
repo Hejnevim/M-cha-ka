@@ -1,0 +1,48 @@
+NAHRÁNÍ NA GITHUB VČETNĚ OBRÁZKŮ (přes GitHub Desktop)
+======================================================
+Cíl: mít v repozitáři VŠE — index.html, data.js, složku lib
+i složku obrazky (~9 200 fotek). Web github.com tolik souborů
+nezvládne, proto GitHub Desktop.
+
+CO MÍT V JEDNÉ SLOŽCE (místní kopie repozitáře)
+-----------------------------------------------
+  index.html               (z tohoto balíčku — čte z obrazky/)
+  data.js                  (z tohoto balíčku — lokální cesty)
+  seznam_obrazku.json
+  NAVOD.txt
+  lib/                     (react + htm; nepovinné, je i CDN záloha)
+  obrazky/                 (VAŠE stažená složka plná fotek)
+
+POSTUP
+------
+1. Otevřete GitHub Desktop.
+2. Vlevo nahoře: Current Repository -> vyberte svůj repozitář
+   s aplikací. (Pokud ho tam nemáte: File -> Clone repository,
+   nebo File -> Add local repository a vyberte složku.)
+3. Do složky repozitáře (na disku) zkopírujte:
+   - index.html a data.js z tohoto balíčku (přepište stávající)
+   - CELOU složku obrazky (pokud tam ještě není)
+   TIP: kde složka repozitáře na disku je zjistíte v GitHub Desktop:
+   Repository -> Show in Explorer (Windows) / Finder (Mac).
+4. GitHub Desktop sám vlevo vypíše všechny změny — uvidíte, že
+   přibylo ~9 200 souborů ve složce obrazky. To je správně.
+   (Vypsání tolika souborů může chvíli trvat — vyčkejte.)
+5. Dole vlevo napište krátký popis (např. "pridani obrazku")
+   a klikněte "Commit to main".
+6. Nahoře klikněte "Push origin". Teď se soubory nahrají na GitHub
+   — u 9 200 fotek to potrvá i několik minut, nechte doběhnout.
+7. Hotovo. Na github.com se v repu objeví složka obrazky.
+   GitHub Pages se obnoví do pár minut; pak otevřete adresu
+   ...github.io/... a fotky se ukážou.
+
+DŮLEŽITÉ .gitignore
+-------------------
+Pokud máte v repu soubor .gitignore, ověřte, že v něm NENÍ řádek
+"obrazky" ani "*.jpg"/"*.png" — jinak by GitHub obrázky ignoroval.
+Pokud tam takový řádek je, smažte ho před commitem.
+
+ZÁLOHA PRO JISTOTU (na zítřejší prezentaci)
+-------------------------------------------
+I když to nahrajete na GitHub, MĚJTE tu samou složku i lokálně.
+Kdyby cokoli s Pages zlobilo, stačí 2x kliknout na index.html
+a aplikace běží z počítače se všemi fotkami, bez internetu.
