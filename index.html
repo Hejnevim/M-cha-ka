@@ -351,9 +351,28 @@ function Calc({ products, recipes, setRecipes, links, setLinks }) {
   const recipe = recipes.find((r) => r.id === recId) || recipes[0];
   const [recQ, setRecQ] = useState("");
   const pantoneAll = recipes.filter((r) => r.type !== "Custom");
-  const pantoneList = recQ.trim()
-    ? pantoneAll.filter((r) => (r.name + " " + (r.series || "")).toLowerCase().includes(recQ.trim().toLowerCase()))
-    : pantoneAll;
+  const [recRada, setRecRada] = useState("");
+  // seznam vzorníků (PMS, HKS, RAL…) z dat
+  const radyList = Array.from(new Set(pantoneAll.map((r) => r.type || "").filter(Boolean))).sort();
+  const bySkup = (r) => {
+    const c = String(r.name || "").replace(/^PANTONE\s+/i, "").replace(/\s+—\s+varianta.*$/i, "").trim();
+    if (/^Cool Gray/i.test(c)) return "Cool Gray";
+    if (/^Warm Gray/i.test(c)) return "Warm Gray";
+    if (/^Process/i.test(c)) return "Process";
+    if (/^Black\s*\d/i.test(c)) return "Black série";
+    if (/^\d{3}\s*[CU]?$/.test(c)) return "3ciferné (100–999)";
+    if (/^\d{4}\s*[CU]?$/.test(c)) return "4ciferné (1000+)";
+    if (/^\d/.test(c)) return "ostatní číselné";
+    return "pojmenované (základní)";
+  };
+  const [recSkup, setRecSkup] = useState("");
+  const skupList = Array.from(new Set(pantoneAll.filter((r) => !recRada || r.type === recRada).map(bySkup))).sort();
+  const pantoneList = pantoneAll.filter((r) => {
+    if (recRada && r.type !== recRada) return false;
+    if (recSkup && bySkup(r) !== recSkup) return false;
+    if (recQ.trim() && !(r.name + " " + (r.series || "")).toLowerCase().includes(recQ.trim().toLowerCase())) return false;
+    return true;
+  });
 
   const [qty, setQty] = useState(500);
   const [gm2, setGm2] = useState(TECHS[tech] ? TECHS[tech].gm2 : 6);
@@ -544,7 +563,17 @@ function Calc({ products, recipes, setRecipes, links, setLinks }) {
 
         <div className="frow c2">
           <div>
-            <label className="f">Receptura (Pantone standard) — ${pantoneList.length} z ${pantoneAll.length}</label>
+            <label className="f">Receptura — ${pantoneList.length} z ${pantoneAll.length}</label>
+            <div className="frow c2" style=${{ marginBottom: 6 }}>
+              <select value=${recRada} onChange=${(e) => { setRecRada(e.target.value); setRecSkup(""); }}>
+                <option value="">Vzorník: všechny (${radyList.length})</option>
+                ${radyList.map((t) => html`<option key=${t} value=${t}>${t}</option>`)}
+              </select>
+              <select value=${recSkup} onChange=${(e) => setRecSkup(e.target.value)}>
+                <option value="">Řada: všechny</option>
+                ${skupList.map((k) => html`<option key=${k} value=${k}>${k}</option>`)}
+              </select>
+            </div>
             <input value=${recQ} onChange=${(e) => setRecQ(e.target.value)} placeholder="Filtr: např. 485 nebo Reflex…" style=${{ marginBottom: 6 }} />
             <select value=${pantoneList.some((r) => r.id === recId) ? recId : ""}
               onChange=${(e) => e.target.value && setRecId(e.target.value)}>
