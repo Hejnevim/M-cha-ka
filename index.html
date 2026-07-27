@@ -6,7 +6,7 @@
 <title>Ink Recipe Manager — Printcolor</title>
 <style>
 :root{
-  --bg:#F0EEE9; --paper:#F0EEE9; --ink:#18170F; --ink-2:#78766C; --line:#E7E4DC; --line-2:#D8D4C8;
+  --bg:#E3E2DE; --paper:#E3E2DE; --ink:#18170F; --ink-2:#78766C; --line:#D6D4CC; --line-2:#C7C4B9;
   --cyan:#3E5C8A; --magenta:#C97B63; --yellow:#D9B44A; --key:#5B5952;
   --ok:#2F7D53; --warn:#B5701C;
   --radius:18px;
@@ -62,8 +62,8 @@ textarea{font-family:var(--mono);font-size:12.5px;min-height:160px;resize:vertic
 .tabs button.on{color:var(--ink);border-bottom-color:var(--ink)}
 .wrap{max-width:none;margin:0;padding:20px clamp(16px,3vw,40px) 56px}
 .grid{display:grid;gap:16px}
-@media(min-width:960px){.grid.calc{grid-template-columns:minmax(0,1fr) minmax(425px,32.5%)}}
-@media(min-width:1600px){.grid.calc{grid-template-columns:minmax(0,1fr) minmax(475px,30%)}}
+@media(min-width:960px){.grid.calc{grid-template-columns:minmax(0,1fr) minmax(425px,32.5%);column-gap:48px}}
+@media(min-width:1600px){.grid.calc{grid-template-columns:minmax(0,1fr) minmax(475px,30%);column-gap:48px}}
 .bigpanel .card{padding:25px 28px;margin-bottom:20px}
 .bigpanel .card h2{font-size:17.5px}
 .bigpanel .card .hint{font-size:15.5px}
@@ -79,9 +79,9 @@ textarea{font-family:var(--mono);font-size:12.5px;min-height:160px;resize:vertic
 .bigpanel .tag{font-size:14px;padding:4px 11px}
 .bigpanel .wbar{height:17px}
 .bigform label.f{font-size:13.5px;margin-bottom:8px}
-.bigform select,.bigform input{font-size:16px;padding:12px 14px;border-radius:12px;box-shadow:var(--neu-in-lg)}
+.bigform select,.bigform input{font-size:16px;padding:12px 14px;border-radius:12px;box-shadow:var(--neu-sm)}
 .bigform select{padding-right:40px}
-.bigform select:focus,.bigform input:focus{box-shadow:var(--neu-in-lg),0 0 0 3px rgba(62,92,138,.18)}
+.bigform select:focus,.bigform input:focus{box-shadow:var(--neu-sm),0 0 0 3px rgba(62,92,138,.18)}
 .bigform .frow{gap:16px;margin-bottom:16px}
 .bigform .note{font-size:13.5px}
 .bigform .swatch{width:36px;height:36px;border-radius:10px}
