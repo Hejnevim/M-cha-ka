@@ -38,12 +38,21 @@ input,select,button,textarea{font-family:inherit;font-size:14px}
 input,select,textarea{border:none;border-radius:10px;padding:9px 12px;background:var(--bg);color:var(--ink);width:100%;box-shadow:var(--neu-in);transition:box-shadow .15s}
 input:focus,select:focus,textarea:focus{outline:none;box-shadow:var(--neu-in),0 0 0 3px rgba(62,92,138,.18)}
 button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
-input[type=number]{font-family:var(--mono)}
+input[type=number]{font-family:var(--mono);appearance:textfield;-moz-appearance:textfield}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+select{appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  background-image:linear-gradient(45deg, transparent 50%, var(--ink-2) 50%), linear-gradient(135deg, var(--ink-2) 50%, transparent 50%);
+  background-position: calc(100% - 20px) calc(50% - 3px), calc(100% - 14px) calc(50% - 3px);
+  background-size:6px 6px, 6px 6px; background-repeat:no-repeat; padding-right:36px}
+input[type=color]{padding:4px;height:40px;cursor:pointer}
+input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+input[type=color]::-webkit-color-swatch{border:none;border-radius:7px}
+input[type=color]::-moz-color-swatch{border:none;border-radius:7px}
 textarea{font-family:var(--mono);font-size:12.5px;min-height:160px;resize:vertical;line-height:1.5}
 .regbar{display:flex;height:4px}
 .regbar span{flex:1}
 .hdr{background:var(--paper);color:var(--ink);padding:22px clamp(16px,3vw,40px) 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
-.themebtn{flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:none;background:var(--paper);box-shadow:var(--neu-sm);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;line-height:1;transition:opacity .15s}
+.themebtn{flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:none;background:var(--paper);box-shadow:var(--neu-sm);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;line-height:1;transition:opacity .15s;color:var(--ink)}
 .themebtn:hover{opacity:.8}
 .hdr h1{margin:0;font-size:clamp(20px,2.6vw,26px);font-weight:800;letter-spacing:-.01em}
 .hdr .sub{color:var(--ink-2);font-size:12px;margin-top:5px;font-family:var(--mono);letter-spacing:.04em}
@@ -71,6 +80,7 @@ textarea{font-family:var(--mono);font-size:12.5px;min-height:160px;resize:vertic
 .bigpanel .wbar{height:17px}
 .bigform label.f{font-size:13.5px;margin-bottom:8px}
 .bigform select,.bigform input{font-size:16px;padding:12px 14px;border-radius:12px;box-shadow:var(--neu-in-lg)}
+.bigform select{padding-right:40px}
 .bigform select:focus,.bigform input:focus{box-shadow:var(--neu-in-lg),0 0 0 3px rgba(62,92,138,.18)}
 .bigform .frow{gap:16px;margin-bottom:16px}
 .bigform .note{font-size:13.5px}
@@ -152,6 +162,22 @@ pre.tpl{background:var(--bg);border-radius:10px;padding:12px;font-size:12px;over
 .searchitem-img{width:40px;height:40px;flex:0 0 auto;object-fit:contain;border-radius:8px;background:var(--paper);box-shadow:var(--neu-sm)}
 .searchitem-nm{font-size:13px;font-weight:700;line-height:1.3}
 .searchitem-dm{font-family:var(--mono);font-size:11px;color:var(--ink-2);margin-top:2px}
+.viewtoggle{display:flex;gap:2px;background:var(--paper);border-radius:999px;padding:4px;box-shadow:var(--neu-in)}
+.viewtoggle button{border:none;background:none;padding:7px 13px;border-radius:999px;cursor:pointer;color:var(--ink-2);font-size:15px;line-height:1;transition:background .15s,color .15s}
+.viewtoggle button.on{background:var(--key);color:#fff}
+.pgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:4px}
+@media(max-width:1500px){.pgrid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:1150px){.pgrid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:800px){.pgrid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.pgrid{grid-template-columns:1fr}}
+.pgcard{background:var(--paper);border-radius:var(--radius);box-shadow:var(--neu);padding:14px;display:flex;flex-direction:column;gap:8px}
+.pgcard-img{aspect-ratio:1/1;border-radius:12px;background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:var(--neu-in)}
+.pgcard-img img{width:100%;height:100%;object-fit:contain;padding:14px}
+.pgcard-nm{font-weight:700;font-size:13.5px;line-height:1.3}
+.pgcard-ref{font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+.pgcard-mat{font-size:12px;color:var(--ink-2);margin-top:2px}
+.pgcard-dots{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;align-items:center}
+.pgcard-actions{display:flex;gap:6px;margin-top:auto;padding-top:4px}
 </style>
 </head>
 <body>
@@ -282,6 +308,13 @@ function App() {
   const [recipes, setRecipes] = useState(() => loadLS("irm-recipes", SEED_RECIPES));
   const [links, setLinks] = useState(() => loadLS("irm-links", {}));
   useEffect(() => { saveLS("irm-links", links); }, [links]);
+  const [deletePw, setDeletePw] = useState(() => loadLS("irm-delete-pw", ""));
+  useEffect(() => { saveLS("irm-delete-pw", deletePw); }, [deletePw]);
+  const [pwGate, setPwGate] = useState(null);
+  const guardDelete = (actionFn, label) => {
+    if (!deletePw) { actionFn(); return; }
+    setPwGate({ onConfirm: actionFn, label: label || "smazání" });
+  };
   const first = useRef(true);
 
   // Samoléčba: při nové verzi data.js doplní barvy, kódy a fotky do uloženého
@@ -338,7 +371,10 @@ function App() {
           onClick=${() => setTheme((t) => t === "dark" ? "light" : "dark")}
           title=${theme === "dark" ? "Přepnout na světlý režim" : "Přepnout na tmavý režim"}
           aria-label="Přepnout světlý/tmavý režim">
-          ${theme === "dark" ? "☀️" : "🌙"}
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
+            <path d="M12 3 A9 9 0 0 1 12 21 Z" fill="currentColor" />
+          </svg>
         </button>
       </header>
       <nav className="tabs">
@@ -357,10 +393,40 @@ function App() {
             <b> Rozbalte celý ZIP do jedné složky a otevřete index.html z ní.</b>
           </div>`}
         ${tab === "calc" && html`<${Calc} products=${products} recipes=${recipes} setRecipes=${setRecipes} links=${links} setLinks=${setLinks} />`}
-        ${tab === "prod" && html`<${Products} products=${products} setProducts=${setProducts} />`}
-        ${tab === "rec" && html`<${Recipes} recipes=${recipes} setRecipes=${setRecipes} />`}
-        ${tab === "imp" && html`<${Importer} setProducts=${setProducts} setRecipes=${setRecipes} />`}
+        ${tab === "prod" && html`<${Products} products=${products} setProducts=${setProducts} guardDelete=${guardDelete} />`}
+        ${tab === "rec" && html`<${Recipes} recipes=${recipes} setRecipes=${setRecipes} guardDelete=${guardDelete} />`}
+        ${tab === "imp" && html`<${Importer} setProducts=${setProducts} setRecipes=${setRecipes} guardDelete=${guardDelete} deletePw=${deletePw} setDeletePw=${setDeletePw} />`}
       </main>
+      ${pwGate && html`<${PwGate} label=${pwGate.label} correctPw=${deletePw}
+        onConfirm=${() => { pwGate.onConfirm(); setPwGate(null); }}
+        onCancel=${() => setPwGate(null)} />`}
+    </div>`;
+}
+
+function PwGate({ label, correctPw, onConfirm, onCancel }) {
+  const [val, setVal] = useState("");
+  const [err, setErr] = useState(false);
+  const submit = () => {
+    if (val === correctPw) onConfirm();
+    else { setErr(true); setVal(""); }
+  };
+  return html`
+    <div className="modalbg" onClick=${(e) => { if (e.target === e.currentTarget) onCancel(); }}>
+      <div className="modalbox" style=${{ width: "min(380px,100%)" }}>
+        <div className="card" style=${{ margin: 0 }}>
+          <h2>Ověření hesla</h2>
+          <p className="hint">Pro potvrzení akce „${label}" zadejte heslo.</p>
+          <input type="password" autoFocus value=${val}
+            onChange=${(e) => { setVal(e.target.value); setErr(false); }}
+            onKeyDown=${(e) => { if (e.key === "Enter") submit(); }}
+            placeholder="Heslo" />
+          ${err && html`<div className="warnbox">Nesprávné heslo.</div>`}
+          <div className="rowline" style=${{ marginTop: 14 }}>
+            <button className="btn danger" onClick=${submit}>Potvrdit smazání</button>
+            <button className="btn sec" onClick=${onCancel}>Zrušit</button>
+          </div>
+        </div>
+      </div>
     </div>`;
 }
 
@@ -965,9 +1031,11 @@ function Vazeni({ comps, totalG, recipeName }) {
 }
 
 /* ============================ PRODUKTY ============================ */
-function Products({ products, setProducts }) {
+function Products({ products, setProducts, guardDelete }) {
   const [edit, setEdit] = useState(null);
   const [q, setQ] = useState("");
+  const [view, setView] = useState(() => loadLS("irm-prod-view", "table"));
+  useEffect(() => { saveLS("irm-prod-view", view); }, [view]);
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
@@ -1004,13 +1072,44 @@ function Products({ products, setProducts }) {
     <div className="card">
       <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 10, flexWrap: "wrap" }}>
         <h2 style=${{ margin: 0 }}>Katalog produktů (${products.length})</h2>
-        <div style=${{ display: "flex", gap: 8 }}>
+        <div style=${{ display: "flex", gap: 8, alignItems: "center" }}>
+          <div className="viewtoggle">
+            <button className=${view === "table" ? "on" : ""} onClick=${() => setView("table")} title="Zobrazit jako tabulku" aria-label="Tabulka">☰</button>
+            <button className=${view === "grid" ? "on" : ""} onClick=${() => setView("grid")} title="Zobrazit jako mřížku" aria-label="Mřížka">▦</button>
+          </div>
           <button className="btn sec" onClick=${exportCsv}>Export CSV</button>
           <button className="btn" onClick=${() => setEdit({ id: uid(), ref: "", name: "", material: "", img: "", positions: [{ id: uid(), name: "", w: 50, h: 30, cover: 100, tech: "SCR", img: "" }] })}>+ Nový produkt</button>
         </div>
       </div>
       <input className="search" value=${q} onChange=${(e) => setQ(e.target.value)} placeholder="Hledat produkt / ref…" style=${{ marginBottom: 14 }} />
-      ${!filtered.length ? html`<div className="empty">Nic nenalezeno.</div>` : html`
+      ${!filtered.length ? html`<div className="empty">Nic nenalezeno.</div>` : (view === "grid" ? html`
+        <div className="pgrid">
+          ${filtered.slice(0, 300).map((p) => html`
+            <div key=${p.id} className="pgcard">
+              <div className="pgcard-img">
+                <${Img} src=${p.img} alt=${p.name}
+                  fallback=${html`<span className="note">bez fotky</span>`}
+                  errFallback=${html`<span className="note imgwarn" style=${{ padding: "4px 8px", borderRadius: 8 }}>chybí fotka</span>`} />
+              </div>
+              <div>
+                <div className="pgcard-ref">${p.ref}</div>
+                <div className="pgcard-nm">${p.name}</div>
+                ${p.material && html`<div className="pgcard-mat">${p.material}</div>`}
+                ${p.colors && p.colors.length ? html`
+                  <div className="pgcard-dots">
+                    ${p.colors.slice(0, 12).map((c, i) => html`<span key=${i} className="cdot" title=${(c.code ? c.code + " " : "") + (c.name || "")} style=${{ background: c.hex || "#CCCCCC" }}></span>`)}
+                    ${p.colors.length > 12 ? html`<span className="note">+${p.colors.length - 12}</span>` : ""}
+                  </div>` : ""}
+                <div className="note" style=${{ marginTop: 4 }}>${p.positions.length} tiskov${p.positions.length === 1 ? "á poloha" : (p.positions.length < 5 ? "é polohy" : "ých poloh")}</div>
+              </div>
+              <div className="pgcard-actions">
+                <button className="btn sec sm" style=${{ flex: 1 }} onClick=${() => setEdit(JSON.parse(JSON.stringify(p)))}>Upravit</button>
+                <button className="btn danger sm" onClick=${() => guardDelete(() => setProducts((prev) => prev.filter((x) => x.id !== p.id)), "smazání produktu " + (p.ref || p.name))}>Smazat</button>
+              </div>
+            </div>`)}
+        </div>
+        ${filtered.length > 300 && html`<p className="note" style=${{ marginTop: 10 }}>Zobrazeno prvních 300 — upřesněte hledání.</p>`}
+      ` : html`
         <table className="t">
           <thead><tr><th /><th>Ref.</th><th>Produkt</th><th>Materiál</th><th>Tiskové polohy</th><th /></tr></thead>
           <tbody>
@@ -1035,12 +1134,12 @@ function Products({ products, setProducts }) {
                 </td>
                 <td style=${{ whiteSpace: "nowrap" }}>
                   <button className="btn sec sm" onClick=${() => setEdit(JSON.parse(JSON.stringify(p)))}>Upravit</button>${" "}
-                  <button className="btn danger sm" onClick=${() => setProducts((prev) => prev.filter((x) => x.id !== p.id))}>Smazat</button>
+                  <button className="btn danger sm" onClick=${() => guardDelete(() => setProducts((prev) => prev.filter((x) => x.id !== p.id)), "smazání produktu " + (p.ref || p.name))}>Smazat</button>
                 </td>
               </tr>`)}
           </tbody>
         </table>
-        ${filtered.length > 300 && html`<p className="note">Zobrazeno prvních 300 — upřesněte hledání.</p>`}`}
+        ${filtered.length > 300 && html`<p className="note">Zobrazeno prvních 300 — upřesněte hledání.</p>`}`)}
     </div>`;
 }
 
@@ -1082,7 +1181,7 @@ function ProductForm({ initial, onSave, onCancel }) {
 }
 
 /* ============================ RECEPTURY ============================ */
-function Recipes({ recipes, setRecipes }) {
+function Recipes({ recipes, setRecipes, guardDelete }) {
   const [edit, setEdit] = useState(null);
   const [q, setQ] = useState("");
   const filtered = useMemo(() => {
@@ -1100,13 +1199,30 @@ function Recipes({ recipes, setRecipes }) {
     setEdit(null);
   };
 
+  const exportCsv = () => {
+    const rows = [["nazev", "typ", "rada", "hustota", "hex", "komponenta", "procento", "sito", "kryvost", "povrch", "objednavatel", "otestovany", "vyblednuti"]];
+    for (const r of recipes)
+      for (const c of r.components)
+        rows.push([r.name, r.type, r.series || "", r.density, (r.hex || "").replace(/^#/, ""), c.name, c.pct,
+          r.mesh || "", r.opacity || "", r.surface || "", r.customer || "", r.tested ? "ano" : "", r.fade ? "ano" : ""]);
+    const csv = rows.map((r) => r.map((c) => '"' + String(c).replace(/"/g, '""') + '"').join(";")).join("\n");
+    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "receptury-zaloha.csv";
+    a.click();
+  };
+
   if (edit) return html`<${RecipeForm} initial=${edit} onSave=${save} onCancel=${() => setEdit(null)} />`;
 
   return html`
     <div className="card">
-      <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+      <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 10, flexWrap: "wrap" }}>
         <h2 style=${{ margin: 0 }}>Receptury barev (${recipes.length})</h2>
-        <button className="btn" onClick=${() => setEdit({ id: uid(), name: "", type: "Pantone", series: "", density: 1.2, hex: "#888888", components: [{ id: uid(), name: "", pct: 100 }] })}>+ Nová receptura</button>
+        <div style=${{ display: "flex", gap: 8 }}>
+          <button className="btn sec" onClick=${exportCsv}>Export CSV</button>
+          <button className="btn" onClick=${() => setEdit({ id: uid(), name: "", type: "Pantone", series: "", density: 1.2, hex: "#888888", components: [{ id: uid(), name: "", pct: 100 }] })}>+ Nová receptura</button>
+        </div>
       </div>
       <p className="hint">Pantone standard = formule dle vaší licencované knihovny Printcolor/Pantone. Custom = vlastní vyvzorkovaná směs. Hromadné nahrání: záložka Import / data.</p>
       <input className="search" value=${q} onChange=${(e) => setQ(e.target.value)} placeholder="Hledat recepturu…" style=${{ marginBottom: 14 }} />
@@ -1129,7 +1245,7 @@ function Recipes({ recipes, setRecipes }) {
                   </td>
                   <td style=${{ whiteSpace: "nowrap" }}>
                     <button className="btn sec sm" onClick=${() => setEdit(JSON.parse(JSON.stringify(r)))}>Upravit</button>${" "}
-                    <button className="btn danger sm" onClick=${() => setRecipes((prev) => prev.filter((x) => x.id !== r.id))}>Smazat</button>
+                    <button className="btn danger sm" onClick=${() => guardDelete(() => setRecipes((prev) => prev.filter((x) => x.id !== r.id)), "smazání receptury " + r.name)}>Smazat</button>
                   </td>
                 </tr>`;
             })}
@@ -1332,13 +1448,25 @@ function csvToRecipes(text) {
   return Array.from(map.values());
 }
 
-function Importer({ setProducts, setRecipes }) {
+function Importer({ setProducts, setRecipes, guardDelete, deletePw, setDeletePw }) {
   const [text, setText] = useState("");
   const [preview, setPreview] = useState(null);
   const [recPreview, setRecPreview] = useState(null);
   const [msg, setMsg] = useState(null);
   const fileRef = useRef(null);
   const recFileRef = useRef(null);
+  const [pwCur, setPwCur] = useState("");
+  const [pw1, setPw1] = useState("");
+  const [pw2, setPw2] = useState("");
+  const [pwMsg, setPwMsg] = useState(null);
+  const savePw = () => {
+    setPwMsg(null);
+    if (deletePw && pwCur !== deletePw) { setPwMsg({ warn: "Současné heslo nesouhlasí." }); return; }
+    if (pw1 !== pw2) { setPwMsg({ warn: "Nová hesla se neshodují." }); return; }
+    setDeletePw(pw1);
+    setPwCur(""); setPw1(""); setPw2("");
+    setPwMsg({ ok: pw1 ? "Heslo pro mazání bylo nastaveno." : "Ochrana heslem byla odebrána — mazání teď funguje bez potvrzení." });
+  };
 
   const analyze = (raw) => {
     setMsg(null); setRecPreview(null);
@@ -1506,13 +1634,28 @@ Firemní zelená CUST-014;Custom;Printcolor 390;1,22;0E8A5F;Transparentní báze
               setMsg({ ok: "Katalog obnoven z data.js (" + ((window.KATALOG || []).length) + " produktů)." });
             }
           }}>Obnovit katalog z data.js</button>
-          <button className="btn danger" onClick=${() => {
+          <button className="btn danger" onClick=${() => guardDelete(() => {
             if (window.confirm("Opravdu vymazat VŠECHNY produkty? (Receptury zůstanou.)")) {
               setProducts([]);
               setMsg({ ok: "Katalog produktů vymazán." });
             }
-          }}>Vymazat katalog produktů</button>
+          }, "vymazání celého katalogu produktů")}>Vymazat katalog produktů</button>
         </div>
+      </div>
+
+      <div className="card">
+        <h2>Zabezpečení mazání</h2>
+        <p className="hint">${deletePw
+          ? "Mazání produktů a receptur je chráněno heslem — nechte nová hesla prázdná a uložte, pokud chcete ochranu odebrat."
+          : "Nastavte heslo, aby šlo mazat produkty a receptury jen po jeho zadání."}</p>
+        <div className="frow c3">
+          ${deletePw && html`<div><label className="f">Současné heslo</label><input type="password" value=${pwCur} onChange=${(e) => setPwCur(e.target.value)} /></div>`}
+          <div><label className="f">Nové heslo</label><input type="password" value=${pw1} onChange=${(e) => setPw1(e.target.value)} placeholder=${deletePw ? "prázdné = zrušit ochranu" : "heslo"} /></div>
+          <div><label className="f">Zopakovat nové heslo</label><input type="password" value=${pw2} onChange=${(e) => setPw2(e.target.value)} /></div>
+        </div>
+        ${pwMsg && pwMsg.warn && html`<div className="warnbox">${pwMsg.warn}</div>`}
+        ${pwMsg && pwMsg.ok && html`<div className="okbox">${pwMsg.ok}</div>`}
+        <button className="btn" style=${{ marginTop: 10 }} onClick=${savePw}>Uložit</button>
       </div>
     <//>`;
 }
