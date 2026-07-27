@@ -6,15 +6,16 @@
 <title>Ink Recipe Manager — Printcolor</title>
 <style>
 :root{
-  --bg:#E3E2DE; --paper:#E3E2DE; --ink:#18170F; --ink-2:#78766C; --line:#D6D4CC; --line-2:#C7C4B9;
+  --bg:#D9D8D3; --paper:#D9D8D3; --ink:#18170F; --ink-2:#78766C; --line:#CCCAC1; --line-2:#BDB9AC;
   --cyan:#3E5C8A; --magenta:#C97B63; --yellow:#D9B44A; --key:#5B5952;
   --ok:#2F7D53; --warn:#B5701C;
   --radius:18px;
-  --neu:-20px -20px 40px rgba(255,255,255,.9), 20px 20px 40px rgba(24,23,15,.12);
-  --neu-sm:-6px -6px 14px rgba(255,255,255,.85), 6px 6px 14px rgba(24,23,15,.14);
-  --neu-in:inset 6px 6px 12px rgba(24,23,15,.10), inset -6px -6px 12px rgba(255,255,255,.8);
-  --neu-in-lg:inset 8px 8px 18px rgba(24,23,15,.11), inset -8px -8px 18px rgba(255,255,255,.85);
+  --neu:-20px -20px 40px rgba(255,255,255,.8), 20px 20px 40px rgba(24,23,15,.18);
+  --neu-sm:-6px -6px 14px rgba(255,255,255,.75), 6px 6px 14px rgba(24,23,15,.20);
+  --neu-in:inset 6px 6px 12px rgba(24,23,15,.15), inset -6px -6px 12px rgba(255,255,255,.7);
+  --neu-in-lg:inset 8px 8px 18px rgba(24,23,15,.16), inset -8px -8px 18px rgba(255,255,255,.75);
   --modal-shadow:0 24px 70px rgba(24,23,15,.28);
+  --logo-shadow:-4px -4px 8px rgba(255,255,255,.85), 4px 4px 8px rgba(24,23,15,.30);
   --mono:ui-monospace,'Cascadia Mono',Consolas,monospace;
   --sans:'Segoe UI',system-ui,Arial,sans-serif;
 }
@@ -27,6 +28,7 @@
   --neu-in:inset 6px 6px 12px rgba(0,0,0,.45), inset -6px -6px 12px rgba(255,255,255,.045);
   --neu-in-lg:inset 8px 8px 18px rgba(0,0,0,.5), inset -8px -8px 18px rgba(255,255,255,.05);
   --modal-shadow:0 24px 70px rgba(0,0,0,.7);
+  --logo-shadow:-4px -4px 8px rgba(255,255,255,.06), 4px 4px 8px rgba(0,0,0,.65);
 }
 :root[data-theme="dark"] .warnbox,:root[data-theme="dark"] #chyba{background:#3A2F1C;border-color:#5C4A26;color:#E8B168}
 :root[data-theme="dark"] .okbox{background:#1E3327;border-color:#2E4F3B;color:#7FD9A8}
@@ -49,17 +51,19 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}
 input[type=color]::-webkit-color-swatch{border:none;border-radius:7px}
 input[type=color]::-moz-color-swatch{border:none;border-radius:7px}
 textarea{font-family:var(--mono);font-size:12.5px;min-height:160px;resize:vertical;line-height:1.5}
-.regbar{display:flex;height:4px}
-.regbar span{flex:1}
-.hdr{background:var(--paper);color:var(--ink);padding:22px clamp(16px,3vw,40px) 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
-.themebtn{flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:none;background:var(--paper);box-shadow:var(--neu-sm);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;line-height:1;transition:opacity .15s;color:var(--ink)}
+.hdr{background:var(--paper);color:var(--ink);padding:9px clamp(16px,3vw,40px);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
+.themebtn{grid-column:3;justify-self:end;flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:none;background:var(--paper);box-shadow:var(--neu-sm);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;line-height:1;transition:opacity .15s;color:var(--ink)}
 .themebtn:hover{opacity:.8}
-.hdr h1{margin:0;font-size:clamp(20px,2.6vw,26px);font-weight:800;letter-spacing:-.01em}
-.hdr .sub{color:var(--ink-2);font-size:12px;margin-top:5px;font-family:var(--mono);letter-spacing:.04em}
-.tabs{display:flex;gap:4px;background:var(--paper);padding:0 clamp(16px,3vw,40px);flex-wrap:wrap}
-.tabs button{background:none;border:none;color:var(--ink-2);padding:14px 16px;font-weight:700;font-size:13px;letter-spacing:.03em;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
-.tabs button:hover{color:var(--ink)}
-.tabs button.on{color:var(--ink);border-bottom-color:var(--ink)}
+.hdr h1{grid-column:2;margin:0;font-size:clamp(66px,8.4vw,90px);font-weight:800;letter-spacing:.04em;text-align:center;color:var(--paper);text-shadow:var(--logo-shadow);cursor:pointer;transition:opacity .15s}
+.hdr h1:hover{opacity:.85}
+.menuwrap{grid-column:1;justify-self:start;position:relative}
+.navbtn{width:42px;height:42px;border-radius:50%;border:none;background:var(--paper);box-shadow:var(--neu-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink);transition:opacity .15s}
+.navbtn:hover{opacity:.8}
+.navdrop{position:absolute;top:calc(100% + 10px);left:0;background:var(--paper);border-radius:14px;box-shadow:var(--neu);padding:6px;z-index:45;min-width:180px;display:flex;flex-direction:column;gap:2px}
+.navdrop button{background:none;border:none;text-align:left;padding:10px 14px;border-radius:10px;font-weight:600;font-size:13.5px;color:var(--ink);cursor:pointer;transition:background .15s}
+.navdrop button:hover{background:rgba(62,92,138,.10)}
+.navdrop button.on{color:var(--cyan);font-weight:800}
+:root[data-theme="dark"] .navdrop button:hover{background:rgba(127,163,217,.16)}
 .wrap{max-width:none;margin:0;padding:20px clamp(16px,3vw,40px) 56px}
 .grid{display:grid;gap:16px}
 @media(min-width:960px){.grid.calc{grid-template-columns:minmax(0,1fr) minmax(425px,32.5%);column-gap:48px}}
@@ -299,6 +303,14 @@ function App() {
     document.documentElement.setAttribute("data-theme", theme);
     saveLS("irm-theme", theme);
   }, [theme]);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onDocClick = (e) => { if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false); };
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, [menuOpen]);
   const dataJsOk = Array.isArray(window.KATALOG) && window.KATALOG.length > 0;
   const [products, setProducts] = useState(() => {
     const stored = loadLS("irm-products", null);
@@ -356,17 +368,22 @@ function App() {
 
   return html`
     <div>
-      <div className="regbar" aria-hidden="true">
-        <span style=${{ background: "var(--cyan)" }} />
-        <span style=${{ background: "var(--magenta)" }} />
-        <span style=${{ background: "var(--yellow)" }} />
-        <span style=${{ background: "var(--key)" }} />
-      </div>
       <header className="hdr">
-        <div>
-          <h1>Ink Recipe Manager</h1>
-          <div className="sub">Printcolor · Pantone Matching System · SCR / PDP / TXP / TRS / FIR · lokální verze</div>
+        <div className="menuwrap" ref=${menuRef}>
+          <button className="navbtn" type="button" onClick=${() => setMenuOpen((o) => !o)}
+            title="Menu" aria-label="Otevřít menu" aria-expanded=${menuOpen}>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true">
+              <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </button>
+          ${menuOpen && html`
+            <div className="navdrop">
+              <button className=${tab === "prod" ? "on" : ""} onClick=${() => { setTab("prod"); setMenuOpen(false); }}>Produkty</button>
+              <button className=${tab === "rec" ? "on" : ""} onClick=${() => { setTab("rec"); setMenuOpen(false); }}>Receptury</button>
+              <button className=${tab === "imp" ? "on" : ""} onClick=${() => { setTab("imp"); setMenuOpen(false); }}>Import / data</button>
+            </div>`}
         </div>
+        <h1 title="Zpět na Kalkulaci" onClick=${() => setTab("calc")}>IRM</h1>
         <button className="themebtn" type="button"
           onClick=${() => setTheme((t) => t === "dark" ? "light" : "dark")}
           title=${theme === "dark" ? "Přepnout na světlý režim" : "Přepnout na tmavý režim"}
@@ -377,12 +394,6 @@ function App() {
           </svg>
         </button>
       </header>
-      <nav className="tabs">
-        <button className=${tab === "calc" ? "on" : ""} onClick=${() => setTab("calc")}>Kalkulace</button>
-        <button className=${tab === "prod" ? "on" : ""} onClick=${() => setTab("prod")}>Produkty</button>
-        <button className=${tab === "rec" ? "on" : ""} onClick=${() => setTab("rec")}>Receptury</button>
-        <button className=${tab === "imp" ? "on" : ""} onClick=${() => setTab("imp")}>Import / data</button>
-      </nav>
       <main className="wrap">
         ${!dataJsOk && html`
           <div className="warnbox" style=${{ marginTop: 0, marginBottom: 18 }}>
