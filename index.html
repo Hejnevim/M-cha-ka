@@ -31,6 +31,7 @@
 :root[data-theme="dark"] .warnbox,:root[data-theme="dark"] #chyba{background:#3A2F1C;border-color:#5C4A26;color:#E8B168}
 :root[data-theme="dark"] .okbox{background:#1E3327;border-color:#2E4F3B;color:#7FD9A8}
 :root[data-theme="dark"] .imgwarn{background:#3A2F1C !important;color:#E8B168 !important}
+:root[data-theme="dark"] .rowactive td{background:rgba(127,163,217,.16)}
 *{box-sizing:border-box}
 body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
 input,select,button,textarea{font-family:inherit;font-size:14px}
@@ -107,6 +108,7 @@ td.num,th.num{text-align:right;font-family:var(--mono)}
 .mixbar{display:flex;height:20px;border-radius:8px;overflow:hidden;box-shadow:var(--neu-in);margin:10px 0 4px}
 .warnbox{background:#FBF1E4;border:1px solid #EFD2A0;color:#8A5A1E;border-radius:10px;padding:10px 12px;font-size:13px;margin-top:12px}
 .imgwarn{background:#FBF1E4 !important;color:#8A5A1E !important}
+.rowactive td{background:rgba(62,92,138,.10)}
 .okbox{background:#EAF3EC;border:1px solid #BCDCC7;color:#1E6B44;border-radius:10px;padding:10px 12px;font-size:13px;margin-top:12px}
 .empty{color:var(--ink-2);font-size:13.5px;padding:20px;text-align:center;border-radius:var(--radius);box-shadow:var(--neu-in)}
 .rowline{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
@@ -950,7 +952,7 @@ function Vazeni({ comps, totalG, recipeName }) {
             <thead><tr><th></th><th>Komponenta</th><th className="num">přidat g</th><th className="num">celkem do g</th></tr></thead>
             <tbody>
               ${comps.map((c, i) => html`
-                <tr key=${c.id} style=${i === step ? { background: "#FFF1ED" } : (i < step ? { opacity: .55 } : {})}>
+                <tr key=${c.id} className=${i === step ? "rowactive" : ""} style=${i < step ? { opacity: .55 } : {}}>
                   <td>${i < step ? "✓" : (i === step ? "▶" : "")}</td>
                   <td>${c.name}</td>
                   <td className="num">${fmt(c.g)}</td>
