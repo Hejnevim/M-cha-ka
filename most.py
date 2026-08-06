@@ -390,8 +390,13 @@ class Most(SimpleHTTPRequestHandler):
             radek = format % args
         except Exception:
             radek = " ".join(str(a) for a in args)
-        if "/api/" in radek:
-            sys.stdout.write("  " + radek + "\n")
+        # Při spuštění na pozadí (pythonw.exe) žádný výstup neexistuje
+        # a sys.stdout je None — zápis by shodil obsluhu požadavku.
+        if "/api/" in radek and sys.stdout is not None:
+            try:
+                sys.stdout.write("  " + radek + "\n")
+            except Exception:
+                pass
 
     def handle_one_request(self):
         # Prohlížeč běžně žádá o soubory, které nejsou stažené (fotky barev,
@@ -404,6 +409,10 @@ class Most(SimpleHTTPRequestHandler):
 
 class Server(ThreadingHTTPServer):
     daemon_threads = True
+    # Windows jinak dovolí, aby se na týž port pověsil druhý most vedle prvního.
+    # Požadavky se pak rozdělí mezi obě instance a aplikace vidí zastaralá data,
+    # proto druhé spuštění raději rovnou selže.
+    allow_reuse_address = False
 
     def handle_error(self, request, client_address):
         typ = sys.exc_info()[0]
@@ -415,9 +424,15 @@ class Server(ThreadingHTTPServer):
 def main():
     cfg = nacti_config()
     port = int(cfg.get("port", 8765))
+    bez_prohlizece = False
+    po_siti = bool(cfg.get("po_siti", False))
     for arg in sys.argv[1:]:
         if arg.startswith("--port="):
             port = int(arg.split("=", 1)[1])
+        elif arg in ("--bez-prohlizece", "--tiche"):
+            bez_prohlizece = True     # pro spuštění na pozadí při startu Windows
+        elif arg in ("--sit", "--lan"):
+            po_siti = True            # zpřístupní most ostatním počítačům v síti
     adresa = "http://localhost:%d/index.html" % port
     print("")
     try:
@@ -438,8 +453,20 @@ def main():
     print("  aplikace: " + adresa)
     print("  ukončení: Ctrl+C")
     print("")
-    server = Server(("127.0.0.1", port), Most)
-    threading.Timer(0.8, lambda: webbrowser.open(adresa)).start()
+    rozhrani = "0.0.0.0" if po_siti else "127.0.0.1"
+    if po_siti:
+        print("  POZOR:    most je zpřístupněn ostatním počítačům v síti (--sit).")
+        print("            Zapínejte jen ve firemní síti, které důvěřujete.")
+    try:
+        server = Server((rozhrani, port), Most)
+    except OSError:
+        # Port drží někdo jiný — skoro vždy už spuštěný most v jiném okně.
+        # Dvě instance najednou dělaly potíže, proto raději skončíme.
+        print("  Port %d je obsazený — most nejspíš už běží v jiném okně." % port)
+        print("  Buď použijte to okno, nebo zvolte jiný port: python most.py --port=8766")
+        return
+    if not bez_prohlizece:
+        threading.Timer(0.8, lambda: webbrowser.open(adresa)).start()
     try:
         server.serve_forever()
     except KeyboardInterrupt:

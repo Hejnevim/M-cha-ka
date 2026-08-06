@@ -559,9 +559,38 @@ function resolveSpec(parsed, products, recipes) {
    nejde. Data poskytuje skript most.py běžící na tomto počítači.
    Je-li aplikace otevřená z mostu (http://localhost:…), použije se stejný původ;
    při otevření dvojklikem (file://) se most zkusí na uloženém portu.            */
-const sgpsBase = () => (location.protocol === "http:" || location.protocol === "https:")
-  ? location.origin + "/api"
-  : "http://localhost:" + n(loadLS("irm-sgps-port", 8765), 8765) + "/api";
+/* Most běží vždy na tomhle počítači. Vlastní adresu použijeme jen tehdy,
+   když z něj aplikace přímo běží; je-li stránka odjinud (třeba z GitHubu),
+   míříme na localhost — jinak bychom API hledali na cizím serveru. */
+const MOST_VYCHOZI = "http://localhost:8765";
+let MOST_NALEZENY = "";     // adresa, na které se most naposledy ozval
+
+/* Adresy, na kterých se most zkusí najít. Ručně zadaná má přednost; jinak
+   nejdřív vlastní původ (aplikace může běžet přímo z mostu) a pak tenhle
+   počítač. Že stránka běží z localhostu ještě neznamená, že je most na témž
+   portu — proto se adresy opravdu zkoušejí, ne jen odhadují. */
+function sgpsKandidati() {
+  const ulozena = String(loadLS("irm-most-adresa", "") || "").trim().replace(/\/+$/, "");
+  if (ulozena) return [ulozena];
+  const port = n(loadLS("irm-sgps-port", 8765), 8765);
+  const list = [];
+  if (MOST_NALEZENY) list.push(MOST_NALEZENY);
+  if (location.protocol === "http:" || location.protocol === "https:") list.push(location.origin);
+  list.push("http://localhost:" + port);
+  list.push("http://127.0.0.1:" + port);
+  return list.filter((a, i) => a && list.indexOf(a) === i);
+}
+const sgpsAdresa = () => MOST_NALEZENY || sgpsKandidati()[0];
+const sgpsBase = () => sgpsAdresa() + "/api";
+
+/* Ověří, že na dané adrese opravdu odpovídá most (a ne třeba jiný web). */
+async function zkusMost(adresa) {
+  const r = await fetch(adresa + "/api/stav", { cache: "no-store" });
+  if (!r.ok) throw new Error("odpověď " + r.status);
+  const d = await r.json();
+  if (!d || d.ok !== true || d.verze === undefined) throw new Error("na téhle adrese neodpovídá most");
+  return d;
+}
 
 async function sgpsGet(cesta) {
   const r = await fetch(sgpsBase() + cesta, { cache: "no-store" });
@@ -588,16 +617,32 @@ function zakazkaNaSpec(z) {
 
 function useSgps() {
   const [stav, setStav] = useState({ stav: "hleda" });   // hleda | ok | chyba
-  const zjisti = async () => {
-    setStav({ stav: "hleda" });
-    try {
-      const s = await sgpsGet("/stav");
-      setStav(Object.assign({ stav: s.chyba ? "chyba" : "ok" }, s));
-    } catch (e) {
-      setStav({ stav: "chyba", chyba: String((e && e.message) || e), most: false });
+  const pokusu = useRef(0);
+  const zjisti = async (tise) => {
+    if (!tise) setStav({ stav: "hleda" });
+    let posledni = "";
+    for (const adresa of sgpsKandidati()) {
+      try {
+        const s = await zkusMost(adresa);
+        MOST_NALEZENY = adresa;
+        pokusu.current = 0;
+        setStav(Object.assign({ stav: s.chyba ? "chyba" : "ok", adresa: adresa }, s));
+        return;
+      } catch (e) { posledni = String((e && e.message) || e); }
     }
+    MOST_NALEZENY = "";
+    setStav({ stav: "chyba", chyba: posledni || "most se neozval", most: false });
   };
   useEffect(() => { zjisti(); }, []);
+  // Dokud most neběží, zkoušíme to dál — spustí-li se kdykoli později,
+  // aplikace si ho najde sama a není potřeba ji načítat znovu.
+  useEffect(() => {
+    if (stav.stav === "ok") return;
+    pokusu.current += 1;
+    const cekat = Math.min(3000 + pokusu.current * 1000, 15000);
+    const t = setTimeout(() => zjisti(true), cekat);
+    return () => clearTimeout(t);
+  }, [stav]);
   return { stav, zjisti };
 }
 
@@ -1462,6 +1507,112 @@ function PdfVKalkulaci({ sgps, products, recipes, onApply, onNacteno }) {
     <//>`;
 }
 
+function PripojeniTab({ sgps }) {
+  const [adresa, setAdresa] = useState(() =>
+    String(loadLS("irm-most-adresa", "") || "").trim() || sgpsAdresa() || MOST_VYCHOZI);
+  const [zkouska, setZkouska] = useState(null);
+  const [zkousim, setZkousim] = useState(false);
+  const ok = sgps.stav.stav === "ok";
+
+  const vyzkousej = async (kam) => {
+    const cil = String(kam || adresa).trim().replace(/\/+$/, "");
+    if (!cil) return;
+    setZkousim(true); setZkouska(null);
+    const t0 = Date.now();
+    try {
+      const d = await zkusMost(cil);
+      setZkouska({ ok: true, ms: Date.now() - t0, d: d, adresa: cil });
+    } catch (e) {
+      setZkouska({ ok: false, chyba: String((e && e.message) || e), adresa: cil });
+    }
+    setZkousim(false);
+  };
+  const uloz = async () => {
+    const cil = adresa.trim().replace(/\/+$/, "");
+    saveLS("irm-most-adresa", cil);
+    await vyzkousej(cil);
+    sgps.zjisti();
+  };
+  const vratVychozi = () => {
+    saveLS("irm-most-adresa", "");
+    setAdresa(sgpsAdresa());
+    sgps.zjisti();
+  };
+
+  return html`
+    <${React.Fragment}>
+      <div className="card">
+        <h2>Připojení k mostu</h2>
+        <p className="hint">
+          Most je pomocný program běžící na počítači — čte PDF a vykresluje stránky.
+          Aplikaci můžete otevřít odkudkoli (z disku, z localhostu i ze stránky na
+          internetu), most se ale vždy hledá na počítači, u kterého sedíte.
+        </p>
+
+        <div className="specbar" style=${{ marginTop: 4 }}>
+          <span className="dot" style=${{ background: ok ? "var(--ok)" : "var(--warn)" }}></span>
+          ${ok
+            ? html`<span>Připojeno k <b>${sgpsAdresa()}</b> — čtení PDF ${sgps.stav.pdf ? "připravené" : "nedostupné"}.</span>`
+            : html`<span>Nepřipojeno. Aplikace to zkouší dál sama; jakmile most naskočí, rozjede se bez načítání znovu.</span>`}
+        </div>
+
+        <label className="f" style=${{ marginTop: 14 }}>Adresa mostu</label>
+        <div className="rowline">
+          <input style=${{ flex: "1 1 320px" }} value=${adresa}
+            onChange=${(e) => setAdresa(e.target.value)}
+            onKeyDown=${(e) => { if (e.key === "Enter") uloz(); }}
+            placeholder=${MOST_VYCHOZI} />
+          <button className="btn" onClick=${uloz} disabled=${zkousim}>
+            ${zkousim ? "Zkouším…" : "Připojit a uložit"}
+          </button>
+          <button className="btn sec" onClick=${() => vyzkousej()} disabled=${zkousim}>Jen vyzkoušet</button>
+          <button className="btn sec sm" onClick=${vratVychozi}>Výchozí</button>
+        </div>
+        <p className="note">
+          Obvykle <b>${MOST_VYCHOZI}</b>. Běží-li most na jiném počítači v dílně,
+          zadejte jeho adresu, například <b>http://192.168.1.50:8765</b> — takový most
+          je ale potřeba spustit příkazem <code>python most.py --sit</code>.
+        </p>
+
+        ${zkouska && (zkouska.ok
+          ? html`<div className="okbox">✓ Most na <b>${zkouska.adresa}</b> odpověděl za ${zkouska.ms} ms —
+              čtení PDF ${zkouska.d.pdf ? "připravené" : "NEDOSTUPNÉ"}, SGPS v režimu „${zkouska.d.rezim}“.</div>`
+          : html`<div className="warnbox">Na <b>${zkouska.adresa}</b> se most neozval — ${zkouska.chyba}</div>`)}
+      </div>
+
+      <div className="card">
+        <h2>Jak most rozběhnout</h2>
+        <p className="hint">Ve složce aplikace stačí jednou nastavit, aby se spouštěl sám se systémem:</p>
+        <pre className="tpl">python autostart.py zapnout    · spouštět po přihlášení
+python autostart.py spustit    · nastartovat hned teď
+python autostart.py stav       · zjistit, jak to je
+python autostart.py zastavit   · ukončit most na pozadí</pre>
+        <p className="note" style=${{ marginTop: 10 }}>
+          Most pak běží neviditelně na pozadí. Spustit ho ze stránky nejde — prohlížeč
+          žádné stránce nedovolí spouštět programy na počítači, a to platí pro každou
+          aplikaci, nejen tuhle.
+        </p>
+      </div>
+
+      <div className="card">
+        <h2>Otevření z GitHubu nebo ze sdíleného disku</h2>
+        <p className="hint">Funguje, ale je dobré vědět o dvou věcech:</p>
+        <div className="kv">
+          <div className="k">Most</div>
+          <div className="v">musí běžet na počítači, u kterého sedíte
+            <span className="note"> — naslouchá jen místně, z internetu se k němu nikdo nedostane</span></div>
+          <div className="k">Uložená data</div>
+          <div className="v">každá adresa má vlastní úložiště
+            <span className="note"> — receptury, vazby a krycí plochy zadané na jedné adrese neuvidíte na jiné</span></div>
+        </div>
+        <p className="note" style=${{ marginTop: 10 }}>
+          Aktuální adresa aplikace: <b>${location.origin === "null" || !location.origin ? location.protocol : location.origin}</b>,
+          most se hledá na <b>${sgpsAdresa()}</b>.
+        </p>
+      </div>
+    <//>`;
+}
+
 function ZakazkyTab({ sgps, onOtevri }) {
   const [q, setQ] = useState("");
   const [list, setList] = useState([]);
@@ -2001,6 +2152,7 @@ function App() {
               <button className=${tab === "pdf" ? "on" : ""} onClick=${() => { setTab("pdf"); setMenuOpen(false); }}>Načíst spec z PDF</button>
               <button className=${tab === "scan" ? "on" : ""} onClick=${() => { setTab("scan"); setMenuOpen(false); }}>Načíst spec (čárový kód)</button>
               <button className=${tab === "zak" ? "on" : ""} onClick=${() => { setTab("zak"); setMenuOpen(false); }}>Zakázky (SGPS)</button>
+              <button className=${tab === "most" ? "on" : ""} onClick=${() => { setTab("most"); setMenuOpen(false); }}>Připojení k mostu</button>
               <button className=${tab === "prod" ? "on" : ""} onClick=${() => { setTab("prod"); setMenuOpen(false); }}>Produkty</button>
               <button className=${tab === "rec" ? "on" : ""} onClick=${() => { setTab("rec"); setMenuOpen(false); }}>Receptury</button>
               <button className=${tab === "imp" ? "on" : ""} onClick=${() => { setTab("imp"); setMenuOpen(false); }}>Import / data</button>
@@ -2036,6 +2188,7 @@ function App() {
           ulozeny=${pdfSpec} setUlozeny=${setPdfSpec}
           onApply=${(res) => { setScanLog((l) => [{ ts: Date.now(), raw: res.parsed.raw, res: res }].concat(l).slice(0, 25)); pouzitSpec(res); }} />`}
         ${tab === "zak" && html`<${ZakazkyTab} sgps=${sgps} onOtevri=${otevriZakazku} />`}
+        ${tab === "most" && html`<${PripojeniTab} sgps=${sgps} />`}
         ${tab === "prod" && html`<${Products} products=${products} setProducts=${setProducts} guardDelete=${guardDelete} />`}
         ${tab === "rec" && html`<${Recipes} recipes=${recipes} setRecipes=${setRecipes} guardDelete=${guardDelete} />`}
         ${tab === "imp" && html`<${Importer} setProducts=${setProducts} setRecipes=${setRecipes} guardDelete=${guardDelete} deletePw=${deletePw} setDeletePw=${setDeletePw} />`}
