@@ -1,0 +1,120 @@
+{
+  "_napoveda": "rezim: demo | soubor | rest. V mapovani jsou vlevo pole aplikace, vpravo seznam možných názvů ve SGPS (bere se první nalezené; lze psát i cestu typu 'objednavka.cislo').",
+  "rezim": "demo",
+  "port": 8765,
+  "soubor": {
+    "cesta": "zakazky_sgps.json",
+    "_pozn": "JSON (pole záznamů nebo {\"orders\": [...]}), CSV (; nebo ,) či XML."
+  },
+  "rest": {
+    "url_seznam": "https://sgps.firma.cz/api/orders?status=open",
+    "url_zakazka": "https://sgps.firma.cz/api/orders/{cislo}",
+    "hlavicky": {
+      "Authorization": "Bearer SEM-PATRI-TOKEN"
+    },
+    "uzivatel": "",
+    "heslo": "",
+    "korenovy_klic": "",
+    "_pozn": "korenovy_klic = název pole, pod kterým API vrací seznam (např. 'data' nebo 'items'); prázdné = odpověď je rovnou pole.",
+    "overit_certifikat": true
+  },
+  "mapovani": {
+    "cislo": [
+      "cislo",
+      "cislo_zakazky",
+      "order_no",
+      "orderNumber",
+      "number",
+      "id"
+    ],
+    "ref": [
+      "ref",
+      "produkt",
+      "product_ref",
+      "productRef",
+      "sku",
+      "item",
+      "artikl"
+    ],
+    "nazev": [
+      "nazev",
+      "produkt_nazev",
+      "product_name",
+      "productName",
+      "name"
+    ],
+    "ks": [
+      "ks",
+      "mnozstvi",
+      "qty",
+      "quantity",
+      "pieces",
+      "amount"
+    ],
+    "poloha": [
+      "poloha",
+      "pozice",
+      "position",
+      "print_position",
+      "printPosition"
+    ],
+    "barva": [
+      "barva",
+      "color",
+      "colour",
+      "barva_produktu"
+    ],
+    "receptura": [
+      "receptura",
+      "recipe",
+      "pantone",
+      "odstin"
+    ],
+    "gm2": [
+      "gm2",
+      "spotreba"
+    ],
+    "ztraty": [
+      "ztraty",
+      "loss"
+    ],
+    "min": [
+      "min",
+      "min_davka",
+      "minBatch"
+    ],
+    "zakaznik": [
+      "zakaznik",
+      "customer",
+      "client",
+      "odberatel",
+      "objednavatel"
+    ],
+    "sito": [
+      "sito",
+      "mesh"
+    ],
+    "kryvost": [
+      "kryvost",
+      "opacity"
+    ],
+    "povrch": [
+      "povrch",
+      "surface"
+    ],
+    "termin": [
+      "termin",
+      "due",
+      "due_date",
+      "dueDate",
+      "deadline"
+    ],
+    "pozn": [
+      "pozn",
+      "poznamka",
+      "note",
+      "notes",
+      "comment"
+    ]
+  }
+}

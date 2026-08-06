@@ -182,6 +182,19 @@ pre.tpl{background:var(--bg);border-radius:10px;padding:12px;font-size:12px;over
 .pgcard-mat{font-size:12px;color:var(--ink-2);margin-top:2px}
 .pgcard-dots{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;align-items:center}
 .pgcard-actions{display:flex;gap:6px;margin-top:auto;padding-top:4px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--paper);box-shadow:var(--neu);border-radius:14px;padding:12px 20px;z-index:60;font-size:14px;font-weight:600;display:flex;gap:10px;align-items:center;max-width:min(620px,92vw)}
+.toast.bad{color:#B23B2A}
+:root[data-theme="dark"] .toast.bad{color:#E8837A}
+.scanrow{display:flex;gap:10px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--line)}
+.scanrow:last-child{border-bottom:none}
+.scanraw{font-family:var(--mono);font-size:12px;word-break:break-all;flex:1;min-width:0}
+.dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;align-self:center}
+.cam{width:100%;max-width:420px;border-radius:12px;background:#000;box-shadow:var(--neu-in);display:block;margin-top:10px}
+.specbar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;border-radius:12px;padding:10px 14px;box-shadow:var(--neu-in);margin-bottom:16px;font-size:13px}
+.specbar b{font-family:var(--mono)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:13px;margin-top:8px}
+.kv .k{color:var(--ink-2);font-size:11px;text-transform:uppercase;letter-spacing:.06em;align-self:center}
+.kv .v{font-weight:700}
 </style>
 </head>
 <body>
@@ -291,6 +304,499 @@ const fixTech = (ps) => (ps || []).map((p) => Object.assign({}, p, {
   positions: (p.positions || []).map((x) => Object.assign({}, x, { tech: x.tech === "TRF" ? "TRS" : x.tech })),
 }));
 
+/* ==================== SPECIFIKACE ZAKÁZKY Z ČÁROVÉHO / QR KÓDU ====================
+   Kód může nést buď samotné ref. číslo produktu ("11101"), nebo celou zakázku
+   jako dvojice klíč=hodnota oddělené | ; nebo tabulátorem, případně JSON:
+     IRM1|ref=11101|ks=500|poz=2|barva=105|rec=PANTONE 485 C|ztraty=15|obj=2026-114
+   Neznámé klíče se ignorují, chybějící hodnoty zůstanou beze změny.          */
+const SPEC_ALIAS = {
+  ref:      /^(ref|kod|k.d|code|produkt|product|sku|art|artikl)$/i,
+  qty:      /^(ks|mn|mnozstvi|mno.stv.|qty|pocet|po.et|quantity|amount)$/i,
+  pos:      /^(poz|pos|poloha|pozice|position|misto|m.sto)$/i,
+  color:    /^(barva|color|col|odstin|odst.n)$/i,
+  recipe:   /^(rec|receptura|recipe|pantone|formule)$/i,
+  gm2:      /^(gm2|g_m2|spotreba|spot.eba)$/i,
+  loss:     /^(ztraty|ztr.ty|loss|odpad)$/i,
+  minBatch: /^(min|mindavka|min_davka|minbatch)$/i,
+  order:    /^(obj|objednavka|objedn.vka|zakazka|zak.zka|order|po)$/i,
+  customer: /^(zakaznik|z.kazn.k|customer|objednavatel|odberatel|odb.ratel)$/i,
+  mesh:     /^(sito|s.to|mesh)$/i,
+  opacity:  /^(kryvost|opacity)$/i,
+  surface:  /^(povrch|surface)$/i,
+  note:     /^(pozn|poznamka|pozn.mka|note|text)$/i,
+};
+const SPEC_LABEL = {
+  ref: "Produkt (ref.)", qty: "Počet kusů", pos: "Poloha", color: "Barva produktu",
+  recipe: "Receptura", gm2: "Spotřeba g/m²", loss: "Ztráty %", minBatch: "Min. dávka g",
+  order: "Zakázka", customer: "Objednavatel", mesh: "Síto", opacity: "Kryvost",
+  surface: "Povrch", note: "Poznámka",
+};
+
+function parseSpec(text) {
+  const raw = String(text == null ? "" : text).trim();
+  const out = { raw, fields: {}, unknown: [] };
+  if (!raw) return out;
+  const put = (k, v) => {
+    const key = String(k).trim();
+    for (const f of Object.keys(SPEC_ALIAS)) if (SPEC_ALIAS[f].test(key)) { out.fields[f] = String(v == null ? "" : v).trim(); return; }
+    if (key) out.unknown.push(key);
+  };
+  if (raw[0] === "{") {
+    try {
+      const o = JSON.parse(raw);
+      for (const k of Object.keys(o)) put(k, o[k]);
+      return out;
+    } catch (e) { /* není JSON — zkusíme dál jako klíč=hodnota */ }
+  }
+  const body = raw.replace(/^IRM\d*\s*[|;]\s*/i, "");
+  let any = false;
+  for (const part of body.split(/[|;\n\r\t]+/)) {
+    const p = part.trim(); if (!p) continue;
+    const m = p.match(/^([^=:]{1,24})[=:]([\s\S]*)$/);
+    if (m) { any = true; put(m[1], m[2]); }
+  }
+  // holý kód (nebo kód, z něhož nešlo nic rozpoznat) bereme jako ref. číslo produktu
+  if (!any || Object.keys(out.fields).length === 0) { out.fields.ref = raw; out.unknown.length = 0; }
+  return out;
+}
+
+/* Namapuje přečtené hodnoty na konkrétní produkt / polohu / barvu / recepturu. */
+function resolveSpec(parsed, products, recipes) {
+  const f = parsed.fields;
+  const r = { parsed: parsed, fields: f, product: null, position: null, colorIdx: -1,
+    recipe: null, qty: null, gm2: null, loss: null, minBatch: null, warn: [], ok: [] };
+  const num = (key, min) => {
+    if (f[key] == null || f[key] === "") return null;
+    const v = n(f[key], NaN);
+    if (isNaN(v) || v < min) { r.warn.push(SPEC_LABEL[key] + ": „" + f[key] + "“ není platné číslo."); return null; }
+    return v;
+  };
+
+  if (f.ref) {
+    const s = f.ref.toLowerCase();
+    r.product = products.find((p) => String(p.ref || "").toLowerCase() === s)
+      || products.find((p) => String(p.id || "").toLowerCase() === s)
+      || products.find((p) => (String(p.ref || "") + " " + p.name).toLowerCase().includes(s))
+      || null;
+    if (r.product) r.ok.push("Produkt: " + (r.product.ref ? r.product.ref + " · " : "") + r.product.name);
+    else r.warn.push("Produkt „" + f.ref + "“ není v katalogu.");
+  } else {
+    r.warn.push("Kód neobsahuje referenci produktu.");
+  }
+
+  if (r.product) {
+    const poss = r.product.positions || [];
+    if (f.pos) {
+      const s = f.pos.toLowerCase();
+      const i = parseInt(f.pos, 10);
+      r.position = (/^\d+$/.test(f.pos.trim()) && i >= 1 && i <= poss.length) ? poss[i - 1]
+        : poss.find((p) => String(p.name || "").toLowerCase() === s)
+        || poss.find((p) => String(p.name || "").toLowerCase().includes(s))
+        || poss.find((p) => String(p.tech || "").toLowerCase() === s)
+        || null;
+      if (r.position) r.ok.push("Poloha: " + r.position.name + " (" + r.position.w + "×" + r.position.h + " mm)");
+      else r.warn.push("Poloha „" + f.pos + "“ u tohoto produktu neexistuje — ponechána stávající.");
+    }
+    if (f.color) {
+      const s = f.color.toLowerCase();
+      const cs = r.product.colors || [];
+      let i = cs.findIndex((c) => String(c.code || "").toLowerCase() === s);
+      if (i < 0) i = cs.findIndex((c) => String(c.name || "").toLowerCase() === s);
+      if (i < 0) i = cs.findIndex((c) => String(c.name || "").toLowerCase().includes(s));
+      if (i < 0) i = cs.findIndex((c) => String(c.hex || "").toLowerCase().replace("#", "") === s.replace("#", ""));
+      r.colorIdx = i;
+      if (i >= 0) r.ok.push("Barva: " + (cs[i].code || "") + (cs[i].name ? " — " + cs[i].name : ""));
+      else r.warn.push("Barva „" + f.color + "“ u tohoto produktu neexistuje — ponechána stávající.");
+    }
+  }
+
+  if (f.recipe) {
+    const s = f.recipe.toLowerCase();
+    r.recipe = recipes.find((x) => x.name.toLowerCase() === s)
+      || recipes.find((x) => x.name.toLowerCase().includes(s))
+      || (/^\d{2,4}\s*[a-z]?$/i.test(f.recipe.trim())
+          ? recipes.find((x) => new RegExp("\\b" + f.recipe.trim().replace(/\s+/g, "\\s*") + "\\b", "i").test(x.name))
+          : null)
+      || null;
+    if (r.recipe) r.ok.push("Receptura: " + r.recipe.name);
+    else r.warn.push("Receptura „" + f.recipe + "“ nebyla nalezena — nahrajte databázi v Import / data.");
+  }
+
+  r.qty = num("qty", 1);
+  r.gm2 = num("gm2", 0.01);
+  r.loss = num("loss", 0);
+  r.minBatch = num("minBatch", 0);
+  if (r.qty != null) r.ok.push("Počet kusů: " + fmt(r.qty, 0));
+  return r;
+}
+
+/* ======================= NAPOJENÍ NA SGPS (přes lokální most) =======================
+   Aplikace nikdy nemluví se SGPS přímo — z prohlížeče to z bezpečnostních důvodů
+   nejde. Data poskytuje skript sgps_most.py běžící na tomto počítači.
+   Je-li aplikace otevřená z mostu (http://localhost:…), použije se stejný původ;
+   při otevření dvojklikem (file://) se most zkusí na uloženém portu.            */
+const sgpsBase = () => (location.protocol === "http:" || location.protocol === "https:")
+  ? location.origin + "/api"
+  : "http://localhost:" + n(loadLS("irm-sgps-port", 8765), 8765) + "/api";
+
+async function sgpsGet(cesta) {
+  const r = await fetch(sgpsBase() + cesta, { cache: "no-store" });
+  let data = null;
+  try { data = await r.json(); } catch (e) {}
+  if (!r.ok || (data && data.ok === false)) {
+    throw new Error((data && data.chyba) || ("most odpověděl " + r.status));
+  }
+  return data;
+}
+
+/* Zakázku ze SGPS převede na tentýž tvar, jaký vzniká čtením čárového kódu —
+   dál už se použije stejné dohledání produktu, polohy, barvy a receptury. */
+function zakazkaNaSpec(z) {
+  const f = {};
+  const put = (k, v) => { if (v != null && String(v).trim() !== "") f[k] = String(v).trim(); };
+  put("ref", z.ref); put("qty", z.ks); put("pos", z.poloha); put("color", z.barva);
+  put("recipe", z.receptura); put("gm2", z.gm2); put("loss", z.ztraty); put("minBatch", z.min);
+  put("order", z.cislo); put("customer", z.zakaznik);
+  put("mesh", z.sito); put("opacity", z.kryvost); put("surface", z.povrch);
+  put("note", [z.pozn, z.termin ? "termín " + z.termin : ""].filter(Boolean).join(" · "));
+  return { raw: "SGPS · zakázka " + (z.cislo || "?"), fields: f, unknown: [], sgps: z };
+}
+
+function useSgps() {
+  const [stav, setStav] = useState({ stav: "hleda" });   // hleda | ok | chyba
+  const zjisti = async () => {
+    setStav({ stav: "hleda" });
+    try {
+      const s = await sgpsGet("/stav");
+      setStav(Object.assign({ stav: s.chyba ? "chyba" : "ok" }, s));
+    } catch (e) {
+      setStav({ stav: "chyba", chyba: String((e && e.message) || e), most: false });
+    }
+  };
+  useEffect(() => { zjisti(); }, []);
+  return { stav, zjisti };
+}
+
+function ZakazkyTab({ sgps, onOtevri }) {
+  const [q, setQ] = useState("");
+  const [list, setList] = useState([]);
+  const [err, setErr] = useState("");
+  const [nacita, setNacita] = useState(false);
+  const [port, setPort] = useState(() => String(loadLS("irm-sgps-port", 8765)));
+  const [detail, setDetail] = useState(null);
+
+  const nacti = async (dotaz) => {
+    setNacita(true); setErr("");
+    try {
+      const d = await sgpsGet("/zakazky?limit=200&q=" + encodeURIComponent(dotaz || ""));
+      setList(d.zakazky || []);
+    } catch (e) { setErr(String((e && e.message) || e)); setList([]); }
+    setNacita(false);
+  };
+  useEffect(() => { if (sgps.stav.stav === "ok") nacti(""); }, [sgps.stav.stav]);
+
+  const zapniPort = () => { saveLS("irm-sgps-port", n(port, 8765)); sgps.zjisti(); };
+  const jeSoubor = location.protocol === "file:";
+
+  if (sgps.stav.stav !== "ok") return html`
+    <div className="card">
+      <h2>Zakázky ze SGPS</h2>
+      ${sgps.stav.stav === "hleda"
+        ? html`<p className="hint">Hledám most…</p>`
+        : html`
+          <${React.Fragment}>
+            <div className="warnbox" style=${{ marginTop: 0 }}>
+              <b>Most na SGPS neběží.</b><br />
+              ${sgps.stav.chyba || ""}
+            </div>
+            <p className="hint" style=${{ marginTop: 12 }}>
+              Ve složce aplikace otevřete příkazový řádek a spusťte:
+            </p>
+            <pre className="tpl">python sgps_most.py</pre>
+            <p className="note">
+              Most se postará o spojení se SGPS a zároveň aplikaci obslouží
+              na adrese <b>http://localhost:${port}</b>. Nechte ho běžet po celou dobu práce.
+              ${jeSoubor ? " Doporučujeme aplikaci otevírat z té adresy — z dvojkliku na soubor je spojení omezené." : ""}
+            </p>
+            <div className="rowline" style=${{ marginTop: 12 }}>
+              <button className="btn" onClick=${sgps.zjisti}>Zkusit znovu</button>
+              <span className="note">port</span>
+              <input style=${{ width: 90 }} value=${port} onChange=${(e) => setPort(e.target.value)} />
+              <button className="btn sec sm" onClick=${zapniPort}>Použít port</button>
+            </div>
+          <//>`}
+    </div>`;
+
+  return html`
+    <${React.Fragment}>
+      <div className="card">
+        <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <h2 style=${{ margin: 0 }}>Zakázky ze SGPS (${list.length})</h2>
+          <div className="rowline" style=${{ margin: 0 }}>
+            <span className="tag tech">${sgps.stav.popis || sgps.stav.rezim}</span>
+            <button className="btn sec sm" onClick=${() => { sgps.zjisti(); nacti(q); }}>Obnovit</button>
+          </div>
+        </div>
+        ${sgps.stav.rezim === "demo" && html`
+          <div className="warnbox">Most běží v <b>ukázkovém režimu</b> — zakázky jsou vymyšlené.
+          Až bude jasné, co SGPS nabízí, přepněte v souboru <code>sgps_config.json</code>
+          položku <code>rezim</code> na <code>soubor</code> nebo <code>rest</code>.</div>`}
+        <div className="rowline" style=${{ marginTop: 12 }}>
+          <input style=${{ flex: "1 1 260px" }} value=${q}
+            onChange=${(e) => { setQ(e.target.value); nacti(e.target.value); }}
+            placeholder="Hledat podle čísla zakázky, produktu nebo zákazníka…" />
+          ${nacita && html`<span className="note">načítám…</span>`}
+        </div>
+        ${err && html`<div className="warnbox">${err}</div>`}
+        ${!err && !list.length && !nacita
+          ? html`<div className="empty" style=${{ marginTop: 12 }}>Žádné zakázky.</div>`
+          : html`
+          <table className="t" style=${{ marginTop: 12 }}>
+            <thead><tr><th>Zakázka</th><th>Produkt</th><th className="num">Ks</th><th>Barva</th><th>Receptura</th><th>Zákazník</th><th>Termín</th><th /></tr></thead>
+            <tbody>
+              ${list.map((z) => html`
+                <tr key=${z.cislo}>
+                  <td style=${{ fontWeight: 700, fontFamily: "var(--mono)" }}>${z.cislo}</td>
+                  <td>${z.ref ? z.ref + " · " : ""}${z.nazev || ""}</td>
+                  <td className="num">${z.ks != null ? fmt(z.ks, 0) : ""}</td>
+                  <td>${z.barva || ""}</td>
+                  <td>${z.receptura || ""}</td>
+                  <td>${z.zakaznik || ""}</td>
+                  <td className="note">${z.termin || ""}</td>
+                  <td style=${{ whiteSpace: "nowrap" }}>
+                    <button className="btn sm" onClick=${() => onOtevri(z)}>Otevřít →</button>${" "}
+                    <button className="btn sec sm" onClick=${() => setDetail(detail === z.cislo ? null : z.cislo)} title="Zobrazit, co přesně SGPS poslalo">⋯</button>
+                  </td>
+                </tr>
+                ${detail === z.cislo && html`
+                  <tr key=${z.cislo + "-d"}>
+                    <td colSpan="8"><pre className="tpl">${JSON.stringify(z._zdroj || z, null, 2)}</pre></td>
+                  </tr>`}`)}
+            </tbody>
+          </table>`}
+      </div>
+      <div className="card">
+        <h2>Jak je to zapojené</h2>
+        <p className="hint">Aplikace nemluví se SGPS přímo — z prohlížeče to nejde. Data dodává skript
+        <code> sgps_most.py</code>, který běží na tomto počítači. Ten se stará o spojení, přihlašovací
+        údaje i překlad názvů polí, takže při změně na straně SGPS se upravuje jen jeho konfigurace.</p>
+        <p className="note">Tlačítko <b>⋯</b> u zakázky ukáže, co přesně SGPS poslalo — podle toho se
+        v <code>sgps_config.json</code> v sekci <code>mapovani</code> doplní názvy polí.</p>
+      </div>
+    <//>`;
+}
+
+/* ---------- čtečka na sériovém portu (USB / RS-232), Chrome/Edge ---------- */
+function useSerialScanner(onCode) {
+  const [on, setOn] = useState(false);
+  const [err, setErr] = useState("");
+  const [baud, setBaud] = useState("9600");
+  const portRef = useRef(null), readerRef = useRef(null);
+  const cb = useRef(onCode); cb.current = onCode;
+
+  const disconnect = async () => {
+    try { if (readerRef.current) await readerRef.current.cancel(); } catch (e) {}
+    try { if (portRef.current) await portRef.current.close(); } catch (e) {}
+    readerRef.current = null; portRef.current = null;
+    setOn(false);
+  };
+  const connect = async () => {
+    setErr("");
+    if (!("serial" in navigator)) { setErr("Tento prohlížeč nepodporuje sériové připojení (Web Serial). Použijte Chrome nebo Edge, nebo režim klávesnice."); return; }
+    try {
+      const port = await navigator.serial.requestPort();
+      await port.open({ baudRate: n(baud, 9600) });
+      portRef.current = port;
+      const dec = new TextDecoderStream();
+      port.readable.pipeTo(dec.writable).catch(() => {});
+      const reader = dec.readable.getReader();
+      readerRef.current = reader;
+      setOn(true);
+      let buf = "";
+      (async () => {
+        try {
+          for (;;) {
+            const res = await reader.read();
+            if (res.done) break;
+            buf += res.value;
+            const lines = buf.split(/[\r\n]+/);
+            buf = lines.pop();
+            for (const l of lines) if (l.trim()) cb.current(l.trim());
+          }
+        } catch (e) { setErr("Čtení ze čtečky selhalo: " + e); }
+      })();
+    } catch (e) {
+      setErr("Připojení se nezdařilo: " + (e && e.message ? e.message : e));
+    }
+  };
+  useEffect(() => () => { disconnect(); }, []);
+  return { on, err, baud, setBaud, connect, disconnect };
+}
+
+/* ---------- čtení kódu kamerou (BarcodeDetector, Chrome/Edge) ---------- */
+function useCamScanner(onCode) {
+  const [on, setOn] = useState(false);
+  const [err, setErr] = useState("");
+  const videoRef = useRef(null), timerRef = useRef(null), streamRef = useRef(null);
+  const lastRef = useRef({ code: "", t: 0 });
+  const cb = useRef(onCode); cb.current = onCode;
+  const supported = typeof window !== "undefined" && "BarcodeDetector" in window;
+
+  const stop = () => {
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+    if (streamRef.current) { streamRef.current.getTracks().forEach((t) => t.stop()); streamRef.current = null; }
+    setOn(false);
+  };
+  useEffect(() => {
+    if (!on) return;
+    let zrusen = false;
+    (async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } } });
+        if (zrusen) { stream.getTracks().forEach((t) => t.stop()); return; }
+        streamRef.current = stream;
+        const v = videoRef.current;
+        if (!v) return;
+        v.srcObject = stream;
+        await v.play();
+        const det = new window.BarcodeDetector();
+        timerRef.current = setInterval(async () => {
+          try {
+            const found = await det.detect(v);
+            if (!found || !found.length) return;
+            const code = String(found[0].rawValue || "").trim();
+            const now = Date.now();
+            if (!code || (code === lastRef.current.code && now - lastRef.current.t < 2500)) return;
+            lastRef.current = { code: code, t: now };
+            cb.current(code);
+          } catch (e) { /* jednotlivé snímky mohou selhat — pokračujeme */ }
+        }, 250);
+      } catch (e) {
+        setErr("Kameru se nepodařilo spustit: " + (e && e.message ? e.message : e));
+        setOn(false);
+      }
+    })();
+    return () => { zrusen = true; };
+  }, [on]);
+  useEffect(() => () => { stop(); }, []);
+  return { on, err, supported, videoRef, start: () => { setErr(""); setOn(true); }, stop };
+}
+
+function ScanTab({ hidOn, setHidOn, scanLog, onCode, onApply, clearLog, sgps }) {
+  const [manual, setManual] = useState("");
+  const ser = useSerialScanner(onCode);
+  const cam = useCamScanner(onCode);
+  const last = scanLog[0] || null;
+  const res = last ? last.res : null;
+  const podat = () => { const t = manual.trim(); if (t) { onCode(t); setManual(""); } };
+  const sgpsOk = sgps && sgps.stav.stav === "ok";
+
+  return html`
+    <${React.Fragment}>
+      <div className="card">
+        <h2>Načtení specifikace zakázky</h2>
+        <p className="hint">Čtečka načte kód ze zakázkového listu a aplikace z něj rovnou předvyplní kalkulaci — produkt, polohu, barvu, recepturu i počet kusů.</p>
+        <div className="specbar" style=${{ marginTop: 4 }}>
+          <span className="dot" style=${{ background: sgpsOk ? "var(--ok)" : "var(--warn)" }}></span>
+          ${sgpsOk
+            ? html`<span>Napojení na <b>SGPS</b> je aktivní (${sgps.stav.popis || sgps.stav.rezim}, ${sgps.stav.pocet} zakázek) — stačí načíst <b>číslo zakázky</b> a zbytek se doplní ze systému.</span>`
+            : html`<span>SGPS není napojeno — kód musí nést všechny údaje sám. Spusťte <code>python sgps_most.py</code>, viz záložka <b>Zakázky (SGPS)</b>.</span>`}
+        </div>
+
+        <label className="f" style=${{ marginTop: 6 }}>1 · Čtečka v režimu klávesnice (běžné USB čtečky)</label>
+        <div className="rowline">
+          <label className="tgl"><input type="checkbox" checked=${hidOn} onChange=${(e) => setHidOn(e.target.checked)} /><span className="tglt"></span>Poslouchat čtečku kdekoli v aplikaci</label>
+          <span className="tag" style=${{ background: hidOn ? "var(--ok)" : "var(--bg)", color: hidOn ? "#fff" : "var(--ink-2)", boxShadow: hidOn ? "var(--neu-sm)" : "var(--neu-in)" }}>${hidOn ? "aktivní" : "vypnuto"}</span>
+        </div>
+        <p className="note">Většina USB čteček se chová jako klávesnice — nic se nepřipojuje, stačí zapnout tento přepínač a načíst kód. Aplikace rozpozná čtečku podle rychlosti zadání, běžné psaní tím není dotčeno.</p>
+
+        <label className="f" style=${{ marginTop: 16 }}>2 · Čtečka na sériovém portu (USB / RS-232)</label>
+        <div className="rowline">
+          ${!ser.on ? html`
+            <${React.Fragment}>
+              <button className="btn" onClick=${ser.connect}>Připojit čtečku (COM)</button>
+              <select style=${{ width: "auto" }} value=${ser.baud} onChange=${(e) => ser.setBaud(e.target.value)} title="Rychlost komunikace (baud)">
+                ${["4800", "9600", "19200", "38400", "115200"].map((b) => html`<option key=${b} value=${b}>${b} Bd</option>`)}
+              </select>
+            <//>` : html`
+            <${React.Fragment}>
+              <span className="tag tech">čtečka připojena</span>
+              <button className="btn danger sm" onClick=${ser.disconnect}>Odpojit</button>
+            <//>`}
+        </div>
+        ${ser.err && html`<div className="warnbox">${ser.err}</div>`}
+
+        <label className="f" style=${{ marginTop: 16 }}>3 · Kamera (QR / DataMatrix na zakázkovém listu)</label>
+        <div className="rowline">
+          ${!cam.on
+            ? html`<button className="btn sec" onClick=${cam.start} disabled=${!cam.supported}>Zapnout kameru</button>`
+            : html`<button className="btn danger sm" onClick=${cam.stop}>Vypnout kameru</button>`}
+          ${!cam.supported && html`<span className="note">tento prohlížeč čtení kódů z kamery nepodporuje (vyžaduje Chrome/Edge)</span>`}
+        </div>
+        ${cam.err && html`<div className="warnbox">${cam.err}</div>`}
+        ${cam.on && html`<video className="cam" ref=${cam.videoRef} muted playsInline></video>`}
+
+        <label className="f" style=${{ marginTop: 16 }}>Ruční zadání / zkouška</label>
+        <div className="rowline">
+          <input style=${{ flex: "1 1 320px" }} value=${manual} onChange=${(e) => setManual(e.target.value)}
+            onKeyDown=${(e) => { if (e.key === "Enter") { e.preventDefault(); podat(); } }}
+            placeholder="Např. 11101 nebo IRM1|ref=11101|ks=500|barva=105" />
+          <button className="btn sec" onClick=${podat}>Načíst</button>
+        </div>
+      </div>
+
+      ${res && html`
+        <div className="card">
+          <h2>Poslední načtený kód</h2>
+          <p className="hint scanraw">${last.raw}</p>
+          <div className="kv">
+            ${Object.keys(res.fields).map((k) => html`
+              <${React.Fragment} key=${k}>
+                <div className="k">${SPEC_LABEL[k] || k}</div>
+                <div className="v">${res.fields[k]}</div>
+              <//>`)}
+          </div>
+          ${res.ok.map((t, i) => html`<div key=${i} className="okbox" style=${{ marginTop: 6 }}>✓ ${t}</div>`)}
+          ${res.warn.map((t, i) => html`<div key=${i} className="warnbox" style=${{ marginTop: 6 }}>${t}</div>`)}
+          ${res.parsed.unknown.length > 0 && html`<div className="note" style=${{ marginTop: 8 }}>Nerozpoznané klíče (ignorovány): ${res.parsed.unknown.join(", ")}</div>`}
+          <div className="rowline" style=${{ marginTop: 14, marginBottom: 0 }}>
+            <button className="btn" disabled=${!res.product} onClick=${() => onApply(res)}>Použít v kalkulaci →</button>
+            ${!res.product && html`<span className="note">bez rozpoznaného produktu nelze zakázku otevřít</span>`}
+          </div>
+        </div>`}
+
+      ${scanLog.length > 1 && html`
+        <div className="card">
+          <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+            <h2 style=${{ margin: 0 }}>Historie načtení (${scanLog.length})</h2>
+            <button className="btn sec sm" onClick=${clearLog}>Vymazat</button>
+          </div>
+          ${scanLog.map((s) => html`
+            <div key=${s.ts} className="scanrow">
+              <span className="dot" style=${{ background: s.res.product ? "var(--ok)" : "var(--warn)" }}></span>
+              <span className="note" style=${{ flex: "0 0 60px" }}>${new Date(s.ts).toLocaleTimeString("cs-CZ")}</span>
+              <span className="scanraw">${s.raw}</span>
+              <span className="note" style=${{ flex: "0 0 auto" }}>${s.res.product ? ((s.res.product.ref || "") + " " + s.res.product.name).slice(0, 40) : "nerozpoznáno"}</span>
+            </div>`)}
+        </div>`}
+
+      <div className="card">
+        <h2>Formát kódu specifikace</h2>
+        <p className="hint">Čtečka může načíst buď samotné referenční číslo produktu, nebo celou zakázku. Klíče se oddělují svislítkem, středníkem nebo tabulátorem; pořadí nerozhoduje a chybějící údaje zůstanou v kalkulaci beze změny.</p>
+        <pre className="tpl">11101
+
+IRM1|ref=11101|ks=500|poz=2|barva=105|rec=PANTONE 485 C|ztraty=15|obj=2026-114
+
+{"ref":"11101","ks":500,"barva":"105","rec":"PANTONE 485 C","zakaznik":"Firma s.r.o."}</pre>
+        <p className="note" style=${{ marginTop: 10 }}>
+          <b>Klíče:</b> ref (kod, produkt, sku) · ks (mnozstvi, pocet, qty) · poz (poloha — pořadové číslo, název nebo technologie)
+          · barva (kód, název nebo hex) · rec (receptura, pantone) · gm2 (spotreba) · ztraty · min (min. dávka)
+          · obj (zakazka) · zakaznik (objednavatel) · sito · kryvost · povrch · pozn.
+        </p>
+      </div>
+    <//>`;
+}
+
 /* ============================ APP ============================ */
 function App() {
   const [tab, setTab] = useState("calc");
@@ -366,6 +872,134 @@ function App() {
   }, [products]);
   useEffect(() => { saveLS("irm-recipes", recipes); }, [recipes]);
 
+  // ---- napojení na SGPS + čtečka čárových kódů: spec zakázky -> kalkulace ----
+  const sgps = useSgps();
+  const [hidOn, setHidOn] = useState(() => { const v = loadLS("irm-scan-hid", true); return v !== false; });
+  useEffect(() => { saveLS("irm-scan-hid", hidOn); }, [hidOn]);
+  const [scanLog, setScanLog] = useState([]);
+  const [spec, setSpec] = useState(null);
+  const [toast, setToast] = useState(null);
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 4500);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  const pouzitSpec = (res) => {
+    setSpec(Object.assign({}, res, { ts: Date.now() }));
+    setTab("calc");
+    setToast({ ok: true, text: "Zakázka načtena: " + (res.product.ref ? res.product.ref + " · " : "") + res.product.name
+      + (res.qty != null ? " — " + fmt(res.qty, 0) + " ks" : "") });
+  };
+
+  // handleCode drží aktuální data v ref, aby globální posluchač nepracoval se zastaralým stavem
+  const scanCtx = useRef({});
+  scanCtx.current = { products, recipes, tab, sgpsOk: sgps.stav.stav === "ok" };
+  const handleCode = useRef(null);
+  handleCode.current = async (raw) => {
+    const c = scanCtx.current;
+    let parsed = parseSpec(raw);
+    const f = parsed.fields;
+    // Holý kód: pokud přesně sedí na ref. číslo produktu, je to produkt; jinak
+    // (a vždy u klíče obj=) to zkusíme ve SGPS jako číslo zakázky.
+    const holy = !!f.ref && Object.keys(f).length === 1;
+    const jeProdukt = holy && c.products.some((p) => String(p.ref || "").toLowerCase() === f.ref.toLowerCase());
+    const cislo = f.order || (holy && !jeProdukt ? f.ref : "");
+    let zeSgps = null;
+    if (c.sgpsOk && cislo) {
+      try {
+        const d = await sgpsGet("/zakazka/" + encodeURIComponent(cislo));
+        zeSgps = d.zakazka;
+      } catch (e) {
+        if (!f.ref || !jeProdukt) {
+          setScanLog((l) => [{ ts: Date.now(), raw: raw,
+            res: { parsed: parsed, fields: f, product: null, colorIdx: -1, ok: [],
+                   warn: ["SGPS: " + String((e && e.message) || e)] } }].concat(l).slice(0, 25));
+          if (c.tab !== "scan") setTab("scan");
+          setToast({ ok: false, text: "Zakázka " + cislo + ": " + String((e && e.message) || e) });
+          return;
+        }
+      }
+    }
+    if (zeSgps) {                       // údaje ze skenu mají přednost před SGPS
+      const zeZak = zakazkaNaSpec(zeSgps);
+      const prepis = Object.assign({}, f);
+      if (!f.order && cislo === f.ref) delete prepis.ref;   // holý kód byl číslo zakázky
+      parsed = { raw: raw, fields: Object.assign(zeZak.fields, prepis),
+                 unknown: parsed.unknown, sgps: zeSgps };
+    }
+    const res = resolveSpec(parsed, c.products, c.recipes);
+    if (zeSgps) res.ok.unshift("Zakázka " + (zeSgps.cislo || cislo) + " načtena ze SGPS");
+    setScanLog((l) => [{ ts: Date.now(), raw: raw, res: res }].concat(l).slice(0, 25));
+    if (res.product) {
+      setSpec(Object.assign({}, res, { ts: Date.now() }));
+      if (c.tab !== "scan") setTab("calc");
+      setToast({ ok: true, text: (zeSgps ? "Zakázka " + (zeSgps.cislo || cislo) + ": " : "Načteno: ")
+        + (res.product.ref ? res.product.ref + " · " : "") + res.product.name
+        + (res.qty != null ? " — " + fmt(res.qty, 0) + " ks" : "")
+        + (res.warn.length ? " (" + res.warn.length + " upozornění)" : "") });
+    } else {
+      if (c.tab !== "scan") setTab("scan");
+      setToast({ ok: false, text: res.warn[0] || "Kód se nepodařilo přiřadit." });
+    }
+  };
+  const onCode = (raw) => handleCode.current(raw);
+
+  // otevření zakázky vybrané ze seznamu SGPS
+  const otevriZakazku = (z) => {
+    const res = resolveSpec(zakazkaNaSpec(z), products, recipes);
+    if (!res.product) {
+      setToast({ ok: false, text: res.warn[0] || "Produkt zakázky není v katalogu." });
+      return;
+    }
+    res.ok.unshift("Zakázka " + (z.cislo || "") + " načtena ze SGPS");
+    setScanLog((l) => [{ ts: Date.now(), raw: "SGPS · zakázka " + (z.cislo || ""), res: res }].concat(l).slice(0, 25));
+    pouzitSpec(res);
+  };
+
+  // Čtečka v režimu klávesnice: rozpozná se podle rychlosti zadání (člověk tak psát nedokáže).
+  // Kód se přitom „napíše" do právě zaostřeného pole — po rozpoznání ho vrátíme do původního
+  // stavu přes nativní setter, aby o změně věděl i React.
+  const buf = useRef({ s: "", t0: 0, tl: 0, el: null, val: "" });
+  useEffect(() => {
+    if (!hidOn) return;
+    const obnovPole = (el, val) => {
+      try {
+        const proto = el.tagName === "TEXTAREA" ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+        const setter = Object.getOwnPropertyDescriptor(proto, "value").set;
+        setter.call(el, val);
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+      } catch (e) {}
+    };
+    const onKey = (e) => {
+      if (e.ctrlKey || e.altKey || e.metaKey) return;
+      const now = Date.now();
+      const b = buf.current;
+      if (now - b.tl > 80) {                       // začátek nové dávky znaků
+        b.s = ""; b.t0 = now;
+        const el = document.activeElement;
+        const pole = el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA") && el.type !== "checkbox" && el.type !== "radio";
+        b.el = pole ? el : null;
+        b.val = pole ? el.value : "";
+      }
+      b.tl = now;
+      if (e.key === "Enter" || e.key === "Tab") {
+        const code = b.s; b.s = "";
+        if (code.length >= 4 && (now - b.t0) / code.length < 45) {
+          e.preventDefault(); e.stopPropagation();
+          if (b.el && b.el.isConnected) obnovPole(b.el, b.val);
+          b.el = null;
+          handleCode.current(code);
+        }
+        return;
+      }
+      if (e.key.length === 1) b.s += e.key;
+      else if (e.key !== "Shift") b.s = "";
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [hidOn]);
+
   return html`
     <div>
       <header className="hdr">
@@ -378,6 +1012,8 @@ function App() {
           </button>
           ${menuOpen && html`
             <div className="navdrop">
+              <button className=${tab === "scan" ? "on" : ""} onClick=${() => { setTab("scan"); setMenuOpen(false); }}>Načíst spec (čárový kód)</button>
+              <button className=${tab === "zak" ? "on" : ""} onClick=${() => { setTab("zak"); setMenuOpen(false); }}>Zakázky (SGPS)</button>
               <button className=${tab === "prod" ? "on" : ""} onClick=${() => { setTab("prod"); setMenuOpen(false); }}>Produkty</button>
               <button className=${tab === "rec" ? "on" : ""} onClick=${() => { setTab("rec"); setMenuOpen(false); }}>Receptury</button>
               <button className=${tab === "imp" ? "on" : ""} onClick=${() => { setTab("imp"); setMenuOpen(false); }}>Import / data</button>
@@ -403,7 +1039,11 @@ function App() {
             Nejčastější příčina: index.html byl otevřen přímo ze ZIPu nebo zkopírován jinam samostatně.
             <b> Rozbalte celý ZIP do jedné složky a otevřete index.html z ní.</b>
           </div>`}
-        ${tab === "calc" && html`<${Calc} products=${products} recipes=${recipes} setRecipes=${setRecipes} links=${links} setLinks=${setLinks} />`}
+        ${tab === "calc" && html`<${Calc} products=${products} recipes=${recipes} setRecipes=${setRecipes} links=${links} setLinks=${setLinks}
+          spec=${spec} onSpecUsed=${() => setSpec(null)} />`}
+        ${tab === "scan" && html`<${ScanTab} hidOn=${hidOn} setHidOn=${setHidOn} scanLog=${scanLog}
+          onCode=${onCode} onApply=${pouzitSpec} clearLog=${() => setScanLog([])} sgps=${sgps} />`}
+        ${tab === "zak" && html`<${ZakazkyTab} sgps=${sgps} onOtevri=${otevriZakazku} />`}
         ${tab === "prod" && html`<${Products} products=${products} setProducts=${setProducts} guardDelete=${guardDelete} />`}
         ${tab === "rec" && html`<${Recipes} recipes=${recipes} setRecipes=${setRecipes} guardDelete=${guardDelete} />`}
         ${tab === "imp" && html`<${Importer} setProducts=${setProducts} setRecipes=${setRecipes} guardDelete=${guardDelete} deletePw=${deletePw} setDeletePw=${setDeletePw} />`}
@@ -411,6 +1051,10 @@ function App() {
       ${pwGate && html`<${PwGate} label=${pwGate.label} correctPw=${deletePw}
         onConfirm=${() => { pwGate.onConfirm(); setPwGate(null); }}
         onCancel=${() => setPwGate(null)} />`}
+      ${toast && html`
+        <div className=${"toast" + (toast.ok ? "" : " bad")} onClick=${() => setToast(null)}>
+          <span>${toast.ok ? "▮▯▮" : "⚠"}</span><span>${toast.text}</span>
+        </div>`}
     </div>`;
 }
 
@@ -442,8 +1086,12 @@ function PwGate({ label, correctPw, onConfirm, onCancel }) {
 }
 
 /* ============================ KALKULACE ============================ */
-function Calc({ products, recipes, setRecipes, links, setLinks }) {
+function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed }) {
   const [q, setQ] = useState("");
+  // hodnoty ze načteného specu mají přednost před automatikami níže (reset barvy,
+  // vázaná receptura, spotřeba dle technologie) — proto je propašujeme přes ref
+  const pend = useRef({ color: null, rec: null, gm2: null });
+  const [zak, setZak] = useState(null);   // hlavička zakázky ze specu (číslo, zákazník, poznámka)
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
     if (!s) return products;
@@ -464,7 +1112,10 @@ function Calc({ products, recipes, setRecipes, links, setLinks }) {
   }, [prodId, product]);
   const colors = (product && product.colors) ? product.colors : [];
   const [colorIdx, setColorIdx] = useState(0);
-  useEffect(() => { setColorIdx(0); }, [prodId]);
+  useEffect(() => {
+    setColorIdx(pend.current.color != null ? pend.current.color : 0);
+    pend.current.color = null;
+  }, [prodId]);
   const colorSel = colors[colorIdx] || colors[0] || null;
   const [pickerOpen, setPickerOpen] = useState(false);
   const [dropOpen, setDropOpen] = useState(false);
@@ -477,6 +1128,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks }) {
   const vazbaId = lk ? (links[lk] || "") : "";
   const vazRec = recipes.find((r) => r.id === vazbaId) || null;
   useEffect(() => {                       // automatické načtení vázané receptury
+    if (pend.current.rec) { pend.current.rec = null; return; }   // spec určil recepturu výslovně
     if (lk && links[lk] && recipes.some((r) => r.id === links[lk])) setRecId(links[lk]);
   }, [prodId, colorIdx]);
 
@@ -522,7 +1174,50 @@ function Calc({ products, recipes, setRecipes, links, setLinks }) {
   const [gm2, setGm2] = useState(TECHS[tech] ? TECHS[tech].gm2 : 6);
   const [loss, setLoss] = useState(15);
   const [minBatch, setMinBatch] = useState(50);
-  useEffect(() => { setGm2(TECHS[tech] ? TECHS[tech].gm2 : 6); }, [tech]);
+  useEffect(() => {
+    if (pend.current.gm2 != null) { setGm2(pend.current.gm2); pend.current.gm2 = null; return; }
+    setGm2(TECHS[tech] ? TECHS[tech].gm2 : 6);
+  }, [tech]);
+
+  // ---- převzetí specifikace načtené čtečkou ----
+  useEffect(() => {
+    if (!spec || !spec.product) return;
+    pend.current = {
+      color: spec.colorIdx >= 0 ? spec.colorIdx : null,
+      rec: spec.recipe ? spec.recipe.id : null,
+      gm2: spec.gm2,
+    };
+    setProdId(spec.product.id);
+    if (spec.position) setPosId(spec.position.id);
+    if (spec.colorIdx >= 0) setColorIdx(spec.colorIdx);
+    if (spec.recipe) setRecId(spec.recipe.id);
+    if (spec.qty != null) setQty(spec.qty);
+    if (spec.gm2 != null) setGm2(spec.gm2);
+    if (spec.loss != null) setLoss(spec.loss);
+    if (spec.minBatch != null) setMinBatch(spec.minBatch);
+    const f = spec.fields;
+    setZak((f.order || f.customer || f.note || f.mesh || f.opacity || f.surface)
+      ? { order: f.order || "", customer: f.customer || "", note: f.note || "",
+          mesh: f.mesh || "", opacity: f.opacity || "", surface: f.surface || "",
+          warn: spec.warn, ts: spec.ts }
+      : null);
+    setPickerOpen(false);
+    // po doběhnutí navazujících efektů příznaky zahodíme, ať neovlivní další ruční změny
+    setTimeout(() => { pend.current = { color: null, rec: null, gm2: null }; }, 0);
+    onSpecUsed();
+  }, [spec]);
+
+  // zápis parametrů ze specu (síto / kryvost / povrch) do vybrané receptury — jen na vyžádání
+  const zapsatParametry = () => {
+    if (!zak || !recipe) return;
+    const patch = {};
+    if (zak.mesh) patch.mesh = zak.mesh;
+    if (zak.opacity) patch.opacity = zak.opacity;
+    if (zak.surface) patch.surface = zak.surface;
+    if (zak.customer) patch.customer = zak.customer;
+    setRecipes((prev) => prev.map((x) => x.id === recipe.id ? Object.assign({}, x, patch) : x));
+    setZak(Object.assign({}, zak, { mesh: "", opacity: "", surface: "" }));
+  };
 
   const calc = useMemo(() => {
     if (!position || !recipe) return null;
@@ -592,7 +1287,9 @@ function Calc({ products, recipes, setRecipes, links, setLinks }) {
     <div><div class="lbl">Zakázka</div><div class="val">${fmt(n(qty), 0)} ks · ${fmt(n(gm2), 1)} g/m² · ztráty ${fmt(n(loss), 0)} %</div></div>
     <div><div class="lbl">Receptura</div><div class="val">${esc(recipe.name)} · ${esc(recipe.series || "")} · hustota ${fmt(n(recipe.density, 1), 2)} g/ml</div></div>
     <div><div class="lbl">Síto / kryvost / povrch</div><div class="val">${esc(recipe.mesh || "—")} · ${esc(recipe.opacity || "—")} · ${esc(recipe.surface || "—")}</div></div>
-    <div><div class="lbl">Objednavatel</div><div class="val">${esc(recipe.customer || "—")}</div></div>
+    <div><div class="lbl">Objednavatel</div><div class="val">${esc((zak && zak.customer) || recipe.customer || "—")}</div></div>
+    ${zak && zak.order ? `<div><div class="lbl">Zakázka</div><div class="val">${esc(zak.order)}</div></div>` : ""}
+    ${zak && zak.note ? `<div><div class="lbl">Poznámka k zakázce</div><div class="val">${esc(zak.note)}</div></div>` : ""}
     <div><div class="lbl">Příznaky</div><div class="val">${[recipe.tested ? "otestovaný" : "", recipe.fade ? "odolný vůči vyblednutí" : ""].filter(Boolean).join(" · ") || "—"}</div></div>
   </div>
   <div class="box">
@@ -643,6 +1340,21 @@ function Calc({ products, recipes, setRecipes, links, setLinks }) {
             ${filtered.length > 12 && html`<div className="searchitem note">… a dalších ${filtered.length - 12} — upřesněte hledání.</div>`}
           </div>`}
       </div>
+
+      ${zak && html`
+        <div className="specbar">
+          <span className="tag tech">spec načten</span>
+          ${zak.order && html`<span>Zakázka <b>${zak.order}</b></span>`}
+          ${zak.customer && html`<span>Objednavatel <b>${zak.customer}</b></span>`}
+          ${zak.note && html`<span className="note">${zak.note}</span>`}
+          ${(zak.mesh || zak.opacity || zak.surface) && html`
+            <${React.Fragment}>
+              <span className="note">požadováno: ${[zak.mesh, zak.opacity, zak.surface].filter(Boolean).join(" · ")}</span>
+              <button className="btn sec sm" onClick=${zapsatParametry}>Zapsat do receptury</button>
+            <//>`}
+          ${zak.warn && zak.warn.length > 0 && html`<span className="note" style=${{ color: "var(--warn)" }}>${zak.warn.length} upozornění — viz Načíst spec</span>`}
+          <button className="btn sec sm" style=${{ marginLeft: "auto" }} onClick=${() => setZak(null)}>✕</button>
+        </div>`}
 
       <div className="grid calc">
         <div style=${{ display: "grid", gap: 20, alignContent: "start" }}>
