@@ -1,0 +1,223 @@
+{
+  "_napoveda": "popisky = co může stát před hodnotou (Popisek: hodnota). vzory = regulární výrazy, první závorka je hodnota. Hledá se nejdřív podle popisků, pak podle vzorů.",
+  "popisky": {
+    "ref": [
+      "ref",
+      "ref.",
+      "reference",
+      "kod",
+      "kód",
+      "kód produktu",
+      "číslo produktu",
+      "produkt č",
+      "artikl",
+      "sku",
+      "položka"
+    ],
+    "nazev": [
+      "název",
+      "nazev",
+      "název produktu",
+      "produkt",
+      "zboží"
+    ],
+    "ks": [
+      "počet kusů",
+      "počet ks",
+      "počet",
+      "množství",
+      "ks",
+      "kusů",
+      "qty",
+      "quantity"
+    ],
+    "poloha": [
+      "pozice",
+      "poloha",
+      "umístění",
+      "umisteni",
+      "tisková poloha",
+      "místo potisku",
+      "position"
+    ],
+    "komponenta": [
+      "komponenta",
+      "component",
+      "díl",
+      "dil"
+    ],
+    "rozmer": [
+      "rozmer potisku",
+      "rozměr potisku",
+      "rozměr",
+      "rozmer",
+      "velikost potisku",
+      "print size",
+      "size"
+    ],
+    "barva": [
+      "barva zboží",
+      "barva zbozi",
+      "barva produktu",
+      "odstín produktu",
+      "barva"
+    ],
+    "receptura": [
+      "barva potisku",
+      "tisková barva",
+      "receptura",
+      "pantone",
+      "odstín",
+      "pms"
+    ],
+    "rada": [
+      "typ barvy",
+      "řada barvy",
+      "řada",
+      "rada",
+      "série",
+      "serie",
+      "series"
+    ],
+    "material": [
+      "materiál",
+      "material"
+    ],
+    "preduprava": [
+      "předúprava",
+      "preduprava",
+      "primer"
+    ],
+    "sito": [
+      "síto",
+      "sito",
+      "sítotisk",
+      "mesh",
+      "tkanina",
+      "raster"
+    ],
+    "stroj": [
+      "stroj",
+      "zařízení",
+      "zarizeni",
+      "linka",
+      "machine"
+    ],
+    "kryvost": [
+      "kryvost",
+      "krytí",
+      "kryti",
+      "opacity"
+    ],
+    "povrch": [
+      "povrch",
+      "podklad",
+      "surface",
+      "materiál povrchu"
+    ],
+    "technologie": [
+      "technologie",
+      "technika",
+      "tisk",
+      "způsob potisku"
+    ],
+    "gm2": [
+      "spotřeba",
+      "spotreba",
+      "g/m2",
+      "g/m²"
+    ],
+    "ztraty": [
+      "ztráty",
+      "ztraty",
+      "odpad",
+      "loss"
+    ],
+    "min": [
+      "minimální dávka",
+      "min. dávka",
+      "min dávka"
+    ],
+    "zakazka": [
+      "číslo zakázky",
+      "cislo zakazky",
+      "zakázka",
+      "zakazka",
+      "objednávka",
+      "č. objednávky",
+      "order"
+    ],
+    "zakaznik": [
+      "zákazník",
+      "zakaznik",
+      "objednavatel",
+      "odběratel",
+      "customer",
+      "firma"
+    ],
+    "termin": [
+      "date of expedition",
+      "termín dodání",
+      "datum dodání",
+      "termín",
+      "termin",
+      "require date",
+      "datum"
+    ],
+    "pozn": [
+      "poznámky",
+      "poznamky",
+      "poznámka",
+      "poznamka",
+      "pozn",
+      "pozn.",
+      "notes"
+    ]
+  },
+  "vzory": {
+    "receptura": [
+      "(PANTONE\\s+[0-9]{2,4}\\s*[A-Z]{0,3}\\b)",
+      "\\b(PMS\\s*[0-9]{2,4}\\s*[A-Z]{0,3})\\b",
+      "(?m)^\\s*(Black|White|Bílá|Bila|Černá|Cerna|Silver|Gold|Stříbrná|Zlatá)\\s*$"
+    ],
+    "sito": [
+      "(?:s[íi]to|mesh)\\D{0,4}(\\d{2,3}\\s*[-/]\\s*\\d{2,3})"
+    ],
+    "kryvost": [
+      "\\b(vysoce\\s+kryc[íi]|transparentn[íi]|standard)\\b"
+    ],
+    "ks": [
+      "Total\\s+Quantity[^\\d]{0,20}(\\d[\\d\\s]{0,7})",
+      "\\b(\\d[\\d\\s]{1,7})\\s*(?:ks|kusů|kusu|pcs)\\b"
+    ],
+    "ref": [
+      "\\b(\\d{5})\\s*-\\s*\\d{3}\\b",
+      "\\b(\\d{5})\\b"
+    ],
+    "barva": [
+      "\\b\\d{5}\\s*-\\s*(\\d{3})\\b"
+    ],
+    "rozmer": [
+      "(\\d+(?:[.,]\\d+)?\\s*[x×]\\s*\\d+(?:[.,]\\d+)?)\\s*mm"
+    ],
+    "technologie": [
+      "\\b(SCR|PDP|TXP|TRS|TRF|FIR)\\b"
+    ],
+    "kod_polohy": [
+      "\\b(\\d{4,6}\\.[\\d.]+\\.[A-Za-z]{2,4}\\d+(?:-\\d+-\\d+|[Xx]\\d+[Yy]\\d+))\\b"
+    ]
+  },
+  "_napoveda_kontroly": "Ověření věrohodnosti — hodnota, která vzoru nevyhoví, se zahodí a hledá se dál (chrání před hlavičkami tabulek).",
+  "kontroly": {
+    "ref": "^\\d{4,7}\\b",
+    "barva": "^[^\\s].{0,39}$",
+    "ks": "\\d",
+    "zakazka": "\\d",
+    "receptura": "^(?!\\d{1,2}$).{2,}$",
+    "rozmer": "\\d\\s*[x×]\\s*\\d",
+    "technologie": "^[A-Za-zÀ-ž]{2,}",
+    "termin": "\\d{1,4}\\s*[./-]\\s*\\d{1,2}",
+    "sito": "\\d{2,3}\\s*[-/]\\s*\\d{2,3}",
+    "kod_polohy": "[A-Za-z]{2,4}\\d+(?:-\\d+-\\d+|[Xx]\\d+[Yy]\\d+)$"
+  }
+}
