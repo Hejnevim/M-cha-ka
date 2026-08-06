@@ -26,6 +26,13 @@ POUŽITÍ
   KALKULACE   vyhledáte produkt (název/ref.), vyberete polohu (karty
               s náhledy jako na webu), recepturu a počet kusů — aplikace
               spočítá celkovou potřebu barvy v g/ml a rozpis komponent.
+  NAČÍST SPEC Z PDF   vložíte zakázkový list v PDF a aplikace z něj
+              vyčte produkt, barvu, řadu, síto, kryvost, povrch,
+              počet kusů atd. (vyžaduje spuštěný most.py, viz níže).
+  NAČÍST SPEC načtení specifikace zakázky čtečkou čárových kódů —
+              předvyplní kalkulaci (viz níže).
+  ZAKÁZKY     seznam otevřených zakázek ze systému SGPS (vyžaduje
+              spuštěný most.py, viz níže).
   PRODUKTY    katalog, ruční přidávání/úpravy, export CSV.
   RECEPTURY   Pantone standard i vlastní (Custom) receptury.
   IMPORT/DATA hromadné nahrání produktů (CSV/JSON) a receptur (CSV,
@@ -52,16 +59,21 @@ nádoby, kolonky pro odškrtnutí a podpis. Vytiskněte, nebo v dialogu
 tisku zvolte "Uložit jako PDF".
 Pokud se okno neotevře, povolte vyskakovací okna pro tuto stránku.
 
-RECEPTURA PRO BARVU PRODUKTU (vazba produkt + barva)
-----------------------------------------------------
-V kalkulaci pod výběrem barvy je tlačítko "+ Receptura pro tuto barvu":
+CUSTOM RECEPTURA PRO KOMBINACI (produkt + barva + technologie + poloha)
+-----------------------------------------------------------------------
+V kalkulaci pod výběrem barvy je tlačítko
+"+ Custom receptura pro tuto kombinaci":
 1. Vyberte výchozí recepturu z Pantone databáze (filtr, např. "485").
 2. "Odvodit a upravit" otevře editor s předvyplněnými komponentami -
    upravte poměry, přidejte/odeberte komponenty, případně hustotu a odstín.
 3. "Uložit recepturu" recepturu uloží jako Custom a NAVÁŽE ji na
-   kombinaci produkt + barva.
-Při příštím výběru stejného produktu a barvy se vázaná receptura
-načte automaticky (v řádku pod výběry je označená "vázaná na barvu").
+   kombinaci produkt + barva produktu + technologie + umístění.
+Tatáž barva tedy může mít jinou recepturu pro sítotisk a jinou pro
+tampontisk, případně pro každé umístění zvlášť.
+Při příštím výběru téže kombinace se vázaná receptura načte automaticky
+(v řádku pod výběry je označená "vázaná na …").
+Starší vazby, uložené jen na produkt + barvu, platí dál pro všechny
+polohy a jsou označené "(všechny polohy)".
 Tlačítka "Upravit" / "Zrušit vazbu" jsou u vybrané barvy.
 Vazby se ukládají v prohlížeči (irm-links) - přenést je lze zálohou
 localStorage; receptury samotné najdete i v záložce Receptury.
@@ -89,3 +101,306 @@ Nastavuje se v kalkulaci pod výběrem receptury i v editoru receptury.
 Tiskne se na míchacím lístku (řádky Objednavatel a Příznaky).
 CSV import: volitelné sloupce objednavatel;otestovany;vyblednuti
 (hodnoty ano/1/x = zapnuto).
+
+NAČTENÍ SPECIFIKACE ZAKÁZKY ČTEČKOU (menu → "Načíst spec")
+----------------------------------------------------------
+Čtečka načte kód ze zakázkového listu a aplikace z něj rovnou předvyplní
+kalkulaci — produkt, polohu potisku, barvu, recepturu i počet kusů.
+Poté už stačí jen vytisknout míchací lístek nebo spustit navažování.
+
+TŘI ZPŮSOBY PŘIPOJENÍ ČTEČKY
+1) Režim klávesnice (většina USB čteček) — nic se nepřipojuje, stačí mít
+   v záložce "Načíst spec" zapnutý přepínač "Poslouchat čtečku kdekoli
+   v aplikaci" (po instalaci je zapnutý). Načíst kód lze pak z libovolné
+   obrazovky. Aplikace pozná čtečku podle rychlosti zadání, běžné psaní
+   do formulářů tím není nijak ovlivněno.
+2) Sériový port (USB / RS-232) — tlačítko "Připojit čtečku (COM)"
+   a výběr rychlosti (baud). Funguje v prohlížeči Chrome/Edge.
+3) Kamera — čte QR a DataMatrix kódy z webkamery (Chrome/Edge).
+
+FORMÁT KÓDU
+  Samotné ref. číslo produktu:
+      11101
+  Celá zakázka (klíče oddělené | ; nebo tabulátorem, pořadí nerozhoduje):
+      IRM1|ref=11070|ks=500|poz=2|barva=105|rec=PANTONE 485 C|ztraty=12|obj=2026-114
+  Nebo JSON:
+      {"ref":"11070","ks":500,"barva":"105","rec":"PANTONE 485 C"}
+
+  Klíče (uvedeny i běžné alternativy):
+      ref       ref. číslo produktu (kod, produkt, sku)
+      ks        počet kusů (mnozstvi, pocet, qty)
+      poz       poloha potisku — pořadové číslo (1, 2, 3…), název polohy
+                nebo kód technologie (SCR, PDP, TXP, TRS, FIR)
+      barva     barva produktu — kód (105), název nebo hex
+      rec       receptura — celý název nebo jen číslo (485)
+      gm2       spotřeba g/m² (jinak se doplní dle technologie)
+      ztraty    ztráty v %
+      min       minimální dávka v g
+      obj       číslo zakázky (zakazka) — tiskne se na míchacím lístku
+      zakaznik  objednavatel — tiskne se na míchacím lístku
+      sito / kryvost / povrch   požadované parametry receptury
+      pozn      poznámka k zakázce
+
+  Chybějící údaje zůstanou v kalkulaci beze změny, neznámé klíče se
+  ignorují. Co se nepodařilo napárovat (např. barva, kterou produkt
+  nemá), aplikace vypíše jako upozornění a nechá původní hodnotu.
+
+  Parametry sito/kryvost/povrch se do receptury NEzapisují automaticky —
+  v pruhu nad kalkulací je na to tlačítko "Zapsat do receptury", aby
+  omylem načtený kód nepřepsal sdílenou Pantone recepturu.
+
+  Poznámka: aby šlo recepturu ze specu najít, musí být předtím nahraná
+  databáze receptur v záložce Import / data.
+
+PROPOJENÍ SE SYSTÉMEM SGPS (most.py) — ZATÍM NEDOSTUPNÉ
+------------------------------------------
+Zakázky se dají číst přímo ze SGPS. Aplikace ale se SGPS nemluví sama —
+prohlížeč otevřený dvojklikem (file://) nesmí z bezpečnostních důvodů
+volat cizí systémy. Spojení proto zajišťuje malý skript, který běží na
+tomto počítači:
+
+    python most.py
+
+Most se spustí, sám otevře aplikaci na http://localhost:8765 a nechá se
+běžet po celou dobu práce (ukončení Ctrl+C). Přihlašovací údaje do SGPS
+zůstávají v jeho konfiguraci, ne v prohlížeči.
+
+CO TO PŘINESE
+  ZAKÁZKY (SGPS)  nová záložka se seznamem otevřených zakázek —
+                  vyhledávání a tlačítko "Otevřít →" naplní kalkulaci.
+  ČTEČKA          stačí načíst číslo zakázky z listu ze SGPS; produkt,
+                  polohu, barvu, recepturu, množství i termín si aplikace
+                  dotáhne ze systému sama. Načtení ref. čísla produktu
+                  funguje dál jako dřív.
+
+NASTAVENÍ (sgps_config.json)
+  Vznikne při prvním spuštění mostu v režimu "demo" — aplikace se chová,
+  jako by zakázky ze SGPS chodily, jen jsou vymyšlené. Slouží k vyzkoušení
+  celého postupu dřív, než je SGPS napojené.
+
+  "rezim": "demo"     ukázkové zakázky, nic se nikam nepřipojuje
+  "rezim": "soubor"   čte export ze SGPS ze zadané cesty; umí JSON, CSV
+                      i XML — v "soubor" → "cesta" uveďte, kde soubor leží
+  "rezim": "rest"     volá HTTP API SGPS; v sekci "rest" se vyplní adresy
+                      "url_seznam" a "url_zakazka" (s místem {cislo}) a
+                      přihlášení ("hlavicky" s tokenem, nebo uzivatel/heslo)
+
+  Sekce "mapovani" říká, jak se pole jmenují ve SGPS. Vlevo je název pole
+  v aplikaci, vpravo seznam možností — bere se první nalezená, na velikosti
+  písmen nezáleží a lze psát i cestu typu "objednavka.cislo". Až bude jasné,
+  co SGPS posílá, stačí do příslušného řádku dopsat jeho název; nic jiného
+  se nemění.
+
+  Nápověda: v záložce Zakázky (SGPS) je u každého řádku tlačítko "⋯",
+  které ukáže, co přesně SGPS poslalo. Podle toho se mapování doplní.
+
+POZOR NA ULOŽENÁ DATA
+  Prohlížeč odděluje data podle adresy. Aplikace spuštěná z mostu
+  (http://localhost:8765) má proto vlastní úložiště a nevidí receptury
+  nahrané dřív ve verzi otevřené dvojklikem. Po přechodu na most jednou
+  znovu nahrajte databázi receptur v záložce Import / data (zálohu
+  pořídíte tlačítkem Export CSV ve staré verzi). Katalog produktů se
+  načte z data.js sám.
+
+NAČTENÍ SPECIFIKACE Z PDF (menu → "Načíst spec z PDF")
+-------------------------------------------------------
+Nejrychlejší cesta od zakázkového listu k navážené barvě. PDF čte pomocný
+program (prohlížeč to sám neumí), takže je potřeba mít spuštěný most:
+
+    python most.py
+
+Most se sám otevře na http://localhost:8765 a nechá se běžet po celou
+dobu práce (ukončení Ctrl+C).
+
+POSTUP (rychlejší cesta — rovnou z kalkulace)
+  1. V kalkulaci je vpravo v kartě "Vybraný produkt" plocha
+     "Zakázkový list (PDF)". Přetáhněte na ni list, nebo na ni klikněte
+     a soubor vyberte.
+  2. Otevře se okno s rozpoznanými údaji. U každého je uvedeno, odkud se
+     vzal, a každý jde přepsat. Prázdné pole se nepoužije a v kalkulaci
+     zůstane stávající hodnota. Tlačítko "Zobrazit text z PDF" ukáže,
+     co přesně se z listu přečetlo.
+  3. "Použít v kalkulaci" — okno se zavře, kalkulace je předvyplněná
+     a můžete tisknout míchací lístek nebo vážit.
+
+POSTUP (přes menu)
+  Totéž nabízí menu → "Načíst spec z PDF", kde údaje zůstávají na
+  stránce. Obě cesty sdílejí stejný spec: co načtete v okně, najdete
+  i v záložce a naopak (tlačítko "Upravit spec" nad kalkulací).
+
+CO SE Z PDF ČTE
+  číslo zakázky, zákazník, termín, ref. produktu, název, barva produktu,
+  počet kusů, umístění, technologie, tisková barva (Pantone), řada barvy,
+  síto, stroj, kryvost, povrch, spotřeba, ztráty, min. dávka, poznámka.
+
+  Technologie i řada barvy nejsou jen informace navíc:
+  - technologie rozliší polohy stejného jména (tentýž potisk bývá
+    v katalogu jednou pro sítotisk a jednou pro tampontisk),
+  - řada barvy rozliší receptury stejného Pantone kódu napříč řadami.
+  Když si řada z PDF a řada nalezené receptury odporují, aplikace to
+  vypíše jako upozornění.
+
+KDYŽ SE NĚCO NENAJDE
+  Rozpoznávání se řídí popisky ve formuláři. Ty vaše se mohou od
+  výchozích lišit — tlačítkem "Zobrazit text z PDF" uvidíte, co přesně
+  se z listu přečetlo, a v souboru pdf_pravidla.json (vznikne sám při
+  prvním použití) se v sekci "popisky" dopíše, jak se pole ve vašem
+  formuláři jmenují. Vlevo je pole aplikace, vpravo seznam možných
+  popisků; na velikosti písmen ani interpunkci nezáleží.
+  V sekci "vzory" jsou regulární výrazy pro údaje, které nestojí za
+  popiskem (např. samotné "PANTONE 485 C" kdekoli v textu).
+
+OMEZENÍ
+  Funguje na PDF vygenerovaná z počítače. Naskenovaný list je obrázek,
+  žádný text neobsahuje a bylo by potřeba OCR — aplikace na to upozorní
+  místo toho, aby tiše vrátila prázdno. PDF chráněné heslem je nutné
+  nejdřív uložit bez ochrany.
+
+ROZMĚR MOTIVU ZE ZAKÁZKOVÉHO LISTU
+-----------------------------------
+Katalog (data.js) nese u každé polohy jen NEJVĚTŠÍ možnou tiskovou plochu,
+zatímco zakázkový list uvádí rozměr skutečného motivu. Rozdíl bývá velký:
+u zakázky 138823 je v katalogu 100×80 mm (80 cm²), ale motiv měří
+98,9×26 mm (25,7 cm²) — barvy je tedy potřeba zhruba třetina.
+
+Načte-li se rozměr z listu, aplikace ho použije přednostně a v pruhu nad
+kalkulací je přepínač "Rozměr z listu ..." spolu s údajem z katalogu.
+Vypnutím se vrátí výpočet podle katalogu. Použitý rozměr se tiskne
+i na míchacím lístku (u rozměru z listu je poznámka "dle listu").
+
+KÓD POTISKU — NEJPŘESNĚJŠÍ URČENÍ POLOHY
+-----------------------------------------
+Zakázkový list nese u čárového kódu označení typu
+
+    92734.5.4.SCR1-01-01        (čárově 92734.5.4.SCR1X01Y01)
+
+V něm je všechno podstatné najednou: 92734 je ref. produktu (z něj se
+doplní i název z katalogu), SCR technologie, a dvojice 01-01 je pořadí
+polohy — přesně to, co nese i název náhledu v katalogu, tedy
+92734_1_01_01.png = "Taška / Přední".
+
+Aplikace tenhle kód použije přednostně, protože polohu určuje
+jednoznačně a nezávisle na jazyku. Rozliší i polohy se stejným názvem:
+u produktu 11070 má "Propiska / Kulovité těleso" jednu variantu pro
+sítotisk (55x20 mm) a druhou pro tampontisk (60x5 mm) — kód je od sebe
+odliší, samotný název ne.
+
+Když kód v listu není nebo neodpovídá žádné poloze, aplikace to napíše
+a hledá polohu podle názvu (viz níže).
+
+NÁZVY POLOH ANGLICKY (záložní způsob)
+--------------------------------------
+Zakázkové listy pojmenovávají polohy anglicky a s číselným kódem
+("Komponenta 306 - Pouch", "Pozice 66 - Front"), katalog je má česky
+("Taška / Přední"). Aplikace mezi nimi překládá podle vestavěného
+slovníčku (pouch/bag → taška, front → přední, back → zadní, lid → víčko,
+pocket → kapsa atd.). Čísla před názvem se ignorují.
+Když se poloha přesto nenajde, vyberte ji ručně v kalkulaci — ostatní
+údaje z listu zůstanou zachovány.
+
+OD PDF K MÍCHACÍMU LÍSTKU BEZ DATABÁZE RECEPTUR
+------------------------------------------------
+Celý postup PDF → spec → míchací lístek funguje i dřív, než je databáze
+receptur hotová. Množství barvy totiž vychází z plochy motivu, počtu kusů,
+spotřeby a ztrát — receptura je potřeba až na rozpis komponent.
+
+  1. Načtěte PDF (menu → "Načíst spec z PDF"), zkontrolujte a případně
+     opravte rozpoznané údaje a dejte "Použít v kalkulaci".
+  2. Není-li barva z listu v databázi, aplikace ji vezme jako
+     ROZPRACOVANOU: spočítá celkovou dávku a nabídne tlačítko
+     "Zadat složení a uložit".
+  3a. Bez složení: "Míchací lístek" se vytiskne s kompletní hlavičkou
+      (zakázka, produkt, barva, poloha, rozměr, dávka) a s prázdnými
+      řádky, do kterých se navážky zapíšou rukou.
+  3b. Se složením: zadáte komponenty a procenta, uložíte — receptura se
+      uloží jako Custom a NAVÁŽE na kombinaci produkt + barva + technologie
+      + umístění. Lístek pak nese hotové navážky včetně kumulativních
+      hodnot a funguje i asistent navážení s váhou.
+
+  Spec zůstává upravitelný — tlačítkem "Upravit spec" v pruhu nad
+  kalkulací se vrátíte k načteným polím, opravíte je a použijete znovu.
+
+  Poznámka: dokud není zadané složení, asistent navážení se neuplatní
+  (vede vážení po komponentách) — dávku navážíte podle lístku.
+
+SKUTEČNÉ POKRYTÍ MOTIVU (kolik barvy logo opravdu spotřebuje)
+--------------------------------------------------------------
+Rozměr potisku je obdélník, do kterého se motiv vejde — uvnitř i kolem
+loga ale zůstává spousta volného místa. Aplikace proto umí spočítat,
+jakou část plochy barva doopravdy pokryje, a přepočítat podle toho dávku.
+
+POSTUP
+  V kartě "Výsledek míchání" je tlačítko "Spočítat krycí plochu
+  z náhledu". V okně vyberete stranu zakázkového listu — motiv se najde
+  SÁM: aplikace rozdělí stránku na souvislé bloky kresby, sloučí ty, co
+  patří k sobě (nadpis a pod ním značky), a vybere ten, jehož poměr stran
+  odpovídá rozměru potisku ze zakázkového listu. Při srovnatelném tvaru
+  má přednost větší předloha, protože z ní vyjde pokrytí přesněji.
+  Jiný motiv zvolíte tlačítkem, nebo ho označíte tažením myši.
+
+BARVA POTISKU — POČÍTAJÍ SE JEN OBJEKTY, NE POMOCNÁ GRAFIKA
+  Náhled na listu bývá orámovaný a popsaný jinou barvou (modré čáry,
+  modrý popisek "MERÍTKO 100%"). Aby se do spotřeby nezapočítaly,
+  aplikace ve výřezu najde jednotlivé barvy a nabídne je jako vzorky
+  s podílem plochy. Sama předvybere tu nejsytější — u jednobarevného
+  potisku je to právě barva potisku. Jiný vzorek zvolíte kliknutím,
+  volba "vše kromě pozadí" se chová jako dřív.
+
+  Rozdíl je znatelný: u zakázky 138823 vyjde "vše kromě pozadí" 16,8 %,
+  ale jen černá 12,2 % — rámeček a popisek dělaly čtvrtinu výsledku.
+
+  Posuvník "Tolerance odstínu" určuje, jak daleko od vybrané barvy se
+  ještě počítá. Vyšší hodnota podchytí změkčené okraje písma, nižší
+  zabrání tomu, aby se chytila jiná barva.
+
+VNĚJŠÍ ODSAZENÍ (mm)
+  Barva se kolem každého objektu rozpíjí, takže potištěná plocha je vždy
+  o kus větší než samotný motiv. Posuvníkem "Vnější odsazení kolem
+  objektů" zadáte, o kolik milimetrů. Aplikace motiv o tuhle hodnotu
+  "nafoukne" — kolem každého objektu zvlášť, ne kolem celku — a z toho
+  spočítá krycí plochu. Měřítko bere z toho, že šířka motivu odpovídá
+  rozměru potisku, takže mm sedí bez dalšího nastavování.
+
+  V okně rovnou vidíte, kolik to dělá cm² a kolik gramů barvy na celou
+  zakázku. Náhled ukazuje motiv tmavě a přidané odsazení světle modře.
+
+  Poznámka: s odsazením může krycí plocha přesáhnout 100 % rozměru
+  potisku. Je to správně — barva se rozpíjí i za hranici motivu.
+
+PAMATUJE SI TO KE KAŽDÉ ZAKÁZCE
+  Nastavená krycí plocha i odsazení se uloží k číslu zakázky. Při
+  příštím načtení téhož listu se hodnota vrátí sama.
+
+  Náhled ukáže modře to, co se počítá jako barva, a oranžovým rámečkem
+  ohraničení motivu. Posuvníkem "Citlivost" doladíte, co ještě je barva
+  a co už pozadí. Přepínač "Měřit jen uvnitř ohraničení motivu" nechte
+  zapnutý — odpovídá tomu, že rozměr potisku je opsaný obdélník motivu.
+
+  "Použít pokrytí" hodnotu zapíše do kalkulace. Štítek u výsledku pak
+  ukazuje "z náhledu" místo "z katalogu"; tlačítkem "Zpět na katalog"
+  se vrátíte k původní hodnotě. Použité pokrytí se tiskne i na
+  míchacím lístku.
+
+CO TO UDĚLÁ S MNOŽSTVÍM
+  U zakázky 138823 (motiv 98,9x26 mm) klesne plocha z 25,71 cm² na
+  10,94 cm² a netto spotřeba z 3,1 g na 1,3 g.
+
+TŘI ZDROJE PŘEDLOHY
+  1) STRANA LISTU (nejpohodlnější) — most stránku PDF vykreslí a v okně
+     ji zobrazí. Tažením myši označíte náhled potisku a pokrytí se
+     spočítá jen uvnitř označené oblasti. Funguje i u vektorových
+     náhledů, tedy tam, kde v PDF žádný obrázek není.
+  2) OBRÁZEK Z PDF — rastrové obrázky vložené v listu (bývá to fotka
+     produktu, u některých listů i samotný motiv).
+  3) TISKOVÉ PODKLADY — soubor přetažený do okna. Nejpřesnější, protože
+     je to přímo to, z čeho se dělá síto.
+
+VYKRESLOVÁNÍ STRÁNEK — JEDNORÁZOVÁ INSTALACE
+  Zobrazení stran listu obstarává knihovna pypdfium2 (vykreslovací
+  jádro z prohlížeče Chrome). Instaluje se jednou příkazem:
+
+      python -m pip install pypdfium2
+
+  Po spuštění most vypíše "vykreslování stránek (pokrytí motivu): ano".
+  Bez knihovny funguje všechno ostatní dál, jen se strany listu
+  v nabídce předloh neobjeví.
