@@ -37,6 +37,8 @@ Vyžaduje pouze Python 3 (žádné doinstalovávání knihoven).
 import csv
 import io
 import json
+import collections
+import hashlib
 import os
 import ssl
 import sys
@@ -61,6 +63,125 @@ if hasattr(sys.stdout, "reconfigure"):
 
 SLOZKA = os.path.dirname(os.path.abspath(__file__))
 CONFIG = os.path.join(SLOZKA, "sgps_config.json")
+DATABAZE = os.path.join(SLOZKA, "databaze barev")
+
+# Poslední přečtená PDF si most chvíli podrží, aby šlo dodatečně vykreslit
+# ostrý výřez, aniž by prohlížeč soubor posílal znovu. Drží se jen pár
+# posledních, ať to nenaroste do paměti.
+_PDF_PAMET = collections.OrderedDict()
+_PDF_ZAMEK = threading.Lock()
+_PDF_KOLIK = 4
+
+
+def _zapamatuj_pdf(data):
+    klic = hashlib.sha1(data).hexdigest()[:16]
+    with _PDF_ZAMEK:
+        _PDF_PAMET[klic] = data
+        _PDF_PAMET.move_to_end(klic)
+        while len(_PDF_PAMET) > _PDF_KOLIK:
+            _PDF_PAMET.popitem(last=False)
+    return klic
+
+
+def _vzpomen_pdf(klic):
+    with _PDF_ZAMEK:
+        return _PDF_PAMET.get(klic)
+
+
+# ------------------------------------------------------- databáze barev -----
+# Ve složce "databaze barev" leží CSV s recepturami. Most je nabídne aplikaci,
+# aby si je natáhla sama a nikdo je nemusel po každé změně ručně importovat.
+def _druh_csv(hlavicka):
+    """Podle hlavičky pozná, jestli jde o receptury, nebo o produkty."""
+    h = hlavicka.lower()
+    if "komponent" in h and ("procent" in h or "pct" in h):
+        return "receptury"
+    if "ref" in h and ("nazev" in h or "název" in h or "name" in h):
+        return "produkty"
+    return "?"
+
+
+def _cti_csv(cesta):
+    """Přečte CSV a poradí si s UTF-8 i s windowsím kódováním."""
+    with open(cesta, "rb") as f:
+        syrove = f.read()
+    for kod in ("utf-8-sig", "utf-8", "cp1250", "latin-1"):
+        try:
+            return syrove.decode(kod)
+        except UnicodeDecodeError:
+            continue
+    return syrove.decode("utf-8", "replace")
+
+
+def _seznam_databazi():
+    out = []
+    if not os.path.isdir(DATABAZE):
+        return out
+    for jmeno in sorted(os.listdir(DATABAZE)):
+        if not jmeno.lower().endswith(".csv"):
+            continue
+        cesta = os.path.join(DATABAZE, jmeno)
+        if not os.path.isfile(cesta):
+            continue
+        st = os.stat(cesta)
+        try:
+            text = _cti_csv(cesta)
+        except OSError:
+            continue
+        radky = text.splitlines()
+        out.append({
+            "jmeno": jmeno,
+            "velikost": st.st_size,
+            "zmeneno": int(st.st_mtime),
+            # verze se mění s obsahem — aplikace podle ní pozná, že má načíst znovu
+            "verze": "%d-%d" % (st.st_size, int(st.st_mtime)),
+            "druh": _druh_csv(radky[0] if radky else ""),
+            "radku": max(0, len(radky) - 1),
+        })
+    return out
+
+
+def _uloz_databazi(jmeno, text):
+    """
+    Zapíše CSV do složky databází. Slouží pro vlastní receptury, které si
+    aplikace odkládá k produktům — aby nezůstaly jen v prohlížeči.
+
+    Zapisuje se přes dočasný soubor a předchozí verze se odloží jako .bak,
+    aby výpadek uprostřed zápisu nepřipravil nikoho o databázi.
+    """
+    if not jmeno or jmeno != os.path.basename(jmeno) or not jmeno.lower().endswith(".csv"):
+        raise ValueError("Zapisovat lze jen CSV přímo do složky databází.")
+    os.makedirs(DATABAZE, exist_ok=True)
+    cesta = os.path.join(DATABAZE, jmeno)
+    docasny = cesta + ".tmp"
+    # newline="" — konce řádků si určuje ten, kdo obsah posílá; jinak by se
+    # jeho \r\n přeložilo znovu a mezi řádky by zůstávaly prázdné mezery
+    with io.open(docasny, "w", encoding="utf-8-sig", newline="") as f:
+        f.write(text)
+    if os.path.exists(cesta):
+        zaloha = cesta + ".bak"
+        try:
+            if os.path.exists(zaloha):
+                os.remove(zaloha)
+            os.replace(cesta, zaloha)
+        except OSError:
+            pass
+    os.replace(docasny, cesta)
+    st = os.stat(cesta)
+    return {"jmeno": jmeno, "verze": "%d-%d" % (st.st_size, int(st.st_mtime)),
+            "velikost": st.st_size}
+
+
+def _databaze_soubor(jmeno):
+    """Vrátí obsah CSV ze složky databází. Jen holé jméno souboru, nic jiného."""
+    if not jmeno or jmeno != os.path.basename(jmeno) or not jmeno.lower().endswith(".csv"):
+        return None
+    cesta = os.path.join(DATABAZE, jmeno)
+    if not os.path.isfile(cesta):
+        return None
+    st = os.stat(cesta)
+    return {"jmeno": jmeno, "verze": "%d-%d" % (st.st_size, int(st.st_mtime)),
+            "text": _cti_csv(cesta)}
 
 VYCHOZI_CONFIG = {
     "_napoveda": "rezim: demo | soubor | rest. V mapovani jsou vlevo pole aplikace, "
@@ -325,9 +446,9 @@ class Most(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         u = urlparse(self.path)
-        if u.path != "/api/pdf":
+        if u.path not in ("/api/pdf", "/api/vyrez", "/api/databaze/ulozit"):
             return self._odpoved({"ok": False, "chyba": "Neznámý požadavek."}, 404)
-        if pdf_spec is None:
+        if pdf_spec is None and u.path != "/api/databaze/ulozit":
             return self._odpoved({"ok": False,
                                   "chyba": "Chybí soubor pdf_spec.py vedle most.py."}, 500)
         try:
@@ -337,9 +458,66 @@ class Most(SimpleHTTPRequestHandler):
             if delka > 40 * 1024 * 1024:
                 return self._odpoved({"ok": False, "chyba": "Soubor je větší než 40 MB."}, 400)
             data = self.rfile.read(delka)
-            return self._odpoved(pdf_spec.zpracuj(data))
+            if u.path == "/api/databaze/ulozit":
+                return self._uloz_databazi(data)
+            if u.path == "/api/vyrez":
+                return self._vyrez(data)
+            vysledek = pdf_spec.zpracuj(data)
+            if vysledek.get("ok"):
+                # klíč, pod kterým si most soubor podrží pro dodatečné výřezy
+                vysledek["pdf_id"] = _zapamatuj_pdf(data)
+            return self._odpoved(vysledek)
         except Exception as e:
             return self._odpoved({"ok": False, "chyba": str(e)}, 400)
+
+    def _uloz_databazi(self, telo):
+        """Uloží CSV, které aplikace posílá — vlastní receptury a jejich vazby."""
+        try:
+            zadani = json.loads(telo.decode("utf-8"))
+            jmeno = str(zadani.get("jmeno") or "")
+            text = zadani.get("text")
+            if not isinstance(text, str):
+                raise ValueError("Chybí obsah souboru.")
+            vysledek = _uloz_databazi(jmeno, text)
+        except ValueError as e:
+            return self._odpoved({"ok": False, "chyba": str(e)}, 400)
+        except Exception as e:
+            return self._odpoved({"ok": False, "chyba": str(e)}, 500)
+        if sys.stdout is not None:
+            try:
+                sys.stdout.write("  uloženo: databaze barev/%s (%d B)\n"
+                                 % (vysledek["jmeno"], vysledek["velikost"]))
+            except Exception:
+                pass
+        vysledek["ok"] = True
+        return self._odpoved(vysledek)
+
+    def _vyrez(self, telo):
+        """Ostré převykreslení označené části stránky — kvůli rozboru pokrytí."""
+        try:
+            zadani = json.loads(telo.decode("utf-8"))
+        except Exception:
+            return self._odpoved({"ok": False, "chyba": "Nesrozumitelné zadání výřezu."}, 400)
+        data = _vzpomen_pdf(str(zadani.get("pdf_id") or ""))
+        if not data:
+            return self._odpoved({"ok": False, "chyba": "Most už tenhle soubor nemá v paměti "
+                                                        "— nahrajte PDF znovu."}, 404)
+        if not hasattr(pdf_spec, "vyrez_z_pdf"):
+            return self._odpoved({"ok": False, "chyba": "Starší pdf_spec.py neumí výřezy."}, 500)
+        try:
+            v = pdf_spec.vyrez_z_pdf(
+                data, zadani.get("strana") or 1,
+                float(zadani.get("x") or 0), float(zadani.get("y") or 0),
+                float(zadani.get("w") or 0), float(zadani.get("h") or 0),
+                float(zadani.get("sirka") or 0), float(zadani.get("vyska") or 0),
+                cil_px=int(zadani.get("cil") or 2000))
+        except Exception as e:
+            return self._odpoved({"ok": False, "chyba": str(e)}, 400)
+        if not v:
+            return self._odpoved({"ok": False, "chyba": "Výřez se nepodařilo vykreslit "
+                                                        "(chybí pypdfium2?)."}, 500)
+        v["ok"] = True
+        return self._odpoved(v)
 
     def _odpoved(self, obj, kod=200):
         telo = json.dumps(obj, ensure_ascii=False).encode("utf-8")
@@ -368,6 +546,19 @@ class Most(SimpleHTTPRequestHandler):
                     "popis": {"demo": "ukázková data (SGPS není připojeno)",
                               "soubor": "export ze SGPS ze souboru",
                               "rest": "HTTP API systému SGPS"}.get(cfg.get("rezim"), "")})
+            if u.path == "/api/databaze":
+                soubor = (dotazy.get("soubor") or [""])[0]
+                if soubor:
+                    d = _databaze_soubor(soubor)
+                    if not d:
+                        return self._odpoved({"ok": False,
+                                              "chyba": "Soubor „" + soubor + "“ ve složce "
+                                                       "databaze barev není."}, 404)
+                    d["ok"] = True
+                    return self._odpoved(d)
+                return self._odpoved({"ok": True, "slozka": "databaze barev",
+                                      "je": os.path.isdir(DATABAZE),
+                                      "soubory": _seznam_databazi()})
             if u.path == "/api/zakazky":
                 q = (dotazy.get("q") or [""])[0]
                 limit = int((dotazy.get("limit") or ["200"])[0])

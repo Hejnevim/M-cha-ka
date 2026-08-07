@@ -38,6 +38,20 @@ POUŽITÍ
   IMPORT/DATA hromadné nahrání produktů (CSV/JSON) a receptur (CSV,
               formát viz vzor_receptury.csv), obnovení katalogu.
 
+POHYB PO APLIKACI — ODSKOK NIC NEZAHODÍ
+  Vedle tlačítka s menu se objeví tlačítko ZPĚT s názvem místa, odkud
+  jste přišli ("‹ Kalkulace"). Kliknutím se tam vrátíte, nemusíte hledat
+  položku v menu. Pamatuje si celou cestu, takže i několik kroků zpátky.
+
+  Zabere i klávesa Alt + šipka vlevo, tlačítko zpět v prohlížeči a boční
+  tlačítko myši.
+
+  Hlavně ale: rozdělaná KALKULACE se odskokem neztratí. Vybraný produkt,
+  poloha, receptura, počet kusů, načtený spec i rozdělané navážení
+  zůstanou přesně tak, jak jste je nechali — záložka se jen schová, nic
+  se nezavírá. Můžete si tedy odskočit do receptur něco opravit a vrátit
+  se do rozpočítané zakázky.
+
 RECEPTURY PRINTCOLOR
   Pantone formule pro barvy Printcolor jsou licencovaná data — vyžádejte
   si je u svého obchodního zástupce Printcolor (recepturační software /
@@ -338,18 +352,191 @@ POSTUP
   má přednost větší předloha, protože z ní vyjde pokrytí přesněji.
   Jiný motiv zvolíte tlačítkem, nebo ho označíte tažením myši.
 
-BARVA POTISKU — POČÍTAJÍ SE JEN OBJEKTY, NE POMOCNÁ GRAFIKA
+PŘELITÍ PŘI VÁŽENÍ — PŘEPOČET DÁVKY (asistent navážení)
+  Přelitou barvu z nádoby nikdo nedostane zpátky. Odstín se pak dá
+  zachovat jediným způsobem: dorovnat všechny ostatní komponenty, tedy
+  zvětšit celou dávku. Aplikace to spočítá sama.
+
+  Jakmile váha ukáže víc, než je cíl komponenty (mimo toleranci),
+  objeví se přepočet:
+    · nová dávka tak velká, aby přelitá komponenta seděla na svůj podíl
+          dávka = přelité gramy / podíl komponenty
+    · o kolik gramů a procent je to víc než původní dávka
+    · kolik ještě přidat u KAŽDÉ komponenty, včetně těch už navážených
+      (ty jsou teď pod svým podílem a je potřeba je dorovnat)
+  Tlačítkem "Přepočítat dávku" se plán přepne na nové hodnoty a vážení
+  pokračuje. Poměr komponent zůstává na desetinu procenta stejný.
+
+  Příklad: receptura 60/30/10 na 100 g, u první komponenty naliji 66 g
+  místo 60 g. Nová dávka 110 g — druhé komponenty 33 g, třetí 11 g.
+  Když se přeliv stane až u druhé komponenty (33 g místo 30), dávka je
+  taky 110 g, ale je potřeba dorovnat i první o 6 g.
+
+  DÁVKA MŮŽE NARŮST HODNĚ
+    Čím menší podíl má přelitá komponenta, tím víc dávka naroste.
+    Přeliv 0,2 g u komponenty s podílem 0,5 % zvedne dávku z 50 g na
+    88 g. Proto je nová dávka vypsaná dřív, než se cokoli potvrdí,
+    a nad dvojnásobek aplikace upozorní, že může být levnější začít
+    znovu. Druhá možnost je vždycky přebytek odebrat a vrátit váhu na
+    původní cíl — dokud je přeliv na váze, tlačítko "Další komponenta"
+    nejde zmáčknout.
+
+  Přepočet je vidět i v pruhu nad postupem ("Dávka přepočtena na …")
+  a lze ho vzít zpět tlačítkem "Zrušit a navážit znovu".
+
+  Tabulka postupu ukazuje u každé komponenty podíl v %, cíl, kolik je
+  nalito a kolik zbývá. Zbytky menší, než váha rozliší, jsou označené
+  "pod tol." — vážit 0,05 g na váze s dílkem 0,1 g nemá smysl.
+
+DATABÁZE BAREV SE NAČÍTAJÍ SAMY
+  Ve složce "databaze barev" vedle aplikace mohou ležet CSV s recepturami.
+  Most je umí přečíst, takže se VŠECHNY natáhnou samy — hned po připojení
+  mostu a znovu vždy, když se soubor změní. Ručně přes Import / data se
+  nic dělat nemusí; ta záložka zůstává pro soubory odjinud.
+
+  Co se načte, je vidět v záložce "Připojení k mostu" v části
+  "Databáze barev ze složky", i s počtem receptur a velikostí souboru.
+  Tlačítko "Načíst databáze znovu" projede soubory znovu, i když se od
+  minule nezměnily. Soubor, kterému chybí sloupce receptur, se ve výpisu
+  označí jako nenačtený i s důvodem — ostatní se načtou normálně.
+
+VLASTNÍ RECEPTURY MAJÍ SVOU DATABÁZI (receptury_vlastni.csv)
+  Custom recepturu založíte tlačítkem "＋ Custom receptura pro tuto
+  kombinaci": vyberete recepturu z databáze jako základ, upravíte složení
+  a uložíte. Odvozeno je od receptury, kterou už v databázích máte —
+  do sloupce "zaklad" se zapíše, z čeho a ze které databáze vznikla.
+
+  Takové receptury mají VLASTNÍ SOUBOR "databaze barev/
+  receptury_vlastni.csv", oddělený od nakoupených databází. Založí se sám
+  (nejdřív jen s hlavičkou sloupců) a ukládá se při každé změně. Do sloupce
+  "vazby" se k receptuře zapíše, na které kombinace byla použita, ve tvaru
+
+      ref produktu | barva produktu | technologie | poloha
+      92734|103|SCR|Taška / Přední
+
+  Jedna receptura jich může mít víc, oddělují se vlnovkou (~).
+
+  DÍKY TOMU SI PRODUKT PAMATUJE SVOU BARVU
+    Vyberete produkt, jeho barvu a polohu potisku a aplikace sama nabídne
+    recepturu, která se na tu kombinaci posledně použila — modré tričko
+    30104 tak drží svou vlastní recepturu odděleně od stejného trička
+    v jiné barvě.
+
+    Vazba už nezávisí na prohlížeči. Otevřete-li aplikaci na jiném
+    počítači nebo v jiném prohlížeči, načte se ze souboru i s vazbami.
+    Ověřeno: na čistém prohlížeči se z prázdna načetla vlastní receptura
+    i vazba na 92734 · 103 · SCR · Taška / Přední a kalkulace ji sama
+    nabídla po výběru produktu.
+
+  Zapisuje most (aplikace sama na disk psát nesmí). Zápis jde přes
+  dočasný soubor a předchozí verze zůstává jako .bak, takže výpadek
+  uprostřed ukládání o databázi nepřipraví.
+
+  Vazby na receptury z jiných databází (Pantone standardy) se do souboru
+  neukládají — ty zůstávají jen v prohlížeči jako dřív.
+
+KAŽDÝ SOUBOR JE VLASTNÍ DATABÁZE (aby se nic nemíchalo)
+  Ke každé receptuře se pamatuje, ze kterého souboru je. Dvě databáze
+  proto mohou mít týž pantone s jiným složením a nepřepíšou si ho —
+  PANTONE 485 C z Ferro Xpression a z Printcolor 390 vedle sebe obstojí.
+
+  Jakmile jsou ve složce aspoň dva soubory, objeví se v kalkulaci
+  i v seznamu receptur přepínač "Databáze receptur": vše / jednotlivé
+  databáze / vlastní a ruční. Vybírá se pak jen z označené databáze.
+  Volba se pamatuje. Dokud je databáze jediná, přepínač se nezobrazuje.
+
+  V seznamu receptur je navíc sloupec "Databáze", ať je u každé vidět,
+  odkud je.
+
+  KDYŽ SOUBOR ZE SLOŽKY ZMIZÍ
+    Receptury z něj v aplikaci zůstanou (mohou být navázané na produkty),
+    ale "Připojení k mostu" na to upozorní a nabídne je odebrat. Po
+    přejmenování souboru se databáze načte pod novým jménem — ty staré
+    je pak potřeba odebrat, jinak zůstanou navíc.
+
+  CO SE PŘI NAČTENÍ NEZTRATÍ
+    Receptura stejného jména se obnoví ze souboru, ale ponechá si:
+      · svoje id — na něm visí vazby na produkt, barvu, technologii a
+        polohu, které by se jinak rozpadly,
+      · síto, kryvost, povrch a příznaky, které k ní zadal technolog
+        (v CSV takové sloupce nejsou).
+    Vlastní receptury (Custom), které v souboru nejsou, zůstávají beze
+    změny. Totéž teď platí i pro ruční import v záložce Import / data.
+
+  Načítá se jen CSV s hlavičkou receptur (musí mít sloupce komponenta a
+  procento). Jiná CSV se ve výpisu ukážou, ale samy se nenačtou — aby
+  omylem vložený soubor nepřepsal katalog produktů.
+
+ODSTÍN POTISKU — PANTONE NEBO CMYK
+  Zakázkový list barvu potisku jen pojmenuje ("Barva Potisku 1: Black") a
+  nakreslí k ní čtvereček se vzorníkem. Žádný pantone ani CMYK v souboru
+  napsaný není — vzorník je uložený jako RGB pro obrazovku. Aplikace proto:
+
+    1) Je-li pantone napsaný v názvu barvy ("PANTONE 485 C", "PMS 485C",
+       "485 C"), platí ten. Je přesný, nic se nedopočítává.
+    2) Jinak vezme odstín ze vzorníku vedle názvu v listu, dopočítá z něj
+       CMYK a najde nejbližší pantone v databázi receptur.
+
+  Výsledek je vidět pod recepturou v kalkulaci a tiskne se na míchacím
+  lístku jako řádek "Odstín potisku". U zakázky 138823 vyjde
+  "CMYK 0 / 0 / 0 / 100 · #000000 · vzorník ze zakázkového listu".
+
+  POZOR: dopočítaný CMYK je odhad z RGB, ne změřená hodnota — bez ICC
+  profilu to jinak nejde. K nejbližšímu pantonu se vypisuje odchylka ΔE:
+  do 2 je rozdíl okem sotva znát, nad 5 už jde o jinou barvu a bere se to
+  jen jako vodítko. Nad 25 aplikace nenabídne nic.
+
+  Nejbližší pantone má smysl až s načtenou databází receptur. S plnou
+  databází (1 097 receptur Ferro Xpression) vychází třeba černá na
+  PANTONE 419 C (ΔE 4,7), zelená #00843D na PANTONE 3425 C (ΔE 2,0).
+
+  Odstín ze vzorníku se zároveň propíše do rozpracované receptury, takže
+  barevný čtvereček v aplikaci ukazuje odstín z listu, ne šedou náhradu.
+
+OSTRÝ VÝŘEZ — ROZBOR SE NEPOČÍTÁ Z HRUBÉHO NÁHLEDU
+  Celá stránka se z PDF kreslí v měřítku 3 (asi 216 DPI). Logo široké 99 mm
+  z ní vyjde jako necelý tisíc bodů a při přiblížení je kostrbaté — a protože
+  se plocha počítá právě z hran písma, byl by z toho i nepřesný výsledek.
+
+  Jakmile se motiv označí, most tu jednu oblast převykreslí znovu, zato
+  jemně: šířka 2400 bodů, u běžného loga kolem 570 DPI. Pod náhledem je pak
+  napsáno "ostrý výřez z PDF 2400x910 px (573 DPI)". Kreslí se jen ten
+  označený kousek, takže je to rychlé a nepřenášejí se megabajty.
+
+  Výsledek díky tomu nezávisí na tom, v jakém rozlišení se kreslí stránka:
+  u zakázky 138823 vyjde 13,5 % při měřítku stránky 2 i 3.
+
+  Most si poslední čtyři přečtená PDF chvíli drží v paměti, aby soubor
+  nemusel prohlížeč posílat znovu. Po restartu mostu se výřez převykreslit
+  nedá — okno to napíše a počítá z hrubého náhledu, stačí PDF nahrát znovu.
+
+PŘIBLÍŽENÍ NÁHLEDU
+  Oba náhledy — strana listu i rozbor pokrytí — mají nad sebou lištu
+  "− 1,0x + na šířku". Přiblížit lze i kolečkem myši se stisknutým Ctrl,
+  a to na místo pod kurzorem. Rámeček se pak posouvá posuvníky; rozbor
+  navíc i tažením myši. Na straně listu tažení dál označuje výřez, takže
+  drobné logo se dá přiblížit a označit přesně. Nad trojnásobek se rozbor
+  kreslí po bodech, aby byly vidět jednotlivé pixely masky.
+
+BARVY POTISKU — POČÍTAJÍ SE JEN OBJEKTY, NE POMOCNÁ GRAFIKA
   Náhled na listu bývá orámovaný a popsaný jinou barvou (modré čáry,
   modrý popisek "MERÍTKO 100%"). Aby se do spotřeby nezapočítaly,
   aplikace ve výřezu najde jednotlivé barvy a nabídne je jako vzorky
   s podílem plochy. Sama předvybere tu nejsytější — u jednobarevného
-  potisku je to právě barva potisku. Jiný vzorek zvolíte kliknutím,
-  volba "vše kromě pozadí" se chová jako dřív.
+  potisku je to právě barva potisku.
+
+  VÍCEBAREVNÝ POTISK: vzorky se přepínají klepnutím a lze jich vybrat
+  víc najednou — počítá se jejich součet. V popisku je vidět, kolik jich
+  je vybraných. Tlačítko "všechny" zapne všechny nalezené barvy, "vše
+  kromě pozadí" se chová jako dřív (počítá i rámečky a popisky).
+
+  Aby velká tolerance u světlých odstínů nespolkla celý bílý papír,
+  bod se započítá jen tehdy, když je vybrané barvě blíž než pozadí.
 
   Rozdíl je znatelný: u zakázky 138823 vyjde "vše kromě pozadí" 16,8 %,
   ale jen černá 12,2 % — rámeček a popisek dělaly čtvrtinu výsledku.
 
-  Posuvník "Tolerance odstínu" určuje, jak daleko od vybrané barvy se
+  Posuvník "Tolerance odstínu" určuje, jak daleko od vybraných barev se
   ještě počítá. Vyšší hodnota podchytí změkčené okraje písma, nižší
   zabrání tomu, aby se chytila jiná barva.
 
@@ -404,3 +591,72 @@ VYKRESLOVÁNÍ STRÁNEK — JEDNORÁZOVÁ INSTALACE
   Po spuštění most vypíše "vykreslování stránek (pokrytí motivu): ano".
   Bez knihovny funguje všechno ostatní dál, jen se strany listu
   v nabídce předloh neobjeví.
+
+AUTOMATICKÉ SPOUŠTĚNÍ MOSTU (autostart.py)
+-------------------------------------------
+Aby se most nemusel spouštět ručně, nechte ho startovat s Windows:
+
+    python autostart.py zapnout     spouštět po přihlášení
+    python autostart.py spustit     nastartovat hned teď (na pozadí)
+    python autostart.py stav        jak to je nastavené a jestli běží
+    python autostart.py zastavit    ukončit most běžící na pozadí
+    python autostart.py vypnout     zrušit automatické spouštění
+
+Most pak běží neviditelně, bez černého okna a bez otevírání prohlížeče.
+Zástupce vzniká ve složce po spuštění Windows jako "IRM most.vbs";
+smazáním toho souboru se automatické spouštění také zruší.
+
+PROČ TO NEJDE ZE STRÁNKY
+  Stránka otevřená v prohlížeči nesmí na počítači spustit žádný program —
+  brání tomu bezpečnost prohlížeče a obejít to nelze. Řešení je opačné:
+  most běží sám od přihlášení a aplikace si ho najde. Pokud most zrovna
+  neběží, aplikace to zkouší dál a jakmile naskočí, sama se rozjede —
+  není potřeba ji načítat znovu.
+
+OTEVŘENÍ APLIKACE ODJINUD (z GitHubu, ze sdíleného disku)
+  Aplikace míří na most na tomto počítači (127.0.0.1) vždy, i když je
+  samotná stránka odjinud. Most naslouchá pouze místně, zvenčí je
+  nedostupný. Pozor: PDF a receptury se ukládají zvlášť pro každou
+  adresu, ze které aplikaci otevřete.
+
+JEN JEDEN MOST NAJEDNOU
+  Druhé spuštění na témž portu skončí hláškou "Port 8765 je obsazený".
+  Dřív se stávalo, že běžely dvě instance vedle sebe a aplikace pak
+  dostávala odpovědi z té starší.
+
+PŘIPOJENÍ K MOSTU (menu → "Připojení k mostu")
+-----------------------------------------------
+Aplikaci lze otevřít odkudkoli — z disku, z localhostu i ze stránky na
+internetu (GitHub Pages). Most ale vždy běží na počítači, u kterého
+sedíte, a aplikace se na něj obrací na jeho místní adresu.
+
+MOST SE HLEDÁ SÁM
+  Aplikace postupně zkouší: ručně zadanou adresu, vlastní adresu stránky
+  a nakonec http://localhost:8765 a http://127.0.0.1:8765. U každé si
+  ověří, že tam opravdu odpovídá most (ne jen nějaká jiná stránka).
+  Není tedy potřeba nic nastavovat — stačí, aby most běžel.
+  Pokud neběží, aplikace to zkouší dál a jakmile naskočí, sama se
+  rozjede bez načítání znovu.
+
+RUČNÍ NASTAVENÍ
+  V záložce "Připojení k mostu" je pole s adresou, tlačítko
+  "Připojit a uložit" (adresu si zapamatuje) a "Jen vyzkoušet"
+  (napíše, jak rychle most odpověděl a co umí). Tlačítko "Výchozí"
+  uložené nastavení zruší a vrátí automatické hledání.
+
+MOST PRO VÍC POČÍTAČŮ
+  Ve výchozím stavu naslouchá most jen místně a z jiného počítače je
+  nedostupný. Má-li ho využívat víc lidí, spusťte ho na jednom stroji
+
+      python most.py --sit
+
+  a na ostatních zadejte v "Připojení k mostu" jeho adresu, například
+  http://192.168.1.50:8765. Zapínejte jen ve firemní síti, které
+  důvěřujete — kdokoli v ní pak mostu může poslat PDF ke zpracování.
+
+CO OMEZUJE PROHLÍŽEČ
+  Stránka nesmí spustit program na počítači — most proto musí běžet
+  předem (viz autostart.py). Volání z internetové stránky na místní
+  adresu prohlížeče povolují, most k tomu posílá potřebná povolení;
+  ve velmi přísně nastaveném prohlížeči nebo za antivirem to ale
+  zablokovat lze. Pak aplikaci otevřete přímo z mostu.

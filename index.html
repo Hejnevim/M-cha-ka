@@ -20,7 +20,8 @@
   --sans:'Segoe UI',system-ui,Arial,sans-serif;
 }
 :root[data-theme="dark"]{
-  --bg:#232220; --paper:#232220; --ink:#EDEBE4; --ink-2:#9C9990; --line:#38372F; --line-2:#46453B;
+  /* Linky se posouvají spolu s pozadím, aby zůstaly stejně zřetelné. */
+  --bg:#2E2D2A; --paper:#2E2D2A; --ink:#EDEBE4; --ink-2:#9C9990; --line:#43423A; --line-2:#515046;
   --cyan:#7FA3D9; --magenta:#C97B63; --yellow:#D9B44A; --key:#84817A;
   --ok:#4FAE7C; --warn:#D69340;
   --neu:-20px -20px 40px rgba(255,255,255,.045), 20px 20px 40px rgba(0,0,0,.55);
@@ -56,7 +57,12 @@ textarea{font-family:var(--mono);font-size:12.5px;min-height:160px;resize:vertic
 .themebtn:hover{opacity:.8}
 .hdr h1{grid-column:2;margin:0;font-size:clamp(66px,8.4vw,90px);font-weight:800;letter-spacing:.04em;text-align:center;color:var(--paper);text-shadow:var(--logo-shadow);cursor:pointer;transition:opacity .15s}
 .hdr h1:hover{opacity:.85}
-.menuwrap{grid-column:1;justify-self:start;position:relative}
+.menuwrap{position:relative}
+.navleft{grid-column:1;justify-self:start;display:flex;align-items:center;gap:8px;min-width:0}
+.backbtn{height:42px;border:none;border-radius:21px;background:var(--paper);box-shadow:var(--neu-sm);cursor:pointer;color:var(--ink);display:flex;align-items:center;gap:7px;padding:0 16px 0 12px;font-weight:700;font-size:13px;white-space:nowrap;transition:opacity .15s}
+.backbtn:hover{opacity:.8}
+.backbtn:active{box-shadow:var(--neu-in)}
+@media(max-width:720px){.backbtn{padding:0;width:42px;border-radius:50%;justify-content:center}.backbtn span{display:none}}
 .navbtn{width:42px;height:42px;border-radius:50%;border:none;background:var(--paper);box-shadow:var(--neu-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink);transition:opacity .15s}
 .navbtn:hover{opacity:.8}
 .navdrop{position:absolute;top:calc(100% + 10px);left:0;background:var(--paper);border-radius:14px;box-shadow:var(--neu);padding:6px;z-index:45;min-width:180px;display:flex;flex-direction:column;gap:2px}
@@ -99,9 +105,16 @@ textarea{font-family:var(--mono);font-size:12.5px;min-height:160px;resize:vertic
 .card .hint{color:var(--ink-2);font-size:12.5px;margin:0 0 14px}
 .frow{display:grid;gap:12px;margin-bottom:12px}
 @media(min-width:640px){.frow.c2{grid-template-columns:1fr 1fr}.frow.c3{grid-template-columns:1fr 1fr 1fr}.frow.c4{grid-template-columns:1fr 1fr 1fr 1fr}}
-label.f{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);margin-bottom:5px}
+label.f{display:block;font-size:11px;line-height:1.25;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);margin-bottom:5px}
+/* Popisek se v užším okně zalomí na dva řádky a pole pod ním se propadne níž
+   než sousední. Popisek v mřížce má proto vždy výšku dvou řádků a text sedí
+   u jeho spodní hrany — pole v řádku tak drží linku při každé šířce okna. */
+@media(min-width:640px){.frow.c2>div>label.f:first-child,.frow.c3>div>label.f:first-child,.frow.c4>div>label.f:first-child{display:flex;align-items:flex-end;min-height:2.5em}
+/* Buňka s přepínači popisek nemá, takže by v mřížce začínala výš než pole
+   vedle ní — srovnáme ji na spodní hranu řádku, na střed sousedního pole. */
+.frow>.flags{align-self:end;margin-top:0;padding-bottom:8px}}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
-.chip{border:none;background:var(--paper);border-radius:999px;padding:7px 14px;cursor:pointer;font-weight:600;font-size:13px;display:inline-flex;align-items:center;transition:box-shadow .15s,background .15s,color .15s;box-shadow:var(--neu-sm)}
+.chip{border:none;background:var(--paper);border-radius:999px;padding:7px 14px;cursor:pointer;font-weight:600;font-size:13px;display:inline-flex;align-items:center;justify-content:center;text-align:center;transition:box-shadow .15s,background .15s,color .15s;box-shadow:var(--neu-sm)}
 .chip.on{background:var(--key);color:#fff}
 .btn{border:none;border-radius:999px;padding:10px 18px;font-weight:700;cursor:pointer;background:var(--key);color:#fff;transition:opacity .15s;box-shadow:var(--neu-sm)}
 .btn:hover{opacity:.82}
@@ -115,7 +128,9 @@ table.t th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:up
 table.t td{border-bottom:1px solid var(--line);padding:9px 8px;vertical-align:top}
 td.num,th.num{text-align:right;font-family:var(--mono)}
 .swatch{width:26px;height:26px;border-radius:7px;border:1px solid rgba(0,0,0,.12);display:inline-block;vertical-align:middle}
-.tag{display:inline-block;font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:999px;background:var(--bg);box-shadow:var(--neu-in);color:var(--ink-2)}
+/* text-align kvůli úzkému sloupci: jakmile se štítek zalomí na víc řádků,
+   zarovnaný doleva vypadá roztřepeně — uvnitř oblého tvaru patří na střed */
+.tag{display:inline-block;text-align:center;font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:999px;background:var(--bg);box-shadow:var(--neu-in);color:var(--ink-2)}
 .tag.tech{background:var(--key);color:#fff;box-shadow:var(--neu-sm)}
 .result-big{font-family:var(--mono);font-size:34px;font-weight:600;line-height:1.05;color:var(--ink)}
 .result-sub{font-family:var(--mono);color:var(--ink-2);font-size:13px}
@@ -280,6 +295,98 @@ const SEED_RECIPES = [
 const uid = () => Math.random().toString(36).slice(2, 9);
 const n = (v, d = 0) => { const x = parseFloat(String(v).replace(",", ".")); return isNaN(x) ? d : x; };
 const fmt = (v, dec = 1) => v.toLocaleString("cs-CZ", { minimumFractionDigits: dec, maximumFractionDigits: dec });
+
+/* ======================= BARVA POTISKU: PANTONE / CMYK =======================
+   Zakázkový list barvu potisku pojmenuje ("Black", "PANTONE 485 C") a nakreslí
+   k ní vzorník. Vzorník je ale jen RGB pro obrazovku, takže:
+     · je-li pantone napsaný v názvu, platí ten — je přesný,
+     · jinak se z RGB dopočítá CMYK a najde nejbližší pantone z databáze.
+   Dopočítaná hodnota je orientační, ne kolorimetricky změřená. */
+const hexNaRgb = (h) => {
+  const m = /^#?([0-9a-f]{6})$/i.exec(String(h || "").trim());
+  if (!m) return null;
+  const v = parseInt(m[1], 16);
+  return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
+};
+const rgbNaCmyk = (rgb) => {
+  const [r, g, b] = rgb.map((v) => Math.max(0, Math.min(1, v / 255)));
+  const k = 1 - Math.max(r, g, b);
+  if (k > 0.999) return [0, 0, 0, 100];
+  return [(1 - r - k) / (1 - k), (1 - g - k) / (1 - k), (1 - b - k) / (1 - k), k]
+    .map((v) => Math.round(v * 100));
+};
+const cmykText = (c) => c.join(" / ");
+
+/* sRGB -> Lab; v Lab odpovídá vzdálenost tomu, jak rozdíl vidí oko,
+   kdežto v RGB by "nejbližší" barva vycházela nesmyslně */
+function rgbNaLab(rgb) {
+  const f = rgb.map((v) => { const s = v / 255; return s <= 0.04045 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4); });
+  const [r, g, b] = f;
+  const x = (0.4124 * r + 0.3576 * g + 0.1805 * b) / 0.95047;
+  const y = (0.2126 * r + 0.7152 * g + 0.0722 * b);
+  const z = (0.0193 * r + 0.1192 * g + 0.9505 * b) / 1.08883;
+  const t = (v) => v > 0.008856 ? Math.cbrt(v) : (7.787 * v + 16 / 116);
+  const [fx, fy, fz] = [t(x), t(y), t(z)];
+  return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
+}
+const deltaE = (a, b) => Math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2);
+
+/* Pantone zapsaný v názvu barvy — "PANTONE 485 C", "PMS 485C", "485 C" */
+function pantoneZNazvu(nazev) {
+  const s = String(nazev || "").trim();
+  if (!s) return "";
+  let m = /(?:PANTONE|PMS)\s*([0-9]{1,4}\s*[A-Z]{0,3}|[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\s*[CU])/i.exec(s);
+  if (m) return ("PANTONE " + m[1].replace(/\s+/g, " ")).toUpperCase().trim();
+  m = /^([0-9]{3,4})\s*([CU])$/i.exec(s);
+  return m ? ("PANTONE " + m[1] + " " + m[2]).toUpperCase() : "";
+}
+
+/* Nejbližší pantone z databáze receptur podle barvy vzorníku. */
+function nejblizsiPantone(rgb, recipes) {
+  const lab = rgbNaLab(rgb);
+  let nej = null, nejd = Infinity;
+  for (const r of (recipes || [])) {
+    if (r.type === "Custom") continue;
+    const c = hexNaRgb(r.hex);
+    if (!c) continue;
+    const d = deltaE(lab, rgbNaLab(c));
+    if (d < nejd) { nej = r; nejd = d; }
+  }
+  return nej ? { recipe: nej, dE: nejd } : null;
+}
+
+/* Najde vzorník, u kterého v listu stojí zrovna tahle hodnota
+   (název tiskové barvy nebo kód barvy zboží). */
+function vzornikProHodnotu(vzorniky, hodnota) {
+  const h = String(hodnota || "").trim().toLowerCase();
+  if (!h || !vzorniky || !vzorniky.length) return null;
+  let volny = null;
+  for (const v of vzorniky) {
+    const p = String(v.popisek || "").trim().toLowerCase();
+    if (p === h) return v;
+    if (!volny && p && (p.indexOf(h) === 0 || h.indexOf(p) === 0)) volny = v;
+  }
+  return volny;
+}
+
+/* Souhrn barvy potisku pro zobrazení i pro tisk lístku. */
+function popisBarvyPotisku(nazev, hex, recipes) {
+  const psany = pantoneZNazvu(nazev);
+  const rgb = hexNaRgb(hex);
+  // presny = pantone je daný přímo názvem barvy (z listu i z databáze receptur),
+  // ne dopočítaný z odstínu vzorníku
+  const out = { pantone: psany, presny: !!psany, hex: rgb ? hex : "", cmyk: null, blizky: null };
+  if (rgb) {
+    out.cmyk = rgbNaCmyk(rgb);
+    if (!psany) {
+      const b = nejblizsiPantone(rgb, recipes);
+      // ΔE se vypisuje, ať je vidět, jak moc je to jen podobné; nad 25 už
+      // nemá smysl nabízet nic
+      if (b && b.dE < 25) out.blizky = b;
+    }
+  }
+  return out;
+}
 
 function loadLS(key, fallback) {
   try { const s = localStorage.getItem(key); if (s) return JSON.parse(s); } catch (e) {}
@@ -696,7 +803,8 @@ async function precistPdf(f) {
     const d = await r.json();
     if (!d.ok) throw new Error(d.chyba || "PDF se nepodařilo přečíst.");
     return { pole: d.pole || {}, zdroj: d.zdroj || {}, text: d.text || "",
-      obrazky: d.obrazky || [], stranky: d.stranky || [] };
+      obrazky: d.obrazky || [], stranky: d.stranky || [], vzorniky: d.vzorniky || [],
+      pdfId: d.pdf_id || "" };
   } catch (e) {
     // "Failed to fetch" znamená, že se požadavek vůbec neodeslal. Zjistíme
     // proto rovnou, jestli most ještě odpovídá, ať se nehádá naslepo.
@@ -715,6 +823,20 @@ async function precistPdf(f) {
     chyba.mostZije = !/přestal odpovídat/.test(popis);
     throw chyba;
   }
+}
+
+/* Ostré převykreslení označené části stránky.
+   Náhled celé stránky je hrubý — pro rozbor pokrytí i pro přiblížení je
+   potřeba jemnější kresba, ale jen v tom kousku, o který jde. */
+async function ostryVyrez(pdfId, strana, vyrez, sirka, vyska, cil) {
+  const telo = JSON.stringify({ pdf_id: pdfId, strana: strana,
+    x: vyrez.x, y: vyrez.y, w: vyrez.w, h: vyrez.h,
+    sirka: sirka, vyska: vyska, cil: cil || 2000 });
+  const r = await fetch(sgpsBase() + "/vyrez", { method: "POST",
+    body: new Blob([telo], { type: "text/plain" }) });
+  const d = await r.json();
+  if (!d.ok) throw new Error(d.chyba || "Výřez se nepodařilo vykreslit.");
+  return d;
 }
 
 /* Mřížka upravitelných polí ze zakázkového listu + náhled syrového textu. */
@@ -769,7 +891,8 @@ function PdfTab({ sgps, products, recipes, onApply, ulozeny, setUlozeny }) {
     try {
       const d = await precistPdf(f);
       setUlozeny({ stav: "hotovo", pole: d.pole, zdroj: d.zdroj, text: d.text,
-        obrazky: d.obrazky, stranky: d.stranky, jmeno: f.name, chyba: "" });
+        obrazky: d.obrazky, stranky: d.stranky, vzorniky: d.vzorniky, pdfId: d.pdfId,
+        jmeno: f.name, chyba: "" });
     } catch (e) {
       if (e && e.mostZije === false) sgps.zjisti();
       setUlozeny({ stav: "chyba", pole: {}, zdroj: {}, text: "", obrazky: [], jmeno: f.name,
@@ -846,7 +969,8 @@ function PdfTab({ sgps, products, recipes, onApply, ulozeny, setUlozeny }) {
           <${SpecVysledek} res=${res} />
           ${res && html`
             <div className="rowline" style=${{ marginTop: 14, marginBottom: 0 }}>
-              <button className="btn" disabled=${!res.product} onClick=${() => onApply(res)}>Použít v kalkulaci →</button>
+              <button className="btn" disabled=${!res.product}
+                onClick=${() => onApply(Object.assign({}, res, { vzorniky: ulozeny.vzorniky || [] }))}>Použít v kalkulaci →</button>
               ${!res.product && html`<span className="note">bez rozpoznaného produktu nelze pokračovat — doplňte ref. číslo výše</span>`}
             </div>`}
         </div>`}
@@ -1008,11 +1132,17 @@ function najdiBarvy(img, vyrez, limit) {
 }
 
 function analyzujPokryti(img, prah, orezat, vyrez, odsazeniMm, rozmerMm, barvaPotisku) {
+  // barvaPotisku smí být jedna barva i seznam barev — vícebarevný potisk se
+  // počítá jako celek, bod stačí, když sedí na kteroukoli z vybraných.
+  const cile = !barvaPotisku ? [] : (Array.isArray(barvaPotisku) ? barvaPotisku : [barvaPotisku]);
   const zx = vyrez ? Math.max(0, Math.round(vyrez.x)) : 0;
   const zy = vyrez ? Math.max(0, Math.round(vyrez.y)) : 0;
   const zw = vyrez ? Math.max(1, Math.round(vyrez.w)) : img.width;
   const zh = vyrez ? Math.max(1, Math.round(vyrez.h)) : img.height;
-  const MAX = 1000;
+  // Strop na velikost rozboru. Ostrý výřez z PDF chodí kolem 2400 bodů —
+  // zmenšovat ho by znamenalo zahodit přesně tu ostrost hran, kvůli které se
+  // kreslí. Víc už jen zdržuje, přesnost plochy se nezlepší.
+  const MAX = 2600;
   const m = Math.min(1, MAX / Math.max(zw, zh, 1));
   const w = Math.max(1, Math.round(zw * m));
   const h = Math.max(1, Math.round(zh * m));
@@ -1057,11 +1187,23 @@ function analyzujPokryti(img, prah, orezat, vyrez, odsazeniMm, rozmerMm, barvaPo
     const i = px(x, y);
     const a = d[i + 3];
     let jeBarva;
-    if (barvaPotisku) {
-      // Počítá se jen barva potisku — pomocné čáry, rámečky a popisky
+    if (cile.length) {
+      // Počítají se jen vybrané barvy potisku — pomocné čáry, rámečky a popisky
       // v jiné barvě se tím z výpočtu vyřadí.
-      jeBarva = a > 40 && (Math.abs(d[i] - barvaPotisku.r) + Math.abs(d[i + 1] - barvaPotisku.g)
-        + Math.abs(d[i + 2] - barvaPotisku.b)) / 3 <= prah;
+      jeBarva = false;
+      if (a > 40) {
+        let nej = 1e9;
+        for (let q = 0; q < cile.length; q++) {
+          const bc = cile[q];
+          const r = (Math.abs(d[i] - bc.r) + Math.abs(d[i + 1] - bc.g) + Math.abs(d[i + 2] - bc.b)) / 3;
+          if (r < nej) nej = r;
+        }
+        // Bod se počítá, jen když je vybrané barvě blíž než pozadí. U světlých
+        // odstínů by jinak větší tolerance spolkla celý bílý papír.
+        const kPozadi = pruhledne ? 1e9
+          : (Math.abs(d[i] - pozadi.r) + Math.abs(d[i + 1] - pozadi.g) + Math.abs(d[i + 2] - pozadi.b)) / 3;
+        jeBarva = nej <= prah && nej < kPozadi;
+      }
     } else if (pruhledne) {
       jeBarva = a > 40;
     } else {
@@ -1128,7 +1270,54 @@ function analyzujPokryti(img, prah, orezat, vyrez, odsazeniMm, rozmerMm, barvaPo
     w: w, h: h, bw: kbw, bh: kbh, bwMotiv: bw, bhMotiv: bh, nahled: nc.toDataURL() };
 }
 
-function PokrytiModal({ obrazky, stranky, sirka, vyska, gm2, qty, hustota,
+/* ---- přiblížení náhledů ----
+   Obrázek se roztáhne nad rámec svého rámečku, který se posouvá vlastními
+   posuvníky. Na drobné logo uprostřed listu jinak není vidět. */
+const ZOOM_MAX = 8;
+
+function useKolecko(ref, zoom, setZoom) {
+  useEffect(() => {
+    const box = ref.current;
+    if (!box) return;
+    const f = (e) => {
+      if (!e.ctrlKey && !e.metaKey) return;   // bez Ctrl ať se dá normálně posouvat
+      e.preventDefault();
+      const r = box.getBoundingClientRect();
+      const cx = e.clientX - r.left, cy = e.clientY - r.top;
+      const mx = cx + box.scrollLeft, my = cy + box.scrollTop;
+      const novy = Math.min(ZOOM_MAX, Math.max(1, zoom * (e.deltaY < 0 ? 1.25 : 0.8)));
+      if (novy === zoom) return;
+      setZoom(novy);
+      // po překreslení dorovnáme posun, aby bod pod kurzorem zůstal na místě
+      requestAnimationFrame(() => {
+        const k = novy / zoom;
+        box.scrollLeft = mx * k - cx;
+        box.scrollTop = my * k - cy;
+      });
+    };
+    box.addEventListener("wheel", f, { passive: false });
+    return () => box.removeEventListener("wheel", f);
+  }, [ref, zoom, setZoom]);
+}
+
+function ZoomLista({ zoom, setZoom, popis }) {
+  // přes funkci, ať se rychlá klepnutí za sebou sečtou (React je slučuje do jednoho překreslení)
+  const krok = (nasobek) => setZoom((z) => Math.min(ZOOM_MAX, Math.max(1, z * nasobek)));
+  return html`
+    <div className="rowline" style=${{ gap: 6, marginBottom: 6, alignItems: "center" }}>
+      <button className="btn sec sm" title="oddálit" disabled=${zoom <= 1}
+        onClick=${() => krok(1 / 1.5)}>−</button>
+      <span className="note" style=${{ minWidth: 40, textAlign: "center" }}>${fmt(zoom, 1)}×</span>
+      <button className="btn sec sm" title="přiblížit" disabled=${zoom >= ZOOM_MAX}
+        onClick=${() => krok(1.5)}>+</button>
+      ${zoom > 1 && html`<button className="btn sec sm" onClick=${() => setZoom(1)}>na šířku</button>`}
+      <span className="note" style=${{ marginLeft: "auto" }}>${popis || "Ctrl + kolečko myši přiblíží"}</span>
+    </div>`;
+}
+
+const klicBarvy = (b) => b.r + "," + b.g + "," + b.b;
+
+function PokrytiModal({ obrazky, stranky, pdfId, sirka, vyska, gm2, qty, hustota,
                         odsazeniVychozi, onPouzit, onClose }) {
   const [zdroj, setZdroj] = useState(null);     // {url, popis, vyrezat}
   const [prah, setPrah] = useState(28);
@@ -1141,48 +1330,102 @@ function PokrytiModal({ obrazky, stranky, sirka, vyska, gm2, qty, hustota,
   const [odsazeni, setOdsazeni] = useState(odsazeniVychozi != null ? odsazeniVychozi : 0);
   const [bloky, setBloky] = useState([]);
   const [barvy, setBarvy] = useState([]);       // barvy nalezené ve výřezu
-  const [barva, setBarva] = useState(null);     // vybraná barva potisku (null = vše kromě pozadí)
+  const [vybrane, setVybrane] = useState([]);   // vybrané barvy potisku (prázdné = vše kromě pozadí)
+  const [zoomS, setZoomS] = useState(1);        // přiblížení stránky listu
+  const [zoomN, setZoomN] = useState(1);        // přiblížení rozboru
+  const [ostry, setOstry] = useState(null);     // jemně převykreslený výřez z PDF
+  const [ostryStav, setOstryStav] = useState("");
   const souborRef = useRef(null);
   const platnoRef = useRef(null);
   const tahRef = useRef(null);
+  const stranaRef = useRef(null);
+  const nahledRef = useRef(null);
+  const panRef = useRef(null);
+  useKolecko(stranaRef, zoomS, setZoomS);
+  useKolecko(nahledRef, zoomN, setZoomN);
+
+  const prepniBarvu = (b) => setVybrane((s) => s.some((x) => klicBarvy(x) === klicBarvy(b))
+    ? s.filter((x) => klicBarvy(x) !== klicBarvy(b))
+    : s.concat([b]));
+
+  // posouvání rozboru tažením, když je přiblížený
+  const panStart = (e) => {
+    const box = nahledRef.current;
+    if (!box || zoomN <= 1) return;
+    e.preventDefault();
+    panRef.current = { x: e.clientX, y: e.clientY, sl: box.scrollLeft, st: box.scrollTop };
+  };
+  const panPohyb = (e) => {
+    const p = panRef.current, box = nahledRef.current;
+    if (!p || !box) return;
+    box.scrollLeft = p.sl - (e.clientX - p.x);
+    box.scrollTop = p.st - (e.clientY - p.y);
+  };
+  const panKonec = () => { panRef.current = null; };
+
+  // Označený výřez si necháme od mostu převykreslit v mnohem vyšším rozlišení.
+  // Náhled celé stránky má jen asi 145 DPI, takže hrany písma jsou na něm
+  // zubaté — a právě z hran se počítá plocha.
+  const klicVyrezu = vyrez
+    ? [Math.round(vyrez.x), Math.round(vyrez.y), Math.round(vyrez.w), Math.round(vyrez.h)].join(",")
+    : "";
+  useEffect(() => {
+    if (!pdfId || !zdroj || !zdroj.vyrezat || !vyrez) { setOstry(null); setOstryStav(""); return; }
+    let zrusen = false;
+    setOstryStav("kreslim");
+    ostryVyrez(pdfId, zdroj.strana || 1, vyrez, zdroj.sirka, zdroj.vyska, 2400)
+      .then((d) => { if (!zrusen) { setOstry(Object.assign({ klic: klicVyrezu }, d)); setOstryStav(""); } })
+      .catch((e) => { if (!zrusen) { setOstry(null); setOstryStav(String((e && e.message) || e)); } });
+    return () => { zrusen = true; };
+  }, [pdfId, zdroj, klicVyrezu]);
+
+  // Ostrý výřez platí, jen když odpovídá právě označené oblasti — než dorazí,
+  // počítá se zatím z hrubého náhledu, ať okno neztuhne.
+  const ostryPlati = !!(ostry && zdroj && zdroj.vyrezat && ostry.klic === klicVyrezu);
+  const cekaOstry = ostryStav === "kreslim" && !ostryPlati;
+  const predloha = ostryPlati ? { url: ostry.url, vyrez: null }
+    : (zdroj && (!zdroj.vyrezat || vyrez) ? { url: zdroj.url, vyrez: vyrez } : null);
 
   useEffect(() => {
-    if (!zdroj) { setVysl(null); return; }
-    if (zdroj.vyrezat && !vyrez) { setVysl(null); return; }   // čeká se na označení oblasti
+    if (!predloha) { setVysl(null); return; }
     let zrusen = false;
     const img = new Image();
     img.onload = () => {
       if (zrusen) return;
       try {
-        setVysl(analyzujPokryti(img, prah, orezat, vyrez, n(odsazeni, 0), { w: sirka, h: vyska }, barva));
+        setVysl(analyzujPokryti(img, prah, orezat, predloha.vyrez, n(odsazeni, 0), { w: sirka, h: vyska }, vybrane));
         setChyba("");
       } catch (e) { setChyba(String(e.message || e)); }
     };
     img.onerror = () => { if (!zrusen) setChyba("Obrázek se nepodařilo načíst."); };
-    img.src = zdroj.url;
+    img.src = predloha.url;
     return () => { zrusen = true; };
-  }, [zdroj, prah, orezat, vyrez, odsazeni, sirka, vyska, barva]);
+  }, [predloha && predloha.url, predloha && predloha.vyrez, prah, orezat, odsazeni, sirka, vyska, vybrane]);
 
   // barvy ve výřezu — nabídka, ze které se vybere barva potisku
   useEffect(() => {
-    if (!zdroj) { setBarvy([]); setBarva(null); return; }
+    if (!zdroj) { setBarvy([]); setVybrane([]); return; }
+    if (cekaOstry) return;   // ať se nabídka barev nepřepisuje dvakrát za sebou
     let zrusen = false;
     const img = new Image();
     img.onload = () => {
       if (zrusen) return;
       try {
-        const b = najdiBarvy(img, vyrez, 6);
+        const b = najdiBarvy(img, predloha ? predloha.vyrez : vyrez, 8);
         setBarvy(b);
         // Potisk je typicky nejsytější barva ve výřezu — pomocné čáry
         // a popisky bývají světlejší nebo barevné.
         const nej = b.slice().sort((x, y) => (x.r + x.g + x.b) - (y.r + y.g + y.b))[0];
-        setBarva(nej && (nej.r + nej.g + nej.b) / 3 < 140 ? nej : null);
+        setVybrane(nej && (nej.r + nej.g + nej.b) / 3 < 140 ? [nej] : []);
         setPrah(nej ? 60 : 28);
       } catch (e) { setBarvy([]); }
     };
-    img.src = zdroj.url;
+    img.src = predloha ? predloha.url : zdroj.url;
     return () => { zrusen = true; };
-  }, [zdroj, vyrez]);
+  }, [zdroj, vyrez, cekaOstry, predloha && predloha.url]);
+
+  // jiná předloha = zpátky na celou šířku, ať se člověk neztratí v přiblížení
+  useEffect(() => { setZoomS(1); setZoomN(1); }, [zdroj]);
 
   // automatické nalezení bloků kresby po výběru strany
   useEffect(() => {
@@ -1275,6 +1518,7 @@ function PokrytiModal({ obrazky, stranky, sirka, vyska, gm2, qty, hustota,
               ${(stranky || []).map((s, i) => html`
                 <button key=${"s" + i} className=${"chip" + (zdroj && zdroj.url === s.url ? " on" : "")}
                   onClick=${() => { setVyrez(null); setZdroj({ url: s.url, vyrezat: true,
+                    strana: s.strana, sirka: s.sirka, vyska: s.vyska,
                     popis: "strana " + s.strana + " zakázkového listu · " + s.sirka + "×" + s.vyska + " px" }); }}>
                   ⃞ Strana ${s.strana} listu
                 </button>`)}
@@ -1301,12 +1545,17 @@ function PokrytiModal({ obrazky, stranky, sirka, vyska, gm2, qty, hustota,
                       Motiv ${i + 1} · ${Math.round(b.w)}×${Math.round(b.h)} px${b.pomer ? " · " + fmt(b.pomer, 1) + ":1" : ""}
                     </button>`)}
                 </div>`}
-              <div style=${{ position: "relative", display: "inline-block", maxWidth: "100%", cursor: "crosshair" }}
-                onMouseDown=${tahStart} onMouseMove=${tahPohyb} onMouseUp=${tahKonec} onMouseLeave=${tahKonec}>
-                <img ref=${platnoRef} src=${zdroj.url} alt="stránka listu" draggable="false"
-                  style=${{ maxWidth: "100%", display: "block", borderRadius: 10, background: "#fff", boxShadow: "var(--neu-in)" }} />
-                ${ramecek() && html`<div style=${Object.assign({ position: "absolute", border: "2px solid var(--cyan)",
-                  background: "rgba(62,92,138,.16)", pointerEvents: "none" }, ramecek())}></div>`}
+              <${ZoomLista} zoom=${zoomS} setZoom=${setZoomS}
+                popis=${zoomS > 1 ? "Ctrl + kolečko přiblíží · označovat lze i přiblížené" : "Ctrl + kolečko myši přiblíží"} />
+              <div ref=${stranaRef} style=${{ overflow: "auto", maxHeight: 520, borderRadius: 10,
+                background: "#fff", boxShadow: "var(--neu-in)" }}>
+                <div style=${{ position: "relative", width: (zoomS * 100) + "%", cursor: "crosshair" }}
+                  onMouseDown=${tahStart} onMouseMove=${tahPohyb} onMouseUp=${tahKonec} onMouseLeave=${tahKonec}>
+                  <img ref=${platnoRef} src=${zdroj.url} alt="stránka listu" draggable="false"
+                    style=${{ width: zoomS > 1 ? "100%" : "auto", maxWidth: "100%", display: "block" }} />
+                  ${ramecek() && html`<div style=${Object.assign({ position: "absolute", border: "2px solid var(--cyan)",
+                    background: "rgba(62,92,138,.16)", pointerEvents: "none" }, ramecek())}></div>`}
+                </div>
               </div>
             </div>`}
           <div onDragOver=${(e) => { e.preventDefault(); setNadHranici(true); }}
@@ -1329,9 +1578,28 @@ function PokrytiModal({ obrazky, stranky, sirka, vyska, gm2, qty, hustota,
               <div className="frow c2" style=${{ alignItems: "start" }}>
                 <div>
                   <label className="f">Náhled — modře to, co se počítá jako barva</label>
-                  <img src=${vysl.nahled} alt="rozbor pokrytí"
-                    style=${{ width: "100%", borderRadius: 10, boxShadow: "var(--neu-in)", background: "#fff" }} />
-                  <div className="note" style=${{ marginTop: 4 }}>${zdroj ? zdroj.popis : ""}</div>
+                  <${ZoomLista} zoom=${zoomN} setZoom=${setZoomN}
+                    popis=${zoomN > 1 ? "tažením myši posunete výřez" : "Ctrl + kolečko myši přiblíží"} />
+                  <div ref=${nahledRef} onMouseDown=${panStart} onMouseMove=${panPohyb}
+                    onMouseUp=${panKonec} onMouseLeave=${panKonec}
+                    style=${{ overflow: "auto", maxHeight: 420, borderRadius: 10, background: "#fff",
+                      boxShadow: "var(--neu-in)", cursor: zoomN > 1 ? "grab" : "default" }}>
+                    <img src=${vysl.nahled} alt="rozbor pokrytí" draggable="false"
+                      style=${{ width: (zoomN * 100) + "%", maxWidth: "none", display: "block",
+                        // U hrubé předlohy chceme při přiblížení vidět jednotlivé body masky;
+                        // u ostrého výřezu z PDF je jich tolik, že hladké zobrazení vypadá líp.
+                        imageRendering: (zoomN >= 3 && vysl.w < 900) ? "pixelated" : "auto" }} />
+                  </div>
+                  <div className="note" style=${{ marginTop: 4 }}>
+                    ${zdroj ? zdroj.popis : ""}
+                    ${ostryPlati && html`<${React.Fragment}> · <b>ostrý výřez z PDF</b> ${ostry.sirka}×${ostry.vyska} px
+                      (${fmt(ostry.px_na_mm * 25.4, 0)} DPI)<//>`}
+                    ${cekaOstry && html`<${React.Fragment}> · kreslí se ostrý výřez…<//>`}
+                  </div>
+                  ${ostryStav && ostryStav !== "kreslim" && html`
+                    <div className="note" style=${{ marginTop: 4 }}>
+                      Ostrý výřez se nepodařilo vykreslit (${ostryStav}) — počítá se z hrubého náhledu stránky.
+                    </div>`}
                 </div>
                 <div>
                   <div className="result-big">${fmt(vysl.pct, 1)} %</div>
@@ -1363,30 +1631,35 @@ function PokrytiModal({ obrazky, stranky, sirka, vyska, gm2, qty, hustota,
                       + fmt(vysl.barvy / Math.max(1, vysl.kryciPocet) * vysl.pct, 1) + " %." : ""}
                   </p>
 
-                  <label className="f" style=${{ marginTop: 14 }}>Barva potisku — počítá se jen ona</label>
+                  <label className="f" style=${{ marginTop: 14 }}>
+                    Barvy potisku — počítají se jen vybrané${vybrane.length > 1 ? " (" + vybrane.length + ")" : ""}
+                  </label>
                   <div className="chips" style=${{ marginBottom: 6 }}>
                     ${barvy.map((b, i) => html`
-                      <button key=${i} className=${"chip" + (barva && barva.r === b.r && barva.g === b.g && barva.b === b.b ? " on" : "")}
-                        onClick=${() => setBarva(b)} title=${"podíl ve výřezu " + fmt(b.podil, 1) + " %"}>
+                      <button key=${i} className=${"chip" + (vybrane.some((x) => klicBarvy(x) === klicBarvy(b)) ? " on" : "")}
+                        onClick=${() => prepniBarvu(b)} title=${"podíl ve výřezu " + fmt(b.podil, 1) + " % · klepnutím přidáte nebo odeberete"}>
                         <span className="cdot" style=${{ background: "rgb(" + b.r + "," + b.g + "," + b.b + ")" }}></span>
                         ${fmt(b.podil, 1)} %
                       </button>`)}
-                    <button className=${"chip" + (barva ? "" : " on")} onClick=${() => setBarva(null)}>
+                    ${barvy.length > 1 && html`
+                      <button className="chip" onClick=${() => setVybrane(barvy.slice())}
+                        title="započítat všechny nalezené barvy">všechny</button>`}
+                    <button className=${"chip" + (vybrane.length ? "" : " on")} onClick=${() => setVybrane([])}>
                       vše kromě pozadí
                     </button>
                   </div>
                   <p className="note">
-                    ${barva
-                      ? "Rámečky, vodicí čáry a popisky v jiné barvě se do výpočtu nezapočítají."
+                    ${vybrane.length
+                      ? "Klepnutím se barvy přidávají a odebírají — u vícebarevného potisku vyberte všechny. Rámečky, vodicí čáry a popisky v jiné barvě se do výpočtu nezapočítají."
                       : "Počítá se všechno, co není pozadí — včetně rámečků a popisků, pokud jsou ve výřezu."}
                   </p>
 
                   <label className="f" style=${{ marginTop: 12 }}>
-                    ${barva ? "Tolerance odstínu" : "Citlivost — co ještě je barva"}
+                    ${vybrane.length ? "Tolerance odstínu" : "Citlivost — co ještě je barva"}
                   </label>
                   <input type="range" min="4" max="120" step="2" value=${prah}
                     onChange=${(e) => setPrah(n(e.target.value, 28))} />
-                  <div className="note">práh ${prah} — ${barva
+                  <div className="note">práh ${prah} — ${vybrane.length
                     ? "zvyšte, pokud vypadávají okraje písma; snižte, pokud se chytá i jiná barva"
                     : "zvyšte, pokud se do barvy počítá i pozadí"}</div>
                   <label className="tgl" style=${{ marginTop: 12 }}>
@@ -1422,10 +1695,11 @@ function PdfVKalkulaci({ sgps, products, recipes, onApply, onNacteno }) {
     try {
       const d = await precistPdf(f);
       setData({ pole: d.pole, zdroj: d.zdroj, text: d.text, obrazky: d.obrazky,
-        stranky: d.stranky, jmeno: f.name });
+        stranky: d.stranky, vzorniky: d.vzorniky, pdfId: d.pdfId, jmeno: f.name });
       setStav("okno");
       if (onNacteno) onNacteno({ stav: "hotovo", pole: d.pole, zdroj: d.zdroj, text: d.text,
-        obrazky: d.obrazky, stranky: d.stranky, jmeno: f.name, chyba: "" });
+        obrazky: d.obrazky, stranky: d.stranky, vzorniky: d.vzorniky, pdfId: d.pdfId,
+        jmeno: f.name, chyba: "" });
     } catch (e) {
       if (e && e.mostZije === false && sgps) sgps.zjisti();
       setChyba(String((e && e.message) || e));
@@ -1436,7 +1710,8 @@ function PdfVKalkulaci({ sgps, products, recipes, onApply, onNacteno }) {
     const nova = Object.assign({}, data, { pole: p });
     setData(nova);
     if (onNacteno) onNacteno({ stav: "hotovo", pole: p, zdroj: nova.zdroj, text: nova.text,
-      obrazky: nova.obrazky, stranky: nova.stranky, jmeno: nova.jmeno, chyba: "" });
+      obrazky: nova.obrazky, stranky: nova.stranky, vzorniky: nova.vzorniky, pdfId: nova.pdfId,
+      jmeno: nova.jmeno, chyba: "" });
   };
   const res = useMemo(() => Object.keys(data.pole).length
     ? resolveSpec(poleNaSpec(data.pole), products, recipes) : null, [data.pole, products, recipes]);
@@ -1497,7 +1772,7 @@ function PdfVKalkulaci({ sgps, products, recipes, onApply, onNacteno }) {
               <${SpecVysledek} res=${res} />
               <div className="rowline" style=${{ marginTop: 16, marginBottom: 0 }}>
                 <button className="btn" disabled=${!res || !res.product}
-                  onClick=${() => { onApply(res); setStav("cekam"); }}>Použít v kalkulaci →</button>
+                  onClick=${() => { onApply(Object.assign({}, res, { vzorniky: data.vzorniky || [] })); setStav("cekam"); }}>Použít v kalkulaci →</button>
                 <button className="btn sec" onClick=${() => setStav("cekam")}>Zrušit</button>
                 ${(!res || !res.product) && html`<span className="note">bez rozpoznaného produktu nelze pokračovat — doplňte ref. číslo výše</span>`}
               </div>
@@ -1507,7 +1782,20 @@ function PdfVKalkulaci({ sgps, products, recipes, onApply, onNacteno }) {
     <//>`;
 }
 
-function PripojeniTab({ sgps }) {
+function PripojeniTab({ sgps, databaze, recipes, links, vlastniStav, onOdebratZdroj }) {
+  // kolik receptur je v aplikaci z kterého souboru
+  const recepturyZdroju = useMemo(() => {
+    const m = {};
+    for (const z of zdrojeReceptur(recipes)) if (z.zdroj) m[z.zdroj] = z.pocet;
+    return m;
+  }, [recipes]);
+  // databáze, jejichž soubor už ve složce není (přejmenovaný nebo smazaný) —
+  // receptury z něj v aplikaci zůstávají, dokud je někdo neodebere
+  const osirele = useMemo(() => {
+    if (!databaze || databaze.stav !== "hotovo") return [];
+    const jsou = new Set((databaze.soubory || []).map((s) => s.jmeno));
+    return zdrojeReceptur(recipes).filter((z) => z.zdroj && !jsou.has(z.zdroj));
+  }, [databaze, recipes]);
   const [adresa, setAdresa] = useState(() =>
     String(loadLS("irm-most-adresa", "") || "").trim() || sgpsAdresa() || MOST_VYCHOZI);
   const [zkouska, setZkouska] = useState(null);
@@ -1578,6 +1866,71 @@ function PripojeniTab({ sgps }) {
           ? html`<div className="okbox">✓ Most na <b>${zkouska.adresa}</b> odpověděl za ${zkouska.ms} ms —
               čtení PDF ${zkouska.d.pdf ? "připravené" : "NEDOSTUPNÉ"}, SGPS v režimu „${zkouska.d.rezim}“.</div>`
           : html`<div className="warnbox">Na <b>${zkouska.adresa}</b> se most neozval — ${zkouska.chyba}</div>`)}
+      </div>
+
+      <div className="card">
+        <h2>Databáze barev ze složky</h2>
+        <p className="hint">
+          Všechna CSV ve složce <b>databaze barev</b> vedle aplikace se načítají samy — hned
+          po připojení mostu a znovu vždy, když se soubor změní. Ručně přes Import / data
+          se nic dělat nemusí. Každý soubor je vlastní databáze: receptury z něj jdou
+          v kalkulaci i v seznamu receptur filtrovat, takže se dvě databáze nemíchají.
+        </p>
+        ${!ok && html`<div className="note">Vyžaduje běžící most — bez něj se do složky nedá nahlédnout.</div>`}
+        ${ok && databaze && databaze.stav === "chyba" && html`
+          <div className="warnbox">Do složky se nepodařilo nahlédnout — ${databaze.chyba}</div>`}
+        ${ok && databaze && databaze.stav === "hotovo" && html`
+          ${databaze.soubory.length
+            ? html`<div className="kv">
+                ${databaze.soubory.map((s) => html`
+                  <${React.Fragment} key=${s.jmeno}>
+                    <div className="k" style=${{ textTransform: "none", letterSpacing: 0 }}>${s.jmeno}</div>
+                    <div className="v">
+                      ${(databaze.chyby || {})[s.jmeno]
+                        ? html`<${React.Fragment}><b style=${{ color: "var(--warn)" }}>nenačteno</b>
+                            <span className="note"> — ${databaze.chyby[s.jmeno]}<//><//>`
+                        : html`<${React.Fragment}>${fmt(s.radku, 0)} řádků složení ·
+                            <b>${fmt((recepturyZdroju[s.jmeno] || 0), 0)} receptur</b><//>`}
+                      <span className="note"> · ${fmt(s.velikost / 1024, 0)} kB</span>
+                    </div>
+                  <//>`)}
+              </div>`
+            : html`<div className="note">Ve složce zatím žádné CSV není. Vložte ho tam a načte se samo.</div>`}
+          ${(() => {
+            const vlastni = recipes.filter(jeVlastni);
+            const vazeb = vlastni.reduce((s, r) => s + vazbyReceptury(links, r.id).length, 0);
+            if (!vlastni.length && vlastniStav.stav === "cekam") return null;
+            return html`
+              <div className=${vlastniStav.stav === "chyba" ? "warnbox" : "okbox"} style=${{ marginTop: 12 }}>
+                <b>Vlastní receptury → ${SOUBOR_VLASTNI}</b><br />
+                ${fmt(vlastni.length, 0)} receptur · ${fmt(vazeb, 0)} vazeb na produkt a barvu
+                ${vlastniStav.stav === "ulozeno" && vlastniStav.kdy
+                  ? " · uloženo " + new Date(vlastniStav.kdy).toLocaleTimeString("cs-CZ") : ""}
+                ${vlastniStav.stav === "chyba" ? html`<${React.Fragment}><br />Uložit se nepodařilo — ${vlastniStav.chyba}<//>` : ""}
+                <div className="note" style=${{ marginTop: 6 }}>
+                  Ukládá se samo při každé změně. Vazby se z tohoto souboru zase načtou,
+                  takže si produkt i jeho barvu pamatuje i jiný počítač nebo prohlížeč.
+                </div>
+              </div>`;
+          })()}
+          ${osirele.map((z) => html`
+            <div key=${z.zdroj} className="warnbox">
+              Soubor <b>${z.zdroj}</b> už ve složce není, ale ${fmt(z.pocet, 0)} receptur z něj
+              zůstává v aplikaci. Pokud jste ho přejmenoval, načte se pod novým jménem znovu —
+              tyhle pak zůstanou navíc.
+              <div style=${{ marginTop: 8 }}>
+                <button className="btn danger sm" onClick=${() => onOdebratZdroj(z.zdroj)}>
+                  Odebrat receptury z ${z.nazev}
+                </button>
+              </div>
+            </div>`)}
+          <div className="rowline" style=${{ marginTop: 12, marginBottom: 0 }}>
+            <button className="btn sec sm" onClick=${() => {
+              saveLS("irm-databaze-verze", {});
+              location.reload();
+            }}>Načíst databáze znovu</button>
+            <span className="note">projede soubory znovu, i když se od minule nezměnily</span>
+          </div>`}
       </div>
 
       <div className="card">
@@ -1934,8 +2287,66 @@ IRM1|ref=11101|ks=500|poz=2|barva=105|rec=PANTONE 485 C|ztraty=15|obj=2026-114
 }
 
 /* ============================ APP ============================ */
+const ZALOZKY_NAZVY = {
+  calc: "Kalkulace", pdf: "Načtení specu z PDF", scan: "Čárový kód",
+  zak: "Zakázky (SGPS)", most: "Připojení k mostu", prod: "Produkty",
+  rec: "Receptury", imp: "Import / data",
+};
+
+/* Pohyb po záložkách s možností vrátit se.
+   Odskočit z rozdělané kalkulace do receptur a zpátky se musí dát jedním
+   tlačítkem — a hlavně tak, aby se cestou nic nezahodilo. Kalkulace proto
+   zůstává v paměti a jen se schová (viz níže), tady se pamatuje jen cesta. */
+function useZalozky(vychozi) {
+  const [tab, setTabPrimo] = useState(vychozi);
+  const [historie, setHistorie] = useState([]);
+  const tabRef = useRef(vychozi);
+  const zpetRef = useRef(null);
+  tabRef.current = tab;
+
+  const setTab = (t) => {
+    const stary = tabRef.current;
+    if (!t || t === stary) return;
+    // Odkud jdeme si musíme zapamatovat TEĎ — React funkci uvnitř setHistorie
+    // spustí až při překreslení, kdy už by v tabRef byla nová záložka.
+    setHistorie((h) => h.concat([stary]).slice(-20));
+    tabRef.current = t;
+    setTabPrimo(t);
+    // ať zabere i tlačítko zpět v prohlížeči a boční tlačítko myši;
+    // při otevření ze souboru (file://) to prohlížeč zakazuje, nevadí
+    try { window.history.pushState({ irm: t }, ""); } catch (e) { /* nevadí */ }
+  };
+
+  const zpet = () => {
+    if (!historie.length) return;
+    const kam = historie[historie.length - 1];
+    setHistorie(historie.slice(0, -1));
+    tabRef.current = kam;
+    setTabPrimo(kam);
+  };
+  zpetRef.current = zpet;
+
+  useEffect(() => {
+    const naZpet = () => { if (zpetRef.current) zpetRef.current(); };
+    const naKlavesu = (e) => {
+      if (e.altKey && e.key === "ArrowLeft") { e.preventDefault(); naZpet(); }
+    };
+    window.addEventListener("popstate", naZpet);
+    window.addEventListener("keydown", naKlavesu);
+    return () => {
+      window.removeEventListener("popstate", naZpet);
+      window.removeEventListener("keydown", naKlavesu);
+    };
+  }, []);
+
+  return { tab: tab, setTab: setTab, zpet: zpet,
+    kamZpet: historie.length ? historie[historie.length - 1] : null };
+}
+
 function App() {
-  const [tab, setTab] = useState("calc");
+  // Kalkulace se nikdy neodpojuje, jen schová (display:none) — jinak by odskok
+  // do receptur nebo produktů zahodil rozdělaný výpočet i rozdělané navážení.
+  const { tab, setTab, zpet, kamZpet } = useZalozky("calc");
   const [theme, setTheme] = useState(() => {
     const saved = loadLS("irm-theme", null);
     if (saved === "light" || saved === "dark") return saved;
@@ -2021,6 +2432,132 @@ function App() {
     const t = setTimeout(() => setToast(null), 4500);
     return () => clearTimeout(t);
   }, [toast]);
+
+  /* ---- databáze receptur ze složky "databaze barev" ----
+     Most tu složku umí přečíst, takže se CSV natáhne samo a nikdo je po každé
+     úpravě nemusí ručně importovat. Načítá se jen to, co se od minule změnilo
+     — poznámka podle velikosti a času souboru. */
+  // ze které databáze se vybírají receptury ("" = ze všech)
+  const [dbFiltr, setDbFiltr] = useState(() => loadLS("irm-databaze-filtr", ""));
+  useEffect(() => { saveLS("irm-databaze-filtr", dbFiltr); }, [dbFiltr]);
+
+  const [databaze, setDatabaze] = useState({ stav: "cekam", soubory: [], chyby: {}, chyba: "" });
+  useEffect(() => {
+    if (sgps.stav.stav !== "ok") return;
+    let zrusen = false;
+    (async () => {
+      try {
+        const seznam = await sgpsGet("/databaze");
+        if (zrusen) return;
+        const soubory = seznam.soubory || [];
+        setDatabaze({ stav: "hotovo", soubory: soubory, chyby: {}, chyba: "" });
+        const verze = loadLS("irm-databaze-verze", {});
+        // Jednorázově: receptury nahrané starší verzí aplikace nemají uvedeno,
+        // ze které databáze jsou. Projedeme soubory znovu a značku jim doplníme,
+        // jinak by je při další databázi bylo nutné rozlišit podle jména —
+        // a dvě databáze mohou mít týž pantone s jiným složením.
+        const adopce = !loadLS("irm-databaze-znacky", 0);
+        if (adopce) {
+          for (const k of Object.keys(verze)) delete verze[k];
+          saveLS("irm-databaze-znacky", 1);
+        }
+        const chyby = {};
+        let celkemNovych = 0, celkemObnovenych = 0, souboru = 0;
+        for (const s of soubory) {
+          if (verze[s.jmeno] === s.verze) continue;
+          try {
+            const soubor = await sgpsGet("/databaze?soubor=" + encodeURIComponent(s.jmeno));
+            if (zrusen) return;
+            const nove = csvToRecipes(soubor.text, s.jmeno);
+            setRecipes((prev) => {
+              const v = sloucReceptury(prev, nove, adopce);
+              celkemNovych += v.pridano; celkemObnovenych += v.obnoveno;
+              // Vazby na produkty a barvy jsou uložené v samotné databázi.
+              // Obnovují se až tady, kdy je jasné, jaké id receptura dostala.
+              const podleKlice = new Map(v.seznam.map((r) => [klicReceptury(r), r]));
+              const vazby = {};
+              for (const r of nove) {
+                if (!r.vazby || !r.vazby.length) continue;
+                const ulozena = podleKlice.get(klicReceptury(r));
+                if (ulozena) for (const k of r.vazby) vazby[k] = ulozena.id;
+              }
+              if (Object.keys(vazby).length) setLinks((p) => Object.assign({}, p, vazby));
+              return v.seznam;
+            });
+            souboru++;
+            // verzi si pamatujeme až po úspěchu, ať se vadný soubor zkusí znovu
+            verze[s.jmeno] = soubor.verze || s.verze;
+            saveLS("irm-databaze-verze", verze);
+          } catch (e) {
+            chyby[s.jmeno] = String((e && e.message) || e);
+          }
+        }
+        if (zrusen) return;
+        setDatabaze({ stav: "hotovo", soubory: soubory, chyby: chyby, chyba: "" });
+        if (souboru) {
+          setToast({ ok: true, text: "Databáze barev: " + fmt(celkemNovych, 0) + " nových receptur"
+            + (celkemObnovenych ? ", " + fmt(celkemObnovenych, 0) + " obnovených" : "")
+            + " z " + souboru + (souboru === 1 ? " souboru" : " souborů") + "." });
+        } else if (Object.keys(chyby).length) {
+          setToast({ ok: false, text: "Databázi se nepodařilo načíst — podrobnosti v Připojení k mostu." });
+        }
+      } catch (e) {
+        if (!zrusen) setDatabaze({ stav: "chyba", soubory: [], chyby: {},
+          chyba: String((e && e.message) || e) });
+      }
+    })();
+    return () => { zrusen = true; };
+  }, [sgps.stav.stav]);
+
+  /* ---- vlastní receptury se odkládají do vlastního CSV ve složce ----
+     Aby vazba „tenhle produkt v téhle barvě se míchá takhle“ nezůstala jen
+     v prohlížeči. Ukládá se se zpožděním, ať psaní v editoru nezapisuje
+     soubor po každém písmenu. */
+  const [vlastniStav, setVlastniStav] = useState({ stav: "cekam", kdy: 0, chyba: "", pocet: 0, vazeb: 0 });
+  const zapsanoRef = useRef("");
+  useEffect(() => {
+    if (sgps.stav.stav !== "ok" || databaze.stav !== "hotovo") return;
+    const vlastni = recipes.filter(jeVlastni);
+    // Soubor se zakládá i prázdný — jen s hlavičkou. Ať je ve složce vidět
+    // od začátku a je poznat, kam se vlastní receptury ukládají.
+    const text = vlastniDoCsv(recipes, links);
+    if (text === zapsanoRef.current) return;
+    const casovac = setTimeout(async () => {
+      try {
+        const r = await fetch(sgpsBase() + "/databaze/ulozit", { method: "POST",
+          body: new Blob([JSON.stringify({ jmeno: SOUBOR_VLASTNI, text: text })], { type: "text/plain" }) });
+        const d = await r.json();
+        if (!d.ok) throw new Error(d.chyba || "zápis se nezdařil");
+        zapsanoRef.current = text;
+        // ať si most uložený soubor hned nenačítá zpátky jako změněnou databázi
+        const v = loadLS("irm-databaze-verze", {});
+        v[SOUBOR_VLASTNI] = d.verze;
+        saveLS("irm-databaze-verze", v);
+        // receptury označíme za pocházející z tohoto souboru, aby se při
+        // příštím načtení spárovaly a nevznikly z nich duplikáty
+        setRecipes((prev) => prev.some((x) => jeVlastni(x) && !x.zdroj)
+          ? prev.map((x) => (jeVlastni(x) && !x.zdroj) ? Object.assign({}, x, { zdroj: SOUBOR_VLASTNI }) : x)
+          : prev);
+        // ať je soubor v seznamu databází vidět hned, ne až po dalším načtení
+        setDatabaze((p) => {
+          const soubory = (p.soubory || []).slice();
+          const zaznam = { jmeno: SOUBOR_VLASTNI, verze: d.verze, velikost: d.velikost || 0,
+            druh: "receptury", radku: Math.max(0, text.split(/\r?\n/).filter(Boolean).length - 1) };
+          const i = soubory.findIndex((s) => s.jmeno === SOUBOR_VLASTNI);
+          if (i >= 0) soubory[i] = Object.assign({}, soubory[i], zaznam); else soubory.push(zaznam);
+          soubory.sort((a, b) => a.jmeno.localeCompare(b.jmeno, "cs"));
+          return Object.assign({}, p, { soubory: soubory });
+        });
+        setVlastniStav({ stav: "ulozeno", kdy: Date.now(), chyba: "",
+          pocet: vlastni.length,
+          vazeb: vlastni.reduce((s, x) => s + vazbyReceptury(links, x.id).length, 0) });
+      } catch (e) {
+        setVlastniStav((p) => Object.assign({}, p, { stav: "chyba",
+          chyba: String((e && e.message) || e) }));
+      }
+    }, 1500);
+    return () => clearTimeout(casovac);
+  }, [recipes, links, sgps.stav.stav, databaze]);
 
   const pouzitSpec = (res) => {
     setSpec(Object.assign({}, res, { ts: Date.now() }));
@@ -2140,6 +2677,7 @@ function App() {
   return html`
     <div>
       <header className="hdr">
+        <div className="navleft">
         <div className="menuwrap" ref=${menuRef}>
           <button className="navbtn" type="button" onClick=${() => setMenuOpen((o) => !o)}
             title="Menu" aria-label="Otevřít menu" aria-expanded=${menuOpen}>
@@ -2157,6 +2695,16 @@ function App() {
               <button className=${tab === "rec" ? "on" : ""} onClick=${() => { setTab("rec"); setMenuOpen(false); }}>Receptury</button>
               <button className=${tab === "imp" ? "on" : ""} onClick=${() => { setTab("imp"); setMenuOpen(false); }}>Import / data</button>
             </div>`}
+        </div>
+        ${kamZpet && html`
+          <button className="backbtn" type="button" onClick=${zpet}
+            title=${"Zpět na „" + (ZALOZKY_NAZVY[kamZpet] || kamZpet) + "“ (Alt + ←)"}>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true">
+              <path d="M15 5l-7 7 7 7" stroke="currentColor" strokeWidth="2.2"
+                strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span>${ZALOZKY_NAZVY[kamZpet] || kamZpet}</span>
+          </button>`}
         </div>
         <h1 title="Zpět na Kalkulaci" onClick=${() => setTab("calc")}>IRM</h1>
         <button className="themebtn" type="button"
@@ -2178,19 +2726,30 @@ function App() {
             Nejčastější příčina: index.html byl otevřen přímo ze ZIPu nebo zkopírován jinam samostatně.
             <b> Rozbalte celý ZIP do jedné složky a otevřete index.html z ní.</b>
           </div>`}
-        ${tab === "calc" && html`<${Calc} products=${products} recipes=${recipes} setRecipes=${setRecipes} links=${links} setLinks=${setLinks}
-          spec=${spec} onSpecUsed=${() => setSpec(null)}
-          onUpravitSpec=${pdfSpec.stav === "hotovo" ? () => setTab("pdf") : null}
-          sgps=${sgps} onPouzitSpec=${pouzitSpec} onPdfNacteno=${setPdfSpec} pdfObrazky=${pdfSpec.obrazky || []} pdfStranky=${pdfSpec.stranky || []} />`}
+        <div style=${{ display: tab === "calc" ? "" : "none" }}>
+          <${Calc} products=${products} recipes=${recipes} setRecipes=${setRecipes} links=${links} setLinks=${setLinks}
+            spec=${spec} onSpecUsed=${() => setSpec(null)}
+            onUpravitSpec=${pdfSpec.stav === "hotovo" ? () => setTab("pdf") : null}
+            sgps=${sgps} onPouzitSpec=${pouzitSpec} onPdfNacteno=${setPdfSpec} pdfObrazky=${pdfSpec.obrazky || []} pdfStranky=${pdfSpec.stranky || []} pdfId=${pdfSpec.pdfId || ""}
+            dbFiltr=${dbFiltr} setDbFiltr=${setDbFiltr} />
+        </div>
         ${tab === "scan" && html`<${ScanTab} hidOn=${hidOn} setHidOn=${setHidOn} scanLog=${scanLog}
           onCode=${onCode} onApply=${pouzitSpec} clearLog=${() => setScanLog([])} sgps=${sgps} />`}
         ${tab === "pdf" && html`<${PdfTab} sgps=${sgps} products=${products} recipes=${recipes}
           ulozeny=${pdfSpec} setUlozeny=${setPdfSpec}
           onApply=${(res) => { setScanLog((l) => [{ ts: Date.now(), raw: res.parsed.raw, res: res }].concat(l).slice(0, 25)); pouzitSpec(res); }} />`}
         ${tab === "zak" && html`<${ZakazkyTab} sgps=${sgps} onOtevri=${otevriZakazku} />`}
-        ${tab === "most" && html`<${PripojeniTab} sgps=${sgps} />`}
+        ${tab === "most" && html`<${PripojeniTab} sgps=${sgps} databaze=${databaze} recipes=${recipes}
+          links=${links} vlastniStav=${vlastniStav}
+          onOdebratZdroj=${(z) => guardDelete(() => {
+            setRecipes((prev) => prev.filter((r) => r.zdroj !== z));
+            const v = loadLS("irm-databaze-verze", {});
+            delete v[z];
+            saveLS("irm-databaze-verze", v);
+          }, "odebrání receptur z databáze " + z)} />`}
         ${tab === "prod" && html`<${Products} products=${products} setProducts=${setProducts} guardDelete=${guardDelete} />`}
-        ${tab === "rec" && html`<${Recipes} recipes=${recipes} setRecipes=${setRecipes} guardDelete=${guardDelete} />`}
+        ${tab === "rec" && html`<${Recipes} recipes=${recipes} setRecipes=${setRecipes} guardDelete=${guardDelete}
+          dbFiltr=${dbFiltr} setDbFiltr=${setDbFiltr} />`}
         ${tab === "imp" && html`<${Importer} setProducts=${setProducts} setRecipes=${setRecipes} guardDelete=${guardDelete} deletePw=${deletePw} setDeletePw=${setDeletePw} />`}
       </main>
       ${pwGate && html`<${PwGate} label=${pwGate.label} correctPw=${deletePw}
@@ -2232,7 +2791,8 @@ function PwGate({ label, correctPw, onConfirm, onCancel }) {
 
 /* ============================ KALKULACE ============================ */
 function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed, onUpravitSpec,
-                sgps, onPouzitSpec, onPdfNacteno, pdfObrazky, pdfStranky }) {
+                sgps, onPouzitSpec, onPdfNacteno, pdfObrazky, pdfStranky, pdfId,
+                dbFiltr, setDbFiltr }) {
   const [q, setQ] = useState("");
   // hodnoty ze načteného specu mají přednost před automatikami níže (reset barvy,
   // vázaná receptura, spotřeba dle technologie) — proto je propašujeme přes ref
@@ -2302,6 +2862,8 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
       id: uid(),
       name: ((product && product.ref ? product.ref + " · " : "") + label + kde + " — " + base.name).trim(),
       type: "Custom", series: "odvozeno z " + base.name,
+      // z čeho a ze které databáze receptura vznikla — zapíše se i do CSV
+      zaklad: base.name + (base.zdroj ? " (" + base.zdroj.replace(/\.csv$/i, "") + ")" : ""),
       density: base.density, hex: base.hex,
       components: base.components.map((c) => ({ id: uid(), name: c.name, pct: c.pct })),
     }});
@@ -2345,8 +2907,18 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     id: "adhoc", name: (nazev || "").trim() || "Nepojmenovaná barva", type: "Custom",
     series: (rada || "").trim(), density: 1.2, hex: "#888888", components: [],
   });
+  // Barva potisku pro výpis a pro lístek: pantone z názvu, jinak CMYK z odstínu.
+  const [zListu, setZListu] = useState(false);   // odstín přišel ze vzorníku v PDF
+  const barvaPotisku = useMemo(() => {
+    if (!recipe) return null;
+    const p = popisBarvyPotisku(recipe.name, recipe.hex, recipes);
+    if (!p.pantone && !p.cmyk) return null;
+    p.zListu = zListu && !!(adHoc && recipe.id === adHoc.id);
+    return p;
+  }, [recipe, recipes, zListu, adHoc]);
+
   const [recQ, setRecQ] = useState("");
-  const pantoneAll = recipes.filter((r) => r.type !== "Custom");
+  const pantoneAll = podleDatabaze(recipes, dbFiltr).filter((r) => r.type !== "Custom");
   const pantoneList = recQ.trim()
     ? pantoneAll.filter((r) => (r.name + " " + (r.series || "")).toLowerCase().includes(recQ.trim().toLowerCase()))
     : pantoneAll;
@@ -2378,7 +2950,13 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
       // barva z listu není v databázi — založíme rozpracovanou recepturu,
       // ať jde dojít k míchacímu lístku a složení doplnit až u míchačky
       setRecId("");
-      setAdHoc(novaAdHoc(spec.fields.recipe, spec.fields.series));
+      const vz = vzornikProHodnotu(spec.vzorniky, spec.fields.recipe);
+      const nova = novaAdHoc(spec.fields.recipe, spec.fields.series);
+      // barvu vezmeme ze vzorníku vedle názvu v listu, ať odstín sedí
+      setAdHoc(vz ? Object.assign(nova, { hex: vz.hex }) : nova);
+      setZListu(!!vz);
+    } else {
+      setZListu(false);
     }
     if (spec.qty != null) setQty(spec.qty);
     if (spec.gm2 != null) setGm2(spec.gm2);
@@ -2499,6 +3077,15 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     <div><div class="lbl">Technologie</div><div class="val">${esc(tech)} — ${esc(TECHS[tech] ? TECHS[tech].name : "")}</div></div>
     <div><div class="lbl">Zakázka</div><div class="val">${fmt(n(qty), 0)} ks · ${fmt(n(gm2), 1)} g/m² · ztráty ${fmt(n(loss), 0)} %</div></div>
     <div><div class="lbl">Barva / řada</div><div class="val">${esc(recipe.name)}${recipe.series ? " · " + esc(recipe.series) : ""} · hustota ${fmt(n(recipe.density, 1), 2)} g/ml${jeAdHoc ? " · <b>neuložená receptura</b>" : ""}</div></div>
+    ${barvaPotisku ? `<div><div class="lbl">Odstín potisku</div><div class="val">${
+      barvaPotisku.pantone
+        ? `<b>${esc(barvaPotisku.pantone)}</b>`
+        : `<b>CMYK ${esc(cmykText(barvaPotisku.cmyk))}</b>`
+      }${barvaPotisku.pantone && barvaPotisku.cmyk ? " · ≈ CMYK " + esc(cmykText(barvaPotisku.cmyk)) : ""
+      }${barvaPotisku.hex ? " · " + esc(barvaPotisku.hex) : ""
+      }${barvaPotisku.zListu ? " · vzorník ze zakázkového listu" : ""
+      }${barvaPotisku.blizky ? " · nejblíž " + esc(barvaPotisku.blizky.recipe.name)
+           + " (odchylka " + fmt(barvaPotisku.blizky.dE, 1) + ")" : ""}</div></div>` : ""}
     <div><div class="lbl">Síto / kryvost / povrch</div><div class="val">${esc(recipe.mesh || "—")} · ${esc(recipe.opacity || "—")} · ${esc(recipe.surface || "—")}</div></div>
     <div><div class="lbl">Objednavatel</div><div class="val">${esc((zak && zak.customer) || recipe.customer || "—")}</div></div>
     ${zak && zak.order ? `<div><div class="lbl">Zakázka</div><div class="val">${esc(zak.order)}</div></div>` : ""}
@@ -2611,6 +3198,8 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
           <div className="card bigform" style=${{ margin: 0 }}>
             <h2>Receptura a zakázka</h2>
             <p className="hint">Vyberte recepturu — technologie a rozměry se doplní z vybrané polohy potisku.</p>
+            <${FiltrDatabaze} recipes=${recipes} hodnota=${dbFiltr} setHodnota=${setDbFiltr}
+              popis="Vybírá se jen z označené databáze — tatáž receptura může mít v jiné databázi jiné složení." />
             <div className="frow c2">
               <div>
                 <label className="f">Receptura (Pantone standard) — ${pantoneList.length} z ${pantoneAll.length}</label>
@@ -2663,6 +3252,23 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                   + (vazbaSiroka ? " (všechny polohy)" : (position ? " · " + position.tech + " " + position.name : ""))
                 : ""}</span>
             </div>
+            ${barvaPotisku && html`
+              <div className="rowline" style=${{ marginTop: 2, marginBottom: 0 }}>
+                <span className="tag" title=${barvaPotisku.presny
+                  ? "pantone je daný názvem barvy"
+                  : "dopočítáno z odstínu vzorníku — orientační, ne změřené"}>
+                  ${barvaPotisku.pantone || "CMYK " + cmykText(barvaPotisku.cmyk)}
+                </span>
+                <span className="note">
+                  ${barvaPotisku.pantone && barvaPotisku.cmyk
+                    ? "≈ CMYK " + cmykText(barvaPotisku.cmyk) + " · " : ""}
+                  ${barvaPotisku.hex}
+                  ${barvaPotisku.zListu ? " — vzorník ze zakázkového listu" : ""}
+                  ${barvaPotisku.blizky
+                    ? " · nejblíž " + barvaPotisku.blizky.recipe.name
+                      + " (odchylka ΔE " + fmt(barvaPotisku.blizky.dE, 1) + ")" : ""}
+                </span>
+              </div>`}
             ${recipe && html`
               <div className="frow c3" style=${{ marginTop: 8 }}>
                 <div>
@@ -2849,7 +3455,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
           </div>
         </div>`}
 
-      ${pokrytiOkno && html`<${PokrytiModal} obrazky=${pdfObrazky} stranky=${pdfStranky}
+      ${pokrytiOkno && html`<${PokrytiModal} obrazky=${pdfObrazky} stranky=${pdfStranky} pdfId=${pdfId}
         sirka=${sirka} vyska=${vyska} gm2=${n(gm2)} qty=${n(qty)}
         odsazeniVychozi=${odsazeniJob} onPouzit=${ulozPokryti} onClose=${() => setPokrytiOkno(false)} />`}
 
@@ -2932,26 +3538,83 @@ function useScale() {
   };
 }
 
+/* Přelitou komponentu z nádoby nikdo nedostane zpátky. Odstín se dá zachovat
+   jen tím, že se dorovnají všechny ostatní — tedy že se zvětší celá dávka.
+   Nová dávka musí být tak velká, aby ani jedna už nalitá komponenta
+   nepřesahovala svůj podíl:  davka = max( nalito_i / podil_i ).            */
+function prepocetDavky(comps, totalG, nalito) {
+  const podil = comps.map((c) => (totalG > 0 ? c.g / totalG : 0));
+  let davka = totalG;
+  for (let i = 0; i < comps.length; i++) {
+    const m = nalito[i] || 0;
+    if (m > 0 && podil[i] > 0) davka = Math.max(davka, m / podil[i]);
+  }
+  const cile = podil.map((p) => davka * p);
+  return {
+    davka: davka,
+    cile: cile,
+    zbyva: cile.map((c, i) => Math.max(0, c - (nalito[i] || 0))),
+    podil: podil,
+  };
+}
+
+/* Drobné navážky mají smysl jen na dvě desetinná místa — jinak by 0,05 g
+   vypadalo jako 0,1 g a nesedělo by to s tím, co je odškrtnuté jako hotové. */
+const fmtG = (v) => fmt(v, Math.abs(v) > 0 && Math.abs(v) < 1 ? 2 : 1);
+
 function Vazeni({ comps, totalG, recipeName }) {
   const sc = useScale();
   const [baud, setBaud] = useState("9600");
-  const [step, setStep] = useState(0);
   const [tol, setTol] = useState(0.5);
+  // kolik gramů které komponenty už je v nádobě; index = pořadí v receptuře
+  const [nalito, setNalito] = useState(() => comps.map(() => 0));
+  const [krok, setKrok] = useState(0);          // která komponenta se váží teď
+  const [davka, setDavka] = useState(totalG);   // celková dávka po případném přepočtu
 
-  useEffect(() => { setStep(0); }, [totalG, comps.length, recipeName]);
+  const zacniZnovu = () => { setNalito(comps.map(() => 0)); setKrok(0); setDavka(totalG); };
+  useEffect(zacniZnovu, [totalG, comps.length, recipeName]);
 
-  // kumulativní cíle: komponenty se váží do jedné nádoby po sobě, bez mezitáry
-  const cum = []; let s = 0;
-  for (const c of comps) { s += c.g; cum.push(s); }
-  const done = step >= comps.length;
-  const cur = done ? null : comps[step];
-  const target = done ? totalG : cum[step];
+  const podil = comps.map((c) => (totalG > 0 ? c.g / totalG : 0));
+  const cil = podil.map((p) => davka * p);
+  const zbyvaVse = cil.map((c, i) => Math.max(0, c - (nalito[i] || 0)));
+  // hotovo = na žádné komponentě už nic nechybí
+  const done = krok < 0 || !zbyvaVse.some((z) => z > Math.max(0.05, n(tol, 0.5)) / 2);
+  const cur = done ? null : comps[krok];
+
+  // Váha ukazuje obsah celé nádoby. Co je v ní mimo právě váženou komponentu,
+  // je pevné — rozdíl oproti tomu je to, co teď přitéká.
+  const vPotu = nalito.reduce((a, b) => a + (b || 0), 0);
+  const zaklad = vPotu - (nalito[krok] || 0);
   const w = sc.weight;
+  const naliteTed = Math.max(0, w - zaklad);
+  const target = done ? vPotu : zaklad + cil[krok];
   const rem = target - w;
   const tolerance = Math.max(0.05, n(tol, 0.5));
   const inTol = Math.abs(rem) <= tolerance;
   const over = rem < -tolerance;
   const progress = target > 0 ? Math.max(0, Math.min(100, (w / target) * 100)) : 0;
+
+  // Náhled přepočtu se počítá průběžně, ať je hned vidět, co přeliv udělá.
+  const naliteSTedka = nalito.map((m, i) => (i === krok ? naliteTed : m || 0));
+  const navrh = over ? prepocetDavky(comps, totalG, naliteSTedka) : null;
+  const prijmoutPrepocet = () => {
+    if (!navrh) return;
+    setNalito(naliteSTedka);
+    setDavka(navrh.davka);
+    // pokračuje se u první komponenty, které něco chybí
+    const dalsi = navrh.zbyva.findIndex((z) => z > tolerance / 2);
+    setKrok(dalsi >= 0 ? dalsi : -1);
+  };
+  const dalsiKrok = () => {
+    const novy = naliteSTedka.slice();
+    setNalito(novy);
+    const zbyvaPo = cil.map((c, i) => Math.max(0, c - novy[i]));
+    let dalsi = -1;
+    for (let i = krok + 1; i < comps.length; i++) if (zbyvaPo[i] > tolerance / 2) { dalsi = i; break; }
+    if (dalsi < 0) for (let i = 0; i <= krok; i++) if (zbyvaPo[i] > tolerance / 2) { dalsi = i; break; }
+    setKrok(dalsi);
+  };
+  const naviceni = davka - totalG;
 
   return html`
     <div className="card" style=${{ margin: 0 }}>
@@ -2990,14 +3653,29 @@ function Vazeni({ comps, totalG, recipeName }) {
           ${sc.mode === "sim" && html`
             <div style=${{ margin: "10px 0" }}>
               <label className="f">Simulace — přidávejte barvu posuvníkem</label>
-              <input type="range" min="0" max=${Math.ceil(totalG * 1.15)} step="0.1" value=${sc.raw}
+              <input type="range" min="0" max=${Math.ceil(davka * 1.4)} step="0.1" value=${sc.raw}
                 onChange=${(e) => sc.setRaw(n(e.target.value))} />
+            </div>`}
+
+          ${naviceni > 0.05 && html`
+            <div className="specbar" style=${{ marginTop: 10 }}>
+              <span className="dot" style=${{ background: "var(--warn)" }}></span>
+              <span>Dávka přepočtena na <b>${fmt(davka)} g</b> (z ${fmt(totalG)} g,
+                +${fmt(naviceni)} g / +${fmt(naviceni / totalG * 100, 0)} %) — poměr komponent zůstal stejný.</span>
+              <span style=${{ marginLeft: "auto" }}></span>
+              <button className="btn sec sm" onClick=${zacniZnovu}>Zrušit a navážit znovu</button>
             </div>`}
 
           ${!done ? html`
             <div style=${{ marginTop: 12 }}>
-              <div style=${{ fontWeight: 800 }}>Krok ${step + 1} / ${comps.length}: ${cur.name}</div>
-              <div className="note">přidat ${fmt(cur.g)} g → navážit celkem do ${fmt(target)} g</div>
+              <div style=${{ fontWeight: 800 }}>
+                ${cur.name}${(nalito[krok] || 0) > 0.05 ? " — dorovnání" : ""}
+              </div>
+              <div className="note">
+                přidat ${fmtG(zbyvaVse[krok])} g${(nalito[krok] || 0) > 0.05
+                  ? " (už nalito " + fmtG(nalito[krok]) + " g z " + fmtG(cil[krok]) + " g)" : ""}
+                → navážit celkem do ${fmt(target)} g
+              </div>
               <div className="wbar" style=${{ marginTop: 8 }}>
                 <span style=${{ width: progress + "%", background: over ? "#B91C1C" : (inTol ? "var(--ok)" : "var(--cyan)") }} />
               </div>
@@ -3005,29 +3683,69 @@ function Vazeni({ comps, totalG, recipeName }) {
                 ${over ? "přelito o " + fmt(-rem, 1) + " g" : (inTol ? "✓ v toleranci" : "zbývá " + fmt(rem, 1) + " g")}
               </div>
               <div className="rowline" style=${{ marginTop: 10 }}>
-                <button className="btn" style=${inTol ? { background: "var(--ok)" } : {}} onClick=${() => setStep(step + 1)}>
-                  ${step + 1 === comps.length ? "Dokončit" : "Další komponenta →"}
+                <button className="btn" style=${inTol ? { background: "var(--ok)" } : {}}
+                  disabled=${over} onClick=${dalsiKrok}>
+                  ${zbyvaVse.filter((z, i) => i !== krok && z > tolerance / 2).length ? "Další komponenta →" : "Dokončit"}
                 </button>
                 <span className="note">tolerance ±</span>
                 <input type="number" step="0.1" min="0.05" value=${tol} onChange=${(e) => setTol(e.target.value)} style=${{ width: 70 }} />
                 <span className="note">g</span>
               </div>
-              ${over && html`<div className="warnbox">Přeliv: buď uberte, nebo dorovnejte poměr — ostatní komponenty lze přepočítat navýšením celé dávky.</div>`}
+
+              ${over && navrh && html`
+                <div className="warnbox">
+                  <b>Přelito o ${fmt(-rem, 1)} g.</b> Odebrat z nádoby přesně jde těžko — odstín se
+                  zachová tím, že se dorovnají ostatní komponenty, tedy že se zvětší celá dávka.
+                  <div className="kv" style=${{ marginTop: 8 }}>
+                    <div className="k">Nová dávka</div>
+                    <div className="v"><b>${fmt(navrh.davka)} g</b>
+                      <span className="note"> místo ${fmt(totalG)} g · o ${fmt(navrh.davka - totalG)} g víc
+                        (+${fmt((navrh.davka - totalG) / Math.max(totalG, 0.01) * 100, 0)} %)</span></div>
+                    <div className="k">Ještě přidat</div>
+                    <div className="v">
+                      ${comps.map((c, i) => navrh.zbyva[i] > tolerance / 2
+                        ? html`<div key=${c.id}>${c.name} — <b>${fmtG(navrh.zbyva[i])} g</b>${
+                            i < krok || (i > krok && (nalito[i] || 0) > 0.05) ? " (dorovnat)" : ""}</div>`
+                        : null)}
+                    </div>
+                  </div>
+                  <div className="rowline" style=${{ marginTop: 10, marginBottom: 0 }}>
+                    <button className="btn" onClick=${prijmoutPrepocet}>
+                      Přepočítat dávku na ${fmt(navrh.davka)} g →
+                    </button>
+                    <span className="note">
+                      nebo přebytek odeberte a vraťte váhu na ${fmt(target)} g
+                    </span>
+                  </div>
+                  ${navrh.davka > totalG * 2 && html`
+                    <div style=${{ marginTop: 8 }}>
+                      Přeliv je velký — dávka by narostla na víc než dvojnásobek. Zvažte, jestli
+                      není levnější začít znovu.
+                    </div>`}
+                </div>`}
             </div>` : html`
             <div className="okbox" style=${{ marginTop: 12 }}>
-              ✓ Všechny komponenty navaženy (${fmt(totalG)} g celkem). Barvu důkladně promíchejte.
-              <div style=${{ marginTop: 8 }}><button className="btn sec sm" onClick=${() => setStep(0)}>Navážit znovu</button></div>
+              ✓ Všechny komponenty navaženy (${fmt(vPotu)} g celkem${naviceni > 0.05
+                ? ", dávka přepočtena z " + fmt(totalG) + " g" : ""}). Barvu důkladně promíchejte.
+              <div style=${{ marginTop: 8 }}><button className="btn sec sm" onClick=${zacniZnovu}>Navážit znovu</button></div>
             </div>`}
 
           <table className="t" style=${{ marginTop: 14 }}>
-            <thead><tr><th></th><th>Komponenta</th><th className="num">přidat g</th><th className="num">celkem do g</th></tr></thead>
+            <thead><tr><th></th><th>Komponenta</th><th className="num">%</th><th className="num">cíl g</th>
+              <th className="num">nalito g</th><th className="num">zbývá g</th></tr></thead>
             <tbody>
               ${comps.map((c, i) => html`
-                <tr key=${c.id} className=${i === step ? "rowactive" : ""} style=${i < step ? { opacity: .55 } : {}}>
-                  <td>${i < step ? "✓" : (i === step ? "▶" : "")}</td>
+                <tr key=${c.id} className=${i === krok ? "rowactive" : ""}
+                  style=${zbyvaVse[i] <= tolerance / 2 ? { opacity: .55 } : {}}>
+                  <td>${zbyvaVse[i] <= tolerance / 2 ? "✓" : (i === krok ? "▶" : "")}</td>
                   <td>${c.name}</td>
-                  <td className="num">${fmt(c.g)}</td>
-                  <td className="num">${fmt(cum[i])}</td>
+                  <td className="num">${fmt(podil[i] * 100)}</td>
+                  <td className="num">${fmtG(cil[i])}</td>
+                  <td className="num">${fmtG(i === krok ? naliteTed : (nalito[i] || 0))}</td>
+                  <td className="num">${zbyvaVse[i] > tolerance / 2
+                    ? fmtG(zbyvaVse[i])
+                    : html`<span className="note" title="méně, než váha rozliší — bere se za navážené">${
+                        zbyvaVse[i] > 0.004 ? fmtG(zbyvaVse[i]) + " ›pod tol.‹" : "—"}</span>`}</td>
                 </tr>`)}
             </tbody>
           </table>
@@ -3186,14 +3904,15 @@ function ProductForm({ initial, onSave, onCancel }) {
 }
 
 /* ============================ RECEPTURY ============================ */
-function Recipes({ recipes, setRecipes, guardDelete }) {
+function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr }) {
   const [edit, setEdit] = useState(null);
   const [q, setQ] = useState("");
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    if (!s) return recipes;
-    return recipes.filter((r) => (r.name + " " + r.series + " " + r.type).toLowerCase().includes(s));
-  }, [q, recipes]);
+    const zaklad = podleDatabaze(recipes, dbFiltr);
+    if (!s) return zaklad;
+    return zaklad.filter((r) => (r.name + " " + r.series + " " + r.type).toLowerCase().includes(s));
+  }, [q, recipes, dbFiltr]);
 
   const save = (r) => {
     setRecipes((prev) => {
@@ -3223,17 +3942,18 @@ function Recipes({ recipes, setRecipes, guardDelete }) {
   return html`
     <div className="card">
       <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 10, flexWrap: "wrap" }}>
-        <h2 style=${{ margin: 0 }}>Receptury barev (${recipes.length})</h2>
+        <h2 style=${{ margin: 0 }}>Receptury barev (${dbFiltr ? fmt(filtered.length, 0) + " z " + fmt(recipes.length, 0) : fmt(recipes.length, 0)})</h2>
         <div style=${{ display: "flex", gap: 8 }}>
           <button className="btn sec" onClick=${exportCsv}>Export CSV</button>
           <button className="btn" onClick=${() => setEdit({ id: uid(), name: "", type: "Pantone", series: "", density: 1.2, hex: "#888888", components: [{ id: uid(), name: "", pct: 100 }] })}>+ Nová receptura</button>
         </div>
       </div>
       <p className="hint">Pantone standard = formule dle vaší licencované knihovny Printcolor/Pantone. Custom = vlastní vyvzorkovaná směs. Hromadné nahrání: záložka Import / data.</p>
+      <${FiltrDatabaze} recipes=${recipes} hodnota=${dbFiltr} setHodnota=${setDbFiltr} />
       <input className="search" value=${q} onChange=${(e) => setQ(e.target.value)} placeholder="Hledat recepturu…" style=${{ marginBottom: 14 }} />
       ${!filtered.length ? html`<div className="empty">Zatím žádné receptury.</div>` : html`
         <table className="t">
-          <thead><tr><th /><th>Receptura</th><th>Typ</th><th>Řada</th><th className="num">Hustota g/ml</th><th>Složení</th><th /></tr></thead>
+          <thead><tr><th /><th>Receptura</th><th>Typ</th><th>Databáze</th><th>Řada</th><th className="num">Hustota g/ml</th><th>Složení</th><th /></tr></thead>
           <tbody>
             ${filtered.slice(0, 100).map((r) => {
               const sum = r.components.reduce((s, c) => s + n(c.pct), 0);
@@ -3242,6 +3962,7 @@ function Recipes({ recipes, setRecipes, guardDelete }) {
                   <td><span className="swatch" style=${{ background: r.hex }} /></td>
                   <td style=${{ fontWeight: 700 }}>${r.name}</td>
                   <td><span className="tag">${r.type === "Pantone" ? "Pantone standard" : "Custom"}</span></td>
+                  <td className="note">${r.zdroj ? r.zdroj.replace(/\.csv$/i, "") : "ručně v aplikaci"}</td>
                   <td>${r.series}</td>
                   <td className="num">${fmt(n(r.density), 2)}</td>
                   <td>
@@ -3415,9 +4136,12 @@ function jsonToItems(data) {
   return items;
 }
 
-/* Receptury CSV: nazev;typ;rada;hustota;hex;komponenta;procento (řádek = komponenta) */
-function csvToRecipes(text) {
+/* Receptury CSV: nazev;typ;rada;hustota;hex;komponenta;procento (řádek = komponenta)
+   zdroj = ze kterého souboru databáze receptura je; podle něj se dá filtrovat,
+   aby se dvě databáze nemíchaly dohromady */
+function csvToRecipes(text, zdroj) {
   const rows = parseCsv(text);
+  if (!rows.length) throw new Error("Soubor je prázdný — chybí i hlavička sloupců.");
   const head = rows[0].map((h) => h.toLowerCase());
   const idx = (re) => head.findIndex((h) => re.test(h));
   const ci = {
@@ -3426,6 +4150,7 @@ function csvToRecipes(text) {
     comp: idx(/^komponent|component|slozka|složka/), pct: idx(/^(procent|pct|%|pod.l)/),
     mesh: idx(/^(s.to|sito|mesh)/), opacity: idx(/^(kryvost|opacity)/), surface: idx(/^(povrch|surface)/),
     customer: idx(/^(objednavatel|customer|z.kazn.k)/), tested: idx(/^(otestovan|tested)/), fade: idx(/^(vyblednut|odolnost|fade)/),
+    zaklad: idx(/^(zaklad|z.klad|odvozeno|base)/), vazby: idx(/^(vazby|vazba|produkty|links)/),
   };
   if (ci.name < 0 || ci.comp < 0 || ci.pct < 0)
     throw new Error("CSV musí obsahovat sloupce: nazev, komponenta, procento (volitelně typ, rada, hustota, hex).");
@@ -3434,7 +4159,7 @@ function csvToRecipes(text) {
     const name = r[ci.name]; if (!name) continue;
     if (!map.has(name)) {
       map.set(name, {
-        id: uid(), name: name,
+        id: uid(), name: name, zdroj: zdroj || "",
         type: ci.type >= 0 && /cust/i.test(r[ci.type] || "") ? "Custom" : "Pantone",
         series: ci.series >= 0 ? (r[ci.series] || "") : "",
         density: ci.density >= 0 ? n(r[ci.density], 1.2) : 1.2,
@@ -3445,12 +4170,148 @@ function csvToRecipes(text) {
         customer: ci.customer >= 0 ? (r[ci.customer] || "") : "",
         tested: ci.tested >= 0 ? /^(1|ano|yes|true|x)$/i.test((r[ci.tested] || "").trim()) : false,
         fade: ci.fade >= 0 ? /^(1|ano|yes|true|x)$/i.test((r[ci.fade] || "").trim()) : false,
+        zaklad: ci.zaklad >= 0 ? (r[ci.zaklad] || "") : "",
+        // na které kombinace produkt+barva+technologie+poloha byla receptura použita
+        vazby: ci.vazby >= 0
+          ? String(r[ci.vazby] || "").split("~").map((s) => s.trim()).filter(Boolean) : [],
         components: [],
       });
     }
-    map.get(name).components.push({ id: uid(), name: r[ci.comp], pct: n(r[ci.pct]) });
+    // řádek bez komponenty je receptura, u které se složení teprve dopisuje
+    if (String(r[ci.comp] || "").trim())
+      map.get(name).components.push({ id: uid(), name: r[ci.comp], pct: n(r[ci.pct]) });
   }
   return Array.from(map.values());
+}
+
+/* Přidá načtené receptury k těm stávajícím. Táž receptura ze stejné databáze
+   se obnoví obsahem ze souboru, ale ponechá si id a co k ní nastavil technolog
+   — na id visí vazby na produkt a polohu a v CSV žádné síto ani kryvost nejsou.
+
+   Klíč je jméno VČETNĚ databáze, ze které receptura pochází: dvě databáze
+   klidně mají PANTONE 485 C každá s jiným složením a nesmí si přepsat jedna
+   druhou. Rozlišit je pak jde filtrem podle databáze. */
+const klicReceptury = (r) => (r.zdroj ? r.zdroj + "|" : "") + String(r.name || "").toLowerCase();
+
+function sloucReceptury(prev, nove, adopce) {
+  const mapa = new Map(prev.map((r) => [klicReceptury(r), r]));
+  // Receptury z dřívějška zdroj uvedený nemají. Při jednorázovém přeznačení
+  // (adopce) si je databáze převezme, aby z jedné receptury nevznikly dvě.
+  // Jindy se nikdy nesahá na receptury bez zdroje — jsou to ty ručně zadané.
+  const kAdopci = new Map();
+  if (adopce) {
+    for (const r of prev) {
+      if (!r.zdroj && r.type !== "Custom") kAdopci.set(String(r.name || "").toLowerCase(), r);
+    }
+  }
+  let pridano = 0, obnoveno = 0;
+  for (const r of nove) {
+    if (!String(r.name || "").trim()) continue;
+    const klic = klicReceptury(r);
+    let stary = mapa.get(klic);
+    if (!stary && r.zdroj) {
+      const prevzaty = kAdopci.get(String(r.name).toLowerCase());
+      if (prevzaty) {
+        stary = prevzaty;
+        mapa.delete(klicReceptury(prevzaty));
+        kAdopci.delete(String(r.name).toLowerCase());
+      }
+    }
+    if (stary) {
+      obnoveno++;
+      mapa.set(klic, Object.assign({}, r, {
+        id: stary.id,
+        mesh: r.mesh || stary.mesh || "", opacity: r.opacity || stary.opacity || "",
+        surface: r.surface || stary.surface || "", customer: r.customer || stary.customer || "",
+        tested: r.tested || !!stary.tested, fade: r.fade || !!stary.fade,
+      }));
+    } else {
+      pridano++;
+      mapa.set(klic, r);
+    }
+  }
+  return { seznam: Array.from(mapa.values()), pridano: pridano, obnoveno: obnoveno };
+}
+
+/* ================== VLASTNÍ RECEPTURY JAKO DATABÁZE V SOUBORU ==================
+   Custom receptury vznikají odvozením z receptur, které už v databázích jsou,
+   a váží se na kombinaci produkt + barva produktu + technologie + poloha.
+   Dokud žijí jen v prohlížeči, zmizí s vymazáním úložiště a nikdo jiný je
+   neuvidí. Proto se odkládají do vlastního CSV ve složce databází — včetně
+   toho, na které produkty a barvy byly použité (sloupec "vazby"). */
+const SOUBOR_VLASTNI = "receptury_vlastni.csv";
+
+/* Vazby jedné receptury: klíče "ref|barva|technologie|poloha" oddělené ~ */
+function vazbyReceptury(links, id) {
+  const out = [];
+  for (const k of Object.keys(links || {})) if (links[k] === id) out.push(k);
+  return out.sort();
+}
+
+/* Které receptury patří do vlastního souboru: ty vlastní, co vznikly
+   v aplikaci, plus ty, které už z tohoto souboru jsou. */
+const jeVlastni = (r) => r.type === "Custom" && (!r.zdroj || r.zdroj === SOUBOR_VLASTNI);
+
+function vlastniDoCsv(recipes, links) {
+  const hlavicka = ["nazev", "typ", "rada", "hustota", "hex", "komponenta", "procento",
+    "sito", "kryvost", "povrch", "objednavatel", "otestovany", "vyblednuti", "zaklad", "vazby"];
+  const radky = [hlavicka];
+  for (const r of recipes.filter(jeVlastni)) {
+    const vazby = vazbyReceptury(links, r.id).join("~");
+    const slozky = r.components && r.components.length ? r.components : [{ name: "", pct: "" }];
+    for (const c of slozky) {
+      radky.push([r.name, "Custom", r.series || "", r.density, (r.hex || "").replace(/^#/, ""),
+        c.name || "", c.pct === "" ? "" : c.pct,
+        r.mesh || "", r.opacity || "", r.surface || "", r.customer || "",
+        r.tested ? "ano" : "", r.fade ? "ano" : "", r.zaklad || "", vazby]);
+    }
+  }
+  return radky.map((r) => r.map((c) => '"' + String(c == null ? "" : c).replace(/"/g, '""') + '"')
+    .join(";")).join("\r\n") + "\r\n";
+}
+
+/* Databáze, ze kterých receptury pocházejí — podklad pro filtr. */
+function zdrojeReceptur(recipes) {
+  const mapa = new Map();
+  for (const r of (recipes || [])) {
+    const z = r.zdroj || "";
+    mapa.set(z, (mapa.get(z) || 0) + 1);
+  }
+  return Array.from(mapa.entries())
+    .map(([zdroj, pocet]) => ({ zdroj: zdroj, pocet: pocet,
+      nazev: zdroj ? zdroj.replace(/\.csv$/i, "") : "vlastní a ruční" }))
+    .sort((a, b) => (a.zdroj ? 0 : 1) - (b.zdroj ? 0 : 1) || a.nazev.localeCompare(b.nazev, "cs"));
+}
+
+/* Přepínač databází. Dokud je databáze jediná, není co přepínat a nic se
+   nezobrazuje — objeví se sám, jakmile ve složce přibude druhý soubor. */
+function FiltrDatabaze({ recipes, hodnota, setHodnota, popis }) {
+  const zdroje = useMemo(() => zdrojeReceptur(recipes), [recipes]);
+  if (zdroje.filter((z) => z.zdroj).length < 2) return null;
+  return html`
+    <div style=${{ marginBottom: 10 }}>
+      <label className="f">Databáze receptur</label>
+      <div className="chips">
+        <button className=${"chip" + (hodnota ? "" : " on")} onClick=${() => setHodnota("")}>
+          vše (${fmt(recipes.length, 0)})
+        </button>
+        ${zdroje.map((z) => html`
+          <button key=${z.zdroj || "-"} className=${"chip" + (hodnota === (z.zdroj || "@vlastni") ? " on" : "")}
+            title=${z.zdroj || "receptury zadané ručně v aplikaci"}
+            onClick=${() => setHodnota(z.zdroj || "@vlastni")}>
+            ${z.nazev} (${fmt(z.pocet, 0)})
+          </button>`)}
+      </div>
+      ${popis && html`<p className="note" style=${{ marginTop: 6 }}>${popis}</p>`}
+    </div>`;
+}
+
+/* Vybere receptury z jedné databáze. "" = ze všech, "@vlastni" = jen ty,
+   které nepřišly ze souboru. */
+function podleDatabaze(recipes, filtr) {
+  if (!filtr) return recipes;
+  if (filtr === "@vlastni") return recipes.filter((r) => !r.zdroj);
+  return recipes.filter((r) => r.zdroj === filtr);
 }
 
 function Importer({ setProducts, setRecipes, guardDelete, deletePw, setDeletePw }) {
@@ -3533,14 +4394,9 @@ function Importer({ setProducts, setRecipes, guardDelete, deletePw, setDeletePw 
   const doImportRecipes = () => {
     if (!recPreview) return;
     setRecipes((prev) => {
-      const byName = new Map(prev.map((r) => [r.name.toLowerCase(), r]));
-      let added = 0, replaced = 0;
-      for (const r of recPreview) {
-        if (byName.has(r.name.toLowerCase())) { replaced++; } else { added++; }
-        byName.set(r.name.toLowerCase(), r);
-      }
-      setMsg({ ok: "Receptury naimportovány — nové: " + added + ", nahrazené: " + replaced + "." });
-      return Array.from(byName.values());
+      const v = sloucReceptury(prev, recPreview);
+      setMsg({ ok: "Receptury naimportovány — nové: " + v.pridano + ", nahrazené: " + v.obnoveno + "." });
+      return v.seznam;
     });
     setRecPreview(null); setText("");
   };
