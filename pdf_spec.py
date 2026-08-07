@@ -239,11 +239,15 @@ def _dekoduj(syrove, font):
     return syrove.decode("cp1252", "replace")
 
 
-def _slozit(kusy):
+def _radky(kusy):
     """
     Poskládá text ze zapsaných kousků podle jejich polohy na stránce.
     Formuláře často kreslí každé písmeno zvlášť (a tučné dvakrát přes sebe),
     takže pořadí v datovém proudu neodpovídá tomu, co člověk čte.
+
+    Vrací seznam řádků shora dolů: (y, [(x, kousek), …], složený text).
+    Polohy jednotlivých kousků se hodí, když je potřeba vzít jen část řádku
+    — třeba text vpravo od barevného vzorníku.
     """
     radky = {}
     for y, x, vel, t in kusy:
@@ -263,21 +267,25 @@ def _slozit(kusy):
                 # dvakrát s nepatrným posunem (~0,02 em). Skutečná dvojitá písmena
                 # („ll" ve „will") dělí aspoň krok nejužšího písmene (~0,22 em),
                 # proto je práh mezi tím.
-                if radek and t == radek[-1] and mezera < 0.12 * v:
+                if radek and t == radek[-1][1] and mezera < 0.12 * v:
                     continue
                 # Mezeru doplníme jen tam, kde mezi úseky opravdu zeje díra.
                 # Šířku předchozího úseku odhadneme z počtu znaků — jeden
                 # formulář kreslí celá slova, jiný každé písmeno zvlášť.
                 if (mezera - posledni_sirka > 0.28 * v
-                        and radek and not radek[-1].endswith(" ")):
-                    radek.append(" ")
-            radek.append(t)
+                        and radek and not radek[-1][1].endswith(" ")):
+                    radek.append((x, " "))
+            radek.append((x, t))
             posledni_x = x
             posledni_sirka = len(t) * 0.62 * v
-        r = re.sub(r"[ \t]+", " ", "".join(radek)).strip()
+        r = re.sub(r"[ \t]+", " ", "".join(t for _, t in radek)).strip()
         if r:
-            out.append(r)
-    return "\n".join(out)
+            out.append((y, radek, r))
+    return out
+
+
+def _slozit(kusy):
+    return "\n".join(r[2] for r in _radky(kusy))
 
 
 def _nasob(m, n):
@@ -289,8 +297,16 @@ def _nasob(m, n):
             e1 * a2 + f1 * c2 + e2, e1 * b2 + f1 * d2 + f2]
 
 
-def _text_ze_stranky(obsah, fonty):
+def _text_ze_stranky(obsah, fonty, sbirej=None):
+    """
+    sbirej: nepovinný slovník. Vyplní se do něj syrové kusy textu s polohou
+    a vyplněné obdélníky i s barvou výplně — z toho se pak dají vytáhnout
+    barevné vzorníky u popisků ("Barva Potisku ■ Black").
+    """
     kusy = []
+    obdelniky = []
+    vypln = [(0.0, 0.0, 0.0)]      # aktuální barva výplně v RGB
+    cekajici = []                  # obdélníky nakreslené, ale ještě nevyplněné
     cmap = None
     velikost = [10.0]
     zasobnik = []
@@ -439,22 +455,49 @@ def _text_ze_stranky(obsah, fonty):
                 ctm[0] = zasobnik_ctm.pop()
         elif op == b"BT":
             tm[0] = [1.0, 0.0, 0.0, 1.0, 0.0, 0.0]
+        elif op in (b"rg", b"g", b"k", b"re", b"f", b"F", b"f*",
+                    b"b", b"b*", b"B", b"B*", b"n", b"W", b"W*") and sbirej is not None:
+            c = cisla()
+            try:
+                if op == b"rg" and len(c) >= 3:
+                    vypln[0] = tuple(float(x) for x in c[-3:])
+                elif op == b"g" and len(c) >= 1:
+                    s = float(c[-1])
+                    vypln[0] = (s, s, s)
+                elif op == b"k" and len(c) >= 4:      # CMYK -> RGB pro porovnání
+                    cy, ma, ze, ka = [float(x) for x in c[-4:]]
+                    vypln[0] = ((1 - cy) * (1 - ka), (1 - ma) * (1 - ka), (1 - ze) * (1 - ka))
+                elif op == b"re" and len(c) >= 4:
+                    x, y, w, h = [float(v) for v in c[-4:]]
+                    a, b_, cc, d, e, f = ctm[0]
+                    rohy = [(x + dx * w, y + dy * h) for dx, dy in ((0, 0), (1, 0), (0, 1), (1, 1))]
+                    body = [(a * px + cc * py + e, b_ * px + d * py + f) for px, py in rohy]
+                    xs = [p[0] for p in body]
+                    ys = [p[1] for p in body]
+                    cekajici.append((min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)))
+                elif op in (b"f", b"F", b"f*", b"b", b"b*", b"B", b"B*"):
+                    for r in cekajici:
+                        obdelniky.append({"x": r[0], "y": r[1], "w": r[2], "h": r[3],
+                                          "rgb": [max(0, min(255, int(round(v * 255)))) for v in vypln[0]]})
+                    cekajici = []
+                elif op in (b"n", b"W", b"W*"):       # ořez nebo zahození cesty
+                    cekajici = []
+            except ValueError:
+                pass
         if op not in (b"BT",):
             zasobnik = []
+    if sbirej is not None:
+        sbirej["kusy"] = kusy
+        sbirej["obdelniky"] = obdelniky
     return _slozit(kusy)
 
 
-def text_z_pdf(data):
-    """Vrátí text PDF. Prázdný řetězec = PDF text neobsahuje (sken)."""
-    if data[:5] != b"%PDF-":
-        raise ValueError("Soubor není PDF.")
-    if re.search(rb"/Encrypt\b", data[:4096]) or re.search(rb"trailer.{0,400}/Encrypt", data, re.S):
-        raise ValueError("PDF je zaheslované — uložte ho bez ochrany heslem.")
-    objekty = _objekty(data)
-    casti = []
+def _obsahy_stranek(objekty):
+    """Projde stránky a vrátí (číslo stránky, fonty, [obsah stránky]) pro každou."""
+    out = []
     stranky = [c for c, (telo, _) in objekty.items()
                if re.search(rb"/Type\s*/Page(?![sA-Za-z])", telo or b"")]
-    for cislo in sorted(stranky):
+    for poradi, cislo in enumerate(sorted(stranky), 1):
         telo = objekty[cislo][0]
         zdroje = _rozbal(objekty, _hodnota(telo, b"Resources"))
         fonty = _fonty_stranky(objekty, zdroje) if zdroje else {}
@@ -466,14 +509,29 @@ def text_z_pdf(data):
             o = _odkaz(obsah_hod)
             if o is not None:
                 cile = [o]
-        kus = []
+        obsahy = []
         for oc in cile:
             if oc not in objekty:
                 continue
             t, s = objekty[oc]
-            data_obsahu = _dekomprimuj(t, s)
-            if data_obsahu:
-                kus.append(_text_ze_stranky(data_obsahu, fonty))
+            d = _dekomprimuj(t, s)
+            if d:
+                obsahy.append(d)
+        out.append((poradi, fonty, obsahy))
+    return out
+
+
+def text_z_pdf(data):
+    """Vrátí text PDF. Prázdný řetězec = PDF text neobsahuje (sken)."""
+    if data[:5] != b"%PDF-":
+        raise ValueError("Soubor není PDF.")
+    if re.search(rb"/Encrypt\b", data[:4096]) or re.search(rb"trailer.{0,400}/Encrypt", data, re.S):
+        raise ValueError("PDF je zaheslované — uložte ho bez ochrany heslem.")
+    objekty = _objekty(data)
+    casti = []
+    for _, fonty, obsahy in _obsahy_stranek(objekty):
+        kus = [_text_ze_stranky(o, fonty) for o in obsahy]
+        kus = [k for k in kus if k]
         if kus:
             casti.append("\n".join(kus))
     if not casti:                        # nouzově: projdi všechny streamy
@@ -485,6 +543,68 @@ def text_z_pdf(data):
     text = re.sub(r"[ \t]+", " ", text)
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
+
+
+def _cmyk(rgb):
+    """Převod RGB -> CMYK. Bez ICC profilu je to odhad, ne kolorimetrie."""
+    r, g, b = [max(0.0, min(1.0, v / 255.0)) for v in rgb]
+    k = 1.0 - max(r, g, b)
+    if k >= 0.999:
+        return [0, 0, 0, 100]
+    c = (1.0 - r - k) / (1.0 - k)
+    m = (1.0 - g - k) / (1.0 - k)
+    y = (1.0 - b - k) / (1.0 - k)
+    return [int(round(v * 100)) for v in (c, m, y, k)]
+
+
+def vzorniky_z_pdf(data, limit_stran=4):
+    """
+    Vytáhne ze zakázkového listu barevné vzorníky — vyplněné čtverečky, které
+    v listu stojí u barvy zboží a u barvy potisku — a ke každému text, který
+    je hned vedle ("■ Black", "■ 103").
+
+    Barva je v listu jen jako RGB (list se kreslí pro obrazovku), takže CMYK
+    z ní vychází dopočítaný, ne změřený. Pokud je v názvu barvy napsaný
+    pantone, má vždycky přednost před touhle dopočítanou hodnotou.
+    """
+    if data[:5] != b"%PDF-":
+        return []
+    objekty = _objekty(data)
+    out = []
+    for poradi, fonty, obsahy in _obsahy_stranek(objekty)[:limit_stran]:
+        kusy, obdelniky = [], []
+        for o in obsahy:
+            sbirej = {}
+            _text_ze_stranky(o, fonty, sbirej)
+            kusy.extend(sbirej.get("kusy") or [])
+            obdelniky.extend(sbirej.get("obdelniky") or [])
+        radky = _radky(kusy)
+        for r in obdelniky:
+            # vzorník je malý čtvereček, ne linka ani podklad celé stránky
+            if not (4 <= r["w"] <= 60 and 4 <= r["h"] <= 60):
+                continue
+            if not (0.4 <= (r["w"] / r["h"]) <= 2.5):
+                continue
+            stred = r["y"] + r["h"] / 2.0
+            # popisek stojí v téže výšce hned vpravo od vzorníku
+            nej, nejd = None, None
+            for y, prvky, _cely in radky:
+                if abs(y - stred) > r["h"]:
+                    continue
+                vpravo = "".join(t for x, t in prvky if x >= r["x"] + r["w"] * 0.5).strip()
+                if not vpravo:
+                    continue
+                d = abs(y - stred)
+                if nejd is None or d < nejd:
+                    nej, nejd = re.sub(r"\s+", " ", vpravo)[:40], d
+            if not nej:
+                continue
+            out.append({
+                "strana": poradi, "popisek": nej, "rgb": r["rgb"],
+                "hex": "#%02X%02X%02X" % tuple(r["rgb"]),
+                "cmyk": _cmyk(r["rgb"]),
+            })
+    return out
 
 
 # ========================================================= text → pole =======
@@ -753,10 +873,14 @@ def _png(sirka, vyska, kanalu, vzorky):
             + kus(b"IEND", b""))
 
 
-def stranky_z_pdf(data, meritko=2.0, limit=4):
+def stranky_z_pdf(data, meritko=3.0, limit=4):
     """
     Vykreslí stránky PDF na obrázky. Díky tomu jde spočítat pokrytí i z náhledu,
     který je v PDF nakreslený čarami a písmem (a žádný obrázek v souboru nemá).
+
+    Měřítko 3 je asi 216 DPI — kompromis, aby se stránka dala v okně přiblížit
+    a přitom se nepřenášely megabajty. Na samotný rozbor pokrytí se označená
+    část stejně převykreslí ostře, viz vyrez_z_pdf.
 
     Vyžaduje knihovnu pypdfium2:  python -m pip install pypdfium2
     Bez ní se prostě žádné stránky nevrátí a zbytek aplikace funguje dál.
@@ -790,6 +914,65 @@ def stranky_z_pdf(data, meritko=2.0, limit=4):
     finally:
         doc.close()
     return out
+
+
+def vyrez_z_pdf(data, strana, x, y, w, h, sirka_ref, vyska_ref,
+                cil_px=2000, max_bodu=16 * 1000 * 1000):
+    """
+    Vykreslí JEN označenou část stránky, zato v mnohem vyšším rozlišení.
+
+    Celá stránka se kreslí v měřítku 2 (asi 145 DPI) — logo široké 99 mm z ní
+    vyjde jako 560 bodů a při přiblížení je kostrbaté. Rozbor pokrytí ale pracuje
+    s hranami písma, takže na nich záleží: čím ostřejší předloha, tím přesnější
+    plocha. Vykreslit takhle jemně celou stránku by znamenalo desítky megabajtů,
+    proto se převykreslí jen ten výřez, který si člověk vybral.
+
+    Souřadnice se předávají v bodech NÁHLEDU, který má prohlížeč zobrazený
+    (sirka_ref × vyska_ref) — tady se přepočtou na podíl stránky, takže na
+    měřítku původního náhledu nezáleží.
+    """
+    try:
+        import pypdfium2 as pdfium
+    except ImportError:
+        return None
+    import base64
+    doc = pdfium.PdfDocument(data)
+    try:
+        i = max(0, min(len(doc) - 1, int(strana) - 1))
+        stranka = doc[i]
+        sirka_pt, vyska_pt = stranka.get_size()
+        if not sirka_ref or not vyska_ref:
+            return None
+        # podíly stránky -> body PDF (1 bod = 1/72 palce)
+        l = max(0.0, x / float(sirka_ref)) * sirka_pt
+        p = max(0.0, 1.0 - (x + w) / float(sirka_ref)) * sirka_pt
+        t = max(0.0, y / float(vyska_ref)) * vyska_pt
+        d = max(0.0, 1.0 - (y + h) / float(vyska_ref)) * vyska_pt
+        sirka_vyrezu = sirka_pt - l - p
+        vyska_vyrezu = vyska_pt - t - d
+        if sirka_vyrezu < 1 or vyska_vyrezu < 1:
+            return None
+        meritko = cil_px / max(sirka_vyrezu, vyska_vyrezu)
+        # strop na počet bodů, ať drobný výřez nespolkne paměť
+        if sirka_vyrezu * vyska_vyrezu * meritko * meritko > max_bodu:
+            meritko = (max_bodu / (sirka_vyrezu * vyska_vyrezu)) ** 0.5
+        meritko = max(1.0, min(40.0, meritko))
+        bitmapa = stranka.render(scale=meritko, crop=(l, d, p, t), rev_byteorder=True)
+        syrove = bytes(bitmapa.buffer)
+        bodu = bitmapa.width * bitmapa.height
+        kanalu = len(syrove) // bodu if bodu else 0
+        if kanalu not in (1, 3, 4):
+            return None
+        png = _png(bitmapa.width, bitmapa.height, kanalu, syrove[:bodu * kanalu])
+        if not png:
+            return None
+        return {
+            "strana": i + 1, "sirka": bitmapa.width, "vyska": bitmapa.height,
+            "meritko": meritko, "px_na_mm": meritko * 72.0 / 25.4,
+            "url": "data:image/png;base64," + base64.b64encode(png).decode("ascii"),
+        }
+    finally:
+        doc.close()
 
 
 def obrazky_z_pdf(data, limit=8, max_bajtu=6 * 1024 * 1024):
@@ -859,8 +1042,12 @@ def zpracuj(data, pravidla=None):
         stranky = stranky_z_pdf(data)
     except Exception:
         stranky = []
+    try:
+        vzorniky = vzorniky_z_pdf(data)
+    except Exception:
+        vzorniky = []
     return {"ok": True, "text": text, "pole": pole, "zdroj": zdroj,
-            "obrazky": obrazky, "stranky": stranky,
+            "obrazky": obrazky, "stranky": stranky, "vzorniky": vzorniky,
             "dvojice": [{"popisek": p, "hodnota": h}
                         for p, h in dvojice_z_textu(text, pravidla.get("popisky", {}))][:120]}
 
