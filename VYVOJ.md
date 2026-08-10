@@ -76,6 +76,7 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 12:49 | Viskozita ve výpočtu spotřeby, klišé pro tampontisk |
 | 13:14 | Síta patří k technologii, každá má vlastní sadu |
 | 13:28 | Prezentace z deníku, členěná datem a časem |
+| 14:00 | Naplánovaná aktualizace prezentace i GitHubu ve všední dny v 17:00 |
 
 ---
 
