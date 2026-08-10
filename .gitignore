@@ -1,8 +1,8 @@
 __pycache__/
 *.pyc
 
-# provozní data dílny — nepatří do repozitáře
+# provozní a licencovaná data — do veřejného repozitáře nepatří
+databaze barev/
 evidence/
-databaze barev/receptury_vlastni.csv
 *.bak
 *.tmp

@@ -1,0 +1,101 @@
+CO JE POTŘEBA DOPLNIT DO PARAMETRŮ
+================================================================================
+Aplikace umí spotřebu barvy spočítat, ale potřebuje k tomu čísla, která
+si nemůže vymyslet — údaje výrobce tkaniny a zkušenost dílny. Tenhle
+soubor říká, co přesně sehnat a kam to zapsat.
+
+Dokud je to prázdné, aplikace počítá jako dřív (paušál dle technologie)
+a u dopočtených hodnot píše "orientační".
+
+
+1) PARAMETRY SÍT  →  sita.csv
+--------------------------------------------------------------------------------
+KDE TO VZÍT: datový list tkaniny od výrobce (Sefar, Saati, Murakami).
+             Bývá ke stažení na webu podle označení tkaniny, např.
+             "Sefar PET 1500 technical data".
+
+KAŽDÁ TECHNOLOGIE MÁ SVOJI SADU. Sloupec technologie určuje, kde se síto
+nabídne — v kalkulaci se ve výběru objeví jen síta té technologie, ve které
+se zrovna pracuje. Sítotisk na plast a sítotisk na textil tedy mají vlastní
+seznamy a nemíchají se. Řádek s prázdnou technologií platí všude.
+
+Dokud pro technologii žádné síto nezapíšete, nabídne se standardní řada
+26 sít (Sefar/Saati DF06), aby bylo z čeho vybírat.
+
+CO Z NĚJ OPSAT (na každé síto jeden řádek):
+    technologie          SCR, TXP… podle toho, kde se síto používá
+    sito                 označení, jak mu říkáte — např. 120-34
+    nitky_cm             počet nití na centimetr (120)
+    vlakno_um            průměr vlákna v µm (34)
+    otevrena_plocha_pct  otevřená plocha v % — v listu "open area"
+    tloustka_um          tloušťka tkaniny v µm — "fabric thickness"
+    vth_cm3_m2           teoretický objem barvy — "theoretical ink volume"
+                         (je-li v listu uvedený, má přednost před dopočtem)
+
+NEPOVINNÉ, ALE UŽITEČNÉ:
+    prenos               kolik z teoretického objemu se opravdu přenese
+                         (0 až 1; nevyplněno = 0,70). Zjistí se zvážením:
+                         vytiskněte známou plochu, zvažte spotřebu a
+                         vydělte ji teoretickým objemem × hustotou.
+    viskozita_od/_do     doporučený výtokový čas k tomuhle sítu v sekundách
+    poharek              kterým pohárkem se měří (DIN 4 mm, Ford 4 mm…)
+
+STAČÍ I ČÁST: vyplníte-li jen nitky a vlákno, aplikace si otevřenou
+plochu a tloušťku dopočítá. U jemných sít se trefí do 10 %, u hrubých
+je asi o pětinu výš — proto to označuje jako orientační.
+
+
+2) KLIŠÉ PRO TAMPONTISK  →  sita.csv (řádky s technologií PDP)
+--------------------------------------------------------------------------------
+Tampontisk nemá tkaninu; kolik barvy přenese, určuje HLOUBKA LEPTU.
+
+CO SEHNAT: hloubku leptu vašich klišé v mikrometrech. Bývá daná
+           technologií výroby klišé (ocel, polymer) a expozicí; měří se
+           hloubkoměrem, nebo ji uvede dodavatel klišé.
+
+JAK TO ZAPSAT:
+    technologie   PDP
+    sito          jak klišé pojmenujete ("klise 18 um", "ocel 20")
+    hloubka_um    hloubka leptu v µm
+
+Hloubka v µm se rovná teoretickému objemu v cm³/m², takže víc není
+potřeba. Ve vzoru jsou dva řádky, upravte je podle svých klišé.
+
+POZOR: dokud pro PDP žádné klišé není, aplikace u tampontisku spotřebu
+nepočítá a nenabízí — sítotiskovou tkaninu si nepůjčí.
+
+
+3) KOEFICIENTY  →  koeficienty.csv
+--------------------------------------------------------------------------------
+To, co z geometrie nevyplývá. Všechny jsou teď 1,00 = beze změny.
+Odhadovat je za vás nebudu, vyjdou ze zkušenosti dílny.
+
+    kryvost     Vysoce krycí / Standard / Transparentní
+                Kolikrát víc barvy proti standardu? Krycí bílá na tmavém
+                textilu bývá výrazně nad 1.
+
+    material    Hledá se v názvu materiálu, u složeného ("Bavlna /
+                Polyester") se vezme nejvyšší nalezený. Savý textil bere
+                víc než hladký plast.
+
+    podklad     světlý / střední / tmavý — třída se určí z odstínu barvy
+                produktu automaticky. Světlá barva na tmavém podkladu se
+                často tiskne dvakrát; pak je koeficient kolem 2.
+
+    viskozita   Klíč je ROZSAH výtokového času: 16-24, <16, >24.
+                Řidší barva projde sítem víc, hustší míň.
+
+JAK NA TO PRAKTICKY: vezměte pár uzavřených zakázek, kde víte, kolik
+barvy se skutečně spotřebovalo, a porovnejte s tím, co aplikace spočítá
+při koeficientech 1,00. Podíl skutečnost/výpočet je hledaný koeficient.
+
+
+4) K ČEMU SE TO POUŽIJE
+--------------------------------------------------------------------------------
+    V [cm³/m²] = otevřená plocha × tloušťka tkaniny  (u klišé hloubka leptu)
+    g/m² = V × přenos × hustota barvy
+           × kryvost × materiál × podklad × viskozita
+
+Výsledek se v kalkulaci nabídne pod polem spotřeby i s celým rozpisem,
+aby šlo zkontrolovat, z čeho číslo vzniklo. Ručně zadanou hodnotu
+aplikace sama nikdy nepřepíše.

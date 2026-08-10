@@ -94,6 +94,11 @@ localStorage; receptury samotné najdete i v záložce Receptury.
 
 SÍTO / KRYVOST / POVRCH (parametry receptury)
 ---------------------------------------------
+U TAMPONTISKU (PDP) se síto nevybírá a netiskne se na míchací lístek —
+tampontisk jede přes leptané klišé, ne přes síto. Ostatní technologie
+síto mají. Je to vlastnost technologie, takže se to pozná podle vybrané
+polohy potisku.
+
 Každá receptura (Pantone i Custom) může nést tři parametry:
 - Síto: standardní řada nití/cm-µm (32-100 ... 165-31, 180-31)
 - Kryvost: Vysoce krycí / Standard / Transparentní
@@ -352,6 +357,133 @@ POSTUP
   má přednost větší předloha, protože z ní vyjde pokrytí přesněji.
   Jiný motiv zvolíte tlačítkem, nebo ho označíte tažením myši.
 
+EVIDENCE ZBYTKŮ BAREV (menu → "Zbytky barev")
+  Po zakázce zbude v kelímku barva. Buď se vyhodí, nebo někde stojí bez
+  popisku, dokud ji nikdo nepozná. Evidence ji vezme do systému.
+
+  BĚŽNÝ POSTUP: ŠTÍTEK PŘI MÍCHÁNÍ, ZBYTEK AŽ PO TISKU
+    Kolik barvy zbude, se dozvíte až po zakázce — ne ve chvíli míchání.
+    Postup je proto obrácený:
+
+      1. Po namíchání zmáčkněte "Štítek na kelímek". Dávka se založí do
+         evidence celá a označí se jako "v tisku". Štítek nalepte na
+         kelímek. (Přepínač "s tužidlem" u tlačítka rovnou nastaví
+         hlídání pot life od téhle chvíle.)
+      2. Kód se vytiskne i na míchacím lístku, takže papír a kelímek
+         drží pohromadě.
+      3. Po zakázce štítek načtěte čtečkou — kdekoli v aplikaci. Otevře
+         se okno "Kolik barvy zbylo?", zvážíte kelímek, zapíšete číslo
+         a tím je zbytek v evidenci. Ukáže se i kolik se spotřebovalo.
+         Tlačítko "Nezbylo nic" kelímek uzavře.
+
+    Dokud se zbytek nezapíše, dávka se v evidenci ukazuje jako "v tisku",
+    nepočítá se do zásoby a jiné zakázce se nenabízí — barva je zrovna
+    na stroji. Připomíná se pruhem nahoře a filtrem "v tisku".
+    Zapsat zbytek jde i bez čtečky, tlačítkem "Zadat zbytek" u řádku.
+
+  KDYŽ ZBYTEK ZNÁTE ROVNOU
+    Tlačítko "Znám zbytek rovnou" v kalkulaci uloží zbytek jedním krokem.
+    Jde to i ručně v záložce Zbytky barev tlačítkem "+ Uložit zbytek".
+    V obou případech se převezme receptura i její složení, zakázka,
+    produkt, barva a poloha, ať je později jasné, odkud zbytek je.
+
+  ŠTÍTEK S ČÁROVÝM KÓDEM
+    Každý kelímek dostane krátký kód (např. Z4TDNU2). Tlačítko "Štítek"
+    otevře náhled a vytiskne lístek s čárovým kódem, názvem barvy,
+    množstvím a datem. Kód se kreslí přímo v aplikaci (Code 128), takže
+    tisk funguje i bez internetu. Přečte ho každá běžná čtečka.
+    V kódu nejsou znaky, které se pletou (0/O, 1/I).
+
+    Načtením kódu čtečkou kdekoli v aplikaci se otevře evidence a
+    kelímek se zvýrazní i s tím, kolik v něm je.
+
+  DOPORUČENÍ PŘI NOVÉ ZAKÁZCE
+    Jakmile je v kalkulaci spočítaná dávka, aplikace projde evidenci a
+    napíše: "Na tuto zakázku můžete využít 20,0 g z kelímku Z4TDNU2 —
+    domíchat pak stačí 30,0 g místo 50,0 g." Tlačítkem "Použít" se to
+    promítne do dávky.
+
+    DVĚ VARIANTY VYUŽITÍ
+      Nevejde-li se kelímek do dávky celý, aplikace nabídne obojí:
+
+      1. DO DÁVKY ZAKÁZKY — použije se jen tolik, kolik se vejde, zbytek
+         zůstane v kelímku. Míchá se přesně to, co zakázka potřebuje.
+      2. CELÝ KELÍMEK — dávka se zvětší na nejmenší velikost, ve které se
+         zbytek spotřebuje beze zbytku:
+
+             dávka = zbytek / nejtěsnější poměr
+
+         Odstín zůstane přesně stejný, jen se namíchá víc, než zakázka
+         žádá. U výsledku i v pruhu je napsáno o kolik, ať je vidět,
+         co to stojí.
+
+      Příklad: zakázka potřebuje 50 g, v kelímku je 300 g barvy, jejíž
+      složení je sytější než cíl. Do dávky se vejde 26,7 g. Při volbě
+      "celý kelímek" se dávka zvětší na 562,4 g — o 512,4 g víc, než
+      zakázka potřebuje, ale kelímek se dočistí.
+
+      Přepínat mezi variantami lze kdykoli tlačítky "Celý kelímek" a
+      "Jen na zakázku". Zvětšená dávka se propíše do rozpisu komponent,
+      na míchací lístek i do asistenta navážení.
+
+    KOLIK ZBYTKU JDE POUŽÍT
+      Zbytek je vlastně předem namíchaná část dávky. Pro každou složku
+      musí platit:  zbytek × jeho podíl  ≤  dávka × cílový podíl.
+      Nejtěsnější z těch podmínek určuje, kolik zbytku se vejde, aby
+      odstín zůstal přesně stejný.
+
+      Díky tomu se nabídne i zbytek, který není přesně tatáž receptura:
+      z čisté bílé jde do dávky, která má 59,4 % bílé, použít 59,4 %
+      dávky a zbytek se domíchá. Obsahuje-li zbytek složku, kterou cíl
+      vůbec nemá, nenabídne se — do téhle barvy nepatří.
+
+    Asistent navážení pak počítá s tím, že zbytek už je v nádobě, a vede
+    jen dolití zbylých složek. Po dokončení tlačítko "Odepsat zbytek ze
+    skladu" ubere použité gramy z evidence.
+
+  EXPIRACE A ČAS POUŽITELNOSTI (POT LIFE)
+    Hlídají se dvě různé věci a rozhoduje ta, která vyprší dřív:
+
+      Spotřebovat do   prosté datum. Nastaví se ručně u kelímku nebo
+                       rovnou při ukládání zbytku.
+      Pot life         dvousložkové barvy s tužidlem tuhnou od chvíle,
+                       kdy se smíchají. Zadá se počet hodin; přepínač
+                       "s tužidlem" ho předvyplní na 8 h. Čas běží od
+                       namíchání, ne od uložení.
+
+    U kelímku je vidět, kolik zbývá ("končí za 56 min", "po lhůtě před
+    12 h") a proč. Upozorňuje se na třech místech:
+      · pruh nahoře v záložce Zbytky barev,
+      · číslo u položky "Zbytky barev" v menu (červené = něco je po
+        lhůtě, oranžové = brzy končí),
+      · hláška po spuštění aplikace.
+    Za "brzy" se bere poslední pětina lhůty, nejvýš ale den dopředu.
+
+    PROŠLÉ SE NENABÍZEJÍ. Kelímek po lhůtě aplikace při nové zakázce
+    vynechá — barva v něm sice je, ale použitelná není. Naopak ty, kterým
+    lhůta brzy končí, jdou v nabídce dopředu a mají u sebe štítek
+    "spotřebovat za …": buď se použijí teď, nebo se vyhodí.
+
+  VISKOZITA
+    Barva časem houstne. Tlačítkem "Změřit" se zapíše výtokový čas
+    v sekundách a typ pohárku (DIN 4/6 mm, Ford 4 mm, ISO 4 mm, Zahn 2).
+    Předchozí měření zůstane uložené, takže je u kelímku vidět posun —
+    "24,0 s · DIN 4 mm, měřeno 10. 8. · dřív 22,0 s (zhoustla)".
+    Drží se posledních deset měření. Aktuální hodnota se tiskne i na
+    štítku.
+
+  FILTRY
+    "bez báze" / "s bází" — báze (transparentní, medium, extender) barvu
+    ředí. Zbytek s bází se nehodí tam, kde je potřeba plná sytost, a
+    naopak. Dál "končí lhůta" a "po lhůtě", hledání (kód, barva, zakázka,
+    složka) a přepínač "jen s množstvím", který skryje dobrané kelímky.
+
+  KDE JSOU DATA
+    Ve složce "evidence" vedle aplikace, v souboru zbytky.csv. Kelímek
+    stojí v dílně a musí být vidět ze všech počítačů, ne jen z toho, kde
+    ho někdo zapsal — proto soubor, ne jen prohlížeč. Ukládá se sám při
+    každé změně, předchozí verze zůstává jako .bak.
+
 PŘELITÍ PŘI VÁŽENÍ — PŘEPOČET DÁVKY (asistent navážení)
   Přelitou barvu z nádoby nikdo nedostane zpátky. Odstín se pak dá
   zachovat jediným způsobem: dorovnat všechny ostatní komponenty, tedy
@@ -387,6 +519,112 @@ PŘELITÍ PŘI VÁŽENÍ — PŘEPOČET DÁVKY (asistent navážení)
   Tabulka postupu ukazuje u každé komponenty podíl v %, cíl, kolik je
   nalito a kolik zbývá. Zbytky menší, než váha rozliší, jsou označené
   "pod tol." — vážit 0,05 g na váze s dílkem 0,1 g nemá smysl.
+
+TECHNOLOGIE JAKO PRACOVNÍ REŽIM
+  V menu je nahoře výběr technologie (SCR, TXP, PDP, TRS, FIR). Zvolená
+  technologie zúží celou aplikaci:
+    · katalog jen na produkty, které se tou technologií tisknou
+      (SCR 411, PDP 511, TXP 298, TRS 695, FIR 35 z 1 320),
+    · polohy potisku jen na ty dané technologie,
+    · nabídku receptur jen na řady k té technologii přiřazené.
+  Zvolená technologie je vidět v hlavičce pod logem a pamatuje si ji.
+
+  Katalog se nedělí natvrdo: 577 z 1 320 produktů se tiskne víc
+  technologiemi (tričko sítotiskem i transferem), takže je technologie
+  filtr, ne přihrádka — produkt se objeví v každé, kterou umí.
+
+  Načte-li se zakázkový list z jiné technologie, aplikace se na ni
+  přepne sama a napíše to.
+
+ŘADY BAREV PODLE TECHNOLOGIE
+  V "Připojení k mostu" má každý soubor databáze přepínače technologií.
+  Neoznačený soubor platí pro všechny. Určit to lze i v samotném CSV
+  volitelným sloupcem "technologie" (u každé receptury zvlášť) — hodí se,
+  když jeden soubor obsahuje řady pro víc technologií.
+
+SPOTŘEBA BARVY ZE SÍTA (složka "parametry")
+  Kolik barvy projde sítem, je dané geometrií tkaniny:
+
+      V [cm³/m²] = otevřená plocha [díl] × tloušťka tkaniny [µm]
+      g/m² = V × faktor přenosu × hustota barvy × koeficienty
+
+  (metr čtvereční o tloušťce jednoho mikrometru je přesně 1 cm³, takže se
+  nic nepřevádí). Faktor přenosu říká, kolik z teoretického objemu se
+  opravdu přenese — část barvy zůstane v sítu; výchozí je 0,70.
+
+  SÍTA PATŘÍ K TECHNOLOGII
+    Sloupec technologie určuje, kde se síto nabídne. V kalkulaci se ve
+    výběru objeví jen síta té technologie, ve které se pracuje — sítotisk
+    na plast a na textil mají vlastní sady a nemíchají se. Řádek
+    s prázdnou technologií platí všude.
+
+    U každého síta se v nabídce ukazuje i jeho teoretický objem
+    ("120-34 · 19 cm³/m²"), aby bylo poznat, co která tkanina udělá.
+
+    Dokud pro technologii žádné síto zapsané není, nabídne se standardní
+    řada 26 sít, aby bylo z čeho vybírat.
+
+    Má-li receptura nastavené síto, které v parametrech dané technologie
+    není (třeba se přenesla z jiné technologie), zůstane v nabídce
+    označené "není v parametrech TXP" — aby se nastavení tiše neztratilo.
+
+  PARAMETRY SÍT — parametry/sita.csv
+      technologie;sito;nitky_cm;vlakno_um;otevrena_plocha_pct;
+      tloustka_um;vth_cm3_m2;prenos;pozn
+  Vyplňte podle datového listu tkaniny (Sefar, Saati). Prázdné sloupce
+  si aplikace dopočítá z názvu síta (120-34 = 120 nití/cm, vlákno 34 µm):
+      oko = 10000/nitky − vlákno
+      otevřená plocha = (oko / (oko + vlákno))²
+      tloušťka = 1,6 × vlákno
+  Koeficient 1,6 vyšel ze srovnání se čtyřmi skutečnými tkaninami. Takový
+  dopočet sedí u jemných sít do 10 %, u hrubých je asi o pětinu vyšší,
+  a v aplikaci je označený jako "orientační". Skutečné údaje výrobce mají
+  vždycky přednost.
+
+  Síto se použije jen tehdy, když je v tabulce pro danou technologii
+  (nebo bez uvedené technologie). Sítotisková tkanina se do tampontisku
+  nepůjčí.
+
+  KOEFICIENTY — parametry/koeficienty.csv
+      druh;klic;koef;pozn
+  Tři druhy, které geometrie neví:
+      kryvost   Vysoce krycí / Standard / Transparentní (hledá se přesně)
+      material  hledá se v názvu materiálu, u složeného ("Bavlna /
+                Polyester") se vezme nejvyšší nalezený koeficient
+      podklad   světlý / střední / tmavý — třída se určí z odstínu barvy
+                produktu, aby nebylo nutné vypisovat 4 218 variant
+  Výchozí hodnoty jsou 1,00, tedy beze změny. Doplňte je podle zkušenosti
+  dílny; dokud jsou na jedné, počítá se jen geometrie.
+
+  KLIŠÉ PRO TAMPONTISK
+    Tampontisk nemá tkaninu — kolik barvy přenese, určuje hloubka leptu
+    klišé. Zapisuje se do téhož souboru řádkem s technologií PDP a
+    vyplněným sloupcem hloubka_um; hloubka v µm se rovná teoretickému
+    objemu v cm³/m². V kalkulaci se pak místo síta nabídne výběr klišé.
+    Dokud pro PDP žádné klišé není, spotřeba se nepočítá.
+
+  VISKOZITA
+    Pole "Viskozita — výtokový čas (s)" je v kalkulaci vedle počtu kusů.
+    Zadá se změřený výtokový čas; tlačítkem "Uložit k receptuře" se
+    zapamatuje jako referenční hodnota barvy a příště se předvyplní.
+
+    Má-li síto v parametrech vyplněný doporučený rozsah (viskozita_od,
+    viskozita_do), aplikace vedle napíše, jestli měření sedí, nebo je
+    mimo — a čím to je ("barva je řidší, protéká víc").
+
+    Do výpočtu spotřeby vstupuje viskozita koeficientem, jehož klíč je
+    rozsah: 16-24, <16, >24. Jak moc řidší barva protéká víc, je věc
+    konkrétní barvy a stroje, proto se to bere z tabulky, ne ze vzorce.
+
+    Viskozita se tiskne i na míchacím lístku.
+
+  V kalkulaci se pak pod polem spotřeby objeví, co ze síta vychází,
+  s celým rozpisem (objem × přenos × hustota × koeficienty), a tlačítkem
+  se to převezme. Ručně zadanou hodnotu aplikace nikdy nepřepíše sama.
+
+  CO JE POTŘEBA DOPLNIT: soupis je ve složce parametry v souboru
+  CO_SEHNAT.txt — kde vzít údaje výrobce tkaniny, jak změřit hloubku
+  leptu klišé a jak si odvodit koeficienty z uzavřených zakázek.
 
 DATABÁZE BAREV SE NAČÍTAJÍ SAMY
   Ve složce "databaze barev" vedle aplikace mohou ležet CSV s recepturami.

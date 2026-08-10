@@ -1,0 +1,31 @@
+﻿technologie;sito;nitky_cm;vlakno_um;otevrena_plocha_pct;tloustka_um;vth_cm3_m2;prenos;hloubka_um;viskozita_od;viskozita_do;poharek;pozn
+;;;;;;;;;;;;"Vyplnte podle datoveho listu tkaniny (Sefar/Saati). Prazdne = dopocet z nazvu sita, jen orientacne."
+SCR;32-100;32;100;;;;;;;;;
+SCR;36-100;36;100;;;;;;;;;
+SCR;43-80;43;80;;;;;;;;;
+SCR;48-70;48;70;;;;;;;;;
+SCR;54-64;54;64;;;;;;;;;
+SCR;61-64;61;64;;;;;;;;;
+SCR;68-55;68;55;;;;;;;;;
+SCR;68-64;68;64;;;;;;;;;
+SCR;77-48;77;48;;;;;;;;;
+SCR;77-55;77;55;;;;;;;;;
+SCR;77-64;77;64;;;;;;;;;
+SCR;90-40;90;40;;;;;;;;;
+SCR;90-48;90;48;;;;;;;;;
+SCR;95-40;95;40;;;;;;;;;
+SCR;100-40;100;40;;;;;;;;;
+SCR;110-40;110;40;;;;;;;;;
+SCR;120-31;120;31;;;;;;;;;
+SCR;120-34;120;34;;;;;;;;;
+SCR;120-40;120;40;;;;;;;;;
+SCR;130-34;130;34;;;;;;;;;
+SCR;140-31;140;31;;;;;;;;;
+SCR;140-34;140;34;;;;;;;;;
+SCR;150-31;150;31;;;;;;;;;
+SCR;150-34;150;34;;;;;;;;;
+SCR;165-31;165;31;;;;;;;;;
+SCR;180-31;180;31;;;;;;;;;
+;;;;;;;;;;;;"KLISE PRO TAMPONTISK: radek s technologii PDP a vyplnenou hloubkou leptu. Hloubka v um se rovna teoretickemu objemu v cm3/m2."
+PDP;klise 18 um;;;;;;;18;;;;"vzor - upravte oznaceni i hloubku dle sveho leptu"
+PDP;klise 25 um;;;;;;;25;;;;

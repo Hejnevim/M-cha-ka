@@ -64,6 +64,17 @@ if hasattr(sys.stdout, "reconfigure"):
 SLOZKA = os.path.dirname(os.path.abspath(__file__))
 CONFIG = os.path.join(SLOZKA, "sgps_config.json")
 DATABAZE = os.path.join(SLOZKA, "databaze barev")
+# Složky, se kterými most pracuje. Nic mimo tenhle seznam číst ani zapisovat
+# nelze — aplikace běžící v prohlížeči se tak nedostane jinam než sem.
+SLOZKY = {
+    "databaze barev": DATABAZE,          # nakoupené i vlastní receptury
+    "evidence": os.path.join(SLOZKA, "evidence"),   # zbytky barev, sklad
+    "parametry": os.path.join(SLOZKA, "parametry"),  # síta, koeficienty spotřeby
+}
+
+
+def _slozka(nazev):
+    return SLOZKY.get((nazev or "databaze barev").strip(), None)
 
 # Poslední přečtená PDF si most chvíli podrží, aby šlo dodatečně vykreslit
 # ostrý výřez, aniž by prohlížeč soubor posílal znovu. Drží se jen pár
@@ -113,14 +124,15 @@ def _cti_csv(cesta):
     return syrove.decode("utf-8", "replace")
 
 
-def _seznam_databazi():
+def _seznam_databazi(slozka=None):
     out = []
-    if not os.path.isdir(DATABAZE):
+    slozka = slozka or DATABAZE
+    if not os.path.isdir(slozka):
         return out
-    for jmeno in sorted(os.listdir(DATABAZE)):
+    for jmeno in sorted(os.listdir(slozka)):
         if not jmeno.lower().endswith(".csv"):
             continue
-        cesta = os.path.join(DATABAZE, jmeno)
+        cesta = os.path.join(slozka, jmeno)
         if not os.path.isfile(cesta):
             continue
         st = os.stat(cesta)
@@ -141,18 +153,19 @@ def _seznam_databazi():
     return out
 
 
-def _uloz_databazi(jmeno, text):
+def _uloz_databazi(jmeno, text, slozka=None):
     """
-    Zapíše CSV do složky databází. Slouží pro vlastní receptury, které si
-    aplikace odkládá k produktům — aby nezůstaly jen v prohlížeči.
+    Zapíše CSV do některé ze složek, se kterými most pracuje — vlastní
+    receptury a evidence zbytků, aby nezůstaly jen v prohlížeči.
 
     Zapisuje se přes dočasný soubor a předchozí verze se odloží jako .bak,
-    aby výpadek uprostřed zápisu nepřipravil nikoho o databázi.
+    aby výpadek uprostřed zápisu nepřipravil nikoho o data.
     """
+    slozka = slozka or DATABAZE
     if not jmeno or jmeno != os.path.basename(jmeno) or not jmeno.lower().endswith(".csv"):
-        raise ValueError("Zapisovat lze jen CSV přímo do složky databází.")
-    os.makedirs(DATABAZE, exist_ok=True)
-    cesta = os.path.join(DATABAZE, jmeno)
+        raise ValueError("Zapisovat lze jen CSV přímo do složky.")
+    os.makedirs(slozka, exist_ok=True)
+    cesta = os.path.join(slozka, jmeno)
     docasny = cesta + ".tmp"
     # newline="" — konce řádků si určuje ten, kdo obsah posílá; jinak by se
     # jeho \r\n přeložilo znovu a mezi řádky by zůstávaly prázdné mezery
@@ -172,11 +185,12 @@ def _uloz_databazi(jmeno, text):
             "velikost": st.st_size}
 
 
-def _databaze_soubor(jmeno):
-    """Vrátí obsah CSV ze složky databází. Jen holé jméno souboru, nic jiného."""
+def _databaze_soubor(jmeno, slozka=None):
+    """Vrátí obsah CSV ze složky. Jen holé jméno souboru, nic jiného."""
+    slozka = slozka or DATABAZE
     if not jmeno or jmeno != os.path.basename(jmeno) or not jmeno.lower().endswith(".csv"):
         return None
-    cesta = os.path.join(DATABAZE, jmeno)
+    cesta = os.path.join(slozka, jmeno)
     if not os.path.isfile(cesta):
         return None
     st = os.stat(cesta)
@@ -475,18 +489,24 @@ class Most(SimpleHTTPRequestHandler):
         try:
             zadani = json.loads(telo.decode("utf-8"))
             jmeno = str(zadani.get("jmeno") or "")
+            nazev = str(zadani.get("slozka") or "databaze barev")
+            slozka = _slozka(nazev)
+            if slozka is None:
+                raise ValueError("Neznámá složka „" + nazev + "“.")
             text = zadani.get("text")
             if not isinstance(text, str):
                 raise ValueError("Chybí obsah souboru.")
-            vysledek = _uloz_databazi(jmeno, text)
+            vysledek = _uloz_databazi(jmeno, text, slozka)
+            vysledek["slozka"] = nazev
         except ValueError as e:
             return self._odpoved({"ok": False, "chyba": str(e)}, 400)
         except Exception as e:
             return self._odpoved({"ok": False, "chyba": str(e)}, 500)
         if sys.stdout is not None:
             try:
-                sys.stdout.write("  uloženo: databaze barev/%s (%d B)\n"
-                                 % (vysledek["jmeno"], vysledek["velikost"]))
+                sys.stdout.write("  uloženo: %s/%s (%d B)\n"
+                                 % (vysledek.get("slozka", "?"), vysledek["jmeno"],
+                                    vysledek["velikost"]))
             except Exception:
                 pass
         vysledek["ok"] = True
@@ -547,18 +567,23 @@ class Most(SimpleHTTPRequestHandler):
                               "soubor": "export ze SGPS ze souboru",
                               "rest": "HTTP API systému SGPS"}.get(cfg.get("rezim"), "")})
             if u.path == "/api/databaze":
+                nazev = (dotazy.get("slozka") or ["databaze barev"])[0]
+                slozka = _slozka(nazev)
+                if slozka is None:
+                    return self._odpoved({"ok": False,
+                                          "chyba": "Neznámá složka „" + nazev + "“."}, 400)
                 soubor = (dotazy.get("soubor") or [""])[0]
                 if soubor:
-                    d = _databaze_soubor(soubor)
+                    d = _databaze_soubor(soubor, slozka)
                     if not d:
                         return self._odpoved({"ok": False,
                                               "chyba": "Soubor „" + soubor + "“ ve složce "
-                                                       "databaze barev není."}, 404)
+                                                       + nazev + " není."}, 404)
                     d["ok"] = True
                     return self._odpoved(d)
-                return self._odpoved({"ok": True, "slozka": "databaze barev",
-                                      "je": os.path.isdir(DATABAZE),
-                                      "soubory": _seznam_databazi()})
+                return self._odpoved({"ok": True, "slozka": nazev,
+                                      "je": os.path.isdir(slozka),
+                                      "soubory": _seznam_databazi(slozka)})
             if u.path == "/api/zakazky":
                 q = (dotazy.get("q") or [""])[0]
                 limit = int((dotazy.get("limit") or ["200"])[0])

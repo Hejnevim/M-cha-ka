@@ -1,0 +1,17 @@
+﻿druh;klic;koef;pozn
+;;;"druh = kryvost | material | podklad | viskozita. koef 1,00 = beze zmeny."
+kryvost;Vysoce krycí;1,00;"doplnte dle zkusenosti dilny"
+kryvost;Standard;1,00;
+kryvost;Transparentní;1,00;
+material;Bavlna;1,00;"savy material bere vic barvy"
+material;Polyester;1,00;
+material;Kov;1,00;
+material;ABS;1,00;
+material;Papír/karton;1,00;
+podklad;světlý;1,00;"trida se urci z odstinu barvy produktu"
+podklad;střední;1,00;
+podklad;tmavý;1,00;"svetla barva na tmavem podkladu casto vyzaduje dva pruchody"
+;;;"viskozita: klic je rozsah vytokoveho casu v sekundach - 18-22, <18, >22"
+viskozita;<16;1,00;"ridsi barva protece sitem vic"
+viskozita;16-24;1,00;"bezny pracovni rozsah"
+viskozita;>24;1,00;"hustsi barva protece min"

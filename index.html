@@ -239,14 +239,20 @@ const { useState, useEffect, useMemo, useRef } = React;
 const html = htm.bind(React.createElement);
 
 /* ---------- technologie a výchozí spotřeby (g/m², editovatelné) ---------- */
+/* sito:false = technologie sítem netiskne (tampontisk jede přes leptané
+   klišé), takže se u ní síto nevybírá ani netiskne na lístek. */
 const TECHS = {
   SCR: { name: "Sítotisk (plast, papír) / rotační", gm2: 6.0 },
-  PDP: { name: "Tampontisk", gm2: 2.5 },
+  PDP: { name: "Tampontisk", gm2: 2.5, sito: false },
   TXP: { name: "Sítotisk (textil)", gm2: 14.0 },
   TRS: { name: "Transfer", gm2: 18.0 },
   FIR: { name: "Firing — Low Temperature", gm2: 8.0 },
 };
-// Standardní sítotisková síta (nití/cm – průměr vlákna µm), řada Sefar/Saati dle DF06.
+const techMaSito = (t) => !(TECHS[t] && TECHS[t].sito === false);
+/* Standardní sítotisková síta (nití/cm – průměr vlákna µm), řada Sefar/Saati
+   dle DF06. Slouží jen jako výchozí nabídka, dokud nejsou v parametrech
+   vlastní síta — každá technologie totiž používá jinou sadu a jakmile se
+   do parametry/sita.csv zapíšou, nabízejí se jen ta její. */
 const SITA = [
   "32-100","36-100","43-80","48-70","54-64","61-64","68-55","68-64",
   "77-48","77-55","77-64","90-40","90-48","95-40","100-40","110-40",
@@ -258,6 +264,22 @@ const POVRCHY = [
   "Aluminium Foil mat","Bílé","Mléčně bílá / přírodní","Stupeň",
   "Stříbro","transparentní","Černé",
 ];
+
+/* ===================== TECHNOLOGIE JAKO PRACOVNÍ REŽIM =====================
+   Dílna nepracuje s celým katalogem najednou — sítotiskař řeší jen produkty,
+   které se sítotiskem tisknou, a jen svoje řady barev a síta. Zvolená
+   technologie proto zužuje katalog, polohy potisku i databáze receptur.
+
+   Rozdělit katalog natvrdo ale nejde: 577 z 1 320 produktů se tiskne víc
+   technologiemi (tričko sítotiskem i transferem). Technologie je tedy filtr,
+   ne přihrádka — produkt se objeví v každé technologii, kterou umí. */
+const TECH_PORADI = ["SCR", "TXP", "PDP", "TRS", "FIR"];
+
+/* Umí produkt tuhle technologii? */
+const produktUmi = (p, tech) => !tech || (p.positions || []).some((x) => x.tech === tech);
+/* Polohy potisku zúžené na technologii. */
+const polohyTech = (p, tech) => !p ? []
+  : (tech ? (p.positions || []).filter((x) => x.tech === tech) : (p.positions || []));
 
 const TECH_MAP = [
   { match: /tampon/i, code: "PDP" },
@@ -1782,7 +1804,8 @@ function PdfVKalkulaci({ sgps, products, recipes, onApply, onNacteno }) {
     <//>`;
 }
 
-function PripojeniTab({ sgps, databaze, recipes, links, vlastniStav, onOdebratZdroj }) {
+function PripojeniTab({ sgps, databaze, recipes, links, vlastniStav, onOdebratZdroj,
+                        dbTech, setDbTech }) {
   // kolik receptur je v aplikaci z kterého souboru
   const recepturyZdroju = useMemo(() => {
     const m = {};
@@ -1892,6 +1915,23 @@ function PripojeniTab({ sgps, databaze, recipes, links, vlastniStav, onOdebratZd
                         : html`<${React.Fragment}>${fmt(s.radku, 0)} řádků složení ·
                             <b>${fmt((recepturyZdroju[s.jmeno] || 0), 0)} receptur</b><//>`}
                       <span className="note"> · ${fmt(s.velikost / 1024, 0)} kB</span>
+                      ${!(databaze.chyby || {})[s.jmeno] && html`
+                        <div className="chips" style=${{ marginTop: 6 }}>
+                          <span className="note" style=${{ alignSelf: "center", marginRight: 4 }}>platí pro:</span>
+                          <button className=${"chip" + (!(dbTech || {})[s.jmeno] ? " on" : "")}
+                            onClick=${() => setDbTech(Object.assign({}, dbTech, { [s.jmeno]: "" }))}
+                            title="řada se nabídne v každé technologii">všechny</button>
+                          ${TECH_PORADI.filter((t) => TECHS[t]).map((t) => {
+                            const nyni = String((dbTech || {})[s.jmeno] || "").split(",").filter(Boolean);
+                            const je = nyni.indexOf(t) >= 0;
+                            return html`
+                              <button key=${t} className=${"chip" + (je ? " on" : "")} title=${TECHS[t].name}
+                                onClick=${() => {
+                                  const nove = je ? nyni.filter((x) => x !== t) : nyni.concat([t]);
+                                  setDbTech(Object.assign({}, dbTech, { [s.jmeno]: nove.join(",") }));
+                                }}>${t}</button>`;
+                          })}
+                        </div>`}
                     </div>
                   <//>`)}
               </div>`
@@ -2290,7 +2330,7 @@ IRM1|ref=11101|ks=500|poz=2|barva=105|rec=PANTONE 485 C|ztraty=15|obj=2026-114
 const ZALOZKY_NAZVY = {
   calc: "Kalkulace", pdf: "Načtení specu z PDF", scan: "Čárový kód",
   zak: "Zakázky (SGPS)", most: "Připojení k mostu", prod: "Produkty",
-  rec: "Receptury", imp: "Import / data",
+  rec: "Receptury", zbytky: "Zbytky barev", imp: "Import / data",
 };
 
 /* Pohyb po záložkách s možností vrátit se.
@@ -2437,6 +2477,139 @@ function App() {
      Most tu složku umí přečíst, takže se CSV natáhne samo a nikdo je po každé
      úpravě nemusí ručně importovat. Načítá se jen to, co se od minule změnilo
      — poznámka podle velikosti a času souboru. */
+  /* ---- parametry sít a koeficienty spotřeby ze složky "parametry" ---- */
+  const [sita, setSita] = useState([]);
+  const [koef, setKoef] = useState({ kryvost: {}, material: {}, podklad: {} });
+  const [paramStav, setParamStav] = useState({ stav: "cekam", chyba: "", sit: 0, koef: 0 });
+  useEffect(() => {
+    if (sgps.stav.stav !== "ok") return;
+    let zrusen = false;
+    (async () => {
+      const chyby = [];
+      let novaSita = [], novyKoef = { kryvost: {}, material: {}, podklad: {} };
+      try {
+        const d = await sgpsGet("/databaze?slozka=" + SLOZKA_PARAMETRY
+          + "&soubor=" + encodeURIComponent(SOUBOR_SITA));
+        novaSita = csvNaSita(d.text);
+      } catch (e) { if (!/není/.test(String(e.message || e))) chyby.push(SOUBOR_SITA + ": " + e.message); }
+      try {
+        const d = await sgpsGet("/databaze?slozka=" + SLOZKA_PARAMETRY
+          + "&soubor=" + encodeURIComponent(SOUBOR_KOEF));
+        novyKoef = csvNaKoeficienty(d.text);
+      } catch (e) { if (!/není/.test(String(e.message || e))) chyby.push(SOUBOR_KOEF + ": " + e.message); }
+      if (zrusen) return;
+      setSita(novaSita);
+      setKoef(novyKoef);
+      setParamStav({ stav: chyby.length ? "chyba" : "hotovo", chyba: chyby.join(" · "),
+        sit: novaSita.length,
+        koef: Object.keys(novyKoef).reduce((s, k) => s + Object.keys(novyKoef[k]).length, 0) });
+    })();
+    return () => { zrusen = true; };
+  }, [sgps.stav.stav]);
+
+  /* ---- evidence zbytků ---- */
+  const [zbytky, setZbytky] = useState(() => loadLS("irm-zbytky", []));
+  useEffect(() => { saveLS("irm-zbytky", zbytky); }, [zbytky]);
+  const [zbytekKod, setZbytekKod] = useState("");     // kód načtený čtečkou
+  const [doplnitZbytek, setDoplnitZbytek] = useState(null);   // {kod, gramu} — po tisku
+  // lhůty ubíhají i bez zásahu uživatele — jednou za minutu se přepočítají
+  const [tikLhut, setTikLhut] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setTikLhut((v) => v + 1), 60000);
+    return () => clearInterval(t);
+  }, []);
+  const [zbytkyStav, setZbytkyStav] = useState({ stav: "cekam", chyba: "", kdy: 0 });
+  const zbytkyZapsano = useRef(null);
+
+  // načtení evidence ze souboru — kelímek stojí v dílně a musí být vidět
+  // ze všech počítačů, ne jen z toho, kde ho někdo zapsal
+  useEffect(() => {
+    if (sgps.stav.stav !== "ok") return;
+    let zrusen = false;
+    (async () => {
+      try {
+        const d = await sgpsGet("/databaze?slozka=" + SLOZKA_EVIDENCE
+          + "&soubor=" + encodeURIComponent(SOUBOR_ZBYTKY));
+        if (zrusen) return;
+        const ze_souboru = csvNaZbytky(d.text);
+        setZbytky((prev) => {
+          const slouceno = sloucZbytky(prev, ze_souboru);
+          zbytkyZapsano.current = zbytkyDoCsv(slouceno);
+          return slouceno;
+        });
+        setZbytkyStav({ stav: "nacteno", chyba: "", kdy: Date.now() });
+      } catch (e) {
+        // soubor ještě neexistuje — to není chyba, založí se prvním zbytkem
+        const zprava = String((e && e.message) || e);
+        if (!zrusen) setZbytkyStav({ stav: /není/.test(zprava) ? "prazdno" : "chyba",
+          chyba: /není/.test(zprava) ? "" : zprava, kdy: Date.now() });
+      }
+    })();
+    return () => { zrusen = true; };
+  }, [sgps.stav.stav]);
+
+  // uložení evidence do souboru při každé změně
+  useEffect(() => {
+    if (sgps.stav.stav !== "ok" || zbytkyStav.stav === "cekam") return;
+    const text = zbytkyDoCsv(zbytky);
+    if (text === zbytkyZapsano.current) return;
+    const casovac = setTimeout(async () => {
+      try {
+        const r = await fetch(sgpsBase() + "/databaze/ulozit", { method: "POST",
+          body: new Blob([JSON.stringify({ slozka: SLOZKA_EVIDENCE, jmeno: SOUBOR_ZBYTKY, text: text })],
+            { type: "text/plain" }) });
+        const d = await r.json();
+        if (!d.ok) throw new Error(d.chyba || "zápis se nezdařil");
+        zbytkyZapsano.current = text;
+        setZbytkyStav({ stav: "ulozeno", chyba: "", kdy: Date.now() });
+      } catch (e) {
+        setZbytkyStav({ stav: "chyba", chyba: String((e && e.message) || e), kdy: Date.now() });
+      }
+    }, 1200);
+    return () => clearTimeout(casovac);
+  }, [zbytky, sgps.stav.stav, zbytkyStav.stav]);
+
+  // Kolik kelímků potřebuje pozornost — číslo se ukazuje i v menu, aby to
+  // člověk viděl, i když zrovna evidenci otevřenou nemá.
+  const lhutyPocet = useMemo(() => {
+    let prosle = 0, brzy = 0;
+    for (const z of zbytky) {
+      if (!(n(z.gramu) > 0)) continue;
+      const s = stavZbytku(z);
+      if (s.stav === "prosle") prosle++;
+      else if (s.stav === "brzy") brzy++;
+    }
+    return { prosle: prosle, brzy: brzy };
+  }, [zbytky, tikLhut]);
+
+  // Upozornění na lhůty hned po načtení evidence — kelímek, kterému dnes končí
+  // pot life, je potřeba spotřebovat teď, ne až si ho někdo náhodou všimne.
+  const lhutyOhlaseny = useRef(false);
+  useEffect(() => {
+    if (lhutyOhlaseny.current || zbytkyStav.stav === "cekam" || !zbytky.length) return;
+    lhutyOhlaseny.current = true;
+    const zive = zbytky.filter((z) => n(z.gramu) > 0).map((z) => ({ z: z, st: stavZbytku(z) }));
+    const prosle = zive.filter((x) => x.st.stav === "prosle");
+    const brzy = zive.filter((x) => x.st.stav === "brzy");
+    if (!prosle.length && !brzy.length) return;
+    // s odstupem, ať nepřebije hlášku o načtených databázích
+    const casti = [];
+    if (brzy.length) casti.push(brzy.length + (brzy.length === 1 ? " kelímku končí lhůta" : " kelímkům končí lhůta")
+      + " (" + brzy.map((x) => x.z.kod + " " + zbyvaText(x.st.zbyva)).slice(0, 3).join(", ") + ")");
+    if (prosle.length) casti.push(prosle.length + (prosle.length === 1 ? " je po lhůtě" : " po lhůtě"));
+    const t = setTimeout(() => setToast({ ok: !prosle.length,
+      text: "Zbytky barev: " + casti.join(" · ") + "." }), 5000);
+    return () => clearTimeout(t);
+  }, [zbytky, zbytkyStav.stav]);
+
+  /* Pracovní technologie — zužuje katalog, polohy i databáze receptur.
+     "" = bez omezení, jako dosud. */
+  const [technologie, setTechnologie] = useState(() => loadLS("irm-technologie", ""));
+  useEffect(() => { saveLS("irm-technologie", technologie); }, [technologie]);
+  // které technologie patří ke kterému souboru databáze receptur
+  const [dbTech, setDbTech] = useState(() => loadLS("irm-databaze-tech", {}));
+  useEffect(() => { saveLS("irm-databaze-tech", dbTech); }, [dbTech]);
+
   // ze které databáze se vybírají receptury ("" = ze všech)
   const [dbFiltr, setDbFiltr] = useState(() => loadLS("irm-databaze-filtr", ""));
   useEffect(() => { saveLS("irm-databaze-filtr", dbFiltr); }, [dbFiltr]);
@@ -2560,6 +2733,13 @@ function App() {
   }, [recipes, links, sgps.stav.stav, databaze]);
 
   const pouzitSpec = (res) => {
+    // Zakázkový list může být z jiné technologie, než ve které se zrovna
+    // pracuje — pak se režim přepne, jinak by poloha z listu nebyla vidět.
+    const techSpecu = res.position && res.position.tech;
+    if (technologie && techSpecu && techSpecu !== technologie) {
+      setTechnologie(techSpecu);
+      setToast({ ok: true, text: "Přepnuto na technologii " + techSpecu + " podle zakázky." });
+    }
     setSpec(Object.assign({}, res, { ts: Date.now() }));
     setTab("calc");
     setToast({ ok: true, text: "Zakázka načtena: " + (res.product.ref ? res.product.ref + " · " : "") + res.product.name
@@ -2568,10 +2748,26 @@ function App() {
 
   // handleCode drží aktuální data v ref, aby globální posluchač nepracoval se zastaralým stavem
   const scanCtx = useRef({});
-  scanCtx.current = { products, recipes, tab, sgpsOk: sgps.stav.stav === "ok" };
+  scanCtx.current = { products, recipes, tab, zbytky, sgpsOk: sgps.stav.stav === "ok" };
   const handleCode = useRef(null);
   handleCode.current = async (raw) => {
     const c = scanCtx.current;
+    // Kód z kelímku se pozná na první pohled a nemá smysl ho hnát rozborem specu.
+    const kod = String(raw || "").trim().toUpperCase();
+    if (jeKodZbytku(kod)) {
+      const z = (c.zbytky || []).find((x) => x.kod === kod);
+      if (!z) {
+        setZbytekKod(kod); setTab("zbytky");
+        setToast({ ok: false, text: "Kelímek " + kod + " v evidenci není." });
+        return;
+      }
+      // Dávka označená při míchání — teď je po tisku a je čas zapsat, co zbylo.
+      if (z.stav === "vtisku") { setDoplnitZbytek({ kod: kod, gramu: "" }); return; }
+      setZbytekKod(kod);
+      setTab("zbytky");
+      setToast({ ok: true, text: "Zbytek " + kod + ": " + z.nazev + " — " + fmt(n(z.gramu)) + " g" });
+      return;
+    }
     let parsed = parseSpec(raw);
     const f = parsed.fields;
     // Holý kód: pokud přesně sedí na ref. číslo produktu, je to produkt; jinak
@@ -2687,12 +2883,39 @@ function App() {
           </button>
           ${menuOpen && html`
             <div className="navdrop">
+              <div className="note" style=${{ padding: "6px 14px 2px", letterSpacing: ".06em" }}>TECHNOLOGIE</div>
+              <button className=${technologie ? "" : "on"}
+                onClick=${() => { setTechnologie(""); setMenuOpen(false); }}>
+                Všechny technologie
+                <span className="note" style=${{ float: "right" }}>${fmt(products.length, 0)}</span>
+              </button>
+              ${TECH_PORADI.filter((t) => TECHS[t]).map((t) => {
+                const kolik = products.filter((p) => produktUmi(p, t)).length;
+                if (!kolik) return null;
+                return html`
+                  <button key=${t} className=${technologie === t ? "on" : ""}
+                    onClick=${() => { setTechnologie(t); setMenuOpen(false); }}
+                    title=${TECHS[t].name}>
+                    ${t} — ${TECHS[t].name.replace(/\s*\(.*/, "")}
+                    <span className="note" style=${{ float: "right" }}>${fmt(kolik, 0)}</span>
+                  </button>`;
+              })}
+              <div style=${{ borderTop: "1px solid var(--line)", margin: "6px 8px" }}></div>
               <button className=${tab === "pdf" ? "on" : ""} onClick=${() => { setTab("pdf"); setMenuOpen(false); }}>Načíst spec z PDF</button>
               <button className=${tab === "scan" ? "on" : ""} onClick=${() => { setTab("scan"); setMenuOpen(false); }}>Načíst spec (čárový kód)</button>
               <button className=${tab === "zak" ? "on" : ""} onClick=${() => { setTab("zak"); setMenuOpen(false); }}>Zakázky (SGPS)</button>
               <button className=${tab === "most" ? "on" : ""} onClick=${() => { setTab("most"); setMenuOpen(false); }}>Připojení k mostu</button>
               <button className=${tab === "prod" ? "on" : ""} onClick=${() => { setTab("prod"); setMenuOpen(false); }}>Produkty</button>
               <button className=${tab === "rec" ? "on" : ""} onClick=${() => { setTab("rec"); setMenuOpen(false); }}>Receptury</button>
+              <button className=${tab === "zbytky" ? "on" : ""} onClick=${() => { setTab("zbytky"); setMenuOpen(false); }}>
+                Zbytky barev
+${lhutyPocet.prosle + lhutyPocet.brzy > 0 && html`<span className="tag"
+                  style=${{ marginLeft: 8, background: lhutyPocet.prosle ? "#B23B2A" : "var(--warn)",
+                    color: "#fff", boxShadow: "none" }}
+                  title=${[lhutyPocet.prosle ? lhutyPocet.prosle + " po lhůtě" : "",
+                    lhutyPocet.brzy ? lhutyPocet.brzy + " brzy končí" : ""].filter(Boolean).join(", ")}>
+                  ${lhutyPocet.prosle + lhutyPocet.brzy}</span>`}
+              </button>
               <button className=${tab === "imp" ? "on" : ""} onClick=${() => { setTab("imp"); setMenuOpen(false); }}>Import / data</button>
             </div>`}
         </div>
@@ -2706,7 +2929,13 @@ function App() {
             <span>${ZALOZKY_NAZVY[kamZpet] || kamZpet}</span>
           </button>`}
         </div>
-        <h1 title="Zpět na Kalkulaci" onClick=${() => setTab("calc")}>IRM</h1>
+        <div style=${{ gridColumn: 2, justifySelf: "center", textAlign: "center" }}>
+          <h1 title="Zpět na Kalkulaci" onClick=${() => setTab("calc")}>IRM</h1>
+          ${technologie && html`<div className="tag tech" style=${{ marginTop: -8 }}
+            title=${(TECHS[technologie] || {}).name || ""}>
+            ${technologie} — ${((TECHS[technologie] || {}).name || "").replace(/\s*\(.*/, "")}
+          </div>`}
+        </div>
         <button className="themebtn" type="button"
           onClick=${() => setTheme((t) => t === "dark" ? "light" : "dark")}
           title=${theme === "dark" ? "Přepnout na světlý režim" : "Přepnout na tmavý režim"}
@@ -2731,7 +2960,10 @@ function App() {
             spec=${spec} onSpecUsed=${() => setSpec(null)}
             onUpravitSpec=${pdfSpec.stav === "hotovo" ? () => setTab("pdf") : null}
             sgps=${sgps} onPouzitSpec=${pouzitSpec} onPdfNacteno=${setPdfSpec} pdfObrazky=${pdfSpec.obrazky || []} pdfStranky=${pdfSpec.stranky || []} pdfId=${pdfSpec.pdfId || ""}
-            dbFiltr=${dbFiltr} setDbFiltr=${setDbFiltr} />
+            dbFiltr=${dbFiltr} setDbFiltr=${setDbFiltr}
+            zbytky=${zbytky} setZbytky=${setZbytky} technologie=${technologie} dbTech=${dbTech}
+            sita=${sita} koef=${koef}
+            onZbytekUlozen=${(kod) => { setZbytekKod(kod); setTab("zbytky"); }} />
         </div>
         ${tab === "scan" && html`<${ScanTab} hidOn=${hidOn} setHidOn=${setHidOn} scanLog=${scanLog}
           onCode=${onCode} onApply=${pouzitSpec} clearLog=${() => setScanLog([])} sgps=${sgps} />`}
@@ -2740,7 +2972,7 @@ function App() {
           onApply=${(res) => { setScanLog((l) => [{ ts: Date.now(), raw: res.parsed.raw, res: res }].concat(l).slice(0, 25)); pouzitSpec(res); }} />`}
         ${tab === "zak" && html`<${ZakazkyTab} sgps=${sgps} onOtevri=${otevriZakazku} />`}
         ${tab === "most" && html`<${PripojeniTab} sgps=${sgps} databaze=${databaze} recipes=${recipes}
-          links=${links} vlastniStav=${vlastniStav}
+          links=${links} vlastniStav=${vlastniStav} dbTech=${dbTech} setDbTech=${setDbTech}
           onOdebratZdroj=${(z) => guardDelete(() => {
             setRecipes((prev) => prev.filter((r) => r.zdroj !== z));
             const v = loadLS("irm-databaze-verze", {});
@@ -2749,9 +2981,58 @@ function App() {
           }, "odebrání receptur z databáze " + z)} />`}
         ${tab === "prod" && html`<${Products} products=${products} setProducts=${setProducts} guardDelete=${guardDelete} />`}
         ${tab === "rec" && html`<${Recipes} recipes=${recipes} setRecipes=${setRecipes} guardDelete=${guardDelete}
-          dbFiltr=${dbFiltr} setDbFiltr=${setDbFiltr} />`}
+          dbFiltr=${dbFiltr} setDbFiltr=${setDbFiltr} technologie=${technologie} dbTech=${dbTech} sita=${sita} />`}
+        ${tab === "zbytky" && html`<${ZbytkyTab} zbytky=${zbytky} setZbytky=${setZbytky} recipes=${recipes}
+          guardDelete=${guardDelete} otevrenyKod=${zbytekKod} onOtevreno=${() => setZbytekKod("")}
+          onDoplnit=${(kod) => setDoplnitZbytek({ kod: kod, gramu: "" })} />`}
         ${tab === "imp" && html`<${Importer} setProducts=${setProducts} setRecipes=${setRecipes} guardDelete=${guardDelete} deletePw=${deletePw} setDeletePw=${setDeletePw} />`}
       </main>
+      ${doplnitZbytek && (() => {
+        const z = zbytky.find((x) => x.kod === doplnitZbytek.kod);
+        if (!z) return null;
+        const zbylo = n(doplnitZbytek.gramu);
+        const spotreba = n(z.davkaG) - zbylo;
+        const zapis = (naSklad) => {
+          setZbytky((prev) => prev.map((x) => x.kod === z.kod ? Object.assign({}, x, {
+            stav: "sklad", gramu: naSklad ? zbylo : 0, zmeneno: Date.now(),
+          }) : x));
+          setDoplnitZbytek(null);
+          setToast(naSklad
+            ? { ok: true, text: "Do evidence uloženo " + fmt(zbylo) + " g — kelímek " + z.kod + "." }
+            : { ok: true, text: "Kelímek " + z.kod + " uzavřen, nezbylo nic." });
+        };
+        return html`
+          <div className="modalbg" onClick=${(e) => { if (e.target === e.currentTarget) setDoplnitZbytek(null); }}>
+            <div className="modalbox" style=${{ width: "min(460px,100%)" }}>
+              <div className="card" style=${{ margin: 0 }}>
+                <h2 style=${{ margin: 0 }}>Kolik barvy zbylo?</h2>
+                <p className="hint">Kelímek <b>${z.kod}</b> byl označený při míchání. Teď stačí zvážit,
+                  co v něm zůstalo, a dostane se do evidence zbytků.</p>
+                <div className="rowline" style=${{ marginTop: 6 }}>
+                  <span className="swatch" style=${{ background: z.hex }} />
+                  <span className="note">${z.nazev}${z.zakazka ? " · zakázka " + z.zakazka : ""}
+                    · namícháno ${fmt(n(z.davkaG))} g</span>
+                </div>
+                <label className="f" style=${{ marginTop: 12 }}>Zbylo (g)</label>
+                <input type="number" step="1" min="0" autoFocus value=${doplnitZbytek.gramu}
+                  onChange=${(e) => setDoplnitZbytek(Object.assign({}, doplnitZbytek, { gramu: e.target.value }))}
+                  onKeyDown=${(e) => { if (e.key === "Enter" && zbylo > 0) zapis(true); }} />
+                ${zbylo > 0 && html`<p className="note" style=${{ marginTop: 6 }}>
+                  Z ${fmt(n(z.davkaG))} g se spotřebovalo ${fmt(Math.max(0, spotreba))} g
+                  ${spotreba < 0 ? html`<b> — zadané množství je větší než namíchaná dávka, zkontrolujte to.</b>` : ""}
+                </p>`}
+                <div className="rowline" style=${{ marginTop: 14, marginBottom: 0 }}>
+                  <button className="btn" disabled=${!(zbylo > 0)} onClick=${() => zapis(true)}>
+                    Uložit do evidence
+                  </button>
+                  <button className="btn sec" onClick=${() => zapis(false)}>Nezbylo nic</button>
+                  <button className="btn sec" onClick=${() => setDoplnitZbytek(null)}>Později</button>
+                </div>
+              </div>
+            </div>
+          </div>`;
+      })()}
+
       ${pwGate && html`<${PwGate} label=${pwGate.label} correctPw=${deletePw}
         onConfirm=${() => { pwGate.onConfirm(); setPwGate(null); }}
         onCancel=${() => setPwGate(null)} />`}
@@ -2792,7 +3073,8 @@ function PwGate({ label, correctPw, onConfirm, onCancel }) {
 /* ============================ KALKULACE ============================ */
 function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed, onUpravitSpec,
                 sgps, onPouzitSpec, onPdfNacteno, pdfObrazky, pdfStranky, pdfId,
-                dbFiltr, setDbFiltr }) {
+                dbFiltr, setDbFiltr, zbytky, setZbytky, onZbytekUlozen,
+                technologie, dbTech, sita, koef }) {
   const [q, setQ] = useState("");
   // hodnoty ze načteného specu mají přednost před automatikami níže (reset barvy,
   // vázaná receptura, spotřeba dle technologie) — proto je propašujeme přes ref
@@ -2810,24 +3092,30 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     const cislo = zak && zak.order ? String(zak.order) : "";
     if (cislo) setPokrytiZakazek((prev) => Object.assign({}, prev, { [cislo]: { pct: pct, odsazeni: mm, ts: Date.now() } }));
   };
+  // katalog zúžený na zvolenou technologii — sítotiskaři nemá co nabízet
+  // produkty, které se sítotiskem netisknou
+  const proTech = useMemo(() => technologie
+    ? products.filter((p) => produktUmi(p, technologie)) : products, [products, technologie]);
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    if (!s) return products;
-    return products.filter((p) =>
+    if (!s) return proTech;
+    return proTech.filter((p) =>
       (p.name + " " + (p.ref || "") + " " + (p.material || "")).toLowerCase().includes(s));
-  }, [q, products]);
+  }, [q, proTech]);
 
   const [prodId, setProdId] = useState(products[0] ? products[0].id : "");
   useEffect(() => {
     if (filtered.length && !filtered.some((p) => p.id === prodId)) setProdId(filtered[0].id);
   }, [filtered]);
   const product = products.find((p) => p.id === prodId);
+  // polohy potisku jen té technologie, ve které se pracuje
+  const polohy = useMemo(() => polohyTech(product, technologie), [product, technologie]);
 
   const [posId, setPosId] = useState("");
   useEffect(() => {
-    if (product && !product.positions.some((p) => p.id === posId))
-      setPosId(product.positions[0] ? product.positions[0].id : "");
-  }, [prodId, product]);
+    if (product && !polohy.some((p) => p.id === posId))
+      setPosId(polohy[0] ? polohy[0].id : "");
+  }, [prodId, product, technologie]);
   const colors = (product && product.colors) ? product.colors : [];
   const [colorIdx, setColorIdx] = useState(0);
   useEffect(() => {
@@ -2856,8 +3144,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
   const baseSel = recipes.find((r) => r.id === baseId) || null;
   const odvodit = (base) => {
     const label = colorSel ? ((colorSel.code ? colorSel.code + " " : "") + (colorSel.name || "")).trim() : "";
-    const pos = product ? product.positions.find((p) => p.id === posId) : null;
-    const kde = pos ? " · " + pos.tech + " " + pos.name : "";
+    const kde = position ? " · " + position.tech + " " + position.name : "";
     setOdvod({ mode: "edit", initial: {
       id: uid(),
       name: ((product && product.ref ? product.ref + " · " : "") + label + kde + " — " + base.name).trim(),
@@ -2880,7 +3167,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     delete nl[lkUplny]; delete nl[lkBarva];
     setLinks(nl);
   };
-  const position = product ? product.positions.find((p) => p.id === posId) : null;
+  const position = polohy.find((p) => p.id === posId) || null;
 
   // vazba se hledá nejdřív na přesnou kombinaci, pak na starší vazbu jen dle barvy
   const lkUplny = klicUplny(product, colorSel, position);
@@ -2895,6 +3182,11 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
   }, [prodId, colorIdx, posId]);
 
   const tech = position ? position.tech : "SCR";
+  const maSito = techMaSito(tech);      // tampontisk tiskne přes klišé, ne přes síto
+  // klišé, která jsou pro tuhle technologii v parametrech; dokud nejsou, nic se nenabízí
+  const klisePro = useMemo(() => sitaPro(sita, tech, true), [sita, tech]);
+  // síta té technologie; bez vlastních dat padne na standardní řadu
+  const sitaProTech = useMemo(() => sitaPro(sita, tech, false), [sita, tech]);
   const [recId, setRecId] = useState(recipes[0] ? recipes[0].id : "");
   // Receptura ze zakázkového listu nemusí být v databázi (nebo databáze ještě
   // není). Rozpracovaná receptura pak žije tady, aby šlo dojít až k míchacímu
@@ -2917,11 +3209,37 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     return p;
   }, [recipe, recipes, zListu, adHoc]);
 
+  /* ---- zbytek z evidence použitý na tuhle dávku ---- */
+  const [pouzityZbytek, setPouzityZbytek] = useState(null);   // {kod}
+  const [ulozitZbytek, setUlozitZbytek] = useState(null);     // dialog uložení
+  const [kodDavky, setKodDavky] = useState("");               // kód dávky — drží se i po zavření štítku
+  const [stitekOtevren, setStitekOtevren] = useState(false);
+  const [dvouslozkova, setDvouslozkova] = useState(false);    // barva s tužidlem — hlídat pot life
+
   const [recQ, setRecQ] = useState("");
-  const pantoneAll = podleDatabaze(recipes, dbFiltr).filter((r) => r.type !== "Custom");
+  const pantoneAll = podleTechnologie(podleDatabaze(recipes, dbFiltr), technologie, dbTech)
+    .filter((r) => r.type !== "Custom");
   const pantoneList = recQ.trim()
     ? pantoneAll.filter((r) => (r.name + " " + (r.series || "")).toLowerCase().includes(recQ.trim().toLowerCase()))
     : pantoneAll;
+
+  /* Viskozita — výtokový čas barvy. U zakázky se buď změří, nebo se vezme
+     referenční hodnota uložená u receptury. */
+  const [viskoz, setViskoz] = useState("");
+  useEffect(() => { setViskoz(recipe && recipe.viskozita != null ? String(recipe.viskozita) : ""); },
+    [recipe && recipe.id]);
+
+  /* Spotřeba spočítaná ze síta — kolik barvy tou tkaninou projde.
+     Nabízí se jen jako návrh; ručně zadanou hodnotu nepřepisuje. */
+  const zeSita = useMemo(() => {
+    if (!recipe || !recipe.mesh || !sita || !sita.length) return null;
+    return spotrebaZeSita({
+      sito: recipe.mesh, sita: sita, tech: tech, hustota: n(recipe.density, 1.2),
+      kryvost: recipe.opacity, material: product ? product.material : "",
+      podkladHex: colorSel ? colorSel.hex : "", koef: koef,
+      viskozita: viskoz,
+    });
+  }, [recipe, sita, koef, tech, product, colorSel, viskoz]);
 
   const [qty, setQty] = useState(500);
   const [gm2, setGm2] = useState(TECHS[tech] ? TECHS[tech].gm2 : 6);
@@ -3020,14 +3338,97 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     return { areaM2, netto, totalG, totalMl, comps, pctSum, minApplied: totalG > withLoss + 1e-9 };
   }, [position, recipe, qty, gm2, loss, minBatch, sirka, vyska, pokryti]);
 
+  // Které kelímky ze skladu na tuhle dávku sednou a kolik z nich jde použít.
+  const nabidky = useMemo(() => (calc && calc.comps.length)
+    ? nabidkyZbytku(zbytky, calc.comps, calc.totalG) : [], [zbytky, calc]);
+  const vyuzitiZbytku = useMemo(() => {
+    if (!pouzityZbytek || !calc || !calc.comps.length) return null;
+    const z = (zbytky || []).find((x) => x.kod === pouzityZbytek.kod);
+    if (!z) return null;
+    return pouzityZbytek.rezim === "cely"
+      ? zbytekCelyPlan(z, calc.comps, calc.totalG)
+      : vyuzitelnyZbytek(z, calc.comps, calc.totalG);
+  }, [pouzityZbytek, zbytky, calc]);
+
+  /* Dávka po přepočtu na zbytek. Při využití celého kelímku se míchá víc,
+     než zakázka žádá — poměr složek zůstává, jen se všechno škáluje. */
+  const calcAkt = useMemo(() => {
+    if (!calc) return calc;
+    const cil = vyuzitiZbytku && vyuzitiZbytku.davka;
+    if (!cil || Math.abs(cil - calc.totalG) < 0.01) return calc;
+    const k = cil / calc.totalG;
+    return Object.assign({}, calc, {
+      totalG: calc.totalG * k, totalMl: calc.totalMl * k,
+      comps: calc.comps.map((c) => Object.assign({}, c, { g: c.g * k, ml: c.ml * k })),
+      zvetseno: true, davkaZakazky: calc.totalG,
+    });
+  }, [calc, vyuzitiZbytku]);
+  // změní-li se receptura nebo dávka tak, že zbytek nesedí, volba se zruší sama
+  useEffect(() => { setPouzityZbytek(null); setKodDavky(""); }, [recipe && recipe.id]);
+
+  const odepisZbytku = () => {
+    if (!vyuzitiZbytku) return;
+    const kod = vyuzitiZbytku.zbytek.kod, ubrat = vyuzitiZbytku.pouzit;
+    setZbytky((prev) => prev.map((z) => z.kod === kod
+      ? Object.assign({}, z, { gramu: Math.max(0, n(z.gramu) - ubrat), zmeneno: Date.now() })
+      : z));
+    setPouzityZbytek(null);
+  };
+
+  /* Štítek se lepí na kelímek hned po namíchání — kolik z barvy zbude, se
+     ví až po tisku. Proto se dávka do evidence založí rovnou celá a ve stavu
+     "v tisku"; po zakázce se štítek načte čtečkou a doplní se zbytek. */
+  const oznacDavku = () => {
+    if (!recipe || !calc) return;
+    const kod = novyKodZbytku(zbytky);
+    const pct = calc.pctSum || 100;
+    setZbytky((prev) => [{
+      id: uid(), kod: kod, nazev: recipe.name, stav: "vtisku",
+      gramu: calc.totalG, davkaG: calc.totalG, puvodne: calc.totalG,
+      hustota: n(recipe.density, 1.2), hex: recipe.hex,
+      zakazka: (zak && zak.order) || "", produkt: (product && product.ref) || "",
+      barva: colorSel ? (colorSel.code || colorSel.name || "") : "",
+      tech: tech || "", poloha: position ? position.name : "",
+      ulozeno: Date.now(), zmeneno: Date.now(), namichano: Date.now(),
+      expirace: "", potlifeH: dvouslozkova ? POTLIFE_VYCHOZI : null, tuzidlo: !!dvouslozkova,
+      viskozita: "", viskPohar: "", viskKdy: 0, viskHist: [],
+      pozn: "", zdroj: recipe.zdroj || "",
+      slozeni: recipe.components.map((c) => ({ name: c.name, pct: n(c.pct) / pct * 100 })),
+    }].concat(prev));
+    setKodDavky(kod);
+    setStitekOtevren(true);
+  };
+
+  const ulozZbytekZKalkulace = () => {
+    if (!ulozitZbytek || !recipe || !(n(ulozitZbytek.gramu) > 0)) return;
+    const kod = novyKodZbytku(zbytky);
+    const pct = calc && calc.pctSum ? calc.pctSum : 100;
+    setZbytky((prev) => [{
+      id: uid(), kod: kod, nazev: recipe.name, gramu: n(ulozitZbytek.gramu),
+      puvodne: n(ulozitZbytek.gramu), hustota: n(recipe.density, 1.2), hex: recipe.hex,
+      zakazka: (zak && zak.order) || "", produkt: (product && product.ref) || "",
+      barva: colorSel ? (colorSel.code || colorSel.name || "") : "",
+      tech: tech || "", poloha: position ? position.name : "",
+      ulozeno: Date.now(), zmeneno: Date.now(), namichano: Date.now(),
+      expirace: ulozitZbytek.expirace || "",
+      potlifeH: ulozitZbytek.potlifeH === "" || ulozitZbytek.potlifeH == null ? null : n(ulozitZbytek.potlifeH),
+      tuzidlo: !!ulozitZbytek.tuzidlo,
+      viskozita: "", viskPohar: "", viskKdy: 0, viskHist: [],
+      pozn: ulozitZbytek.pozn || "", zdroj: recipe.zdroj || "",
+      slozeni: recipe.components.map((c) => ({ name: c.name, pct: n(c.pct) / pct * 100 })),
+    }].concat(prev));
+    setUlozitZbytek(null);
+    if (onZbytekUlozen) onZbytekUlozen(kod);
+  };
+
   const esc = (x) => String(x == null ? "" : x).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const tiskLisku = () => {
-    if (!calc || !product || !position || !recipe) return;
+    if (!calcAkt || !product || !position || !recipe) return;
     const d = new Date();
     const dat = d.toLocaleDateString("cs-CZ") + " " + d.toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" });
     let kum = 0;
-    const radky = calc.comps.length
-      ? calc.comps.map((c, i) => {
+    const radky = calcAkt.comps.length
+      ? calcAkt.comps.map((c, i) => {
           kum += c.g;
           return `<tr>
         <td class="num">${i + 1}</td>
@@ -3076,6 +3477,9 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
       ? " (z náhledu motivu" + (odsazeniJob ? ", odsazení " + fmt(odsazeniJob, 1) + " mm" : "") + ")" : ""}</div></div>
     <div><div class="lbl">Technologie</div><div class="val">${esc(tech)} — ${esc(TECHS[tech] ? TECHS[tech].name : "")}</div></div>
     <div><div class="lbl">Zakázka</div><div class="val">${fmt(n(qty), 0)} ks · ${fmt(n(gm2), 1)} g/m² · ztráty ${fmt(n(loss), 0)} %</div></div>
+    ${kodDavky ? `<div><div class="lbl">Kód kelímku</div><div class="val" style="font-family:Consolas,monospace;font-weight:800">${esc(kodDavky)}
+      <img src="${code128Url(kodDavky, 34, 1)}" alt="${esc(kodDavky)}" style="display:block;margin-top:2px">
+      <span style="font-size:10px;color:#78766C;font-family:Segoe UI,Arial,sans-serif;font-weight:400">po zakázce načtěte a zapište zbytek</span></div></div>` : ""}
     <div><div class="lbl">Barva / řada</div><div class="val">${esc(recipe.name)}${recipe.series ? " · " + esc(recipe.series) : ""} · hustota ${fmt(n(recipe.density, 1), 2)} g/ml${jeAdHoc ? " · <b>neuložená receptura</b>" : ""}</div></div>
     ${barvaPotisku ? `<div><div class="lbl">Odstín potisku</div><div class="val">${
       barvaPotisku.pantone
@@ -3086,7 +3490,11 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
       }${barvaPotisku.zListu ? " · vzorník ze zakázkového listu" : ""
       }${barvaPotisku.blizky ? " · nejblíž " + esc(barvaPotisku.blizky.recipe.name)
            + " (odchylka " + fmt(barvaPotisku.blizky.dE, 1) + ")" : ""}</div></div>` : ""}
-    <div><div class="lbl">Síto / kryvost / povrch</div><div class="val">${esc(recipe.mesh || "—")} · ${esc(recipe.opacity || "—")} · ${esc(recipe.surface || "—")}</div></div>
+    ${n(viskoz) > 0 ? `<div><div class="lbl">Viskozita</div><div class="val">${fmt(n(viskoz), 1)} s${
+      zeSita && zeSita.dopVisk ? ` <span style="font-size:10px;color:#78766C">doporučeno ${fmt(zeSita.dopVisk.od, 0)}–${fmt(zeSita.dopVisk.do, 0)} s</span>` : ""
+      }</div></div>` : ""}
+    <div><div class="lbl">${maSito ? "Síto / kryvost / povrch" : "Kryvost / povrch"}</div><div class="val">${
+      maSito ? esc(recipe.mesh || "—") + " · " : ""}${esc(recipe.opacity || "—")} · ${esc(recipe.surface || "—")}</div></div>
     <div><div class="lbl">Objednavatel</div><div class="val">${esc((zak && zak.customer) || recipe.customer || "—")}</div></div>
     ${zak && zak.order ? `<div><div class="lbl">Zakázka</div><div class="val">${esc(zak.order)}</div></div>` : ""}
     ${zak && zak.note ? `<div><div class="lbl">Poznámka k zakázce</div><div class="val">${esc(zak.note)}</div></div>` : ""}
@@ -3095,15 +3503,15 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     <div><div class="lbl">Příznaky</div><div class="val">${[recipe.tested ? "otestovaný" : "", recipe.fade ? "odolný vůči vyblednutí" : ""].filter(Boolean).join(" · ") || "—"}</div></div>
   </div>
   <div class="box">
-    <div class="lbl">Celkem namíchat${calc.minApplied ? " (uplatněna min. dávka)" : ""}</div>
-    <div class="big">${fmt(calc.totalG)} g <span style="font-size:15px;color:#78766C">≈ ${fmt(calc.totalMl)} ml</span></div>
+    <div class="lbl">Celkem namíchat${calcAkt.minApplied ? " (uplatněna min. dávka)" : ""}</div>
+    <div class="big">${fmt(calcAkt.totalG)} g <span style="font-size:15px;color:#78766C">≈ ${fmt(calcAkt.totalMl)} ml</span></div>
   </div>
   <table>
     <thead><tr><th style="text-align:right">#</th><th>Komponenta</th><th style="text-align:right">%</th><th style="text-align:right">navážit g</th><th style="text-align:right">kumulativně g</th><th style="text-align:right">ml</th><th style="text-align:center">✓</th></tr></thead>
     <tbody>${radky}</tbody>
-    <tfoot><tr><td></td><td>Celkem</td><td class="num">${calc.comps.length ? "100,0" : ""}</td><td class="num">${fmt(calc.totalG)}</td><td class="num">${fmt(calc.totalG)}</td><td class="num">${fmt(calc.totalMl)}</td><td></td></tr></tfoot>
+    <tfoot><tr><td></td><td>Celkem</td><td class="num">${calcAkt.comps.length ? "100,0" : ""}</td><td class="num">${fmt(calcAkt.totalG)}</td><td class="num">${fmt(calcAkt.totalG)}</td><td class="num">${fmt(calcAkt.totalMl)}</td><td></td></tr></tfoot>
   </table>
-  ${calc.comps.length
+  ${calcAkt.comps.length
     ? `<div class="note">Kumulativní vážení do jedné nádoby: po každé komponentě má displej váhy ukazovat hodnotu ve sloupci „kumulativně g". Tolerance navážení ±0,5 g, pokud technolog neurčí jinak.</div>`
     : `<div class="note"><b>Složení receptury zatím není v aplikaci zadané.</b> Namíchejte podle firemní receptury na celkovou dávku uvedenou výše a navážky zapište do tabulky. Tolerance navážení ±0,5 g, pokud technolog neurčí jinak.</div>`}
   <div class="pods"><div>Namíchal/a</div><div>Datum a čas</div><div>Kontrola / šarže</div></div>
@@ -3270,14 +3678,27 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 </span>
               </div>`}
             ${recipe && html`
-              <div className="frow c3" style=${{ marginTop: 8 }}>
-                <div>
-                  <label className="f">Síto</label>
-                  <select value=${recipe.mesh || ""} onChange=${(e) => upravRecepturu({ mesh: e.target.value })}>
-                    <option value="">— nevybráno —</option>
-                    ${SITA.map((m) => html`<option key=${m} value=${m}>${m}</option>`)}
-                  </select>
-                </div>
+              <div className=${"frow " + (maSito ? "c3" : "c2")} style=${{ marginTop: 8 }}>
+                ${maSito && html`
+                  <div>
+                    <label className="f">Síto</label>
+                    <select value=${recipe.mesh || ""} onChange=${(e) => upravRecepturu({ mesh: e.target.value })}>
+                      <option value="">— nevybráno —</option>
+                      ${sitaProTech.map((m) => html`<option key=${m.sito} value=${m.sito}>${m.sito}${
+                        m.vth > 0 ? " · " + fmt(m.vth, 0) + " cm³/m²" : ""}</option>`)}
+                      ${recipe.mesh && !sitaProTech.some((m) => m.sito === recipe.mesh)
+                        && html`<option value=${recipe.mesh}>${recipe.mesh} (není v parametrech ${tech})</option>`}
+                    </select>
+                  </div>`}
+                ${!maSito && klisePro.length > 0 && html`
+                  <div>
+                    <label className="f">Klišé (hloubka leptu)</label>
+                    <select value=${recipe.mesh || ""} onChange=${(e) => upravRecepturu({ mesh: e.target.value })}>
+                      <option value="">— nevybráno —</option>
+                      ${klisePro.map((m) => html`<option key=${m.sito} value=${m.sito}>${m.sito}${
+                        m.hloubka > 0 ? " · " + fmt(m.hloubka, 0) + " µm" : ""}</option>`)}
+                    </select>
+                  </div>`}
                 <div>
                   <label className="f">Kryvost</label>
                   <select value=${recipe.opacity || ""} onChange=${(e) => upravRecepturu({ opacity: e.target.value })}>
@@ -3317,16 +3738,72 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 <input type="number" step="10" value=${minBatch} onChange=${(e) => setMinBatch(e.target.value)} />
               </div>
             </div>
-            <p className="note">Spotřeba se předvyplňuje dle technologie (${Object.entries(TECHS).map(([k, t]) => k + " " + t.gm2).join(" · ")} g/m²) — upravte podle síta / hloubky leptu klišé a viskozity.</p>
+
+            <div className="frow c2">
+              <div>
+                <label className="f">Viskozita — výtokový čas (s)</label>
+                <div className="rowline" style=${{ marginBottom: 0 }}>
+                  <input type="number" step="0.5" min="0" style=${{ flex: 1 }} value=${viskoz}
+                    placeholder=${zeSita && zeSita.dopVisk
+                      ? "doporučeno " + fmt(zeSita.dopVisk.od, 0) + "–" + fmt(zeSita.dopVisk.do, 0) + " s"
+                      : "změřeno výtokovým pohárkem"}
+                    onChange=${(e) => setViskoz(e.target.value)} />
+                  ${recipe && n(viskoz) > 0 && n(viskoz) !== n(recipe.viskozita) && html`
+                    <button className="btn sec sm" title="uložit jako referenční hodnotu receptury"
+                      onClick=${() => upravRecepturu({ viskozita: n(viskoz) })}>Uložit k receptuře</button>`}
+                </div>
+              </div>
+              ${zeSita && zeSita.dopVisk && html`
+                <div>
+                  <label className="f">Doporučeno k ${recipe.mesh}</label>
+                  <div className=${zeSita.mimoRozsah ? "warnbox" : "okbox"} style=${{ marginTop: 0 }}>
+                    ${fmt(zeSita.dopVisk.od, 0)}–${fmt(zeSita.dopVisk.do, 0)} s${
+                      zeSita.dopVisk.poharek ? " · " + zeSita.dopVisk.poharek : ""}
+                    ${zeSita.mimoRozsah
+                      ? html`<br /><b>Změřených ${fmt(n(viskoz), 1)} s je mimo rozsah</b> — barva
+                          ${n(viskoz) < zeSita.dopVisk.od ? "je řidší, protéká víc" : "je hustší, protéká míň"}.`
+                      : (n(viskoz) > 0 ? html`<br />Změřených ${fmt(n(viskoz), 1)} s sedí.` : "")}
+                  </div>
+                </div>`}
+            </div>
+            ${zeSita
+              ? html`
+                <div className=${Math.abs(zeSita.gm2 - n(gm2)) > 0.05 ? "okbox" : "specbar"} style=${{ marginTop: 4 }}>
+                  ${Math.abs(zeSita.gm2 - n(gm2)) > 0.05
+                    ? html`<${React.Fragment}>
+                        <b>${zeSita.sito.klise ? "Z klišé" : "Ze síta"} ${recipe.mesh} vychází ${fmt(zeSita.gm2, 1)} g/m²</b>
+                        ${" — teď je nastaveno " + fmt(n(gm2), 1) + " g/m²."}
+                        <div className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
+                          <button className="btn sm" onClick=${() => setGm2(fmt(zeSita.gm2, 1).replace(",", "."))}>
+                            Použít ${fmt(zeSita.gm2, 1)} g/m²
+                          </button>
+                        </div>
+                      <//>`
+                    : html`<${React.Fragment}>
+                        <span className="dot" style=${{ background: "var(--ok)" }}></span>
+                        <span>Spotřeba odpovídá ${zeSita.sito.klise ? "klišé" : "sítu"} ${recipe.mesh}.</span>
+                      <//>`}
+                  <div className="note" style=${{ marginTop: 6 }}>
+                    ${fmt(zeSita.sito.vth, 1)} cm³/m² teoreticky${zeSita.sito.klise ? " (hloubka leptu)" : ""}
+                    ${zeSita.sito.dopocteno ? " (dopočteno z geometrie tkaniny — orientační)" : ""}
+                    ${" × " + fmt(zeSita.prenos, 2) + " přenos × " + fmt(n(recipe.density, 1), 2) + " g/ml hustota"}
+                    ${zeSita.kKryvost !== 1 ? " × " + fmt(zeSita.kKryvost, 2) + " " + (recipe.opacity || "kryvost") : ""}
+                    ${zeSita.kMaterial !== 1 ? " × " + fmt(zeSita.kMaterial, 2) + " " + zeSita.materialKlic : ""}
+                    ${zeSita.kPodklad !== 1 ? " × " + fmt(zeSita.kPodklad, 2) + " podklad " + zeSita.tridaPodkladu : ""}
+                    ${zeSita.kViskozita !== 1 ? " × " + fmt(zeSita.kViskozita, 2) + " viskozita " + fmt(zeSita.viskozita, 1) + " s" : ""}
+                  </div>
+                </div>`
+              : html`<p className="note">Spotřeba se předvyplňuje dle technologie (${Object.entries(TECHS).map(([k, t]) => k + " " + t.gm2).join(" · ")} g/m²) — upravte podle síta / hloubky leptu klišé a viskozity.${
+                  (sita && sita.length) ? " Vyberte síto u receptury a spotřeba se spočítá z jeho parametrů." : ""}</p>`}
           </div>
 
         </div>
 
-        ${calc && html`
+        ${calcAkt && html`
           <div className="bigpanel" style=${{ display: "grid", gap: 20, alignContent: "start" }}>
           <div className="card" style=${{ margin: 0 }}>
             <h2>Výsledek míchání</h2>
-            <p className="hint">Plocha motivu ${fmt(calc.areaM2 * 10000, 2)} cm² / ks · netto ${fmt(calc.netto)} g${colorSel ? " · barva produktu " + colorSel.code + (colorSel.name ? " — " + colorSel.name : "") : ""}</p>
+            <p className="hint">Plocha motivu ${fmt(calcAkt.areaM2 * 10000, 2)} cm² / ks · netto ${fmt(calcAkt.netto)} g${colorSel ? " · barva produktu " + colorSel.code + (colorSel.name ? " — " + colorSel.name : "") : ""}</p>
             <div className="rowline" style=${{ marginTop: 0, marginBottom: 10 }}>
               <span className="tag" title="Podíl plochy, který barva doopravdy pokryje">
                 krycí plocha ${fmt(pokryti, 1)} %${pokrytiJob != null
@@ -3339,13 +3816,14 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
               ${pokrytiJob != null && html`<button className="btn sec sm" onClick=${() => { setPokrytiJob(null); setOdsazeniJob(null); }}>Zpět na katalog</button>`}
             </div>
 
-            <div className="result-big">${fmt(calc.totalG)} g</div>
-            <div className="result-sub">≈ ${fmt(calc.totalMl)} ml při hustotě ${fmt(n(recipe.density, 1), 2)} g/ml</div>
-            ${calc.minApplied && html`<div className="warnbox">Uplatněna minimální dávka ${fmt(n(minBatch), 0)} g (výpočtová potřeba je nižší).</div>`}
+            <div className="result-big">${fmt(calcAkt.totalG)} g</div>
+            <div className="result-sub">≈ ${fmt(calcAkt.totalMl)} ml při hustotě ${fmt(n(recipe.density, 1), 2)} g/ml${
+              calcAkt.zvetseno ? " · zakázka potřebuje " + fmt(calcAkt.davkaZakazky) + " g" : ""}</div>
+            ${calcAkt.minApplied && html`<div className="warnbox">Uplatněna minimální dávka ${fmt(n(minBatch), 0)} g (výpočtová potřeba je nižší).</div>`}
 
-            ${calc.comps.length > 0 && html`
+            ${calcAkt.comps.length > 0 && html`
               <div className="mixbar" title="Poměr komponent">
-                ${calc.comps.map((c, i) => html`<span key=${c.id} style=${{ width: c.norm + "%", background: i === 0 ? recipe.hex : "hsl(" + ((i * 67) % 360) + " 25% " + (78 - i * 8) + "%)" }} />`)}
+                ${calcAkt.comps.map((c, i) => html`<span key=${c.id} style=${{ width: c.norm + "%", background: i === 0 ? recipe.hex : "hsl(" + ((i * 67) % 360) + " 25% " + (78 - i * 8) + "%)" }} />`)}
               </div>`}
 
             <table className="t" style=${{ marginTop: 8 }}>
@@ -3353,7 +3831,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 <tr><th>Komponenta</th><th className="num">%</th><th className="num">g</th><th className="num">ml</th></tr>
               </thead>
               <tbody>
-                ${calc.comps.map((c) => html`
+                ${calcAkt.comps.map((c) => html`
                   <tr key=${c.id}>
                     <td>${c.name}</td>
                     <td className="num">${fmt(c.norm)}</td>
@@ -3363,21 +3841,105 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 <tr>
                   <td style=${{ fontWeight: 700 }}>Celkem</td>
                   <td className="num" style=${{ fontWeight: 700 }}>100,0</td>
-                  <td className="num" style=${{ fontWeight: 700 }}>${fmt(calc.totalG)}</td>
-                  <td className="num" style=${{ fontWeight: 700 }}>${fmt(calc.totalMl)}</td>
+                  <td className="num" style=${{ fontWeight: 700 }}>${fmt(calcAkt.totalG)}</td>
+                  <td className="num" style=${{ fontWeight: 700 }}>${fmt(calcAkt.totalMl)}</td>
                 </tr>
               </tbody>
             </table>
-            ${calc.comps.length === 0
+            ${calcAkt.comps.length === 0
               ? html`<div className="warnbox">Složení receptury zatím není zadané — celková dávka je spočítaná,
                   míchací lístek se vytiskne s prázdnými řádky na navážky.</div>`
-              : (Math.abs(calc.pctSum - 100) > 0.01 && html`<div className="warnbox">Součet receptury je ${fmt(calc.pctSum)} % — poměry byly normalizovány na 100 %.</div>`)}
+              : (Math.abs(calcAkt.pctSum - 100) > 0.01 && html`<div className="warnbox">Součet receptury je ${fmt(calcAkt.pctSum)} % — poměry byly normalizovány na 100 %.</div>`)}
+
+            ${!pouzityZbytek && nabidky.length > 0 && html`
+              <div className="okbox">
+                <b>Na tuto zakázku můžete využít zbytek.</b>
+                ${nabidky.slice(0, 3).map((v) => html`
+                  <div key=${v.zbytek.kod} className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
+                    <span className="swatch" style=${{ background: v.zbytek.hex, width: 20, height: 20 }} />
+                    <span>
+                      <b>${fmt(v.pouzit)} g</b> z kelímku <b>${v.zbytek.kod}</b> — ${v.zbytek.nazev}
+                      <span className="note"> (v kelímku ${fmt(n(v.zbytek.gramu))} g${
+                        v.shoda < 0.999 ? ", složení sedí na " + fmt(v.shoda * 100, 0) + " %" : ""})</span>
+                      ${v.stav && v.stav.stav === "brzy" && html`<span className="tag" style=${{ marginLeft: 6 }}
+                        title=${v.stav.duvod}>spotřebovat ${zbyvaText(v.stav.zbyva)}</span>`}
+                      <br /><span className="note">domíchat pak stačí ${fmt(v.domichat)} g místo ${fmt(calcAkt.totalG)} g</span>
+                    </span>
+                    <span style=${{ marginLeft: "auto" }}></span>
+                    <button className="btn sm" onClick=${() => setPouzityZbytek({ kod: v.zbytek.kod, rezim: "cast" })}>
+                      Použít ${fmt(v.pouzit)} g
+                    </button>
+                  </div>
+                  ${(() => {
+                    // Nevejde-li se kelímek celý, nabídneme i variantu, kdy se dávka
+                    // zvětší tak, aby se spotřeboval beze zbytku.
+                    if (v.zbudeVKelimku <= 0.5) return null;
+                    const c = zbytekCelyPlan(v.zbytek, calc.comps, calc.totalG);
+                    if (!c || c.prebytek <= 0.5) return null;
+                    return html`
+                      <div key=${v.zbytek.kod + "-cely"} className="rowline"
+                        style=${{ marginTop: 4, marginBottom: 0, paddingLeft: 30 }}>
+                        <span className="note">
+                          …nebo <b>spotřebovat celý kelímek</b> (${fmt(n(v.zbytek.gramu))} g):
+                          dávka se zvětší na ${fmt(c.davka)} g, tedy o ${fmt(c.prebytek)} g víc,
+                          než zakázka potřebuje. Odstín zůstane stejný.
+                        </span>
+                        <span style=${{ marginLeft: "auto" }}></span>
+                        <button className="btn sec sm" onClick=${() => setPouzityZbytek({ kod: v.zbytek.kod, rezim: "cely" })}>
+                          Celý kelímek
+                        </button>
+                      </div>`;
+                  })()}
+                  <${React.Fragment} key=${v.zbytek.kod + "-x"} />`)}
+              </div>`}
+
+            ${pouzityZbytek && vyuzitiZbytku && html`
+              <div className="specbar" style=${{ marginTop: 10 }}>
+                <span className="dot" style=${{ background: "var(--ok)" }}></span>
+                <span>
+                  Použije se <b>${fmt(vyuzitiZbytku.pouzit)} g</b> ze zbytku
+                  <b> ${vyuzitiZbytku.zbytek.kod}</b> — domíchat ${fmt(vyuzitiZbytku.domichat)} g.
+                  ${vyuzitiZbytku.celyZbytek
+                    ? html`<span className="note"> Kelímek se spotřebuje celý; dávka
+                        ${" " + fmt(calcAkt.totalG)} g je o ${fmt(vyuzitiZbytku.prebytek)} g větší,
+                        než zakázka potřebuje.</span>`
+                    : html`<span className="note"> V kelímku pak zůstane ${fmt(vyuzitiZbytku.zbudeVKelimku)} g.</span>`}
+                </span>
+                <span style=${{ marginLeft: "auto" }}></span>
+                ${vyuzitiZbytku.celyZbytek
+                  ? html`<button className="btn sec sm"
+                      onClick=${() => setPouzityZbytek({ kod: pouzityZbytek.kod, rezim: "cast" })}>Jen na zakázku</button>`
+                  : (vyuzitiZbytku.zbudeVKelimku > 0.5 && html`<button className="btn sec sm"
+                      onClick=${() => setPouzityZbytek({ kod: pouzityZbytek.kod, rezim: "cely" })}>Celý kelímek</button>`)}
+                <button className="btn sec sm" onClick=${() => setPouzityZbytek(null)}>Nepoužít</button>
+              </div>`}
+            ${pouzityZbytek && !vyuzitiZbytku && html`
+              <div className="warnbox">Zvolený zbytek už na tuhle dávku nesedí — složení nebo množství se změnilo.
+                <div style=${{ marginTop: 8 }}><button className="btn sec sm" onClick=${() => setPouzityZbytek(null)}>Zrušit použití</button></div>
+              </div>`}
+
             <div className="rowline" style=${{ marginTop: 12, marginBottom: 0 }}>
               <button className="btn" onClick=${tiskLisku}>🖨 Míchací lístek</button>
-              <span className="note">otevře tiskové okno — vytiskněte, nebo uložte jako PDF</span>
+              <button className="btn sec" onClick=${oznacDavku} disabled=${!recipe || !calc}>
+                Štítek na kelímek →
+              </button>
+              <label className="tgl" title="pot life se pak hlídá od namíchání">
+                <input type="checkbox" checked=${dvouslozkova} onChange=${(e) => setDvouslozkova(e.target.checked)} />
+                <span className="tglt"></span>s tužidlem
+              </label>
             </div>
+            <p className="note" style=${{ marginTop: 6 }}>
+              Štítek nalepte na kelímek hned po namíchání. Po zakázce ho načtěte čtečkou
+              a aplikace se zeptá, kolik barvy zbylo — tím se dostane do evidence zbytků.
+              ${" "}<button className="btn sec sm" style=${{ marginLeft: 4 }}
+                onClick=${() => setUlozitZbytek({ gramu: "", pozn: "", expirace: "", potlifeH: "", tuzidlo: false })}
+                disabled=${!recipe}>Znám zbytek rovnou</button>
+            </p>
           </div>
-          <${Vazeni} comps=${calc.comps} totalG=${calc.totalG} recipeName=${recipe ? recipe.name : ""} />
+          <${Vazeni} comps=${calcAkt.comps} totalG=${calcAkt.totalG} recipeName=${recipe ? recipe.name : ""}
+            predem=${vyuzitiZbytku ? vyuzitiZbytku.prispevek : null}
+            predemPopis=${vyuzitiZbytku ? "zbytek " + vyuzitiZbytku.zbytek.kod : ""}
+            onHotovo=${vyuzitiZbytku ? odepisZbytku : null} />
           </div>`}
       </div>
 
@@ -3435,7 +3997,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
 
               <label className="f" style=${{ marginTop: 4 }}>Možnosti potisku — vyberte polohu</label>
               <div className="poscards">
-                ${(product ? product.positions : []).map((p) => html`
+                ${polohy.map((p) => html`
                   <div key=${p.id} className=${"poscard" + (p.id === posId ? " on" : "")}
                     role="button" tabIndex="0"
                     onClick=${() => setPosId(p.id)}
@@ -3455,6 +4017,73 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
           </div>
         </div>`}
 
+      ${stitekOtevren && (zbytky || []).some((z) => z.kod === kodDavky) && html`
+        <${StitekZbytku} zbytek=${(zbytky || []).find((z) => z.kod === kodDavky)}
+          onClose=${() => setStitekOtevren(false)} />`}
+
+      ${ulozitZbytek && recipe && html`
+        <div className="modalbg" onClick=${(e) => { if (e.target === e.currentTarget) setUlozitZbytek(null); }}>
+          <div className="modalbox" style=${{ width: "min(480px,100%)" }}>
+            <div className="card" style=${{ margin: 0 }}>
+              <h2 style=${{ margin: 0 }}>Uložit zbytek do evidence</h2>
+              <p className="hint">
+                Zbylá barva dostane kód na štítek. Při další zakázce se stejnou recepturou
+                aplikace sama nabídne, kolik z ní jde použít.
+              </p>
+              <div className="rowline" style=${{ marginTop: 6 }}>
+                <span className="swatch" style=${{ background: recipe.hex }} />
+                <span className="note">${recipe.name}${recipe.series ? " · " + recipe.series : ""}
+                  · ${recipe.components.length} komponent</span>
+              </div>
+              <div className="frow c2" style=${{ marginTop: 10 }}>
+                <div>
+                  <label className="f">Kolik zbylo (g)</label>
+                  <input type="number" step="1" min="0" autoFocus value=${ulozitZbytek.gramu}
+                    onChange=${(e) => setUlozitZbytek(Object.assign({}, ulozitZbytek, { gramu: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="f">Poznámka</label>
+                  <input value=${ulozitZbytek.pozn}
+                    onChange=${(e) => setUlozitZbytek(Object.assign({}, ulozitZbytek, { pozn: e.target.value }))}
+                    placeholder="např. kelímek u míchačky" />
+                </div>
+              </div>
+              <div className="frow c3" style=${{ marginTop: 4 }}>
+                <div>
+                  <label className="f">Spotřebovat do</label>
+                  <input type="date" value=${ulozitZbytek.expirace || ""}
+                    onChange=${(e) => setUlozitZbytek(Object.assign({}, ulozitZbytek, { expirace: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="f">Čas použitelnosti (h)</label>
+                  <input type="number" step="0.5" min="0" value=${ulozitZbytek.potlifeH || ""}
+                    placeholder="jen dvousložkové"
+                    onChange=${(e) => setUlozitZbytek(Object.assign({}, ulozitZbytek, { potlifeH: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="f">Dvousložková</label>
+                  <label className="tgl" style=${{ marginTop: 6 }}>
+                    <input type="checkbox" checked=${!!ulozitZbytek.tuzidlo}
+                      onChange=${(e) => setUlozitZbytek(Object.assign({}, ulozitZbytek, { tuzidlo: e.target.checked,
+                        potlifeH: e.target.checked && !ulozitZbytek.potlifeH ? String(POTLIFE_VYCHOZI) : ulozitZbytek.potlifeH }))} />
+                    <span className="tglt"></span>s tužidlem
+                  </label>
+                </div>
+              </div>
+              <p className="note">
+                Pot life se počítá od teď — barva se právě namíchala. Zapíše se i zakázka${zak && zak.order ? " " + zak.order : ""},
+                produkt${product && product.ref ? " " + product.ref : ""} a poloha, ať je pak jasné, odkud zbytek je.
+              </p>
+              <div className="rowline" style=${{ marginTop: 12, marginBottom: 0 }}>
+                <button className="btn" disabled=${!(n(ulozitZbytek.gramu) > 0)} onClick=${ulozZbytekZKalkulace}>
+                  Uložit a otevřít štítek
+                </button>
+                <button className="btn sec" onClick=${() => setUlozitZbytek(null)}>Zrušit</button>
+              </div>
+            </div>
+          </div>
+        </div>`}
+
       ${pokrytiOkno && html`<${PokrytiModal} obrazky=${pdfObrazky} stranky=${pdfStranky} pdfId=${pdfId}
         sirka=${sirka} vyska=${vyska} gm2=${n(gm2)} qty=${n(qty)}
         odsazeniVychozi=${odsazeniJob} onPouzit=${ulozPokryti} onClose=${() => setPokrytiOkno(false)} />`}
@@ -3462,7 +4091,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
       ${odvod && odvod.mode === "edit" && html`
         <div className="modalbg" onClick=${(e) => { if (e.target === e.currentTarget) setOdvod(null); }}>
           <div className="modalbox">
-            <${RecipeForm} initial=${odvod.initial} onSave=${ulozOdvozenou} onCancel=${() => setOdvod(null)} />
+            <${RecipeForm} initial=${odvod.initial} onSave=${ulozOdvozenou} onCancel=${() => setOdvod(null)} sita=${sita} />
           </div>
         </div>`}
     </div>`;
@@ -3562,17 +4191,26 @@ function prepocetDavky(comps, totalG, nalito) {
    vypadalo jako 0,1 g a nesedělo by to s tím, co je odškrtnuté jako hotové. */
 const fmtG = (v) => fmt(v, Math.abs(v) > 0 && Math.abs(v) < 1 ? 2 : 1);
 
-function Vazeni({ comps, totalG, recipeName }) {
+function Vazeni({ comps, totalG, recipeName, predem, predemPopis, onHotovo }) {
   const sc = useScale();
   const [baud, setBaud] = useState("9600");
   const [tol, setTol] = useState(0.5);
-  // kolik gramů které komponenty už je v nádobě; index = pořadí v receptuře
-  const [nalito, setNalito] = useState(() => comps.map(() => 0));
+  // Zbytek z evidence je vlastně předem nalitá část dávky — do nádoby se
+  // nalije jako první a asistent pak vede jen dolití zbylých složek.
+  const zacatek = () => comps.map((c, i) => (predem && predem[i] > 0) ? predem[i] : 0);
+  const [nalito, setNalito] = useState(zacatek);
   const [krok, setKrok] = useState(0);          // která komponenta se váží teď
   const [davka, setDavka] = useState(totalG);   // celková dávka po případném přepočtu
 
-  const zacniZnovu = () => { setNalito(comps.map(() => 0)); setKrok(0); setDavka(totalG); };
-  useEffect(zacniZnovu, [totalG, comps.length, recipeName]);
+  const zacniZnovu = () => {
+    const z = zacatek();
+    setNalito(z);
+    setDavka(totalG);
+    const podil0 = comps.map((c) => (totalG > 0 ? c.g / totalG : 0));
+    const prvni = podil0.findIndex((p, i) => totalG * p - z[i] > Math.max(0.05, n(tol, 0.5)) / 2);
+    setKrok(prvni >= 0 ? prvni : -1);
+  };
+  useEffect(zacniZnovu, [totalG, comps.length, recipeName, (predem || []).join(",")]);
 
   const podil = comps.map((c) => (totalG > 0 ? c.g / totalG : 0));
   const cil = podil.map((p) => davka * p);
@@ -3657,6 +4295,12 @@ function Vazeni({ comps, totalG, recipeName }) {
                 onChange=${(e) => sc.setRaw(n(e.target.value))} />
             </div>`}
 
+          ${predemPopis && (predem || []).some((x) => x > 0) && html`
+            <div className="specbar" style=${{ marginTop: 10 }}>
+              <span className="dot" style=${{ background: "var(--ok)" }}></span>
+              <span>V nádobě už je <b>${fmtG((predem || []).reduce((a, b) => a + b, 0))} g</b>${" "}
+                ze zbytku (${predemPopis}) — asistent vede jen dolití zbylých složek.</span>
+            </div>`}
           ${naviceni > 0.05 && html`
             <div className="specbar" style=${{ marginTop: 10 }}>
               <span className="dot" style=${{ background: "var(--warn)" }}></span>
@@ -3727,7 +4371,10 @@ function Vazeni({ comps, totalG, recipeName }) {
             <div className="okbox" style=${{ marginTop: 12 }}>
               ✓ Všechny komponenty navaženy (${fmt(vPotu)} g celkem${naviceni > 0.05
                 ? ", dávka přepočtena z " + fmt(totalG) + " g" : ""}). Barvu důkladně promíchejte.
-              <div style=${{ marginTop: 8 }}><button className="btn sec sm" onClick=${zacniZnovu}>Navážit znovu</button></div>
+              <div className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
+                <button className="btn sec sm" onClick=${zacniZnovu}>Navážit znovu</button>
+                ${onHotovo && html`<button className="btn sm" onClick=${onHotovo}>Odepsat zbytek ze skladu</button>`}
+              </div>
             </div>`}
 
           <table className="t" style=${{ marginTop: 14 }}>
@@ -3741,7 +4388,7 @@ function Vazeni({ comps, totalG, recipeName }) {
                   <td>${c.name}</td>
                   <td className="num">${fmt(podil[i] * 100)}</td>
                   <td className="num">${fmtG(cil[i])}</td>
-                  <td className="num">${fmtG(i === krok ? naliteTed : (nalito[i] || 0))}</td>
+                  <td className="num">${fmtG(nalito[i] || 0)}</td>
                   <td className="num">${zbyvaVse[i] > tolerance / 2
                     ? fmtG(zbyvaVse[i])
                     : html`<span className="note" title="méně, než váha rozliší — bere se za navážené">${
@@ -3751,6 +4398,396 @@ function Vazeni({ comps, totalG, recipeName }) {
           </table>
         <//>`}
     </div>`;
+}
+
+/* ============================ ZBYTKY BAREV ============================ */
+function StitekZbytku({ zbytek, onClose }) {
+  const vytiskni = () => {
+    const w = window.open("", "_blank", "width=520,height=420");
+    if (!w) return;
+    const e = (s) => String(s == null ? "" : s).replace(/[&<>"]/g,
+      (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    w.document.write('<!doctype html><html lang="cs"><head><meta charset="utf-8">'
+      + "<title>Štítek " + e(zbytek.kod) + "</title><style>"
+      + "body{font-family:Segoe UI,Arial,sans-serif;margin:8mm;color:#000}"
+      + ".s{border:1.5px solid #000;border-radius:6px;padding:6mm;width:80mm}"
+      + ".k{font-family:Consolas,monospace;font-size:20px;font-weight:800;letter-spacing:.08em}"
+      + ".n{font-size:15px;font-weight:700;margin:2mm 0 1mm}"
+      + ".m{font-size:13px}.p{font-size:10px;color:#555;margin-top:2mm}"
+      + "img{display:block;margin:3mm 0 1mm}"
+      + "@media print{body{margin:0}}</style></head><body>"
+      + '<div class="s">'
+      + '<img src="' + code128Url(zbytek.kod, 90, 2) + '" alt="' + e(zbytek.kod) + '">'
+      + '<div class="k">' + e(zbytek.kod) + "</div>"
+      + '<div class="n">' + e(zbytek.nazev || "—") + "</div>"
+      + '<div class="m">' + fmt(n(zbytek.gramu)) + " g"
+      + (zbytek.hustota ? " · hustota " + fmt(n(zbytek.hustota), 2) + " g/ml" : "") + "</div>"
+      + '<div class="m">'
+      + (zbytek.expirace ? "spotřebovat do " + e(zbytek.expirace) : "")
+      + (n(zbytek.potlifeH) > 0
+          ? (zbytek.expirace ? " · " : "") + "pot life " + fmt(n(zbytek.potlifeH), 0) + " h"
+            + (zbytek.namichano ? " od " + new Date(zbytek.namichano).toLocaleString("cs-CZ",
+                { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" }) : "")
+          : "")
+      + "</div>"
+      + '<div class="p">'
+      + (zbytek.zakazka ? "zakázka " + e(zbytek.zakazka) + " · " : "")
+      + (zbytek.ulozeno ? new Date(zbytek.ulozeno).toLocaleDateString("cs-CZ") : "")
+      + (zbytek.viskozita ? " · viskozita " + fmt(n(zbytek.viskozita), 1) + " s"
+          + (zbytek.viskPohar ? " (" + e(zbytek.viskPohar) + ")" : "") : "")
+      + "</div></div>"
+      + '<script>window.addEventListener("load",function(){setTimeout(function(){window.print()},150)})<\/script>'
+      + "</body></html>");
+    w.document.close();
+  };
+  return html`
+    <div className="modalbg" onClick=${(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="modalbox" style=${{ width: "min(420px,100%)" }}>
+        <div className="card" style=${{ margin: 0, textAlign: "center" }}>
+          <h2 style=${{ margin: 0 }}>Štítek na kelímek</h2>
+          <img src=${code128Url(zbytek.kod, 90, 2)} alt=${zbytek.kod}
+            style=${{ maxWidth: "100%", margin: "14px auto 6px", display: "block", background: "#fff", padding: 8, borderRadius: 8 }} />
+          <div style=${{ fontFamily: "var(--mono)", fontSize: 22, fontWeight: 800, letterSpacing: ".08em" }}>${zbytek.kod}</div>
+          <div style=${{ fontWeight: 700, marginTop: 6 }}>${zbytek.nazev || "—"}</div>
+          <div className="note">${fmt(n(zbytek.gramu))} g${zbytek.zakazka ? " · zakázka " + zbytek.zakazka : ""}</div>
+          <div className="rowline" style=${{ marginTop: 14, marginBottom: 0, justifyContent: "center" }}>
+            <button className="btn" onClick=${vytiskni}>Vytisknout štítek</button>
+            <button className="btn sec" onClick=${onClose}>Zavřít</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function ZbytkyTab({ zbytky, setZbytky, recipes, guardDelete, otevrenyKod, onOtevreno, onDoplnit }) {
+  const [q, setQ] = useState("");
+  const [baze, setBaze] = useState("");          // "" | "s" | "bez"
+  const [lhuta, setLhuta] = useState("");        // "" | "brzy" | "prosle"
+  const [jenSMnozstvim, setJenSMnozstvim] = useState(true);
+  const [stitek, setStitek] = useState(null);
+  const [zvyraznen, setZvyraznen] = useState("");
+  const [novy, setNovy] = useState(null);
+
+  // kód načtený čtečkou — vyhledá a zvýrazní kelímek
+  useEffect(() => {
+    if (!otevrenyKod) return;
+    setQ(otevrenyKod); setJenSMnozstvim(false); setBaze("");
+    setZvyraznen(otevrenyKod);
+    if (onOtevreno) onOtevreno();
+    const t = setTimeout(() => setZvyraznen(""), 4000);
+    return () => clearTimeout(t);
+  }, [otevrenyKod]);
+
+  const filtr = useMemo(() => {
+    const s = q.trim().toLowerCase();
+    return (zbytky || []).filter((z) => {
+      if (jenSMnozstvim && !(n(z.gramu) > 0)) return false;
+      if (baze === "s" && !maBazi(z)) return false;
+      if (baze === "bez" && maBazi(z)) return false;
+      if (lhuta === "vtisku") { if (z.stav !== "vtisku") return false; }
+      else if (lhuta && stavZbytku(z).stav !== lhuta) return false;
+      if (!s) return true;
+      return (z.kod + " " + z.nazev + " " + (z.zakazka || "") + " " + (z.produkt || "")
+        + " " + (z.slozeni || []).map((c) => c.name).join(" ")).toLowerCase().includes(s);
+    });
+  }, [zbytky, q, baze, lhuta, jenSMnozstvim]);
+
+  const uprav = (kod, zmena) => setZbytky((prev) => prev.map((z) =>
+    z.kod === kod ? Object.assign({}, z, zmena, { zmeneno: Date.now() }) : z));
+  const smaz = (z) => guardDelete(() => setZbytky((prev) => prev.filter((x) => x.kod !== z.kod)),
+    "smazání zbytku " + z.kod + " (" + z.nazev + ")");
+
+  const celkem = filtr.filter((z) => z.stav !== "vtisku").reduce((s, z) => s + n(z.gramu), 0);
+
+  // upozornění na lhůty — počítá se z aktuálního času, ne z uloženého stavu
+  const [ted, setTed] = useState(Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setTed(Date.now()), 60000);
+    return () => clearInterval(t);
+  }, []);
+  const stavy = useMemo(() => {
+    const m = {};
+    for (const z of (zbytky || [])) m[z.kod] = stavZbytku(z, ted);
+    return m;
+  }, [zbytky, ted]);
+  const vTisku = (zbytky || []).filter((z) => z.stav === "vtisku");
+  const hlidane = (zbytky || []).filter((z) => n(z.gramu) > 0 && z.stav !== "vtisku");
+  const prosleKs = hlidane.filter((z) => stavy[z.kod] && stavy[z.kod].stav === "prosle");
+  const brzyKs = hlidane.filter((z) => stavy[z.kod] && stavy[z.kod].stav === "brzy");
+
+  const [merim, setMerim] = useState(null);   // {kod, s, pohar}
+  const zapisViskozitu = () => {
+    if (!merim || !(n(merim.s) > 0)) return;
+    const z = (zbytky || []).find((x) => x.kod === merim.kod);
+    if (!z) { setMerim(null); return; }
+    const hist = (z.viskHist || []).concat(
+      z.viskozita ? [{ s: n(z.viskozita), kdy: n(z.viskKdy) || n(z.ulozeno) }] : []).slice(-9);
+    uprav(merim.kod, { viskozita: n(merim.s), viskPohar: merim.pohar || "", viskKdy: Date.now(),
+      viskHist: hist });
+    setMerim(null);
+  };
+
+  const ulozNovy = () => {
+    if (!novy || !novy.nazev.trim() || !(n(novy.gramu) > 0)) return;
+    const rec = recipes.find((r) => r.id === novy.receptId) || null;
+    const kod = novyKodZbytku(zbytky);
+    setZbytky((prev) => [{
+      id: uid(), kod: kod, nazev: novy.nazev.trim(), gramu: n(novy.gramu), puvodne: n(novy.gramu),
+      hustota: rec ? n(rec.density, 1.2) : 1.2, hex: rec ? rec.hex : "#888888",
+      zakazka: novy.zakazka || "", produkt: "", barva: "", tech: "", poloha: "",
+      ulozeno: Date.now(), zmeneno: Date.now(), namichano: Date.now(),
+      expirace: novy.expirace || "",
+      potlifeH: novy.potlifeH === "" ? null : n(novy.potlifeH), tuzidlo: !!novy.tuzidlo,
+      viskozita: "", viskPohar: "", viskKdy: 0, viskHist: [],
+      pozn: novy.pozn || "", zdroj: rec ? (rec.zdroj || "") : "",
+      slozeni: rec ? rec.components.map((c) => ({ name: c.name, pct: n(c.pct) })) : [],
+    }].concat(prev));
+    setNovy(null);
+    setStitek(kod);
+  };
+
+  return html`
+    <${React.Fragment}>
+      <div className="card">
+        <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 10, flexWrap: "wrap" }}>
+          <h2 style=${{ margin: 0 }}>Zbytky barev (${fmt(filtr.length, 0)}${filtr.length !== (zbytky || []).length ? " z " + fmt((zbytky || []).length, 0) : ""})</h2>
+          <button className="btn" onClick=${() => setNovy({ nazev: "", gramu: "", receptId: "", zakazka: "",
+            expirace: "", potlifeH: "", tuzidlo: false, pozn: "" })}>
+            + Uložit zbytek
+          </button>
+        </div>
+        <p className="hint">
+          Nespotřebovaná barva z minulé zakázky. Kelímek dostane kód na štítek; při další
+          zakázce aplikace sama napíše, kolik z něj jde použít a kolik už stačí domíchat.
+        </p>
+
+        ${vTisku.length > 0 && html`
+          <div className="specbar" style=${{ marginTop: 0 }}>
+            <span className="dot" style=${{ background: "var(--key)" }}></span>
+            <span><b>${fmt(vTisku.length, 0)} ${vTisku.length === 1 ? "dávka je označená" : "dávek je označených"} v tisku</b>
+              ${" — " + vTisku.slice(0, 3).map((z) => z.kod).join(", ")}${vTisku.length > 3 ? " a další" : ""}.
+              Po zakázce načtěte štítek čtečkou, nebo zapište zbytek tlačítkem u řádku.</span>
+          </div>`}
+        ${(prosleKs.length > 0 || brzyKs.length > 0) && html`
+          <div className=${prosleKs.length ? "warnbox" : "okbox"} style=${{ marginTop: 0 }}>
+            ${prosleKs.length > 0 && html`<${React.Fragment}>
+              <b>${fmt(prosleKs.length, 0)} ${prosleKs.length === 1 ? "kelímek má" : "kelímků má"} po lhůtě</b>
+              ${" (" + fmt(prosleKs.reduce((s, z) => s + n(z.gramu), 0)) + " g) — barva už není použitelná, aplikace ji nenabízí."}
+              <br /><//>`}
+            ${brzyKs.length > 0 && html`<${React.Fragment}>
+              <b>${fmt(brzyKs.length, 0)} ${brzyKs.length === 1 ? "kelímku" : "kelímkům"} končí lhůta:</b>
+              ${" "}${brzyKs.slice(0, 4).map((z) => z.kod + " (" + zbyvaText(stavy[z.kod].zbyva) + ")").join(", ")}
+              ${brzyKs.length > 4 ? " a další" : ""} — spotřebovat přednostně.<//>`}
+          </div>`}
+
+        <label className="f">Filtr</label>
+        <div className="chips" style=${{ marginBottom: 8 }}>
+          <button className=${"chip" + (baze ? "" : " on")} onClick=${() => setBaze("")}>všechny</button>
+          <button className=${"chip" + (baze === "bez" ? " on" : "")} onClick=${() => setBaze("bez")}
+            title="čisté barvy bez transparentní báze">bez báze</button>
+          <button className=${"chip" + (baze === "s" ? " on" : "")} onClick=${() => setBaze("s")}
+            title="barvy ředěné transparentní bází nebo mediem">s bází</button>
+          <span style=${{ width: 12 }}></span>
+          <button className=${"chip" + (lhuta === "brzy" ? " on" : "")} onClick=${() => setLhuta(lhuta === "brzy" ? "" : "brzy")}
+            title="kelímky, kterým brzy končí lhůta">končí lhůta ${brzyKs.length ? "(" + brzyKs.length + ")" : ""}</button>
+          <button className=${"chip" + (lhuta === "prosle" ? " on" : "")} onClick=${() => setLhuta(lhuta === "prosle" ? "" : "prosle")}
+            title="kelímky po lhůtě">po lhůtě ${prosleKs.length ? "(" + prosleKs.length + ")" : ""}</button>
+          <span style=${{ width: 12 }}></span>
+          <button className=${"chip" + (jenSMnozstvim ? " on" : "")} onClick=${() => setJenSMnozstvim((v) => !v)}
+            title="skrýt kelímky, které už jsou dobrané">jen s množstvím</button>
+          ${vTisku.length > 0 && html`<button className=${"chip" + (lhuta === "vtisku" ? " on" : "")}
+            onClick=${() => setLhuta(lhuta === "vtisku" ? "" : "vtisku")}
+            title="dávky označené při míchání, u kterých se ještě nezapsal zbytek">v tisku (${vTisku.length})</button>`}
+        </div>
+        <input className="search" value=${q} onChange=${(e) => setQ(e.target.value)}
+          placeholder="Hledat podle kódu, barvy, zakázky nebo složky…" style=${{ marginBottom: 12 }} />
+
+        ${!filtr.length ? html`
+          <div className="empty">
+            ${(zbytky || []).length ? "Filtru nic neodpovídá." : "Zatím žádné zbytky. Uložit je můžete i rovnou z kalkulace po namíchání."}
+          </div>` : html`
+          <${React.Fragment}>
+            <p className="note">Celkem ve filtru <b>${fmt(celkem)} g</b> barvy${
+              vTisku.length ? " (dávky v tisku se nepočítají — ještě se z nich tiskne)" : ""}.</p>
+            <table className="t">
+              <thead><tr><th /><th>Kód</th><th>Barva</th><th className="num">g</th>
+                <th>Báze</th><th>Lhůta</th><th>Viskozita</th><th>Zakázka</th><th /></tr></thead>
+              <tbody>
+                ${filtr.slice(0, 200).map((z) => {
+                  const st = stavy[z.kod] || stavZbytku(z, ted);
+                  const barvaStavu = st.stav === "prosle" ? "#B23B2A"
+                    : (st.stav === "brzy" ? "var(--warn)" : "var(--ink-2)");
+                  const predchozi = (z.viskHist || [])[(z.viskHist || []).length - 1];
+                  return html`
+                  <tr key=${z.kod} className=${zvyraznen === z.kod ? "rowactive" : ""}
+                    style=${n(z.gramu) > 0 ? {} : { opacity: .5 }}>
+                    <td><span className="swatch" style=${{ background: z.hex }} /></td>
+                    <td style=${{ fontFamily: "var(--mono)", fontWeight: 700 }}>${z.kod}</td>
+                    <td>
+                      <div style=${{ fontWeight: 700 }}>${z.nazev}
+                        ${z.stav === "vtisku" && html`<span className="tag" style=${{ marginLeft: 6, background: "var(--key)", color: "#fff", boxShadow: "none" }}
+                          title="označeno při míchání, zbytek se teprve zapíše">v tisku</span>`}
+                        ${z.tuzidlo && html`<span className="tag" style=${{ marginLeft: 6 }}>s tužidlem</span>`}</div>
+                      <div className="note">${(z.slozeni || []).map((c) => c.name + " " + fmt(n(c.pct)) + " %").join(" · ") || "složení neuvedeno"}</div>
+                    </td>
+                    <td className="num">
+                      <input type="number" step="1" min="0" value=${z.gramu} style=${{ width: 78, textAlign: "right" }}
+                        onChange=${(e) => uprav(z.kod, { gramu: n(e.target.value) })} />
+                    </td>
+                    <td><span className="tag">${maBazi(z) ? "s bází" : "bez báze"}</span></td>
+                    <td style=${{ minWidth: 150 }}>
+                      ${st.doKdy
+                        ? html`<div style=${{ color: barvaStavu, fontWeight: st.stav === "ok" ? 400 : 700 }}>
+                            ${st.stav === "prosle" ? "po lhůtě " + zbyvaText(st.zbyva)
+                              : (st.stav === "brzy" ? "končí " + zbyvaText(st.zbyva) : zbyvaText(st.zbyva))}
+                          </div>
+                          <div className="note">${st.duvod}</div>`
+                        : html`<span className="note">bez lhůty</span>`}
+                      <div className="rowline" style=${{ gap: 4, marginTop: 4, marginBottom: 0 }}>
+                        <input type="date" value=${z.expirace || ""} style=${{ width: 132, padding: "4px 6px", fontSize: 12 }}
+                          title="spotřebovat do" onChange=${(e) => uprav(z.kod, { expirace: e.target.value })} />
+                      </div>
+                      <div className="rowline" style=${{ gap: 4, marginTop: 4, marginBottom: 0 }}>
+                        <input type="number" step="0.5" min="0" placeholder="pot life h"
+                          value=${z.potlifeH == null ? "" : z.potlifeH} style=${{ width: 74, padding: "4px 6px", fontSize: 12 }}
+                          title="čas použitelnosti po namíchání (hodin)"
+                          onChange=${(e) => uprav(z.kod, { potlifeH: e.target.value === "" ? null : n(e.target.value),
+                            namichano: n(z.namichano) || n(z.ulozeno) || Date.now() })} />
+                        <label className="note" style=${{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer" }}
+                          title="dvousložková barva — pot life se počítá od namíchání">
+                          <input type="checkbox" checked=${!!z.tuzidlo} style=${{ width: "auto" }}
+                            onChange=${(e) => uprav(z.kod, { tuzidlo: e.target.checked,
+                              potlifeH: e.target.checked && z.potlifeH == null ? POTLIFE_VYCHOZI : z.potlifeH,
+                              namichano: n(z.namichano) || n(z.ulozeno) || Date.now() })} />
+                          tužidlo
+                        </label>
+                      </div>
+                    </td>
+                    <td style=${{ minWidth: 130 }}>
+                      ${z.viskozita
+                        ? html`<${React.Fragment}>
+                            <div><b>${fmt(n(z.viskozita), 1)} s</b>${z.viskPohar ? " · " + z.viskPohar : ""}</div>
+                            <div className="note">měřeno ${z.viskKdy ? new Date(z.viskKdy).toLocaleDateString("cs-CZ") : "—"}
+                              ${predchozi ? " · dřív " + fmt(predchozi.s, 1) + " s"
+                                + (n(z.viskozita) > predchozi.s ? " (zhoustla)" : "") : ""}</div>
+                          <//>`
+                        : html`<span className="note">neměřeno</span>`}
+                      <button className="btn sec sm" style=${{ marginTop: 4 }}
+                        onClick=${() => setMerim({ kod: z.kod, s: "", pohar: z.viskPohar || POHARKY[0] })}>Změřit</button>
+                    </td>
+                    <td className="note">${z.zakazka || "—"}<br />${z.ulozeno ? new Date(z.ulozeno).toLocaleDateString("cs-CZ") : ""}</td>
+                    <td style=${{ whiteSpace: "nowrap" }}>
+                      ${z.stav === "vtisku" && html`<${React.Fragment}>
+                        <button className="btn sm" onClick=${() => onDoplnit && onDoplnit(z.kod)}
+                          title="zapsat, kolik z dávky zbylo">Zadat zbytek</button>${" "}<//>`}
+                      <button className="btn sec sm" onClick=${() => setStitek(z.kod)}>Štítek</button>
+                      ${" "}
+                      <button className="btn danger sm" onClick=${() => smaz(z)}>Smazat</button>
+                    </td>
+                  </tr>`; })}
+              </tbody>
+            </table>
+          <//>`}
+      </div>
+
+      ${novy && html`
+        <div className="modalbg" onClick=${(e) => { if (e.target === e.currentTarget) setNovy(null); }}>
+          <div className="modalbox" style=${{ width: "min(560px,100%)" }}>
+            <div className="card" style=${{ margin: 0 }}>
+              <h2 style=${{ margin: 0 }}>Uložit zbytek do evidence</h2>
+              <p className="hint">Složení se převezme z vybrané receptury — podle něj se pak pozná, na jakou zakázku zbytek sedí.</p>
+              <div className="frow c2">
+                <div>
+                  <label className="f">Receptura</label>
+                  <select value=${novy.receptId} onChange=${(e) => {
+                    const r = recipes.find((x) => x.id === e.target.value);
+                    setNovy(Object.assign({}, novy, { receptId: e.target.value,
+                      nazev: r ? r.name : novy.nazev }));
+                  }}>
+                    <option value="">— bez receptury (jen název) —</option>
+                    ${recipes.slice(0, 400).map((r) => html`<option key=${r.id} value=${r.id}>${r.name}${r.series ? " · " + r.series : ""}</option>`)}
+                  </select>
+                </div>
+                <div>
+                  <label className="f">Název barvy</label>
+                  <input value=${novy.nazev} onChange=${(e) => setNovy(Object.assign({}, novy, { nazev: e.target.value }))}
+                    placeholder="např. PANTONE 485 C" />
+                </div>
+              </div>
+              <div className="frow c3">
+                <div>
+                  <label className="f">Množství (g)</label>
+                  <input type="number" step="1" min="0" value=${novy.gramu}
+                    onChange=${(e) => setNovy(Object.assign({}, novy, { gramu: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="f">Ze zakázky</label>
+                  <input value=${novy.zakazka} onChange=${(e) => setNovy(Object.assign({}, novy, { zakazka: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="f">Spotřebovat do</label>
+                  <input type="date" value=${novy.expirace}
+                    onChange=${(e) => setNovy(Object.assign({}, novy, { expirace: e.target.value }))} />
+                </div>
+              </div>
+              <label className="f">Poznámka</label>
+              <input value=${novy.pozn} onChange=${(e) => setNovy(Object.assign({}, novy, { pozn: e.target.value }))} />
+              <div className="rowline" style=${{ marginTop: 14, marginBottom: 0 }}>
+                <button className="btn" disabled=${!novy.nazev.trim() || !(n(novy.gramu) > 0)} onClick=${ulozNovy}>
+                  Uložit a vytisknout štítek
+                </button>
+                <button className="btn sec" onClick=${() => setNovy(null)}>Zrušit</button>
+              </div>
+            </div>
+          </div>
+        </div>`}
+
+      ${merim && html`
+        <div className="modalbg" onClick=${(e) => { if (e.target === e.currentTarget) setMerim(null); }}>
+          <div className="modalbox" style=${{ width: "min(440px,100%)" }}>
+            <div className="card" style=${{ margin: 0 }}>
+              <h2 style=${{ margin: 0 }}>Změřit viskozitu</h2>
+              <p className="hint">
+                Výtokový čas z pohárku v sekundách. Barva časem houstne — předchozí měření
+                zůstane uložené, takže je posun vidět.
+              </p>
+              <div className="frow c2">
+                <div>
+                  <label className="f">Výtokový čas (s)</label>
+                  <input type="number" step="0.1" min="0" autoFocus value=${merim.s}
+                    onChange=${(e) => setMerim(Object.assign({}, merim, { s: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="f">Pohárek</label>
+                  <select value=${merim.pohar} onChange=${(e) => setMerim(Object.assign({}, merim, { pohar: e.target.value }))}>
+                    ${POHARKY.map((p) => html`<option key=${p} value=${p}>${p}</option>`)}
+                  </select>
+                </div>
+              </div>
+              ${(() => {
+                const z = (zbytky || []).find((x) => x.kod === merim.kod);
+                const h = z ? (z.viskHist || []).concat(z.viskozita ? [{ s: n(z.viskozita), kdy: n(z.viskKdy) }] : []) : [];
+                return h.length ? html`
+                  <${React.Fragment}>
+                    <label className="f" style=${{ marginTop: 10 }}>Dosavadní měření</label>
+                    <div className="note">
+                      ${h.map((m, i) => html`<span key=${i}>${i ? " → " : ""}${fmt(m.s, 1)} s
+                        (${m.kdy ? new Date(m.kdy).toLocaleDateString("cs-CZ") : "?"})</span>`)}
+                    </div>
+                  <//>` : null;
+              })()}
+              <div className="rowline" style=${{ marginTop: 14, marginBottom: 0 }}>
+                <button className="btn" disabled=${!(n(merim.s) > 0)} onClick=${zapisViskozitu}>Zapsat měření</button>
+                <button className="btn sec" onClick=${() => setMerim(null)}>Zrušit</button>
+              </div>
+            </div>
+          </div>
+        </div>`}
+
+      ${stitek && (zbytky || []).some((z) => z.kod === stitek) && html`
+        <${StitekZbytku} zbytek=${(zbytky || []).find((z) => z.kod === stitek)}
+          onClose=${() => setStitek(null)} />`}
+    <//>`;
 }
 
 /* ============================ PRODUKTY ============================ */
@@ -3904,15 +4941,15 @@ function ProductForm({ initial, onSave, onCancel }) {
 }
 
 /* ============================ RECEPTURY ============================ */
-function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr }) {
+function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr, technologie, dbTech, sita }) {
   const [edit, setEdit] = useState(null);
   const [q, setQ] = useState("");
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    const zaklad = podleDatabaze(recipes, dbFiltr);
+    const zaklad = podleTechnologie(podleDatabaze(recipes, dbFiltr), technologie, dbTech);
     if (!s) return zaklad;
     return zaklad.filter((r) => (r.name + " " + r.series + " " + r.type).toLowerCase().includes(s));
-  }, [q, recipes, dbFiltr]);
+  }, [q, recipes, dbFiltr, technologie, dbTech]);
 
   const save = (r) => {
     setRecipes((prev) => {
@@ -3937,7 +4974,7 @@ function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr }) {
     a.click();
   };
 
-  if (edit) return html`<${RecipeForm} initial=${edit} onSave=${save} onCancel=${() => setEdit(null)} />`;
+  if (edit) return html`<${RecipeForm} initial=${edit} onSave=${save} onCancel=${() => setEdit(null)} sita=${sita} />`;
 
   return html`
     <div className="card">
@@ -3981,7 +5018,13 @@ function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr }) {
     </div>`;
 }
 
-function RecipeForm({ initial, onSave, onCancel }) {
+function RecipeForm({ initial, onSave, onCancel, sita }) {
+  // Editor receptury neví, pro kterou technologii se bude tisknout, proto
+  // nabídne všechna zapsaná síta i klišé; bez vlastních dat standardní řadu.
+  const nabidkaSit = useMemo(() => {
+    const z = (sita || []).map((s) => s.sito).filter(Boolean);
+    return z.length ? Array.from(new Set(z)) : SITA;
+  }, [sita]);
   const [r, setR] = useState(initial);
   const setC = (id, k, v) => setR(Object.assign({}, r, { components: r.components.map((x) => x.id === id ? Object.assign({}, x, { [k]: v }) : x) }));
   const sum = r.components.reduce((s, c) => s + n(c.pct), 0);
@@ -4005,7 +5048,9 @@ function RecipeForm({ initial, onSave, onCancel }) {
           <label className="f">Síto</label>
           <select value=${r.mesh || ""} onChange=${(e) => setR(Object.assign({}, r, { mesh: e.target.value }))}>
             <option value="">— nevybráno —</option>
-            ${SITA.map((m) => html`<option key=${m} value=${m}>${m}</option>`)}
+            ${nabidkaSit.map((m) => html`<option key=${m} value=${m}>${m}</option>`)}
+            ${r.mesh && nabidkaSit.indexOf(r.mesh) < 0
+              && html`<option value=${r.mesh}>${r.mesh}</option>`}
           </select>
         </div>
         <div>
@@ -4151,6 +5196,7 @@ function csvToRecipes(text, zdroj) {
     mesh: idx(/^(s.to|sito|mesh)/), opacity: idx(/^(kryvost|opacity)/), surface: idx(/^(povrch|surface)/),
     customer: idx(/^(objednavatel|customer|z.kazn.k)/), tested: idx(/^(otestovan|tested)/), fade: idx(/^(vyblednut|odolnost|fade)/),
     zaklad: idx(/^(zaklad|z.klad|odvozeno|base)/), vazby: idx(/^(vazby|vazba|produkty|links)/),
+    tech: idx(/^(technologie|tech|technika)/), visk: idx(/^(viskozita|viscosity)/),
   };
   if (ci.name < 0 || ci.comp < 0 || ci.pct < 0)
     throw new Error("CSV musí obsahovat sloupce: nazev, komponenta, procento (volitelně typ, rada, hustota, hex).");
@@ -4171,6 +5217,9 @@ function csvToRecipes(text, zdroj) {
         tested: ci.tested >= 0 ? /^(1|ano|yes|true|x)$/i.test((r[ci.tested] || "").trim()) : false,
         fade: ci.fade >= 0 ? /^(1|ano|yes|true|x)$/i.test((r[ci.fade] || "").trim()) : false,
         zaklad: ci.zaklad >= 0 ? (r[ci.zaklad] || "") : "",
+        // technologie, pro které řada platí; prázdné = pro všechny
+        tech: ci.tech >= 0 ? String(r[ci.tech] || "").toUpperCase().replace(/\s+/g, "") : "",
+        viskozita: ci.visk >= 0 && r[ci.visk] !== "" ? n(r[ci.visk]) : null,
         // na které kombinace produkt+barva+technologie+poloha byla receptura použita
         vazby: ci.vazby >= 0
           ? String(r[ci.vazby] || "").split("~").map((s) => s.trim()).filter(Boolean) : [],
@@ -4254,7 +5303,8 @@ const jeVlastni = (r) => r.type === "Custom" && (!r.zdroj || r.zdroj === SOUBOR_
 
 function vlastniDoCsv(recipes, links) {
   const hlavicka = ["nazev", "typ", "rada", "hustota", "hex", "komponenta", "procento",
-    "sito", "kryvost", "povrch", "objednavatel", "otestovany", "vyblednuti", "zaklad", "vazby"];
+    "sito", "kryvost", "povrch", "objednavatel", "otestovany", "vyblednuti", "viskozita",
+    "zaklad", "vazby"];
   const radky = [hlavicka];
   for (const r of recipes.filter(jeVlastni)) {
     const vazby = vazbyReceptury(links, r.id).join("~");
@@ -4263,11 +5313,519 @@ function vlastniDoCsv(recipes, links) {
       radky.push([r.name, "Custom", r.series || "", r.density, (r.hex || "").replace(/^#/, ""),
         c.name || "", c.pct === "" ? "" : c.pct,
         r.mesh || "", r.opacity || "", r.surface || "", r.customer || "",
-        r.tested ? "ano" : "", r.fade ? "ano" : "", r.zaklad || "", vazby]);
+        r.tested ? "ano" : "", r.fade ? "ano" : "",
+        r.viskozita == null ? "" : cislo(r.viskozita, 1), r.zaklad || "", vazby]);
     }
   }
   return radky.map((r) => r.map((c) => '"' + String(c == null ? "" : c).replace(/"/g, '""') + '"')
     .join(";")).join("\r\n") + "\r\n";
+}
+
+/* ==================== SÍTA A VÝPOČET SPOTŘEBY BARVY ====================
+   Kolik barvy projde sítem, je dané geometrií tkaniny. Teoretický objem
+   nánosu se počítá takto:
+
+       V [cm³/m²] = otevřená plocha [díl] × tloušťka tkaniny [µm]
+
+   (metr čtvereční o tloušťce jednoho mikrometru je přesně 1 cm³, takže
+   se čísla nemusí nijak převádět). Skutečný nános je menší — část barvy
+   zůstane v sítu; tomu se říká faktor přenosu. Gramáž pak vyjde:
+
+       g/m² = V × faktor přenosu × hustota barvy × koeficienty
+
+   Koeficienty pokrývají to, co geometrie neví: krycí barva jde nanést
+   silněji, savý textil bere víc než hladký plast a světlá barva na tmavém
+   podkladu se často tiskne dvakrát.
+
+   Parametry sít i koeficienty se načítají ze složky "parametry" — jsou to
+   údaje výrobce tkaniny a zkušenost dílny, ne něco, co by aplikace mohla
+   uhodnout. Dokud tam nic není, počítá se jako dosud dle technologie. */
+const SLOZKA_PARAMETRY = "parametry";
+const SOUBOR_SITA = "sita.csv";
+const SOUBOR_KOEF = "koeficienty.csv";
+const PRENOS_VYCHOZI = 0.7;      // kolik z teoretického objemu se opravdu přenese
+
+/* Není-li otevřená plocha v datech, spočítá se z geometrie tkaniny:
+   n nití na cm, průměr vlákna d µm → oko o = 10000/n − d [µm]
+   otevřená plocha = (o / (o + d))², tloušťka = 1,6 × d
+
+   Koeficient 1,6 není odhad — vyšel ze srovnání se čtyřmi skutečnými
+   tkaninami (43-80, 77-55, 120-34, 150-31), kde poměr tloušťky k průměru
+   vlákna vychází 1,61 až 1,64. S ním sedí teoretický objem u jemných sít
+   na jednotky procent, u hrubých je asi o pětinu vyšší — dopočet je proto
+   jen náhrada, dokud se nenačtou údaje výrobce tkaniny. */
+function dopocitejSito(s) {
+  const n_ = n(s.nitky), d = n(s.vlakno);
+  const out = Object.assign({}, s);
+  if (!(out.otevrena > 0) && n_ > 0 && d > 0) {
+    const oko = 10000 / n_ - d;
+    if (oko > 0) out.otevrena = Math.pow(oko / (oko + d), 2) * 100;
+  }
+  if (!(out.tloustka > 0) && d > 0) out.tloustka = d * 1.6;
+  if (!(out.vth > 0) && out.otevrena > 0 && out.tloustka > 0) {
+    out.vth = (out.otevrena / 100) * out.tloustka;
+    out.dopocteno = true;
+  }
+  return out;
+}
+
+function csvNaSita(text) {
+  const rows = parseCsv(text);
+  if (!rows.length) throw new Error("Soubor sít je prázdný.");
+  const head = rows[0].map((h) => h.toLowerCase().trim());
+  const i = (re) => head.findIndex((h) => re.test(h));
+  const ci = {
+    tech: i(/^(technologie|tech)/), sito: i(/^(sito|s.to|mesh)/),
+    nitky: i(/^(nitky|nit._cm|mesh_count|po.et_nit)/), vlakno: i(/^(vlakno|vl.kno|thread|prumer)/),
+    otevrena: i(/^(otevrena|otev.en|open)/), tloustka: i(/^(tloustka|tlou..ka|thickness)/),
+    vth: i(/^(vth|objem|volume|teoreticky)/), prenos: i(/^(prenos|p.enos|transfer)/),
+    hloubka: i(/^(hloubka|depth|lept)/),
+    viskOd: i(/^(viskozita_od|visk_od)/), viskDo: i(/^(viskozita_do|visk_do)/),
+    poharek: i(/^(poharek|poh.rek|cup)/),
+    pozn: i(/^(pozn|note)/),
+  };
+  if (ci.sito < 0) throw new Error("CSV sít musí mít sloupec sito.");
+  return rows.slice(1).map((r) => {
+    const zaznam = {
+      tech: ci.tech >= 0 ? String(r[ci.tech] || "").toUpperCase().trim() : "",
+      sito: String(r[ci.sito] || "").trim(),
+      nitky: ci.nitky >= 0 ? n(r[ci.nitky]) : 0,
+      vlakno: ci.vlakno >= 0 ? n(r[ci.vlakno]) : 0,
+      otevrena: ci.otevrena >= 0 ? n(r[ci.otevrena]) : 0,
+      tloustka: ci.tloustka >= 0 ? n(r[ci.tloustka]) : 0,
+      vth: ci.vth >= 0 ? n(r[ci.vth]) : 0,
+      prenos: ci.prenos >= 0 && r[ci.prenos] !== "" ? n(r[ci.prenos]) : null,
+      // tampontisk nemá tkaninu — objem dává hloubka leptu klišé, a protože
+      // metr čtvereční o hloubce 1 µm je 1 cm³, jde hloubka rovnou do Vth
+      hloubka: ci.hloubka >= 0 ? n(r[ci.hloubka]) : 0,
+      viskOd: ci.viskOd >= 0 ? n(r[ci.viskOd]) : 0,
+      viskDo: ci.viskDo >= 0 ? n(r[ci.viskDo]) : 0,
+      poharek: ci.poharek >= 0 ? (r[ci.poharek] || "") : "",
+      pozn: ci.pozn >= 0 ? (r[ci.pozn] || "") : "",
+    };
+    if (!zaznam.vth && zaznam.hloubka > 0) { zaznam.vth = zaznam.hloubka; zaznam.klise = true; }
+    // "120-34" v názvu síta nese nitky i vlákno, když sloupce chybí
+    if ((!zaznam.nitky || !zaznam.vlakno) && /^(\d+)\s*[-/]\s*(\d+)/.test(zaznam.sito)) {
+      const m = /^(\d+)\s*[-/]\s*(\d+)/.exec(zaznam.sito);
+      if (!zaznam.nitky) zaznam.nitky = n(m[1]);
+      if (!zaznam.vlakno) zaznam.vlakno = n(m[2]);
+    }
+    return dopocitejSito(zaznam);
+  }).filter((s) => s.sito);
+}
+
+/* Klíč koeficientu může být i rozsah — u viskozity se nedá vypsat každá
+   sekunda zvlášť. Přijímá se "18-22", "<18", ">22" i prosté číslo. */
+function koefProHodnotu(tabulka, hodnota) {
+  if (!tabulka || hodnota == null || hodnota === "") return null;
+  const v = n(hodnota);
+  for (const klic of Object.keys(tabulka)) {
+    const k = String(klic).replace(/\s|s$/g, "");
+    let m;
+    if ((m = /^(-?[\d.]+)-(-?[\d.]+)$/.exec(k))) {
+      if (v >= n(m[1]) && v <= n(m[2])) return tabulka[klic];
+    } else if ((m = /^[<≤]=?(-?[\d.]+)$/.exec(k))) {
+      if (v < n(m[1])) return tabulka[klic];
+    } else if ((m = /^[>≥]=?(-?[\d.]+)$/.exec(k))) {
+      if (v > n(m[1])) return tabulka[klic];
+    } else if (/^-?[\d.]+$/.test(k) && Math.abs(v - n(k)) < 0.001) {
+      return tabulka[klic];
+    }
+  }
+  return null;
+}
+
+function csvNaKoeficienty(text) {
+  const rows = parseCsv(text);
+  if (!rows.length) throw new Error("Soubor koeficientů je prázdný.");
+  const head = rows[0].map((h) => h.toLowerCase().trim());
+  const i = (re) => head.findIndex((h) => re.test(h));
+  const ci = { druh: i(/^(druh|typ|kategorie)/), klic: i(/^(klic|kl..|hodnota|nazev|n.zev)/),
+    koef: i(/^(koef|nasobek|n.sobek|factor)/) };
+  if (ci.druh < 0 || ci.klic < 0 || ci.koef < 0)
+    throw new Error("CSV koeficientů musí mít sloupce druh, klic, koef.");
+  const out = { kryvost: {}, material: {}, podklad: {}, viskozita: {} };
+  for (const r of rows.slice(1)) {
+    const druh = String(r[ci.druh] || "").toLowerCase().trim();
+    const klic = String(r[ci.klic] || "").trim();
+    const k = n(r[ci.koef]);
+    if (!out[druh] || !klic || !(k > 0)) continue;
+    out[druh][klic.toLowerCase()] = k;
+  }
+  return out;
+}
+
+/* Síta, která patří k dané technologii. Řádek bez uvedené technologie platí
+   všude. Nejsou-li v parametrech žádná, vrátí se standardní řada — ať je
+   z čeho vybírat, dokud dílna svoje síta nezapíše. */
+function sitaPro(sita, tech, jenKlise) {
+  const vsechna = (sita || []).filter((s) => !!s.klise === !!jenKlise);
+  const moje = vsechna.filter((s) => s.tech === tech);
+  const obecna = vsechna.filter((s) => !s.tech);
+  const vybrana = moje.length ? moje.concat(obecna) : obecna;
+  if (vybrana.length) return vybrana;
+  return jenKlise ? [] : SITA.map((m) => ({ sito: m, tech: "", vychozi: true }));
+}
+
+/* Podklad se dělí jen na světlý / střední / tmavý — na 4 218 barevných
+   variant by koeficienty nikdo neudržoval. Třída se pozná z odstínu. */
+function tridaPodkladu(hex) {
+  const rgb = hexNaRgb(hex);
+  if (!rgb) return "";
+  const jas = rgbNaLab(rgb)[0];      // L* v Lab, 0 = černá, 100 = bílá
+  return jas >= 70 ? "světlý" : (jas >= 35 ? "střední" : "tmavý");
+}
+
+/* Spotřeba v g/m² ze síta a parametrů zakázky. Vrací i rozpis, aby bylo
+   vidět, z čeho číslo vzniklo — technolog to musí umět zkontrolovat. */
+function spotrebaZeSita({ sito, sita, tech, hustota, kryvost, material, podkladHex, koef, prenos,
+                          viskozita }) {
+  if (!sito || !sita || !sita.length) return null;
+  const kl = String(sito).trim().toLowerCase();
+  const nalezene = sita.filter((s) => s.sito.toLowerCase() === kl);
+  // Parametry cizí technologie se nepoužijí — tampontisk se netiskne přes
+  // sítotiskovou tkaninu a číslo z ní by nedávalo smysl. Řádek bez uvedené
+  // technologie platí všude.
+  const s = nalezene.find((x) => x.tech === tech) || nalezene.find((x) => !x.tech) || null;
+  if (!s || !(s.vth > 0)) return null;
+  const k = koef || { kryvost: {}, material: {}, podklad: {} };
+  const kKryv = (kryvost && k.kryvost[String(kryvost).toLowerCase()]) || 1;
+  const mat = String(material || "").toLowerCase();
+  // materiál bývá složený ("Bavlna / Polyester") — vezme se nejvyšší koeficient
+  let kMat = 1, matKlic = "";
+  for (const klic of Object.keys(k.material || {})) {
+    if (klic && mat.indexOf(klic) >= 0 && k.material[klic] > kMat) { kMat = k.material[klic]; matKlic = klic; }
+  }
+  const trida = tridaPodkladu(podkladHex);
+  const kPod = (trida && k.podklad[trida]) || 1;
+  // Řidší barva projde sítem snáz, hustší hůř. Jak moc, to je věc konkrétní
+  // barvy a stroje — proto se to bere z tabulky koeficientů, ne ze vzorce.
+  const kVisk = koefProHodnotu(k.viskozita, viskozita) || 1;
+  const f = prenos != null ? n(prenos) : (s.prenos != null ? s.prenos : PRENOS_VYCHOZI);
+  const gm2 = s.vth * f * n(hustota, 1.2) * kKryv * kMat * kPod * kVisk;
+  // doporučený rozsah výtokového času k tomuhle sítu
+  const dopVisk = (s.viskOd > 0 || s.viskDo > 0)
+    ? { od: s.viskOd, do: s.viskDo, poharek: s.poharek } : null;
+  const mimoRozsah = !!(dopVisk && n(viskozita) > 0
+    && ((dopVisk.od > 0 && n(viskozita) < dopVisk.od) || (dopVisk.do > 0 && n(viskozita) > dopVisk.do)));
+  return {
+    gm2: gm2, sito: s, prenos: f,
+    kKryvost: kKryv, kMaterial: kMat, materialKlic: matKlic,
+    kPodklad: kPod, tridaPodkladu: trida,
+    kViskozita: kVisk, viskozita: n(viskozita) || null,
+    dopVisk: dopVisk, mimoRozsah: mimoRozsah,
+  };
+}
+
+/* ========================= EVIDENCE ZBYTKŮ BAREV =========================
+   Po zakázce zbude v kelímku barva. Dnes se buď vyhodí, nebo někde stojí bez
+   popisku, dokud ji nikdo nepozná. Evidence ji vezme do systému: dostane kód
+   na štítek, ví se z čeho je, kolik jí je, a při další zakázce aplikace sama
+   nabídne, kolik z ní jde použít a kolik už stačí domíchat. */
+const SOUBOR_ZBYTKY = "zbytky.csv";
+const SLOZKA_EVIDENCE = "evidence";
+
+/* Znaky kódu bez těch, které se na štítku pletou (0/O, 1/I/l). */
+const ZNAKY_KODU = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+function novyKodZbytku(zbytky) {
+  const obsazene = new Set((zbytky || []).map((z) => z.kod));
+  for (let pokus = 0; pokus < 200; pokus++) {
+    let k = "Z";
+    for (let i = 0; i < 6; i++) k += ZNAKY_KODU[Math.floor(Math.random() * ZNAKY_KODU.length)];
+    if (!obsazene.has(k)) return k;
+  }
+  return "Z" + Date.now().toString(36).toUpperCase().slice(-6);
+}
+const jeKodZbytku = (s) => /^Z[2-9A-HJ-NP-Z]{6}$/.test(String(s || "").trim().toUpperCase());
+
+/* Báze (transparentní, medium) ředí barvu. Zbytek s bází se nedá použít tam,
+   kde je potřeba plná sytost, a naopak — proto se na to filtruje. */
+const VZOR_BAZE = /b[áa]ze|base|transparen|medium|firnis|extender/i;
+const maBazi = (z) => (z.slozeni || []).some((c) => VZOR_BAZE.test(c.name || ""));
+const normKomp = (s) => String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
+
+/* ---- expirace a čas použitelnosti (pot life) ----
+   Dvousložkové barvy s tužidlem tuhnou od chvíle, kdy se smíchají — po
+   uplynutí pot life je kelímek k ničemu, i když je plný. Expirace je proti
+   tomu prosté datum spotřeby. Sleduje se obojí a rozhoduje to, co vyprší dřív. */
+const HODINA = 3600 * 1000;
+const POTLIFE_VYCHOZI = 8;        // hodin, běžné u dvousložkových sítotiskových barev
+
+function stavZbytku(z, ted) {
+  const nyni = ted || Date.now();
+  const meze = [];
+  if (z.expirace) {
+    // datum spotřeby platí do konce toho dne
+    const d = new Date(z.expirace + "T23:59:59");
+    if (!isNaN(d)) meze.push({ do: d.getTime(), duvod: "spotřeba do " + z.expirace });
+  }
+  if (n(z.potlifeH) > 0) {
+    const od = n(z.namichano) || n(z.ulozeno) || nyni;
+    meze.push({ do: od + n(z.potlifeH) * HODINA,
+      duvod: "pot life " + fmt(n(z.potlifeH), 0) + " h od namíchání" });
+  }
+  if (!meze.length) return { stav: "ok", zbyva: null, doKdy: null, duvod: "" };
+  const nej = meze.reduce((a, b) => (a.do <= b.do ? a : b));
+  const zbyva = nej.do - nyni;
+  // "brzy" = poslední pětina lhůty, nejvýš ale den dopředu, ať to neřve zbytečně
+  const lhuta = nej.do - (n(z.namichano) || n(z.ulozeno) || nyni);
+  const prah = Math.min(24 * HODINA, Math.max(HODINA, lhuta * 0.2));
+  return {
+    stav: zbyva <= 0 ? "prosle" : (zbyva <= prah ? "brzy" : "ok"),
+    zbyva: zbyva, doKdy: nej.do, duvod: nej.duvod,
+  };
+}
+
+/* Zbývající čas lidsky: "za 3 h 20 min", "před 2 dny" */
+function zbyvaText(ms) {
+  if (ms == null) return "";
+  const zaporne = ms < 0;
+  const m = Math.abs(ms);
+  const dny = Math.floor(m / (24 * HODINA));
+  const hod = Math.floor((m % (24 * HODINA)) / HODINA);
+  const min = Math.floor((m % HODINA) / 60000);
+  let t;
+  if (dny > 0) t = dny + (dny === 1 ? " den" : (dny < 5 ? " dny" : " dní")) + (hod ? " " + hod + " h" : "");
+  else if (hod > 0) t = hod + " h" + (min ? " " + min + " min" : "");
+  else t = Math.max(1, min) + " min";
+  return zaporne ? "před " + t : "za " + t;
+}
+
+/* Viskozita se u zbytku měří výtokovým pohárkem — barva časem houstne,
+   takže se drží i předchozí měření, aby byl vidět posun. */
+const POHARKY = ["DIN 4 mm", "DIN 6 mm", "Ford 4 mm", "ISO 4 mm", "Zahn 2"];
+function viskHistDoTextu(h) {
+  return (h || []).map((m) => cislo(m.s, 1) + "@" + m.kdy).join("|");
+}
+function viskHistZTextu(s) {
+  return String(s || "").split("|").filter(Boolean).map((kus) => {
+    const [v, kdy] = kus.split("@");
+    return { s: n(v), kdy: n(kdy) };
+  }).filter((m) => m.s > 0);
+}
+
+/* Kolik zbytku jde do dávky použít, aniž by se rozhodil poměr.
+   Zbytek je vlastně předem namíchaná část dávky: pro každou složku musí platit
+   zbytek × jeho_podíl ≤ dávka × cílový_podíl. Nejtěsnější z těch podmínek
+   určuje, kolik zbytku se vejde. Obsahuje-li zbytek složku, kterou cíl vůbec
+   nemá, použít nejde vůbec. */
+function vyuzitelnyZbytek(zbytek, comps, totalG) {
+  if (!zbytek || !(n(zbytek.gramu) > 0) || !comps || !comps.length || !(totalG > 0)) return null;
+  const cil = new Map();
+  for (const c of comps) {
+    const k = normKomp(c.name);
+    cil.set(k, (cil.get(k) || 0) + n(c.g) / totalG);
+  }
+  const soucet = (zbytek.slozeni || []).reduce((s, c) => s + n(c.pct), 0);
+  if (!(soucet > 0)) return null;
+  const zb = new Map();
+  for (const c of (zbytek.slozeni || [])) {
+    const k = normKomp(c.name);
+    zb.set(k, (zb.get(k) || 0) + n(c.pct) / soucet);
+  }
+  let nejtesnejsi = Infinity;
+  for (const [k, q] of zb) {
+    if (!(q > 0)) continue;
+    const p = cil.get(k) || 0;
+    if (!(p > 0)) return null;               // složka navíc — zbytek sem nepatří
+    nejtesnejsi = Math.min(nejtesnejsi, p / q);
+  }
+  if (!isFinite(nejtesnejsi) || nejtesnejsi <= 0) return null;
+  const pouzit = Math.min(n(zbytek.gramu), totalG * nejtesnejsi);
+  if (!(pouzit > 0.05)) return null;
+  // čím se zbytek podílí na jednotlivých složkách
+  const prispevek = comps.map((c) => pouzit * (zb.get(normKomp(c.name)) || 0));
+  return {
+    zbytek: zbytek,
+    pouzit: pouzit,
+    domichat: Math.max(0, totalG - pouzit),
+    zbudeVKelimku: Math.max(0, n(zbytek.gramu) - pouzit),
+    prispevek: prispevek,
+    // 1 = složení sedí přesně, míň = zbytek je v něčem sytější než cíl
+    shoda: Math.min(1, nejtesnejsi),
+    pomer: nejtesnejsi,      // neomezeně — potřeba pro dopočet celé dávky
+  };
+}
+
+/* Přepočet receptury tak, aby se spotřeboval CELÝ zbytek.
+   Do dávky, kterou žádá zakázka, se často vejde jen část starého kelímku.
+   Zbytek se dá využít celý, když se dávka zvětší — nejmenší možná dávka je ta,
+   ve které ani jedna složka zbytku nepřesahuje svůj podíl:
+
+       dávka = zbytek / nejtěsnější poměr
+
+   Odstín zůstává přesný, jen se namíchá víc, než zakázka potřebuje. */
+function zbytekCelyPlan(zbytek, comps, totalG) {
+  const zaklad = vyuzitelnyZbytek(zbytek, comps, totalG);
+  if (!zaklad || !(zaklad.pomer > 0)) return null;
+  const L = n(zbytek.gramu);
+  // Nikdy míň, než žádá zakázka — vejde-li se zbytek do její dávky celý,
+  // není co zvětšovat a plán je totožný s běžným využitím.
+  const davka = Math.max(totalG, L / zaklad.pomer);
+  const podil = comps.map((c) => (totalG > 0 ? n(c.g) / totalG : 0));
+  // kolik z které složky zbytek přináší (celý, ne jen jeho použitelná část)
+  const prispevek = zaklad.prispevek.map((p) => zaklad.pouzit > 0 ? p / zaklad.pouzit * L : 0);
+  return Object.assign({}, zaklad, {
+    celyZbytek: true,
+    davka: davka,
+    pouzit: L,
+    prispevek: prispevek,
+    pridat: comps.map((c, i) => Math.max(0, davka * podil[i] - prispevek[i])),
+    domichat: Math.max(0, davka - L),
+    zbudeVKelimku: 0,
+    prebytek: Math.max(0, davka - totalG),   // o kolik víc, než zakázka žádá
+  });
+}
+
+/* ---- čárový kód Code 128 pro štítek na kelímek ----
+   Kreslí se rovnou v aplikaci, aby štítek šel vytisknout i bez internetu.
+   Code 128 zvládne každá běžná čtečka i kamera v mobilu; sada B pokrývá
+   číslice i velká písmena, ze kterých se kód zbytku skládá. */
+const C128 = ["212222", "222122", "222221", "121223", "121322", "131222", "122213", "122312",
+  "132212", "221213", "221312", "231212", "112232", "122132", "122231", "113222", "123122",
+  "123221", "223211", "221132", "221231", "213212", "223112", "312131", "311222", "321122",
+  "321221", "312212", "322112", "322211", "212123", "212321", "232121", "111323", "131123",
+  "131321", "112313", "132113", "132311", "211313", "231113", "231311", "112133", "112331",
+  "132131", "113123", "113321", "133121", "313121", "211331", "231131", "213113", "213311",
+  "213131", "311123", "311321", "331121", "312113", "312311", "332111", "314111", "221411",
+  "431111", "111224", "111422", "121124", "121421", "141122", "141221", "112214", "112412",
+  "122114", "122411", "142112", "142211", "241211", "221114", "413111", "241112", "134111",
+  "111242", "121142", "121241", "114212", "124112", "124211", "411212", "421112", "421211",
+  "212141", "214121", "412121", "111143", "111341", "131141", "114113", "114311", "411113",
+  "411311", "113141", "114131", "311141", "411131", "211412", "211214", "211232", "2331112"];
+
+/* Vrátí šířky čar a mezer (střídavě, začíná čárou) pro daný text. */
+function code128Pruhy(text) {
+  const s = String(text || "");
+  const hodnoty = [104];                       // START B
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charCodeAt(i);
+    if (c < 32 || c > 126) throw new Error("Kód obsahuje znak, který Code 128 sada B neumí.");
+    hodnoty.push(c - 32);
+  }
+  let kontrola = 104;
+  for (let i = 1; i < hodnoty.length; i++) kontrola += hodnoty[i] * i;
+  hodnoty.push(kontrola % 103);
+  hodnoty.push(106);                           // STOP
+  const pruhy = [];
+  for (const h of hodnoty) for (const z of C128[h]) pruhy.push(parseInt(z, 10));
+  return pruhy;
+}
+
+function code128Svg(text, vyska, modul) {
+  const pruhy = code128Pruhy(text);
+  const m = modul || 2;
+  const v = vyska || 60;
+  let x = 10, cary = "";
+  for (let i = 0; i < pruhy.length; i++) {
+    const w = pruhy[i] * m;
+    if (i % 2 === 0) cary += '<rect x="' + x + '" y="0" width="' + w + '" height="' + v + '"/>';
+    x += w;
+  }
+  const sirka = x + 10;
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="' + sirka + '" height="' + v
+    + '" viewBox="0 0 ' + sirka + ' ' + v + '" fill="#000">' + cary + '</svg>';
+}
+const code128Url = (text, vyska, modul) =>
+  "data:image/svg+xml;charset=utf-8," + encodeURIComponent(code128Svg(text, vyska, modul));
+
+/* Evidence se odkládá do souboru evidence/zbytky.csv — kelímek stojí v dílně
+   a musí být vidět ze všech počítačů, ne jen z toho, kde ho někdo zapsal. */
+const ZBYTKY_HLAVICKA = ["kod", "nazev", "gramu", "puvodne", "hustota", "hex", "zakazka",
+  "produkt", "barva", "technologie", "poloha", "ulozeno", "zmeneno", "expirace", "pozn",
+  "zdroj", "namichano", "potlife_h", "tuzidlo", "viskozita_s", "viskozita_pohar",
+  "viskozita_kdy", "viskozita_historie", "stav", "davka_g", "komponenta", "procento"];
+
+/* Čísla se zaokrouhlují — soubor někdo otevře v Excelu a 71,61999999999999
+   tam vypadá jako chyba, i když o setinu procenta v barvě nejde. */
+const cislo = (v, des) => (v == null || v === "") ? "" : String(Math.round(n(v) * Math.pow(10, des)) / Math.pow(10, des));
+
+function zbytkyDoCsv(zbytky) {
+  const radky = [ZBYTKY_HLAVICKA];
+  for (const z of zbytky) {
+    const slozky = (z.slozeni && z.slozeni.length) ? z.slozeni : [{ name: "", pct: "" }];
+    for (const c of slozky) {
+      radky.push([z.kod, z.nazev || "", cislo(z.gramu, 2), z.puvodne == null ? "" : cislo(z.puvodne, 2),
+        z.hustota == null ? "" : z.hustota, (z.hex || "").replace(/^#/, ""),
+        z.zakazka || "", z.produkt || "", z.barva || "", z.tech || "", z.poloha || "",
+        z.ulozeno || "", z.zmeneno || "", z.expirace || "", z.pozn || "", z.zdroj || "",
+        z.namichano || "", z.potlifeH == null ? "" : cislo(z.potlifeH, 1),
+        z.tuzidlo ? "ano" : "", z.viskozita == null || z.viskozita === "" ? "" : cislo(z.viskozita, 1),
+        z.viskPohar || "", z.viskKdy || "", viskHistDoTextu(z.viskHist),
+        z.stav || "sklad", z.davkaG == null ? "" : cislo(z.davkaG, 2),
+        c.name || "", c.pct === "" ? "" : cislo(c.pct, 4)]);
+    }
+  }
+  return radky.map((r) => r.map((c) => '"' + String(c == null ? "" : c).replace(/"/g, '""') + '"')
+    .join(";")).join("\r\n") + "\r\n";
+}
+
+function csvNaZbytky(text) {
+  const rows = parseCsv(text);
+  if (!rows.length) return [];
+  const head = rows[0].map((h) => h.toLowerCase().trim());
+  const i = (jm) => head.indexOf(jm);
+  const ci = {};
+  for (const jm of ZBYTKY_HLAVICKA) ci[jm] = i(jm);
+  if (ci.kod < 0) throw new Error("CSV zbytků musí mít sloupec kod.");
+  const mapa = new Map();
+  for (const r of rows.slice(1)) {
+    const kod = String(r[ci.kod] || "").trim();
+    if (!kod) continue;
+    if (!mapa.has(kod)) {
+      const hex = String(r[ci.hex] || "").trim();
+      mapa.set(kod, {
+        id: uid(), kod: kod, nazev: r[ci.nazev] || "",
+        gramu: n(r[ci.gramu]), puvodne: ci.puvodne >= 0 && r[ci.puvodne] !== "" ? n(r[ci.puvodne]) : null,
+        hustota: ci.hustota >= 0 && r[ci.hustota] !== "" ? n(r[ci.hustota], 1.2) : 1.2,
+        hex: /^#?[0-9a-f]{6}$/i.test(hex) ? (hex[0] === "#" ? hex : "#" + hex) : "#888888",
+        zakazka: r[ci.zakazka] || "", produkt: r[ci.produkt] || "", barva: r[ci.barva] || "",
+        tech: r[ci.technologie] || "", poloha: r[ci.poloha] || "",
+        ulozeno: n(r[ci.ulozeno]) || 0, zmeneno: n(r[ci.zmeneno]) || n(r[ci.ulozeno]) || 0,
+        expirace: r[ci.expirace] || "", pozn: r[ci.pozn] || "", zdroj: r[ci.zdroj] || "",
+        namichano: n(r[ci.namichano]) || n(r[ci.ulozeno]) || 0,
+        potlifeH: ci.potlife_h >= 0 && r[ci.potlife_h] !== "" ? n(r[ci.potlife_h]) : null,
+        tuzidlo: /^(1|ano|yes|true|x)$/i.test(String(r[ci.tuzidlo] || "").trim()),
+        viskozita: ci.viskozita_s >= 0 && r[ci.viskozita_s] !== "" ? n(r[ci.viskozita_s]) : "",
+        viskPohar: r[ci.viskozita_pohar] || "", viskKdy: n(r[ci.viskozita_kdy]) || 0,
+        viskHist: viskHistZTextu(r[ci.viskozita_historie]),
+        // "vtisku" = barva se právě namíchala a je na stroji, kolik zbude
+        // se teprve dozvíme; "sklad" = zbytek v kelímku k dalšímu použití
+        stav: String(r[ci.stav] || "sklad").trim().toLowerCase() === "vtisku" ? "vtisku" : "sklad",
+        davkaG: ci.davka_g >= 0 && r[ci.davka_g] !== "" ? n(r[ci.davka_g]) : null,
+        slozeni: [],
+      });
+    }
+    const jmenoK = String(r[ci.komponenta] || "").trim();
+    if (jmenoK) mapa.get(kod).slozeni.push({ name: jmenoK, pct: n(r[ci.procento]) });
+  }
+  return Array.from(mapa.values());
+}
+
+/* Sloučení evidence ze souboru s tou v prohlížeči. Rozhoduje čas poslední
+   změny — kelímek mohl někdo upravit na jiném počítači. */
+function sloucZbytky(mistni, ze_souboru) {
+  const mapa = new Map((mistni || []).map((z) => [z.kod, z]));
+  for (const z of (ze_souboru || [])) {
+    const stary = mapa.get(z.kod);
+    if (!stary || n(z.zmeneno) > n(stary.zmeneno)) mapa.set(z.kod, Object.assign({}, z,
+      { id: stary ? stary.id : z.id }));
+  }
+  return Array.from(mapa.values()).sort((a, b) => n(b.zmeneno) - n(a.zmeneno));
+}
+
+/* Nabídky zbytků pro danou dávku. Prošlé se nenabízejí vůbec — v kelímku sice
+   barva je, ale použitelná není. Ty, kterým lhůta brzy končí, jdou naopak
+   dopředu: buď se spotřebují teď, nebo se vyhodí. */
+function nabidkyZbytku(zbytky, comps, totalG, ted) {
+  return (zbytky || [])
+    .map((z) => {
+      const v = vyuzitelnyZbytek(z, comps, totalG);
+      return v ? Object.assign(v, { stav: stavZbytku(z, ted) }) : null;
+    })
+    .filter((v) => v && v.stav.stav !== "prosle" && v.zbytek.stav !== "vtisku")
+    .sort((a, b) => (a.stav.stav === "brzy" ? 0 : 1) - (b.stav.stav === "brzy" ? 0 : 1)
+      || b.pouzit - a.pouzit);
 }
 
 /* Databáze, ze kterých receptury pocházejí — podklad pro filtr. */
@@ -4312,6 +5870,23 @@ function podleDatabaze(recipes, filtr) {
   if (!filtr) return recipes;
   if (filtr === "@vlastni") return recipes.filter((r) => !r.zdroj);
   return recipes.filter((r) => r.zdroj === filtr);
+}
+
+/* Řady barev se vážou na technologii — sítotisková barva se do tampontisku
+   nehodí. Technologie může být uvedená u receptury (sloupec v CSV), nebo se
+   přiřadí celému souboru v Připojení k mostu. Neurčená řada platí všude. */
+function techReceptury(r, dbTech) {
+  const zRadku = String(r.tech || "").trim();
+  if (zRadku) return zRadku.split(/[,;+ ]+/).filter(Boolean);
+  const zeSouboru = r.zdroj ? String((dbTech || {})[r.zdroj] || "").trim() : "";
+  return zeSouboru ? zeSouboru.split(/[,;+ ]+/).filter(Boolean) : [];
+}
+function podleTechnologie(recipes, tech, dbTech) {
+  if (!tech) return recipes;
+  return (recipes || []).filter((r) => {
+    const t = techReceptury(r, dbTech);
+    return !t.length || t.indexOf(tech) >= 0;
+  });
 }
 
 function Importer({ setProducts, setRecipes, guardDelete, deletePw, setDeletePw }) {
