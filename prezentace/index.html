@@ -1,0 +1,866 @@
+<title>Ink Recipe Manager — vývoj krok za krokem</title>
+<style>
+  /* ---- tokeny: světlá paleta je úplná, tmavá jen přepisuje ---- */
+  :root {
+    --paper:      #E6E3DB;
+    --paper-2:    #EFEDE7;
+    --ink:        #17160F;
+    --ink-2:      #6E6C61;
+    --ink-3:      #94918660;
+    --rule:       #CBC8BD;
+    --rule-soft:  #D8D5CC;
+    --key:        #33507A;   /* procesní modrá — hlavní akcent */
+    --key-soft:   #33507A1A;
+    --mag:        #B0603F;   /* terakota — jen naměřené výsledky */
+    --yel:        #C9A43C;   /* žlutá — motiv sítoviny */
+    --ok:         #2F7D53;
+    --warn:       #A9660F;
+    --shadow:     0 1px 0 #FFFFFF80, 0 12px 32px -20px #17160F40;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:     #17160F;
+      --paper-2:   #1F1E17;
+      --ink:       #EDEBE4;
+      --ink-2:     #A29F94;
+      --ink-3:     #6E6C6150;
+      --rule:      #3A382F;
+      --rule-soft: #2C2B23;
+      --key:       #8FB0E0;
+      --key-soft:  #8FB0E01A;
+      --mag:       #D8886A;
+      --yel:       #D9B44A;
+      --ok:        #5CB98A;
+      --warn:      #D69340;
+      --shadow:    0 1px 0 #FFFFFF08, 0 12px 32px -20px #000000A0;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:     #17160F;
+    --paper-2:   #1F1E17;
+    --ink:       #EDEBE4;
+    --ink-2:     #A29F94;
+    --ink-3:     #6E6C6150;
+    --rule:      #3A382F;
+    --rule-soft: #2C2B23;
+    --key:       #8FB0E0;
+    --key-soft:  #8FB0E01A;
+    --mag:       #D8886A;
+    --yel:       #D9B44A;
+    --ok:        #5CB98A;
+    --warn:      #D69340;
+    --shadow:    0 1px 0 #FFFFFF08, 0 12px 32px -20px #000000A0;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
+    font-size: 17px;
+    line-height: 1.62;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 56px); }
+
+  h1, h2, h3, .lbl, .num, .chip, th { font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
+  .mono, .num, time, .code { font-family: Consolas, "SF Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+
+  .lbl {
+    font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--ink-2); margin: 0;
+  }
+
+  /* ---- sítovina: dvě soustavy vláken, jako tkanina síta ---- */
+  .mesh {
+    background-image:
+      repeating-linear-gradient(90deg, var(--rule) 0 1px, transparent 1px 7px),
+      repeating-linear-gradient(0deg,  var(--rule) 0 1px, transparent 1px 7px);
+    opacity: .5;
+  }
+
+  /* ---------------- hlavička ---------------- */
+  header { padding: clamp(44px, 8vw, 92px) 0 clamp(28px, 5vw, 56px); position: relative; overflow: hidden; }
+  header .mesh {
+    position: absolute; inset: 0 0 auto 0; height: 100%;
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 62%);
+    mask-image: linear-gradient(180deg, #000 0%, transparent 62%);
+    opacity: .28; pointer-events: none;
+  }
+  header .wrap { position: relative; }
+  h1 {
+    font-size: clamp(38px, 6.4vw, 74px); font-weight: 700; letter-spacing: -.03em;
+    line-height: 1.02; margin: 14px 0 0; text-wrap: balance; max-width: 15ch;
+  }
+  .podnadpis {
+    font-size: clamp(18px, 2.2vw, 22px); color: var(--ink-2);
+    max-width: 56ch; margin: 20px 0 0; line-height: 1.5;
+  }
+  .rozsah {
+    display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 30px;
+    font-size: 13px; color: var(--ink-2);
+  }
+  .rozsah b { color: var(--ink); font-weight: 600; }
+
+  /* ---------------- hlavní číslo ---------------- */
+  .hero-stat {
+    margin-top: clamp(34px, 5vw, 56px);
+    border: 1px solid var(--rule); border-radius: 3px;
+    background: var(--paper-2); box-shadow: var(--shadow);
+    display: grid; grid-template-columns: 1fr; overflow: hidden;
+  }
+  @media (min-width: 760px) { .hero-stat { grid-template-columns: 1.15fr 1fr; } }
+  .hero-stat > div { padding: clamp(22px, 3.4vw, 34px); }
+  .hero-stat > div + div { border-top: 1px solid var(--rule-soft); }
+  @media (min-width: 760px) {
+    .hero-stat > div + div { border-top: 0; border-left: 1px solid var(--rule-soft); }
+  }
+  .velke {
+    font-family: Consolas, ui-monospace, monospace; font-variant-numeric: tabular-nums;
+    font-size: clamp(40px, 6vw, 62px); line-height: 1; letter-spacing: -.02em;
+    display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+  }
+  .velke .pred { color: var(--ink-2); text-decoration: line-through; text-decoration-thickness: 2px; }
+  .velke .sip { color: var(--ink-2); font-size: .5em; }
+  .velke .po { color: var(--mag); font-weight: 700; }
+  .hero-stat p { margin: 14px 0 0; font-size: 15px; color: var(--ink-2); line-height: 1.55; }
+
+  /* ---------------- pruh čísel ---------------- */
+  .cisla {
+    display: grid; gap: 1px; background: var(--rule-soft);
+    border: 1px solid var(--rule); border-radius: 3px; overflow: hidden;
+    grid-template-columns: repeat(2, 1fr); margin-top: 20px;
+  }
+  @media (min-width: 700px) { .cisla { grid-template-columns: repeat(4, 1fr); } }
+  .cisla div { background: var(--paper-2); padding: 18px 20px; }
+  .cisla .num { font-size: 26px; font-weight: 600; letter-spacing: -.01em; display: block; }
+  .cisla .lbl { margin-top: 6px; font-size: 10.5px; }
+
+  /* ---------------- sekce ---------------- */
+  section { padding: clamp(40px, 6vw, 76px) 0 0; }
+  h2 {
+    font-size: clamp(24px, 3.2vw, 33px); font-weight: 700; letter-spacing: -.02em;
+    margin: 10px 0 0; text-wrap: balance;
+  }
+  .uvod { color: var(--ink-2); max-width: 62ch; margin: 14px 0 0; }
+
+  /* ---------------- den ---------------- */
+  .den { margin-top: clamp(30px, 4vw, 52px); }
+  .den-hlava {
+    display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
+    padding-bottom: 10px; border-bottom: 2px solid var(--ink);
+    position: relative;
+  }
+  .den-datum { font-size: clamp(20px, 2.6vw, 26px); font-weight: 700; letter-spacing: -.01em; }
+  .den-cas { font-size: 13px; color: var(--ink-2); }
+  .den-pocet {
+    margin-left: auto; font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink-2); white-space: nowrap;
+  }
+  .den-pruh { height: 10px; margin-top: 0; }
+
+  /* ---------------- záznam ---------------- */
+  .zaznam {
+    display: grid; grid-template-columns: 1fr; gap: 4px 26px;
+    padding: 22px 0; border-bottom: 1px solid var(--rule-soft);
+  }
+  @media (min-width: 720px) { .zaznam { grid-template-columns: 96px 1fr; } }
+  .zaznam:last-child { border-bottom: 0; }
+  .zaznam > time {
+    font-size: 14px; color: var(--key); font-weight: 600;
+    padding-top: 2px; letter-spacing: -.01em;
+  }
+  .zaznam h3 {
+    font-size: 19px; font-weight: 700; margin: 0 0 8px; letter-spacing: -.01em;
+    text-wrap: balance;
+  }
+  .zaznam p { margin: 0 0 10px; }
+  .zaznam p:last-child { margin-bottom: 0; }
+  .zaznam .pozadavek {
+    font-size: 14.5px; color: var(--ink-2); font-style: italic;
+    border-left: 2px solid var(--rule); padding-left: 14px; margin: 0 0 12px;
+  }
+
+  /* ---------------- výsledek ---------------- */
+  .vysledek {
+    background: var(--key-soft); border-left: 3px solid var(--key);
+    padding: 12px 16px; margin: 12px 0 0; font-size: 15.5px; border-radius: 0 3px 3px 0;
+  }
+  .vysledek b { color: var(--key); }
+  .vysledek .cislo { font-family: Consolas, ui-monospace, monospace; font-variant-numeric: tabular-nums; color: var(--mag); font-weight: 700; }
+
+  /* ---------------- tabulka ---------------- */
+  .tab-obal { overflow-x: auto; margin: 14px 0 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; min-width: 380px; }
+  th, td { text-align: left; padding: 8px 14px 8px 0; border-bottom: 1px solid var(--rule-soft); }
+  th { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); font-weight: 700; }
+  td.n, th.n { text-align: right; font-family: Consolas, ui-monospace, monospace; font-variant-numeric: tabular-nums; padding-right: 0; }
+  tr:last-child td { border-bottom: 0; }
+
+  /* ---------------- vzorec ---------------- */
+  .vzorec {
+    font-family: Consolas, ui-monospace, monospace; font-size: 14px;
+    background: var(--paper-2); border: 1px solid var(--rule-soft);
+    padding: 14px 16px; border-radius: 3px; margin: 14px 0 0;
+    overflow-x: auto; white-space: pre; line-height: 1.7;
+  }
+
+  .chip {
+    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; padding: 3px 9px; border-radius: 2px;
+    border: 1px solid var(--rule); color: var(--ink-2); background: var(--paper-2);
+    vertical-align: 2px; margin-left: 8px;
+  }
+  .chip.oprava { border-color: var(--warn); color: var(--warn); }
+
+  /* ---------------- závěr ---------------- */
+  .dve { display: grid; gap: 22px; margin-top: 24px; }
+  @media (min-width: 760px) { .dve { grid-template-columns: 1fr 1fr; gap: 40px; } }
+  .karta {
+    border: 1px solid var(--rule); border-radius: 3px; padding: 24px;
+    background: var(--paper-2);
+  }
+  .karta h3 { margin: 8px 0 12px; font-size: 19px; font-weight: 700; letter-spacing: -.01em; }
+  .karta ul { margin: 0; padding-left: 18px; }
+  .karta li { margin-bottom: 10px; }
+  .karta li:last-child { margin-bottom: 0; }
+
+  footer {
+    margin-top: clamp(48px, 7vw, 88px); padding: 26px 0 60px;
+    border-top: 1px solid var(--rule); font-size: 13px; color: var(--ink-2);
+  }
+
+  a { color: var(--key); }
+  b, strong { font-weight: 700; }
+  @media (prefers-reduced-motion: no-preference) {
+    .zaznam { transition: none; }
+  }
+</style>
+
+<header>
+  <div class="mesh" aria-hidden="true"></div>
+  <div class="wrap">
+    <p class="lbl">Vývojový deník · sítotisková a tampontisková dílna</p>
+    <h1>Ink Recipe Manager</h1>
+    <p class="podnadpis">
+      Aplikace, která spočítá, kolik barvy namíchat na zakázku, přečte si zadání
+      ze zakázkového listu v PDF a provede obsluhu navážením na digitální váze.
+      Jeden soubor, žádná instalace, žádný server.
+    </p>
+    <div class="rozsah">
+      <span><b>20. 7. — 10. 8. 2026</b></span>
+      <span>7 pracovních dnů</span>
+      <span>105 zadání</span>
+      <span>1 320 produktů · 1 097 receptur</span>
+    </div>
+
+    <div class="hero-stat">
+      <div>
+        <p class="lbl">Spotřeba barvy na zakázce 138823</p>
+        <div class="velke">
+          <span class="pred">3,1 g</span>
+          <span class="sip">→</span>
+          <span class="po">0,4 g</span>
+        </div>
+        <p>
+          Dřív se spotřeba počítala z obdélníku, do kterého se logo vejde.
+          Teď z plochy, kterou barva doopravdy pokryje — 3,25 cm² místo 25,71 cm².
+        </p>
+      </div>
+      <div>
+        <p class="lbl">Co se tím mění</p>
+        <p style="margin-top:10px">
+          Míchá se řádově méně barvy, než odhad velel. U materiálu za tisíce korun
+          za kilo je to přímá úspora a méně likvidovaného nebezpečného odpadu.
+          Přesnost výpočtu je ověřená proti obrazcům se známým výsledkem.
+        </p>
+      </div>
+    </div>
+
+    <div class="cisla">
+      <div><span class="num">14</span><p class="lbl">údajů čtených z PDF</p></div>
+      <div><span class="num">573</span><p class="lbl">DPI podklad pro výpočet</p></div>
+      <div><span class="num">0&nbsp;%</span><p class="lbl">odchylka u síta 120-34</p></div>
+      <div><span class="num">0</span><p class="lbl">externích závislostí čtečky PDF</p></div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <p class="lbl">Jak číst tenhle dokument</p>
+    <h2>Chronologie práce, den po dni</h2>
+    <p class="uvod">
+      Každý záznam má stejnou stavbu: <b>co bylo zadáno</b>, co se s tím udělalo
+      a <b>co to měřitelně přineslo</b>. Časy jsou skutečné, ze záznamů sezení.
+      Čísla jsou naměřená na reálné zakázce, ne odhady.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+
+    <!-- ---------- 20. 7. ---------- -->
+    <div class="den">
+      <div class="den-hlava">
+        <span class="den-datum">20. července</span>
+        <span class="den-cas">01:15 — 19:11</span>
+        <span class="den-pocet">Základ</span>
+      </div>
+      <div class="mesh den-pruh" aria-hidden="true"></div>
+
+      <div class="zaznam">
+        <time>01:15</time>
+        <div>
+          <h3>Katalog a obrázky</h3>
+          <p class="pozadavek">„Jak stáhnu obrázky, aby se mi zobrazily v aplikaci?"</p>
+          <p>
+            Stahovací skript naplní katalog 1 320 produktů Stricker fotkami
+            a náhledy tiskových poloh — 5 583 obrázků. Aplikace tím funguje
+            i bez internetu.
+          </p>
+        </div>
+      </div>
+      <div class="zaznam">
+        <time>19:11</time>
+        <div>
+          <h3>Nasazení na GitHub</h3>
+          <p>
+            Aplikace se dá otevřít odkudkoli — z disku, z počítače v dílně
+            i ze stránky na internetu.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- 27. 7. ---------- -->
+    <div class="den">
+      <div class="den-hlava">
+        <span class="den-datum">27. července</span>
+        <span class="den-cas">17:15 — 20:43</span>
+        <span class="den-pocet">43 zadání · nejhustší den</span>
+      </div>
+      <div class="mesh den-pruh" aria-hidden="true"></div>
+
+      <div class="zaznam">
+        <time>17:15</time>
+        <div>
+          <h3>Nový layout od nuly</h3>
+          <p class="pozadavek">„Vytvoř mi nový layout pro míchací aplikaci… jednoduché a easy to navigate."</p>
+          <p>
+            Vyhledávání produktu se přesunulo na samostatnou horní lištu, kalkulace
+            se stala hlavním panelem a zbytek se schoval do menu. Cílem bylo, aby
+            stránka neměla zbytečné volné místo.
+          </p>
+        </div>
+      </div>
+      <div class="zaznam">
+        <time>18:13</time>
+        <div>
+          <h3>Vizuální jazyk: měkké stíny místo čar</h3>
+          <p>
+            Celý vzhled se přepsal do jednoho stylu — bez obrysových linek,
+            s prostorovými stíny. Prošlo to několika koly ladění: velikost ikon,
+            odstín pozadí, hloubka stínů, sladění stínů s novým pozadím.
+          </p>
+        </div>
+      </div>
+      <div class="zaznam">
+        <time>18:47</time>
+        <div>
+          <h3>Tmavý režim</h3>
+          <p class="pozadavek">„Vytvoř mi možnost dark modu."</p>
+          <p>
+            Přepínač světlý / tmavý. Následovaly dvě opravy míst, kde se v tmavém
+            režimu držela světlá paleta a výběr nebyl vidět.
+            <span class="chip oprava">oprava z provozu</span>
+          </p>
+        </div>
+      </div>
+      <div class="zaznam">
+        <time>19:21</time>
+        <div>
+          <h3>Mazání chráněné heslem</h3>
+          <p class="pozadavek">„Už se mi tak povedlo omylem smazat 2 produkty… opravit."</p>
+          <div class="vysledek">
+            Smazání produktu i receptury teď vyžaduje heslo. Chyba nahlášená
+            z reálného používání, ne teoretické riziko.
+          </div>
+        </div>
+      </div>
+      <div class="zaznam">
+        <time>20:27</time>
+        <div>
+          <h3>Identita IRM</h3>
+          <p>
+            Hlavička se pročistila na samotné logo IRM — v obou režimech
+            se stejným stínováním jako ostatní prvky, aby aplikace držela pohromadě.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- 5.–6. 8. ---------- -->
+    <div class="den">
+      <div class="den-hlava">
+        <span class="den-datum">5.—6. srpna</span>
+        <span class="den-cas">20:10 — 18:20</span>
+        <span class="den-pocet">26 zadání · zlom</span>
+      </div>
+      <div class="mesh den-pruh" aria-hidden="true"></div>
+
+      <div class="zaznam">
+        <time>6. 8.<br>06:32</time>
+        <div>
+          <h3>Načtení zadání čárovým kódem</h3>
+          <p class="pozadavek">„Čtečka by měla načíst spec s produktem, množstvím a veškerými parametry objednávky."</p>
+          <p>
+            Tři způsoby připojení čtečky: klávesnicový režim (funguje kdekoli
+            v aplikaci), sériový port a kamera.
+          </p>
+        </div>
+      </div>
+      <div class="zaznam">
+        <time>07:04</time>
+        <div>
+          <h3>Napojení na podnikový systém SGPS</h3>
+          <p>
+            Připraveny obě varianty — export ze souboru i HTTP rozhraní.
+            Zatím běží v ukázkovém režimu, čeká se na informaci od IT.
+          </p>
+        </div>
+      </div>
+      <div class="zaznam">
+        <time>10:15</time>
+        <div>
+          <h3>Obrat: zadání se bude číst z PDF</h3>
+          <p class="pozadavek">„Do SGPS se nedostaneme, ale můžeme odvodit SPEC z PDF."</p>
+          <p>
+            Vlastní čtečka PDF napsaná od nuly na standardní knihovně Pythonu —
+            bez jediné externí závislosti. Rozebere komprimované objekty, mapování
+            znaků i dvoubajtové kódování a poskládá text podle skutečné polohy
+            na stránce.
+          </p>
+          <div class="vysledek">
+            Ze zakázkového listu se přečte <b>14 údajů automaticky</b>. Technolog
+            dřív osm z nich opisoval ručně, u každého s možností překlepu.
+          </div>
+          <p style="margin-top:14px">
+            Nešlo to vyřešit hotovou knihovnou. Formuláře kreslí každé písmeno zvlášť
+            a tučné dvakrát přes sebe — bez ošetření vyjde <span class="code">PPoozznnáámmkkyy</span>.
+            Rozlišuje se to podle vzdálenosti: falešně tučné písmo má posun 0,02 em,
+            nejužší skutečné písmeno 0,22 em.
+          </p>
+        </div>
+      </div>
+      <div class="zaznam">
+        <time>12:43</time>
+        <div>
+          <h3>Kolik barvy logo doopravdy spotřebuje</h3>
+          <p class="pozadavek">„V logu a kolem loga bývá i volné místo."</p>
+          <p>
+            Aplikace vykreslí stránku PDF, sama na ní najde logo a spočítá,
+            jakou část plochy barva doopravdy pokryje. Přidat lze vnější odsazení
+            v milimetrech — barva se kolem každého objektu rozpíjí.
+          </p>
+          <div class="tab-obal">
+            <table>
+              <thead><tr><th>Zakázka 138823</th><th class="n">Plocha</th><th class="n">Spotřeba</th></tr></thead>
+              <tbody>
+                <tr><td>z obdélníku (dřív)</td><td class="n">25,71 cm²</td><td class="n">3,1 g</td></tr>
+                <tr><td>skutečné pokrytí</td><td class="n">3,25 cm²</td><td class="n">0,4 g</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="vysledek">
+            Ověřeno proti obrazcům se známým výsledkem: čtverce pokrývající přesně
+            25 % plochy → aplikace <span class="cislo">25,0 %</span>. Čtverec 20 × 20 mm
+            rozšířený o 0 / 1 / 2 mm → 400 / 483 / 571 mm² proti přesně spočítaným
+            400 / 483,1 / 572,6 mm².
+          </div>
+        </div>
+      </div>
+      <div class="zaznam">
+        <time>17:14</time>
+        <div>
+          <h3>Most, který se spouští sám</h3>
+          <p class="pozadavek">„Potřebuju, aby se ten most aktivoval automaticky, i když to otevřu z GitHubu."</p>
+          <p>
+            Prohlížeč nesmí spouštět programy na počítači — to nejde obejít.
+            Řešení je opačné: most běží od přihlášení do Windows a aplikace si ho
+            najde, ať je otevřená odkudkoli.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- 7. 8. ---------- -->
+    <div class="den">
+      <div class="den-hlava">
+        <span class="den-datum">7. srpna</span>
+        <span class="den-cas">07:00 — 11:51</span>
+        <span class="den-pocet">13 zadání · přesnost</span>
+      </div>
+      <div class="mesh den-pruh" aria-hidden="true"></div>
+
+      <div class="zaznam">
+        <time>07:18</time>
+        <div>
+          <h3>Ostrý výřez z PDF</h3>
+          <p class="pozadavek">„Logo se mi rozbíjí a je zubaté."</p>
+          <p>
+            Stránka se vykreslovala ve 144 DPI — logo široké 99 mm z ní vyšlo jako
+            560 bodů. Nově se převykreslí jen označená oblast, zato v 573 DPI.
+          </p>
+          <div class="vysledek">
+            Krycí plocha vyšla <span class="cislo">13,5 %</span> místo 12,2 % — rozdíl
+            dělaly tenké tahy, které se v hrubém náhledu rozmazaly do šedi. Číslo je
+            nově <b>stabilní</b>: vyjde stejně bez ohledu na to, jak jemně se náhled kreslí.
+          </div>
+        </div>
+      </div>
+      <div class="zaznam">
+        <time>07:53</time>
+        <div>
+          <h3>Odskok, který nic nezahodí</h3>
+          <p class="pozadavek">„Abych nemusel klikat na menu a vše se mi neresetovalo."</p>
+          <p>
+            Tlačítko zpět s názvem místa, odkud jste přišli. Hlavně ale: rozdělaná
+            kalkulace se odskokem neztratí — vybraný produkt, receptura, počet kusů
+            i rozdělané navážení zůstanou.
+          </p>
+        </div>
+      </div>
+      <div class="zaznam">
+        <time>09:25</time>
+        <div>
+          <h3>Odstín potisku jako Pantone nebo CMYK</h3>
+          <p>
+            V zakázkovém listu žádný pantone ani CMYK napsaný není — ověřeno.
+            Aplikace proto přečte skutečnou barvu vzorníku z grafiky, dopočítá CMYK
+            a najde nejbližší pantone. Vzdálenost se počítá v barevném prostoru Lab,
+            protože v RGB vycházejí „nejbližší" barvy nesmyslně.
+          </p>
+          <div class="vysledek">
+            Černá → PANTONE 419 C (odchylka ΔE 4,7), zelená → 3425 C (ΔE 2,0),
+            bílá → Cool Gray 1 C (ΔE 0,5). Dopočítaný CMYK je odhad z RGB, ne měření —
+            proto se odchylka vždycky vypisuje.
+          </div>
+        </div>
+      </div>
+      <div class="zaznam">
+        <time>09:44</time>
+        <div>
+          <h3>Databáze barev se načítají samy</h3>
+          <p>
+            Všechna CSV ve složce se načtou sama a znovu pokaždé, když se soubor
+            změní. Každý soubor je vlastní databáze — dvě databáze mohou mít týž
+            pantone s jiným složením a nepřepíšou si ho.
+          </p>
+          <div class="vysledek">
+            <b>Chyba odhalená při kontrole:</b> obnovení receptury ze souboru
+            přidělovalo nové id, což tiše rozbíjelo vazby na produkty. Opraveno
+            i v ručním importu, kde ta chyba byla už dřív.
+          </div>
+        </div>
+      </div>
+      <div class="zaznam">
+        <time>11:51</time>
+        <div>
+          <h3>Přelití při vážení</h3>
+          <p class="pozadavek">„Může se stát, že člověk přelije barvu… potřeba autokorekce."</p>
+          <p>
+            Přelitou barvu z nádoby nikdo nedostane zpátky. Odstín jde zachovat
+            jediným způsobem — dorovnat všechny ostatní složky, tedy zvětšit dávku.
+          </p>
+          <div class="vzorec">nová dávka = přelité gramy / podíl komponenty</div>
+          <div class="tab-obal">
+            <table>
+              <thead><tr><th>Receptura 60/30/10 na 100 g</th><th class="n">Nová dávka</th><th>Co dorovnat</th></tr></thead>
+              <tbody>
+                <tr><td>1. složka 66 g místo 60</td><td class="n">110 g</td><td>B 33 g, C 11 g</td></tr>
+                <tr><td>2. složka 33 g místo 30</td><td class="n">110 g</td><td><b>A 6 g</b>, C 11 g</td></tr>
+                <tr><td>3. složka 12 g místo 10</td><td class="n">120 g</td><td>A 12 g, B 6 g</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="margin-top:12px">
+            Druhý řádek je ten, který se snadno přehlédne: přelije-li se až druhá
+            složka, musí se dorovnat i první, jinak je poměr pryč. Přepočet se
+            nespustí sám — automatické navýšení dávky bez ptaní by tiše prodražilo
+            zakázku.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- 9. 8. ---------- -->
+    <div class="den">
+      <div class="den-hlava">
+        <span class="den-datum">9. srpna</span>
+        <span class="den-cas">11:30 — 14:40</span>
+        <span class="den-pocet">Rozbor a směr</span>
+      </div>
+      <div class="mesh den-pruh" aria-hidden="true"></div>
+
+      <div class="zaznam">
+        <time>13:58</time>
+        <div>
+          <h3>Práce z VS Code a zápis změn</h3>
+          <p class="pozadavek">„Co mám dělat pro to, abys byl neustále informovaný a zapisoval si poznámky ke změnám?"</p>
+          <p>
+            Od téhle chvíle vzniká vývojový deník průběžně, jako podklad pro popis
+            práce a pro tuhle prezentaci.
+          </p>
+        </div>
+      </div>
+      <div class="zaznam">
+        <time>14:40</time>
+        <div>
+          <h3>Roadmapa dalších funkcí</h3>
+          <p>
+            Zadány směry na další období: měření podle velikosti síta a těrek,
+            evidence zbytků s čárovým kódem, sledování expirace a viskozity,
+            systém rolí a napojení na podnikový systém.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- 10. 8. ---------- -->
+    <div class="den">
+      <div class="den-hlava">
+        <span class="den-datum">10. srpna</span>
+        <span class="den-cas">06:34 — 13:28</span>
+        <span class="den-pocet">10 zadání · sklad a výpočty</span>
+      </div>
+      <div class="mesh den-pruh" aria-hidden="true"></div>
+
+      <div class="zaznam">
+        <time>07:06</time>
+        <div>
+          <h3>Evidence zbytků — z odpadu se stává sklad</h3>
+          <p class="pozadavek">„Možnost uložit nespotřebovanou barvu do systému a při nové zakázce doporučit: na tuto zakázku můžete využít 150 g zbytkové barvy XY."</p>
+          <p>
+            Kelímek dostane štítek s čárovým kódem, který se kreslí přímo v aplikaci
+            — tisk funguje i bez internetu. Načtením kódu kdekoli v aplikaci se
+            kelímek najde.
+          </p>
+          <div class="vysledek">
+            Čárové kódy nechány přečíst <b>nezávislým dekodérem</b> — vlastní kontrola
+            by systematickou chybu přehlédla, protože kóduje i dekóduje podle stejné
+            předlohy. Všechny testované kódy přečteny přesně.
+          </div>
+        </div>
+      </div>
+      <div class="zaznam">
+        <time>08:22</time>
+        <div>
+          <h3>Expirace, pot life a viskozita</h3>
+          <p>
+            U každého kelímku se hlídají dvě lhůty a rozhoduje ta dřívější: datum
+            spotřeby a čas použitelnosti dvousložkové barvy, který běží od namíchání.
+            Viskozita se měří výtokovým pohárkem a předchozí měření zůstávají, takže
+            je vidět, jak barva houstne.
+          </p>
+          <div class="vysledek">
+            <b>Prošlé kelímky se při nové zakázce nenabízejí vůbec.</b> Ty, kterým
+            lhůta brzy končí, jdou naopak v nabídce dopředu — buď se použijí teď,
+            nebo se vyhodí.
+          </div>
+        </div>
+      </div>
+      <div class="zaznam">
+        <time>08:49</time>
+        <div>
+          <h3>Štítek při míchání, zbytek až po tisku</h3>
+          <p class="pozadavek">„Jakmile se namíchá barva, nakonec z ní něco zbyde. Dá se ten zbytek podle štítku načíst?"</p>
+          <p>
+            Pořadí se otočilo podle toho, jak to běží v dílně: po namíchání se
+            vytiskne štítek a dávka se označí jako „v tisku", po zakázce se štítek
+            načte čtečkou a zapíše se, kolik zbylo. Vzniká tím údaj
+            <i>namícháno → spotřebováno → zbylo</i>, který dřív nikde nebyl.
+          </p>
+        </div>
+      </div>
+      <div class="zaznam">
+        <time>09:49</time>
+        <div>
+          <h3>Přepočet receptury na zbytek</h3>
+          <p>
+            Zbytek je vlastně předem namíchaná část dávky. Pro každou složku musí
+            platit podmínka níže a nejtěsnější z nich určuje, kolik se ho vejde,
+            aby odstín zůstal přesně stejný.
+          </p>
+          <div class="vzorec">zbytek × jeho podíl  ≤  dávka × cílový podíl</div>
+          <p style="margin-top:12px">
+            Nevejde-li se kelímek celý, nabídne aplikace i druhou variantu: zvětšit
+            dávku tak, aby se spotřeboval beze zbytku.
+          </p>
+          <div class="vysledek">
+            Zakázka potřebuje 50 g, v kelímku je 300 g sytější barvy. Do dávky se
+            vejde 26,7 g; volba „celý kelímek" zvětší dávku na <span class="cislo">562,4 g</span>
+            a kelímek dočistí. O kolik je to víc, než zakázka žádá, je vždycky
+            napsané — rozhodnutí zůstává na člověku.
+          </div>
+        </div>
+      </div>
+      <div class="zaznam">
+        <time>11:30</time>
+        <div>
+          <h3>Technologie jako pracovní režim</h3>
+          <p class="pozadavek">„Aplikaci rozdělíme tak, aby každá technologie měla svoji sekci a vybraný katalog produktů."</p>
+          <p>
+            Zvolená technologie zúží katalog, polohy potisku i nabídku receptur.
+          </p>
+          <div class="vysledek">
+            <b>Zjištění z dat, které tvar řešení určilo:</b> katalog nejde rozdělit
+            natvrdo — <span class="cislo">577 z 1 320</span> produktů (44 %) se tiskne
+            víc technologiemi. Tričko se potiskuje sítotiskem i transferem.
+            Technologie je proto filtr, ne přihrádka.
+          </div>
+          <div class="tab-obal">
+            <table>
+              <thead><tr><th>Technologie</th><th class="n">Produktů</th></tr></thead>
+              <tbody>
+                <tr><td>TRS — transfer</td><td class="n">695</td></tr>
+                <tr><td>PDP — tampontisk</td><td class="n">511</td></tr>
+                <tr><td>SCR — sítotisk</td><td class="n">411</td></tr>
+                <tr><td>TXP — sítotisk textil</td><td class="n">298</td></tr>
+                <tr><td>FIR — vypalování</td><td class="n">35</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="zaznam">
+        <time>11:30</time>
+        <div>
+          <h3>Spotřeba spočítaná ze síta</h3>
+          <p>
+            Místo paušálu podle technologie se počítá z geometrie tkaniny.
+            Metr čtvereční o tloušťce jednoho mikrometru je přesně 1 cm³, takže se
+            nic nepřevádí.
+          </p>
+          <div class="vzorec">V [cm³/m²] = otevřená plocha × tloušťka tkaniny [µm]
+g/m²       = V × faktor přenosu × hustota × koeficienty</div>
+          <div class="vysledek">
+            <b>Chyba, kterou odhalilo ověření proti skutečným tkaninám:</b> první odhad
+            tloušťky dával objemy o 40—65 % vyšší. Ze srovnání se čtyřmi tkaninami
+            vyšel správný koeficient a odchylka klesla na <span class="cislo">0—9 %</span>
+            u jemných sít.
+          </div>
+          <div class="tab-obal">
+            <table>
+              <thead><tr><th>Síto</th><th class="n">Tloušťka poč. / výr.</th><th class="n">Objem poč. / výr.</th></tr></thead>
+              <tbody>
+                <tr><td>120-34</td><td class="n">54 / 55 µm</td><td class="n">19,1 / 19</td></tr>
+                <tr><td>77-55</td><td class="n">88 / 90 µm</td><td class="n">29,2 / 30</td></tr>
+                <tr><td>150-31</td><td class="n">50 / 50 µm</td><td class="n">14,2 / 13</td></tr>
+                <tr><td>43-80</td><td class="n">128 / 130 µm</td><td class="n">55,1 / 46</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="zaznam">
+        <time>12:49</time>
+        <div>
+          <h3>Viskozita a klišé pro tampontisk</h3>
+          <p>
+            Viskozita vstupuje do spotřeby jako čtvrtý koeficient — řidší barva
+            projde sítem víc. Tampontisk nemá tkaninu, objem určuje hloubka leptu
+            klišé, a ta se rovná teoretickému objemu.
+          </p>
+          <div class="vysledek">
+            <b>Chyba, kterou test odhalil:</b> výpočet sahal na hodnotu deklarovanou
+            až pod ním a aplikace se vůbec nevykreslila. Kontrola syntaxe to
+            nezachytí — je to běhová chyba, a našel ji až test v prohlížeči.
+          </div>
+        </div>
+      </div>
+      <div class="zaznam">
+        <time>13:14</time>
+        <div>
+          <h3>Síta patří k technologii</h3>
+          <p>
+            Sítotisk na plast a na textil používají jiné tkaniny, takže má každá
+            technologie vlastní sadu. Dokud pro ni žádné síto zapsané není, nabídne
+            se standardní řada 26 sít, aby bylo z čeho vybírat.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="lbl">Metoda</p>
+    <h2>Jak se ověřuje, že to počítá správně</h2>
+    <div class="dve">
+      <div class="karta">
+        <p class="lbl">Testy</p>
+        <h3>Aplikace se spouští, ne odhaduje</h3>
+        <p style="margin:0">
+          Každá změna se spustí v prohlížeči bez okna, ovládá se skriptem a výsledek
+          se čte přímo ze stránky — stejně, jako by to dělal člověk. Výpočty se navíc
+          kontrolují proti obrazcům a příkladům se známým výsledkem.
+        </p>
+      </div>
+      <div class="karta">
+        <p class="lbl">Co to odhalilo</p>
+        <h3>Čtyři chyby, které by jinak prošly</h3>
+        <ul>
+          <li>Import receptur tiše rozbíjel vazby na produkty.</li>
+          <li>Dopočet tloušťky tkaniny byl o 40—65 % vysoko.</li>
+          <li>Sítotiskové síto se použilo i pro tampontisk.</li>
+          <li>Běhová chyba, po které se aplikace nevykreslila.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="lbl">Další krok</p>
+    <h2>Co zbývá</h2>
+    <div class="dve">
+      <div class="karta">
+        <p class="lbl">Čeká se na data</p>
+        <h3>Parametry sít a klišé</h3>
+        <p style="margin:0 0 10px">
+          Aplikace umí spotřebu spočítat, ale potřebuje čísla, která si nemůže
+          vymyslet: údaje výrobce tkaniny, hloubku leptu klišé a koeficienty pro
+          typ barvy, materiál a barvu podkladu.
+        </p>
+        <p style="margin:0">
+          Koeficienty se dají odvodit z uzavřených zakázek — podíl skutečné
+          spotřeby a výpočtu.
+        </p>
+      </div>
+      <div class="karta">
+        <p class="lbl">Rozpracované</p>
+        <h3>Systém a čtení zadání</h3>
+        <ul>
+          <li>Napojení na SGPS — most je připravený, čeká se na rozhraní od IT.</li>
+          <li>Přesnější čtení zakázkových listů: upřesnit, co které výrazy a kódy znamenají.</li>
+          <li>Doplňování databáze receptur — aplikace na víc databází připravená je.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Ink Recipe Manager · vývojový deník 20. 7. — 10. 8. 2026 ·
+    časy pořízené ze záznamů pracovních sezení
+  </div>
+</footer>

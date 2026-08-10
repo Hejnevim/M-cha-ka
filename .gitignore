@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+
+# provozní data dílny — nepatří do repozitáře
+evidence/
+databaze barev/receptury_vlastni.csv
+*.bak
+*.tmp
