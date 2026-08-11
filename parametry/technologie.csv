@@ -1,0 +1,9 @@
+tech;stav;pozn
+;;"stav = ostra | priprava. Ostra = da se v ni pracovat, priprava = zamcena."
+;;"Odemykat az kdyz jsou k technologii receptury i parametry tisku a postup je overeny."
+;;"Aplikace si sama hlida, co ktere technologii chybi - viz odemykaci seznam v menu."
+FIR;ostra;"vypalovani, nizka teplota - databaze Ferro Xpression + vlastni receptury"
+SCR;priprava;"chybi parametry sit a overene koeficienty"
+TXP;priprava;"chybi parametry sit pro textil a overene koeficienty"
+PDP;priprava;"chybi hloubky leptu klise"
+TRS;priprava;"chybi postup a parametry"

@@ -97,36 +97,61 @@ def main():
         return 2
 
     # Kopie musí ležet vedle originálu — potřebuje data.js, lib/ a obrázky.
-    docasny = os.path.join(os.path.dirname(zdroj), "~kontrola.html")
+    # Jméno je jedinečné, aby si dva souběžné běhy nepřepsaly soubor.
+    docasny = os.path.join(os.path.dirname(zdroj), "~kontrola-%d.html" % os.getpid())
+
+    # Prázdné vykreslení bez jediné chybové hlášky nebývá chyba v kódu, ale
+    # prohlížeč, který to pod zátěží nestihl. Skutečná chyba se ohlásí vždycky
+    # a pokaždé stejně, kdežto tohle zmizí při opakování — proto se opakuje.
+    # Bez toho by brána zastavovala nahrávání zdravé práce.
+    pokusy = []
     try:
         priprav(zdroj, docasny)
-        vystup = subprocess.run(
-            [prohlizec, "--headless=new", "--disable-gpu", "--no-sandbox",
-             "--virtual-time-budget=%d" % a.cekani, "--allow-file-access-from-files",
-             "--dump-dom", "file:///" + docasny.replace("\\", "/")],
-            capture_output=True, timeout=120,
-        ).stdout.decode("utf-8", "replace")
+        for pokus in range(3):
+            vystup = subprocess.run(
+                [prohlizec, "--headless=new", "--disable-gpu", "--no-sandbox",
+                 "--virtual-time-budget=%d" % a.cekani, "--allow-file-access-from-files",
+                 "--dump-dom", "file:///" + docasny.replace("\\", "/")],
+                capture_output=True, timeout=120,
+            ).stdout.decode("utf-8", "replace")
+            m = re.search(r'<div id="vysledek-kontroly"[^>]*>(.*?)</div>', vystup, re.S)
+            if not m:
+                pokusy.append((None, 0, 0, "hlášení v DOMu chybí", len(vystup)))
+                continue
+            t = m.group(1)
+            deti = int(re.search(r"DETI&gt;&gt;(-?\d+)", t).group(1))
+            znaku = int(re.search(r"ZNAKU&gt;&gt;(\d+)", t).group(1))
+            chyby = re.search(r"CHYBY&gt;&gt;(.*?)&lt;&lt;KONEC", t, re.S).group(1).strip()
+            pokusy.append((deti, znaku, len(vystup), chyby, len(vystup)))
+            # Vykreslené a bez hlášek → hotovo, opakovat netřeba.
+            if deti > 0 and chyby == "zadne":
+                break
+            # Zachycená chyba je průkazná sama o sobě, opakování nic nezmění.
+            if chyby not in ("zadne", "hlášení v DOMu chybí"):
+                break
     finally:
         if os.path.exists(docasny):
             os.remove(docasny)
 
-    m = re.search(r'<div id="vysledek-kontroly"[^>]*>(.*?)</div>', vystup, re.S)
-    if not m:
+    if not pokusy:
+        print("NELZE ZKONTROLOVAT: prohlížeč nic nevrátil.")
+        return 2
+    deti, znaku, domlen, chyby, _ = pokusy[-1]
+    if deti is None:
         print("NELZE ZKONTROLOVAT: stránka se vůbec nenačetla (hlášení v DOMu chybí).")
         return 2
-    t = m.group(1)
-    deti = int(re.search(r"DETI&gt;&gt;(-?\d+)", t).group(1))
-    znaku = int(re.search(r"ZNAKU&gt;&gt;(\d+)", t).group(1))
-    chyby = re.search(r"CHYBY&gt;&gt;(.*?)&lt;&lt;KONEC", t, re.S).group(1).strip()
 
     print("kořenový prvek: %d potomků, %d znaků" % (deti, znaku))
-    print("celkový DOM:    %d znaků" % len(vystup))
+    print("celkový DOM:    %d znaků" % domlen)
     print("chyby:          %s" % chyby.replace(" ;; ", "\n                "))
+    if len(pokusy) > 1:
+        print("pokusů:         %d (první neuspěl, opakováno)" % len(pokusy))
 
     if deti <= 0:
-        print("\nSELHALO: aplikace se nevykreslila. Hledejte běhovou chybu —")
-        print("typicky nepředaná vlastnost komponentě nebo použití proměnné")
-        print("dřív, než je deklarovaná. Kontrola syntaxe tohle nezachytí.")
+        print("\nSELHALO: aplikace se nevykreslila ani na %d pokusy." % len(pokusy))
+        print("Hledejte běhovou chybu — typicky nepředaná vlastnost komponentě")
+        print("nebo použití proměnné dřív, než je deklarovaná. Kontrola syntaxe")
+        print("tohle nezachytí.")
         return 1
     if chyby != "zadne":
         print("\nVYKRESLILO SE, ale stránka hlásí chyby (viz výše).")

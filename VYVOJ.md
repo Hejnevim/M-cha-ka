@@ -87,6 +87,7 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 09:30 | Podklad jako vstup do odstínu, kryvost a prosvítání, korekce po nátisku |
 | 10:05 | Pigment a báze odděleně; aplikace radí, čím korigovat |
 | 10:55 | Kontrola vykreslení aplikace, zařazená před nahrání na GitHub |
+| 12:20 | Zámek technologií: ostrá jen FIR, ostatní s odemykacím seznamem |
 
 ---
 
@@ -749,3 +750,57 @@ shodí všechno.
 Vrátí-li 1, nenahraje se nic. Vrátí-li 2 (chybí prohlížeč, nelze zkontrolovat),
 jen se to zapíše do protokolu a pokračuje se — nemožnost zkontrolovat není
 totéž co nalezená chyba.
+
+**Kontrola sama musela být opravena.** Při dalším použití nahlásila pád
+u obrazovky, která byla ve skutečnosti v pořádku — táž verze pak třikrát po sobě
+prošla. Příčinou byla souběžně běžící okna prohlížeče: pod zátěží se nestihlo
+vykreslit dřív, než skončil vyměřený čas. Falešný poplach je u brány, která
+zastavuje nahrávání, horší než žádná brána, protože se přestane věřit i
+skutečným nálezům.
+
+Řešení stojí na rozlišení dvou situací. **Zachycená chybová hláška je průkazná**
+— opakování s ní nic neudělá, takže se hlásí hned. **Prázdné vykreslení bez
+jediné hlášky** je podezřelé z časování, a proto se pokus až třikrát opakuje;
+selže-li pokaždé, jde o skutečnou chybu. Dočasný soubor navíc nese v názvu číslo
+procesu, aby si dva souběžné běhy nepřepsaly práci.
+
+---
+
+## 15. Zámek technologií — ostrá je zatím jen FIR
+
+**Zadání.** Pracovat zatím jen v technologii FIR (vypalování, nízká teplota),
+kde je databáze Ferro Xpression i vlastní receptury. Ostatní technologie
+odemykat postupně, jak k nim budou data a ověřené postupy.
+
+**Rozvaha: samostatná aplikace pro FIR, nebo jedna se zámkem?** Rozhodnuto pro
+jednu se zámkem, ze tří důvodů. Aplikace je jeden soubor bez sestavování, takže
+druhá verze znamená kopii 5 400 řádků a každou opravu dvakrát — a jednou se to
+zapomene. Katalog navíc nejde rozříznout: **577 z 1 320 produktů** se tiskne víc
+technologiemi, takže by FIR-only verze stejně potřebovala celá data. A většina
+aplikace je na technologii nezávislá — evidence zbytků, štítky, čtení PDF,
+asistent vážení, pigmenty. Zdvojit to znamená pěstovat chyby ve dvou zahrádkách.
+Odemykání je pak přepnutí příznaku, ne slučování dvou kódů.
+
+**Jak to funguje.** Stav se čte z `parametry/technologie.csv` (ostrá / příprava),
+aby šlo odemykat bez zásahu do kódu. Zamčenou technologii nelze zvolit jako
+pracovní režim, ale v menu je vidět — se zámkem, důvodem a poměrem hotových
+bodů. Skrývat ji by nemělo smysl, lidi by ji hledali. Jakmile se stav načte,
+aplikace se sama přepne do jediné ostré technologie; stojí-li uživatel
+v zamčené, vrátí ho to.
+
+**Odemykací seznam** je na tom to podstatné. U každé technologie se ukazuje, co
+jí chybí — databáze receptur, parametry sít nebo hloubky leptu klišé,
+koeficienty spotřeby, pigmenty a báze — a aplikace si to **odškrtává sama
+z dat**, která má. Zámek tím není byrokracie, ale ukazatel postupu.
+
+**Co seznam hned ukázal.** FIR má **2 body ze 4**: receptury a pigmenty ano,
+parametry sít a koeficienty ne. „Nejvíc informací" tedy znamená receptury —
+spotřeba se u FIR pořád počítá paušálem 8 g/m², ne z geometrie síta. Zúžení na
+jednu technologii tu mezeru neodstranilo, jen ji zviditelnilo, a to bylo
+zamýšlené.
+
+**Ověření.** 16 kontrol v node: čtení stavů ze souboru, chování bez souboru
+(nezamyká se nic — jinak by po aktualizaci někomu zmizela technologie, ve které
+pracuje), odškrtávání bodů z prázdných i naplněných dat, oddělení klišé od sít
+(tampontisk si nesmí započítat cizí síto a naopak) a to, že vlastní receptury
+se nepočítají jako přiřazená databáze.

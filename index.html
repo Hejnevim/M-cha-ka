@@ -2481,13 +2481,15 @@ function App() {
   const [sita, setSita] = useState([]);
   const [koef, setKoef] = useState({ kryvost: {}, material: {}, podklad: {} });
   const [pigmenty, setPigmenty] = useState({});
+  const [techStav, setTechStav] = useState({});
   const [paramStav, setParamStav] = useState({ stav: "cekam", chyba: "", sit: 0, koef: 0, pigm: 0 });
   useEffect(() => {
     if (sgps.stav.stav !== "ok") return;
     let zrusen = false;
     (async () => {
       const chyby = [];
-      let novaSita = [], novyKoef = { kryvost: {}, material: {}, podklad: {} }, novePigmenty = {};
+      let novaSita = [], novyKoef = { kryvost: {}, material: {}, podklad: {} }, novePigmenty = {},
+          novyTechStav = {};
       try {
         const d = await sgpsGet("/databaze?slozka=" + SLOZKA_PARAMETRY
           + "&soubor=" + encodeURIComponent(SOUBOR_SITA));
@@ -2503,7 +2505,13 @@ function App() {
           + "&soubor=" + encodeURIComponent(SOUBOR_PIGMENTY));
         novePigmenty = csvNaPigmenty(d.text);
       } catch (e) { if (!/není/.test(String(e.message || e))) chyby.push(SOUBOR_PIGMENTY + ": " + e.message); }
+      try {
+        const d = await sgpsGet("/databaze?slozka=" + SLOZKA_PARAMETRY
+          + "&soubor=" + encodeURIComponent(SOUBOR_TECHNOLOGIE));
+        novyTechStav = csvNaTechStav(d.text);
+      } catch (e) { if (!/není/.test(String(e.message || e))) chyby.push(SOUBOR_TECHNOLOGIE + ": " + e.message); }
       if (zrusen) return;
+      setTechStav(novyTechStav);
       setSita(novaSita);
       setKoef(novyKoef);
       setPigmenty(novePigmenty);
@@ -2614,6 +2622,16 @@ function App() {
      "" = bez omezení, jako dosud. */
   const [technologie, setTechnologie] = useState(() => loadLS("irm-technologie", ""));
   useEffect(() => { saveLS("irm-technologie", technologie); }, [technologie]);
+  // Jakmile se načte stav technologií, přepne se do jediné ostré (dnes FIR),
+  // aby nikdo nezačal počítat v technologii, která na to ještě nemá data.
+  // Stojí-li uživatel v zamčené, vrátí ho to zpátky.
+  useEffect(() => {
+    const ostre = Object.keys(techStav).filter((t) => techStav[t].stav === "ostra");
+    if (!ostre.length) return;
+    if (!technologie || !techOstra(technologie, techStav)) {
+      if (ostre.length === 1) setTechnologie(ostre[0]);
+    }
+  }, [techStav]);
   // které technologie patří ke kterému souboru databáze receptur
   const [dbTech, setDbTech] = useState(() => loadLS("irm-databaze-tech", {}));
   useEffect(() => { saveLS("irm-databaze-tech", dbTech); }, [dbTech]);
@@ -2892,22 +2910,34 @@ function App() {
           ${menuOpen && html`
             <div className="navdrop">
               <div className="note" style=${{ padding: "6px 14px 2px", letterSpacing: ".06em" }}>TECHNOLOGIE</div>
-              <button className=${technologie ? "" : "on"}
-                onClick=${() => { setTechnologie(""); setMenuOpen(false); }}>
-                Všechny technologie
-                <span className="note" style=${{ float: "right" }}>${fmt(products.length, 0)}</span>
-              </button>
+              ${!Object.keys(techStav).length && html`
+                <button className=${technologie ? "" : "on"}
+                  onClick=${() => { setTechnologie(""); setMenuOpen(false); }}>
+                  Všechny technologie
+                  <span className="note" style=${{ float: "right" }}>${fmt(products.length, 0)}</span>
+                </button>`}
               ${TECH_PORADI.filter((t) => TECHS[t]).map((t) => {
                 const kolik = products.filter((p) => produktUmi(p, t)).length;
                 if (!kolik) return null;
+                const ostra = techOstra(t, techStav);
+                const pr = pripravenostTech(t, { sita, koef, pigmenty, recipes, dbTech, techStav });
                 return html`
                   <button key=${t} className=${technologie === t ? "on" : ""}
-                    onClick=${() => { setTechnologie(t); setMenuOpen(false); }}
-                    title=${TECHS[t].name}>
-                    ${t} — ${TECHS[t].name.replace(/\s*\(.*/, "")}
-                    <span className="note" style=${{ float: "right" }}>${fmt(kolik, 0)}</span>
+                    disabled=${!ostra}
+                    style=${ostra ? {} : { opacity: .55, cursor: "not-allowed" }}
+                    onClick=${() => { if (ostra) { setTechnologie(t); setMenuOpen(false); } }}
+                    title=${ostra ? TECHS[t].name
+                      : "Zamčeno: " + (pr.pozn || "chybí data") + " — hotovo " + pr.hotovo + " ze " + pr.celkem}>
+                    ${!ostra ? "🔒 " : ""}${t} — ${TECHS[t].name.replace(/\s*\(.*/, "")}
+                    <span className="note" style=${{ float: "right" }}>
+                      ${ostra ? fmt(kolik, 0) : pr.hotovo + "/" + pr.celkem}
+                    </span>
                   </button>`;
               })}
+              ${Object.keys(techStav).length > 0 && html`
+                <button onClick=${() => { setTab("odemykani"); setMenuOpen(false); }}>
+                  Co chybí k odemčení…
+                </button>`}
               <div style=${{ borderTop: "1px solid var(--line)", margin: "6px 8px" }}></div>
               <button className=${tab === "pdf" ? "on" : ""} onClick=${() => { setTab("pdf"); setMenuOpen(false); }}>Načíst spec z PDF</button>
               <button className=${tab === "scan" ? "on" : ""} onClick=${() => { setTab("scan"); setMenuOpen(false); }}>Načíst spec (čárový kód)</button>
@@ -2987,6 +3017,9 @@ ${lhutyPocet.prosle + lhutyPocet.brzy > 0 && html`<span className="tag"
             delete v[z];
             saveLS("irm-databaze-verze", v);
           }, "odebrání receptur z databáze " + z)} />`}
+        ${tab === "odemykani" && html`<${OdemykaniTab} techStav=${techStav} products=${products}
+          sita=${sita} koef=${koef} pigmenty=${pigmenty} recipes=${recipes} dbTech=${dbTech}
+          technologie=${technologie} setTechnologie=${setTechnologie} />`}
         ${tab === "prod" && html`<${Products} products=${products} setProducts=${setProducts} guardDelete=${guardDelete} />`}
         ${tab === "rec" && html`<${Recipes} recipes=${recipes} setRecipes=${setRecipes} guardDelete=${guardDelete}
           dbFiltr=${dbFiltr} setDbFiltr=${setDbFiltr} technologie=${technologie} dbTech=${dbTech} sita=${sita} />`}
@@ -3079,6 +3112,58 @@ function PwGate({ label, correctPw, onConfirm, onCancel }) {
 }
 
 /* ============================ KALKULACE ============================ */
+/* Přehled toho, co které technologii chybí, aby se dala odemknout. Body si
+   aplikace odškrtává sama z dat — seznam tedy neukazuje, co si kdo myslí,
+   ale co doopravdy je ve složce parametrů a v databázích. */
+function OdemykaniTab({ techStav, products, sita, koef, pigmenty, recipes, dbTech,
+                        technologie, setTechnologie }) {
+  const rady = TECH_PORADI.filter((t) => TECHS[t]).map(
+    (t) => pripravenostTech(t, { sita, koef, pigmenty, recipes, dbTech, techStav }));
+  return html`
+    <div className="card">
+      <h2>Odemykání technologií</h2>
+      <p className="hint">
+        Dílna otevírá technologie postupně — pracuje se jen v té, ke které jsou
+        receptury i parametry tisku. Body níže si aplikace odškrtává sama podle
+        toho, co najde ve složce <b>parametry</b> a v databázích receptur.
+        Stav se přepíná v souboru <b>parametry/technologie.csv</b>.
+      </p>
+      ${rady.map((pr) => {
+        const ostra = pr.stav === "ostra";
+        const kolik = products.filter((p) => produktUmi(p, pr.tech)).length;
+        return html`
+          <div key=${pr.tech} className=${ostra ? "okbox" : "specbar"} style=${{ marginTop: 12 }}>
+            <div className="rowline" style=${{ marginTop: 0, gap: 8 }}>
+              <b style=${{ fontSize: 15 }}>${ostra ? "" : "🔒 "}${pr.tech} — ${TECHS[pr.tech].name}</b>
+              <span className="tag">${ostra ? "ostrá" : "v přípravě"}</span>
+              <span className="tag">${fmt(kolik, 0)} produktů</span>
+              <span className="tag">hotovo ${pr.hotovo} ze ${pr.celkem}</span>
+              ${ostra && technologie !== pr.tech && html`
+                <button className="btn sec sm" onClick=${() => setTechnologie(pr.tech)}>
+                  Přepnout se do ní</button>`}
+              ${technologie === pr.tech && html`<span className="tag">pracujete v ní</span>`}
+            </div>
+            ${pr.pozn && html`<div className="note" style=${{ marginTop: 6 }}>${pr.pozn}</div>`}
+            <table className="t" style=${{ marginTop: 8 }}>
+              <tbody>
+                ${pr.body.map((b) => html`
+                  <tr key=${b.klic}>
+                    <td style=${{ width: 28 }}>${b.hotovo ? "✓" : "—"}</td>
+                    <td style=${b.hotovo ? {} : { opacity: .7 }}>${b.popis}</td>
+                    <td className="num" style=${{ opacity: .7 }}>${b.detail}</td>
+                  </tr>`)}
+              </tbody>
+            </table>
+          </div>`;
+      })}
+      <p className="note" style=${{ marginTop: 14 }}>
+        Odškrtnutý bod neznamená, že je hodnota správná — jen že vůbec je.
+        Správnost čísel ověří až první zakázka, u které srovnáte spočítanou
+        spotřebu se skutečně spotřebovanou barvou.
+      </p>
+    </div>`;
+}
+
 function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed, onUpravitSpec,
                 sgps, onPouzitSpec, onPdfNacteno, pdfObrazky, pdfStranky, pdfId,
                 dbFiltr, setDbFiltr, zbytky, setZbytky, onZbytekUlozen,
@@ -5753,6 +5838,77 @@ function analyzaPodkladu({ barvaHex, podkladHex, kryvost }) {
     posun: tahne ? "Podklad je sytý a barva průsvitná — výsledek se posune do " + tahne + "." : "",
   };
 }
+
+/* ================== ZÁMEK TECHNOLOGIÍ ==================
+   Dílna otevírá technologie postupně — nejdřív FIR, kde jsou receptury
+   i postupy, ostatní až budou data. Zamčená technologie se nesmí dát vybrat
+   jako pracovní režim, ale musí být vidět, jinak ji lidi hledají.
+
+   Stav se čte z parametry/technologie.csv, aby šlo odemykat bez zásahu do
+   kódu. Není-li soubor, chová se aplikace jako dřív a nezamyká nic — jinak by
+   po aktualizaci někomu zmizela technologie, ve které zrovna pracuje. */
+const SOUBOR_TECHNOLOGIE = "technologie.csv";
+
+function csvNaTechStav(text) {
+  const rows = parseCsv(text);
+  if (!rows.length) throw new Error("Soubor technologií je prázdný.");
+  const head = rows[0].map((h) => h.toLowerCase().trim());
+  const i = (re) => head.findIndex((h) => re.test(h));
+  const ci = { tech: i(/^(tech|technologie)/), stav: i(/^stav/), pozn: i(/^(pozn|duvod)/) };
+  if (ci.tech < 0 || ci.stav < 0)
+    throw new Error("CSV technologií musí mít sloupce tech a stav.");
+  const out = {};
+  for (const r of rows.slice(1)) {
+    const t = String(r[ci.tech] || "").trim().toUpperCase();
+    const s = String(r[ci.stav] || "").trim().toLowerCase();
+    if (!t || !TECHS[t]) continue;
+    out[t] = { stav: s === "ostra" || s === "ostrá" ? "ostra" : "priprava",
+      pozn: ci.pozn >= 0 ? String(r[ci.pozn] || "").trim() : "" };
+  }
+  return out;
+}
+
+/* Odemykací seznam: co které technologii chybí, aby se v ní dalo pracovat.
+   Odškrtává se sám z dat, která aplikace má — zámek tím není byrokracie,
+   ale ukazatel postupu. */
+function pripravenostTech(tech, { sita, koef, pigmenty, recipes, dbTech, techStav }) {
+  const st = (techStav || {})[tech];
+  const maSito = techMaSito(tech);
+  const vlastniSita = (sita || []).filter((s) => s.tech === tech && !!s.klise === !maSito);
+  // receptury přiřazené téhle technologii přes databázi, ke které patří
+  const souboryTech = Object.keys(dbTech || {}).filter(
+    (f) => String((dbTech || {})[f] || "").split(",").filter(Boolean).indexOf(tech) >= 0);
+  const receptur = (recipes || []).filter(
+    (r) => r.type === "Custom" ? false : souboryTech.indexOf(r.zdroj) >= 0).length;
+  const koefu = koef ? Object.keys(koef).reduce(
+    (s, k) => s + Object.keys(koef[k] || {}).length, 0) : 0;
+
+  const body = [
+    { klic: "receptury", popis: "databáze receptur přiřazená technologii",
+      hotovo: receptur > 0, detail: receptur > 0 ? receptur + " receptur" : "žádná databáze" },
+    { klic: "sita", popis: maSito ? "parametry sít" : "hloubky leptu klišé",
+      hotovo: vlastniSita.length > 0,
+      detail: vlastniSita.length > 0 ? vlastniSita.length + (maSito ? " sít" : " klišé")
+        : (maSito ? "nejsou, počítá se paušálem" : "nejsou") },
+    { klic: "koeficienty", popis: "koeficienty spotřeby",
+      hotovo: koefu > 0, detail: koefu > 0 ? koefu + " hodnot" : "nejsou" },
+    { klic: "pigmenty", popis: "pigmenty a báze",
+      hotovo: pigmenty && Object.keys(pigmenty).length > 0,
+      detail: pigmenty && Object.keys(pigmenty).length
+        ? Object.keys(pigmenty).length + " položek" : "nejsou" },
+  ];
+  const hotovo = body.filter((b) => b.hotovo).length;
+  return {
+    tech: tech,
+    stav: st ? st.stav : "ostra",     // bez souboru se nezamyká
+    pozn: st ? st.pozn : "",
+    body: body, hotovo: hotovo, celkem: body.length,
+    podil: body.length ? hotovo / body.length : 0,
+  };
+}
+
+const techOstra = (tech, techStav) =>
+  !tech || !techStav || !techStav[tech] || techStav[tech].stav === "ostra";
 
 /* ================== PIGMENT A BÁZE ODDĚLENĚ ==================
    Převzato z toho, jak má poskládaný sortiment Matsui: pár koncentrovaných
