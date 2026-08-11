@@ -2480,13 +2480,14 @@ function App() {
   /* ---- parametry sít a koeficienty spotřeby ze složky "parametry" ---- */
   const [sita, setSita] = useState([]);
   const [koef, setKoef] = useState({ kryvost: {}, material: {}, podklad: {} });
-  const [paramStav, setParamStav] = useState({ stav: "cekam", chyba: "", sit: 0, koef: 0 });
+  const [pigmenty, setPigmenty] = useState({});
+  const [paramStav, setParamStav] = useState({ stav: "cekam", chyba: "", sit: 0, koef: 0, pigm: 0 });
   useEffect(() => {
     if (sgps.stav.stav !== "ok") return;
     let zrusen = false;
     (async () => {
       const chyby = [];
-      let novaSita = [], novyKoef = { kryvost: {}, material: {}, podklad: {} };
+      let novaSita = [], novyKoef = { kryvost: {}, material: {}, podklad: {} }, novePigmenty = {};
       try {
         const d = await sgpsGet("/databaze?slozka=" + SLOZKA_PARAMETRY
           + "&soubor=" + encodeURIComponent(SOUBOR_SITA));
@@ -2497,12 +2498,19 @@ function App() {
           + "&soubor=" + encodeURIComponent(SOUBOR_KOEF));
         novyKoef = csvNaKoeficienty(d.text);
       } catch (e) { if (!/není/.test(String(e.message || e))) chyby.push(SOUBOR_KOEF + ": " + e.message); }
+      try {
+        const d = await sgpsGet("/databaze?slozka=" + SLOZKA_PARAMETRY
+          + "&soubor=" + encodeURIComponent(SOUBOR_PIGMENTY));
+        novePigmenty = csvNaPigmenty(d.text);
+      } catch (e) { if (!/není/.test(String(e.message || e))) chyby.push(SOUBOR_PIGMENTY + ": " + e.message); }
       if (zrusen) return;
       setSita(novaSita);
       setKoef(novyKoef);
+      setPigmenty(novePigmenty);
       setParamStav({ stav: chyby.length ? "chyba" : "hotovo", chyba: chyby.join(" · "),
         sit: novaSita.length,
-        koef: Object.keys(novyKoef).reduce((s, k) => s + Object.keys(novyKoef[k]).length, 0) });
+        koef: Object.keys(novyKoef).reduce((s, k) => s + Object.keys(novyKoef[k]).length, 0),
+        pigm: Object.keys(novePigmenty).length });
     })();
     return () => { zrusen = true; };
   }, [sgps.stav.stav]);
@@ -3250,6 +3258,16 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     });
   }, [recipe, colorSel]);
 
+  // Rozdělení složení na pigmenty a bázi — odstín dělá poměr pigmentů,
+  // vlastnosti dělá báze.
+  const slozeni = useMemo(
+    () => rozborSlozeni(recipe ? recipe.components : [], pigmenty),
+    [recipe, pigmenty]);
+  // báze, které dílna má — pro nabídku výměny na jiný materiál
+  const bazeVolby = useMemo(
+    () => Object.values(pigmenty || {}).filter((p) => p.role === "baze"),
+    [pigmenty]);
+
   const [qty, setQty] = useState(500);
   const [gm2, setGm2] = useState(TECHS[tech] ? TECHS[tech].gm2 : 6);
   const [loss, setLoss] = useState(15);
@@ -3841,6 +3859,44 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 Posouzení vychází z odstínu barvy a materiálu, ne z měření — je to
                 upozornění, ne verdikt. Meze si dílna může upravit v parametrech.
               </p>
+              ${podklad.stav !== "ok" && slozeni.baze.length > 0 && bazeVolby.length > 1 && html`
+                <div className="note" style=${{ marginTop: 6 }}>
+                  Odstín dělá poměr pigmentů, kryvost dělá báze — tentýž odstín jde
+                  namíchat na krycí bázi místo ${slozeni.baze.map((b) => b.name).join(", ")}.
+                  Dílna má: ${bazeVolby.map((b) => b.nazev).join(" · ")}.
+                </div>`}
+            </div>`}
+
+          ${slozeni.znamy && html`
+            <div style=${{ marginTop: 14 }}>
+              <div className="lbl">Pigment a báze</div>
+              <div className=${slozeni.pretizeno ? "warnbox" : "specbar"} style=${{ marginTop: 4 }}>
+                <div className="rowline" style=${{ marginTop: 0, gap: 8 }}>
+                  <span className="tag">pigmenty ${fmt(slozeni.pctPigment, 1)} %</span>
+                  <span className="tag">báze ${fmt(slozeni.pctBaze, 1)} %</span>
+                  <span className="tag" title="Kolik pigmentu báze snese">strop ${fmt(slozeni.strop, 0)} %</span>
+                </div>
+                ${slozeni.pigmenty.length > 0 && html`
+                  <div className="rowline" style=${{ marginTop: 6, gap: 6 }}>
+                    ${slozeni.pigmenty.map((p, i) => html`
+                      <span key=${i} className="tag">
+                        ${p.hex ? html`<span style=${{ display: "inline-block", width: 9, height: 9, borderRadius: 2,
+                                        background: p.hex, marginRight: 5, verticalAlign: -1 }}></span>` : ""}
+                        ${p.name} ${fmt(n(p.pct), 1)} %
+                      </span>`)}
+                  </div>`}
+                ${slozeni.pretizeno && html`
+                  <div style=${{ marginTop: 6 }}>
+                    Pigmentu je <b>${fmt(slozeni.pctPigment, 1)} %</b>, ale báze snese jen
+                    ${fmt(slozeni.strop, 0)} %. Nad stropem barva ztrácí vlastnosti —
+                    praská a hůř drží v praní.
+                  </div>`}
+                ${slozeni.nezname.length > 0 && html`
+                  <div className="note" style=${{ marginTop: 6 }}>
+                    Nezařazeno: ${slozeni.nezname.map((c) => c.name).join(", ")} — doplňte je
+                    do parametry/pigmenty.csv, jinak s nimi aplikace neumí počítat.
+                  </div>`}
+              </div>
             </div>`}
 
         </div>
@@ -3985,6 +4041,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
           <${Vazeni} comps=${calcAkt.comps} totalG=${calcAkt.totalG} recipeName=${recipe ? recipe.name : ""}
             predem=${vyuzitiZbytku ? vyuzitiZbytku.prispevek : null}
             predemPopis=${vyuzitiZbytku ? "zbytek " + vyuzitiZbytku.zbytek.kod : ""}
+            pigmenty=${pigmenty} barvaHex=${recipe ? recipe.hex : ""}
             onHotovo=${vyuzitiZbytku ? odepisZbytku : null} />
           </div>`}
       </div>
@@ -4237,7 +4294,7 @@ function prepocetDavky(comps, totalG, nalito) {
    vypadalo jako 0,1 g a nesedělo by to s tím, co je odškrtnuté jako hotové. */
 const fmtG = (v) => fmt(v, Math.abs(v) > 0 && Math.abs(v) < 1 ? 2 : 1);
 
-function Vazeni({ comps, totalG, recipeName, predem, predemPopis, onHotovo }) {
+function Vazeni({ comps, totalG, recipeName, predem, predemPopis, onHotovo, pigmenty, barvaHex }) {
   const sc = useScale();
   const [baud, setBaud] = useState("9600");
   const [tol, setTol] = useState(0.5);
@@ -4252,6 +4309,7 @@ function Vazeni({ comps, totalG, recipeName, predem, predemPopis, onHotovo }) {
   const [korPodil, setKorPodil] = useState(null);
   const [korSlozka, setKorSlozka] = useState(0);
   const [korSila, setKorSila] = useState("mirne");
+  const [korSmer, setKorSmer] = useState("mocSvetle");
   const [korHistorie, setKorHistorie] = useState([]);
 
   const zacniZnovu = () => {
@@ -4439,6 +4497,47 @@ function Vazeni({ comps, totalG, recipeName, predem, predemPopis, onHotovo }) {
                 vždycky přídavek a dávka poroste. Přidávejte po malých krocích a mezi
                 nimi tiskněte — barvicí síla bází je velmi různá.
               </p>
+
+              ${(() => {
+                // Zná-li aplikace odstíny pigmentů, poradí i ČÍM korigovat —
+                // stačí popsat, co je na nátisku vidět.
+                const maPigmenty = pigmenty && Object.keys(pigmenty).length > 0;
+                if (!maPigmenty || !barvaHex) return "";
+                const dop = doporucKorekci({ barvaHex: barvaHex, komponenty: comps,
+                  pigmenty: pigmenty, smer: korSmer, sila: korSila });
+                return html`
+                  <div style=${{ marginTop: 8 }}>
+                    <div className="rowline" style=${{ marginTop: 0 }}>
+                      <span className="note">Nátisk proti etalonu:</span>
+                      <select value=${korSmer} onChange=${(e) => setKorSmer(e.target.value)}
+                              style=${{ width: "auto" }}>
+                        ${Object.entries(SMERY_KOREKCE).map(([k, v]) => html`
+                          <option key=${k} value=${k}>${v.popis}</option>`)}
+                      </select>
+                    </div>
+                    ${dop && dop.navrhy.length > 0
+                      ? html`<div className="okbox" style=${{ marginTop: 6 }}>
+                          Nejlíp tím směrem táhne
+                          <b> <span style=${{ display: "inline-block", width: 9, height: 9, borderRadius: 2,
+                                    background: dop.navrhy[0].hex, marginRight: 4, verticalAlign: -1 }}></span>${dop.navrhy[0].name}</b>.
+                          Začněte s <b>${fmt(dop.navrhy[0].startPct, 2)} %</b> dávky, tedy
+                          ${fmtG(davka * dop.navrhy[0].startPct / 100)} g.
+                          ${dop.navrhy.length > 1 && html`<div className="note" style=${{ marginTop: 4 }}>
+                            Dál v pořadí: ${dop.navrhy.slice(1).map((x) => x.name).join(", ")}.</div>`}
+                          <div className="note" style=${{ marginTop: 4 }}>
+                            Výpočet předpokládá, že se odstíny průměrují. Míchání barev je ale
+                            odečítací a silný pigment posune odstín víc — proto se nabízí
+                            jen třetina spočítaného množství. Rozhoduje oko.
+                          </div>
+                          <button className="btn sec sm" style=${{ marginTop: 6 }} onClick=${() => {
+                            const i = comps.findIndex((c) => c.name === dop.navrhy[0].name);
+                            if (i >= 0) setKorSlozka(i);
+                          }}>Vybrat ${dop.navrhy[0].name} níže</button>
+                        </div>`
+                      : html`<div className="note" style=${{ marginTop: 6 }}>
+                          ${dop ? dop.duvod : ""}</div>`}
+                  </div>`;
+              })()}
               <div className="rowline" style=${{ marginTop: 8 }}>
                 <select value=${korSlozka} onChange=${(e) => setKorSlozka(+e.target.value)}
                         style=${{ width: "auto" }} title="Kterou složkou se koriguje">
@@ -5206,6 +5305,10 @@ function RecipeForm({ initial, onSave, onCancel, sita }) {
 
 /* ============================ IMPORT / DATA ============================ */
 function parseCsv(text) {
+  // Excel ukládá CSV se značkou pořadí bajtů (BOM). Bez odstranění by první
+  // sloupec hlavičky vyšel jako "﻿druh", hledání sloupců by selhalo
+  // a soubor by se tvářil jako špatně vyplněný, ačkoli je v pořádku.
+  text = String(text || "").replace(/^﻿/, "");
   const delim = ((text.match(/;/g) || []).length >= (text.match(/,/g) || []).length) ? ";" : ",";
   const lines = text.split(/\r?\n/).filter((l) => l.trim());
   return lines.map((l) => {
@@ -5651,6 +5754,66 @@ function analyzaPodkladu({ barvaHex, podkladHex, kryvost }) {
   };
 }
 
+/* ================== PIGMENT A BÁZE ODDĚLENĚ ==================
+   Převzato z toho, jak má poskládaný sortiment Matsui: pár koncentrovaných
+   pigmentů, které jdou do všech bází. Odstín určuje poměr pigmentů mezi sebou,
+   vlastnosti (měkkost, kryvost, odbarvování, pružnost) určuje báze.
+
+   Praktický důsledek: tentýž odstín na světlé i tmavé tričko není dvojí
+   receptura, ale tentýž poměr pigmentů ve dvou bázích. A protože pigmentů je
+   hrstka, dá se u nich zapsat odstín — a teprve tím může aplikace radit, ČÍM
+   korigovat, ne jen počítat, kolik přidat.
+
+   Tabulka je v parametry/pigmenty.csv; dokud tam nic není, chová se aplikace
+   jako dosud a složení bere jako plochý seznam. */
+const SOUBOR_PIGMENTY = "pigmenty.csv";
+const MAX_PODIL_PIGMENTU = 15;   // % dávky; strop, není-li u báze uvedený vlastní
+
+function csvNaPigmenty(text) {
+  const rows = parseCsv(text);
+  if (!rows.length) throw new Error("Soubor pigmentů je prázdný.");
+  const head = rows[0].map((h) => h.toLowerCase().trim());
+  const i = (re) => head.findIndex((h) => re.test(h));
+  const ci = { druh: i(/^(druh|typ)/), nazev: i(/^(nazev|n.zev|name)/),
+    hex: i(/^(hex|odstin|odst.n|barva)/), max: i(/^(maxpodil|max)/) };
+  if (ci.druh < 0 || ci.nazev < 0)
+    throw new Error("CSV pigmentů musí mít sloupce druh a nazev.");
+  const out = {};
+  for (const r of rows.slice(1)) {
+    const druh = String(r[ci.druh] || "").toLowerCase().trim();
+    const nazev = String(r[ci.nazev] || "").trim();
+    if (!nazev || (druh !== "pigment" && druh !== "baze" && druh !== "báze")) continue;
+    const hex = ci.hex >= 0 ? String(r[ci.hex] || "").trim() : "";
+    out[nazev.toLowerCase()] = {
+      nazev: nazev, role: druh === "pigment" ? "pigment" : "baze",
+      hex: hexNaRgb(hex) ? hex : "",
+      max: ci.max >= 0 && n(r[ci.max]) > 0 ? n(r[ci.max]) : 0,
+    };
+  }
+  return out;
+}
+
+/* Rozdělí složení receptury na pigmenty a báze. Co v tabulce není, zůstane
+   nezařazené — aplikace o tom mlčky nerozhoduje, radši to přizná. */
+function rozborSlozeni(components, pigmenty) {
+  const tab = pigmenty || {};
+  const out = { pigmenty: [], baze: [], nezname: [], pctPigment: 0, pctBaze: 0, znamy: false };
+  if (!components || !components.length) return out;
+  for (const c of components) {
+    const zn = tab[String(c.name || "").trim().toLowerCase()];
+    const pct = n(c.pct);
+    if (zn && zn.role === "pigment") { out.pigmenty.push(Object.assign({}, c, { hex: zn.hex })); out.pctPigment += pct; }
+    else if (zn) { out.baze.push(Object.assign({}, c, { max: zn.max })); out.pctBaze += pct; }
+    else out.nezname.push(c);
+  }
+  out.znamy = out.pigmenty.length > 0 || out.baze.length > 0;
+  // Strop bere z báze, je-li u ní uvedený — discharge snese míň než akrylát.
+  const stropy = out.baze.map((b) => b.max).filter((m) => m > 0);
+  out.strop = stropy.length ? Math.min.apply(null, stropy) : MAX_PODIL_PIGMENTU;
+  out.pretizeno = out.pctPigment > out.strop + 1e-9;
+  return out;
+}
+
 /* ===================== KOREKCE ODSTÍNU PO NÁTISKU =====================
    Uděláte nátisk, přiložíte ho k etalonu a vidíte, že je to vedle. Bez
    spektrofotometru nikdo nespočítá, o kolik — ale ví se, co se s tím dá dělat:
@@ -5681,6 +5844,66 @@ function korekceOdstinu({ comps, totalG, index, sila }) {
     slozka: comps[index].name, pridat: pridat, sila: krok.popis, dil: krok.dil,
     davka: novaDavka, puvodniDavka: T, naviceni: pridat,
     nove: nove, puvodniPct: puvodniPct,
+  };
+}
+
+/* Čím korigovat: technolog popíše, co na nátisku vidí, a aplikace vybere
+   pigment, který táhne opačným směrem.
+
+   Model: přidá-li se podíl f pigmentu P do směsi M, posune se odstín přibližně
+   o f × (P − M). Pigment je tedy tím vhodnější, čím líp jeho směr od současné
+   barvy míří tam, kam potřebujeme; potřebný podíl vyjde jako
+   f = žádaný posun / vzdálenost pigmentu od směsi.
+
+   MEZ MODELU, kterou je nutné říct nahlas: míchání barev je odečítací, ne
+   průměrovací. Silný pigment posune odstín víc, než tenhle výpočet čeká —
+   u syté černé násobně. Číslo je proto začátek, ne předpis; koriguje se po
+   malých krocích a rozhoduje oko. */
+const SMERY_KOREKCE = {
+  mocSvetle:  { popis: "je moc světlé",   v: [-1, 0, 0] },
+  mocTmave:   { popis: "je moc tmavé",    v: [1, 0, 0] },
+  maloCervene:{ popis: "je málo červené", v: [0, 1, 0] },
+  mocCervene: { popis: "je moc červené",  v: [0, -1, 0] },
+  maloZlute:  { popis: "je málo žluté",   v: [0, 0, 1] },
+  mocZlute:   { popis: "je moc žluté",    v: [0, 0, -1] },
+  vybledle:   { popis: "je vybledlé",     v: null, sytost: 1 },
+  mocSyte:    { popis: "je moc syté",     v: null, sytost: -1 },
+};
+const POSUN_KOREKCE = { mirne: 1, znatelne: 3, vyrazne: 6 };   // žádaný posun v jednotkách ΔE
+
+function doporucKorekci({ barvaHex, komponenty, pigmenty, smer, sila }) {
+  const smerDef = SMERY_KOREKCE[smer];
+  const rgbM = hexNaRgb(barvaHex);
+  if (!smerDef || !rgbM || !komponenty || !komponenty.length) return null;
+  const labM = rgbNaLab(rgbM);
+  let v = smerDef.v;
+  if (!v) {                       // sytost = směr od šedé (nebo k ní)
+    const d = Math.sqrt(labM[1] * labM[1] + labM[2] * labM[2]);
+    if (!(d > 1)) return { smer: smerDef.popis, navrhy: [], duvod: "Barva je téměř šedá — sytost nemá kam růst ani klesat." };
+    v = [0, (labM[1] / d) * smerDef.sytost, (labM[2] / d) * smerDef.sytost];
+  }
+  const posun = POSUN_KOREKCE[sila] || POSUN_KOREKCE.mirne;
+  const navrhy = [];
+  for (const c of komponenty) {
+    const zn = (pigmenty || {})[String(c.name || "").trim().toLowerCase()];
+    if (!zn || zn.role !== "pigment" || !zn.hex) continue;
+    const labP = rgbNaLab(hexNaRgb(zn.hex));
+    const d = [labP[0] - labM[0], labP[1] - labM[1], labP[2] - labM[2]];
+    const delka = Math.sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
+    if (!(delka > 1)) continue;   // pigment téměř totožný se směsí nikam netáhne
+    const skore = (d[0] * v[0] + d[1] * v[1] + d[2] * v[2]) / delka;   // -1 až 1
+    if (skore <= 0.05) continue;  // netáhne tím směrem
+    const podilPct = (posun / delka) * 100;
+    // Protože skutečný posun bývá větší, než lineární model čeká, je vypočtené
+    // množství horní odhad — a přestřelit se nedá vzít zpět. Nabízí se proto
+    // třetina, nejvýš procento dávky: raději korigovat dvakrát než jednou moc.
+    navrhy.push({ name: c.name, hex: zn.hex, skore: skore, podilPct: podilPct,
+      startPct: Math.min(podilPct / 3, 1) });
+  }
+  navrhy.sort((a, b) => b.skore - a.skore);
+  return {
+    smer: smerDef.popis, navrhy: navrhy,
+    duvod: navrhy.length ? "" : "Žádná ze složek tímhle směrem netáhne — potřebujete pigment, který v receptuře není.",
   };
 }
 

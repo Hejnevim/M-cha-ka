@@ -85,6 +85,7 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 |---|---|
 | 09:25 | Směr: přenést principy InkFormulation, ale bez spektrofotometru |
 | 09:30 | Podklad jako vstup do odstínu, kryvost a prosvítání, korekce po nátisku |
+| 10:05 | Pigment a báze odděleně; aplikace radí, čím korigovat |
 
 ---
 
@@ -663,3 +664,54 @@ nesedí?" — má teď aplikace napsané na obrazovce, i s odůvodněním.
 
 **Meze.** Je to posouzení z odstínů, ne měření. Čísla jsou výchozí a dílna si
 je má upravit podle toho, co jí skutečně prosvítá.
+
+---
+
+## 13. Pigment a báze odděleně — a aplikace, která radí, čím korigovat
+
+**Odkud to přišlo.** Ze způsobu, jakým má poskládaný sortiment Matsui: hrstka
+koncentrovaných pigmentů, které jdou do všech bází, v poměru zhruba 10 %
+pigmentu na 90 % báze. Odstín dělá poměr pigmentů mezi sebou, vlastnosti
+(měkkost, kryvost, odbarvování, pružnost) dělá báze.
+
+**Co to řeší.** Dosud bylo složení plochý seznam a z něj nešlo poznat, co je
+barvivo a co nosič. Rozdělení přineslo tři věci naráz:
+
+- **Tentýž odstín na světlé i tmavé tričko** není dvojí receptura, ale tentýž
+  poměr pigmentů ve dvou bázích. Panel o prosvítání teď rovnou napíše, které
+  báze dílna má.
+- **Strop pigmentu.** Každá báze snese jen určitý podíl pigmentu (u discharge
+  bývá nižší než u akrylátu). Nad stropem barva praská a hůř drží v praní.
+  Plochá receptura tuhle mez neuměla ani vyjádřit; teď aplikace hlásí
+  překročení.
+- **Doporučení, čím korigovat.** Tohle byla den předtím slepá ulička: aplikace
+  neznala barvy složek. Doplnit odstíny u stovek složek je nereálné, ale
+  **pigmentů je dvanáct** — a to je práce na půl hodiny.
+
+**Jak doporučení funguje.** Technolog vybere, co na nátisku vidí („je moc
+světlé", „je málo žluté", „je vybledlé"). Přidá-li se podíl f pigmentu P do
+směsi M, posune se odstín přibližně o f × (P − M); pigment je tedy tím
+vhodnější, čím líp jeho směr od současné barvy míří tam, kam je potřeba.
+Potřebný podíl vyjde jako *žádaný posun / vzdálenost pigmentu od směsi*.
+
+**Rozhodnutí, které stojí za vysvětlení.** Model předpokládá, že se odstíny
+průměrují. Míchání barev je ale odečítací a silný pigment posune odstín víc,
+než výpočet čeká — a přestřelit se nedá vzít zpět. Aplikace proto nenabízí
+spočítané množství, ale **jeho třetinu, nejvýš procento dávky**. U černé
+v modelové receptuře vyjde 1,17 %, nabídne se 0,39 %. Raději korigovat dvakrát
+než jednou moc.
+
+**Chyba nalezená mimochodem.** `parseCsv` neodstraňoval značku pořadí bajtů
+(BOM), kterou na začátek souboru píše Excel. První sloupec hlavičky pak vycházel
+jako `﻿druh` místo `druh` a hledání sloupců selhalo — `koeficienty.csv` se
+tvářil jako špatně vyplněný, ačkoli byl v pořádku. Opraveno pro všechna CSV.
+
+**Ověření.** 25 kontrol v node: načtení tabulky (12 pigmentů, 5 bází), soubor
+s BOM i bez něj, součty podílů, strop podle báze, nezařazené složky, pořadí
+doporučených pigmentů ve čtyřech směrech, chování u šedé barvy a u receptury
+bez pigmentů, meze startovního kroku. Kontrola pořadí je to podstatné: na
+„je málo žluté" musí u zelené směsi vyjít Žlutá, na „je moc světlé" Modrá.
+
+**Co zbývá.** Odstíny pigmentů v `parametry/pigmenty.csv` jsou orientační —
+dílna je má přepsat podle vlastního vzorníku. Názvy se musí shodovat s názvy
+složek v recepturách, jinak se nespárují a aplikace to napíše.
