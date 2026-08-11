@@ -90,6 +90,8 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 12:20 | Zámek technologií: ostrá jen FIR, ostatní s odemykacím seznamem |
 | 13:50 | Příkaz odemkni.py pro odemčení a zamčení technologie |
 | 14:25 | Zamykání přímo v aplikaci, chráněné heslem |
+| 15:10 | Databáze Printcolor MS 786 a MS 660 převedené z PDF, 1 603 receptur |
+| 15:20 | Přiřazení databází k technologiím souborem, ne jen v prohlížeči |
 
 ---
 
@@ -847,3 +849,57 @@ most si k tomu drží zálohu `.bak`.
 pracuje), odškrtávání bodů z prázdných i naplněných dat, oddělení klišé od sít
 (tampontisk si nesmí započítat cizí síto a naopak) a to, že vlastní receptury
 se nepočítají jako přiřazená databáze.
+
+---
+
+## 16. Databáze Printcolor z PDF a přiřazení k technologiím
+
+**Zadání.** Dvě nové databáze od Printcolor, obě v PDF: **MS 786** jen pro
+tampontisk, **MS 660** pro textil, tampontisk i sítotisk. Ferro Xpression má
+napříště platit jen pro FIR.
+
+**Čtení PDF.** Výpis z Printcolor easyMEMO má pevnou stavbu — záhlaví
+s pantonem, řádek s míchacím systémem, složky s procenty a součet. Převodník
+`prevod_printcolor.py` staví na vlastní čtečce PDF, která už v aplikaci byla,
+takže nepřibyla žádná závislost.
+
+| | MS 786 | MS 660 |
+|---|---|---|
+| receptur | 820 | 783 |
+| řádků složení | 3 092 | 3 617 |
+| různých složek | 25 | 32 |
+| nerozpoznaných řádků | **0** | **0** |
+| součet složení mimo 100 % | **0** | **0** |
+
+**Dvě věci, které by se daly snadno přehlédnout.**
+
+*Týž pantone dvakrát.* V 786 je 33 pantonů a v 660 dalších 22 uvedeno ve dvou
+verzích, lišících se rokem předpisu — například PANTONE 124 C podle receptury
+z roku 2019 a z let 2002—2003, s výrazně jiným složením. Obojí je platné, jen
+novější a starší. Kdyby se rozlišení neudělalo, tvářily by se v aplikaci jako
+táž receptura a jedna by druhou přebila. Rok je proto součástí názvu:
+`PANTONE 124 C (2019)`.
+
+*Odstíny v PDF nejsou.* Dohledávají se podle názvu pantonu z databází, které už
+ve složce jsou — vyšlo **627 z 820** a **560 z 783**. U receptur bez odstínu
+aplikace neporadí s prosvítáním ani s korekcí, ale míchat podle nich jde.
+Doplní se, jakmile bude čím.
+
+**Hustota v PDF také není** a nechala se prázdná — aplikace pak počítá
+s 1,2 g/ml. Vymýšlet si ji nemá smysl, patří do seznamu toho, co sehnat.
+
+**Přiřazení databází k technologiím** se přesunulo do
+`parametry/databaze.csv`. Dokud byly databáze dvě, stačilo nastavení
+v prohlížeči — jenže to má každý počítač svoje, a u tří databází s různým
+záběrem by si dílna nastavila pokaždé něco jiného. Soubor proto nastavení
+v prohlížeči přebíjí; ručně přidané databáze navíc v něm zůstávají.
+
+**Ověření.** 8 kontrol čtení přiřazení: správný záběr u všech čtyř databází,
+přeskočení komentářových řádků, zahození neznámé technologie, snesení mezer
+a malých písmen, srozumitelná chyba u souboru bez potřebných sloupců. Převod
+sám hlásí počty a kontroluje součty složení — u obou databází vyšlo 100 %
+u každé jednotlivé receptury.
+
+**Pozor na licenci.** Obě nové databáze leží v `databaze barev/`, která je
+v `.gitignore` — na veřejný GitHub se nesmějí dostat, stejně jako Ferro
+Xpression. Ověřeno, že je git skutečně ignoruje.

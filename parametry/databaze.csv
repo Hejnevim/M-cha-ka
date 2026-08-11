@@ -1,0 +1,7 @@
+soubor;technologie;pozn
+;;"Ktera databaze receptur patri ke ktere technologii. Vic technologii oddelte carkou."
+;;"Prazdne technologie = databaze plati vsude. Soubor prepise nastaveni v prohlizeci."
+receptury_PMS_Xpression.csv;FIR;"Ferro Xpression - vypalovani, nizka teplota"
+receptury_PMS_786.csv;PDP;"Printcolor Mischsystem MS 786 - tampontisk"
+receptury_PMS_660.csv;TXP,PDP,SCR;"Printcolor Mischsystem MS 660 - textil, tampontisk, sitotisk"
+receptury_vlastni.csv;;"vlastni receptury dilny - plati ve vsech technologiich"

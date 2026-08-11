@@ -2538,9 +2538,18 @@ function App() {
         novyTechStav = csvNaTechStav(d.text);
         novyTechText = d.text;
       } catch (e) { if (!/není/.test(String(e.message || e))) chyby.push(SOUBOR_TECHNOLOGIE + ": " + e.message); }
+      let noveDbTech = null;
+      try {
+        const d = await sgpsGet("/databaze?slozka=" + SLOZKA_PARAMETRY
+          + "&soubor=" + encodeURIComponent(SOUBOR_DATABAZE));
+        noveDbTech = csvNaDbTech(d.text);
+      } catch (e) { if (!/není/.test(String(e.message || e))) chyby.push(SOUBOR_DATABAZE + ": " + e.message); }
       if (zrusen) return;
       setTechStav(novyTechStav);
       setTechStavText(novyTechText);
+      // soubor přebíjí nastavení v prohlížeči, ale jen u souborů, které v něm
+      // opravdu jsou — ručně nastavené databáze navíc zůstanou
+      if (noveDbTech) setDbTech((prev) => Object.assign({}, prev, noveDbTech));
       setSita(novaSita);
       setKoef(novyKoef);
       setPigmenty(novePigmenty);
@@ -5917,6 +5926,30 @@ function csvNaTechStav(text) {
     if (!t || !TECHS[t]) continue;
     out[t] = { stav: s === "ostra" || s === "ostrá" ? "ostra" : "priprava",
       pozn: ci.pozn >= 0 ? String(r[ci.pozn] || "").trim() : "" };
+  }
+  return out;
+}
+
+/* Přiřazení databází receptur k technologiím ze souboru. Dokud bylo databází
+   pár, stačilo nastavení v prohlížeči — jenže to má každý počítač svoje a
+   u tří databází s různým záběrem by si dílna nastavila pokaždé něco jiného.
+   Soubor proto přebíjí nastavení v prohlížeči. */
+const SOUBOR_DATABAZE = "databaze.csv";
+
+function csvNaDbTech(text) {
+  const rows = parseCsv(text);
+  if (!rows.length) throw new Error("Soubor databází je prázdný.");
+  const head = rows[0].map((h) => h.toLowerCase().trim());
+  const i = (re) => head.findIndex((h) => re.test(h));
+  const ci = { soubor: i(/^(soubor|databaze|datab.ze|file)/), tech: i(/^(technologie|tech)/) };
+  if (ci.soubor < 0 || ci.tech < 0)
+    throw new Error("CSV databází musí mít sloupce soubor a technologie.");
+  const out = {};
+  for (const r of rows.slice(1)) {
+    const s = String(r[ci.soubor] || "").trim();
+    if (!s) continue;
+    out[s] = String(r[ci.tech] || "").toUpperCase().replace(/\s+/g, "")
+      .split(",").filter((t) => TECHS[t]).join(",");
   }
   return out;
 }
