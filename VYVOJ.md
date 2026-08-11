@@ -612,16 +612,33 @@ se známým výsledkem (viz čísla u bodů 3 a 8).
 
 ## Co zbývá
 
+- **Barevné databáze pro zbývající technologie** — tohle je teď hlavní úkol
+  a bez něj se technologie nedají odemknout. Stav k 11. 8. 2026:
+
+  | technologie | databáze | receptur | stav |
+  |---|---|---|---|
+  | FIR | Ferro Xpression | 1 097 | máme |
+  | PDP | Printcolor MS 786 + MS 660 | 1 592 | máme |
+  | TXP | Printcolor MS 660 | 778 | ověřit, zda je to řada na textil |
+  | SCR | Printcolor MS 660 | 778 | ověřit totéž pro plast a papír |
+  | TRS | žádná | 0 | **chybí celá** |
+
+  U nových databází stačí PDF z Printcolor easyMEMO — převod je hotový
+  (`prevod_printcolor.py`) a zvládne i jiné míchací systémy, protože se řídí
+  stavbou dokumentu, ne konkrétními čísly.
+- **Hustota barvy a chybějící odstíny** u Printcolor receptur. Hustota v PDF
+  není vůbec, aplikace počítá s 1,20 g/ml. Odstín se dohledal podle názvu
+  pantonu z jiných databází, ale u MS 786 chybí u 193 a u MS 660 u 223 receptur;
+  bez něj aplikace neporadí s prosvítáním ani s korekcí.
 - **SGPS** (podnikový systém) je zatím v ukázkovém režimu — čeká se na informaci
   od IT, jaké rozhraní nabízí. Most je připravený na obě varianty: soubor
   s exportem i HTTP rozhraní, přepíná se v konfiguraci.
 - **Vazby na nakoupené pantonové receptury** se zatím ukládají jen v prohlížeči;
   do souboru jdou jen vazby vlastních receptur.
-- **Databáze receptur** se bude dál doplňovat; aplikace na to je připravená
-  (víc souborů + přepínač databáze).
 - **Barvy jednotlivých bází** aplikace nezná — složka receptury nese jen název
-  a procento. Dokud se nedoplní, nemůže sama radit, čím korigovat odstín; bázi
-  vybírá technolog.
+  a procento. U pigmentů je to vyřešené tabulkou, u složek nakoupených databází
+  (Weiss, Schwarz, Binder…) zatím ne; dokud se nedoplní, radí aplikace
+  s korekcí jen tam, kde složku pozná.
 
 ---
 

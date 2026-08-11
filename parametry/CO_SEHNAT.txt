@@ -90,7 +90,39 @@ barvy se skutečně spotřebovalo, a porovnejte s tím, co aplikace spočítá
 při koeficientech 1,00. Podíl skutečnost/výpočet je hledaný koeficient.
 
 
-4) K ČEMU SE TO POUŽIJE
+4) BAREVNÉ DATABÁZE PRO ZBÝVAJÍCÍ TECHNOLOGIE  →  složka "databaze barev"
+--------------------------------------------------------------------------------
+Každá technologie potřebuje svoji řadu barev. Tohle je stav k 11. 8. 2026;
+přiřazení databází k technologiím se nastavuje v parametry/databaze.csv.
+
+    FIR   Ferro Xpression                    1 097 receptur   MÁME
+    PDP   Printcolor MS 786 + MS 660         1 592 receptur   MÁME
+    TXP   Printcolor MS 660                    778 receptur   ověřit, zda
+                                                              je to ta správná
+                                                              řada na textil
+    SCR   Printcolor MS 660                    778 receptur   ověřit totéž
+                                                              pro plast/papír
+    TRS   žádná                                    0          CHYBÍ CELÁ
+
+CO SEHNAT:
+    - databázi barev pro TRANSFER (TRS) — zatím není vůbec žádná
+    - potvrdit u Printcolor, jestli na TXP a SCR stačí MS 660, nebo jestli
+      mají pro textil a pro plast vlastní míchací systém
+    - u nových databází stačí PDF z Printcolor easyMEMO, převede se příkazem:
+          python prevod_printcolor.py "cesta/k/PMS xxx.pdf"
+      Soubor se uloží do "databaze barev" a přiřazení se dopíše do
+      parametry/databaze.csv.
+
+CO V PDF NENÍ a musí se doplnit jinak:
+    hustota barvy (g/ml)  - u Printcolor receptur zůstala prázdná, aplikace
+                            počítá s 1,20. Bývá v technickém listu barvy.
+    odstín (hex)          - dohledal se podle názvu pantonu z jiných databází;
+                            u MS 786 chybí u 193 receptur, u MS 660 u 223.
+                            Bez odstínu aplikace neporadí s prosvítáním
+                            ani s korekcí, míchat podle receptury ale jde.
+
+
+5) K ČEMU SE TO POUŽIJE
 --------------------------------------------------------------------------------
     V [cm³/m²] = otevřená plocha × tloušťka tkaniny  (u klišé hloubka leptu)
     g/m² = V × přenos × hustota barvy
