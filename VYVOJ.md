@@ -89,6 +89,7 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 10:55 | Kontrola vykreslení aplikace, zařazená před nahrání na GitHub |
 | 12:20 | Zámek technologií: ostrá jen FIR, ostatní s odemykacím seznamem |
 | 13:50 | Příkaz odemkni.py pro odemčení a zamčení technologie |
+| 14:25 | Zamykání přímo v aplikaci, chráněné heslem |
 
 ---
 
@@ -811,6 +812,18 @@ Nezakazuje odemknout technologii, které data chybí — jen to napíše. Co je
 připravené, rozhoduje dílna, ne skript. Poznámky a komentáře v souboru zůstávají
 netknuté, mění se jen jeden údaj.
 
+**Odemknutí v aplikaci.** Na obrazovce odemykání má každá technologie tlačítko
+*Odemknout* / *Zamknout*, chráněné **týmž heslem jako mazání** — jde o krok,
+který ovlivní celou dílnu, ne jen toho, kdo klikl.
+
+Zapisuje se do `parametry/technologie.csv`, ne do prohlížeče. Zámek totiž musí
+platit na všech počítačích stejně; kdyby se držel v prohlížeči, měl by ho každý
+jiný a smysl by se ztratil. Bez běžícího mostu proto tlačítka nejsou a aplikace
+vysvětlí proč — s odkazem na ruční úpravu souboru nebo na `odemkni.py`.
+
+Mění se vždy jen jeden údaj v jednom řádku. Přegenerovat soubor celý by
+z něj smazalo vysvětlivky a poznámky dílny, a ty jsou tam pro lidi.
+
 **Chyba, kterou to odhalilo.** Odemykací seznam i příkaz zprvu považovaly za
 splněné parametry sít i tam, kde byl v souboru jen **název síta**. Vzorový
 `sita.csv` obsahuje celou standardní řadu 26 sít pro SCR s počtem nití
@@ -819,6 +832,15 @@ Kontrola se zpřísnila: za hotové se počítá až zadaný objem, nebo otevře
 plocha spolu s tloušťkou tkaniny. Místo mlčení se teď vypíše
 „26 sít jen podle názvu", což je podstatně užitečnější zpráva než odškrtnutá
 položka.
+
+**Ověření zápisu.** 13 kontrol v node na přepisu souboru: že se změní jen
+dotčená technologie, že zůstanou všechny tři komentářové řádky i poznámky, že
+se nezmění počet řádků, že zamčení vrátí soubor do znaku přesně původního
+stavu, a hlavně že **středník uvnitř poznámky v uvozovkách soubor nerozsype**.
+Dál se ověřilo doplnění chybějící technologie, snesení značky BOM a to, že
+soubor bez potřebných sloupců skončí srozumitelnou chybou. Zápis přes most se
+pak vyzkoušel naostro — soubor se změnil, přečetl a vrátil do původního stavu;
+most si k tomu drží zálohu `.bak`.
 
 **Ověření.** 16 kontrol v node: čtení stavů ze souboru, chování bez souboru
 (nezamyká se nic — jinak by po aktualizaci někomu zmizela technologie, ve které

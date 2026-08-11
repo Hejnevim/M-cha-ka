@@ -2420,6 +2420,28 @@ function App() {
     if (!deletePw) { actionFn(); return; }
     setPwGate({ onConfirm: actionFn, label: label || "smazání" });
   };
+
+  /* Přepnutí zámku technologie. Zapisuje se do parametry/technologie.csv, ne
+     do prohlížeče — zámek musí platit na všech počítačích v dílně stejně,
+     jinak by si každý odemkl něco jiného. Bez mostu to tedy nejde a je to
+     tak správně; aplikace to řekne rovnou. */
+  const prepniTech = async (tech, novyStav) => {
+    setTechZapis({ stav: "uklada", chyba: "" });
+    try {
+      const zaklad = techStavText || vychoziTechCsv(technologie || "FIR");
+      const text = zmenStavVCsv(zaklad, tech, novyStav);
+      const r = await fetch(sgpsBase() + "/databaze/ulozit", { method: "POST",
+        body: new Blob([JSON.stringify({ slozka: SLOZKA_PARAMETRY,
+          jmeno: SOUBOR_TECHNOLOGIE, text: text })], { type: "text/plain" }) });
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.chyba || "zápis se nezdařil");
+      setTechStavText(text);
+      setTechStav(csvNaTechStav(text));
+      setTechZapis({ stav: "ulozeno", chyba: "" });
+    } catch (e) {
+      setTechZapis({ stav: "chyba", chyba: String((e && e.message) || e) });
+    }
+  };
   const first = useRef(true);
 
   // Samoléčba: při nové verzi data.js doplní barvy, kódy a fotky do uloženého
@@ -2482,6 +2504,10 @@ function App() {
   const [koef, setKoef] = useState({ kryvost: {}, material: {}, podklad: {} });
   const [pigmenty, setPigmenty] = useState({});
   const [techStav, setTechStav] = useState({});
+  // původní text souboru — při přepínání se v něm mění jen jeden údaj,
+  // aby zůstaly komentáře a poznámky dílny
+  const [techStavText, setTechStavText] = useState("");
+  const [techZapis, setTechZapis] = useState({ stav: "", chyba: "" });
   const [paramStav, setParamStav] = useState({ stav: "cekam", chyba: "", sit: 0, koef: 0, pigm: 0 });
   useEffect(() => {
     if (sgps.stav.stav !== "ok") return;
@@ -2505,13 +2531,16 @@ function App() {
           + "&soubor=" + encodeURIComponent(SOUBOR_PIGMENTY));
         novePigmenty = csvNaPigmenty(d.text);
       } catch (e) { if (!/není/.test(String(e.message || e))) chyby.push(SOUBOR_PIGMENTY + ": " + e.message); }
+      let novyTechText = "";
       try {
         const d = await sgpsGet("/databaze?slozka=" + SLOZKA_PARAMETRY
           + "&soubor=" + encodeURIComponent(SOUBOR_TECHNOLOGIE));
         novyTechStav = csvNaTechStav(d.text);
+        novyTechText = d.text;
       } catch (e) { if (!/není/.test(String(e.message || e))) chyby.push(SOUBOR_TECHNOLOGIE + ": " + e.message); }
       if (zrusen) return;
       setTechStav(novyTechStav);
+      setTechStavText(novyTechText);
       setSita(novaSita);
       setKoef(novyKoef);
       setPigmenty(novePigmenty);
@@ -3019,7 +3048,9 @@ ${lhutyPocet.prosle + lhutyPocet.brzy > 0 && html`<span className="tag"
           }, "odebrání receptur z databáze " + z)} />`}
         ${tab === "odemykani" && html`<${OdemykaniTab} techStav=${techStav} products=${products}
           sita=${sita} koef=${koef} pigmenty=${pigmenty} recipes=${recipes} dbTech=${dbTech}
-          technologie=${technologie} setTechnologie=${setTechnologie} />`}
+          technologie=${technologie} setTechnologie=${setTechnologie}
+          prepniTech=${prepniTech} techZapis=${techZapis} guard=${guardDelete}
+          mostOk=${sgps.stav.stav === "ok"} />`}
         ${tab === "prod" && html`<${Products} products=${products} setProducts=${setProducts} guardDelete=${guardDelete} />`}
         ${tab === "rec" && html`<${Recipes} recipes=${recipes} setRecipes=${setRecipes} guardDelete=${guardDelete}
           dbFiltr=${dbFiltr} setDbFiltr=${setDbFiltr} technologie=${technologie} dbTech=${dbTech} sita=${sita} />`}
@@ -3116,7 +3147,7 @@ function PwGate({ label, correctPw, onConfirm, onCancel }) {
    aplikace odškrtává sama z dat — seznam tedy neukazuje, co si kdo myslí,
    ale co doopravdy je ve složce parametrů a v databázích. */
 function OdemykaniTab({ techStav, products, sita, koef, pigmenty, recipes, dbTech,
-                        technologie, setTechnologie }) {
+                        technologie, setTechnologie, prepniTech, techZapis, guard, mostOk }) {
   const rady = TECH_PORADI.filter((t) => TECHS[t]).map(
     (t) => pripravenostTech(t, { sita, koef, pigmenty, recipes, dbTech, techStav }));
   return html`
@@ -3142,6 +3173,13 @@ function OdemykaniTab({ techStav, products, sita, koef, pigmenty, recipes, dbTec
                 <button className="btn sec sm" onClick=${() => setTechnologie(pr.tech)}>
                   Přepnout se do ní</button>`}
               ${technologie === pr.tech && html`<span className="tag">pracujete v ní</span>`}
+              ${mostOk && html`
+                <button className="btn sec sm" style=${{ marginLeft: "auto" }}
+                  onClick=${() => guard(
+                    () => prepniTech(pr.tech, ostra ? "priprava" : "ostra"),
+                    (ostra ? "zamčení" : "odemčení") + " technologie " + pr.tech)}>
+                  ${ostra ? "Zamknout" : "🔓 Odemknout"}
+                </button>`}
             </div>
             ${pr.pozn && html`<div className="note" style=${{ marginTop: 6 }}>${pr.pozn}</div>`}
             <table className="t" style=${{ marginTop: 8 }}>
@@ -3156,6 +3194,21 @@ function OdemykaniTab({ techStav, products, sita, koef, pigmenty, recipes, dbTec
             </table>
           </div>`;
       })}
+      ${techZapis && techZapis.stav === "chyba" && html`
+        <div className="warnbox" style=${{ marginTop: 12 }}>
+          Zámek se nepodařilo uložit: ${techZapis.chyba}
+        </div>`}
+      ${techZapis && techZapis.stav === "ulozeno" && html`
+        <div className="okbox" style=${{ marginTop: 12 }}>
+          Uloženo do parametry/technologie.csv — platí i na ostatních počítačích v dílně.
+        </div>`}
+      ${!mostOk && html`
+        <div className="warnbox" style=${{ marginTop: 12 }}>
+          Zamykat a odemykat jde jen s běžícím mostem. Zámek se zapisuje do souboru
+          <b> parametry/technologie.csv</b>, aby platil na všech počítačích stejně —
+          kdyby se držel jen v prohlížeči, měl by ho každý jiný. Bez mostu se dá
+          soubor upravit ručně nebo příkazem <b>odemkni.py</b>.
+        </div>`}
       <p className="note" style=${{ marginTop: 14 }}>
         Odškrtnutý bod neznamená, že je hodnota správná — jen že vůbec je.
         Správnost čísel ověří až první zakázka, u které srovnáte spočítanou
@@ -5866,6 +5919,68 @@ function csvNaTechStav(text) {
       pozn: ci.pozn >= 0 ? String(r[ci.pozn] || "").trim() : "" };
   }
   return out;
+}
+
+/* Výchozí obsah souboru, není-li žádný — aby šlo zamykat i tehdy, když si
+   dílna soubor ještě nevytvořila. Ostrá zůstane ta, ve které se pracuje. */
+function vychoziTechCsv(ostra) {
+  const radky = ["tech;stav;pozn",
+    ';;"stav = ostra | priprava. Ostra = da se v ni pracovat, priprava = zamcena."'];
+  for (const t of TECH_PORADI) {
+    if (!TECHS[t]) continue;
+    radky.push(t + ";" + (t === ostra ? "ostra" : "priprava") + ";");
+  }
+  return radky.join("\r\n") + "\r\n";
+}
+
+/* Rozdělení a složení řádku CSV se zachováním uvozovek — poznámka může
+   obsahovat středník a ten se nesmí rozsypat. */
+function rozdelRadek(l) {
+  const out = []; let cur = "", vQ = false;
+  for (let i = 0; i < l.length; i++) {
+    const ch = l[i];
+    if (vQ) {
+      if (ch === '"' && l[i + 1] === '"') { cur += '""'; i++; }
+      else if (ch === '"') { cur += '"'; vQ = false; }
+      else cur += ch;
+    } else if (ch === '"') { cur += '"'; vQ = true; }
+    else if (ch === ";") { out.push(cur); cur = ""; }
+    else cur += ch;
+  }
+  out.push(cur);
+  return out;
+}
+
+/* Přepíše stav jedné technologie a nechá všechno ostatní být — komentáře,
+   poznámky i pořadí řádků. Soubor je pro dílnu čitelný dokument, ne jen data;
+   přegenerovat ho celý by z něj smazalo vysvětlivky. */
+function zmenStavVCsv(text, tech, novyStav) {
+  const zdroj = String(text || "").replace(/^﻿/, "");
+  const radky = zdroj.split(/\r?\n/);
+  const hlavicka = rozdelRadek(radky[0] || "").map((h) => h.trim().toLowerCase());
+  let iTech = hlavicka.indexOf("tech"), iStav = hlavicka.indexOf("stav");
+  if (iTech < 0) iTech = hlavicka.findIndex((h) => /^techno/.test(h));
+  if (iTech < 0 || iStav < 0) throw new Error("Soubor technologií nemá sloupce tech a stav.");
+  let nalezeno = false;
+  for (let i = 1; i < radky.length; i++) {
+    if (!radky[i].trim()) continue;
+    const b = rozdelRadek(radky[i]);
+    if ((b[iTech] || "").trim().toUpperCase() !== tech) continue;
+    while (b.length <= iStav) b.push("");
+    b[iStav] = novyStav;
+    radky[i] = b.join(";");
+    nalezeno = true;
+    break;
+  }
+  if (!nalezeno) {
+    const b = [];
+    for (let k = 0; k < hlavicka.length; k++) b.push("");
+    b[iTech] = tech; b[iStav] = novyStav;
+    // před případný prázdný konec souboru
+    while (radky.length && !radky[radky.length - 1].trim()) radky.pop();
+    radky.push(b.join(";"));
+  }
+  return radky.join("\r\n").replace(/\r\n*$/, "") + "\r\n";
 }
 
 /* Odemykací seznam: co které technologii chybí, aby se v ní dalo pracovat.
