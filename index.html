@@ -3372,8 +3372,13 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
   const [dvouslozkova, setDvouslozkova] = useState(false);    // barva s tužidlem — hlídat pot life
 
   const [recQ, setRecQ] = useState("");
-  const pantoneAll = podleTechnologie(podleDatabaze(recipes, dbFiltr), technologie, dbTech)
-    .filter((r) => r.type !== "Custom");
+  // Rozhoduje technologie vybrané polohy, ne pracovní režim. Na textilní síto
+  // se nebude míchat receptura z databáze pro tampontisk ani pro vypalování —
+  // nabízet ji je jen lákání k chybě.
+  const recTech = tech || technologie;
+  const recepturyTech = useMemo(() => podleTechnologie(recipes, recTech, dbTech),
+    [recipes, recTech, dbTech]);
+  const pantoneAll = podleDatabaze(recepturyTech, dbFiltr).filter((r) => r.type !== "Custom");
   const pantoneList = recQ.trim()
     ? pantoneAll.filter((r) => (r.name + " " + (r.series || "")).toLowerCase().includes(recQ.trim().toLowerCase()))
     : pantoneAll;
@@ -3780,7 +3785,8 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
           <div className="card bigform" style=${{ margin: 0 }}>
             <h2>Receptura a zakázka</h2>
             <p className="hint">Vyberte recepturu — technologie a rozměry se doplní z vybrané polohy potisku.</p>
-            <${FiltrDatabaze} recipes=${recipes} hodnota=${dbFiltr} setHodnota=${setDbFiltr}
+            <${FiltrDatabaze} recipes=${recepturyTech} hodnota=${dbFiltr} setHodnota=${setDbFiltr}
+              tech=${recTech} skryto=${recipes.length - recepturyTech.length}
               popis="Vybírá se jen z označené databáze — tatáž receptura může mít v jiné databázi jiné složení." />
             <div className="frow c2">
               <div>
@@ -6586,12 +6592,23 @@ function zdrojeReceptur(recipes) {
 
 /* Přepínač databází. Dokud je databáze jediná, není co přepínat a nic se
    nezobrazuje — objeví se sám, jakmile ve složce přibude druhý soubor. */
-function FiltrDatabaze({ recipes, hodnota, setHodnota, popis }) {
+/* Nabídka databází. Dostane už zúžený seznam receptur, takže se nabízejí jen
+   databáze, které k dané technologii patří — na textilní síto nemá co dělat
+   databáze pro tampontisk. Kolik receptur technologie odfiltrovala, se řekne
+   nahlas; jinak by čísla nesouhlasila s tím, co je ve složce. */
+function FiltrDatabaze({ recipes, hodnota, setHodnota, popis, tech, skryto }) {
   const zdroje = useMemo(() => zdrojeReceptur(recipes), [recipes]);
+  // Zvolená databáze, která k téhle technologii nepatří, by tiše ukazovala
+  // prázdný seznam — proto se výběr vrátí na "vše".
+  useEffect(() => {
+    if (!hodnota) return;
+    const je = zdroje.some((z) => (z.zdroj || "@vlastni") === hodnota);
+    if (!je) setHodnota("");
+  }, [hodnota, zdroje]);
   if (zdroje.filter((z) => z.zdroj).length < 2) return null;
   return html`
     <div style=${{ marginBottom: 10 }}>
-      <label className="f">Databáze receptur</label>
+      <label className="f">Databáze receptur${tech ? " pro " + tech : ""}</label>
       <div className="chips">
         <button className=${"chip" + (hodnota ? "" : " on")} onClick=${() => setHodnota("")}>
           vše (${fmt(recipes.length, 0)})
@@ -6603,6 +6620,10 @@ function FiltrDatabaze({ recipes, hodnota, setHodnota, popis }) {
             ${z.nazev} (${fmt(z.pocet, 0)})
           </button>`)}
       </div>
+      ${skryto > 0 && html`<p className="note" style=${{ marginTop: 6 }}>
+        Skryto ${fmt(skryto, 0)} receptur z databází, které k technologii
+        ${tech ? " " + tech : ""} nepatří.
+      </p>`}
       ${popis && html`<p className="note" style=${{ marginTop: 6 }}>${popis}</p>`}
     </div>`;
 }

@@ -92,6 +92,7 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 14:25 | Zamykání přímo v aplikaci, chráněné heslem |
 | 15:10 | Databáze Printcolor MS 786 a MS 660 převedené z PDF, 1 603 receptur |
 | 15:20 | Přiřazení databází k technologiím souborem, ne jen v prohlížeči |
+| 15:45 | Nabízejí se jen receptury patřící k technologii vybrané polohy |
 
 ---
 
@@ -903,3 +904,40 @@ u každé jednotlivé receptury.
 **Pozor na licenci.** Obě nové databáze leží v `databaze barev/`, která je
 v `.gitignore` — na veřejný GitHub se nesmějí dostat, stejně jako Ferro
 Xpression. Ověřeno, že je git skutečně ignoruje.
+
+---
+
+## 17. Nabízet jen receptury, které k technologii patří
+
+**Co bylo špatně.** U tašky z netkané textilie s polohou TXP nabízela aplikace
+všech pět dlaždic databází — včetně MS 786, která je jen pro tampontisk,
+a Ferro Xpression, která je jen pro vypalování. Přiřazení k technologiím sice
+existovalo, ale filtrovalo se podle **pracovního režimu**, ne podle technologie
+skutečně vybrané polohy potisku. Kdo si vybere polohu TXP, tomu nemá co nabízet
+barva na vypalování; je to jen lákání k chybě.
+
+**Řešení.** Rozhoduje technologie zvolené polohy. Seznam receptur i nabídka
+databází se zúží podle ní, a kolik receptur tím zmizelo, aplikace napíše —
+jinak by čísla nesouhlasila s tím, co je ve složce. Byla-li vybraná databáze,
+která k nové technologii nepatří, výběr se vrátí na „vše"; jinak by se tiše
+ukazoval prázdný seznam.
+
+| technologie | nabízené databáze | receptur |
+|---|---|---|
+| TXP | MS 660 + vlastní | 781 |
+| PDP | MS 786 + MS 660 + vlastní | 1 595 |
+| SCR | MS 660 + vlastní | 781 |
+| FIR | Ferro Xpression + vlastní | 1 100 |
+
+Z 2 692 receptur se tak u textilního sítotisku nabízí 781 — zbytek by na tu
+zakázku stejně nešel použít.
+
+**Chyba zachycená při psaní.** Nová proměnná se jmenovala `proTech` stejně jako
+už existující proměnná pro zúžený katalog produktů o sto řádků výš. Upozornil na
+to editor ještě před spuštěním; jinak by to shodilo celou kalkulaci a hledalo by
+se to hůř, protože obě jména dávají v místě použití smysl.
+
+**Ověření.** 9 kontrol na napodobenině skutečného stavu (1 097 + 814 + 778 + 3
+receptur): že každá technologie dostane právě své databáze, že vlastní receptury
+platí všude, že TXP nedostane Xpression ani MS 786, že FIR nedostane Printcolor
+a že bez zvolené technologie se nefiltruje nic.
