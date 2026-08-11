@@ -3241,6 +3241,15 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     });
   }, [recipe, sita, koef, tech, product, colorSel, viskoz]);
 
+  // Podklad dosud vstupoval jen do spotřeby. Tohle je druhá otázka: projde ta
+  // barva na tomhle materiálu vůbec, nebo bude prosvítat?
+  const podklad = useMemo(() => {
+    if (!recipe || !colorSel) return null;
+    return analyzaPodkladu({
+      barvaHex: recipe.hex, podkladHex: colorSel.hex, kryvost: recipe.opacity,
+    });
+  }, [recipe, colorSel]);
+
   const [qty, setQty] = useState(500);
   const [gm2, setGm2] = useState(TECHS[tech] ? TECHS[tech].gm2 : 6);
   const [loss, setLoss] = useState(15);
@@ -3797,6 +3806,43 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                   (sita && sita.length) ? " Vyberte síto u receptury a spotřeba se spočítá z jeho parametrů." : ""}</p>`}
           </div>
 
+          ${podklad && html`
+            <div style=${{ marginTop: 14 }}>
+              <div className="lbl">Barva na podkladu</div>
+              <div className=${podklad.stav === "podtisk" ? "warnbox" : (podklad.stav === "riziko" ? "okbox" : "specbar")}
+                   style=${{ marginTop: 4 }}>
+                <div className="rowline" style=${{ marginTop: 0, gap: 8 }}>
+                  <span className="tag" title="Odstín barvy">
+                    <span style=${{ display: "inline-block", width: 10, height: 10, borderRadius: 2,
+                                    background: recipe.hex, marginRight: 5, verticalAlign: -1 }}></span>
+                    barva
+                  </span>
+                  <span className="tag" title="Odstín materiálu, na který se tiskne">
+                    <span style=${{ display: "inline-block", width: 10, height: 10, borderRadius: 2,
+                                    background: colorSel.hex, marginRight: 5, verticalAlign: -1 }}></span>
+                    podklad ${podklad.tridaPodkladu}
+                  </span>
+                  <span className="tag" title="O kolik je barva světlejší (+) nebo tmavší (−) než podklad">
+                    rozdíl jasu ${podklad.dL > 0 ? "+" : ""}${fmt(podklad.dL, 0)}
+                  </span>
+                  ${recipe.opacity && html`<span className="tag">${recipe.opacity}</span>`}
+                </div>
+                ${podklad.hlaska
+                  ? html`<div style=${{ marginTop: 6 }}>${podklad.hlaska}</div>`
+                  : html`<div style=${{ marginTop: 6 }}>Barva je vůči podkladu dost tmavá — prosvítání nehrozí.</div>`}
+                ${podklad.podtiskNutny && html`
+                  <div className="note" style=${{ marginTop: 6 }}>
+                    Podtisk znamená průchod navíc: bílá se počítá jako samostatná dávka
+                    a k času tisku přibude sušení mezi průchody.
+                  </div>`}
+                ${podklad.posun && html`<div style=${{ marginTop: 6 }}>${podklad.posun}</div>`}
+              </div>
+              <p className="note" style=${{ marginTop: 4 }}>
+                Posouzení vychází z odstínu barvy a materiálu, ne z měření — je to
+                upozornění, ne verdikt. Meze si dílna může upravit v parametrech.
+              </p>
+            </div>`}
+
         </div>
 
         ${calcAkt && html`
@@ -4201,18 +4247,26 @@ function Vazeni({ comps, totalG, recipeName, predem, predemPopis, onHotovo }) {
   const [nalito, setNalito] = useState(zacatek);
   const [krok, setKrok] = useState(0);          // která komponenta se váží teď
   const [davka, setDavka] = useState(totalG);   // celková dávka po případném přepočtu
+  // Po korekci odstínu už poměry neodpovídají receptuře — asistent musí vést
+  // dolití podle nových podílů, ne podle původních.
+  const [korPodil, setKorPodil] = useState(null);
+  const [korSlozka, setKorSlozka] = useState(0);
+  const [korSila, setKorSila] = useState("mirne");
+  const [korHistorie, setKorHistorie] = useState([]);
 
   const zacniZnovu = () => {
     const z = zacatek();
     setNalito(z);
     setDavka(totalG);
+    setKorPodil(null);
+    setKorHistorie([]);
     const podil0 = comps.map((c) => (totalG > 0 ? c.g / totalG : 0));
     const prvni = podil0.findIndex((p, i) => totalG * p - z[i] > Math.max(0.05, n(tol, 0.5)) / 2);
     setKrok(prvni >= 0 ? prvni : -1);
   };
   useEffect(zacniZnovu, [totalG, comps.length, recipeName, (predem || []).join(",")]);
 
-  const podil = comps.map((c) => (totalG > 0 ? c.g / totalG : 0));
+  const podil = korPodil || comps.map((c) => (totalG > 0 ? c.g / totalG : 0));
   const cil = podil.map((p) => davka * p);
   const zbyvaVse = cil.map((c, i) => Math.max(0, c - (nalito[i] || 0)));
   // hotovo = na žádné komponentě už nic nechybí
@@ -4375,6 +4429,56 @@ function Vazeni({ comps, totalG, recipeName, predem, predemPopis, onHotovo }) {
                 <button className="btn sec sm" onClick=${zacniZnovu}>Navážit znovu</button>
                 ${onHotovo && html`<button className="btn sm" onClick=${onHotovo}>Odepsat zbytek ze skladu</button>`}
               </div>
+            </div>`}
+
+          ${done && comps.length > 0 && html`
+            <div style=${{ marginTop: 14 }}>
+              <div className="lbl">Korekce po nátisku</div>
+              <p className="note" style=${{ marginTop: 4 }}>
+                Nátisk nesedí s etalonem? Z nádoby se ubrat nedá, takže korekce je
+                vždycky přídavek a dávka poroste. Přidávejte po malých krocích a mezi
+                nimi tiskněte — barvicí síla bází je velmi různá.
+              </p>
+              <div className="rowline" style=${{ marginTop: 8 }}>
+                <select value=${korSlozka} onChange=${(e) => setKorSlozka(+e.target.value)}
+                        style=${{ width: "auto" }} title="Kterou složkou se koriguje">
+                  ${comps.map((c, i) => html`<option key=${c.id || i} value=${i}>${c.name || "složka " + (i + 1)}</option>`)}
+                </select>
+                <select value=${korSila} onChange=${(e) => setKorSila(e.target.value)}
+                        style=${{ width: "auto" }} title="Jak velký krok">
+                  ${Object.entries(KROKY_KOREKCE).map(([k, v]) => html`
+                    <option key=${k} value=${k}>${v.popis} (${fmt(v.dil * 100, 1)} % dávky)</option>`)}
+                </select>
+                <button className="btn sec sm" onClick=${() => {
+                  const zaklad = comps.map((c, i) => ({ name: c.name, g: cil[i] }));
+                  const k = korekceOdstinu({ comps: zaklad, totalG: davka, index: korSlozka, sila: korSila });
+                  if (!k) return;
+                  setKorPodil(k.nove.map((x) => x.pct / 100));
+                  setDavka(k.davka);
+                  setKrok(korSlozka);
+                  setKorHistorie(korHistorie.concat([{ nazev: k.slozka, g: k.pridat, sila: k.sila }]));
+                }}>Přidat do dávky</button>
+              </div>
+              ${(() => {
+                const zaklad = comps.map((c, i) => ({ name: c.name, g: cil[i] }));
+                const n_ = korekceOdstinu({ comps: zaklad, totalG: davka, index: korSlozka, sila: korSila });
+                if (!n_) return "";
+                return html`<div className="note" style=${{ marginTop: 4 }}>
+                  Přidá se <b>${fmtG(n_.pridat)} g</b> složky ${n_.slozka};
+                  dávka naroste z ${fmt(davka)} g na <b>${fmt(n_.davka)} g</b>.
+                </div>`;
+              })()}
+              ${korHistorie.length > 0 && html`
+                <div className="okbox" style=${{ marginTop: 8 }}>
+                  <b>Provedené korekce:</b>
+                  ${korHistorie.map((h, i) => html`<div key=${i} className="note" style=${{ marginTop: 2 }}>
+                    ${i + 1}. ${h.sila} — ${h.nazev} +${fmtG(h.g)} g</div>`)}
+                  <div className="note" style=${{ marginTop: 6 }}>
+                    Dávka je teď ${fmt(davka)} g místo původních ${fmt(totalG)} g.
+                    Tohle složení už není receptura z databáze — než ho použijete znovu,
+                    uložte si ho jako vlastní recepturu k tomuhle produktu a barvě.
+                  </div>
+                </div>`}
             </div>`}
 
           <table className="t" style=${{ marginTop: 14 }}>
@@ -5474,6 +5578,110 @@ function tridaPodkladu(hex) {
   if (!rgb) return "";
   const jas = rgbNaLab(rgb)[0];      // L* v Lab, 0 = černá, 100 = bílá
   return jas >= 70 ? "světlý" : (jas >= 35 ? "střední" : "tmavý");
+}
+
+/* ===================== PODKLAD, KRYVOST A PROSVÍTÁNÍ =====================
+   Podklad dosud vstupoval jen do spotřeby. Jenže barva na modrém tričku
+   vypadá jinak než na bílém papíře, a světlý odstín na tmavém podkladu se
+   bez podtisku bílou nedá vytisknout vůbec. Tohle je posouzení, ne měření:
+   pracuje se s odstínem barvy a odstínem materiálu, oba aplikace zná.
+
+   Meze níže jsou v jednotkách L* (0 = černá, 100 = bílá) a jsou to výchozí
+   hodnoty, ne fyzikální konstanty — dílna si je časem upraví podle toho, co
+   jí skutečně prosvítá. */
+const MEZ_PODTISK = 20;   // barva o tolik světlejší než podklad -> podtisk bílou
+const MEZ_RIZIKO = 8;     // ...o tolik -> hraniční, nejdřív zkouška
+const MEZ_SYTOST_PODKLADU = 15;  // barevnost podkladu, od které táhne odstín
+
+/* Název odstínu z polohy v Lab — aby se dalo napsat "podklad táhne do žluté"
+   a ne "podklad má b* = 42".
+
+   Hranice nejsou odhad: jsou to středy mezi skutečnými úhly čistých barev
+   převedených do Lab. Pro kontrolu, kam co padá —
+     červená 40°, oranžová 60°, žlutá 103°, zelená 136°,
+     azurová 196°, modrá 306°, purpurová 328°.
+   Odhad od oka tu selhal: žlutý podklad #F0D000 leží na 93°, což při dřívější
+   hranici 75° vycházelo jako "zelená". */
+const PASMA_ODSTINU = [
+  [50, "červené"], [80, "oranžové"], [120, "žluté"], [165, "zelené"],
+  [240, "tyrkysové"], [320, "modré"], [345, "purpurové"], [360, "červené"],
+];
+function odstinNazev(lab) {
+  const [, a, b] = lab;
+  const sytost = Math.sqrt(a * a + b * b);
+  if (sytost < MEZ_SYTOST_PODKLADU) return "";
+  const uhel = (Math.atan2(b, a) * 180 / Math.PI + 360) % 360;
+  for (const [mez, jm] of PASMA_ODSTINU) if (uhel < mez) return jm;
+  return "";
+}
+
+/* Posouzení dvojice barva + podklad. Vrací i důvody, ať je z čeho vyjít při
+   sporu — technolog musí vidět, proč mu aplikace radí podtisk. */
+function analyzaPodkladu({ barvaHex, podkladHex, kryvost }) {
+  const rgbB = hexNaRgb(barvaHex), rgbP = hexNaRgb(podkladHex);
+  if (!rgbB || !rgbP) return null;
+  const labB = rgbNaLab(rgbB), labP = rgbNaLab(rgbP);
+  const dL = labB[0] - labP[0];          // + = barva je světlejší než podklad
+  const trida = tridaPodkladu(podkladHex);
+  const sytostP = Math.sqrt(labP[1] * labP[1] + labP[2] * labP[2]);
+  const kry = String(kryvost || "").toLowerCase();
+  const kryci = /vysoce|krycí|kryci|opak/.test(kry);
+  const transparentni = /transp/.test(kry);
+
+  let stav = "ok", hlaska = "", podtisk = false;
+  if (dL >= MEZ_PODTISK && !kryci) {
+    stav = "podtisk"; podtisk = true;
+    hlaska = "Barva je výrazně světlejší než podklad a není vysoce krycí — bez podtisku bílou prosvítá.";
+  } else if (dL >= MEZ_PODTISK && kryci) {
+    stav = "riziko";
+    hlaska = "Barva je výrazně světlejší než podklad. Vysoce krycí barva to obvykle utáhne, ale počítejte s druhým průchodem.";
+  } else if (dL >= MEZ_RIZIKO && !kryci) {
+    stav = "riziko";
+    hlaska = "Rozdíl jasu je hraniční — než se pustíte do série, udělejte zkoušku.";
+  }
+
+  // Průsvitná barva na barevném podkladu nese odstín podkladu s sebou.
+  const tahne = transparentni && sytostP >= MEZ_SYTOST_PODKLADU ? odstinNazev(labP) : "";
+  return {
+    dL: dL, tridaPodkladu: trida, sytostPodkladu: sytostP,
+    kryci: kryci, transparentni: transparentni,
+    stav: stav, hlaska: hlaska, podtiskNutny: podtisk,
+    tahneDo: tahne,
+    posun: tahne ? "Podklad je sytý a barva průsvitná — výsledek se posune do " + tahne + "." : "",
+  };
+}
+
+/* ===================== KOREKCE ODSTÍNU PO NÁTISKU =====================
+   Uděláte nátisk, přiložíte ho k etalonu a vidíte, že je to vedle. Bez
+   spektrofotometru nikdo nespočítá, o kolik — ale ví se, co se s tím dá dělat:
+   z nádoby už nic neubereš, takže korekce je vždycky PŘÍDAVEK a dávka poroste.
+
+   Podíl přidané složky se počítá z dávky, ne z té složky. Kroky jsou schválně
+   malé: barvicí síla bází je velmi různá a u syté černé bývá i půl procenta
+   moc. Proto se koriguje po krocích a mezi nimi se tiskne. */
+const KROKY_KOREKCE = {
+  mirne:    { popis: "mírně",    dil: 0.005 },
+  znatelne: { popis: "znatelně", dil: 0.015 },
+  vyrazne:  { popis: "výrazně",  dil: 0.040 },
+};
+
+function korekceOdstinu({ comps, totalG, index, sila }) {
+  const krok = KROKY_KOREKCE[sila] || KROKY_KOREKCE.mirne;
+  const T = n(totalG);
+  if (!comps || !comps.length || !(T > 0)) return null;
+  if (!(index >= 0 && index < comps.length)) return null;
+  const pridat = T * krok.dil;
+  const novaDavka = T + pridat;
+  const nove = comps.map((c, i) => {
+    const g = n(c.g) + (i === index ? pridat : 0);
+    return { name: c.name, g: g, pct: novaDavka > 0 ? (g / novaDavka) * 100 : 0 };
+  });
+  const puvodniPct = comps.map((c) => (T > 0 ? (n(c.g) / T) * 100 : 0));
+  return {
+    slozka: comps[index].name, pridat: pridat, sila: krok.popis, dil: krok.dil,
+    davka: novaDavka, puvodniDavka: T, naviceni: pridat,
+    nove: nove, puvodniPct: puvodniPct,
+  };
 }
 
 /* Spotřeba v g/m² ze síta a parametrů zakázky. Vrací i rozpis, aby bylo

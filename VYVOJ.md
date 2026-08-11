@@ -78,6 +78,13 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 13:28 | Prezentace z deníku, členěná datem a časem |
 | 14:00 | Naplánovaná aktualizace prezentace i GitHubu ve všední dny v 17:00 |
 | 17:59 | Zpřísněné zadání rutiny — každý řádek osy musí být viditelný záznam |
+| 20:15 | Razítko v patičce prezentace: kdy naposledy běžela aktualizace |
+
+### 11. srpna — inspirace InkFormulation
+| čas | co |
+|---|---|
+| 09:25 | Směr: přenést principy InkFormulation, ale bez spektrofotometru |
+| 09:30 | Podklad jako vstup do odstínu, kryvost a prosvítání, korekce po nátisku |
 
 ---
 
@@ -604,3 +611,55 @@ se známým výsledkem (viz čísla u bodů 3 a 8).
   do souboru jdou jen vazby vlastních receptur.
 - **Databáze receptur** se bude dál doplňovat; aplikace na to je připravená
   (víc souborů + přepínač databáze).
+- **Barvy jednotlivých bází** aplikace nezná — složka receptury nese jen název
+  a procento. Dokud se nedoplní, nemůže sama radit, čím korigovat odstín; bázi
+  vybírá technolog.
+
+---
+
+## 12. Inspirace InkFormulation — co jde udělat bez spektrofotometru
+
+**Zadání.** Mířit na principy profesionálního formulačního softwaru
+(X-Rite InkFormulation). Ten ale stojí na měření: recepturu z barvy počítá
+z Kubelka-Munkovy teorie, k níž je potřeba každou bázi nakalibrovanou ve řadě
+koncentrací a měřený podklad. Dílna spektrofotometr nemá.
+
+**Rozhodnutí.** Nepředstírat měření. Vzít z InkFormulation ty principy, které
+se opřou o úsudek obsluhy a o data, která aplikace už má — odstín barvy
+a odstín materiálu. Doplněno trojí:
+
+**1. Barva na podkladu.** Porovná se jas barvy a jas materiálu (L* v Lab).
+Je-li barva o 20 jednotek světlejší než podklad a není vysoce krycí, aplikace
+hlásí, že bez podtisku bílou prosvítá; mezi 8 a 20 doporučí zkoušku. U vysoce
+krycí barvy podtisk nežádá, ale upozorní na druhý průchod.
+
+**2. Průsvitná barva na barevném podkladu.** Je-li podklad sytý a barva
+transparentní, výsledek se posune k odstínu podkladu — aplikace napíše kterým
+směrem, slovy („posune se do žluté"), ne souřadnicemi.
+
+**3. Korekce po nátisku.** Z nádoby se ubrat nedá, takže korekce je vždycky
+přídavek a dávka poroste. Technolog vybere složku a sílu kroku
+(0,5 / 1,5 / 4 % dávky), aplikace spočítá přídavek, přepočítá podíly a asistent
+navážení pak vede dolití podle nových poměrů. Kroky jsou schválně malé —
+barvicí síla bází je velmi různá a u syté černé bývá i půl procenta moc.
+Korekce se sčítají a je vidět jejich seznam.
+
+**Chyba, kterou odhalilo ověření.** Názvy odstínů („táhne do žluté") jsem
+nejdřív odvodil z odhadnutých hranic úhlu v Lab. Žlutý podklad #F0D000 leží na
+93° a při hranici 75° vycházel jako **zelený**. Hranice se přepočítaly ze
+skutečných úhlů čistých barev (červená 40°, oranžová 60°, žlutá 103°,
+zelená 136°, azurová 196°, modrá 306°, purpurová 328°) a nastavily na středy
+mezi nimi. Deset kontrolních odstínů teď vychází správně.
+
+**Jak to bylo ověřeno.** Logika se vytáhla ze souboru a projela v node —
+25 kontrol: prosvítání, podtisk, hraniční rozdíl jasu, chování krycí
+i transparentní barvy, součet gramů a procent po korekci, neměnnost ostatních
+složek, ošetření nesmyslných vstupů. Aplikace se pak načetla v prohlížeči bez
+okna, aby se vyloučila běhová chyba jako minule u viskozity.
+
+**Co to znamená v praxi.** Dvě otázky, které dosud musel technolog držet
+v hlavě — „projde ta barva na tomhle materiálu?" a „co s tím, když nátisk
+nesedí?" — má teď aplikace napsané na obrazovce, i s odůvodněním.
+
+**Meze.** Je to posouzení z odstínů, ne měření. Čísla jsou výchozí a dílna si
+je má upravit podle toho, co jí skutečně prosvítá.
