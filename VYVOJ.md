@@ -86,6 +86,7 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 09:25 | Směr: přenést principy InkFormulation, ale bez spektrofotometru |
 | 09:30 | Podklad jako vstup do odstínu, kryvost a prosvítání, korekce po nátisku |
 | 10:05 | Pigment a báze odděleně; aplikace radí, čím korigovat |
+| 10:55 | Kontrola vykreslení aplikace, zařazená před nahrání na GitHub |
 
 ---
 
@@ -715,3 +716,36 @@ bez pigmentů, meze startovního kroku. Kontrola pořadí je to podstatné: na
 **Co zbývá.** Odstíny pigmentů v `parametry/pigmenty.csv` jsou orientační —
 dílna je má přepsat podle vlastního vzorníku. Názvy se musí shodovat s názvy
 složek v recepturách, jinak se nespárují a aplikace to napíše.
+
+---
+
+## 14. Kontrola, že se aplikace vůbec vykreslí
+
+**Co se stalo.** Po předchozí změně zůstala aplikace bílá. Příčina: stav
+`pigmenty` vznikl v hlavní komponentě, ale používal se v komponentě kalkulace,
+které se nepředal — `pigmenty is not defined`. Kontrola syntaxe takovou chybu
+nenajde, protože soubor je syntakticky v pořádku; projeví se až za běhu.
+
+**Proč to neodhalilo dosavadní ověřování.** Načetl jsem stránku v prohlížeči
+bez okna a měřil velikost výsledného DOMu. Jenže statická kostra a vnořené
+skripty zaberou přes 360 kB i tehdy, když se nevykreslí vůbec nic — rozdíl
+proti zdravému stavu byl necelých 10 % a splynul s běžným kolísáním. **Měřil
+jsem špatnou veličinu.**
+
+**Řešení.** `kontrola_aplikace.py` vloží do kopie stránky sběrač chyb (do
+hlavičky, aby byl dřív než aplikace) a na konec hlášení, které přečte, kolik
+potomků má kořenový prvek. To je jednoznačné: zdravá aplikace má potomka,
+rozbitá nula. Navíc vypíše zachycené chyby včetně hlášky prohlížeče.
+
+**Ověření samotného nástroje.** Nestačí, že kontrola projde na zdravé verzi —
+musí umět selhat. Rozbil jsem kopii přesně toutéž chybou a kontrola ji našla
+i s hláškou `ReferenceError: pigmenty is not defined`, návratový kód 1.
+Napoprvé jsem přitom rozbil kopii špatně — smazal jsem jen předání vlastnosti,
+ne její převzetí, takže vyšla `undefined` a aplikace běžela dál. To samo o sobě
+stojí za zapamatování: nepředaná vlastnost je neškodná, chybějící deklarace
+shodí všechno.
+
+**Zařazení.** Skript pro nahrávání na GitHub kontrolu spouští jako první krok.
+Vrátí-li 1, nenahraje se nic. Vrátí-li 2 (chybí prohlížeč, nelze zkontrolovat),
+jen se to zapíše do protokolu a pokračuje se — nemožnost zkontrolovat není
+totéž co nalezená chyba.

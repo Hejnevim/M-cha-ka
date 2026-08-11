@@ -2970,7 +2970,7 @@ ${lhutyPocet.prosle + lhutyPocet.brzy > 0 && html`<span className="tag"
             sgps=${sgps} onPouzitSpec=${pouzitSpec} onPdfNacteno=${setPdfSpec} pdfObrazky=${pdfSpec.obrazky || []} pdfStranky=${pdfSpec.stranky || []} pdfId=${pdfSpec.pdfId || ""}
             dbFiltr=${dbFiltr} setDbFiltr=${setDbFiltr}
             zbytky=${zbytky} setZbytky=${setZbytky} technologie=${technologie} dbTech=${dbTech}
-            sita=${sita} koef=${koef}
+            sita=${sita} koef=${koef} pigmenty=${pigmenty}
             onZbytekUlozen=${(kod) => { setZbytekKod(kod); setTab("zbytky"); }} />
         </div>
         ${tab === "scan" && html`<${ScanTab} hidOn=${hidOn} setHidOn=${setHidOn} scanLog=${scanLog}
@@ -3082,7 +3082,7 @@ function PwGate({ label, correctPw, onConfirm, onCancel }) {
 function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed, onUpravitSpec,
                 sgps, onPouzitSpec, onPdfNacteno, pdfObrazky, pdfStranky, pdfId,
                 dbFiltr, setDbFiltr, zbytky, setZbytky, onZbytekUlozen,
-                technologie, dbTech, sita, koef }) {
+                technologie, dbTech, sita, koef, pigmenty }) {
   const [q, setQ] = useState("");
   // hodnoty ze načteného specu mají přednost před automatikami níže (reset barvy,
   // vázaná receptura, spotřeba dle technologie) — proto je propašujeme přes ref
