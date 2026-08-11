@@ -3038,7 +3038,7 @@ ${lhutyPocet.prosle + lhutyPocet.brzy > 0 && html`<span className="tag"
             sgps=${sgps} onPouzitSpec=${pouzitSpec} onPdfNacteno=${setPdfSpec} pdfObrazky=${pdfSpec.obrazky || []} pdfStranky=${pdfSpec.stranky || []} pdfId=${pdfSpec.pdfId || ""}
             dbFiltr=${dbFiltr} setDbFiltr=${setDbFiltr}
             zbytky=${zbytky} setZbytky=${setZbytky} technologie=${technologie} dbTech=${dbTech}
-            sita=${sita} koef=${koef} pigmenty=${pigmenty}
+            sita=${sita} koef=${koef} pigmenty=${pigmenty} guardDelete=${guardDelete}
             onZbytekUlozen=${(kod) => { setZbytekKod(kod); setTab("zbytky"); }} />
         </div>
         ${tab === "scan" && html`<${ScanTab} hidOn=${hidOn} setHidOn=${setHidOn} scanLog=${scanLog}
@@ -3229,7 +3229,7 @@ function OdemykaniTab({ techStav, products, sita, koef, pigmenty, recipes, dbTec
 function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed, onUpravitSpec,
                 sgps, onPouzitSpec, onPdfNacteno, pdfObrazky, pdfStranky, pdfId,
                 dbFiltr, setDbFiltr, zbytky, setZbytky, onZbytekUlozen,
-                technologie, dbTech, sita, koef, pigmenty }) {
+                technologie, dbTech, sita, koef, pigmenty, guardDelete }) {
   const [q, setQ] = useState("");
   // hodnoty ze načteného specu mají přednost před automatikami níže (reset barvy,
   // vázaná receptura, spotřeba dle technologie) — proto je propašujeme přes ref
@@ -3289,39 +3289,6 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
   const klicUplny = (p, c, pos) => (p && c && pos)
     ? klicBarva(p, c) + "|" + String(pos.tech || "") + "|" + String(pos.name || "") : "";
 
-  // ---- nástroj odvození receptury ----
-  const [odvod, setOdvod] = useState(null);      // null | {mode:"pick"} | {mode:"edit", initial}
-  const [baseQ, setBaseQ] = useState("");
-  const [baseId, setBaseId] = useState("");
-  const baseList = baseQ.trim()
-    ? recipes.filter((r) => (r.name + " " + (r.series || "")).toLowerCase().includes(baseQ.trim().toLowerCase()))
-    : recipes;
-  const baseSel = recipes.find((r) => r.id === baseId) || null;
-  const odvodit = (base) => {
-    const label = colorSel ? ((colorSel.code ? colorSel.code + " " : "") + (colorSel.name || "")).trim() : "";
-    const kde = position ? " · " + position.tech + " " + position.name : "";
-    setOdvod({ mode: "edit", initial: {
-      id: uid(),
-      name: ((product && product.ref ? product.ref + " · " : "") + label + kde + " — " + base.name).trim(),
-      type: "Custom", series: "odvozeno z " + base.name,
-      // z čeho a ze které databáze receptura vznikla — zapíše se i do CSV
-      zaklad: base.name + (base.zdroj ? " (" + base.zdroj.replace(/\.csv$/i, "") + ")" : ""),
-      density: base.density, hex: base.hex,
-      components: base.components.map((c) => ({ id: uid(), name: c.name, pct: c.pct })),
-    }});
-  };
-  const ulozOdvozenou = (r) => {
-    setRecipes((prev) => prev.some((x) => x.id === r.id) ? prev.map((x) => x.id === r.id ? r : x) : prev.concat([r]));
-    if (lk) setLinks(Object.assign({}, links, { [lk]: r.id }));
-    setRecId(r.id);
-    setAdHoc(null);            // rozpracovaná receptura je teď uložená natrvalo
-    setOdvod(null);
-  };
-  const zrusVazbu = () => {
-    const nl = Object.assign({}, links);
-    delete nl[lkUplny]; delete nl[lkBarva];
-    setLinks(nl);
-  };
   const position = polohy.find((p) => p.id === posId) || null;
 
   // vazba se hledá nejdřív na přesnou kombinaci, pak na starší vazbu jen dle barvy
@@ -3382,6 +3349,83 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
   const pantoneList = recQ.trim()
     ? pantoneAll.filter((r) => (r.name + " " + (r.series || "")).toLowerCase().includes(recQ.trim().toLowerCase()))
     : pantoneAll;
+
+  /* ---- nástroj odvození receptury ----
+     Custom receptura nevzniká z ničeho — vždycky se odvodí z formule, která
+     v nahraných databázích už je, a jen z těch databází, které k technologii
+     patří. Podklad je tak pokaždé dohledatelný: u každé vlastní barvy je
+     vidět, ze které řady a které receptury vyšla. */
+  const [odvod, setOdvod] = useState(null);      // null | {mode:"pick"} | {mode:"edit", initial}
+  const [baseQ, setBaseQ] = useState("");
+  const [baseId, setBaseId] = useState("");
+  const zakladAll = useMemo(() => recepturyTech.filter((r) => r.type !== "Custom"), [recepturyTech]);
+  const baseList = baseQ.trim()
+    ? zakladAll.filter((r) => (r.name + " " + (r.series || "")).toLowerCase().includes(baseQ.trim().toLowerCase()))
+    : zakladAll;
+  const baseSel = zakladAll.find((r) => r.id === baseId) || null;
+  const odvodit = (base) => {
+    setOdvod({ mode: "edit", initial: {
+      id: uid(),
+      name: nazevCustom(base, product, colorSel, position),
+      type: "Custom", series: "odvozeno z " + base.name + (base.zdroj ? " · " + nazevDb(base.zdroj) : ""),
+      // z čeho a ze které databáze receptura vznikla — zapíše se i do CSV
+      zaklad: base.name + (base.zdroj ? " (" + nazevDb(base.zdroj) + ")" : ""),
+      density: base.density, hex: base.hex,
+      components: base.components.map((c) => ({ id: uid(), name: c.name, pct: c.pct })),
+    }});
+  };
+  const ulozOdvozenou = (r) => {
+    setRecipes((prev) => prev.some((x) => x.id === r.id) ? prev.map((x) => x.id === r.id ? r : x) : prev.concat([r]));
+    if (lk) setLinks(Object.assign({}, links, { [lk]: r.id }));
+    setRecId(r.id);
+    setAdHoc(null);            // rozpracovaná receptura je teď uložená natrvalo
+    setOdvod(null);
+  };
+  const zrusVazbu = () => {
+    const nl = Object.assign({}, links);
+    delete nl[lkUplny]; delete nl[lkBarva];
+    setLinks(nl);
+  };
+
+  /* Custom receptury se nabízejí jen u produktu, na kterém vznikly — vlastní
+     odstín namíchaný na jednu zakázku nemá u cizího produktu co dělat. */
+  const customList = useMemo(() => customKProduktu(recipes, links, {
+    ref: product ? String(product.ref || product.id) : "", tech: tech, klic: lkUplny,
+  }), [recipes, links, product, tech, lkUplny]);
+  const customSkryto = useMemo(
+    () => recipes.filter((r) => r.type === "Custom").length - customList.length, [recipes, customList]);
+  /* Smazání vlastní receptury — namíchá se špatně, zapíše se překlep, a musí
+     jít pryč. Krok navíc s potvrzením je schválně: receptura mizí i ze souboru
+     a s ní všechny vazby na produkty, takže omyl by nebylo kam vrátit.
+     Je-li nastavené heslo na mazání, platí i tady. */
+  const [smazPotvrd, setSmazPotvrd] = useState("");   // id receptury čekající na potvrzení
+  const smazCustom = (r) => {
+    if (!r || r.type !== "Custom") return;
+    const provest = () => {
+      setRecipes((prev) => prev.filter((x) => x.id !== r.id));
+      setLinks((prev) => {
+        const nl = {};
+        for (const k of Object.keys(prev || {})) if (prev[k] !== r.id) nl[k] = prev[k];
+        return nl;
+      });
+      setRecId((prev) => prev === r.id ? "" : prev);
+      setOdvod(null);
+      setSmazPotvrd("");
+    };
+    if (guardDelete) guardDelete(provest, "smazání custom receptury " + r.name);
+    else provest();
+  };
+  const customVybrany = (customList.find((x) => x.r.id === recId) || {}).r || null;
+
+  /* Po přepnutí produktu se custom receptura toho předchozího nesmí vézt dál.
+     Mění se přes funkci, aby nepřebila vazbu, která se nastavuje ve stejném
+     kroku — vlastní barva vázaná na novou kombinaci zůstane vybraná. */
+  useEffect(() => {
+    setRecId((prev) => {
+      const r = recipes.find((x) => x.id === prev);
+      return (r && r.type === "Custom" && !customList.some((x) => x.r.id === r.id)) ? "" : prev;
+    });
+  }, [customList]);
 
   /* Viskozita — výtokový čas barvy. U zakázky se buď změří, nebo se vezme
      referenční hodnota uložená u receptury. */
@@ -3800,12 +3844,28 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 ${pantoneList.length > 400 && html`<div className="note" style=${{ marginTop: 4 }}>Zobrazeno prvních 400 — upřesněte filtr.</div>`}
               </div>
               <div>
-                <label className="f">Custom receptura</label>
-                <select value=${recipes.some((r) => r.id === recId && r.type === "Custom") ? recId : ""}
+                <label className="f">Custom receptura${product ? " — " + (product.ref || product.name) : ""}</label>
+                <select value=${customList.some((x) => x.r.id === recId) ? recId : ""}
                   onChange=${(e) => e.target.value && setRecId(e.target.value)}>
-                  <option value="">— vyberte custom recepturu —</option>
-                  ${recipes.filter((r) => r.type === "Custom").map((r) => html`<option key=${r.id} value=${r.id}>${r.name} · ${r.series}</option>`)}
+                  <option value="">${customList.length ? "— vyberte custom recepturu —" : "— žádná pro tento produkt —"}</option>
+                  ${customList.map(({ r, presna, volna }) => html`<option key=${r.id} value=${r.id}>${
+                    r.name}${presna ? " ✓ tato kombinace" : (volna ? " · bez vazby" : "")}</option>`)}
                 </select>
+                <div className="note" style=${{ marginTop: 4 }}>
+                  Nabízejí se jen vlastní barvy vytvořené na tento produkt${tech ? " a technologii " + tech : ""}.
+                  ${customSkryto > 0 ? " Skryto " + fmt(customSkryto, 0) + " custom receptur jiných produktů." : ""}
+                </div>
+                ${customVybrany && html`
+                  <div className="rowline" style=${{ marginTop: 6, marginBottom: 0 }}>
+                    ${smazPotvrd === customVybrany.id ? html`
+                      <span className="note">Smazat <b style=${{ color: "var(--ink)" }}>${customVybrany.name}</b> i s vazbami na produkt? Vrátit to nejde.</span>
+                      <button className="btn danger sm" onClick=${() => smazCustom(customVybrany)}>Ano, smazat</button>
+                      <button className="btn sec sm" onClick=${() => setSmazPotvrd("")}>Zpět</button>
+                    ` : html`
+                      <button className="btn sec sm" onClick=${() => setSmazPotvrd(customVybrany.id)}>Smazat tuto custom recepturu</button>
+                      <span className="note">smaže se i ze souboru vlastních receptur</span>
+                    `}
+                  </div>`}
               </div>
             </div>
             ${!recipe && html`
@@ -4227,26 +4287,54 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                     <div className="linkbox">
                       ${vazRec ? html`
                         <span className="note">Vázaná receptura${vazbaSiroka ? " (pro všechny polohy)" : ""}: <b style=${{ color: "var(--ink)" }}>${vazRec.name}</b></span>
-                        <button className="btn sec sm" onClick=${() => setOdvod({ mode: "edit", initial: JSON.parse(JSON.stringify(vazRec)) })}>Upravit</button>
-                        <button className="btn danger sm" onClick=${zrusVazbu}>Zrušit vazbu</button>
+                        ${smazPotvrd === vazRec.id ? html`
+                          <span className="note">Opravdu smazat celou recepturu? Vrátit to nejde.</span>
+                          <button className="btn danger sm" onClick=${() => smazCustom(vazRec)}>Ano, smazat</button>
+                          <button className="btn sec sm" onClick=${() => setSmazPotvrd("")}>Zpět</button>
+                        ` : html`
+                          <button className="btn sec sm" onClick=${() => setOdvod({ mode: "edit", initial: JSON.parse(JSON.stringify(vazRec)) })}>Upravit</button>
+                          <button className="btn danger sm" onClick=${zrusVazbu}>Zrušit vazbu</button>
+                          ${vazRec.type === "Custom" && html`
+                            <button className="btn danger sm" onClick=${() => setSmazPotvrd(vazRec.id)}>Smazat recepturu</button>`}
+                        `}
                       ` : html`
-                        <button className="btn sec sm" onClick=${() => { setBaseId(recipe ? recipe.id : ""); setBaseQ(""); setOdvod({ mode: "pick" }); }}>＋ Custom receptura pro tuto kombinaci</button>
-                        <span className="note">uloží se k：${colorSel.code || colorSel.name || ""}${(product ? " · " + (product.ref || "") : "")}${position ? " · " + position.tech + " · " + position.name : " · (vyberte polohu níže)"}</span>
+                        <button className="btn sec sm" onClick=${() => {
+                          // předvyplní se jen receptura, ze které jde odvozovat — tedy z databáze
+                          setBaseId(recipe && zakladAll.some((r) => r.id === recipe.id) ? recipe.id : "");
+                          setBaseQ(""); setOdvod({ mode: "pick" });
+                        }}>＋ Custom receptura pro tuto kombinaci</button>
+                        <span className="note">uloží se jen k：${colorSel.code || colorSel.name || ""}${(product ? " · " + (product.ref || "") : "")}${position ? " · " + position.tech + " · " + position.name : " · (vyberte polohu níže)"}</span>
                       `}
                     </div>
                     ${odvod && odvod.mode === "pick" && html`
                       <div className="pickbox">
-                        <label className="f">Výchozí receptura (${baseList.length} z ${recipes.length})</label>
-                        <input value=${baseQ} onChange=${(e) => setBaseQ(e.target.value)} placeholder="Filtr: např. 485, Reflex, custom…" style=${{ marginBottom: 6 }} />
-                        <select value=${baseList.some((r) => r.id === baseId) ? baseId : ""} onChange=${(e) => setBaseId(e.target.value)}>
-                          <option value="">— vyberte výchozí recepturu —</option>
-                          ${baseList.slice(0, 400).map((r) => html`<option key=${r.id} value=${r.id}>${r.name} · ${r.series}</option>`)}
-                        </select>
-                        ${baseList.length > 400 && html`<div className="note" style=${{ marginTop: 4 }}>Zobrazeno prvních 400 — upřesněte filtr.</div>`}
+                        <label className="f">Výchozí receptura z databáze (${baseList.length} z ${zakladAll.length})</label>
+                        ${zakladAll.length === 0 ? html`
+                          <div className="warnbox" style=${{ marginTop: 0 }}>
+                            Pro technologii <b>${tech}</b> není nahraná žádná databáze receptur,
+                            není tedy z čeho odvozovat. Přiřaďte databázi v
+                            <b> parametry/databaze.csv</b>.
+                          </div>` : html`
+                          <div>
+                            <input value=${baseQ} onChange=${(e) => setBaseQ(e.target.value)} placeholder="Filtr: např. 485, Reflex…" style=${{ marginBottom: 6 }} />
+                            <select value=${baseList.some((r) => r.id === baseId) ? baseId : ""} onChange=${(e) => setBaseId(e.target.value)}>
+                              <option value="">— vyberte výchozí recepturu —</option>
+                              ${baseList.slice(0, 400).map((r) => html`<option key=${r.id} value=${r.id}>${
+                                r.name}${r.zdroj ? " · " + nazevDb(r.zdroj) : (r.series ? " · " + r.series : "")}</option>`)}
+                            </select>
+                            ${baseList.length > 400 && html`<div className="note" style=${{ marginTop: 4 }}>Zobrazeno prvních 400 — upřesněte filtr.</div>`}
+                            <div className="note" style=${{ marginTop: 4 }}>
+                              Vybírá se jen z databází nahraných pro technologii ${tech} — vlastní barva
+                              tak vždycky vychází z dohledatelné formule.
+                            </div>
+                          </div>`}
                         <div className="rowline" style=${{ marginTop: 10, marginBottom: 0 }}>
                           <button className="btn sm" disabled=${!baseSel} onClick=${() => baseSel && odvodit(baseSel)}>Odvodit a upravit →</button>
                           <button className="btn sec sm" onClick=${() => setOdvod(null)}>Zavřít</button>
                         </div>
+                        ${baseSel && html`<div className="note" style=${{ marginTop: 8 }}>
+                          Uloží se jako: <b style=${{ color: "var(--ink)" }}>${nazevCustom(baseSel, product, colorSel, position)}</b>
+                        </div>`}
                       </div>`}
                   `}
                 </div>`}
@@ -5655,6 +5743,72 @@ function vazbyReceptury(links, id) {
   const out = [];
   for (const k of Object.keys(links || {})) if (links[k] === id) out.push(k);
   return out.sort();
+}
+
+/* Ze souboru databáze udělá čitelný název: receptury_PMS_660.csv → PMS 660 */
+function nazevDb(zdroj) {
+  return String(zdroj || "").replace(/\.csv$/i, "").replace(/^receptury[_ -]*/i, "")
+    .replace(/_/g, " ").trim();
+}
+
+/* Název odvozené receptury. Nejdřív barva a databáze, ze které vznikla, pak
+   číslo produktu, barva produktu a poloha potisku. Z názvu je tak vidět
+   ze které řady receptura vyšla i ke které kombinaci patří — a dvě custom
+   barvy odvozené ze stejného pantonu na dva různé produkty se nepletou. */
+function nazevCustom(base, product, color, position) {
+  const casti = [];
+  const db = base ? nazevDb(base.zdroj) : "";
+  casti.push((base && base.name ? base.name : "vlastní barva") + (db ? " (" + db + ")" : ""));
+  const ref = product ? String(product.ref || product.name || "").trim() : "";
+  if (ref) casti.push(ref);
+  const bar = color ? String(color.code || color.name || "").trim() : "";
+  if (bar) casti.push(bar);
+  if (position) {
+    const pos = (String(position.tech || "") + " " + String(position.name || "")).trim();
+    if (pos) casti.push(pos);
+  }
+  return casti.join(" · ");
+}
+
+/* Klíč vazby je "ref|barva|technologie|poloha"; starší vazby mají jen
+   první dvě části. */
+function castKlice(k, i) {
+  const c = String(k || "").split("|");
+  return c.length > i ? c[i] : "";
+}
+
+/* Custom receptury jednoho produktu. Vlastní odstín vzniká vždycky na
+   konkrétní kombinaci produkt + barva + poloha, takže u jiného produktu
+   jen mate. Receptura bez jediné vazby (starší data, ruční zápis) se
+   nabídne vždycky, aby o ni nikdo nepřišel.
+   Vrací [{ r, presna, volna }] — přesná je ta vázaná právě na kombinaci,
+   se kterou se zrovna pracuje. */
+function customKProduktu(recipes, links, kde) {
+  const ref = String((kde && kde.ref) || "");
+  const tech = (kde && kde.tech) || "";
+  const klic = (kde && kde.klic) || "";
+  const vazby = new Map();
+  for (const k of Object.keys(links || {})) {
+    const id = links[k];
+    if (!vazby.has(id)) vazby.set(id, []);
+    vazby.get(id).push(k);
+  }
+  const out = [];
+  for (const r of (recipes || [])) {
+    if (r.type !== "Custom") continue;
+    const ks = vazby.get(r.id) || [];
+    if (!ks.length) { out.push({ r: r, presna: false, volna: true }); continue; }
+    if (!ref) continue;
+    const moje = ks.filter((k) => castKlice(k, 0) === ref);
+    if (!moje.length) continue;
+    // vazba nese i technologii — barva pro tampontisk se u sítotisku nenabídne
+    if (tech && !moje.some((k) => { const t = castKlice(k, 2); return !t || t === tech; })) continue;
+    out.push({ r: r, presna: !!klic && moje.indexOf(klic) >= 0, volna: false });
+  }
+  out.sort((a, b) => (b.presna ? 1 : 0) - (a.presna ? 1 : 0)
+    || (a.volna ? 1 : 0) - (b.volna ? 1 : 0)
+    || String(a.r.name || "").localeCompare(String(b.r.name || ""), "cs"));
+  return out;
 }
 
 /* Které receptury patří do vlastního souboru: ty vlastní, co vznikly

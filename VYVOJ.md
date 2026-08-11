@@ -93,6 +93,8 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 15:10 | Databáze Printcolor MS 786 a MS 660 převedené z PDF, 1 603 receptur |
 | 15:20 | Přiřazení databází k technologiím souborem, ne jen v prohlížeči |
 | 15:45 | Nabízejí se jen receptury patřící k technologii vybrané polohy |
+| 16:05 | Custom receptura vždy z nahrané databáze a jen k tomu produktu, na kterém vznikla |
+| 16:35 | Mazání vlastní receptury přímo v kalkulaci, ve dvou krocích a pod heslem |
 
 ---
 
@@ -958,3 +960,95 @@ se to hůř, protože obě jména dávají v místě použití smysl.
 receptur): že každá technologie dostane právě své databáze, že vlastní receptury
 platí všude, že TXP nedostane Xpression ani MS 786, že FIR nedostane Printcolor
 a že bez zvolené technologie se nefiltruje nic.
+
+---
+
+## 18. Custom receptura: vždy z databáze a vždy jen ke svému produktu
+
+**Co bylo špatně.** Vlastní barva šla odvodit z čehokoli — nabídka výchozích
+receptur sahala přes všechny databáze bez ohledu na technologii a nabízela
+i jiné custom receptury. Vzniklá barva se pak nabízela **u všech produktů**:
+v seznamu „Custom receptura" byl vidět celý sklad vlastních odstínů, včetně
+těch namíchaných na docela jinou zakázku. Kdo hledal svou barvu, listoval
+cizími; kdo nelistoval, mohl si vzít cizí.
+
+**Řešení — dvě pravidla.**
+
+1. **Odvozuje se jen z toho, co je nahrané.** Výchozí receptura se vybírá
+   z databází přiřazených k technologii vybrané polohy, a jen z těch
+   nakoupených — custom se z custom neodvozuje. U každé vlastní barvy je tak
+   dohledatelné, ze které řady a které formule vyšla. Není-li pro technologii
+   žádná databáze, aplikace to řekne rovnou a nenechá míchat naslepo.
+
+2. **Custom patří produktu, na kterém vznikl.** Nabídka se filtruje podle
+   vazby `ref produktu | barva | technologie | poloha`, kterou receptura dostala
+   při uložení. Barva na přesně tu kombinaci, se kterou se pracuje, je označená
+   „✓ tato kombinace" a je první. Kolik custom receptur patří jiným produktům,
+   se napíše — aby nevznikl dojem, že se něco ztratilo. Po přepnutí produktu
+   se cizí custom sám odvybere.
+
+**Název nese celou adresu.** Dřív začínal číslem produktu a barva byla až na
+konci. Nově je pořadí takové, jak se receptura hledá — barva a databáze, pak
+kam patří:
+
+```
+PANTONE 1235 C (PMS 660) · 11003 · 124 · PDP Sportovní Láhev / Víčko lahve
+     ^ barva a řada        ^ produkt ^ barva produktu ^ technologie a poloha
+```
+
+Dvě vlastní barvy odvozené ze stejného pantonu na dva různé produkty se tak
+nepletou ani v seznamu, ani v CSV, ani na míchacím lístku.
+
+**Starší data zůstávají.** Vazby jen `produkt | barva` (bez technologie a
+polohy) se stále čtou. Receptura, která nemá vazbu žádnou, se nabídne vždycky
+a je označená „bez vazby" — nic se neschová jen proto, že to vzniklo dřív.
+
+**Ověření.** 26 kontrol logiky (název, převod jména databáze, filtr podle
+produktu a technologie, starší vazby, prázdné vstupy) a čtyři průchody
+aplikací v prohlížeči bez okna:
+
+| co se zkoušelo | výsledek |
+|---|---|
+| nabídka výchozích receptur u PDP | 400 z MS 660 a MS 786, 0 custom |
+| náhled názvu před uložením | `PANTONE 1235 C (PMS 660) · 11003 · 124 · PDP …` |
+| po uložení u produktu 11003 | nová barva první, značka „✓ tato kombinace" |
+| přepnutí na produkt 11031 | barva produktu 11003 zmizela, hláška o 2 skrytých |
+
+**Uklizeno po sobě.** Zkušební průchod si recepturu opravdu uložil — most ji
+zapsal do `receptury_vlastni.csv` a prohlížeč do úložiště. Obojí smazáno,
+zůstaly jen tři skutečné vlastní receptury dílny.
+
+---
+
+## 19. Mazání vlastní receptury
+
+**Proč.** Custom barva se namíchá špatně, do názvu se dostane překlep, receptura
+vznikne omylem na jiné poloze. Dosud šla smazat jen v záložce Databáze receptur —
+tedy hledáním v seznamu 2 692 položek, mimo místo, kde se s ní pracuje.
+
+**Řešení.** Smazat jde přímo v kalkulaci, u vybrané custom receptury, a v okně
+„Barva a poloha potisku" u receptury vázané na kombinaci. Pantone receptury
+z nakoupených databází tlačítko nemají — ty se nemažou, jen se k nim nepřihlíží.
+
+**Dva kroky, ne jeden.** První klik jen odkryje potvrzení („Vrátit to nejde"),
+teprve druhý maže. Je to schválně: receptura mizí i ze souboru
+`receptury_vlastni.csv` a s ní všechny vazby na produkty a polohy — omyl by
+nebylo kam vrátit. Je-li nastavené heslo na mazání, platí i tady; brána je
+společná s mazáním produktů.
+
+**Ověření v prohlížeči bez okna:**
+
+| co se zkoušelo | výsledek |
+|---|---|
+| založit custom a hned smazat | zmizel ze seznamu, z úložiště i ze souboru na disku |
+| vazba na produkt po smazání | odstraněna, zbylé vazby beze změny |
+| smazání s nastaveným heslem | vyskočí „Ověření hesla", popis akce sedí na název receptury |
+| špatné heslo | „Nesprávné heslo", receptura zůstala |
+
+**Chyba, kterou jsem udělal při zkoušení.** Testovací průchod uložení opravdu
+provede — a běží-li most, zapíše se na disk. Při úklidu po sobě jsem přepsal
+`receptury_vlastni.csv` špatně (Python při čtení převádí `
+`, takže se
+soubor rozpadl na jeden řádek) a přišel o ukázkovou recepturu. Obnoveno ze
+zálohy, soubor sedí na bajt. Poučení je zapsané: před proklikávacím testem
+zálohovat, číst i psát s `newline=""`.
