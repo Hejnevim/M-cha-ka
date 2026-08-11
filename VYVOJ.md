@@ -88,6 +88,7 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 10:05 | Pigment a báze odděleně; aplikace radí, čím korigovat |
 | 10:55 | Kontrola vykreslení aplikace, zařazená před nahrání na GitHub |
 | 12:20 | Zámek technologií: ostrá jen FIR, ostatní s odemykacím seznamem |
+| 13:50 | Příkaz odemkni.py pro odemčení a zamčení technologie |
 
 ---
 
@@ -798,6 +799,26 @@ parametry sít a koeficienty ne. „Nejvíc informací" tedy znamená receptury 
 spotřeba se u FIR pořád počítá paušálem 8 g/m², ne z geometrie síta. Zúžení na
 jednu technologii tu mezeru neodstranilo, jen ji zviditelnilo, a to bylo
 zamýšlené.
+
+**Odemknutí příkazem.** `odemkni.py` mění stav bez ručního otvírání souboru:
+
+    python odemkni.py            vypíše stav všech technologií
+    python odemkni.py FIR        odemkne
+    python odemkni.py SCR -z     zamkne
+    python odemkni.py TXP -d "cekame na sita"    odemkne s poznámkou
+
+Nezakazuje odemknout technologii, které data chybí — jen to napíše. Co je
+připravené, rozhoduje dílna, ne skript. Poznámky a komentáře v souboru zůstávají
+netknuté, mění se jen jeden údaj.
+
+**Chyba, kterou to odhalilo.** Odemykací seznam i příkaz zprvu považovaly za
+splněné parametry sít i tam, kde byl v souboru jen **název síta**. Vzorový
+`sita.csv` obsahuje celou standardní řadu 26 sít pro SCR s počtem nití
+a průměrem vlákna, ale bez údajů výrobce — z toho se objem jen odhaduje.
+Kontrola se zpřísnila: za hotové se počítá až zadaný objem, nebo otevřená
+plocha spolu s tloušťkou tkaniny. Místo mlčení se teď vypíše
+„26 sít jen podle názvu", což je podstatně užitečnější zpráva než odškrtnutá
+položka.
 
 **Ověření.** 16 kontrol v node: čtení stavů ze souboru, chování bez souboru
 (nezamyká se nic — jinak by po aktualizaci někomu zmizela technologie, ve které

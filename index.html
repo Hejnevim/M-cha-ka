@@ -5874,7 +5874,14 @@ function csvNaTechStav(text) {
 function pripravenostTech(tech, { sita, koef, pigmenty, recipes, dbTech, techStav }) {
   const st = (techStav || {})[tech];
   const maSito = techMaSito(tech);
-  const vlastniSita = (sita || []).filter((s) => s.tech === tech && !!s.klise === !maSito);
+  // Řádek se jménem síta ještě nejsou parametry. Vzorový soubor obsahuje celou
+  // standardní řadu jen s počtem nití a průměrem vlákna — z toho se objem
+  // dopočítá jen odhadem. Za hotové se proto počítá až údaj výrobce, tedy
+  // objem zadaný nebo spočítaný z otevřené plochy a tloušťky tkaniny.
+  const vlastniSita = (sita || []).filter(
+    (s) => s.tech === tech && !!s.klise === !maSito && s.vth > 0 && !s.dopocteno);
+  const jenNazvy = (sita || []).filter(
+    (s) => s.tech === tech && !!s.klise === !maSito).length - vlastniSita.length;
   // receptury přiřazené téhle technologii přes databázi, ke které patří
   const souboryTech = Object.keys(dbTech || {}).filter(
     (f) => String((dbTech || {})[f] || "").split(",").filter(Boolean).indexOf(tech) >= 0);
@@ -5886,10 +5893,11 @@ function pripravenostTech(tech, { sita, koef, pigmenty, recipes, dbTech, techSta
   const body = [
     { klic: "receptury", popis: "databáze receptur přiřazená technologii",
       hotovo: receptur > 0, detail: receptur > 0 ? receptur + " receptur" : "žádná databáze" },
-    { klic: "sita", popis: maSito ? "parametry sít" : "hloubky leptu klišé",
+    { klic: "sita", popis: maSito ? "parametry sít od výrobce" : "hloubky leptu klišé",
       hotovo: vlastniSita.length > 0,
       detail: vlastniSita.length > 0 ? vlastniSita.length + (maSito ? " sít" : " klišé")
-        : (maSito ? "nejsou, počítá se paušálem" : "nejsou") },
+        : (jenNazvy > 0 ? jenNazvy + (maSito ? " sít jen podle názvu" : " klišé bez hloubky")
+          : "nejsou") },
     { klic: "koeficienty", popis: "koeficienty spotřeby",
       hotovo: koefu > 0, detail: koefu > 0 ? koefu + " hodnot" : "nejsou" },
     { klic: "pigmenty", popis: "pigmenty a báze",
