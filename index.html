@@ -6,40 +6,53 @@
 <title>Ink Recipe Manager — Printcolor</title>
 <style>
 :root{
-  --bg:#D9D8D3; --paper:#D9D8D3; --ink:#18170F; --ink-2:#78766C; --line:#CCCAC1; --line-2:#BDB9AC;
-  --cyan:#3E5C8A; --magenta:#C97B63; --yellow:#D9B44A; --key:#5B5952;
-  --ok:#2F7D53; --warn:#B5701C;
+  /* Vzhled zůstává měkký — karty vystupují z plochy stínem, ne rámečkem.
+     Mění se jen barvy: plocha je neutrálně šedá místo teplé béžové a inkoust
+     je tmavší, aby se na to dalo dívat celý den. Barevný akcent zmizel;
+     zvýraznění dělá inkoust, barva zůstala tam, kde nese význam (odstín
+     barvy, varování, stav vážení). */
+  /* --bg maluje JEN plochu stránky; všechno, co na ní leží (karty, lišty,
+     tlačítka, pole, štítky), bere barvu z --paper. Ty dvě proměnné jdou
+     nastavit nezávisle — plocha je samostatná jednotka. */
+  --bg:#EAEAEA; --paper:#EAEAEA; --zvyraz:#DEDEDE; --logo:#EAEAEA;
+  --ink:#141414; --ink-2:#767676; --line:#D8D8D8; --line-2:#C7C7C7;
+  --cyan:#141414; --magenta:#C97B63; --yellow:#D9B44A; --key:#141414;
+  --btn-ink:#FFFFFF; --focus:rgba(20,20,20,.20); --danger:#A8382A;
+  --ok:#1F6B45; --warn:#8A5A1E;
   --radius:18px;
-  --neu:-20px -20px 40px rgba(255,255,255,.8), 20px 20px 40px rgba(24,23,15,.18);
-  --neu-sm:-6px -6px 14px rgba(255,255,255,.75), 6px 6px 14px rgba(24,23,15,.20);
-  --neu-in:inset 6px 6px 12px rgba(24,23,15,.15), inset -6px -6px 12px rgba(255,255,255,.7);
-  --neu-in-lg:inset 8px 8px 18px rgba(24,23,15,.16), inset -8px -8px 18px rgba(255,255,255,.75);
-  --modal-shadow:0 24px 70px rgba(24,23,15,.28);
-  --logo-shadow:-4px -4px 8px rgba(255,255,255,.85), 4px 4px 8px rgba(24,23,15,.30);
+  --neu:-18px -18px 34px rgba(255,255,255,.9), 18px 18px 34px rgba(0,0,0,.10);
+  --neu-sm:-5px -5px 12px rgba(255,255,255,.85), 5px 5px 12px rgba(0,0,0,.11);
+  --neu-in:inset 5px 5px 11px rgba(0,0,0,.09), inset -5px -5px 11px rgba(255,255,255,.85);
+  --neu-in-lg:inset 7px 7px 16px rgba(0,0,0,.10), inset -7px -7px 16px rgba(255,255,255,.9);
+  --modal-shadow:0 24px 70px rgba(0,0,0,.22);
+  --logo-shadow:-4px -4px 8px rgba(255,255,255,.95), 4px 4px 8px rgba(0,0,0,.18);
   --mono:ui-monospace,'Cascadia Mono',Consolas,monospace;
   --sans:'Segoe UI',system-ui,Arial,sans-serif;
 }
 :root[data-theme="dark"]{
-  /* Linky se posouvají spolu s pozadím, aby zůstaly stejně zřetelné. */
-  --bg:#2E2D2A; --paper:#2E2D2A; --ink:#EDEBE4; --ink-2:#9C9990; --line:#43423A; --line-2:#515046;
-  --cyan:#7FA3D9; --magenta:#C97B63; --yellow:#D9B44A; --key:#84817A;
-  --ok:#4FAE7C; --warn:#D69340;
-  --neu:-20px -20px 40px rgba(255,255,255,.045), 20px 20px 40px rgba(0,0,0,.55);
-  --neu-sm:-6px -6px 14px rgba(255,255,255,.05), 6px 6px 14px rgba(0,0,0,.5);
-  --neu-in:inset 6px 6px 12px rgba(0,0,0,.45), inset -6px -6px 12px rgba(255,255,255,.045);
-  --neu-in-lg:inset 8px 8px 18px rgba(0,0,0,.5), inset -8px -8px 18px rgba(255,255,255,.05);
-  --modal-shadow:0 24px 70px rgba(0,0,0,.7);
-  --logo-shadow:-4px -4px 8px rgba(255,255,255,.06), 4px 4px 8px rgba(0,0,0,.65);
+  /* Tmavý režim je hlubší než dřív, ale ne černý — na černé plochu nejde
+     osvětlit a stíny by zmizely. Hlavní tlačítko je světlé s tmavým písmem.
+     Linky se posouvají spolu s pozadím, aby zůstaly stejně zřetelné. */
+  --bg:#1D1D1D; --paper:#1D1D1D; --zvyraz:#2A2A2A; --logo:#1D1D1D;
+  --ink:#EDEDED; --ink-2:#8C8C8C; --line:#2C2C2C; --line-2:#3A3A3A;
+  --cyan:#EDEDED; --magenta:#C97B63; --yellow:#D9B44A; --key:#EDEDED;
+  --btn-ink:#161616; --focus:rgba(237,237,237,.22); --danger:#E0705E;
+  --ok:#5CBF8A; --warn:#D9A45C;
+  --neu:-18px -18px 34px rgba(255,255,255,.030), 18px 18px 34px rgba(0,0,0,.62);
+  --neu-sm:-5px -5px 12px rgba(255,255,255,.035), 5px 5px 12px rgba(0,0,0,.6);
+  --neu-in:inset 5px 5px 11px rgba(0,0,0,.55), inset -5px -5px 11px rgba(255,255,255,.035);
+  --neu-in-lg:inset 7px 7px 16px rgba(0,0,0,.6), inset -7px -7px 16px rgba(255,255,255,.04);
+  --modal-shadow:0 24px 70px rgba(0,0,0,.8);
+  --logo-shadow:-4px -4px 8px rgba(255,255,255,.05), 4px 4px 8px rgba(0,0,0,.7);
 }
-:root[data-theme="dark"] .warnbox,:root[data-theme="dark"] #chyba{background:#3A2F1C;border-color:#5C4A26;color:#E8B168}
-:root[data-theme="dark"] .okbox{background:#1E3327;border-color:#2E4F3B;color:#7FD9A8}
-:root[data-theme="dark"] .imgwarn{background:#3A2F1C !important;color:#E8B168 !important}
-:root[data-theme="dark"] .rowactive td{background:rgba(127,163,217,.16)}
+:root[data-theme="dark"] .warnbox,:root[data-theme="dark"] #chyba{background:#2C2317;border-color:#463824;color:#E0AE6B}
+:root[data-theme="dark"] .okbox{background:#182A20;border-color:#284434;color:#79CFA0}
+:root[data-theme="dark"] .imgwarn{background:#2C2317 !important;color:#E0AE6B !important}
 *{box-sizing:border-box}
 body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
 input,select,button,textarea{font-family:inherit;font-size:14px}
-input,select,textarea{border:none;border-radius:10px;padding:9px 12px;background:var(--bg);color:var(--ink);width:100%;box-shadow:var(--neu-in);transition:box-shadow .15s}
-input:focus,select:focus,textarea:focus{outline:none;box-shadow:var(--neu-in),0 0 0 3px rgba(62,92,138,.18)}
+input,select,textarea{border:none;border-radius:10px;padding:9px 12px;background:var(--paper);color:var(--ink);width:100%;box-shadow:var(--neu-in);transition:box-shadow .15s}
+input:focus,select:focus,textarea:focus{outline:none;box-shadow:var(--neu-in),0 0 0 3px var(--focus)}
 button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 input[type=number]{font-family:var(--mono);appearance:textfield;-moz-appearance:textfield}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
@@ -52,10 +65,10 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}
 input[type=color]::-webkit-color-swatch{border:none;border-radius:7px}
 input[type=color]::-moz-color-swatch{border:none;border-radius:7px}
 textarea{font-family:var(--mono);font-size:12.5px;min-height:160px;resize:vertical;line-height:1.5}
-.hdr{background:var(--paper);color:var(--ink);padding:9px clamp(16px,3vw,40px);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
+.hdr{background:transparent;color:var(--ink);padding:9px clamp(16px,3vw,40px);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
 .themebtn{grid-column:3;justify-self:end;flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:none;background:var(--paper);box-shadow:var(--neu-sm);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;line-height:1;transition:opacity .15s;color:var(--ink)}
 .themebtn:hover{opacity:.8}
-.hdr h1{grid-column:2;margin:0;font-size:clamp(66px,8.4vw,90px);font-weight:800;letter-spacing:.04em;text-align:center;color:var(--paper);text-shadow:var(--logo-shadow);cursor:pointer;transition:opacity .15s}
+.hdr h1{grid-column:2;margin:0;font-size:clamp(66px,8.4vw,90px);font-weight:800;letter-spacing:.04em;text-align:center;color:var(--logo);text-shadow:var(--logo-shadow);cursor:pointer;transition:opacity .15s}
 .hdr h1:hover{opacity:.85}
 .menuwrap{position:relative}
 .navleft{grid-column:1;justify-self:start;display:flex;align-items:center;gap:8px;min-width:0}
@@ -67,33 +80,52 @@ textarea{font-family:var(--mono);font-size:12.5px;min-height:160px;resize:vertic
 .navbtn:hover{opacity:.8}
 .navdrop{position:absolute;top:calc(100% + 10px);left:0;background:var(--paper);border-radius:14px;box-shadow:var(--neu);padding:6px;z-index:45;min-width:180px;display:flex;flex-direction:column;gap:2px}
 .navdrop button{background:none;border:none;text-align:left;padding:10px 14px;border-radius:10px;font-weight:600;font-size:13.5px;color:var(--ink);cursor:pointer;transition:background .15s}
-.navdrop button:hover{background:rgba(62,92,138,.10)}
+.navdrop button:hover{background:var(--zvyraz)}
 .navdrop button.on{color:var(--cyan);font-weight:800}
 :root[data-theme="dark"] .navdrop button:hover{background:rgba(127,163,217,.16)}
 .wrap{max-width:none;margin:0;padding:20px clamp(16px,3vw,40px) 56px}
 .grid{display:grid;gap:16px}
-@media(min-width:960px){.grid.calc{grid-template-columns:minmax(0,1fr) minmax(425px,32.5%);column-gap:48px}}
-@media(min-width:1600px){.grid.calc{grid-template-columns:minmax(0,1fr) minmax(475px,30%);column-gap:48px}}
+/* Kalkulace stojí na dvou stejných polovinách: vlevo zadání, vpravo výsledek.
+   Obě okna mají tutéž šířku a potkávají se přesně uprostřed stránky. */
+@media(min-width:960px){.grid.calc{grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:40px;align-items:stretch}}
+/* Obě okna končí ve stejné výšce: levý sloupec je sloupec pružný, poslední
+   karta v něm dorovná zbytek místa, a karta výsledku vyplní svůj sloupec celý.
+   Tlačítka se v obou drží u dolního okraje. */
+/* Vybraný produkt a Kolik namíchat stojí vedle sebe v prvním řádku, takže
+   mají tutéž šířku i výšku a potkávají se uprostřed stránky. Zadání zakázky
+   je pod produktem, ve druhém řádku. */
+@media(min-width:960px){
+  .grid.calc>.karta-produkt{grid-column:1;grid-row:1}
+  .grid.calc>.bigpanel{grid-column:2;grid-row:1}
+  .grid.calc>.bigform{grid-column:1;grid-row:2}
+  .grid.calc>.card{margin-bottom:0}
+  .karta-produkt{display:flex;flex-direction:column}
+}
+.grid.calc>.bigpanel{align-content:stretch}
+.bigpanel>.card{height:100%;display:flex;flex-direction:column}
+.bigpanel .michtl{margin-top:auto}
 .bigpanel .card{padding:25px 28px;margin-bottom:20px}
-.bigpanel .card h2{font-size:17.5px}
+.bigpanel .card h2{font-size:19px}
 .bigpanel .card .hint{font-size:15.5px}
-.bigpanel .result-big{font-size:42px}
-.bigpanel .result-sub{font-size:16px}
-.bigpanel .mixbar{height:25px}
+.bigpanel .result-big{font-size:clamp(46px,4.6vw,68px)}
+.bigpanel .result-sub{font-size:17px}
+.bigpanel .mixbar{height:30px}
 .bigpanel table.t{font-size:17px}
 .bigpanel table.t th{padding:10px}
 .bigpanel table.t td{padding:11px 10px}
-.bigpanel .note{font-size:15px}
+.bigpanel .note{font-size:15.5px}
 .bigpanel .btn{font-size:16px;padding:12px 22px}
-.bigpanel .swatch{width:32px;height:32px}
+.bigpanel .swatch{width:34px;height:34px}
 .bigpanel .tag{font-size:14px;padding:4px 11px}
 .bigpanel .wbar{height:17px}
-.bigform label.f{font-size:13.5px;margin-bottom:8px}
-.bigform select,.bigform input{font-size:16px;padding:12px 14px;border-radius:12px;box-shadow:var(--neu-sm)}
+.bigform.card>h2{font-size:19px}
+.bigform.card>.hint{font-size:15.5px}
+.bigform label.f{font-size:14px;margin-bottom:8px}
+.bigform select,.bigform input{font-size:17px;padding:13px 15px;border-radius:12px;box-shadow:var(--neu-sm)}
 .bigform select{padding-right:40px}
-.bigform select:focus,.bigform input:focus{box-shadow:var(--neu-sm),0 0 0 3px rgba(62,92,138,.18)}
+.bigform select:focus,.bigform input:focus{box-shadow:var(--neu-sm),0 0 0 3px var(--focus)}
 .bigform .frow{gap:16px;margin-bottom:16px}
-.bigform .note{font-size:13.5px}
+.bigform .note{font-size:14.5px}
 .bigform .swatch{width:36px;height:36px;border-radius:10px}
 .bigform .tgl{font-size:15.5px;gap:12px}
 .bigform .tglt{width:50px;height:27px;border-radius:14px}
@@ -115,13 +147,13 @@ label.f{display:block;font-size:11px;line-height:1.25;font-weight:700;letter-spa
 .frow>.flags{align-self:end;margin-top:0;padding-bottom:8px}}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 .chip{border:none;background:var(--paper);border-radius:999px;padding:7px 14px;cursor:pointer;font-weight:600;font-size:13px;display:inline-flex;align-items:center;justify-content:center;text-align:center;transition:box-shadow .15s,background .15s,color .15s;box-shadow:var(--neu-sm)}
-.chip.on{background:var(--key);color:#fff}
-.btn{border:none;border-radius:999px;padding:10px 18px;font-weight:700;cursor:pointer;background:var(--key);color:#fff;transition:opacity .15s;box-shadow:var(--neu-sm)}
+.chip.on{background:var(--key);color:var(--btn-ink)}
+.btn{border:none;border-radius:999px;padding:10px 18px;font-weight:700;cursor:pointer;background:var(--key);color:var(--btn-ink);transition:opacity .15s;box-shadow:var(--neu-sm)}
 .btn:hover{opacity:.82}
 .btn.sec{background:var(--paper);color:var(--ink)}
 .btn.sec:hover{opacity:1}
 .btn.sm{padding:6px 12px;font-size:12.5px}
-.btn.danger{background:var(--paper);color:#B23B2A}
+.btn.danger{background:var(--paper);color:var(--danger)}
 .btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
 table.t{width:100%;border-collapse:collapse;font-size:13.5px}
 table.t th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);border-bottom:1.5px solid var(--ink);padding:8px}
@@ -130,42 +162,95 @@ td.num,th.num{text-align:right;font-family:var(--mono)}
 .swatch{width:26px;height:26px;border-radius:7px;border:1px solid rgba(0,0,0,.12);display:inline-block;vertical-align:middle}
 /* text-align kvůli úzkému sloupci: jakmile se štítek zalomí na víc řádků,
    zarovnaný doleva vypadá roztřepeně — uvnitř oblého tvaru patří na střed */
-.tag{display:inline-block;text-align:center;font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:999px;background:var(--bg);box-shadow:var(--neu-in);color:var(--ink-2)}
-.tag.tech{background:var(--key);color:#fff;box-shadow:var(--neu-sm)}
+.tag{display:inline-block;text-align:center;font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:999px;background:var(--paper);box-shadow:var(--neu-in);color:var(--ink-2)}
+.tag.tech{background:var(--key);color:var(--btn-ink);box-shadow:var(--neu-sm)}
 .result-big{font-family:var(--mono);font-size:34px;font-weight:600;line-height:1.05;color:var(--ink)}
 .result-sub{font-family:var(--mono);color:var(--ink-2);font-size:13px}
 .mixbar{display:flex;height:20px;border-radius:8px;overflow:hidden;box-shadow:var(--neu-in);margin:10px 0 4px}
-.warnbox{background:#FBF1E4;border:1px solid #EFD2A0;color:#8A5A1E;border-radius:10px;padding:10px 12px;font-size:13px;margin-top:12px}
+.warnbox{background:#F6EEDF;border:1px solid #E3CFA6;color:#8A5A1E;border-radius:10px;padding:10px 12px;font-size:13px;margin-top:12px}
 .imgwarn{background:#FBF1E4 !important;color:#8A5A1E !important}
-.rowactive td{background:rgba(62,92,138,.10)}
-.okbox{background:#EAF3EC;border:1px solid #BCDCC7;color:#1E6B44;border-radius:10px;padding:10px 12px;font-size:13px;margin-top:12px}
+.rowactive td{background:var(--zvyraz)}
+.okbox{background:#E7F1EA;border:1px solid #C0D9C9;color:#1E6B44;border-radius:10px;padding:10px 12px;font-size:13px;margin-top:12px}
 .empty{color:var(--ink-2);font-size:13.5px;padding:20px;text-align:center;border-radius:var(--radius);box-shadow:var(--neu-in)}
 .rowline{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
 .note{font-size:12px;color:var(--ink-2)}
 .search{max-width:340px}
-pre.tpl{background:var(--bg);border-radius:10px;padding:12px;font-size:12px;overflow:auto;font-family:var(--mono);box-shadow:var(--neu-in)}
+pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;overflow:auto;font-family:var(--mono);box-shadow:var(--neu-in)}
+/* Fotka produktu a plocha pro zakázkový list jsou dvě stejné dlaždice vedle
+   sebe. Text a volby jdou pod ně na celou šířku — ve třech sloupcích vedle
+   sebe se při užším okně název rozsypal na jedno písmeno na řádek. */
+/* Horní pruh karty produktu: tři stejné dlaždice přes celou šířku — co se
+   tiskne, kam se to tiskne a kam pustit zakázkový list. Text a volby jdou pod
+   ně na celou šířku; ve sloupcích vedle textu se název při užším okně rozsypal
+   na jedno slovo na řádek. */
+.produkt-dlazdice{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+.produkt-dlazdice .dlazdice{min-width:0;display:flex;flex-direction:column}
+.produkt-dlazdice .prodphoto,.produkt-dlazdice .pdfdrop{
+  width:100%;height:auto;aspect-ratio:1;flex:none}
+.produkt-dlazdice .popiska{margin-top:7px;font-size:12.5px;line-height:1.35;color:var(--ink-2);text-align:center}
+.produkt-dlazdice .popiska b{color:var(--ink);font-size:13.5px}
+.produkt-dlazdice button.prodphoto{border:none;color:var(--ink-2);font-size:13px;padding:10px}
+.pdfdrop{min-width:0;cursor:pointer}
 .prodphoto{width:128px;height:128px;object-fit:contain;border-radius:12px;background:var(--paper);flex:0 0 auto;box-shadow:var(--neu-sm)}
 .poscards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:8px 0 6px}
 .poscard{border:none;border-radius:12px;background:var(--paper);padding:8px;cursor:pointer;text-align:center;transition:box-shadow .15s;box-shadow:var(--neu)}
-.poscard.on{box-shadow:0 0 0 3px rgba(62,92,138,.25),var(--neu)}
+.poscard.on{box-shadow:0 0 0 3px var(--focus),var(--neu)}
 .poscard img{width:100%;height:92px;object-fit:contain;background:transparent}
 .poscard .nm{font-size:12px;font-weight:700;margin-top:6px;line-height:1.25}
 .poscard .dm{font-family:var(--mono);font-size:11px;color:var(--ink-2);margin-top:3px}
 .noimg{width:100%;height:92px;display:flex;align-items:center;justify-content:center;color:var(--ink-2);font-size:11px;background:transparent;border-radius:8px;text-align:center;padding:4px}
 .thumb{width:46px;height:46px;object-fit:contain;border-radius:8px;background:var(--paper);box-shadow:var(--neu-sm)}
-.wbar{height:14px;background:var(--bg);border-radius:7px;overflow:hidden;box-shadow:var(--neu-in)}
+.wbar{height:14px;background:var(--paper);border-radius:7px;overflow:hidden;box-shadow:var(--neu-in)}
 .wbar>span{display:block;height:100%;transition:width .15s}
 .cdot{display:inline-block;width:13px;height:13px;border-radius:4px;margin-right:4px;vertical-align:-2px;border:1px solid rgba(0,0,0,.18)}
-.modalbg{position:fixed;inset:0;background:rgba(24,23,15,.4);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:30px 16px;overflow:auto}
+.modalbg{position:fixed;inset:0;background:rgba(24,23,15,.4);z-index:90;display:flex;align-items:flex-start;justify-content:center;padding:30px 16px;overflow:auto}
 .modalbox{width:min(860px,100%)}
 .modalbox .card{margin:0;box-shadow:var(--modal-shadow)}
+/* Míchací režim — celá obrazovka jen pro to, co tiskař u váhy potřebuje.
+   Písmo je záměrně o dost větší: na displej se kouká z metru a se špinavýma
+   rukama, ne z pracovní vzdálenosti. */
+.michbg{position:fixed;inset:0;z-index:80;background:var(--bg);overflow:auto;display:flex;flex-direction:column}
+.michhlav{position:sticky;top:0;z-index:2;background:var(--bg);display:flex;align-items:center;gap:16px;
+  flex-wrap:wrap;padding:14px 22px;box-shadow:0 6px 16px rgba(24,23,15,.10)}
+.michhlav .nazev{font-size:26px;font-weight:800;line-height:1.1;color:var(--ink)}
+.michhlav .kde{font-size:14px;color:var(--ink-2);font-family:var(--mono)}
+.michdavka{margin-left:auto;text-align:right;font-family:var(--mono)}
+.michdavka b{display:block;font-size:34px;font-weight:700;line-height:1}
+.michdavka span{font-size:13px;color:var(--ink-2)}
+.michvzorek{width:52px;height:52px;border-radius:14px;box-shadow:var(--neu-sm);flex:none}
+.michtelo{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:22px;padding:18px 22px 28px;align-items:start}
+.michtab{width:100%;border-collapse:collapse;font-size:20px}
+.michtab th{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-2);
+  text-align:left;padding:6px 10px;border-bottom:2px solid var(--line-2)}
+.michtab td{padding:11px 10px;border-bottom:1px solid var(--line)}
+.michtab td.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.michtab .g{font-size:26px;font-weight:700}
+.michtab tr.ted{background:var(--zvyraz)}
+.michtab tr.ted td{font-weight:700}
+.michtab tr.hotovo td{color:var(--ink-2)}
+.michtab tr.hotovo .g{font-weight:400}
+.michstav{display:inline-block;width:26px;text-align:center}
+/* Ovládání uvnitř režimu je větší — míchá se ve stoje, často v rukavicích. */
+.michbg .card{box-shadow:none;padding:0}
+.michbg .card>h2{font-size:20px}
+.michbg .btn{padding:13px 22px;font-size:15px}
+.michbg .btn.sm{padding:9px 15px;font-size:13.5px}
+.michbg .result-big{font-size:52px}
+.michbg .wbar{height:20px}
+.michbg .note,.michbg .result-sub{font-size:13.5px}
+@media (max-width:1000px){
+  .michtelo{grid-template-columns:1fr}
+  .michtab{font-size:17px}
+  .michtab .g{font-size:22px}
+}
+@media print{.michbg{display:none}}
 .linkbox{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
 .pickbox{border:none;border-radius:12px;padding:12px;margin-top:10px;background:var(--paper);box-shadow:var(--neu-in)}
 .flags{display:flex;gap:20px;flex-wrap:wrap;align-items:center;margin-top:10px}
 .tgl{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--ink);user-select:none}
 .tgl input{position:absolute;opacity:0;width:0;height:0}
-.tglt{width:38px;height:20px;border-radius:11px;background:var(--bg);box-shadow:var(--neu-in);position:relative;transition:background .15s;flex:0 0 auto}
-.tglt::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(24,23,15,.3);transition:transform .15s}
+.tglt{width:38px;height:20px;border-radius:11px;background:var(--paper);box-shadow:var(--neu-in);position:relative;transition:background .15s;flex:0 0 auto}
+.tglt::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--paper);box-shadow:0 1px 3px rgba(0,0,0,.35);transition:transform .15s}
 .tgl input:checked + .tglt{background:var(--cyan);box-shadow:none}
 .tgl input:checked + .tglt::after{transform:translateX(18px)}
 #chyba{max-width:700px;margin:60px auto;background:var(--paper);color:#8A5A1E;border-radius:12px;padding:24px;font-size:15px;display:none;box-shadow:var(--neu)}
@@ -177,20 +262,20 @@ pre.tpl{background:var(--bg);border-radius:10px;padding:12px;font-size:12px;over
 .searchbar .count{white-space:nowrap;color:var(--ink-2);font-size:12.5px}
 .searchdrop{position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--paper);border-radius:12px;box-shadow:var(--neu);z-index:40;max-height:400px;overflow:auto}
 .searchitem{display:flex;gap:12px;align-items:center;padding:10px 14px;cursor:pointer}
-.searchitem:hover,.searchitem.hi{background:var(--bg)}
+.searchitem:hover,.searchitem.hi{background:var(--zvyraz)}
 .searchitem-img{width:40px;height:40px;flex:0 0 auto;object-fit:contain;border-radius:8px;background:var(--paper);box-shadow:var(--neu-sm)}
 .searchitem-nm{font-size:13px;font-weight:700;line-height:1.3}
 .searchitem-dm{font-family:var(--mono);font-size:11px;color:var(--ink-2);margin-top:2px}
 .viewtoggle{display:flex;gap:2px;background:var(--paper);border-radius:999px;padding:4px;box-shadow:var(--neu-in)}
 .viewtoggle button{border:none;background:none;padding:7px 13px;border-radius:999px;cursor:pointer;color:var(--ink-2);font-size:15px;line-height:1;transition:background .15s,color .15s}
-.viewtoggle button.on{background:var(--key);color:#fff}
+.viewtoggle button.on{background:var(--key);color:var(--btn-ink)}
 .pgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:4px}
 @media(max-width:1500px){.pgrid{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:1150px){.pgrid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:800px){.pgrid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:480px){.pgrid{grid-template-columns:1fr}}
 .pgcard{background:var(--paper);border-radius:var(--radius);box-shadow:var(--neu);padding:14px;display:flex;flex-direction:column;gap:8px}
-.pgcard-img{aspect-ratio:1/1;border-radius:12px;background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:var(--neu-in)}
+.pgcard-img{aspect-ratio:1/1;border-radius:12px;background:var(--paper);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:var(--neu-in)}
 .pgcard-img img{width:100%;height:100%;object-fit:contain;padding:14px}
 .pgcard-nm{font-weight:700;font-size:13.5px;line-height:1.3}
 .pgcard-ref{font-family:var(--mono);font-size:11px;color:var(--ink-2)}
@@ -198,7 +283,7 @@ pre.tpl{background:var(--bg);border-radius:10px;padding:12px;font-size:12px;over
 .pgcard-dots{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;align-items:center}
 .pgcard-actions{display:flex;gap:6px;margin-top:auto;padding-top:4px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--paper);box-shadow:var(--neu);border-radius:14px;padding:12px 20px;z-index:60;font-size:14px;font-weight:600;display:flex;gap:10px;align-items:center;max-width:min(620px,92vw)}
-.toast.bad{color:#B23B2A}
+.toast.bad{color:var(--danger)}
 :root[data-theme="dark"] .toast.bad{color:#E8837A}
 .scanrow{display:flex;gap:10px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--line)}
 .scanrow:last-child{border-bottom:none}
@@ -235,7 +320,7 @@ if (!window.React || !window.ReactDOM || !window.htm) {
 } else {
 (function () {
 "use strict";
-const { useState, useEffect, useMemo, useRef } = React;
+const { useState, useEffect, useMemo, useRef, useCallback } = React;
 const html = htm.bind(React.createElement);
 
 /* ---------- technologie a výchozí spotřeby (g/m², editovatelné) ---------- */
@@ -952,7 +1037,7 @@ function PdfTab({ sgps, products, recipes, onApply, ulozeny, setUlozeny }) {
           onDragLeave=${() => setNadHranici(false)} onDrop=${naPusteni}
           onClick=${() => souborRef.current && souborRef.current.click()}
           style=${{ borderRadius: 14, padding: "34px 20px", textAlign: "center", cursor: "pointer",
-            boxShadow: nadHranici ? "var(--neu-in),0 0 0 3px rgba(62,92,138,.25)" : "var(--neu-in)" }}>
+            boxShadow: nadHranici ? "var(--neu-in),0 0 0 3px var(--focus)" : "var(--neu-in)" }}>
           <div style=${{ fontSize: 30, opacity: .5 }}>⇩</div>
           <div style=${{ fontWeight: 700, marginTop: 6 }}>
             ${stav === "cte" ? "Čtu PDF…" : "Přetáhněte PDF sem, nebo klikněte a vyberte soubor"}
@@ -1576,7 +1661,7 @@ function PokrytiModal({ obrazky, stranky, pdfId, sirka, vyska, gm2, qty, hustota
                   <img ref=${platnoRef} src=${zdroj.url} alt="stránka listu" draggable="false"
                     style=${{ width: zoomS > 1 ? "100%" : "auto", maxWidth: "100%", display: "block" }} />
                   ${ramecek() && html`<div style=${Object.assign({ position: "absolute", border: "2px solid var(--cyan)",
-                    background: "rgba(62,92,138,.16)", pointerEvents: "none" }, ramecek())}></div>`}
+                    background: "rgba(127,127,127,.28)", pointerEvents: "none" }, ramecek())}></div>`}
                 </div>
               </div>
             </div>`}
@@ -1585,7 +1670,7 @@ function PokrytiModal({ obrazky, stranky, pdfId, sirka, vyska, gm2, qty, hustota
             onDrop=${(e) => { e.preventDefault(); setNadHranici(false); zeSouboru(e.dataTransfer.files && e.dataTransfer.files[0]); }}
             onClick=${() => souborRef.current && souborRef.current.click()}
             style=${{ borderRadius: 12, padding: "18px 14px", textAlign: "center", cursor: "pointer",
-              boxShadow: nadHranici ? "var(--neu-in),0 0 0 3px rgba(62,92,138,.25)" : "var(--neu-in)" }}>
+              boxShadow: nadHranici ? "var(--neu-in),0 0 0 3px var(--focus)" : "var(--neu-in)" }}>
             <div style=${{ fontWeight: 700, fontSize: 13 }}>Přetáhněte sem tiskové podklady (PNG, JPG)</div>
             <div className="note" style=${{ marginTop: 3 }}>
               nejpřesnější je soubor, ze kterého se dělá síto — na bílém nebo průhledném pozadí
@@ -1740,16 +1825,16 @@ function PdfVKalkulaci({ sgps, products, recipes, onApply, onNacteno }) {
 
   return html`
     <${React.Fragment}>
-      <div style=${{ flex: "0 0 250px", marginLeft: "auto", alignSelf: "stretch", minWidth: 0 }}
+      <div className="pdfdrop"
         onDragOver=${(e) => { if (mostOk) { e.preventDefault(); setNadHranici(true); } }}
         onDragLeave=${() => setNadHranici(false)}
         onDrop=${(e) => { e.preventDefault(); setNadHranici(false);
           const f = e.dataTransfer.files && e.dataTransfer.files[0]; if (mostOk && f) posli(f); }}
         onClick=${() => mostOk && souborRef.current && souborRef.current.click()}>
-        <div style=${{ height: "100%", minHeight: 128, borderRadius: 12, padding: "14px 12px",
+        <div style=${{ height: "100%", borderRadius: 12, padding: "10px",
           display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
           textAlign: "center", gap: 4, cursor: mostOk ? "pointer" : "default", opacity: mostOk ? 1 : .55,
-          boxShadow: nadHranici ? "var(--neu-in),0 0 0 3px rgba(62,92,138,.25)" : "var(--neu-in)" }}>
+          boxShadow: nadHranici ? "var(--neu-in),0 0 0 3px var(--focus)" : "var(--neu-in)" }}>
           <div style=${{ fontSize: 22, opacity: .55 }}>⇩</div>
           <div style=${{ fontWeight: 700, fontSize: 13 }}>
             ${stav === "cte" ? "Čtu PDF…" : "Zakázkový list (PDF)"}
@@ -2235,7 +2320,7 @@ function ScanTab({ hidOn, setHidOn, scanLog, onCode, onApply, clearLog, sgps }) 
         <label className="f" style=${{ marginTop: 6 }}>1 · Čtečka v režimu klávesnice (běžné USB čtečky)</label>
         <div className="rowline">
           <label className="tgl"><input type="checkbox" checked=${hidOn} onChange=${(e) => setHidOn(e.target.checked)} /><span className="tglt"></span>Poslouchat čtečku kdekoli v aplikaci</label>
-          <span className="tag" style=${{ background: hidOn ? "var(--ok)" : "var(--bg)", color: hidOn ? "#fff" : "var(--ink-2)", boxShadow: hidOn ? "var(--neu-sm)" : "var(--neu-in)" }}>${hidOn ? "aktivní" : "vypnuto"}</span>
+          <span className="tag" style=${{ background: hidOn ? "var(--ok)" : "var(--paper)", color: hidOn ? "#fff" : "var(--ink-2)", boxShadow: hidOn ? "var(--neu-sm)" : "var(--neu-in)" }}>${hidOn ? "aktivní" : "vypnuto"}</span>
         </div>
         <p className="note">Většina USB čteček se chová jako klávesnice — nic se nepřipojuje, stačí zapnout tento přepínač a načíst kód. Aplikace rozpozná čtečku podle rychlosti zadání, běžné psaní tím není dotčeno.</p>
 
@@ -3399,6 +3484,12 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
      jít pryč. Krok navíc s potvrzením je schválně: receptura mizí i ze souboru
      a s ní všechny vazby na produkty, takže omyl by nebylo kam vrátit.
      Je-li nastavené heslo na mazání, platí i tady. */
+  /* Míchací režim na celou obrazovku a stav vážení, který si z něj bere
+     zvýraznění právě vážené složky. */
+  const [michRezim, setMichRezim] = useState(false);
+  const [michStav, setMichStav] = useState(null);
+  const zavriMichani = useCallback(() => setMichRezim(false), []);
+
   const [smazPotvrd, setSmazPotvrd] = useState("");   // id receptury čekající na potvrzení
   const smazCustom = (r) => {
     if (!r || r.type !== "Custom") return;
@@ -3794,6 +3885,305 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     w.document.close();
   };
 
+  /* Zadání se po vyplnění sbalí do jednoho řádku. Dokud tiskař vybírá, je
+     všechno otevřené; jakmile je vybraná receptura, poloha i počet kusů, není
+     důvod držet na obrazovce dvacet polí, která už udělala svou práci. */
+  const zadaniHotove = !!(recipe && position && n(qty) > 0 && calcAkt);
+  const [zadaniOtevrene, setZadaniOtevrene] = useState(true);
+  // Sbaluje se na vyslovnou volbu obsluhy, ne podle změn stavu: receptura se
+  // mění i sama (dotažení databází, vazba na produkt) a zadání by se zavíralo
+  // pod rukama dřív, než si ho stačí někdo přečíst.
+  const zadaniHotovo = () => setZadaniOtevrene(false);
+
+  /* Rady k barvě — prosvítání podkladu a poměr pigment/báze. Jsou k něčemu
+     ve chvíli míchání, ne při vybírání zakázky. */
+  const blokRady = calcAkt ? html`<${React.Fragment}>
+          ${podklad && html`
+            <div style=${{ marginTop: 14 }}>
+              <div className="lbl">Barva na podkladu</div>
+              <div className=${podklad.stav === "podtisk" ? "warnbox" : (podklad.stav === "riziko" ? "okbox" : "specbar")}
+                   style=${{ marginTop: 4 }}>
+                <div className="rowline" style=${{ marginTop: 0, gap: 8 }}>
+                  <span className="tag" title="Odstín barvy">
+                    <span style=${{ display: "inline-block", width: 10, height: 10, borderRadius: 2,
+                                    background: recipe.hex, marginRight: 5, verticalAlign: -1 }}></span>
+                    barva
+                  </span>
+                  <span className="tag" title="Odstín materiálu, na který se tiskne">
+                    <span style=${{ display: "inline-block", width: 10, height: 10, borderRadius: 2,
+                                    background: colorSel.hex, marginRight: 5, verticalAlign: -1 }}></span>
+                    podklad ${podklad.tridaPodkladu}
+                  </span>
+                  <span className="tag" title="O kolik je barva světlejší (+) nebo tmavší (−) než podklad">
+                    rozdíl jasu ${podklad.dL > 0 ? "+" : ""}${fmt(podklad.dL, 0)}
+                  </span>
+                  ${recipe.opacity && html`<span className="tag">${recipe.opacity}</span>`}
+                </div>
+                ${podklad.hlaska
+                  ? html`<div style=${{ marginTop: 6 }}>${podklad.hlaska}</div>`
+                  : html`<div style=${{ marginTop: 6 }}>Barva je vůči podkladu dost tmavá — prosvítání nehrozí.</div>`}
+                ${podklad.podtiskNutny && html`
+                  <div className="note" style=${{ marginTop: 6 }}>
+                    Podtisk znamená průchod navíc: bílá se počítá jako samostatná dávka
+                    a k času tisku přibude sušení mezi průchody.
+                  </div>`}
+                ${podklad.posun && html`<div style=${{ marginTop: 6 }}>${podklad.posun}</div>`}
+              </div>
+              <p className="note" style=${{ marginTop: 4 }}>
+                Posouzení vychází z odstínu barvy a materiálu, ne z měření — je to
+                upozornění, ne verdikt. Meze si dílna může upravit v parametrech.
+              </p>
+              ${podklad.stav !== "ok" && slozeni.baze.length > 0 && bazeVolby.length > 1 && html`
+                <div className="note" style=${{ marginTop: 6 }}>
+                  Odstín dělá poměr pigmentů, kryvost dělá báze — tentýž odstín jde
+                  namíchat na krycí bázi místo ${slozeni.baze.map((b) => b.name).join(", ")}.
+                  Dílna má: ${bazeVolby.map((b) => b.nazev).join(" · ")}.
+                </div>`}
+            </div>`}
+
+          ${slozeni.znamy && html`
+            <div style=${{ marginTop: 14 }}>
+              <div className="lbl">Pigment a báze</div>
+              <div className=${slozeni.pretizeno ? "warnbox" : "specbar"} style=${{ marginTop: 4 }}>
+                <div className="rowline" style=${{ marginTop: 0, gap: 8 }}>
+                  <span className="tag">pigmenty ${fmt(slozeni.pctPigment, 1)} %</span>
+                  <span className="tag">báze ${fmt(slozeni.pctBaze, 1)} %</span>
+                  <span className="tag" title="Kolik pigmentu báze snese">strop ${fmt(slozeni.strop, 0)} %</span>
+                </div>
+                ${slozeni.pigmenty.length > 0 && html`
+                  <div className="rowline" style=${{ marginTop: 6, gap: 6 }}>
+                    ${slozeni.pigmenty.map((p, i) => html`
+                      <span key=${i} className="tag">
+                        ${p.hex ? html`<span style=${{ display: "inline-block", width: 9, height: 9, borderRadius: 2,
+                                        background: p.hex, marginRight: 5, verticalAlign: -1 }}></span>` : ""}
+                        ${p.name} ${fmt(n(p.pct), 1)} %
+                      </span>`)}
+                  </div>`}
+                ${slozeni.pretizeno && html`
+                  <div style=${{ marginTop: 6 }}>
+                    Pigmentu je <b>${fmt(slozeni.pctPigment, 1)} %</b>, ale báze snese jen
+                    ${fmt(slozeni.strop, 0)} %. Nad stropem barva ztrácí vlastnosti —
+                    praská a hůř drží v praní.
+                  </div>`}
+                ${slozeni.nezname.length > 0 && html`
+                  <div className="note" style=${{ marginTop: 6 }}>
+                    Nezařazeno: ${slozeni.nezname.map((c) => c.name).join(", ")} — doplňte je
+                    do parametry/pigmenty.csv, jinak s nimi aplikace neumí počítat.
+                  </div>`}
+              </div>
+            </div>`}
+          <//>` : null;
+
+  /* Domovská stránka nese jen výsledek: kolik a jakou barvu. Všechno, co se
+     dělá až u míchačky — krycí plocha z náhledu, zbytky ze skladu, štítek
+     a navažování — se přesunulo do míchacího režimu. Po výběru zakázky tak
+     na obrazovce nezůstane nic, co v tu chvíli nikdo nepotřebuje. */
+  const blokPokryti = calcAkt ? html`
+            <div className="rowline" style=${{ marginTop: 0, marginBottom: 10 }}>
+              <span className="tag" title="Podíl plochy, který barva doopravdy pokryje">
+                krycí plocha ${fmt(pokryti, 1)} %${pokrytiJob != null
+                  ? " · z náhledu" + (odsazeniJob ? " + " + fmt(odsazeniJob, 1) + " mm" : "")
+                  : " · z katalogu"}
+              </span>
+              <button className="btn sec sm" onClick=${() => setPokrytiOkno(true)}>
+                ${pokrytiJob != null ? "Upravit krycí plochu" : "Spočítat krycí plochu z náhledu"}
+              </button>
+              ${pokrytiJob != null && html`<button className="btn sec sm" onClick=${() => { setPokrytiJob(null); setOdsazeniJob(null); }}>Zpět na katalog</button>`}
+            </div>` : null;
+  const blokZbytku = calcAkt ? html`<${React.Fragment}>
+            ${!pouzityZbytek && nabidky.length > 0 && html`
+              <div className="okbox">
+                <b>Na tuto zakázku můžete využít zbytek.</b>
+                ${nabidky.slice(0, 3).map((v) => html`
+                  <div key=${v.zbytek.kod} className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
+                    <span className="swatch" style=${{ background: v.zbytek.hex, width: 20, height: 20 }} />
+                    <span>
+                      <b>${fmt(v.pouzit)} g</b> z kelímku <b>${v.zbytek.kod}</b> — ${v.zbytek.nazev}
+                      <span className="note"> (v kelímku ${fmt(n(v.zbytek.gramu))} g${
+                        v.shoda < 0.999 ? ", složení sedí na " + fmt(v.shoda * 100, 0) + " %" : ""})</span>
+                      ${v.stav && v.stav.stav === "brzy" && html`<span className="tag" style=${{ marginLeft: 6 }}
+                        title=${v.stav.duvod}>spotřebovat ${zbyvaText(v.stav.zbyva)}</span>`}
+                      <br /><span className="note">domíchat pak stačí ${fmt(v.domichat)} g místo ${fmt(calcAkt.totalG)} g</span>
+                    </span>
+                    <span style=${{ marginLeft: "auto" }}></span>
+                    <button className="btn sm" onClick=${() => setPouzityZbytek({ kod: v.zbytek.kod, rezim: "cast" })}>
+                      Použít ${fmt(v.pouzit)} g
+                    </button>
+                  </div>
+                  ${(() => {
+                    // Nevejde-li se kelímek celý, nabídneme i variantu, kdy se dávka
+                    // zvětší tak, aby se spotřeboval beze zbytku.
+                    if (v.zbudeVKelimku <= 0.5) return null;
+                    const c = zbytekCelyPlan(v.zbytek, calc.comps, calc.totalG);
+                    if (!c || c.prebytek <= 0.5) return null;
+                    return html`
+                      <div key=${v.zbytek.kod + "-cely"} className="rowline"
+                        style=${{ marginTop: 4, marginBottom: 0, paddingLeft: 30 }}>
+                        <span className="note">
+                          …nebo <b>spotřebovat celý kelímek</b> (${fmt(n(v.zbytek.gramu))} g):
+                          dávka se zvětší na ${fmt(c.davka)} g, tedy o ${fmt(c.prebytek)} g víc,
+                          než zakázka potřebuje. Odstín zůstane stejný.
+                        </span>
+                        <span style=${{ marginLeft: "auto" }}></span>
+                        <button className="btn sec sm" onClick=${() => setPouzityZbytek({ kod: v.zbytek.kod, rezim: "cely" })}>
+                          Celý kelímek
+                        </button>
+                      </div>`;
+                  })()}
+                  <${React.Fragment} key=${v.zbytek.kod + "-x"} />`)}
+              </div>`}
+            ${pouzityZbytek && vyuzitiZbytku && html`
+              <div className="specbar" style=${{ marginTop: 10 }}>
+                <span className="dot" style=${{ background: "var(--ok)" }}></span>
+                <span>
+                  Použije se <b>${fmt(vyuzitiZbytku.pouzit)} g</b> ze zbytku
+                  <b> ${vyuzitiZbytku.zbytek.kod === ZBYTEK_RUCNI
+                    ? vyuzitiZbytku.zbytek.nazev : vyuzitiZbytku.zbytek.kod}</b>${" "}
+                  — domíchat ${fmt(vyuzitiZbytku.domichat)} g.
+                  ${vyuzitiZbytku.celyZbytek
+                    ? html`<span className="note"> Kelímek se spotřebuje celý; dávka
+                        ${" " + fmt(calcAkt.totalG)} g je o ${fmt(vyuzitiZbytku.prebytek)} g větší,
+                        než zakázka potřebuje.</span>`
+                    : html`<span className="note"> V kelímku pak zůstane ${fmt(vyuzitiZbytku.zbudeVKelimku)} g.</span>`}
+                </span>
+                <span style=${{ marginLeft: "auto" }}></span>
+                ${vyuzitiZbytku.celyZbytek
+                  ? html`<button className="btn sec sm"
+                      onClick=${() => setPouzityZbytek({ kod: pouzityZbytek.kod, rezim: "cast" })}>Jen na zakázku</button>`
+                  : (vyuzitiZbytku.zbudeVKelimku > 0.5 && html`<button className="btn sec sm"
+                      onClick=${() => setPouzityZbytek({ kod: pouzityZbytek.kod, rezim: "cely" })}>Celý kelímek</button>`)}
+                <button className="btn sec sm" onClick=${() => setPouzityZbytek(null)}>Nepoužít</button>
+              </div>`}
+            ${pouzityZbytek && !vyuzitiZbytku && html`
+              <div className="warnbox">Zvolený zbytek už na tuhle dávku nesedí — složení nebo množství se změnilo.
+                <div style=${{ marginTop: 8 }}><button className="btn sec sm" onClick=${() => setPouzityZbytek(null)}>Zrušit použití</button></div>
+              </div>`}
+            ${rozpisZbytku && rozpisZbytku.some((r) => r.pridat > 0.005) && html`
+              <div className="okbox" style=${{ marginTop: 8 }}>
+                <b>K tomu, co je v kelímku, přidejte
+                  ${" " + rozpisZbytku.filter((r) => r.pridat > 0.005)
+                    .map((r) => fmt(r.pridat) + " g " + r.name).join(" · ")}.</b>
+                <p className="note" style=${{ marginTop: 6 }}>
+                  Navažuje se na váhu i s kelímkem — sloupec „přidat" je to, co má přibýt.
+                  Míchací lístek i asistent vážení už s tím počítají.
+                </p>
+              </div>`}
+            ${!pouzityZbytek && html`
+              <div className="rowline" style=${{ marginTop: 10, marginBottom: 0 }}>
+                <button className="btn sec sm" onClick=${() => setRucni(rucni || {
+                  nazev: "", gramu: "", slozeni: [{ id: uid(), name: "", pct: "" }] })}>
+                  ${rucni ? "Zbytek zadaný ručně" : "Zbytek není v evidenci — zadat ručně"}
+                </button>
+                <span className="note">z kelímku bez štítku se dá vyjít taky, když víte, co v něm je</span>
+              </div>`}
+            ${!pouzityZbytek && rucni && html`
+              <div className="pickbox" style=${{ marginTop: 8 }}>
+                <div className="rowline" style=${{ marginTop: 0 }}>
+                  <b>Zbytek zadaný ručně</b>
+                  <span className="note">cíl: ${recipe.name} · dávka zakázky ${fmt(calc.totalG)} g</span>
+                  <span style=${{ marginLeft: "auto" }}></span>
+                  <button className="btn sec sm" onClick=${() => setRucni(null)}>Zavřít</button>
+                </div>
+                <div className="frow c3" style=${{ marginTop: 8 }}>
+                  <div>
+                    <label className="f">Co to je (nepovinné)</label>
+                    <input value=${rucni.nazev} placeholder="např. kelímek u míchačky"
+                      onChange=${(e) => setRucni(Object.assign({}, rucni, { nazev: e.target.value }))} />
+                  </div>
+                  <div>
+                    <label className="f">Kolik ho mám (g)</label>
+                    <input type="number" step="1" min="0" value=${rucni.gramu} placeholder="např. 200"
+                      onChange=${(e) => setRucni(Object.assign({}, rucni, { gramu: e.target.value }))} />
+                  </div>
+                  <div>
+                    <label className="f">Vyplnit složení podle receptury</label>
+                    <select value="" onChange=${(e) => {
+                      const r = recipes.find((x) => x.id === e.target.value);
+                      if (!r) return;
+                      const suma = r.components.reduce((a, c) => a + n(c.pct), 0) || 100;
+                      setRucni(Object.assign({}, rucni, {
+                        nazev: rucni.nazev || r.name,
+                        slozeni: r.components.map((c) => ({ id: uid(), name: c.name,
+                          pct: cislo(n(c.pct) / suma * 100, 2) })),
+                      }));
+                    }}>
+                      <option value="">— vybrat recepturu —</option>
+                      ${recepturyTech.filter((r) => r.components && r.components.length).slice(0, 400)
+                        .map((r) => html`<option key=${r.id} value=${r.id}>${r.name}${r.zdroj ? " · " + nazevDb(r.zdroj) : ""}</option>`)}
+                    </select>
+                  </div>
+                </div>
+
+                <label className="f" style=${{ marginTop: 8 }}>Co je v kelímku (komponenta a %)</label>
+                ${(rucni.slozeni || []).map((c, i) => html`
+                  <div key=${c.id} className="rowline" style=${{ marginTop: 4, marginBottom: 0 }}>
+                    <input style=${{ flex: 3 }} value=${c.name} placeholder="název komponenty"
+                      onChange=${(e) => setRucni(Object.assign({}, rucni, {
+                        slozeni: rucni.slozeni.map((x, j) => j === i ? Object.assign({}, x, { name: e.target.value }) : x) }))} />
+                    <input style=${{ flex: 1 }} type="number" step="0.01" min="0" value=${c.pct} placeholder="%"
+                      onChange=${(e) => setRucni(Object.assign({}, rucni, {
+                        slozeni: rucni.slozeni.map((x, j) => j === i ? Object.assign({}, x, { pct: e.target.value }) : x) }))} />
+                    <button className="btn sec sm" title="odebrat řádek"
+                      onClick=${() => setRucni(Object.assign({}, rucni, {
+                        slozeni: rucni.slozeni.filter((x, j) => j !== i) }))}>✕</button>
+                  </div>`)}
+                <div className="rowline" style=${{ marginTop: 6 }}>
+                  <button className="btn sec sm" onClick=${() => setRucni(Object.assign({}, rucni, {
+                    slozeni: (rucni.slozeni || []).concat([{ id: uid(), name: "", pct: "" }]) }))}>+ řádek</button>
+                  <span className="note">${(() => {
+                    const su = (rucni.slozeni || []).reduce((a, x) => a + n(x.pct), 0);
+                    return su > 0 ? "součet " + fmt(su) + " % — poměry se stejně přepočítají na sto" : "";
+                  })()}</span>
+                </div>
+
+                ${(() => {
+                  if (!rucniZbytekObj) return html`<div className="note" style=${{ marginTop: 8 }}>
+                    Napište, kolik zbytku máte a co v něm je — aspoň jednu složku s procenty.</div>`;
+                  const d = domichaniZeZbytku({ slozeni: rucniZbytekObj.slozeni, gramu: rucniZbytekObj.gramu,
+                    cil: recipe.components, chciCelkem: calc.totalG });
+                  if (!d) return null;
+                  if (!d.ok) return html`<div className="warnbox" style=${{ marginTop: 8 }}>
+                    ${d.cizi.length === 1
+                      ? html`Ve zbytku je <b>${d.cizi[0]}</b>, kterou receptura ${recipe.name} vůbec nemá.`
+                      : html`Ve zbytku jsou složky <b>${d.cizi.join(", ")}</b>, které receptura ${recipe.name} vůbec nemá.`}
+                    ${" "}Přiléváním se toho nezbavíte — na tenhle odstín se tenhle kelímek použít nedá.
+                  </div>`;
+                  return html`
+                    <div className="okbox" style=${{ marginTop: 8 }}>
+                      ${d.sedi
+                        ? html`Zbytek už má složení receptury ${recipe.name} — stačí ho použít a domíchat zbytek dávky.`
+                        : html`<b>Přidejte ${d.pridat.map((r) => fmt(r.pridat) + " g " + r.name).join(" · ")}.</b>`}
+                      ${d.zvetseno && html`<span className="note">
+                        ${" "}Aby se kelímek vešel celý, musí být dávka aspoň ${fmt(d.minDavka)} g —
+                        o ${fmt(d.minDavka - calc.totalG)} g víc, než zakázka potřebuje.</span>`}
+                      <div className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
+                        <button className="btn sm" onClick=${() => setPouzityZbytek({ kod: ZBYTEK_RUCNI,
+                          rezim: d.zvetseno ? "cely" : "cast" })}>Namíchat z tohoto zbytku</button>
+                        <span className="note">dávka, míchací lístek i vážení se tím přepočítají</span>
+                      </div>
+                    </div>`;
+                })()}
+              </div>`}
+          <//>` : null;
+  const blokStitku = calcAkt ? html`<${React.Fragment}>
+            <div className="rowline" style=${{ marginTop: 12, marginBottom: 0 }}>
+              <button className="btn sec" onClick=${oznacDavku} disabled=${!recipe || !calc}>
+                Štítek na kelímek →
+              </button>
+              <label className="tgl" title="pot life se pak hlídá od namíchání">
+                <input type="checkbox" checked=${dvouslozkova} onChange=${(e) => setDvouslozkova(e.target.checked)} />
+                <span className="tglt"></span>s tužidlem
+              </label>
+            </div>
+            <p className="note" style=${{ marginTop: 6 }}>
+              Štítek nalepte na kelímek hned po namíchání. Po zakázce ho načtěte čtečkou
+              a aplikace se zeptá, kolik barvy zbylo — tím se dostane do evidence zbytků.
+              ${" "}<button className="btn sec sm" style=${{ marginLeft: 4 }}
+                onClick=${() => setUlozitZbytek({ gramu: "", pozn: "", expirace: "", potlifeH: "", tuzidlo: false })}
+                disabled=${!recipe}>Znám zbytek rovnou</button>
+            </p>
+          <//>` : null;
+
   if (!products.length) return html`<div className="empty">Katalog je prázdný — v záložce Import / data obnovte katalog nebo nahrajte soubor.</div>`;
 
   return html`
@@ -3853,31 +4243,88 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
         </div>`}
 
       <div className="grid calc">
-        <div style=${{ display: "grid", gap: 20, alignContent: "start" }}>
-
-          <div className="card" style=${{ margin: 0 }}>
+          <div className="card karta-produkt" style=${{ margin: 0 }}>
             <h2>Vybraný produkt</h2>
-            <div className="rowline" style=${{ alignItems: "flex-start", margin: "2px 0 0" }}>
-              <${Img} className="prodphoto" srcs=${prodPhotos} alt=${product ? product.name : ""}
-                errFallback=${html`<div className="prodphoto noimg">fotka nenalezena</div>`} />
-              <div style=${{ minWidth: 0, flex: 1 }}>
-                <div style=${{ fontWeight: 800 }}>${product && product.ref ? product.ref + " · " : ""}${product ? product.name : ""}</div>
-                ${product && product.material && html`<div className="note">${product.material}</div>`}
-                <div className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
-                  <span className="tag tech">${tech} — ${TECHS[tech] ? TECHS[tech].name : ""}</span>
-                  <span className="tag" title=${rozmerListu ? "rozměr ze zakázkového listu" : "největší tisková plocha dle katalogu"}>
-                    ${position ? fmt(sirka, 1) + "×" + fmt(vyska, 1) : "?"} mm${rozmerListu ? " ⌂" : ""}
-                  </span>
-                  ${colorSel && html`<span className="tag"><span className="cdot" style=${{ background: colorSel.hex || "#CCCCCC" }}></span>${colorSel.code || colorSel.name || ""}</span>`}
-                </div>
-                <button className="btn sec sm" style=${{ marginTop: 12 }} onClick=${() => setPickerOpen(true)} disabled=${!product}>Barva a poloha potisku →</button>
+            <div className="produkt-dlazdice">
+              <div className="dlazdice">
+                <${Img} className="prodphoto" srcs=${prodPhotos} alt=${product ? product.name : ""}
+                  errFallback=${html`<div className="prodphoto noimg">fotka nenalezena</div>`} />
+                <div className="popiska">Produkt</div>
               </div>
-              ${onPouzitSpec && html`<${PdfVKalkulaci} sgps=${sgps} products=${products} recipes=${recipes}
-                onApply=${onPouzitSpec} onNacteno=${onPdfNacteno} />`}
+              <div className="dlazdice">
+                ${position ? html`
+                  <${Img} className="prodphoto" src=${position.img} alt=${position.name}
+                    fallback=${html`<div className="prodphoto noimg">bez náhledu</div>`}
+                    errFallback=${html`<div className="prodphoto noimg">obrázek nenalezen</div>`} />
+                  <div className="popiska"><b>${position.name}</b><br />
+                    ${position.tech} · ${fmt(position.w, 1)} × ${fmt(position.h, 1)} mm</div>
+                ` : html`
+                  <button className="prodphoto noimg" onClick=${() => setPickerOpen(true)} disabled=${!product}
+                    style=${{ cursor: product ? "pointer" : "default" }}>vyberte polohu potisku</button>
+                  <div className="popiska">Poloha potisku</div>
+                `}
+              </div>
+              ${onPouzitSpec && html`
+                <div className="dlazdice">
+                  <${PdfVKalkulaci} sgps=${sgps} products=${products} recipes=${recipes}
+                    onApply=${onPouzitSpec} onNacteno=${onPdfNacteno} />
+                  <div className="popiska">Zakázkový list</div>
+                </div>`}
+            </div>
+            <div style=${{ marginTop: 14 }}>
+              <div style=${{ fontWeight: 800, fontSize: 16 }}>${product && product.ref ? product.ref + " · " : ""}${product ? product.name : ""}</div>
+              ${product && product.material && html`<div className="note">${product.material}</div>`}
+            </div>
+            <div className="rowline" style=${{ marginTop: 10, marginBottom: 0 }}>
+              <span className="tag tech">${tech} — ${TECHS[tech] ? TECHS[tech].name : ""}</span>
+              <span className="tag" title=${rozmerListu ? "rozměr ze zakázkového listu" : "největší tisková plocha dle katalogu"}>
+                ${position ? fmt(sirka, 1) + "×" + fmt(vyska, 1) : "?"} mm${rozmerListu ? " ⌂" : ""}
+              </span>
+              ${colorSel && html`<span className="tag"><span className="cdot" style=${{ background: colorSel.hex || "#CCCCCC" }}></span>${colorSel.code || colorSel.name || ""}</span>`}
+              <button className="btn sec sm" onClick=${() => setPickerOpen(true)} disabled=${!product}>Barva a poloha potisku →</button>
             </div>
           </div>
 
           <div className="card bigform" style=${{ margin: 0 }}>
+            ${zadaniHotove && !zadaniOtevrene ? html`<${React.Fragment}>
+              <div className="rowline" style=${{ marginTop: 0, marginBottom: 0 }}>
+                <h2 style=${{ margin: 0 }}>Zadání zakázky</h2>
+                <span style=${{ marginLeft: "auto" }}></span>
+                <button className="btn sec sm" onClick=${() => setZadaniOtevrene(true)}>Upravit zadání</button>
+              </div>
+              <div className="kv" style=${{ marginTop: 14, fontSize: 15, gap: "10px 18px" }}>
+                <div className="k">Receptura</div>
+                <div className="v">
+                  <span className="swatch" style=${{ background: recipe.hex || "#888", width: 18, height: 18,
+                    display: "inline-block", verticalAlign: -4, marginRight: 8 }} />
+                  ${recipe.name}${recipe.series ? html`<span className="note" style=${{ fontWeight: 400 }}> · ${recipe.series}</span>` : ""}
+                </div>
+                <div className="k">Produkt</div>
+                <div className="v">${product ? (product.ref ? product.ref + " · " : "") + product.name : "—"}</div>
+                ${colorSel && html`<${React.Fragment}>
+                  <div className="k">Barva produktu</div>
+                  <div className="v">
+                    <span className="cdot" style=${{ background: colorSel.hex || "#CCC" }}></span>
+                    ${(colorSel.code || "") + (colorSel.name ? " " + colorSel.name : "")}
+                  </div>
+                <//>`}
+                <div className="k">Poloha a technologie</div>
+                <div className="v">${position ? position.name + " · " + position.tech + " — "
+                  + (TECHS[position.tech] ? TECHS[position.tech].name : "") : tech}</div>
+                <div className="k">Rozměr potisku</div>
+                <div className="v">${fmt(sirka, 1)} × ${fmt(vyska, 1)} mm${rozmerListu ? " (ze zakázkového listu)" : ""}
+                  <span className="note" style=${{ fontWeight: 400 }}> · krycí plocha ${fmt(pokryti, 1)} %</span></div>
+                <div className="k">Zakázka</div>
+                <div className="v">${fmt(n(qty), 0)} ks · ${fmt(n(gm2), 1)} g/m²${
+                  n(loss) > 0 ? " · ztráty " + fmt(n(loss), 0) + " %" : ""}${
+                  n(minBatch) > 0 ? " · min. dávka " + fmt(n(minBatch), 0) + " g" : ""}</div>
+                ${(recipe.mesh || recipe.opacity || n(viskoz) > 0) && html`<${React.Fragment}>
+                  <div className="k">Tisk</div>
+                  <div className="v">${[recipe.mesh, recipe.opacity, recipe.surface,
+                    n(viskoz) > 0 ? fmt(n(viskoz), 1) + " s" : ""].filter(Boolean).join(" · ")}</div>
+                <//>`}
+              </div>
+            <//>` : html`<${React.Fragment}>
             <h2>Receptura a zakázka</h2>
             <p className="hint">Vyberte recepturu — technologie a rozměry se doplní z vybrané polohy potisku.</p>
             <${FiltrDatabaze} recipes=${recepturyTech} hodnota=${dbFiltr} setHodnota=${setDbFiltr}
@@ -3888,7 +4335,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 <label className="f">Receptura (Pantone standard) — ${pantoneList.length} z ${pantoneAll.length}</label>
                 <input value=${recQ} onChange=${(e) => setRecQ(e.target.value)} placeholder="Filtr: např. 485 nebo Reflex…" style=${{ marginBottom: 6 }} />
                 <select value=${pantoneList.some((r) => r.id === recId) ? recId : ""}
-                  onChange=${(e) => e.target.value && setRecId(e.target.value)}>
+                  onChange=${(e) => { if (e.target.value) { setRecId(e.target.value); zadaniHotovo(); } }}>
                   <option value="">— vyberte Pantone recepturu —</option>
                   ${pantoneList.slice(0, 400).map((r) => html`<option key=${r.id} value=${r.id}>${r.name} · ${r.series}</option>`)}
                 </select>
@@ -3897,7 +4344,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
               <div>
                 <label className="f">Custom receptura${product ? " — " + (product.ref || product.name) : ""}</label>
                 <select value=${customList.some((x) => x.r.id === recId) ? recId : ""}
-                  onChange=${(e) => e.target.value && setRecId(e.target.value)}>
+                  onChange=${(e) => { if (e.target.value) { setRecId(e.target.value); zadaniHotovo(); } }}>
                   <option value="">${customList.length ? "— vyberte custom recepturu —" : "— žádná pro tento produkt —"}</option>
                   ${customList.map(({ r, presna, volna }) => html`<option key=${r.id} value=${r.id}>${
                     r.name}${presna ? " ✓ tato kombinace" : (volna ? " · bez vazby" : "")}</option>`)}
@@ -4086,361 +4533,84 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 </div>`
               : html`<p className="note">Spotřeba se předvyplňuje dle technologie (${Object.entries(TECHS).map(([k, t]) => k + " " + t.gm2).join(" · ")} g/m²) — upravte podle síta / hloubky leptu klišé a viskozity.${
                   (sita && sita.length) ? " Vyberte síto u receptury a spotřeba se spočítá z jeho parametrů." : ""}</p>`}
+              ${zadaniHotove && html`
+                <div className="rowline" style=${{ marginTop: 12, marginBottom: 0 }}>
+                  <button className="btn sec sm" onClick=${() => setZadaniOtevrene(false)}>Sbalit zadání</button>
+                  <span className="note">na obrazovce zůstane jen dávka a barva</span>
+                </div>`}
+            <//>`}
           </div>
 
-          ${podklad && html`
-            <div style=${{ marginTop: 14 }}>
-              <div className="lbl">Barva na podkladu</div>
-              <div className=${podklad.stav === "podtisk" ? "warnbox" : (podklad.stav === "riziko" ? "okbox" : "specbar")}
-                   style=${{ marginTop: 4 }}>
-                <div className="rowline" style=${{ marginTop: 0, gap: 8 }}>
-                  <span className="tag" title="Odstín barvy">
-                    <span style=${{ display: "inline-block", width: 10, height: 10, borderRadius: 2,
-                                    background: recipe.hex, marginRight: 5, verticalAlign: -1 }}></span>
-                    barva
-                  </span>
-                  <span className="tag" title="Odstín materiálu, na který se tiskne">
-                    <span style=${{ display: "inline-block", width: 10, height: 10, borderRadius: 2,
-                                    background: colorSel.hex, marginRight: 5, verticalAlign: -1 }}></span>
-                    podklad ${podklad.tridaPodkladu}
-                  </span>
-                  <span className="tag" title="O kolik je barva světlejší (+) nebo tmavší (−) než podklad">
-                    rozdíl jasu ${podklad.dL > 0 ? "+" : ""}${fmt(podklad.dL, 0)}
-                  </span>
-                  ${recipe.opacity && html`<span className="tag">${recipe.opacity}</span>`}
-                </div>
-                ${podklad.hlaska
-                  ? html`<div style=${{ marginTop: 6 }}>${podklad.hlaska}</div>`
-                  : html`<div style=${{ marginTop: 6 }}>Barva je vůči podkladu dost tmavá — prosvítání nehrozí.</div>`}
-                ${podklad.podtiskNutny && html`
-                  <div className="note" style=${{ marginTop: 6 }}>
-                    Podtisk znamená průchod navíc: bílá se počítá jako samostatná dávka
-                    a k času tisku přibude sušení mezi průchody.
-                  </div>`}
-                ${podklad.posun && html`<div style=${{ marginTop: 6 }}>${podklad.posun}</div>`}
-              </div>
-              <p className="note" style=${{ marginTop: 4 }}>
-                Posouzení vychází z odstínu barvy a materiálu, ne z měření — je to
-                upozornění, ne verdikt. Meze si dílna může upravit v parametrech.
-              </p>
-              ${podklad.stav !== "ok" && slozeni.baze.length > 0 && bazeVolby.length > 1 && html`
-                <div className="note" style=${{ marginTop: 6 }}>
-                  Odstín dělá poměr pigmentů, kryvost dělá báze — tentýž odstín jde
-                  namíchat na krycí bázi místo ${slozeni.baze.map((b) => b.name).join(", ")}.
-                  Dílna má: ${bazeVolby.map((b) => b.nazev).join(" · ")}.
-                </div>`}
-            </div>`}
-
-          ${slozeni.znamy && html`
-            <div style=${{ marginTop: 14 }}>
-              <div className="lbl">Pigment a báze</div>
-              <div className=${slozeni.pretizeno ? "warnbox" : "specbar"} style=${{ marginTop: 4 }}>
-                <div className="rowline" style=${{ marginTop: 0, gap: 8 }}>
-                  <span className="tag">pigmenty ${fmt(slozeni.pctPigment, 1)} %</span>
-                  <span className="tag">báze ${fmt(slozeni.pctBaze, 1)} %</span>
-                  <span className="tag" title="Kolik pigmentu báze snese">strop ${fmt(slozeni.strop, 0)} %</span>
-                </div>
-                ${slozeni.pigmenty.length > 0 && html`
-                  <div className="rowline" style=${{ marginTop: 6, gap: 6 }}>
-                    ${slozeni.pigmenty.map((p, i) => html`
-                      <span key=${i} className="tag">
-                        ${p.hex ? html`<span style=${{ display: "inline-block", width: 9, height: 9, borderRadius: 2,
-                                        background: p.hex, marginRight: 5, verticalAlign: -1 }}></span>` : ""}
-                        ${p.name} ${fmt(n(p.pct), 1)} %
-                      </span>`)}
-                  </div>`}
-                ${slozeni.pretizeno && html`
-                  <div style=${{ marginTop: 6 }}>
-                    Pigmentu je <b>${fmt(slozeni.pctPigment, 1)} %</b>, ale báze snese jen
-                    ${fmt(slozeni.strop, 0)} %. Nad stropem barva ztrácí vlastnosti —
-                    praská a hůř drží v praní.
-                  </div>`}
-                ${slozeni.nezname.length > 0 && html`
-                  <div className="note" style=${{ marginTop: 6 }}>
-                    Nezařazeno: ${slozeni.nezname.map((c) => c.name).join(", ")} — doplňte je
-                    do parametry/pigmenty.csv, jinak s nimi aplikace neumí počítat.
-                  </div>`}
-              </div>
-            </div>`}
-
-        </div>
-
         ${calcAkt && html`
-          <div className="bigpanel" style=${{ display: "grid", gap: 20, alignContent: "start" }}>
+          <div className="bigpanel" style=${{ display: "grid", gap: 20 }}>
           <div className="card" style=${{ margin: 0 }}>
-            <h2>Výsledek míchání</h2>
-            <p className="hint">Plocha motivu ${fmt(calcAkt.areaM2 * 10000, 2)} cm² / ks · netto ${fmt(calcAkt.netto)} g${colorSel ? " · barva produktu " + colorSel.code + (colorSel.name ? " — " + colorSel.name : "") : ""}</p>
-            <div className="rowline" style=${{ marginTop: 0, marginBottom: 10 }}>
-              <span className="tag" title="Podíl plochy, který barva doopravdy pokryje">
-                krycí plocha ${fmt(pokryti, 1)} %${pokrytiJob != null
-                  ? " · z náhledu" + (odsazeniJob ? " + " + fmt(odsazeniJob, 1) + " mm" : "")
-                  : " · z katalogu"}
+            <h2>Kolik namíchat</h2>
+
+            <div className="rowline" style=${{ marginTop: 2, marginBottom: 12 }}>
+              <span className="swatch" style=${{ background: recipe.hex || "#888", width: 40, height: 40 }} />
+              <span>
+                <b style=${{ fontSize: 17 }}>${recipe.name}</b>
+                ${recipe.series ? html`<span className="note"> · ${recipe.series}</span>` : ""}
+                <br /><span className="note">
+                  ${colorSel ? (colorSel.code || "") + (colorSel.name ? " " + colorSel.name : "") + " · " : ""}
+                  ${position ? position.tech + " " + position.name : tech}
+                  ${" · " + fmt(n(qty), 0) + " ks"}
+                </span>
               </span>
-              <button className="btn sec sm" onClick=${() => setPokrytiOkno(true)}>
-                ${pokrytiJob != null ? "Upravit krycí plochu" : "Spočítat krycí plochu z náhledu"}
-              </button>
-              ${pokrytiJob != null && html`<button className="btn sec sm" onClick=${() => { setPokrytiJob(null); setOdsazeniJob(null); }}>Zpět na katalog</button>`}
             </div>
 
             <div className="result-big">${fmt(calcAkt.totalG)} g</div>
             <div className="result-sub">≈ ${fmt(calcAkt.totalMl)} ml při hustotě ${fmt(n(recipe.density, 1), 2)} g/ml${
               calcAkt.zvetseno ? " · zakázka potřebuje " + fmt(calcAkt.davkaZakazky) + " g" : ""}</div>
-            ${calcAkt.minApplied && html`<div className="warnbox">Uplatněna minimální dávka ${fmt(n(minBatch), 0)} g (výpočtová potřeba je nižší).</div>`}
 
             ${calcAkt.comps.length > 0 && html`
-              <div className="mixbar" title="Poměr komponent">
+              <div className="mixbar" title=${calcAkt.comps.map((c) => c.name + " " + fmt(c.norm) + " %").join(" · ")}>
                 ${calcAkt.comps.map((c, i) => html`<span key=${c.id} style=${{ width: c.norm + "%", background: i === 0 ? recipe.hex : "hsl(" + ((i * 67) % 360) + " 25% " + (78 - i * 8) + "%)" }} />`)}
               </div>`}
 
-            <table className="t" style=${{ marginTop: 8 }}>
-              <thead>
-                <tr><th>Komponenta</th><th className="num">%</th><th className="num">g</th><th className="num">ml</th></tr>
-              </thead>
-              <tbody>
-                ${calcAkt.comps.map((c) => html`
-                  <tr key=${c.id}>
-                    <td>${c.name}</td>
-                    <td className="num">${fmt(c.norm)}</td>
-                    <td className="num">${fmt(c.g)}</td>
-                    <td className="num">${fmt(c.ml)}</td>
-                  </tr>`)}
-                <tr>
-                  <td style=${{ fontWeight: 700 }}>Celkem</td>
-                  <td className="num" style=${{ fontWeight: 700 }}>100,0</td>
-                  <td className="num" style=${{ fontWeight: 700 }}>${fmt(calcAkt.totalG)}</td>
-                  <td className="num" style=${{ fontWeight: 700 }}>${fmt(calcAkt.totalMl)}</td>
-                </tr>
-              </tbody>
-            </table>
+            ${calcAkt.minApplied && html`<div className="warnbox">Uplatněna minimální dávka ${fmt(n(minBatch), 0)} g (výpočtová potřeba je nižší).</div>`}
             ${calcAkt.comps.length === 0
               ? html`<div className="warnbox">Složení receptury zatím není zadané — celková dávka je spočítaná,
                   míchací lístek se vytiskne s prázdnými řádky na navážky.</div>`
               : (Math.abs(calcAkt.pctSum - 100) > 0.01 && html`<div className="warnbox">Součet receptury je ${fmt(calcAkt.pctSum)} % — poměry byly normalizovány na 100 %.</div>`)}
-
-            ${!pouzityZbytek && nabidky.length > 0 && html`
-              <div className="okbox">
-                <b>Na tuto zakázku můžete využít zbytek.</b>
-                ${nabidky.slice(0, 3).map((v) => html`
-                  <div key=${v.zbytek.kod} className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
-                    <span className="swatch" style=${{ background: v.zbytek.hex, width: 20, height: 20 }} />
-                    <span>
-                      <b>${fmt(v.pouzit)} g</b> z kelímku <b>${v.zbytek.kod}</b> — ${v.zbytek.nazev}
-                      <span className="note"> (v kelímku ${fmt(n(v.zbytek.gramu))} g${
-                        v.shoda < 0.999 ? ", složení sedí na " + fmt(v.shoda * 100, 0) + " %" : ""})</span>
-                      ${v.stav && v.stav.stav === "brzy" && html`<span className="tag" style=${{ marginLeft: 6 }}
-                        title=${v.stav.duvod}>spotřebovat ${zbyvaText(v.stav.zbyva)}</span>`}
-                      <br /><span className="note">domíchat pak stačí ${fmt(v.domichat)} g místo ${fmt(calcAkt.totalG)} g</span>
-                    </span>
-                    <span style=${{ marginLeft: "auto" }}></span>
-                    <button className="btn sm" onClick=${() => setPouzityZbytek({ kod: v.zbytek.kod, rezim: "cast" })}>
-                      Použít ${fmt(v.pouzit)} g
-                    </button>
-                  </div>
-                  ${(() => {
-                    // Nevejde-li se kelímek celý, nabídneme i variantu, kdy se dávka
-                    // zvětší tak, aby se spotřeboval beze zbytku.
-                    if (v.zbudeVKelimku <= 0.5) return null;
-                    const c = zbytekCelyPlan(v.zbytek, calc.comps, calc.totalG);
-                    if (!c || c.prebytek <= 0.5) return null;
-                    return html`
-                      <div key=${v.zbytek.kod + "-cely"} className="rowline"
-                        style=${{ marginTop: 4, marginBottom: 0, paddingLeft: 30 }}>
-                        <span className="note">
-                          …nebo <b>spotřebovat celý kelímek</b> (${fmt(n(v.zbytek.gramu))} g):
-                          dávka se zvětší na ${fmt(c.davka)} g, tedy o ${fmt(c.prebytek)} g víc,
-                          než zakázka potřebuje. Odstín zůstane stejný.
-                        </span>
-                        <span style=${{ marginLeft: "auto" }}></span>
-                        <button className="btn sec sm" onClick=${() => setPouzityZbytek({ kod: v.zbytek.kod, rezim: "cely" })}>
-                          Celý kelímek
-                        </button>
-                      </div>`;
-                  })()}
-                  <${React.Fragment} key=${v.zbytek.kod + "-x"} />`)}
-              </div>`}
-
-            ${pouzityZbytek && vyuzitiZbytku && html`
+            ${vyuzitiZbytku && html`
               <div className="specbar" style=${{ marginTop: 10 }}>
                 <span className="dot" style=${{ background: "var(--ok)" }}></span>
-                <span>
-                  Použije se <b>${fmt(vyuzitiZbytku.pouzit)} g</b> ze zbytku
-                  <b> ${vyuzitiZbytku.zbytek.kod === ZBYTEK_RUCNI
-                    ? vyuzitiZbytku.zbytek.nazev : vyuzitiZbytku.zbytek.kod}</b>${" "}
-                  — domíchat ${fmt(vyuzitiZbytku.domichat)} g.
-                  ${vyuzitiZbytku.celyZbytek
-                    ? html`<span className="note"> Kelímek se spotřebuje celý; dávka
-                        ${" " + fmt(calcAkt.totalG)} g je o ${fmt(vyuzitiZbytku.prebytek)} g větší,
-                        než zakázka potřebuje.</span>`
-                    : html`<span className="note"> V kelímku pak zůstane ${fmt(vyuzitiZbytku.zbudeVKelimku)} g.</span>`}
-                </span>
-                <span style=${{ marginLeft: "auto" }}></span>
-                ${vyuzitiZbytku.celyZbytek
-                  ? html`<button className="btn sec sm"
-                      onClick=${() => setPouzityZbytek({ kod: pouzityZbytek.kod, rezim: "cast" })}>Jen na zakázku</button>`
-                  : (vyuzitiZbytku.zbudeVKelimku > 0.5 && html`<button className="btn sec sm"
-                      onClick=${() => setPouzityZbytek({ kod: pouzityZbytek.kod, rezim: "cely" })}>Celý kelímek</button>`)}
-                <button className="btn sec sm" onClick=${() => setPouzityZbytek(null)}>Nepoužít</button>
+                <span>Míchá se ze zbytku <b>${vyuzitiZbytku.zbytek.kod === ZBYTEK_RUCNI
+                  ? vyuzitiZbytku.zbytek.nazev : vyuzitiZbytku.zbytek.kod}</b>${" "}
+                  (${fmt(vyuzitiZbytku.pouzit)} g) — domíchat ${fmt(vyuzitiZbytku.domichat)} g.</span>
               </div>`}
-            ${pouzityZbytek && !vyuzitiZbytku && html`
-              <div className="warnbox">Zvolený zbytek už na tuhle dávku nesedí — složení nebo množství se změnilo.
-                <div style=${{ marginTop: 8 }}><button className="btn sec sm" onClick=${() => setPouzityZbytek(null)}>Zrušit použití</button></div>
+            ${!vyuzitiZbytku && nabidky.length > 0 && html`
+              <div className="specbar" style=${{ marginTop: 10 }}>
+                <span className="dot" style=${{ background: "var(--ok)" }}></span>
+                <span>Ve skladu ${nabidky.length === 1 ? "je zbytek, který" : "jsou " + nabidky.length + " zbytky, které"}
+                  ${" "}na tuhle dávku ${nabidky.length === 1 ? "sedne" : "sednou"} — nabídnou se v míchacím režimu.</span>
               </div>`}
 
-            ${rozpisZbytku && rozpisZbytku.some((r) => r.pridat > 0.005) && html`
-              <div className="okbox" style=${{ marginTop: 8 }}>
-                <b>K tomu, co je v kelímku, přidejte
-                  ${" " + rozpisZbytku.filter((r) => r.pridat > 0.005)
-                    .map((r) => fmt(r.pridat) + " g " + r.name).join(" · ")}.</b>
-                <table className="t" style=${{ marginTop: 8 }}>
-                  <thead>
-                    <tr><th>Komponenta</th><th className="num">%</th><th className="num">ze zbytku g</th><th className="num">přidat g</th><th className="num">celkem g</th></tr>
-                  </thead>
-                  <tbody>
-                    ${rozpisZbytku.map((r) => html`
-                      <tr key=${r.name}>
-                        <td>${r.name}</td>
-                        <td className="num">${fmt(r.pct)}</td>
-                        <td className="num">${r.zeZbytku > 0.005 ? fmt(r.zeZbytku) : "—"}</td>
-                        <td className="num" style=${{ fontWeight: r.pridat > 0.005 ? 700 : 400 }}>${r.pridat > 0.005 ? fmt(r.pridat) : "—"}</td>
-                        <td className="num">${fmt(r.celkem)}</td>
-                      </tr>`)}
-                    <tr>
-                      <td style=${{ fontWeight: 700 }}>Celkem</td>
-                      <td className="num" style=${{ fontWeight: 700 }}>100,0</td>
-                      <td className="num" style=${{ fontWeight: 700 }}>${fmt(vyuzitiZbytku.pouzit)}</td>
-                      <td className="num" style=${{ fontWeight: 700 }}>${fmt(vyuzitiZbytku.domichat)}</td>
-                      <td className="num" style=${{ fontWeight: 700 }}>${fmt(calcAkt.totalG)}</td>
-                    </tr>
-                  </tbody>
-                </table>
-                <p className="note" style=${{ marginTop: 6 }}>
-                  Navažuje se na váhu i s kelímkem — sloupec „přidat" je to, co má přibýt.
-                  Míchací lístek i asistent vážení už s tím počítají.
-                </p>
-              </div>`}
-
-            ${!pouzityZbytek && html`
-              <div className="rowline" style=${{ marginTop: 10, marginBottom: 0 }}>
-                <button className="btn sec sm" onClick=${() => setRucni(rucni || {
-                  nazev: "", gramu: "", slozeni: [{ id: uid(), name: "", pct: "" }] })}>
-                  ${rucni ? "Zbytek zadaný ručně" : "Zbytek není v evidenci — zadat ručně"}
-                </button>
-                <span className="note">z kelímku bez štítku se dá vyjít taky, když víte, co v něm je</span>
-              </div>`}
-
-            ${!pouzityZbytek && rucni && html`
-              <div className="pickbox" style=${{ marginTop: 8 }}>
-                <div className="rowline" style=${{ marginTop: 0 }}>
-                  <b>Zbytek zadaný ručně</b>
-                  <span className="note">cíl: ${recipe.name} · dávka zakázky ${fmt(calc.totalG)} g</span>
-                  <span style=${{ marginLeft: "auto" }}></span>
-                  <button className="btn sec sm" onClick=${() => setRucni(null)}>Zavřít</button>
-                </div>
-                <div className="frow c3" style=${{ marginTop: 8 }}>
-                  <div>
-                    <label className="f">Co to je (nepovinné)</label>
-                    <input value=${rucni.nazev} placeholder="např. kelímek u míchačky"
-                      onChange=${(e) => setRucni(Object.assign({}, rucni, { nazev: e.target.value }))} />
-                  </div>
-                  <div>
-                    <label className="f">Kolik ho mám (g)</label>
-                    <input type="number" step="1" min="0" value=${rucni.gramu} placeholder="např. 200"
-                      onChange=${(e) => setRucni(Object.assign({}, rucni, { gramu: e.target.value }))} />
-                  </div>
-                  <div>
-                    <label className="f">Vyplnit složení podle receptury</label>
-                    <select value="" onChange=${(e) => {
-                      const r = recipes.find((x) => x.id === e.target.value);
-                      if (!r) return;
-                      const suma = r.components.reduce((a, c) => a + n(c.pct), 0) || 100;
-                      setRucni(Object.assign({}, rucni, {
-                        nazev: rucni.nazev || r.name,
-                        slozeni: r.components.map((c) => ({ id: uid(), name: c.name,
-                          pct: cislo(n(c.pct) / suma * 100, 2) })),
-                      }));
-                    }}>
-                      <option value="">— vybrat recepturu —</option>
-                      ${recepturyTech.filter((r) => r.components && r.components.length).slice(0, 400)
-                        .map((r) => html`<option key=${r.id} value=${r.id}>${r.name}${r.zdroj ? " · " + nazevDb(r.zdroj) : ""}</option>`)}
-                    </select>
-                  </div>
-                </div>
-
-                <label className="f" style=${{ marginTop: 8 }}>Co je v kelímku (komponenta a %)</label>
-                ${(rucni.slozeni || []).map((c, i) => html`
-                  <div key=${c.id} className="rowline" style=${{ marginTop: 4, marginBottom: 0 }}>
-                    <input style=${{ flex: 3 }} value=${c.name} placeholder="název komponenty"
-                      onChange=${(e) => setRucni(Object.assign({}, rucni, {
-                        slozeni: rucni.slozeni.map((x, j) => j === i ? Object.assign({}, x, { name: e.target.value }) : x) }))} />
-                    <input style=${{ flex: 1 }} type="number" step="0.01" min="0" value=${c.pct} placeholder="%"
-                      onChange=${(e) => setRucni(Object.assign({}, rucni, {
-                        slozeni: rucni.slozeni.map((x, j) => j === i ? Object.assign({}, x, { pct: e.target.value }) : x) }))} />
-                    <button className="btn sec sm" title="odebrat řádek"
-                      onClick=${() => setRucni(Object.assign({}, rucni, {
-                        slozeni: rucni.slozeni.filter((x, j) => j !== i) }))}>✕</button>
-                  </div>`)}
-                <div className="rowline" style=${{ marginTop: 6 }}>
-                  <button className="btn sec sm" onClick=${() => setRucni(Object.assign({}, rucni, {
-                    slozeni: (rucni.slozeni || []).concat([{ id: uid(), name: "", pct: "" }]) }))}>+ řádek</button>
-                  <span className="note">${(() => {
-                    const su = (rucni.slozeni || []).reduce((a, x) => a + n(x.pct), 0);
-                    return su > 0 ? "součet " + fmt(su) + " % — poměry se stejně přepočítají na sto" : "";
-                  })()}</span>
-                </div>
-
-                ${(() => {
-                  if (!rucniZbytekObj) return html`<div className="note" style=${{ marginTop: 8 }}>
-                    Napište, kolik zbytku máte a co v něm je — aspoň jednu složku s procenty.</div>`;
-                  const d = domichaniZeZbytku({ slozeni: rucniZbytekObj.slozeni, gramu: rucniZbytekObj.gramu,
-                    cil: recipe.components, chciCelkem: calc.totalG });
-                  if (!d) return null;
-                  if (!d.ok) return html`<div className="warnbox" style=${{ marginTop: 8 }}>
-                    ${d.cizi.length === 1
-                      ? html`Ve zbytku je <b>${d.cizi[0]}</b>, kterou receptura ${recipe.name} vůbec nemá.`
-                      : html`Ve zbytku jsou složky <b>${d.cizi.join(", ")}</b>, které receptura ${recipe.name} vůbec nemá.`}
-                    ${" "}Přiléváním se toho nezbavíte — na tenhle odstín se tenhle kelímek použít nedá.
-                  </div>`;
-                  return html`
-                    <div className="okbox" style=${{ marginTop: 8 }}>
-                      ${d.sedi
-                        ? html`Zbytek už má složení receptury ${recipe.name} — stačí ho použít a domíchat zbytek dávky.`
-                        : html`<b>Přidejte ${d.pridat.map((r) => fmt(r.pridat) + " g " + r.name).join(" · ")}.</b>`}
-                      ${d.zvetseno && html`<span className="note">
-                        ${" "}Aby se kelímek vešel celý, musí být dávka aspoň ${fmt(d.minDavka)} g —
-                        o ${fmt(d.minDavka - calc.totalG)} g víc, než zakázka potřebuje.</span>`}
-                      <div className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
-                        <button className="btn sm" onClick=${() => setPouzityZbytek({ kod: ZBYTEK_RUCNI,
-                          rezim: d.zvetseno ? "cely" : "cast" })}>Namíchat z tohoto zbytku</button>
-                        <span className="note">dávka, míchací lístek i vážení se tím přepočítají</span>
-                      </div>
-                    </div>`;
-                })()}
-              </div>`}
-
-            <div className="rowline" style=${{ marginTop: 12, marginBottom: 0 }}>
-              <button className="btn" onClick=${tiskLisku}>🖨 Míchací lístek</button>
-              <button className="btn sec" onClick=${oznacDavku} disabled=${!recipe || !calc}>
-                Štítek na kelímek →
-              </button>
-              <label className="tgl" title="pot life se pak hlídá od namíchání">
-                <input type="checkbox" checked=${dvouslozkova} onChange=${(e) => setDvouslozkova(e.target.checked)} />
-                <span className="tglt"></span>s tužidlem
-              </label>
+            <div className="rowline michtl" style=${{ marginTop: 16, marginBottom: 0 }}>
+              <button className="btn" style=${{ padding: "15px 26px", fontSize: 16 }}
+                onClick=${() => setMichRezim(true)} disabled=${!recipe || !calcAkt}
+                title="Celá obrazovka jen pro míchání (zavřít klávesou Esc)">⛶ Míchací režim</button>
+              <button className="btn sec" onClick=${tiskLisku}>🖨 Míchací lístek</button>
             </div>
-            <p className="note" style=${{ marginTop: 6 }}>
-              Štítek nalepte na kelímek hned po namíchání. Po zakázce ho načtěte čtečkou
-              a aplikace se zeptá, kolik barvy zbylo — tím se dostane do evidence zbytků.
-              ${" "}<button className="btn sec sm" style=${{ marginLeft: 4 }}
-                onClick=${() => setUlozitZbytek({ gramu: "", pozn: "", expirace: "", potlifeH: "", tuzidlo: false })}
-                disabled=${!recipe}>Znám zbytek rovnou</button>
+            <p className="note" style=${{ marginTop: 8 }}>
+              V míchacím režimu je celý rozpis navážek, krycí plocha z náhledu motivu,
+              zbytky ze skladové evidence, štítek na kelímek a asistent navážení s váhou.
             </p>
           </div>
-          <${Vazeni} comps=${calcAkt.comps} totalG=${calcAkt.totalG} recipeName=${recipe ? recipe.name : ""}
-            predem=${vyuzitiZbytku ? vyuzitiZbytku.prispevek : null}
-            predemPopis=${vyuzitiZbytku ? (vyuzitiZbytku.zbytek.kod === ZBYTEK_RUCNI
-              ? vyuzitiZbytku.zbytek.nazev : "zbytek " + vyuzitiZbytku.zbytek.kod) : ""}
-            pigmenty=${pigmenty} barvaHex=${recipe ? recipe.hex : ""}
-            onHotovo=${vyuzitiZbytku ? odepisZbytku : null} />
+          <${MichaciRezim} aktivni=${michRezim} onZavrit=${zavriMichani}
+            recipe=${recipe} calcAkt=${calcAkt} rozpis=${rozpisZbytku} vyuziti=${vyuzitiZbytku}
+            stav=${michStav} product=${product} colorSel=${colorSel} position=${position}
+            tech=${tech} zak=${zak} kodDavky=${kodDavky}
+            pokryti=${blokPokryti} zbytky=${blokZbytku} stitek=${blokStitku} rady=${blokRady}>
+            <${Vazeni} comps=${calcAkt.comps} totalG=${calcAkt.totalG} recipeName=${recipe ? recipe.name : ""}
+              predem=${vyuzitiZbytku ? vyuzitiZbytku.prispevek : null}
+              predemPopis=${vyuzitiZbytku ? (vyuzitiZbytku.zbytek.kod === ZBYTEK_RUCNI
+                ? vyuzitiZbytku.zbytek.nazev : "zbytek " + vyuzitiZbytku.zbytek.kod) : ""}
+              pigmenty=${pigmenty} barvaHex=${recipe ? recipe.hex : ""}
+              onStav=${setMichStav}
+              onHotovo=${vyuzitiZbytku ? odepisZbytku : null} />
+          <//>
           </div>`}
       </div>
 
@@ -4540,7 +4710,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
               </div>
 
               <div style=${{ marginTop: 16 }}>
-                <button className="btn" onClick=${() => setPickerOpen(false)}>Potvrdit výběr</button>
+                <button className="btn" onClick=${() => { setPickerOpen(false); zadaniHotovo(); }}>Potvrdit výběr</button>
               </div>
             </div>
           </div>
@@ -4720,7 +4890,127 @@ function prepocetDavky(comps, totalG, nalito) {
    vypadalo jako 0,1 g a nesedělo by to s tím, co je odškrtnuté jako hotové. */
 const fmtG = (v) => fmt(v, Math.abs(v) > 0 && Math.abs(v) < 1 ? 2 : 1);
 
-function Vazeni({ comps, totalG, recipeName, predem, predemPopis, onHotovo, pigmenty, barvaHex }) {
+/* Míchací režim — celá obrazovka jen pro míchání.
+   U váhy je všechno ostatní na obtíž: katalog, filtry, rozměry potisku. Tiskař
+   potřebuje vědět jedinou věc — co míchá, kolik toho má být a co navážit teď.
+   Proto se to na jedno tlačítko přepne přes celou obrazovku a velkým písmem.
+
+   Asistent vážení se sem NEPŘESOUVÁ, jen se překreslí jinam: kdyby se odpojil
+   od stromu a znovu připojil, React by ho zahodil i s rozpracovaným vážením
+   a s otevřeným portem váhy. Přenos přes portál nechává komponentu na místě,
+   mění se jen to, kam se vykreslí. */
+function MichaciRezim({ aktivni, onZavrit, recipe, calcAkt, rozpis, vyuziti, stav,
+                        product, colorSel, position, tech, zak, kodDavky,
+                        pokryti, zbytky, stitek, rady, children }) {
+  useEffect(() => {
+    if (!aktivni) return;
+    const naKlavesu = (e) => { if (e.key === "Escape") onZavrit(); };
+    window.addEventListener("keydown", naKlavesu);
+    return () => window.removeEventListener("keydown", naKlavesu);
+  }, [aktivni, onZavrit]);
+
+  // Zavřený režim asistenta neschovává ze stromu, jen z očí: kdyby se odpojil,
+  // přišel by o rozpracované vážení i o otevřený port váhy.
+  if (!aktivni || !recipe || !calcAkt) return html`<div style=${{ display: "none" }}>${children}</div>`;
+
+  const krok = stav ? stav.krok : -1;
+  const hotovo = stav ? stav.done : false;
+  const davka = stav && stav.davka > 0 ? stav.davka : calcAkt.totalG;
+  const kdo = [
+    product ? (product.ref || product.name) : "",
+    colorSel ? (colorSel.code || colorSel.name || "") : "",
+    position ? (position.tech || tech) + " " + position.name : (tech || ""),
+    zak && zak.order ? "zakázka " + zak.order : "",
+    kodDavky ? "kelímek " + kodDavky : "",
+  ].filter(Boolean).join(" · ");
+  // kumulativní součet se počítá z toho, co se doopravdy navažuje — je-li
+  // v nádobě zbytek, přibývá jen zbývající část
+  let kum = 0;
+
+  return ReactDOM.createPortal(html`
+    <div className="michbg">
+      <div className="michhlav">
+        <span className="michvzorek" style=${{ background: recipe.hex || "#888" }}></span>
+        <div>
+          <div className="nazev">${recipe.name}</div>
+          <div className="kde">${kdo || "—"}</div>
+        </div>
+        <div className="michdavka">
+          <b>${fmt(davka)} g</b>
+          <span>${calcAkt.zvetseno || Math.abs(davka - calcAkt.totalG) > 0.05
+            ? "zakázka potřebuje " + fmt(calcAkt.davkaZakazky || calcAkt.totalG) + " g"
+            : "≈ " + fmt(calcAkt.totalMl) + " ml"}</span>
+        </div>
+        <button className="btn sec" onClick=${onZavrit} title="Zavřít můžete i klávesou Esc">
+          ✕ Zpět do kalkulace
+        </button>
+      </div>
+
+      <div className="michtelo">
+        <div>
+          ${rady}
+          ${pokryti}
+          ${vyuziti && html`
+            <div className="okbox" style=${{ marginTop: 0, marginBottom: 12, fontSize: 15 }}>
+              V nádobě už je <b>${fmt(vyuziti.pouzit)} g</b> ze zbytku
+              <b> ${vyuziti.zbytek.kod === ZBYTEK_RUCNI ? vyuziti.zbytek.nazev : vyuziti.zbytek.kod}</b>
+              ${" "}— navažuje se jen sloupec „navážit".
+            </div>`}
+          ${calcAkt.comps.length ? html`
+            <table className="michtab">
+              <thead>
+                <tr>
+                  <th style=${{ width: 34 }}></th>
+                  <th>Komponenta</th>
+                  ${rozpis && html`<th className="num">ze zbytku</th>`}
+                  <th className="num">navážit</th>
+                  <th className="num">kumulativně</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${calcAkt.comps.map((c, i) => {
+                  const r = rozpis ? rozpis[i] : null;
+                  const navazit = r ? r.pridat : c.g;
+                  kum += navazit;
+                  const jeTed = !hotovo && i === krok;
+                  const jeHotovo = hotovo || (stav && stav.zbyva && stav.zbyva[i] <= 0.05);
+                  return html`
+                    <tr key=${c.id || i} className=${jeTed ? "ted" : (jeHotovo ? "hotovo" : "")}>
+                      <td><span className="michstav">${jeTed ? "▶" : (jeHotovo ? "✓" : "")}</span></td>
+                      <td>${c.name}</td>
+                      ${rozpis && html`<td className="num">${r && r.zeZbytku > 0.005 ? fmt(r.zeZbytku) : "—"}</td>`}
+                      <td className="num g">${navazit > 0.005 ? fmt(navazit) : "—"}</td>
+                      <td className="num">${fmt(kum)}</td>
+                    </tr>`;
+                })}
+                <tr>
+                  <td></td>
+                  <td style=${{ fontWeight: 700 }}>Navážit celkem</td>
+                  ${rozpis && html`<td className="num" style=${{ fontWeight: 700 }}>${fmt(vyuziti ? vyuziti.pouzit : 0)}</td>`}
+                  <td className="num g">${fmt(kum)}</td>
+                  <td className="num" style=${{ fontWeight: 700 }}>${fmt(kum)}</td>
+                </tr>
+              </tbody>
+            </table>` : html`
+            <div className="warnbox" style=${{ marginTop: 0 }}>
+              Složení téhle receptury není v aplikaci zadané. Namíchejte
+              ${" " + fmt(calcAkt.totalG)} g podle firemní receptury.
+            </div>`}
+          <p className="note" style=${{ marginTop: 12 }}>
+            Váží se kumulativně do jedné nádoby — displej váhy má po každé složce
+            ukazovat hodnotu ve sloupci „kumulativně"${vyuziti
+              ? " (váhu vytárujte i s kelímkem; v nádobě pak bude " + fmt(calcAkt.totalG) + " g)"
+              : ""}. Zavřít můžete klávesou Esc.
+          </p>
+          ${zbytky}
+          ${stitek}
+        </div>
+        <div>${children}</div>
+      </div>
+    </div>`, document.body);
+}
+
+function Vazeni({ comps, totalG, recipeName, predem, predemPopis, onHotovo, pigmenty, barvaHex, onStav }) {
   const sc = useScale();
   const [baud, setBaud] = useState("9600");
   const [tol, setTol] = useState(0.5);
@@ -4792,6 +5082,13 @@ function Vazeni({ comps, totalG, recipeName, predem, predemPopis, onHotovo, pigm
   };
   const naviceni = davka - totalG;
 
+  /* Míchací režim kreslí tutéž práci velkým písmem vedle — potřebuje vědět,
+     kde vážení je. Hlásí se jen hodnoty, ne funkce, aby to nikoho nenutilo
+     překreslovat víc, než je nutné. */
+  useEffect(() => {
+    if (onStav) onStav({ krok: krok, done: done, davka: davka, zbyva: zbyvaVse });
+  }, [onStav, krok, done, davka, nalito, comps.length]);
+
   return html`
     <div className="card" style=${{ margin: 0 }}>
       <h2>Asistent navážení</h2>
@@ -4812,7 +5109,7 @@ function Vazeni({ comps, totalG, recipeName, predem, predemPopis, onHotovo, pigm
           <//>`}
         ${sc.mode !== "off" && html`
           <${React.Fragment}>
-            <span className="tag" style=${{ background: "#EDF7F2", color: "#0E5C40" }}>
+            <span className="tag" style=${{ background: "var(--paper)", color: "var(--ok)" }}>
               ${sc.mode === "serial" ? "váha připojena" : "simulace váhy"}
             </span>
             <button className="btn sec sm" onClick=${sc.tare}>Tára (0)</button>

@@ -103,6 +103,18 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 |---|---|
 | 10:30 | Strukturovaný rozbor aplikace: architektura, funkce, technologie a hardware |
 | 12:30 | Rozbor se aktualizuje sám — generované úseky se čtou ze zdrojů, kontrola před nahráním |
+| 13:40 | Míchací režim na celou obrazovku — u váhy jen to, co tiskař potřebuje |
+| 15:05 | Domovská stránka jen s dávkou a barvou; práce u míchačky je v režimu |
+| 15:50 | Obě okna kalkulace stejně velká, potkávají se uprostřed stránky |
+| 16:20 | Vybraný produkt a Kolik namíchat jako dvě stejná okna vedle sebe |
+| 16:45 | Karta produktu přestala padat při úzkém okně — dlaždice nahoře, údaje pod nimi |
+| 17:15 | Horní pruh karty produktu: tři dlaždice — produkt, poloha potisku, zakázkový list |
+| 18:10 | Nové barvy při zachovaném vzhledu: neutrální šedá místo béžové, hlubší tmavý režim |
+| 19:00 | Nástroj na ladění barev: skutečné prvky aplikace a posuvníky, výstup k vložení |
+| 19:25 | Plocha stránky je samostatná — karty, lišty a pole na ní nezávisí |
+| 19:45 | Horní lišta s logem splynula s plochou stránky, nemaluje se zvlášť |
+| 20:10 | Nástroj umí i stíny — směr světla, odstávání, rozostření a sílu |
+| 20:30 | Logo má vlastní barvu a vlastní ražbu, nezávisle na zbytku |
 
 ---
 
@@ -1200,3 +1212,311 @@ jenže v `technologie.csv` byly mezitím odemčené všechny technologie. Přesn
 ten druh tichého rozporu, kvůli kterému generovaná část vznikla. Zbylá pevná
 čísla v textu (počty receptur, chybějící odstíny) se nahradila odkazem na
 generovanou tabulku, aby nebylo co udržovat dvakrát.
+
+---
+
+## 23. Míchací režim na celou obrazovku
+
+**Proč.** U váhy je všechno ostatní na obtíž. Tiskař stojí, kouká na displej
+z metru, má špinavé ruce — a na obrazovce má katalog produktů, filtry databází,
+rozměry potisku, krycí plochu, evidenci zbytků. Devadesát procent z toho už
+udělalo svou práci ve chvíli, kdy je dávka spočítaná.
+
+**Řešení.** Tlačítko **⛶ Míchací režim** vedle míchacího lístku přepne obrazovku
+na jedinou věc: co se míchá a co teď navážit.
+
+- **Hlavička**: vzorek odstínu, název receptury, pro který produkt, barvu,
+  polohu a zakázku, a velká celková dávka. Míchá-li se do kelímku se zbytkem,
+  ukáže se i o kolik je dávka větší, než zakázka potřebuje.
+- **Tabulka** velkým písmem: komponenta, *ze zbytku*, *navážit*, *kumulativně*.
+  Řádek, který se váží právě teď, je zvýrazněný a označený `▶`; hotové mají `✓`
+  a zešednou. Zvýraznění se posouvá samo, jak asistent postupuje.
+- **Asistent navážení** vedle — živá váha, tolerance, přepočet při přelití,
+  korekce po nátisku. Ovládací prvky jsou uvnitř režimu záměrně větší.
+- Zavírá se tlačítkem nebo klávesou **Esc**.
+
+**Co bylo na tom technicky ošidné.** Nabízelo se vykreslit asistenta v režimu
+znovu. To by ale znamenalo druhou instanci: React by tu původní zahodil i
+s rozpracovaným vážením, a hlavně by se zavřel sériový port váhy — druhé
+otevření téhož portu se nezdaří. Asistent proto zůstává na svém místě ve stromu
+komponent a jen se **přenáší portálem** (`ReactDOM.createPortal`) do překryvu.
+Přepnutí tam a zpět tak nepřeruší ani vážení, ani spojení s váhou.
+
+Kde vážení právě je, hlásí asistent nahoru jedním callbackem (`onStav`) —
+posílají se jen hodnoty, ne funkce, aby se nepřekreslovalo víc, než je nutné.
+
+**Ověření v prohlížeči bez okna:**
+
+| co se zkoušelo | výsledek |
+|---|---|
+| otevření režimu | hlavička s recepturou, produktem, polohou a dávkou; kalkulace na obrazovce není |
+| tabulka | první řádek `▶`, kumulativní součty sedí (10,9 → 36,1 → 46,1 → 49,1 → 50,0) |
+| navážení první složky v simulaci | „v toleranci", tlačítko Další komponenta aktivní |
+| posun na druhou složku | první řádek `✓ hotovo`, druhý `▶ teď` |
+| míchání ze zbytku | sloupec „ze zbytku", hláška o 200 g v nádobě, dávka 406,5 g s poznámkou, že zakázka potřebuje 50 g |
+| zavření klávesou Esc | režim zmizel, asistent zůstal v kalkulaci (nepřemountoval se) |
+
+---
+
+## 24. Domovská stránka: dávka a barva, nic víc
+
+**Co bylo špatně.** Po vybrání zakázky byla obrazovka plná. Výběr receptury,
+filtr databází, síto, kryvost, povrch, počet kusů, g/m², ztráty, minimální
+dávka, rozpis spotřeby ze síta, posouzení podkladu, poměr pigment/báze, tabulka
+složení, nabídka zbytků, štítek, asistent navážení. Všechno užitečné — ale ne
+naráz a ne pro toho, kdo se jen potřebuje podívat, kolik čeho namíchat.
+
+**Rozdělení podle toho, kdy to člověk potřebuje.**
+
+*Domovská stránka* drží po výběru jen odpověď na otázku, kvůli které se sem
+chodí: **kolik a jakou barvu**. Vzorek odstínu, název receptury, produkt,
+poloha, počet kusů, velká dávka v gramech a poměr komponent jako proužek.
+K tomu dvě tlačítka: **⛶ Míchací režim** a **🖨 Míchací lístek**.
+
+*Zadání* se po volbě sbalí do jednoho řádku s tlačítkem „Upravit zadání".
+Sbalí se **na vyslovnou volbu obsluhy** — po výběru receptury nebo po potvrzení
+barvy a polohy. Ne podle změn stavu: receptura se mění i sama (dotažení
+databází ze složky, vazba na produkt) a zadání by se zavíralo pod rukama dřív,
+než si ho stačí někdo přečíst. Na to se přišlo při zkoušení: první pokus hlídal
+„první vykreslení", jenže data dotečou až po něm a formulář se zavřel hned.
+
+*Míchací režim* dostal všechno ostatní: krycí plochu z náhledu motivu, nabídku
+zbytků ze skladové evidence i ruční zadání zbytku, rozpis navážek velkým
+písmem, štítek na kelímek, posouzení podkladu a asistenta navážení s váhou.
+
+**Na obrazovce zůstává i to, co varuje.** Sbalit se smí to, co už udělalo svou
+práci — ne upozornění. Na domovské stránce proto zůstává hláška o uplatněné
+minimální dávce, o nezadaném složení, o normalizovaném součtu procent, a nově
+i jednořádkové upozornění, že na tuhle dávku sedí zbytek ze skladu (nabídne se
+v režimu) nebo že se už ze zbytku míchá.
+
+**Ověření v prohlížeči bez okna:**
+
+| co se zkoušelo | výsledek |
+|---|---|
+| po startu | zadání rozbalené — je z čeho vybírat |
+| po výběru receptury | zadání sbalené do jednoho řádku |
+| co je vidět na domovské stránce | dávka 50,0 g, receptura, tlačítka Upravit zadání / Míchací režim / Míchací lístek |
+| asistent, krycí plocha, zbytky, štítek, tabulka složení | na domovské stránce **nejsou vidět** |
+| po otevření režimu | všechny čtyři bloky uvnitř, plus tabulka navážek a rada o podkladu |
+| Esc | režim zavřený, asistent zůstal nepřemountovaný |
+
+**Dvě chyby při přesouvání, obě stejného druhu.** Přesouvané kusy JSX braly
+s sebou uzavírací značku, která patřila něčemu jinému — jednou `</div>` konce
+řádku s tlačítky, podruhé `</div>` levého sloupce. Aplikace se pak nevykreslila
+a htm hlásilo `h.push is not a function`, což o příčině neřekne nic. Napovědělo
+až porovnání odsazení: značka na osmi mezerách nemůže uzavírat blok otevřený
+na deseti. Kontrola vykreslení obojí zachytila hned při prvním spuštění.
+
+---
+
+## 25. Dvě stejná okna, která se potkají uprostřed
+
+**Co bylo špatně.** Kalkulace stála na sloupcích 67 : 33 — vlevo široké zadání,
+vpravo úzký proužek s výsledkem. Jenže po zeštíhlení domovské stránky je
+výsledek to hlavní, co na ní je, a mačkal se do třetiny šířky, zatímco druhá
+polovina obrazovky zůstávala prázdná.
+
+**Řešení.** Obě okna mají tutéž šířku a potkávají se přesně uprostřed stránky
+(2× 892 px na 1920 px, mezera 40 px vystředěná na 952 px). Levý sloupec je
+pružný a jeho poslední karta dorovná zbytek výšky, takže obě okna končí ve
+stejné výšce. Tlačítka v pravém okně se drží u dolního okraje.
+
+**Místo navíc dostalo obsah, ne prázdno.** Dávka je teď `clamp(46px, 4,6vw, 68px)`
+— na širokém monitoru se čte přes celou dílnu. Vyrostl i nadpis, popisky,
+proužek s poměrem komponent a pole formuláře. A hlavně: sbalené zadání už není
+jeden řádek, ale přehled zakázky — receptura s odstínem, produkt, barva
+produktu, poloha a technologie, rozměr potisku s krycí plochou, počet kusů,
+g/m², ztráty a minimální dávka. Prázdné okno by vedle plného vypadalo jako
+chyba; tohle je informace, kterou stejně někdo hledá.
+
+**Chyba, na kterou se přišlo měřením.** Rozvržení nešlo srovnat, protože levý
+sloupec měl `display:grid` a `align-content:start` **zapsané inline v JSX** —
+a inline styl přebije stylopis, takže pravidla v CSS byla celou dobu bez
+účinku. Poznalo se to až z vypsaných vypočtených stylů (`display=grid`, ačkoli
+CSS říkalo `flex`). Inline styl se nahradil třídou `sloupec-zadani`.
+
+**Ověřeno měřením v prohlížeči, ne od oka:** šířky sloupců, jejich souřadnice
+na stránce a střed stránky se čtou z `getBoundingClientRect()`; k tomu snímek
+obrazovky pro vizuální kontrolu.
+
+**Opraveno po zpětné vazbě.** Napoprvé se srovnaly *sloupce*, jenže srovnat se
+měla **okna** — „Vybraný produkt" vlevo nahoře a „Kolik namíchat" vpravo.
+Karty proto přestaly být zabalené ve vlastním sloupci a jdou do mřížky přímo:
+produkt a výsledek do prvního řádku (mřížka je sama srovná na stejnou výšku),
+zadání zakázky do druhého pod produkt. Obě okna jsou teď 885 × 456 px, mezera
+40 px je vystředěná na 945 px, tedy přesně na středu stránky.
+
+Aby produkt v tom větším okně nezel prázdnotou, dostal větší fotku a dole
+náhled zvolené polohy potisku s popisem — tiskař vidí, kam se tiskne, aniž by
+otevíral výběr.
+
+**Ještě jedna oprava: karta padala při užším okně.** Fotka, text a plocha pro
+zakázkový list stály vedle sebe ve třech sloupcích. Jakmile se okno zúžilo,
+prostřední sloupec se smrskl a název produktu se rozsypal na jedno slovo —
+místy na jedno písmeno — na řádek, tlačítko se vešlo doprostřed textu.
+
+Uspořádání se proto obrátilo: **nahoře dvě stejné dlaždice** (fotka produktu
+a plocha pro PDF, obě `clamp(118px, 12vw, 190px)` na výšku i šířku),
+**pod nimi na celou šířku** název s materiálem a **vodorovná řada** štítků
+(technologie, rozměr, barva) s tlačítkem výběru, která se zalomí, když se
+nevejde. Šířka textu tak nezávisí na tom, co stojí vedle něj.
+
+Ověřeno snímky ve třech šířkách okna — 1920, 1100 a 620 px. Na nejužší se
+sloupce složí pod sebe a karta drží tvar.
+
+**Poloha potisku nahoru mezi dlaždice.** Náhled zvolené polohy visel pod
+kartou jako pruh navíc. Přesunul se do horního pruhu, takže ten teď nese tři
+stejné dlaždice přes celou šířku: **co se tiskne · kam se tiskne · kam pustit
+zakázkový list**. Každá má popisku, u polohy i název a rozměr dle katalogu.
+Není-li poloha vybraná, je místo náhledu tlačítko, které rovnou otevře výběr.
+
+**Chyba, kterou stojí za to si přiznat.** Při odstraňování starého pruhu jsem
+vyřízl text mezi dvěma značkami — a druhá značka nepatřila konci toho pruhu,
+ale konci celé karty *Zadání zakázky*. Zmizela tím celá karta i s výběrem
+receptury a všemi poli zakázky. Kontrola vykreslení to nezachytila, protože
+aplikace se dál vykreslovala; poznalo se to až na snímku obrazovky, kde karta
+chyběla. Vrátila se ze zálohy pořízené před přestavbou (`index_pred_zjednodusenim.html`)
+a znovu se do ní doplnilo sbalování po volbě receptury.
+
+Poučení: **řezat podle značky, která patří k témuž bloku** — a u přesunů
+si ověřit odsazení obou konců. Zálohu souboru před každou větší přestavbou
+ukládat do scratchpadu; tady zachránila práci.
+
+---
+
+## 26. Nové barvy, starý vzhled
+
+**Zadání.** Dílna dodala ukázku rozhraní ve světlém a tmavém režimu — čistě
+jednobarevnou, s tmavými pilulkami tlačítek. Šlo o **barvy**, ne o přestavbu
+vzhledu: aplikace se má snáz koukat, ne vypadat jinak.
+
+**Napoprvé jsem zašel dál, než bylo zadáno** a vyměnil i vzhled: měkké stíny
+zmizely, karty dostaly vlasové linky a plochu odlišnou od pozadí. Vypadalo to
+podle předlohy, ale nebylo to, co si dílna přála. Vráceno zpět — karty zase
+vystupují z plochy stínem, logo je vyražené, vstupy jsou vsazené dovnitř.
+
+**Co se doopravdy změnilo, jsou barvy:**
+
+| | dřív | teď |
+|---|---|---|
+| plocha a karty (světlý) | `#D9D8D3` teplá béžová | `#EAEAEA` neutrální šedá |
+| inkoust (světlý) | `#18170F` | `#141414` |
+| plocha a karty (tmavý) | `#2E2D2A` hnědošedá | `#1D1D1D` hlubší, bez nádechu |
+| inkoust (tmavý) | `#EDEBE4` | `#EDEDED` |
+| akcent | modrošedá `#3E5C8A` | žádný — zvýrazňuje inkoust |
+| hlavní tlačítko | šedá pilulka | tmavá pilulka (světlá v tmavém režimu) |
+
+Z rozhraní tím zmizel barevný nádech: šedá je opravdu šedá, ne béžová, a modrý
+akcent nahradil inkoust — černý ve světlém, světlý v tmavém režimu. Barva
+zůstala jen tam, kde nese význam: vzorek odstínu, proužek poměru komponent,
+náhled motivu, varování a stav vážení.
+
+**Aby to fungovalo v obou režimech**, přibyl token `--btn-ink` (písmo na
+hlavním tlačítku — v tmavém režimu je pilulka světlá, takže text musí být
+tmavý) a `--focus` místo modrého prstence. Barvy zapsané natvrdo v kódu
+(štítek připojené váhy, výběr v náhledu motivu, orámování při přetažení PDF)
+se převedly na tokeny.
+
+**Tmavý režim není černý.** Předloha je skoro černá, jenže na černé ploše se
+nedá nic osvětlit a měkké stíny by zmizely — proto `#1D1D1D`, o poznání hlubší
+než dřív, ale pořád s prostorem pro světlou hranu.
+
+**Zkusmo oddělená karta, vrácená zpět.** Karty a lišty se ve světlém režimu
+na chvíli obarvily o odstín tmavěji než plocha stránky, aby byla vidět hranice.
+Dílna to zamítla — měkký přechod je záměr, ne nedostatek. Vráceno; z pokusu
+zůstal jen token `--zvyraz` pro zvýrazněný řádek (položka pod myší, právě
+vážená složka), který do té doby splýval s kartou.
+
+**Ověřeno snímky v obou režimech** — kalkulace, katalog i míchací režim.
+Míchací lístek zůstal záměrně světlý: tiskne se na papír.
+
+---
+
+## 27. Nástroj na ladění barev
+
+**Proč.** Barvu nejde posoudit z hexů v souboru ani ze snímku obrazovky. Musí
+se vidět na skutečných prvcích, vedle sebe, v obou režimech — a hlavně si to
+musí osahat ten, kdo se na to bude dívat celý den.
+
+**Co to je.** `barvy.html` — jedna stránka, kde vlevo stojí posuvníky barev
+a vpravo skutečné prvky aplikace: karta, tlačítka, štítky, pole, tabulka,
+dávka velkým písmem, proužek poměru komponent, ukazatel navážení, hlášky.
+Dole se průběžně píše blok, který stačí zkopírovat do `index.html` — nebo
+poslat mně a vložím ho.
+
+**Nemůže se rozejít s aplikací.** Styly se neopisují; skript `barvy_nastroj.py`
+je vytáhne přímo z `index.html` a vloží do ukázky. Změní-li se v aplikaci
+vzhled, stačí nástroj spustit znovu:
+
+```
+python barvy_nastroj.py          vytvoří balicek/barvy.html
+python barvy_nastroj.py --open   vytvoří a rovnou otevře
+```
+
+Laděných proměnných je třináct — plocha, papír, zvýraznění, dva stupně textu,
+dvě linky, hlavní tlačítko s písmem, zvýraznění a tři významové barvy.
+
+**Stíny se ladí jako fyzika, ne jako text.** Zapisovat `-18px -18px 34px rgba(...)`
+ručně je práce pro stroj. V nástroji se místo toho nastavuje, **odkud svítí
+světlo** (osm směrů k prokliknutí i jemný posuvník), jak daleko předmět
+odstává, jak je stín rozostřený a jak silné je světlo a stín. Zvlášť pro karty,
+zvlášť pro tlačítka, zvlášť pro vsazená pole.
+
+Z těch devíti čísel se dopočítají všechny stíny naráz — velký, malý, dva
+vsazené i stín modálních oken. Proto spolu drží a svítí z jedné strany; při
+ručním psaní se to rozjede při první nepozornosti.
+
+**Logo stojí stranou.** Nápis IRM je jediné místo, kde je ražba vidět ve
+velkém — přes celou hlavičku a v písmu přes 60 px. Co sedí na kartách, na něm
+většinou nesedí: stín, který je u tlačítka sotva znát, je na logu buď neviditelný,
+nebo přehnaný. Dostalo proto **vlastní barvu** (`--logo`, do té doby bylo vyražené
+do plochy stránky a nešlo s ním hnout samostatně) a **vlastní pětici posuvníků** —
+směr světla, odstávání písmen, rozostření, sílu světla a sílu stínu.
+
+Ověřeno: změna barvy loga se projeví jen na logu, změna odstávání písmen jen na
+`--logo-shadow` — stín karet zůstane, kde byl.
+
+**Ověření a jedna past.** Změna proměnné se v ukázce hned projeví — ověřeno
+měřením vypočtených stylů (karta, nadpis, tlačítko změnily barvu okamžitě).
+Pozadí stránky se přitom tvářilo, že se nezměnilo: má na sobě přechod
+(`transition: background .2s`) a prohlížeč bez okna běží ve virtuálním čase,
+ve kterém se plynulé přechody nedopočítají. V normálním prohlížeči se překreslí
+i ono — past byla v měření, ne v nástroji.
+
+---
+
+## 28. Plocha stránky jako samostatná jednotka
+
+**Co překáželo.** Vstupní pole, štítky, ukazatel navážení i přepínače braly
+barvu z `--bg`, tedy z plochy stránky. Dokud měly obě proměnné stejnou hodnotu,
+nikdo si toho nevšiml — jenže při ladění barev to znamenalo, že se plocha
+stránky nedala pohnout samostatně: posunutím `--bg` se hnuly i všechny prvky,
+které na ní leží.
+
+**Jak to je teď.** Proměnné mají oddělenou roli:
+
+| proměnná | co maluje |
+|---|---|
+| `--bg` | **jen plochu stránky** (a plochu míchacího režimu, což je taky stránka) |
+| `--paper` | všechno, co na ní leží — karty, lišty, tlačítka, pole, štítky, přepínače |
+| `--zvyraz` | zvýrazněný řádek (položka pod myší, právě vážená složka) |
+
+**Ověřeno pokusem, ne úvahou.** Ve vykreslené aplikaci se `--bg` přepsalo na
+modrou: karta, pole, štítek, tlačítko i horní lišta zůstaly beze změny.
+Pak se přepsal `--paper` na oranžovou a změnily se všechny naráz. Plocha je
+tedy doopravdy samostatná.
+
+Hodnoty zůstaly stejné, takže se vzhled aplikace nezměnil — změnilo se jen to,
+že jdou od sebe. V nástroji `barvy.html` se tím `--bg` a `--paper` staly dvěma
+nezávislými posuvníky.
+
+**Lišta za logem není samostatná plocha.** Horní pruh přes celou šířku se
+maloval barvou karet, takže jakmile se plocha stránky odlišila, objevil se
+nahoře pás. Přitom to žádná karta není — je to kus stránky. Nemaluje se tedy
+vůbec (`background: transparent`) a logo je vyražené do plochy stránky.
+Totéž platí pro lištu v míchacím režimu; ta zůstala neprůhledná, protože se
+drží nahoře a obsah pod ni podjíždí, ale barvu bere z plochy.
+
+Na obrazovce tak zůstaly jen dva druhy ploch: **stránka** a **věci, které na
+ní leží** — karty, tlačítka, pole, štítky.

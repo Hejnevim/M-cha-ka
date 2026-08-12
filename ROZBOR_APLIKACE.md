@@ -5,18 +5,18 @@
 > `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — nepřepisují
 > se ručně a nemohou se rozejít se skutečností. Text mimo ně píše člověk.
 
-> Poslední zapsaná změna ve vývojovém deníku: **12. srpna 12:30 — Rozbor se aktualizuje sám — generované úseky se čtou ze zdrojů, kontrola před nahráním**
+> Poslední zapsaná změna ve vývojovém deníku: **12. srpna 20:30 — Logo má vlastní barvu a vlastní ražbu, nezávisle na zbytku**
 
 | soubor | řádků | velikost |
 |---|---:|---:|
-| `index.html` | 7 284 | 399 kB |
+| `index.html` | 7 581 | 416 kB |
 | `most.py` | 694 | 29 kB |
 | `pdf_spec.py` | 1 071 | 42 kB |
 | `odemkni.py` | 213 | 8 kB |
 | `prevod_printcolor.py` | 188 | 7 kB |
 | `kontrola_aplikace.py` | 169 | 7 kB |
 | `rozbor_aktualizuj.py` | 354 | 13 kB |
-| **celkem** | **9 973** | |
+| **celkem** | **10 270** | |
 <!-- /AUTO:stav -->
 
 ---
@@ -221,6 +221,10 @@ táruje i s kelímkem.
 
 ### Krok 8 — Navážení na digitální váze
 
+Na jedno tlačítko se dá přepnout do **míchacího režimu přes celou obrazovku** —
+u váhy je katalog i filtry na obtíž, takže zůstane jen odstín, dávka, tabulka
+navážek velkým písmem a asistent. Zavírá se klávesou Esc.
+
 Asistent vede obsluhu složku po složce: ukazuje cíl, aktuální hmotnost, kolik
 zbývá, a barevně hlásí, když je navážka v toleranci. Váha se připojí přes USB
 (Web Serial); kdo ji nemá, může si celý postup projít v **simulaci**.
@@ -352,6 +356,11 @@ podle dat, ne podle dojmu.
 
 **Míchání**
 - Míchací lístek A4 s kumulativním vážením a zaškrtávacími políčky
+- Míchací režim na celou obrazovku: jen receptura, dávka a navážky velkým
+  písmem, se zvýrazněnou právě váženou složkou; asistent se do něj přenáší
+  portálem, takže se nepřeruší vážení ani spojení s váhou
+- Domovská stránka po výběru drží jen dávku a barvu; zadání se sbalí do jednoho
+  řádku a práce u míchačky (krycí plocha, zbytky, štítek, vážení) je v režimu
 - Asistent navážení s živým čtením z váhy, tolerancí a tárou
 - Simulace váhy pro nácvik a pro pracoviště bez váhy
 - Přepočet dávky při přelití se zachováním odstínu
@@ -363,10 +372,14 @@ podle dat, ne podle dojmu.
 - Běh z jednoho souboru, bez instalace a bez serveru
 - Zámek technologií s kontrolním seznamem, odemykání příkazem i v aplikaci
 - Mazání chráněné heslem
-- Tmavý i světlý režim, ovládání z klávesnice, práce na tabletu
+- Světlý i tmavý režim v neutrálních šedých, bez barevného akcentu — barva
+  zůstává jen tam, kde nese význam (odstín barvy, varování, stav vážení).
+  Ovládání z klávesnice, práce na tabletu
 - Kontrola vykreslení aplikace (`kontrola_aplikace.py`) zařazená před nahrání
   na GitHub — rozbitá verze se nenahraje
 - Převod databází Printcolor z PDF do CSV (`prevod_printcolor.py`)
+- Nástroj na ladění barev (`barvy_nastroj.py` → `barvy.html`): skutečné prvky
+  aplikace vedle posuvníků, výstup jako blok k vložení do index.html
 
 ## 2.2 Rozpracované — chybí data, ne kód
 

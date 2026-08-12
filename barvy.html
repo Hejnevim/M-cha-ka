@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="cs"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IRM — ladění barev a stínů</title>
+<style>
+
+:root{
+  /* Vzhled zůstává měkký — karty vystupují z plochy stínem, ne rámečkem.
+     Mění se jen barvy: plocha je neutrálně šedá místo teplé béžové a inkoust
+     je tmavší, aby se na to dalo dívat celý den. Barevný akcent zmizel;
+     zvýraznění dělá inkoust, barva zůstala tam, kde nese význam (odstín
+     barvy, varování, stav vážení). */
+  /* --bg maluje JEN plochu stránky; všechno, co na ní leží (karty, lišty,
+     tlačítka, pole, štítky), bere barvu z --paper. Ty dvě proměnné jdou
+     nastavit nezávisle — plocha je samostatná jednotka. */
+  --bg:#EAEAEA; --paper:#EAEAEA; --zvyraz:#DEDEDE; --logo:#EAEAEA;
+  --ink:#141414; --ink-2:#767676; --line:#D8D8D8; --line-2:#C7C7C7;
+  --cyan:#141414; --magenta:#C97B63; --yellow:#D9B44A; --key:#141414;
+  --btn-ink:#FFFFFF; --focus:rgba(20,20,20,.20); --danger:#A8382A;
+  --ok:#1F6B45; --warn:#8A5A1E;
+  --radius:18px;
+  --neu:-18px -18px 34px rgba(255,255,255,.9), 18px 18px 34px rgba(0,0,0,.10);
+  --neu-sm:-5px -5px 12px rgba(255,255,255,.85), 5px 5px 12px rgba(0,0,0,.11);
+  --neu-in:inset 5px 5px 11px rgba(0,0,0,.09), inset -5px -5px 11px rgba(255,255,255,.85);
+  --neu-in-lg:inset 7px 7px 16px rgba(0,0,0,.10), inset -7px -7px 16px rgba(255,255,255,.9);
+  --modal-shadow:0 24px 70px rgba(0,0,0,.22);
+  --logo-shadow:-4px -4px 8px rgba(255,255,255,.95), 4px 4px 8px rgba(0,0,0,.18);
+  --mono:ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --sans:'Segoe UI',system-ui,Arial,sans-serif;
+}
+:root[data-theme="dark"]{
+  /* Tmavý režim je hlubší než dřív, ale ne černý — na černé plochu nejde
+     osvětlit a stíny by zmizely. Hlavní tlačítko je světlé s tmavým písmem.
+     Linky se posouvají spolu s pozadím, aby zůstaly stejně zřetelné. */
+  --bg:#1D1D1D; --paper:#1D1D1D; --zvyraz:#2A2A2A; --logo:#1D1D1D;
+  --ink:#EDEDED; --ink-2:#8C8C8C; --line:#2C2C2C; --line-2:#3A3A3A;
+  --cyan:#EDEDED; --magenta:#C97B63; --yellow:#D9B44A; --key:#EDEDED;
+  --btn-ink:#161616; --focus:rgba(237,237,237,.22); --danger:#E0705E;
+  --ok:#5CBF8A; --warn:#D9A45C;
+  --neu:-18px -18px 34px rgba(255,255,255,.030), 18px 18px 34px rgba(0,0,0,.62);
+  --neu-sm:-5px -5px 12px rgba(255,255,255,.035), 5px 5px 12px rgba(0,0,0,.6);
+  --neu-in:inset 5px 5px 11px rgba(0,0,0,.55), inset -5px -5px 11px rgba(255,255,255,.035);
+  --neu-in-lg:inset 7px 7px 16px rgba(0,0,0,.6), inset -7px -7px 16px rgba(255,255,255,.04);
+  --modal-shadow:0 24px 70px rgba(0,0,0,.8);
+  --logo-shadow:-4px -4px 8px rgba(255,255,255,.05), 4px 4px 8px rgba(0,0,0,.7);
+}
+:root[data-theme="dark"] .warnbox,:root[data-theme="dark"] #chyba{background:#2C2317;border-color:#463824;color:#E0AE6B}
+:root[data-theme="dark"] .okbox{background:#182A20;border-color:#284434;color:#79CFA0}
+:root[data-theme="dark"] .imgwarn{background:#2C2317 !important;color:#E0AE6B !important}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
+input,select,button,textarea{font-family:inherit;font-size:14px}
+input,select,textarea{border:none;border-radius:10px;padding:9px 12px;background:var(--paper);color:var(--ink);width:100%;box-shadow:var(--neu-in);transition:box-shadow .15s}
+input:focus,select:focus,textarea:focus{outline:none;box-shadow:var(--neu-in),0 0 0 3px var(--focus)}
+button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+input[type=number]{font-family:var(--mono);appearance:textfield;-moz-appearance:textfield}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+select{appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  background-image:linear-gradient(45deg, transparent 50%, var(--ink-2) 50%), linear-gradient(135deg, var(--ink-2) 50%, transparent 50%);
+  background-position: calc(100% - 20px) calc(50% - 3px), calc(100% - 14px) calc(50% - 3px);
+  background-size:6px 6px, 6px 6px; background-repeat:no-repeat; padding-right:36px}
+input[type=color]{padding:4px;height:40px;cursor:pointer}
+input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+input[type=color]::-webkit-color-swatch{border:none;border-radius:7px}
+input[type=color]::-moz-color-swatch{border:none;border-radius:7px}
+textarea{font-family:var(--mono);font-size:12.5px;min-height:160px;resize:vertical;line-height:1.5}
+.hdr{background:transparent;color:var(--ink);padding:9px clamp(16px,3vw,40px);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
+.themebtn{grid-column:3;justify-self:end;flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:none;background:var(--paper);box-shadow:var(--neu-sm);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;line-height:1;transition:opacity .15s;color:var(--ink)}
+.themebtn:hover{opacity:.8}
+.hdr h1{grid-column:2;margin:0;font-size:clamp(66px,8.4vw,90px);font-weight:800;letter-spacing:.04em;text-align:center;color:var(--logo);text-shadow:var(--logo-shadow);cursor:pointer;transition:opacity .15s}
+.hdr h1:hover{opacity:.85}
+.menuwrap{position:relative}
+.navleft{grid-column:1;justify-self:start;display:flex;align-items:center;gap:8px;min-width:0}
+.backbtn{height:42px;border:none;border-radius:21px;background:var(--paper);box-shadow:var(--neu-sm);cursor:pointer;color:var(--ink);display:flex;align-items:center;gap:7px;padding:0 16px 0 12px;font-weight:700;font-size:13px;white-space:nowrap;transition:opacity .15s}
+.backbtn:hover{opacity:.8}
+.backbtn:active{box-shadow:var(--neu-in)}
+@media(max-width:720px){.backbtn{padding:0;width:42px;border-radius:50%;justify-content:center}.backbtn span{display:none}}
+.navbtn{width:42px;height:42px;border-radius:50%;border:none;background:var(--paper);box-shadow:var(--neu-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink);transition:opacity .15s}
+.navbtn:hover{opacity:.8}
+.navdrop{position:absolute;top:calc(100% + 10px);left:0;background:var(--paper);border-radius:14px;box-shadow:var(--neu);padding:6px;z-index:45;min-width:180px;display:flex;flex-direction:column;gap:2px}
+.navdrop button{background:none;border:none;text-align:left;padding:10px 14px;border-radius:10px;font-weight:600;font-size:13.5px;color:var(--ink);cursor:pointer;transition:background .15s}
+.navdrop button:hover{background:var(--zvyraz)}
+.navdrop button.on{color:var(--cyan);font-weight:800}
+:root[data-theme="dark"] .navdrop button:hover{background:rgba(127,163,217,.16)}
+.wrap{max-width:none;margin:0;padding:20px clamp(16px,3vw,40px) 56px}
+.grid{display:grid;gap:16px}
+/* Kalkulace stojí na dvou stejných polovinách: vlevo zadání, vpravo výsledek.
+   Obě okna mají tutéž šířku a potkávají se přesně uprostřed stránky. */
+@media(min-width:960px){.grid.calc{grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:40px;align-items:stretch}}
+/* Obě okna končí ve stejné výšce: levý sloupec je sloupec pružný, poslední
+   karta v něm dorovná zbytek místa, a karta výsledku vyplní svůj sloupec celý.
+   Tlačítka se v obou drží u dolního okraje. */
+/* Vybraný produkt a Kolik namíchat stojí vedle sebe v prvním řádku, takže
+   mají tutéž šířku i výšku a potkávají se uprostřed stránky. Zadání zakázky
+   je pod produktem, ve druhém řádku. */
+@media(min-width:960px){
+  .grid.calc>.karta-produkt{grid-column:1;grid-row:1}
+  .grid.calc>.bigpanel{grid-column:2;grid-row:1}
+  .grid.calc>.bigform{grid-column:1;grid-row:2}
+  .grid.calc>.card{margin-bottom:0}
+  .karta-produkt{display:flex;flex-direction:column}
+}
+.grid.calc>.bigpanel{align-content:stretch}
+.bigpanel>.card{height:100%;display:flex;flex-direction:column}
+.bigpanel .michtl{margin-top:auto}
+.bigpanel .card{padding:25px 28px;margin-bottom:20px}
+.bigpanel .card h2{font-size:19px}
+.bigpanel .card .hint{font-size:15.5px}
+.bigpanel .result-big{font-size:clamp(46px,4.6vw,68px)}
+.bigpanel .result-sub{font-size:17px}
+.bigpanel .mixbar{height:30px}
+.bigpanel table.t{font-size:17px}
+.bigpanel table.t th{padding:10px}
+.bigpanel table.t td{padding:11px 10px}
+.bigpanel .note{font-size:15.5px}
+.bigpanel .btn{font-size:16px;padding:12px 22px}
+.bigpanel .swatch{width:34px;height:34px}
+.bigpanel .tag{font-size:14px;padding:4px 11px}
+.bigpanel .wbar{height:17px}
+.bigform.card>h2{font-size:19px}
+.bigform.card>.hint{font-size:15.5px}
+.bigform label.f{font-size:14px;margin-bottom:8px}
+.bigform select,.bigform input{font-size:17px;padding:13px 15px;border-radius:12px;box-shadow:var(--neu-sm)}
+.bigform select{padding-right:40px}
+.bigform select:focus,.bigform input:focus{box-shadow:var(--neu-sm),0 0 0 3px var(--focus)}
+.bigform .frow{gap:16px;margin-bottom:16px}
+.bigform .note{font-size:14.5px}
+.bigform .swatch{width:36px;height:36px;border-radius:10px}
+.bigform .tgl{font-size:15.5px;gap:12px}
+.bigform .tglt{width:50px;height:27px;border-radius:14px}
+.bigform .tglt::after{width:23px;height:23px}
+.bigform .tgl input:checked + .tglt::after{transform:translateX(23px)}
+.bigform .flags{gap:28px}
+.card{background:var(--paper);border-radius:var(--radius);padding:20px 22px;margin-bottom:16px;box-shadow:var(--neu)}
+.card h2{margin:0 0 4px;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--ink)}
+.card .hint{color:var(--ink-2);font-size:12.5px;margin:0 0 14px}
+.frow{display:grid;gap:12px;margin-bottom:12px}
+@media(min-width:640px){.frow.c2{grid-template-columns:1fr 1fr}.frow.c3{grid-template-columns:1fr 1fr 1fr}.frow.c4{grid-template-columns:1fr 1fr 1fr 1fr}}
+label.f{display:block;font-size:11px;line-height:1.25;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);margin-bottom:5px}
+/* Popisek se v užším okně zalomí na dva řádky a pole pod ním se propadne níž
+   než sousední. Popisek v mřížce má proto vždy výšku dvou řádků a text sedí
+   u jeho spodní hrany — pole v řádku tak drží linku při každé šířce okna. */
+@media(min-width:640px){.frow.c2>div>label.f:first-child,.frow.c3>div>label.f:first-child,.frow.c4>div>label.f:first-child{display:flex;align-items:flex-end;min-height:2.5em}
+/* Buňka s přepínači popisek nemá, takže by v mřížce začínala výš než pole
+   vedle ní — srovnáme ji na spodní hranu řádku, na střed sousedního pole. */
+.frow>.flags{align-self:end;margin-top:0;padding-bottom:8px}}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:none;background:var(--paper);border-radius:999px;padding:7px 14px;cursor:pointer;font-weight:600;font-size:13px;display:inline-flex;align-items:center;justify-content:center;text-align:center;transition:box-shadow .15s,background .15s,color .15s;box-shadow:var(--neu-sm)}
+.chip.on{background:var(--key);color:var(--btn-ink)}
+.btn{border:none;border-radius:999px;padding:10px 18px;font-weight:700;cursor:pointer;background:var(--key);color:var(--btn-ink);transition:opacity .15s;box-shadow:var(--neu-sm)}
+.btn:hover{opacity:.82}
+.btn.sec{background:var(--paper);color:var(--ink)}
+.btn.sec:hover{opacity:1}
+.btn.sm{padding:6px 12px;font-size:12.5px}
+.btn.danger{background:var(--paper);color:var(--danger)}
+.btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+table.t{width:100%;border-collapse:collapse;font-size:13.5px}
+table.t th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);border-bottom:1.5px solid var(--ink);padding:8px}
+table.t td{border-bottom:1px solid var(--line);padding:9px 8px;vertical-align:top}
+td.num,th.num{text-align:right;font-family:var(--mono)}
+.swatch{width:26px;height:26px;border-radius:7px;border:1px solid rgba(0,0,0,.12);display:inline-block;vertical-align:middle}
+/* text-align kvůli úzkému sloupci: jakmile se štítek zalomí na víc řádků,
+   zarovnaný doleva vypadá roztřepeně — uvnitř oblého tvaru patří na střed */
+.tag{display:inline-block;text-align:center;font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:999px;background:var(--paper);box-shadow:var(--neu-in);color:var(--ink-2)}
+.tag.tech{background:var(--key);color:var(--btn-ink);box-shadow:var(--neu-sm)}
+.result-big{font-family:var(--mono);font-size:34px;font-weight:600;line-height:1.05;color:var(--ink)}
+.result-sub{font-family:var(--mono);color:var(--ink-2);font-size:13px}
+.mixbar{display:flex;height:20px;border-radius:8px;overflow:hidden;box-shadow:var(--neu-in);margin:10px 0 4px}
+.warnbox{background:#F6EEDF;border:1px solid #E3CFA6;color:#8A5A1E;border-radius:10px;padding:10px 12px;font-size:13px;margin-top:12px}
+.imgwarn{background:#FBF1E4 !important;color:#8A5A1E !important}
+.rowactive td{background:var(--zvyraz)}
+.okbox{background:#E7F1EA;border:1px solid #C0D9C9;color:#1E6B44;border-radius:10px;padding:10px 12px;font-size:13px;margin-top:12px}
+.empty{color:var(--ink-2);font-size:13.5px;padding:20px;text-align:center;border-radius:var(--radius);box-shadow:var(--neu-in)}
+.rowline{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+.note{font-size:12px;color:var(--ink-2)}
+.search{max-width:340px}
+pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;overflow:auto;font-family:var(--mono);box-shadow:var(--neu-in)}
+/* Fotka produktu a plocha pro zakázkový list jsou dvě stejné dlaždice vedle
+   sebe. Text a volby jdou pod ně na celou šířku — ve třech sloupcích vedle
+   sebe se při užším okně název rozsypal na jedno písmeno na řádek. */
+/* Horní pruh karty produktu: tři stejné dlaždice přes celou šířku — co se
+   tiskne, kam se to tiskne a kam pustit zakázkový list. Text a volby jdou pod
+   ně na celou šířku; ve sloupcích vedle textu se název při užším okně rozsypal
+   na jedno slovo na řádek. */
+.produkt-dlazdice{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+.produkt-dlazdice .dlazdice{min-width:0;display:flex;flex-direction:column}
+.produkt-dlazdice .prodphoto,.produkt-dlazdice .pdfdrop{
+  width:100%;height:auto;aspect-ratio:1;flex:none}
+.produkt-dlazdice .popiska{margin-top:7px;font-size:12.5px;line-height:1.35;color:var(--ink-2);text-align:center}
+.produkt-dlazdice .popiska b{color:var(--ink);font-size:13.5px}
+.produkt-dlazdice button.prodphoto{border:none;color:var(--ink-2);font-size:13px;padding:10px}
+.pdfdrop{min-width:0;cursor:pointer}
+.prodphoto{width:128px;height:128px;object-fit:contain;border-radius:12px;background:var(--paper);flex:0 0 auto;box-shadow:var(--neu-sm)}
+.poscards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:8px 0 6px}
+.poscard{border:none;border-radius:12px;background:var(--paper);padding:8px;cursor:pointer;text-align:center;transition:box-shadow .15s;box-shadow:var(--neu)}
+.poscard.on{box-shadow:0 0 0 3px var(--focus),var(--neu)}
+.poscard img{width:100%;height:92px;object-fit:contain;background:transparent}
+.poscard .nm{font-size:12px;font-weight:700;margin-top:6px;line-height:1.25}
+.poscard .dm{font-family:var(--mono);font-size:11px;color:var(--ink-2);margin-top:3px}
+.noimg{width:100%;height:92px;display:flex;align-items:center;justify-content:center;color:var(--ink-2);font-size:11px;background:transparent;border-radius:8px;text-align:center;padding:4px}
+.thumb{width:46px;height:46px;object-fit:contain;border-radius:8px;background:var(--paper);box-shadow:var(--neu-sm)}
+.wbar{height:14px;background:var(--paper);border-radius:7px;overflow:hidden;box-shadow:var(--neu-in)}
+.wbar>span{display:block;height:100%;transition:width .15s}
+.cdot{display:inline-block;width:13px;height:13px;border-radius:4px;margin-right:4px;vertical-align:-2px;border:1px solid rgba(0,0,0,.18)}
+.modalbg{position:fixed;inset:0;background:rgba(24,23,15,.4);z-index:90;display:flex;align-items:flex-start;justify-content:center;padding:30px 16px;overflow:auto}
+.modalbox{width:min(860px,100%)}
+.modalbox .card{margin:0;box-shadow:var(--modal-shadow)}
+/* Míchací režim — celá obrazovka jen pro to, co tiskař u váhy potřebuje.
+   Písmo je záměrně o dost větší: na displej se kouká z metru a se špinavýma
+   rukama, ne z pracovní vzdálenosti. */
+.michbg{position:fixed;inset:0;z-index:80;background:var(--bg);overflow:auto;display:flex;flex-direction:column}
+.michhlav{position:sticky;top:0;z-index:2;background:var(--bg);display:flex;align-items:center;gap:16px;
+  flex-wrap:wrap;padding:14px 22px;box-shadow:0 6px 16px rgba(24,23,15,.10)}
+.michhlav .nazev{font-size:26px;font-weight:800;line-height:1.1;color:var(--ink)}
+.michhlav .kde{font-size:14px;color:var(--ink-2);font-family:var(--mono)}
+.michdavka{margin-left:auto;text-align:right;font-family:var(--mono)}
+.michdavka b{display:block;font-size:34px;font-weight:700;line-height:1}
+.michdavka span{font-size:13px;color:var(--ink-2)}
+.michvzorek{width:52px;height:52px;border-radius:14px;box-shadow:var(--neu-sm);flex:none}
+.michtelo{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:22px;padding:18px 22px 28px;align-items:start}
+.michtab{width:100%;border-collapse:collapse;font-size:20px}
+.michtab th{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-2);
+  text-align:left;padding:6px 10px;border-bottom:2px solid var(--line-2)}
+.michtab td{padding:11px 10px;border-bottom:1px solid var(--line)}
+.michtab td.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.michtab .g{font-size:26px;font-weight:700}
+.michtab tr.ted{background:var(--zvyraz)}
+.michtab tr.ted td{font-weight:700}
+.michtab tr.hotovo td{color:var(--ink-2)}
+.michtab tr.hotovo .g{font-weight:400}
+.michstav{display:inline-block;width:26px;text-align:center}
+/* Ovládání uvnitř režimu je větší — míchá se ve stoje, často v rukavicích. */
+.michbg .card{box-shadow:none;padding:0}
+.michbg .card>h2{font-size:20px}
+.michbg .btn{padding:13px 22px;font-size:15px}
+.michbg .btn.sm{padding:9px 15px;font-size:13.5px}
+.michbg .result-big{font-size:52px}
+.michbg .wbar{height:20px}
+.michbg .note,.michbg .result-sub{font-size:13.5px}
+@media (max-width:1000px){
+  .michtelo{grid-template-columns:1fr}
+  .michtab{font-size:17px}
+  .michtab .g{font-size:22px}
+}
+@media print{.michbg{display:none}}
+.linkbox{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
+.pickbox{border:none;border-radius:12px;padding:12px;margin-top:10px;background:var(--paper);box-shadow:var(--neu-in)}
+.flags{display:flex;gap:20px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.tgl{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--ink);user-select:none}
+.tgl input{position:absolute;opacity:0;width:0;height:0}
+.tglt{width:38px;height:20px;border-radius:11px;background:var(--paper);box-shadow:var(--neu-in);position:relative;transition:background .15s;flex:0 0 auto}
+.tglt::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--paper);box-shadow:0 1px 3px rgba(0,0,0,.35);transition:transform .15s}
+.tgl input:checked + .tglt{background:var(--cyan);box-shadow:none}
+.tgl input:checked + .tglt::after{transform:translateX(18px)}
+#chyba{max-width:700px;margin:60px auto;background:var(--paper);color:#8A5A1E;border-radius:12px;padding:24px;font-size:15px;display:none;box-shadow:var(--neu)}
+.searchwrap{position:relative;margin-bottom:20px}
+.searchbar{background:var(--paper);border-radius:var(--radius);padding:12px 18px;display:flex;align-items:center;gap:12px;box-shadow:var(--neu)}
+.searchbar .ic{flex:0 0 auto;font-size:16px;opacity:.6}
+.searchbar input{border:none;background:transparent;padding:6px 0;font-size:15px;box-shadow:none !important}
+.searchbar input:focus{border:none;box-shadow:none !important}
+.searchbar .count{white-space:nowrap;color:var(--ink-2);font-size:12.5px}
+.searchdrop{position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--paper);border-radius:12px;box-shadow:var(--neu);z-index:40;max-height:400px;overflow:auto}
+.searchitem{display:flex;gap:12px;align-items:center;padding:10px 14px;cursor:pointer}
+.searchitem:hover,.searchitem.hi{background:var(--zvyraz)}
+.searchitem-img{width:40px;height:40px;flex:0 0 auto;object-fit:contain;border-radius:8px;background:var(--paper);box-shadow:var(--neu-sm)}
+.searchitem-nm{font-size:13px;font-weight:700;line-height:1.3}
+.searchitem-dm{font-family:var(--mono);font-size:11px;color:var(--ink-2);margin-top:2px}
+.viewtoggle{display:flex;gap:2px;background:var(--paper);border-radius:999px;padding:4px;box-shadow:var(--neu-in)}
+.viewtoggle button{border:none;background:none;padding:7px 13px;border-radius:999px;cursor:pointer;color:var(--ink-2);font-size:15px;line-height:1;transition:background .15s,color .15s}
+.viewtoggle button.on{background:var(--key);color:var(--btn-ink)}
+.pgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:4px}
+@media(max-width:1500px){.pgrid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:1150px){.pgrid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:800px){.pgrid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.pgrid{grid-template-columns:1fr}}
+.pgcard{background:var(--paper);border-radius:var(--radius);box-shadow:var(--neu);padding:14px;display:flex;flex-direction:column;gap:8px}
+.pgcard-img{aspect-ratio:1/1;border-radius:12px;background:var(--paper);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:var(--neu-in)}
+.pgcard-img img{width:100%;height:100%;object-fit:contain;padding:14px}
+.pgcard-nm{font-weight:700;font-size:13.5px;line-height:1.3}
+.pgcard-ref{font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+.pgcard-mat{font-size:12px;color:var(--ink-2);margin-top:2px}
+.pgcard-dots{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;align-items:center}
+.pgcard-actions{display:flex;gap:6px;margin-top:auto;padding-top:4px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--paper);box-shadow:var(--neu);border-radius:14px;padding:12px 20px;z-index:60;font-size:14px;font-weight:600;display:flex;gap:10px;align-items:center;max-width:min(620px,92vw)}
+.toast.bad{color:var(--danger)}
+:root[data-theme="dark"] .toast.bad{color:#E8837A}
+.scanrow{display:flex;gap:10px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--line)}
+.scanrow:last-child{border-bottom:none}
+.scanraw{font-family:var(--mono);font-size:12px;word-break:break-all;flex:1;min-width:0}
+.dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;align-self:center}
+.cam{width:100%;max-width:420px;border-radius:12px;background:#000;box-shadow:var(--neu-in);display:block;margin-top:10px}
+.specbar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;border-radius:12px;padding:10px 14px;box-shadow:var(--neu-in);margin-bottom:16px;font-size:13px}
+.specbar b{font-family:var(--mono)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:13px;margin-top:8px}
+.kv .k{color:var(--ink-2);font-size:11px;text-transform:uppercase;letter-spacing:.06em;align-self:center}
+.kv .v{font-weight:700}
+
+/* ---- jen pro tuhle stránku ---- */
+.nastroj{display:grid;grid-template-columns:minmax(320px,390px) minmax(0,1fr);gap:24px;
+  padding:20px clamp(16px,3vw,40px) 60px;align-items:start}
+@media(max-width:900px){.nastroj{grid-template-columns:1fr}}
+.skupina{margin-bottom:18px}
+.skupina h3{margin:0 0 8px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+.radek{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.radek input[type=color]{width:44px;height:38px;padding:3px;flex:0 0 auto}
+.radek .txt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.radek .txt b{font-family:var(--mono);font-size:12.5px}
+.radek input[type=text]{width:110px;flex:0 0 auto;font-family:var(--mono);font-size:12.5px;text-align:center}
+.posuv{margin-bottom:12px}
+.posuv .hlava{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;margin-bottom:4px}
+.posuv .hlava b{font-family:var(--mono);font-size:12.5px}
+.smery{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:130px;margin:0 0 14px}
+.smery button{aspect-ratio:1;border:none;border-radius:10px;background:var(--paper);
+  box-shadow:var(--neu-sm);cursor:pointer;color:var(--ink);font-size:14px;line-height:1}
+.smery button.on{background:var(--key);color:var(--btn-ink)}
+.smery button.stred{visibility:hidden}
+.ukazka{display:grid;gap:16px}
+.vystup textarea{min-height:280px}
+.lista{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+</style></head>
+<body>
+<div class="hdr"><div class="navleft"></div><h1>BARVY</h1><div></div></div>
+
+<div class="nastroj">
+  <div class="card">
+    <h2>Paleta a stíny</h2>
+    <p class="hint">Ladíte režim, který je právě zapnutý. Přepínačem se přepne
+      i to, co upravujete — světlý a tmavý režim mají vlastní sadu.</p>
+    <div class="lista">
+      <button class="chip on" id="rezim-svetly">Světlý režim</button>
+      <button class="chip" id="rezim-tmavy">Tmavý režim</button>
+    </div>
+    <div class="skupina"><h3>Stíny</h3>
+<div class="smery" id="smery"></div>
+<div class="posuv" data-klic="uhel"><div class="hlava"><span>Odkud svítí světlo</span><b data-role="cislo"></b></div><input type="range" min="0" max="360" step="5" data-role="posuv" data-jed="°" /></div>
+<div class="posuv" data-klic="dVelky"><div class="hlava"><span>Odstávání karet</span><b data-role="cislo"></b></div><input type="range" min="0" max="45" step="1" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-klic="blurVelky"><div class="hlava"><span>Rozostření u karet</span><b data-role="cislo"></b></div><input type="range" min="0" max="90" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-klic="dMaly"><div class="hlava"><span>Odstávání tlačítek</span><b data-role="cislo"></b></div><input type="range" min="0" max="20" step="1" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-klic="blurMaly"><div class="hlava"><span>Rozostření u tlačítek</span><b data-role="cislo"></b></div><input type="range" min="0" max="40" step="1" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-klic="dVsazeny"><div class="hlava"><span>Hloubka vsazených polí</span><b data-role="cislo"></b></div><input type="range" min="0" max="20" step="1" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-klic="blurVsazeny"><div class="hlava"><span>Rozostření uvnitř polí</span><b data-role="cislo"></b></div><input type="range" min="0" max="40" step="1" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-klic="silaSvetla"><div class="hlava"><span>Síla světla</span><b data-role="cislo"></b></div><input type="range" min="0" max="100" step="1" data-role="posuv" data-jed="%" /></div>
+<div class="posuv" data-klic="silaStinu"><div class="hlava"><span>Síla stínu</span><b data-role="cislo"></b></div><input type="range" min="0" max="100" step="1" data-role="posuv" data-jed="%" /></div>
+</div>
+<div class="skupina"><h3>Stínování loga</h3>
+<div class="posuv" data-klic="logoUhel"><div class="hlava"><span>Odkud svítí na logo</span><b data-role="cislo"></b></div><input type="range" min="0" max="360" step="5" data-role="posuv" data-jed="°" /></div>
+<div class="posuv" data-klic="logoD"><div class="hlava"><span>Odstávání písmen</span><b data-role="cislo"></b></div><input type="range" min="0" max="20" step="1" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-klic="logoBlur"><div class="hlava"><span>Rozostření</span><b data-role="cislo"></b></div><input type="range" min="0" max="40" step="1" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-klic="logoSvetlo"><div class="hlava"><span>Síla světla</span><b data-role="cislo"></b></div><input type="range" min="0" max="100" step="1" data-role="posuv" data-jed="%" /></div>
+<div class="posuv" data-klic="logoStin"><div class="hlava"><span>Síla stínu</span><b data-role="cislo"></b></div><input type="range" min="0" max="100" step="1" data-role="posuv" data-jed="%" /></div>
+</div>
+    <div class="skupina"><h3>Plocha a papír</h3>
+<label class="radek" data-klic="--bg"><input type="color" data-role="barva" /><span class="txt"><b>--bg</b><span class="note">plocha stránky</span></span><input type="text" data-role="hex" spellcheck="false" /></label>
+<label class="radek" data-klic="--paper"><input type="color" data-role="barva" /><span class="txt"><b>--paper</b><span class="note">karty, lišty, tlačítka, pole</span></span><input type="text" data-role="hex" spellcheck="false" /></label>
+<label class="radek" data-klic="--zvyraz"><input type="color" data-role="barva" /><span class="txt"><b>--zvyraz</b><span class="note">zvýrazněný řádek (pod myší, právě vážená složka)</span></span><input type="text" data-role="hex" spellcheck="false" /></label>
+</div>
+<div class="skupina"><h3>Text a linky</h3>
+<label class="radek" data-klic="--ink"><input type="color" data-role="barva" /><span class="txt"><b>--ink</b><span class="note">hlavní text</span></span><input type="text" data-role="hex" spellcheck="false" /></label>
+<label class="radek" data-klic="--ink-2"><input type="color" data-role="barva" /><span class="txt"><b>--ink-2</b><span class="note">vedlejší text a popisky</span></span><input type="text" data-role="hex" spellcheck="false" /></label>
+<label class="radek" data-klic="--line"><input type="color" data-role="barva" /><span class="txt"><b>--line</b><span class="note">linky v tabulkách</span></span><input type="text" data-role="hex" spellcheck="false" /></label>
+<label class="radek" data-klic="--line-2"><input type="color" data-role="barva" /><span class="txt"><b>--line-2</b><span class="note">silnější linky</span></span><input type="text" data-role="hex" spellcheck="false" /></label>
+</div>
+<div class="skupina"><h3>Ovládání</h3>
+<label class="radek" data-klic="--key"><input type="color" data-role="barva" /><span class="txt"><b>--key</b><span class="note">hlavní tlačítko a aktivní přepínač</span></span><input type="text" data-role="hex" spellcheck="false" /></label>
+<label class="radek" data-klic="--btn-ink"><input type="color" data-role="barva" /><span class="txt"><b>--btn-ink</b><span class="note">písmo na hlavním tlačítku</span></span><input type="text" data-role="hex" spellcheck="false" /></label>
+<label class="radek" data-klic="--cyan"><input type="color" data-role="barva" /><span class="txt"><b>--cyan</b><span class="note">zvýraznění (ukazatel navážení, přepínač)</span></span><input type="text" data-role="hex" spellcheck="false" /></label>
+</div>
+<div class="skupina"><h3>Významové barvy</h3>
+<label class="radek" data-klic="--ok"><input type="color" data-role="barva" /><span class="txt"><b>--ok</b><span class="note">v pořádku, v toleranci</span></span><input type="text" data-role="hex" spellcheck="false" /></label>
+<label class="radek" data-klic="--warn"><input type="color" data-role="barva" /><span class="txt"><b>--warn</b><span class="note">upozornění</span></span><input type="text" data-role="hex" spellcheck="false" /></label>
+<label class="radek" data-klic="--danger"><input type="color" data-role="barva" /><span class="txt"><b>--danger</b><span class="note">mazání, přelití</span></span><input type="text" data-role="hex" spellcheck="false" /></label>
+</div>
+<div class="skupina"><h3>Logo</h3>
+<label class="radek" data-klic="--logo"><input type="color" data-role="barva" /><span class="txt"><b>--logo</b><span class="note">nápis IRM v hlavičce</span></span><input type="text" data-role="hex" spellcheck="false" /></label>
+</div>
+    <div class="rowline" style="margin-top:14px">
+      <button class="btn sec sm" id="zpet">Vrátit původní</button>
+      <span class="note">vrátí hodnoty, se kterými se stránka otevřela</span>
+    </div>
+  </div>
+
+  <div class="ukazka">
+    <div class="card">
+      <h2>Jak to vypadá v aplikaci</h2>
+      <p class="hint">Skutečné prvky aplikace se skutečnými styly.</p>
+      <div class="rowline">
+        <button class="btn">Hlavní tlačítko</button>
+        <button class="btn sec">Vedlejší</button>
+        <button class="btn danger sm">Smazat</button>
+        <button class="btn sm" disabled>Nedostupné</button>
+      </div>
+      <div class="chips" style="margin-top:10px">
+        <button class="chip on">vybráno</button>
+        <button class="chip">nevybráno</button>
+        <button class="chip">další</button>
+      </div>
+      <div class="rowline" style="margin-top:12px">
+        <span class="tag tech">TXP — Sítotisk</span>
+        <span class="tag">260,0×300,0 mm</span>
+        <span class="tag">krycí plocha 100 %</span>
+        <span class="swatch" style="background:#FDD922"></span>
+      </div>
+      <div class="frow c3" style="margin-top:14px">
+        <div><label class="f">Pole</label><input value="hodnota"></div>
+        <div><label class="f">Číslo</label><input type="number" value="500"></div>
+        <div><label class="f">Výběr</label><select><option>položka</option></select></div>
+      </div>
+      <div class="result-big">627,9 g</div>
+      <div class="result-sub">≈ 523,3 ml při hustotě 1,20 g/ml</div>
+      <div class="mixbar"><span style="width:22%;background:#FDD922"></span><span style="width:50%;background:#C9CFA8"></span><span style="width:20%;background:#8FBFA0"></span><span style="width:8%;background:#7E93B8"></span></div>
+      <div class="wbar" style="margin-top:10px"><span style="width:64%;background:var(--cyan)"></span></div>
+      <div class="okbox">V pořádku — navážka je v toleranci.</div>
+      <div class="warnbox">Uplatněna minimální dávka 50 g (výpočtová potřeba je nižší).</div>
+      <table class="t" style="margin-top:14px">
+        <thead><tr><th>Komponenta</th><th class="num">%</th><th class="num">g</th></tr></thead>
+        <tbody>
+          <tr><td>9000 Weiss</td><td class="num">21,7</td><td class="num">88,2</td></tr>
+          <tr class="rowactive"><td>1100 Mittelgelb</td><td class="num">50,5</td><td class="num">205,3</td></tr>
+          <tr><td>Binder</td><td class="num">20,0</td><td class="num">81,3</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card vystup">
+      <h2>Blok k vložení do index.html</h2>
+      <p class="hint">Celé bloky <b>:root</b> a <b>:root[data-theme="dark"]</b>
+        i s tím, čeho se ladění netýká — dají se přepsat jedním vložením.
+        Nebo mi je pošlete a vložím je sám.</p>
+      <textarea id="vystup" spellcheck="false" readonly></textarea>
+      <div class="rowline" style="margin-top:10px;margin-bottom:0">
+        <button class="btn" id="kopirovat">Zkopírovat</button>
+        <span class="note" id="stav"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var VYCH_BARVY = {"light": {"--bg": "#EAEAEA", "--paper": "#EAEAEA", "--zvyraz": "#DEDEDE", "--ink": "#141414", "--ink-2": "#767676", "--line": "#D8D8D8", "--line-2": "#C7C7C7", "--key": "#141414", "--btn-ink": "#FFFFFF", "--cyan": "#141414", "--ok": "#1F6B45", "--warn": "#8A5A1E", "--danger": "#A8382A", "--logo": "#EAEAEA"}, "dark": {"--bg": "#1D1D1D", "--paper": "#1D1D1D", "--zvyraz": "#2A2A2A", "--ink": "#EDEDED", "--ink-2": "#8C8C8C", "--line": "#2C2C2C", "--line-2": "#3A3A3A", "--key": "#EDEDED", "--btn-ink": "#161616", "--cyan": "#EDEDED", "--ok": "#5CBF8A", "--warn": "#D9A45C", "--danger": "#E0705E", "--logo": "#1D1D1D"}}, VYCH_STINY = {"light": {"uhel": 135, "dVelky": 25, "blurVelky": 34, "dMaly": 7, "blurMaly": 12, "dVsazeny": 7, "blurVsazeny": 11, "silaSvetla": 90, "silaStinu": 10, "logoUhel": 135, "logoD": 6, "logoBlur": 8, "logoSvetlo": 95, "logoStin": 18}, "dark": {"uhel": 135, "dVelky": 25, "blurVelky": 34, "dMaly": 7, "blurMaly": 12, "dVsazeny": 7, "blurVsazeny": 11, "silaSvetla": 3, "silaStinu": 62, "logoUhel": 135, "logoD": 6, "logoBlur": 8, "logoSvetlo": 5, "logoStin": 70}};
+var BLOK = { light: "\n  /* Vzhled z\u016fst\u00e1v\u00e1 m\u011bkk\u00fd \u2014 karty vystupuj\u00ed z plochy st\u00ednem, ne r\u00e1me\u010dkem.\n     M\u011bn\u00ed se jen barvy: plocha je neutr\u00e1ln\u011b \u0161ed\u00e1 m\u00edsto tepl\u00e9 b\u00e9\u017eov\u00e9 a inkoust\n     je tmav\u0161\u00ed, aby se na to dalo d\u00edvat cel\u00fd den. Barevn\u00fd akcent zmizel;\n     zv\u00fdrazn\u011bn\u00ed d\u011bl\u00e1 inkoust, barva z\u016fstala tam, kde nese v\u00fdznam (odst\u00edn\n     barvy, varov\u00e1n\u00ed, stav v\u00e1\u017een\u00ed). */\n  /* --bg maluje JEN plochu str\u00e1nky; v\u0161echno, co na n\u00ed le\u017e\u00ed (karty, li\u0161ty,\n     tla\u010d\u00edtka, pole, \u0161t\u00edtky), bere barvu z --paper. Ty dv\u011b prom\u011bnn\u00e9 jdou\n     nastavit nez\u00e1visle \u2014 plocha je samostatn\u00e1 jednotka. */\n  --bg:#EAEAEA; --paper:#EAEAEA; --zvyraz:#DEDEDE; --logo:#EAEAEA;\n  --ink:#141414; --ink-2:#767676; --line:#D8D8D8; --line-2:#C7C7C7;\n  --cyan:#141414; --magenta:#C97B63; --yellow:#D9B44A; --key:#141414;\n  --btn-ink:#FFFFFF; --focus:rgba(20,20,20,.20); --danger:#A8382A;\n  --ok:#1F6B45; --warn:#8A5A1E;\n  --radius:18px;\n  --neu:-18px -18px 34px rgba(255,255,255,.9), 18px 18px 34px rgba(0,0,0,.10);\n  --neu-sm:-5px -5px 12px rgba(255,255,255,.85), 5px 5px 12px rgba(0,0,0,.11);\n  --neu-in:inset 5px 5px 11px rgba(0,0,0,.09), inset -5px -5px 11px rgba(255,255,255,.85);\n  --neu-in-lg:inset 7px 7px 16px rgba(0,0,0,.10), inset -7px -7px 16px rgba(255,255,255,.9);\n  --modal-shadow:0 24px 70px rgba(0,0,0,.22);\n  --logo-shadow:-4px -4px 8px rgba(255,255,255,.95), 4px 4px 8px rgba(0,0,0,.18);\n  --mono:ui-monospace,'Cascadia Mono',Consolas,monospace;\n  --sans:'Segoe UI',system-ui,Arial,sans-serif;\n", dark: "\n  /* Tmav\u00fd re\u017eim je hlub\u0161\u00ed ne\u017e d\u0159\u00edv, ale ne \u010dern\u00fd \u2014 na \u010dern\u00e9 plochu nejde\n     osv\u011btlit a st\u00edny by zmizely. Hlavn\u00ed tla\u010d\u00edtko je sv\u011btl\u00e9 s tmav\u00fdm p\u00edsmem.\n     Linky se posouvaj\u00ed spolu s pozad\u00edm, aby z\u016fstaly stejn\u011b z\u0159eteln\u00e9. */\n  --bg:#1D1D1D; --paper:#1D1D1D; --zvyraz:#2A2A2A; --logo:#1D1D1D;\n  --ink:#EDEDED; --ink-2:#8C8C8C; --line:#2C2C2C; --line-2:#3A3A3A;\n  --cyan:#EDEDED; --magenta:#C97B63; --yellow:#D9B44A; --key:#EDEDED;\n  --btn-ink:#161616; --focus:rgba(237,237,237,.22); --danger:#E0705E;\n  --ok:#5CBF8A; --warn:#D9A45C;\n  --neu:-18px -18px 34px rgba(255,255,255,.030), 18px 18px 34px rgba(0,0,0,.62);\n  --neu-sm:-5px -5px 12px rgba(255,255,255,.035), 5px 5px 12px rgba(0,0,0,.6);\n  --neu-in:inset 5px 5px 11px rgba(0,0,0,.55), inset -5px -5px 11px rgba(255,255,255,.035);\n  --neu-in-lg:inset 7px 7px 16px rgba(0,0,0,.6), inset -7px -7px 16px rgba(255,255,255,.04);\n  --modal-shadow:0 24px 70px rgba(0,0,0,.8);\n  --logo-shadow:-4px -4px 8px rgba(255,255,255,.05), 4px 4px 8px rgba(0,0,0,.7);\n" };
+var barvy = JSON.parse(JSON.stringify(VYCH_BARVY));
+var stiny = JSON.parse(JSON.stringify(VYCH_STINY));
+var rezim = "light";
+var korenu = document.documentElement;
+
+/* Ze čtyř čísel (úhel, vzdálenost, rozostření, síly) se dopočítají všechny
+   stíny naráz — proto spolu drží a svítí z jedné strany. */
+function posun(s, d){
+  var r = s.uhel * Math.PI / 180;
+  return { x: Math.round(Math.cos(r) * d), y: Math.round(-Math.sin(r) * d) };
+}
+function stinyCss(s){
+  var sv = (s.silaSvetla / 100), tm = (s.silaStinu / 100);
+  var v = posun(s, s.dVelky), m = posun(s, s.dMaly), i = posun(s, s.dVsazeny);
+  var iv = posun(s, Math.round(s.dVsazeny * 1.4));
+  function rgbaS(a){ return "rgba(255,255,255," + (Math.round(a * 1000) / 1000) + ")"; }
+  function rgbaT(a){ return "rgba(0,0,0," + (Math.round(a * 1000) / 1000) + ")"; }
+  return {
+    "--neu": v.x + "px " + v.y + "px " + s.blurVelky + "px " + rgbaS(sv) + ", "
+      + (-v.x) + "px " + (-v.y) + "px " + s.blurVelky + "px " + rgbaT(tm),
+    "--neu-sm": m.x + "px " + m.y + "px " + s.blurMaly + "px " + rgbaS(sv * .95) + ", "
+      + (-m.x) + "px " + (-m.y) + "px " + s.blurMaly + "px " + rgbaT(tm * 1.1),
+    "--neu-in": "inset " + (-i.x) + "px " + (-i.y) + "px " + s.blurVsazeny + "px " + rgbaT(tm * .9)
+      + ", inset " + i.x + "px " + i.y + "px " + s.blurVsazeny + "px " + rgbaS(sv * .95),
+    "--neu-in-lg": "inset " + (-iv.x) + "px " + (-iv.y) + "px " + Math.round(s.blurVsazeny * 1.45)
+      + "px " + rgbaT(tm) + ", inset " + iv.x + "px " + iv.y + "px "
+      + Math.round(s.blurVsazeny * 1.45) + "px " + rgbaS(sv),
+    "--modal-shadow": "0 " + Math.round(s.dVelky) + "px " + Math.round(s.blurVelky * 2) + "px "
+      + rgbaT(Math.min(1, tm * 2)),
+    "--logo-shadow": logoCss(s)
+  };
+}
+
+/* Logo si nese vlastní směr i sílu — je to jediné místo, kde je ražba vidět
+   ve velkém, a co sedí na kartách, na něm většinou nesedí. */
+function logoCss(s){
+  var r = s.logoUhel * Math.PI / 180, d = s.logoD;
+  var x = Math.round(Math.cos(r) * d), y = Math.round(-Math.sin(r) * d);
+  var sv = Math.round(s.logoSvetlo * 10) / 1000, tm = Math.round(s.logoStin * 10) / 1000;
+  return x + "px " + y + "px " + s.logoBlur + "px rgba(255,255,255," + sv + "), "
+    + (-x) + "px " + (-y) + "px " + s.logoBlur + "px rgba(0,0,0," + tm + ")";
+}
+
+function jeHex(v){ return /^#[0-9a-fA-F]{6}$/.test(v); }
+
+function nasad(){
+  korenu.setAttribute("data-theme", rezim);
+  var b = barvy[rezim], s = stinyCss(stiny[rezim]);
+  for (var k in b) korenu.style.setProperty(k, b[k]);
+  for (var k2 in s) korenu.style.setProperty(k2, s[k2]);
+  radky.forEach(function(r){
+    var klic = r.getAttribute("data-klic"), v = b[klic] || "";
+    r.querySelector('[data-role=hex]').value = v;
+    if (jeHex(v)) r.querySelector('[data-role=barva]').value = v;
+  });
+  posuvy.forEach(function(p){
+    var klic = p.getAttribute("data-klic"), inp = p.querySelector('[data-role=posuv]');
+    inp.value = stiny[rezim][klic];
+    p.querySelector('[data-role=cislo]').textContent = inp.value + inp.getAttribute("data-jed");
+  });
+  oznacSmer();
+  vypis();
+}
+
+function vypis(){
+  var t = "";
+  ["light", "dark"].forEach(function(m){
+    var blk = BLOK[m], hodnoty = Object.assign({}, barvy[m], stinyCss(stiny[m]));
+    for (var k in hodnoty){
+      var re = new RegExp("(" + k.replace(/[-]/g, "\\-") + "\\s*:\\s*)[^;]*;");
+      if (re.test(blk)) blk = blk.replace(re, "$1" + hodnoty[k] + ";");
+      else blk = blk.replace(/\s*$/, "\n  " + k + ":" + hodnoty[k] + ";\n");
+    }
+    t += (m === "light" ? ":root{" : ':root[data-theme="dark"]{') + blk + "}\n";
+  });
+  document.getElementById("vystup").value = t;
+}
+
+var radky = [].slice.call(document.querySelectorAll(".radek"));
+radky.forEach(function(r){
+  var klic = r.getAttribute("data-klic");
+  var barva = r.querySelector('[data-role=barva]'), hex = r.querySelector('[data-role=hex]');
+  barva.addEventListener("input", function(){ barvy[rezim][klic] = barva.value; hex.value = barva.value;
+    korenu.style.setProperty(klic, barva.value); vypis(); });
+  hex.addEventListener("input", function(){ barvy[rezim][klic] = hex.value;
+    if (jeHex(hex.value)) barva.value = hex.value;
+    korenu.style.setProperty(klic, hex.value); vypis(); });
+});
+
+var posuvy = [].slice.call(document.querySelectorAll(".posuv"));
+posuvy.forEach(function(p){
+  var klic = p.getAttribute("data-klic"), inp = p.querySelector('[data-role=posuv]');
+  inp.addEventListener("input", function(){
+    stiny[rezim][klic] = +inp.value;
+    p.querySelector('[data-role=cislo]').textContent = inp.value + inp.getAttribute("data-jed");
+    var s = stinyCss(stiny[rezim]);
+    for (var k in s) korenu.style.setProperty(k, s[k]);
+    oznacSmer(); vypis();
+  });
+});
+
+/* Osm světových stran místo hádání úhlu. */
+var SMERY = [[135,"↖"],[90,"↑"],[45,"↗"],[180,"←"],null,[0,"→"],[225,"↙"],[270,"↓"],[315,"↘"]];
+var smeryEl = document.getElementById("smery");
+SMERY.forEach(function(s){
+  var b = document.createElement("button");
+  if (!s){ b.className = "stred"; b.disabled = true; }
+  else { b.textContent = s[1]; b.title = "světlo z tohoto směru";
+    b.addEventListener("click", function(){
+      stiny[rezim].uhel = s[0];
+      var s2 = stinyCss(stiny[rezim]);
+      for (var k in s2) korenu.style.setProperty(k, s2[k]);
+      var p = posuvy.filter(function(x){ return x.getAttribute("data-klic") === "uhel"; })[0];
+      p.querySelector('[data-role=posuv]').value = s[0];
+      p.querySelector('[data-role=cislo]').textContent = s[0] + "°";
+      oznacSmer(); vypis();
+    }); }
+  smeryEl.appendChild(b);
+});
+function oznacSmer(){
+  var u = stiny[rezim].uhel;
+  [].slice.call(smeryEl.children).forEach(function(b, i){
+    var s = SMERY[i];
+    b.classList.toggle("on", !!s && s[0] === u);
+  });
+}
+
+document.getElementById("rezim-svetly").addEventListener("click", function(){
+  rezim = "light"; this.classList.add("on");
+  document.getElementById("rezim-tmavy").classList.remove("on"); nasad(); });
+document.getElementById("rezim-tmavy").addEventListener("click", function(){
+  rezim = "dark"; this.classList.add("on");
+  document.getElementById("rezim-svetly").classList.remove("on"); nasad(); });
+document.getElementById("zpet").addEventListener("click", function(){
+  barvy[rezim] = Object.assign({}, VYCH_BARVY[rezim]);
+  stiny[rezim] = Object.assign({}, VYCH_STINY[rezim]); nasad(); });
+document.getElementById("kopirovat").addEventListener("click", function(){
+  var t = document.getElementById("vystup");
+  t.removeAttribute("readonly"); t.select();
+  var ok = false;
+  try { ok = document.execCommand("copy"); } catch (e) {}
+  t.setAttribute("readonly", "readonly");
+  document.getElementById("stav").textContent = ok ? "zkopírováno do schránky"
+    : "nepodařilo se — označte text a zkopírujte ručně";
+});
+
+nasad();
+</script>
+</body></html>
