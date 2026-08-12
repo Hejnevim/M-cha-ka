@@ -5,18 +5,18 @@
 > `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — nepřepisují
 > se ručně a nemohou se rozejít se skutečností. Text mimo ně píše člověk.
 
-> Poslední zapsaná změna ve vývojovém deníku: **12. srpna 20:30 — Logo má vlastní barvu a vlastní ražbu, nezávisle na zbytku**
+> Poslední zapsaná změna ve vývojovém deníku: **12. srpna 22:10 — Srovnané řádkování obou sloupců, viskozita široká jako pole nad ní**
 
 | soubor | řádků | velikost |
 |---|---:|---:|
-| `index.html` | 7 581 | 416 kB |
+| `index.html` | 7 600 | 418 kB |
 | `most.py` | 694 | 29 kB |
 | `pdf_spec.py` | 1 071 | 42 kB |
 | `odemkni.py` | 213 | 8 kB |
 | `prevod_printcolor.py` | 188 | 7 kB |
 | `kontrola_aplikace.py` | 169 | 7 kB |
 | `rozbor_aktualizuj.py` | 354 | 13 kB |
-| **celkem** | **10 270** | |
+| **celkem** | **10 289** | |
 <!-- /AUTO:stav -->
 
 ---
@@ -361,6 +361,10 @@ podle dat, ne podle dojmu.
   portálem, takže se nepřeruší vážení ani spojení s váhou
 - Domovská stránka po výběru drží jen dávku a barvu; zadání se sbalí do jednoho
   řádku a práce u míchačky (krycí plocha, zbytky, štítek, vážení) je v režimu
+- Kalkulace stojí na dvou stejně velkých oknech, která se potkávají uprostřed
+  stránky: vlevo vybraný produkt (fotka, poloha potisku, místo pro zakázkový
+  list), vpravo kolik namíchat. Rozbalené zadání se roztáhne přes obě poloviny,
+  čísla zakázky drží samostatný sloupec u pravého okraje
 - Asistent navážení s živým čtením z váhy, tolerancí a tárou
 - Simulace váhy pro nácvik a pro pracoviště bez váhy
 - Přepočet dávky při přelití se zachováním odstínu
@@ -432,6 +436,7 @@ je fyzika tkaniny, druhé zkušenost dílny.
 | **Most** | Python 3, **jen standardní knihovna**. Volitelně `pypdfium2` pro hezčí náhled stránky PDF; bez něj se použije vlastní vykreslování |
 | **Formát dat** | CSV (středníkem, UTF-8 s BOM) a JSON. Vše čitelné v Excelu i v textovém editoru |
 | **Distribuce** | jeden soubor; volitelně GitHub Pages, aby šla aplikace otevřít odkudkoli |
+| **Vzhled** | měkký: karty vystupují z plochy stínem, ne rámečkem. Celá paleta i stíny jsou v proměnných na jednom místě a ladí se v `barvy.html` |
 
 **Platformy**
 

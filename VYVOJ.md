@@ -115,6 +115,11 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 19:45 | Horní lišta s logem splynula s plochou stránky, nemaluje se zvlášť |
 | 20:10 | Nástroj umí i stíny — směr světla, odstávání, rozostření a sílu |
 | 20:30 | Logo má vlastní barvu a vlastní ražbu, nezávisle na zbytku |
+| 20:55 | Nasazena paleta naladěná dílnou v nástroji barvy.html |
+| 21:15 | Zadání zakázky přerovnáno: viskozita přes šířku, čísla vpravo pod sebou |
+| 21:35 | Rozbalené zadání zabere celou šířku stránky, sbalený souhrn zůstává úzký |
+| 21:55 | Čísla zakázky jako sloupec vpravo přes celou výšku, viskozita samostatný řádek |
+| 22:10 | Srovnané řádkování obou sloupců, viskozita široká jako pole nad ní |
 
 ---
 
@@ -1520,3 +1525,83 @@ drží nahoře a obsah pod ni podjíždí, ale barvu bere z plochy.
 
 Na obrazovce tak zůstaly jen dva druhy ploch: **stránka** a **věci, které na
 ní leží** — karty, tlačítka, pole, štítky.
+
+---
+
+## 29. Paleta naladěná dílnou
+
+Nástroj se osvědčil hned první den: dílna si barvy i stíny naladila sama
+a poslala hotový blok, který se vložil do `index.html` beze změny. Rozdíl proti
+tomu, co jsem navrhoval:
+
+| | já | dílna |
+|---|---|---|
+| plocha (světlý) | `#EAEAEA` | `#C2C2C2` — o dost tmavší |
+| karty (světlý) | `#EAEAEA` (stejná) | `#EAEAEA` — teď o poznání světlejší než plocha |
+| plocha (tmavý) | `#1D1D1D` | `#272525` |
+| karty (tmavý) | `#1D1D1D` (stejná) | `#3B3B3B` — světlejší než plocha |
+| stín u karet | 25 px, rozostření 34 | 13 px, rozostření 26, ale výrazně silnější |
+| směr světla | shodně z levého horního rohu | totéž, jen u karet mírně stočený |
+
+Podstatné je, co z toho vyplývá: **dílna chtěla karty vidět jako předměty
+ležící na ploše**, ne jako plochu se stínem. Přesně to, co jsem předtím zkusil
+rámečky a co bylo zamítnuto — jde to i měkkou cestou, jen se musí rozejít
+barva plochy a barva karet, ne přidat obrys.
+
+Logo dostalo barvu plochy (`#C2C2C2`) a slabší ražbu, v tmavém režimu je
+tmavší než plocha a má jen světlou hranu bez stínu.
+
+Vloženo přes celé bloky `:root` i `:root[data-theme="dark"]`, ověřeno
+vykreslením a snímky obou režimů včetně tabulky v katalogu.
+
+---
+
+## 30. Zadání zakázky: čísla vpravo, viskozita přes šířku
+
+Počet kusů, spotřeba, ztráty a minimální dávka stály ve čtyřech sloupcích přes
+celou šířku karty. Jsou to čtyři krátká čísla — pole byla zbytečně široká,
+zatímco viskozita pod nimi se krčila v polovině řádku, ačkoli k ní patří
+tlačítko na uložení k receptuře i hláška o doporučeném rozsahu.
+
+Teď stojí **čtyři čísla vpravo pod sebou** v úzkém sloupci (230 px) a
+**viskozita zabírá celý zbytek šířky** (385 px na kartě široké 631 px), takže
+navazuje na pole nad sebou. Doporučený rozsah k sítu se přesunul pod ni, kam
+patří — je to komentář k té hodnotě, ne samostatné pole.
+
+Na užším okně (do 720 px) se sloupec s čísly přesune pod viskozitu a přeskládá
+se do dvou po dvou, aby pole nezůstala přes celou šířku sama.
+
+**Karta se při rozbalení roztáhne přes obě poloviny.** Sbalený souhrn je krátký
+a sedí pod kartou produktu, takže mu úzký sloupec stačí. Rozbalené zadání je
+ale formulář o dvanácti polích — v polovině stránky se lámal a vedle něj
+zůstávala prázdná plocha. Rozbalené proto dostane `grid-column: 1 / -1`, tedy
+celou šířku (1 389 px z 1 500), sbalené zůstává na 675 px.
+
+**Chyba, která tím vyplavala.** Řada síto / kryvost / povrch měla natvrdo dva
+sloupce, kdykoli se netiskne přes síto — jenže u tampontisku je místo síta
+klišé, takže polí jsou pořád tři a třetí padalo samo na další řádek. V úzké
+kartě si toho nikdo nevšiml, na široké to bylo přes celou obrazovku. Počet
+sloupců se teď řídí tím, kolik polí se doopravdy vykreslí.
+
+**Konečná podoba.** Čísla zakázky nestojí pod poli, ale tvoří **samostatný
+sloupec u pravého okraje karty**, který začíná ve stejné výšce jako první pole
+receptury (naměřeno: obojí y = 922 px). Počet kusů a spotřeba jsou tak vidět
+hned nahoře, ne až po odrolování celého formuláře.
+
+Viskozita se přesunula **na samostatný řádek pod ostatní pole** a zabírá celou
+šířku levého sloupce (1 101 px) — patří k ní tlačítko na uložení k receptuře
+i hláška o doporučeném rozsahu, na které je potřeba místo.
+
+Na užším okně (do 820 px) se sloupec s čísly složí pod pole a přeskládá se na
+dvě po dvou.
+
+**Srovnané řádkování.** Popisky polí v mřížce mají vyhrazenou výšku dvou řádků
+(aby se dlouhý název zalomil a pole pod ním nepropadlo níž než sousední).
+Sloupec s čísly ale v mřížce nestál, takže to pravidlo na něj nesedělo a začínal
+o osmnáct pixelů výš. Teď platí i pro něj: první pole obou sloupců začíná
+na stejné řádce — naměřeno y = 965 v obou. Rozestupy vpravo se srovnaly na
+16 px jako všude jinde ve formuláři, takže jsou čtyři čísla po 105 px.
+
+**Viskozita je pole jako každé jiné.** Roztažená přes celou šířku levého
+sloupce působila jako něco jiného než výběry nad ní. Sedí teď v témž
+trojsloupci — 356 px, přesně tolik co pole nad ní.
