@@ -4,5 +4,9 @@ __pycache__/
 # provozní a licencovaná data — do veřejného repozitáře nepatří
 databaze barev/
 evidence/
+# receptury nesou licencované míchací formule (Printcolor, Ferro), i když jde
+# jen o vzorek nebo o zálohu exportovanou z aplikace
+receptury*.csv
+vzor_receptury.csv
 *.bak
 *.tmp
