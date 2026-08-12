@@ -95,6 +95,14 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 15:45 | Nabízejí se jen receptury patřící k technologii vybrané polohy |
 | 16:05 | Custom receptura vždy z nahrané databáze a jen k tomu produktu, na kterém vznikla |
 | 16:35 | Mazání vlastní receptury přímo v kalkulaci, ve dvou krocích a pod heslem |
+| 17:10 | Domíchání ze zbytku: kolik čeho přidat, aby z kelímku vznikl žádaný odstín |
+| 18:05 | Zbytek jako zdroj pro dávku zakázky — z evidence i zadaný ručně |
+
+### 12. srpna — dokumentace, která nezastará
+| čas | co |
+|---|---|
+| 10:30 | Strukturovaný rozbor aplikace: architektura, funkce, technologie a hardware |
+| 12:30 | Rozbor se aktualizuje sám — generované úseky se čtou ze zdrojů, kontrola před nahráním |
 
 ---
 
@@ -1052,3 +1060,143 @@ provede — a běží-li most, zapíše se na disk. Při úklidu po sobě jsem p
 soubor rozpadl na jeden řádek) a přišel o ukázkovou recepturu. Obnoveno ze
 zálohy, soubor sedí na bajt. Poučení je zapsané: před proklikávacím testem
 zálohovat, číst i psát s `newline=""`.
+
+---
+
+## 20. Zbytek jako zdroj pro dávku — kolik čeho přidat
+
+**Zadání z dílny.** „Vím, jakou barvu míchám a kolik jí potřebuju na zakázku.
+Chci mít možnost ten recept odvodit ze zbytku, který mám v evidenci — nebo
+zbytek zadat ručně, když v evidenci není."
+
+**Proč to jde spočítat přesně.** Zbytek je předem namíchaná část dávky. Ubrat
+z kelímku nejde nic, jen přilévat, takže pro každou složku musí platit
+
+    zbytek × podíl_ve_zbytku  ≤  dávka × podíl_v_cíli.
+
+Nejmenší dávka, do které se kelímek vejde celý, je proto
+
+    dávka = zbytek × max(podíl_ve_zbytku / podíl_v_cíli)
+
+a přidat se musí rozdíl mezi cílovou navážkou a tím, co kelímek přinesl.
+Rozhoduje složka, které je v kelímku poměrově nejvíc — o ni se dávka „zapře".
+Ten poměr je vždycky aspoň 1, takže barvy vždycky přibude; míň jí být nemůže.
+
+**Dva zdroje zbytku, jedna cesta dál.**
+
+1. **Z evidence.** Kelímky, které na dávku sednou, se nabízejí samy — u každého
+   je vidět, kolik z něj jde použít a kolik pak stačí domíchat. To bylo
+   v aplikaci už dřív; nově se k tomu ukáže i rozpis navážek.
+2. **Ručně.** Kelímek u míchačky bez štítku, o kterém obsluha ví, co v něm je.
+   Zadá se kolik ho je a co v něm je — po řádcích, nebo jedním klikem podle
+   receptury, ze které se kdysi míchal. Takový zbytek se dál chová stejně jako
+   kelímek ze skladu, jen nemá kód a nic se z něj neodepisuje.
+
+Obojí ústí do téhož: dávka, míchací lístek i asistent vážení se přepočítají.
+
+**Co obsluha vidí.** Na zakázku se 50 g barvy PANTONE 1235 C, kelímek 200 g
+zbylý po PANTONE 129 C:
+
+> Přidejte 135,5 g 1100 Mittelgelb · 41,3 g Binder · 24,4 g 1200 Dunkelgelb ·
+> 5,3 g 3100 Magentarot(tr). Aby se kelímek vešel celý, musí být dávka aspoň
+> 406,5 g — o 356,5 g víc, než zakázka potřebuje.
+
+| komponenta | % | ze zbytku g | přidat g | celkem g |
+|---|---:|---:|---:|---:|
+| 9000 Weiss | 21,7 | 88,2 | — | 88,2 |
+| 1100 Mittelgelb | 50,5 | 69,8 | **135,5** | 205,3 |
+| Binder | 20,0 | 40,0 | **41,3** | 81,3 |
+| 1200 Dunkelgelb | 6,0 | — | **24,4** | 24,4 |
+| 3100 Magentarot(tr) | 1,8 | 2,0 | **5,3** | 7,3 |
+| **Celkem** | 100,0 | 200,0 | **206,5** | **406,5** |
+
+Nechce-li obsluha míchat osminásobek zakázky, přepne na „jen na zakázku" —
+pak se z kelímku vezme jen tolik, kolik se do dávky vejde, a zbytek zůstane
+ve skladu. Odstín je v obou případech přesný.
+
+**Míchací lístek to ví.** Míchá-li se do kelímku se zbytkem, přibudou na lístku
+sloupce „ze zbytku g" a „přidat g", kumulativní součet jde přes přidávané
+množství a v poznámce stojí, že se váha táruje i s kelímkem. Asistent vážení
+totéž hlásí na displeji.
+
+**Kdy to nejde.** Je-li v kelímku složka, kterou cíl vůbec neobsahuje,
+přiléváním se jí nezbavíte. Aplikace ji pojmenuje a nepočítá nic — je
+poctivější říct „na tenhle odstín se tenhle kelímek nedá použít" než nabídnout
+dávku, která nesedí.
+
+**Ověření.** 38 kontrol výpočtu v node (dávka, navážky, zbytek totožný s cílem,
+složka navíc, přání větší i menší dávky, sloučení stejných složek, texty místo
+čísel, nesmyslné vstupy) a průchody aplikací v prohlížeči bez okna: ruční
+zadání zbytku 200 g PANTONE 129 C na cíl PANTONE 1235 C dalo dávku 406,5 g
+a navážky, které do gramu sedí s ručním výpočtem; po stisku „Namíchat z tohoto
+zbytku" se přepočítala dávka i rozpis. Kombinace, které nejdou (Xpression do
+MS 660), aplikace odmítla a pojmenovala složky navíc.
+
+---
+
+## 21. Kontrola vykreslení měřila v nesprávný okamžik
+
+**Co se stalo.** Po přidání rozpisu navážek začala kontrola hlásit, že se
+aplikace nevykreslila — a to i ve chvíli, kdy se v prohlížeči vykreslovala
+bez chyby. Ověřeno třemi výpisy DOMu za sebou: kořen měl obsah pokaždé.
+
+**Proč.** Kontrola měřila počet potomků kořene **synchronně** skriptem na konci
+stránky. React 18 ale vykresluje přes `createRoot`, což je práce naplánovaná,
+ne okamžitá — u větší aplikace se první vykreslení do té chvíle nestihne.
+Dokud byla aplikace menší, stihlo se to a měření vycházelo; s každou další
+obrazovkou to bylo těsnější. Signál toho byl vidět už dřív: kontrola hlásila
+„první pokus neuspěl, opakováno" a naměřených 7 973 znaků byla jen rozdělaná
+stránka, ne hotová aplikace.
+
+**Oprava.** Měří se se zpožděním; prohlížeč běží ve virtuálním čase, takže to
+nic nezdrží. Kontrola teď vidí 38 104 znaků — celou vykreslenou aplikaci.
+
+**Že brána pořád funguje**, je ověřené rozdílovým testem: z kopie se odebrala
+deklarace proměnné a kontrola selhala s hlášením
+`ReferenceError: rucni is not defined`. Poučení stojí za zapsání: u kontroly
+je stejně důležité *kdy* se měří jako *co* se měří — a když nástroj hlásí
+chybu, kterou prohlížeč nepotvrdí, je podezřelý nástroj.
+
+---
+
+## 22. Rozbor aplikace, který nezastará
+
+**Problém s dokumentací.** Rozbor aplikace zastará dřív, než ho stihne někdo
+přečíst. Čísla v něm — kolik je receptur, co je odemčené, jaké soubory most
+obsluhuje — se po pár změnách rozejdou se skutečností a dokument začne lhát.
+A lhoucí dokumentace je horší než žádná: podle žádné se člověk zeptá, podle
+lhoucí se rozhodne špatně.
+
+**Řešení.** Rozbor se rozdělil na dvě části podle toho, kdo je umí udržet:
+
+1. **Co ví stroj** — počty receptur po databázích a kolik jich nemá odstín,
+   stav zámku technologií a které databáze k nim patří, záložky aplikace,
+   rozhraní mostu, povolené složky pro zápis, klíče v úložišti, rozsah kódu,
+   poslední zapsaná změna z tohoto deníku. To se generuje přímo ze zdrojových
+   a datových souborů skriptem `rozbor_aktualizuj.py` do úseků vyznačených
+   značkami `<!-- AUTO:jmeno -->`.
+2. **Co ví člověk** — proč se to dělá takhle, jak vypadá cesta tiskaře
+   aplikací, co je hotové a co chybí, jaká jsou omezení. To zůstává psané
+   ručně, protože stroj ví *co* v kódu je, ale ne *proč*.
+
+**Kontrola místo důvěry.** `rozbor_aktualizuj.py --kontrola` nic nemění, jen
+řekne, které úseky nesedí, a vrátí kód 1. Volá se z `nahraj_na_github.ps1`
+(v ostrém běhu rovnou v režimu přepisu), takže se zastaralý rozbor nepustí dál
+bez povšimnutí.
+
+**Ověřeno rozdílovým testem.** V `parametry/technologie.csv` se dočasně zamkla
+technologie SCR:
+
+| krok | výsledek |
+|---|---|
+| `--kontrola` po změně | „Rozbor je zastaralý — neodpovídá úsek: technologie", kód 1 |
+| přepis | v tabulce se objevilo `SCR … v přípravě` |
+| návrat souboru do původního stavu | tabulka se vrátila na `ostrá`, kontrola opět čistá |
+
+Soubor se po testu obnovil na bajt (kontrolní součet souhlasí).
+
+**Co se přitom ukázalo.** Ručně psaný rozbor tvrdil, že ostrá je jen FIR —
+jenže v `technologie.csv` byly mezitím odemčené všechny technologie. Přesně
+ten druh tichého rozporu, kvůli kterému generovaná část vznikla. Zbylá pevná
+čísla v textu (počty receptur, chybějící odstíny) se nahradila odkazem na
+generovanou tabulku, aby nebylo co udržovat dvakrát.

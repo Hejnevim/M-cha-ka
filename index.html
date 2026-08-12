@@ -3332,7 +3332,8 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
   }, [recipe, recipes, zListu, adHoc]);
 
   /* ---- zbytek z evidence použitý na tuhle dávku ---- */
-  const [pouzityZbytek, setPouzityZbytek] = useState(null);   // {kod}
+  const [pouzityZbytek, setPouzityZbytek] = useState(null);   // {kod, rezim}
+  const [rucni, setRucni] = useState(null);   // ručně zadaný zbytek: {nazev, gramu, slozeni[]}
   const [ulozitZbytek, setUlozitZbytek] = useState(null);     // dialog uložení
   const [kodDavky, setKodDavky] = useState("");               // kód dávky — drží se i po zavření štítku
   const [stitekOtevren, setStitekOtevren] = useState(false);
@@ -3564,14 +3565,29 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
   // Které kelímky ze skladu na tuhle dávku sednou a kolik z nich jde použít.
   const nabidky = useMemo(() => (calc && calc.comps.length)
     ? nabidkyZbytku(zbytky, calc.comps, calc.totalG) : [], [zbytky, calc]);
+  /* Zbytek nemusí být v evidenci — kelímek stojí u míchačky bez štítku a
+     obsluha ví, co v něm je. Takový zbytek se zadá ručně: chová se stejně
+     jako kelímek ze skladu, jen nemá kód a nic se z něj neodepisuje. */
+  const rucniZbytekObj = useMemo(() => {
+    if (!rucni) return null;
+    const slozeni = (rucni.slozeni || [])
+      .filter((c) => String(c.name || "").trim() && n(c.pct) > 0)
+      .map((c) => ({ name: String(c.name).trim(), pct: n(c.pct) }));
+    if (!(n(rucni.gramu) > 0) || !slozeni.length) return null;
+    return { kod: ZBYTEK_RUCNI, nazev: String(rucni.nazev || "").trim() || "zbytek zadaný ručně",
+      gramu: n(rucni.gramu), hex: rucni.hex || "#9A968A", slozeni: slozeni, stav: "sklad" };
+  }, [rucni]);
+  const zbytekPodleKodu = (kod) => kod === ZBYTEK_RUCNI
+    ? rucniZbytekObj : ((zbytky || []).find((x) => x.kod === kod) || null);
+
   const vyuzitiZbytku = useMemo(() => {
     if (!pouzityZbytek || !calc || !calc.comps.length) return null;
-    const z = (zbytky || []).find((x) => x.kod === pouzityZbytek.kod);
+    const z = zbytekPodleKodu(pouzityZbytek.kod);
     if (!z) return null;
     return pouzityZbytek.rezim === "cely"
       ? zbytekCelyPlan(z, calc.comps, calc.totalG)
       : vyuzitelnyZbytek(z, calc.comps, calc.totalG);
-  }, [pouzityZbytek, zbytky, calc]);
+  }, [pouzityZbytek, zbytky, calc, rucniZbytekObj]);
 
   /* Dávka po přepočtu na zbytek. Při využití celého kelímku se míchá víc,
      než zakázka žádá — poměr složek zůstává, jen se všechno škáluje. */
@@ -3586,12 +3602,25 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
       zvetseno: true, davkaZakazky: calc.totalG,
     });
   }, [calc, vyuzitiZbytku]);
+  /* Rozpis pro obsluhu: co už v kelímku je a co se k tomu dováží. Bere se
+     z téhož výpočtu, ze kterého se míchá — jedno číslo, jeden zdroj. */
+  const rozpisZbytku = useMemo(() => {
+    if (!vyuzitiZbytku || !calcAkt || !calcAkt.comps.length) return null;
+    const pr = vyuzitiZbytku.prispevek || [];
+    return calcAkt.comps.map((c, i) => ({
+      name: c.name, pct: c.norm, zeZbytku: pr[i] || 0,
+      pridat: Math.max(0, c.g - (pr[i] || 0)), celkem: c.g,
+    }));
+  }, [vyuzitiZbytku, calcAkt]);
+
   // změní-li se receptura nebo dávka tak, že zbytek nesedí, volba se zruší sama
   useEffect(() => { setPouzityZbytek(null); setKodDavky(""); }, [recipe && recipe.id]);
 
   const odepisZbytku = () => {
     if (!vyuzitiZbytku) return;
     const kod = vyuzitiZbytku.zbytek.kod, ubrat = vyuzitiZbytku.pouzit;
+    // ručně zadaný zbytek v evidenci není, není z čeho odepisovat
+    if (kod === ZBYTEK_RUCNI) { setPouzityZbytek(null); return; }
     setZbytky((prev) => prev.map((z) => z.kod === kod
       ? Object.assign({}, z, { gramu: Math.max(0, n(z.gramu) - ubrat), zmeneno: Date.now() })
       : z));
@@ -3650,15 +3679,23 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     const d = new Date();
     const dat = d.toLocaleDateString("cs-CZ") + " " + d.toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" });
     let kum = 0;
+    // Míchá-li se do kelímku se zbytkem, navažuje se jen to, co má přibýt —
+    // proto lístek v tom případě ukazuje i sloupec "ze zbytku" a kumulativní
+    // součet jde přes přidávané množství, ne přes celou navážku.
+    const zeZbytku = rozpisZbytku;
     const radky = calcAkt.comps.length
       ? calcAkt.comps.map((c, i) => {
-          kum += c.g;
+          const r = zeZbytku ? zeZbytku[i] : null;
+          const navazit = r ? r.pridat : c.g;
+          kum += navazit;
           return `<tr>
         <td class="num">${i + 1}</td>
         <td>${esc(c.name)}</td>
         <td class="num">${fmt(c.norm)}</td>
-        <td class="num b">${fmt(c.g)}</td>
+        ${r ? `<td class="num">${r.zeZbytku > 0.005 ? fmt(r.zeZbytku) : "—"}</td>` : ""}
+        <td class="num b">${navazit > 0.005 ? fmt(navazit) : "—"}</td>
         <td class="num">${fmt(kum)}</td>
+        ${r ? `<td class="num">${fmt(c.g)}</td>` : ""}
         <td class="num">${fmt(c.ml)}</td>
         <td class="chk"></td>
       </tr>`;
@@ -3666,6 +3703,14 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
       // složení zatím není — lístek se vytiskne s prázdnými řádky na dopsání
       : Array.from({ length: 8 }, (_, i) =>
           `<tr><td class="num">${i + 1}</td><td>&nbsp;</td><td></td><td></td><td></td><td></td><td class="chk"></td></tr>`).join("");
+    const hlavicka = rozpisZbytku
+      ? `<th style="text-align:right">#</th><th>Komponenta</th><th style="text-align:right">%</th>
+         <th style="text-align:right">ze zbytku g</th><th style="text-align:right">přidat g</th>
+         <th style="text-align:right">kumulativně g</th><th style="text-align:right">celkem g</th>
+         <th style="text-align:right">ml</th><th style="text-align:center">✓</th>`
+      : `<th style="text-align:right">#</th><th>Komponenta</th><th style="text-align:right">%</th>
+         <th style="text-align:right">navážit g</th><th style="text-align:right">kumulativně g</th>
+         <th style="text-align:right">ml</th><th style="text-align:center">✓</th>`;
     const w = window.open("", "_blank");
     if (!w) { alert("Prohlížeč zablokoval nové okno — povolte vyskakovací okna pro tuto stránku."); return; }
     w.document.write(`<!doctype html><html lang="cs"><head><meta charset="utf-8"><title>Míchací lístek — ${esc(recipe.name)}</title>
@@ -3730,12 +3775,18 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     <div class="big">${fmt(calcAkt.totalG)} g <span style="font-size:15px;color:#78766C">≈ ${fmt(calcAkt.totalMl)} ml</span></div>
   </div>
   <table>
-    <thead><tr><th style="text-align:right">#</th><th>Komponenta</th><th style="text-align:right">%</th><th style="text-align:right">navážit g</th><th style="text-align:right">kumulativně g</th><th style="text-align:right">ml</th><th style="text-align:center">✓</th></tr></thead>
+    <thead><tr>${hlavicka}</tr></thead>
     <tbody>${radky}</tbody>
-    <tfoot><tr><td></td><td>Celkem</td><td class="num">${calcAkt.comps.length ? "100,0" : ""}</td><td class="num">${fmt(calcAkt.totalG)}</td><td class="num">${fmt(calcAkt.totalG)}</td><td class="num">${fmt(calcAkt.totalMl)}</td><td></td></tr></tfoot>
+    <tfoot><tr><td></td><td>Celkem</td><td class="num">${calcAkt.comps.length ? "100,0" : ""}</td>${
+      rozpisZbytku ? `<td class="num">${fmt(vyuzitiZbytku.pouzit)}</td>` : ""}<td class="num">${
+      fmt(rozpisZbytku ? vyuzitiZbytku.domichat : calcAkt.totalG)}</td><td class="num">${
+      fmt(rozpisZbytku ? vyuzitiZbytku.domichat : calcAkt.totalG)}</td>${
+      rozpisZbytku ? `<td class="num">${fmt(calcAkt.totalG)}</td>` : ""}<td class="num">${fmt(calcAkt.totalMl)}</td><td></td></tr></tfoot>
   </table>
   ${calcAkt.comps.length
-    ? `<div class="note">Kumulativní vážení do jedné nádoby: po každé komponentě má displej váhy ukazovat hodnotu ve sloupci „kumulativně g". Tolerance navážení ±0,5 g, pokud technolog neurčí jinak.</div>`
+    ? `<div class="note">Kumulativní vážení do jedné nádoby: po každé komponentě má displej váhy ukazovat hodnotu ve sloupci „kumulativně g". Tolerance navážení ±0,5 g, pokud technolog neurčí jinak.${
+        rozpisZbytku ? ` Míchá se do kelímku se zbytkem (${esc(vyuzitiZbytku.zbytek.kod === ZBYTEK_RUCNI
+          ? vyuzitiZbytku.zbytek.nazev : vyuzitiZbytku.zbytek.kod)}, ${fmt(vyuzitiZbytku.pouzit)} g) — váhu vytárujte i s kelímkem a navažujte sloupec „přidat g".` : ""}</div>`
     : `<div class="note"><b>Složení receptury zatím není v aplikaci zadané.</b> Namíchejte podle firemní receptury na celkovou dávku uvedenou výše a navážky zapište do tabulky. Tolerance navážení ±0,5 g, pokud technolog neurčí jinak.</div>`}
   <div class="pods"><div>Namíchal/a</div><div>Datum a čas</div><div>Kontrola / šarže</div></div>
   <script>window.addEventListener("load",function(){setTimeout(function(){window.print()},150)})<\/script>
@@ -4213,7 +4264,9 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 <span className="dot" style=${{ background: "var(--ok)" }}></span>
                 <span>
                   Použije se <b>${fmt(vyuzitiZbytku.pouzit)} g</b> ze zbytku
-                  <b> ${vyuzitiZbytku.zbytek.kod}</b> — domíchat ${fmt(vyuzitiZbytku.domichat)} g.
+                  <b> ${vyuzitiZbytku.zbytek.kod === ZBYTEK_RUCNI
+                    ? vyuzitiZbytku.zbytek.nazev : vyuzitiZbytku.zbytek.kod}</b>${" "}
+                  — domíchat ${fmt(vyuzitiZbytku.domichat)} g.
                   ${vyuzitiZbytku.celyZbytek
                     ? html`<span className="note"> Kelímek se spotřebuje celý; dávka
                         ${" " + fmt(calcAkt.totalG)} g je o ${fmt(vyuzitiZbytku.prebytek)} g větší,
@@ -4231,6 +4284,137 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
             ${pouzityZbytek && !vyuzitiZbytku && html`
               <div className="warnbox">Zvolený zbytek už na tuhle dávku nesedí — složení nebo množství se změnilo.
                 <div style=${{ marginTop: 8 }}><button className="btn sec sm" onClick=${() => setPouzityZbytek(null)}>Zrušit použití</button></div>
+              </div>`}
+
+            ${rozpisZbytku && rozpisZbytku.some((r) => r.pridat > 0.005) && html`
+              <div className="okbox" style=${{ marginTop: 8 }}>
+                <b>K tomu, co je v kelímku, přidejte
+                  ${" " + rozpisZbytku.filter((r) => r.pridat > 0.005)
+                    .map((r) => fmt(r.pridat) + " g " + r.name).join(" · ")}.</b>
+                <table className="t" style=${{ marginTop: 8 }}>
+                  <thead>
+                    <tr><th>Komponenta</th><th className="num">%</th><th className="num">ze zbytku g</th><th className="num">přidat g</th><th className="num">celkem g</th></tr>
+                  </thead>
+                  <tbody>
+                    ${rozpisZbytku.map((r) => html`
+                      <tr key=${r.name}>
+                        <td>${r.name}</td>
+                        <td className="num">${fmt(r.pct)}</td>
+                        <td className="num">${r.zeZbytku > 0.005 ? fmt(r.zeZbytku) : "—"}</td>
+                        <td className="num" style=${{ fontWeight: r.pridat > 0.005 ? 700 : 400 }}>${r.pridat > 0.005 ? fmt(r.pridat) : "—"}</td>
+                        <td className="num">${fmt(r.celkem)}</td>
+                      </tr>`)}
+                    <tr>
+                      <td style=${{ fontWeight: 700 }}>Celkem</td>
+                      <td className="num" style=${{ fontWeight: 700 }}>100,0</td>
+                      <td className="num" style=${{ fontWeight: 700 }}>${fmt(vyuzitiZbytku.pouzit)}</td>
+                      <td className="num" style=${{ fontWeight: 700 }}>${fmt(vyuzitiZbytku.domichat)}</td>
+                      <td className="num" style=${{ fontWeight: 700 }}>${fmt(calcAkt.totalG)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p className="note" style=${{ marginTop: 6 }}>
+                  Navažuje se na váhu i s kelímkem — sloupec „přidat" je to, co má přibýt.
+                  Míchací lístek i asistent vážení už s tím počítají.
+                </p>
+              </div>`}
+
+            ${!pouzityZbytek && html`
+              <div className="rowline" style=${{ marginTop: 10, marginBottom: 0 }}>
+                <button className="btn sec sm" onClick=${() => setRucni(rucni || {
+                  nazev: "", gramu: "", slozeni: [{ id: uid(), name: "", pct: "" }] })}>
+                  ${rucni ? "Zbytek zadaný ručně" : "Zbytek není v evidenci — zadat ručně"}
+                </button>
+                <span className="note">z kelímku bez štítku se dá vyjít taky, když víte, co v něm je</span>
+              </div>`}
+
+            ${!pouzityZbytek && rucni && html`
+              <div className="pickbox" style=${{ marginTop: 8 }}>
+                <div className="rowline" style=${{ marginTop: 0 }}>
+                  <b>Zbytek zadaný ručně</b>
+                  <span className="note">cíl: ${recipe.name} · dávka zakázky ${fmt(calc.totalG)} g</span>
+                  <span style=${{ marginLeft: "auto" }}></span>
+                  <button className="btn sec sm" onClick=${() => setRucni(null)}>Zavřít</button>
+                </div>
+                <div className="frow c3" style=${{ marginTop: 8 }}>
+                  <div>
+                    <label className="f">Co to je (nepovinné)</label>
+                    <input value=${rucni.nazev} placeholder="např. kelímek u míchačky"
+                      onChange=${(e) => setRucni(Object.assign({}, rucni, { nazev: e.target.value }))} />
+                  </div>
+                  <div>
+                    <label className="f">Kolik ho mám (g)</label>
+                    <input type="number" step="1" min="0" value=${rucni.gramu} placeholder="např. 200"
+                      onChange=${(e) => setRucni(Object.assign({}, rucni, { gramu: e.target.value }))} />
+                  </div>
+                  <div>
+                    <label className="f">Vyplnit složení podle receptury</label>
+                    <select value="" onChange=${(e) => {
+                      const r = recipes.find((x) => x.id === e.target.value);
+                      if (!r) return;
+                      const suma = r.components.reduce((a, c) => a + n(c.pct), 0) || 100;
+                      setRucni(Object.assign({}, rucni, {
+                        nazev: rucni.nazev || r.name,
+                        slozeni: r.components.map((c) => ({ id: uid(), name: c.name,
+                          pct: cislo(n(c.pct) / suma * 100, 2) })),
+                      }));
+                    }}>
+                      <option value="">— vybrat recepturu —</option>
+                      ${recepturyTech.filter((r) => r.components && r.components.length).slice(0, 400)
+                        .map((r) => html`<option key=${r.id} value=${r.id}>${r.name}${r.zdroj ? " · " + nazevDb(r.zdroj) : ""}</option>`)}
+                    </select>
+                  </div>
+                </div>
+
+                <label className="f" style=${{ marginTop: 8 }}>Co je v kelímku (komponenta a %)</label>
+                ${(rucni.slozeni || []).map((c, i) => html`
+                  <div key=${c.id} className="rowline" style=${{ marginTop: 4, marginBottom: 0 }}>
+                    <input style=${{ flex: 3 }} value=${c.name} placeholder="název komponenty"
+                      onChange=${(e) => setRucni(Object.assign({}, rucni, {
+                        slozeni: rucni.slozeni.map((x, j) => j === i ? Object.assign({}, x, { name: e.target.value }) : x) }))} />
+                    <input style=${{ flex: 1 }} type="number" step="0.01" min="0" value=${c.pct} placeholder="%"
+                      onChange=${(e) => setRucni(Object.assign({}, rucni, {
+                        slozeni: rucni.slozeni.map((x, j) => j === i ? Object.assign({}, x, { pct: e.target.value }) : x) }))} />
+                    <button className="btn sec sm" title="odebrat řádek"
+                      onClick=${() => setRucni(Object.assign({}, rucni, {
+                        slozeni: rucni.slozeni.filter((x, j) => j !== i) }))}>✕</button>
+                  </div>`)}
+                <div className="rowline" style=${{ marginTop: 6 }}>
+                  <button className="btn sec sm" onClick=${() => setRucni(Object.assign({}, rucni, {
+                    slozeni: (rucni.slozeni || []).concat([{ id: uid(), name: "", pct: "" }]) }))}>+ řádek</button>
+                  <span className="note">${(() => {
+                    const su = (rucni.slozeni || []).reduce((a, x) => a + n(x.pct), 0);
+                    return su > 0 ? "součet " + fmt(su) + " % — poměry se stejně přepočítají na sto" : "";
+                  })()}</span>
+                </div>
+
+                ${(() => {
+                  if (!rucniZbytekObj) return html`<div className="note" style=${{ marginTop: 8 }}>
+                    Napište, kolik zbytku máte a co v něm je — aspoň jednu složku s procenty.</div>`;
+                  const d = domichaniZeZbytku({ slozeni: rucniZbytekObj.slozeni, gramu: rucniZbytekObj.gramu,
+                    cil: recipe.components, chciCelkem: calc.totalG });
+                  if (!d) return null;
+                  if (!d.ok) return html`<div className="warnbox" style=${{ marginTop: 8 }}>
+                    ${d.cizi.length === 1
+                      ? html`Ve zbytku je <b>${d.cizi[0]}</b>, kterou receptura ${recipe.name} vůbec nemá.`
+                      : html`Ve zbytku jsou složky <b>${d.cizi.join(", ")}</b>, které receptura ${recipe.name} vůbec nemá.`}
+                    ${" "}Přiléváním se toho nezbavíte — na tenhle odstín se tenhle kelímek použít nedá.
+                  </div>`;
+                  return html`
+                    <div className="okbox" style=${{ marginTop: 8 }}>
+                      ${d.sedi
+                        ? html`Zbytek už má složení receptury ${recipe.name} — stačí ho použít a domíchat zbytek dávky.`
+                        : html`<b>Přidejte ${d.pridat.map((r) => fmt(r.pridat) + " g " + r.name).join(" · ")}.</b>`}
+                      ${d.zvetseno && html`<span className="note">
+                        ${" "}Aby se kelímek vešel celý, musí být dávka aspoň ${fmt(d.minDavka)} g —
+                        o ${fmt(d.minDavka - calc.totalG)} g víc, než zakázka potřebuje.</span>`}
+                      <div className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
+                        <button className="btn sm" onClick=${() => setPouzityZbytek({ kod: ZBYTEK_RUCNI,
+                          rezim: d.zvetseno ? "cely" : "cast" })}>Namíchat z tohoto zbytku</button>
+                        <span className="note">dávka, míchací lístek i vážení se tím přepočítají</span>
+                      </div>
+                    </div>`;
+                })()}
               </div>`}
 
             <div className="rowline" style=${{ marginTop: 12, marginBottom: 0 }}>
@@ -4253,7 +4437,8 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
           </div>
           <${Vazeni} comps=${calcAkt.comps} totalG=${calcAkt.totalG} recipeName=${recipe ? recipe.name : ""}
             predem=${vyuzitiZbytku ? vyuzitiZbytku.prispevek : null}
-            predemPopis=${vyuzitiZbytku ? "zbytek " + vyuzitiZbytku.zbytek.kod : ""}
+            predemPopis=${vyuzitiZbytku ? (vyuzitiZbytku.zbytek.kod === ZBYTEK_RUCNI
+              ? vyuzitiZbytku.zbytek.nazev : "zbytek " + vyuzitiZbytku.zbytek.kod) : ""}
             pigmenty=${pigmenty} barvaHex=${recipe ? recipe.hex : ""}
             onHotovo=${vyuzitiZbytku ? odepisZbytku : null} />
           </div>`}
@@ -6447,6 +6632,9 @@ const VZOR_BAZE = /b[áa]ze|base|transparen|medium|firnis|extender/i;
 const maBazi = (z) => (z.slozeni || []).some((c) => VZOR_BAZE.test(c.name || ""));
 const normKomp = (s) => String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
 
+/* Kód zbytku, který v evidenci není — obsluha ho zadala ručně. */
+const ZBYTEK_RUCNI = "@rucni";
+
 /* ---- expirace a čas použitelnosti (pot life) ----
    Dvousložkové barvy s tužidlem tuhnou od chvíle, kdy se smíchají — po
    uplynutí pot life je kelímek k ničemu, i když je plný. Expirace je proti
@@ -6578,6 +6766,80 @@ function zbytekCelyPlan(zbytek, comps, totalG) {
     zbudeVKelimku: 0,
     prebytek: Math.max(0, davka - totalG),   // o kolik víc, než zakázka žádá
   });
+}
+
+/* Co přidat do zbytku, aby z něj vznikl žádaný odstín.
+
+   Zbytek je předem namíchaná část dávky. Aby výsledek seděl přesně, musí pro
+   každou složku platit
+
+       zbytek × podíl_ve_zbytku ≤ dávka × podíl_v_cíli,
+
+   protože z kelímku už nic ubrat nejde — přilévá se jen. Nejmenší dávka, do
+   které se celý kelímek vejde, je tedy
+
+       dávka = zbytek × max(podíl_ve_zbytku / podíl_v_cíli)
+
+   a přidat se musí rozdíl mezi cílovou navážkou a tím, co kelímek přinesl.
+   Ten poměr je vždycky aspoň 1 (obě složení jsou procenta ze sta), takže
+   výsledku je vždy víc než zbytku — nikdy ne míň.
+
+   Složku, kterou cíl vůbec nemá, z kelímku nedostaneme. Pak se řekne, která
+   to je, a nepočítá se nic; míchat by se muselo od začátku. */
+function domichaniZeZbytku({ slozeni, gramu, cil, chciCelkem }) {
+  const L = n(gramu);
+  const sluc = (radky) => {
+    const mapa = new Map();
+    for (const c of (radky || [])) {
+      const jm = String(c.name || "").trim();
+      const pct = n(c.pct);
+      if (!jm || !(pct > 0)) continue;
+      const k = normKomp(jm);
+      if (mapa.has(k)) mapa.get(k).pct += pct;
+      else mapa.set(k, { name: jm, pct: pct, k: k });
+    }
+    return Array.from(mapa.values());
+  };
+  const cilR = sluc(cil), zbR = sluc(slozeni);
+  const sumC = cilR.reduce((s, c) => s + c.pct, 0);
+  const sumZ = zbR.reduce((s, c) => s + c.pct, 0);
+  if (!(L > 0) || !(sumC > 0) || !(sumZ > 0)) return null;
+
+  const podilCil = new Map(cilR.map((c) => [c.k, c.pct / sumC]));
+  const podilZb = new Map(zbR.map((c) => [c.k, c.pct / sumZ]));
+
+  const cizi = [];
+  let nejhorsi = 0;                       // max(podíl ve zbytku / podíl v cíli)
+  for (const c of zbR) {
+    const p = podilCil.get(c.k) || 0;
+    if (!(p > 0)) { cizi.push(c.name); continue; }
+    nejhorsi = Math.max(nejhorsi, (podilZb.get(c.k) || 0) / p);
+  }
+  if (cizi.length) return { ok: false, cizi: cizi, zbytek: L };
+  if (!(nejhorsi > 0)) return null;
+
+  const minDavka = L * nejhorsi;
+  const zadano = n(chciCelkem);
+  const davka = zadano > minDavka ? zadano : minDavka;
+  const radky = cilR.map((c) => {
+    const celkem = davka * (c.pct / sumC);
+    const zeZbytku = L * (podilZb.get(c.k) || 0);
+    return { name: c.name, pct: c.pct / sumC * 100, zeZbytku: zeZbytku,
+      pridat: Math.max(0, celkem - zeZbytku), celkem: celkem };
+  });
+  return {
+    ok: true,
+    zbytek: L,
+    davka: davka,
+    minDavka: minDavka,
+    // dávka vyšla větší, než se žádalo — kelímek se jinak celý nevejde
+    zvetseno: zadano > 0 && minDavka > zadano + 0.005,
+    radky: radky,
+    pridat: radky.filter((r) => r.pridat > 0.005),
+    celkemPridat: radky.reduce((s, r) => s + r.pridat, 0),
+    // 1 = zbytek už má přesně složení cíle, není co dorovnávat
+    sedi: nejhorsi <= 1.0001,
+  };
 }
 
 /* ---- čárový kód Code 128 pro štítek na kelímek ----

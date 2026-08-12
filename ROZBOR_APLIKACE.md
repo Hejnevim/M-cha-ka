@@ -1,128 +1,566 @@
-# Ink Recipe Manager — rozbor celé aplikace
+# Ink Recipe Manager — strukturovaný rozbor aplikace
 
-> Stav ke commitu `2a3ec32` (main). Podklad vychází z přímé prohlídky zdrojových
-> souborů (`index.html`, `most.py`, `pdf_spec.py`, `NAVOD.txt` — 662 řádků) a
-> ze zadání pro další vývoj.
+<!-- AUTO:stav -->
+> **Stav k 12. srpna 2026.** Čísla v úsecích označených `AUTO` generuje
+> `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — nepřepisují
+> se ručně a nemohou se rozejít se skutečností. Text mimo ně píše člověk.
 
-## Shrnutí
+> Poslední zapsaná změna ve vývojovém deníku: **12. srpna 12:30 — Rozbor se aktualizuje sám — generované úseky se čtou ze zdrojů, kontrola před nahráním**
 
-Ink Recipe Manager je dnes **dvoudílný systém**: webová aplikace (`index.html`,
-258 kB, jeden soubor) a lokální doprovodný program (`most.py` + `pdf_spec.py`),
-který jí zprostředkovává vše, co prohlížeč z bezpečnostních důvodů nesmí —
-čtení disku, čtení PDF, volání firemního systému SGPS.
+| soubor | řádků | velikost |
+|---|---:|---:|
+| `index.html` | 7 284 | 399 kB |
+| `most.py` | 694 | 29 kB |
+| `pdf_spec.py` | 1 071 | 42 kB |
+| `odemkni.py` | 213 | 8 kB |
+| `prevod_printcolor.py` | 188 | 7 kB |
+| `kontrola_aplikace.py` | 169 | 7 kB |
+| `rozbor_aktualizuj.py` | 354 | 13 kB |
+| **celkem** | **9 973** | |
+<!-- /AUTO:stav -->
 
-Aplikace pokrývá celý tok od zakázky po navážení: **vstup** (ručně, PDF,
-čtečka kódů, SGPS) → **kalkulace** (produkt, poloha, receptura, skutečné
-pokrytí motivu) → **míchací lístek** → **asistent navážení** s přepočtem při
-přelití. Vše běží lokálně, bez cloudu; sdílená data (receptury, jejich vazby
-na produkty) se ukládají do souborů na disku, ne jen do prohlížeče.
+---
 
-## Architektura
+## 0. Co to je, v deseti řádcích
 
-| Vrstva | Soubor | Účel |
+Ink Recipe Manager (IRM) je nástroj pro sítotiskovou, tampontiskovou a vypalovací
+dílnu. Odpovídá na jedinou otázku, kolem které se točí celý provoz: **kolik čeho
+navážit, aby vznikl správný odstín ve správném množství** — a udělá to tak, aby
+to zvládl kdokoli u váhy, ne jen ten, kdo míchá deset let.
+
+Není to cloudová služba. Je to jeden HTML soubor, který se otevře v prohlížeči,
+a malý pomocný program v Pythonu, který mu zpřístupní disk a PDF. Data zůstávají
+v dílně.
+
+**Rozsah dat a kódu**
+
+<!-- AUTO:data -->
+| co | kolik |
+|---|---|
+| produktů v katalogu | 1 320 |
+| receptur celkem | 2 692 |
+| — `receptury_PMS_660.csv` (TXP,PDP,SCR) | 778 receptur / 3 617 řádků složení, 223 bez odstínu |
+| — `receptury_PMS_786.csv` (PDP) | 814 receptur / 3 092 řádků složení, 190 bez odstínu |
+| — `receptury_PMS_Xpression.csv` (FIR) | 1 097 receptur / 3 986 řádků složení |
+| — `receptury_vlastni.csv` (platí všude) | 3 receptur / 12 řádků složení |
+| obrázků produktů a poloh | 5 583 stažených z 9 209 v seznamu |
+| sít a klišé v parametrech | 28 zapsaných, z toho 2 s údaji výrobce |
+| koeficientů spotřeby | 14 zapsaných, 0 nastavených mimo 1,00 |
+| pigmentů a bází | 12 pigmentů, 5 bází |
+<!-- /AUTO:data -->
+
+---
+
+# 1. ARCHITEKTURA & PROCESY
+
+## 1.1 Stavba systému
+
+Systém má tři vrstvy a žádnou z nich nepotřebuje internet.
+
+| vrstva | soubor | co dělá |
 |---|---|---|
-| UI (prohlížeč) | `index.html` (258 kB) | Celá aplikace — React + htm, bez buildu |
-| Katalog produktů | `data.js` (1,25 MB) | 1 320 produktů Stricker, statická data |
-| Obrázky | `seznam_obrazku.json` + `obrazky/` | 9 209 náhledů ke stažení |
-| **Most** | `most.py` (28 kB, 669 řádků) | Lokální server na `:8765` — jediný, kdo smí sahat na disk a do SGPS |
-| PDF parser | `pdf_spec.py` (43 kB, 1 071 řádků) | Vlastní parser PDF i PNG kodér — bez externích knihoven (`pypdfium2` jen volitelně pro náhled stránky) |
-| Autostart | `autostart.py` | Registrace mostu do startu Windows |
-| SGPS napojení | `sgps_config.json` | Režim demo / soubor / rest + mapování polí |
-| PDF pravidla | `pdf_pravidla.json` | Popisky a regulární výrazy pro rozpoznávání polí z listu — upravitelné bez zásahu do kódu |
-| Databáze receptur | `databaze barev/*.csv` | Nakoupené i vlastní databáze, načítají se samy |
+| **Aplikace** | `index.html` | Celé UI i výpočty. React 18 + htm, **bez build kroku** — soubor se otevře a běží. |
+| **Data katalogu** | `data.js` | Produkty, jejich barvy, tiskové polohy, rozměry, materiály. Statické, počty viz tabulka výše. |
+| **Obrázky** | `obrazky/` + `seznam_obrazku.json` | Náhledy produktů a poloh potisku, stažené předem kvůli běhu bez internetu. |
+| **Most** | `most.py` (Python, jen standardní knihovna) | Lokální server na `127.0.0.1:8765`. Dělá to, co prohlížeč sám nesmí: čte disk, rozebírá PDF, vykresluje stránky, volá firemní systém. |
+| **PDF parser** | `pdf_spec.py` | Vlastní čtečka PDF napsaná od nuly (dekomprese, mapování znaků včetně Identity-H, poloha textu na stránce) + PNG kodér. Žádná externí závislost. |
+| **Databáze barev** | `databaze barev/*.csv` | Nakoupené i vlastní receptury. Načítají se samy, přiřazení k technologiím je v `parametry/databaze.csv`. |
+| **Parametry dílny** | `parametry/*.csv` | Síta, koeficienty spotřeby, pigmenty a báze, zámek technologií. |
+| **Evidence zbytků** | `evidence/` | Kelímky se zbytky barev, jejich stav a lhůty. |
 
-Prohlížeč se na most nikdy "nenutí" — sám si ho hledá (`localhost:8765` /
-`127.0.0.1:8765` / uložená adresa) a když neběží, čeká a naskočí, jakmile
-najede. Bez mostu aplikace funguje dál v původním, čistě prohlížečovém
-rozsahu (ruční zadání, localStorage).
+**Záložky aplikace**
 
-## Moduly aplikace (8 záložek)
+<!-- AUTO:zalozky -->
+1. **Kalkulace** (`calc`)
+2. **Načtení specu z PDF** (`pdf`)
+3. **Čárový kód** (`scan`)
+4. **Zakázky (SGPS)** (`zak`)
+5. **Připojení k mostu** (`most`)
+6. **Produkty** (`prod`)
+7. **Receptury** (`rec`)
+8. **Zbytky barev** (`zbytky`)
+9. **Import / data** (`imp`)
+<!-- /AUTO:zalozky -->
 
-1. **Kalkulace** — jádro aplikace: výběr produktu/polohy/receptury, výpočet
-   dávky, míchací lístek, asistent navážení. Umí vzít vstup odkudkoli
-   (ručně/PDF/čtečka/SGPS) a nezapomene rozdělanou práci při odskoku jinam.
-2. **Načíst spec z PDF** — nahrání zakázkového listu, ~19 rozpoznaných polí
-   s uvedením zdroje u každého, ruční doplnění chybějících.
-3. **Načíst spec (čtečka)** — tři způsoby čtení kódu (klávesnicový režim,
-   sériový port, kamera QR/DataMatrix), stejný formát specu jako PDF.
-4. **Zakázky (SGPS)** — seznam otevřených zakázek ze SGPS, otevření přímo
-   do kalkulace (zatím režim demo).
-5. **Produkty** — katalog, tabulkové i mřížkové zobrazení, export CSV.
-6. **Receptury** — Pantone standard i Custom, filtr podle databáze (když je
-   jich víc), editor se sítem/kryvostí/povrchem a příznaky.
-7. **Import / data** — hromadný CSV/JSON import, obnova katalogu, **správa
-   hesla pro mazání**.
-8. **Připojení k mostu** — stav mostu, přehled načtených databází receptur,
-   vlastní receptury a jejich vazby, ruční nastavení adresy mostu.
+**Bez mostu aplikace funguje dál** — v čistě prohlížečovém rozsahu (ruční
+zadání, `localStorage`). Aplikace si most sama hledá na `localhost:8765`,
+`127.0.0.1:8765` a na uložené adrese; jakmile naskočí, sama se připojí.
 
-## Klíčové mechanismy (co dělá aplikaci výjimečnou)
+## 1.2 Cesta tiskaře aplikací — krok za krokem
 
-- **Skutečné pokrytí motivu.** Katalog dává jen největší možnou plochu.
-  Aplikace najde motiv přímo v náhledu PDF, nechá ho mostem převykreslit
-  ostře (~570 DPI), rozliší barvu potisku od pomocné grafiky (rámečky,
-  popisky) a připočte rozpití barvy v mm. Konkrétní dopad: **3,1 g → 1,3 g**
-  u zakázky 138823.
-- **Kód potisku jako jednoznačný klíč polohy** (`92734.5.4.SCR1-01-01`) —
-  rozliší i dvě polohy stejného názvu na stejném produktu (sítotisk vs.
-  tampontisk), plus slovníček anglicko-českého překladu názvů poloh.
-- **Nejbližší Pantone z barvy**, když list barvu jen pojmenuje — RGB ze
-  vzorníku → CMYK → nejbližší receptura přes ΔE (nad 25 nic nenabídne).
-- **Receptury na disku, ne jen v prohlížeči.** Vlastní databáze
-  (`receptury_vlastni.csv`) se zapisuje přes dočasný soubor se zálohou
-  `.bak`; vazba produkt + barva + technologie + poloha přežije jiný
-  prohlížeč i počítač. Víc databází vedle sebe se nemíchá — `PANTONE 485 C`
-  z Ferro Xpression a z Printcolor 390 mají každý svoje složení.
-- **Přepočet dávky při přelití** — dorovná všechny komponenty tak, aby
-  poměr zůstal na desetinu procenta stejný, a upozorní, když by dávka
-  narostla přes dvojnásobek.
-- **Ochrana mazání heslem** a **tmavý/světlý režim** (z předchozí vizuální
-  přestavby UI).
+### Krok 1 — Zadání přijde do aplikace (čtyři možné vstupy)
 
-## Rizika a omezení (dobré říkat nahlas)
+| vstup | jak to jde | stav |
+|---|---|---|
+| **PDF zakázkový list** | Přetáhne se do aplikace. Most ho rozebere, aplikace ukáže rozpoznaná pole s uvedením zdroje u každého. | funkční, hlavní cesta |
+| **Čárový/2D kód** | Čtečka v režimu klávesnice, čtečka na sériovém portu, nebo kamera (QR/DataMatrix). | funkční |
+| **Ručně** | Vybere se produkt, poloha, barva, počet kusů. | funkční |
+| **SGPS (firemní systém)** | Seznam otevřených zakázek, otevření přímo do kalkulace. | připraveno, běží v režimu **demo** — ostré napojení čeká na přístup |
 
-- **Závislost na mostu** — PDF, SGPS i sdílené receptury bez něj nejedou.
-  Autostart to řeší, ale je to nový bod selhání (kolega bez Pythonu, přísný
-  antivirus).
-- **PDF musí mít textovou vrstvu** — na sken (obrázek bez textu) aplikace
-  poctivě upozorní, místo aby tiše vrátila prázdno.
-- **GitHub repozitář `Hejnevim/M-cha-ka` je veřejný** a obsahuje složku
-  `databaze barev/` s licencovanými Pantone/Ferro recepturami — vědomé
-  rozhodnutí, ale stojí za to mít ho na paměti při dalším sdílení odkazu.
-- **Jeden 258kB soubor `index.html`** — zatím v pohodě, při dalším růstu
-  (a hlavně s novými moduly níže) bude rozdělení do modulů čím dál užitečnější.
+Z PDF se hledá **23 pojmenovaných polí** (ref, název, ks, poloha, komponenta,
+rozměr, barva, receptura, řada, materiál, předúprava, síto, stroj, kryvost,
+povrch, technologie, g/m², ztráty, min. dávka, zakázka, zákazník, termín,
+poznámka) a k tomu **9 strukturovaných vzorů** (mimo jiné kód polohy typu
+`92734.5.4.SCR1-01-01`, ze kterého se jednoznačně určí produkt, technologie
+i pořadí polohy). Pravidla jsou v `pdf_pravidla.json` — dají se upravit bez
+zásahu do kódu. Na testovací zakázce se přečte 14 údajů automaticky; dřív jich
+technolog osm opisoval ručně.
 
-## Plánovaný rozvoj
+**Co bylo na čtení PDF těžké** (a proč to nešlo hotovou knihovnou): formuláře
+kreslí každé písmeno zvlášť a tučné písmo dvakrát přes sebe (bez ošetření vyjde
+`PPoozznnáámmkkyy`); stránka může být otočená, takže se musí sledovat
+transformační matice; kerning trhá slova (`PANT ONE`), takže se mezera doplňuje
+podle skutečné vzdálenosti úseků.
 
-### Čeká se na vstupní data (blokující, mimo naši kontrolu)
+### Krok 2 — Produkt, barva produktu, poloha potisku
 
-- **Měření podle velikosti síta a těrek** — přesnější odhad spotřeby barvy
-  na základě parametrů síta (nití/cm, µm) a těrky (tvrdost, úhel). Čeká se
-  na dodání dat s těmito parametry, dřív se nedá začít.
-- **PMS databáze** — čeká se na dodání (licencovaná data, viz výše u
-  receptur Printcolor/Ferro).
+Vybere se produkt (našeptávač podle názvu i referenčního čísla), jeho barevná
+varianta a poloha potisku. **Technologie se určí polohou**, ne globálním
+nastavením — jeden produkt se běžně tiskne víc technologiemi (577 z 1 320
+produktů, tedy 44 %). Rozměr potisku se vezme ze zakázkového listu, jinak
+z katalogu.
 
-### Nové funkce k vývoji
+### Krok 3 — Skutečná krycí plocha motivu
 
-1. **Přepočet podle zbytku barvy** — možnost vzít starý zbytek namíchané
-   barvy z minula a přepočítat recepturu tak, aby se tento zbytek
-   přednostně využil místo míchání úplně nové dávky.
-2. **Databáze hustoty barev** — hustota se dnes zadává ručně u každé
-   receptury; cílem je vlastní databáze hustot propojená s existujícími
-   barvami, plněná postupně (ne najednou).
-3. **Evidence zbytků (waste management)** — uložení nespotřebované barvy do
-   systému s čárovým/QR kódem; při nové zakázce aplikace doporučí "na tuto
-   zakázku můžete využít 150 g zbytkové barvy XY".
-4. **Sledování expirace a viskozity** — upozornění na čas použitelnosti
-   (pot life) u dvousložkových barev s tužidlem.
-5. **Systém rolí** — Tiskař (jen míchá podle receptu), Technolog/Mistr
-   (schvaluje a upravuje receptury), Manažer (vidí statistiky a náklady).
-6. **Audit log / historie míchání** — kdo, kdy a s jakou odchylkou barvu
-   namíchal; klíčové pro reklamace u B2B zákazníků.
-7. **API napojení na ERP/MIS** — odpis spotřebovaného materiálu ze skladu
-   tiskárny přímo z aplikace.
+Tohle je největší jednotlivá úspora materiálu. Dřív se počítalo z obdélníku,
+do kterého se logo vejde — jenže v logu a kolem něj je spousta volného místa.
 
-Body 1–4 navazují přímo na to, co aplikace už umí (receptury na disku,
-hustota u receptury, přepočet dávky) — jde o rozšíření existujících
-mechanismů. Body 5–7 jsou nová vrstva nad rámec současné jednouživatelské
-aplikace (role, audit, napojení na sklad) a budou znamenat větší
-architektonický zásah, než dosavadní novinky.
+Aplikace vykreslí stránku PDF, sama najde motiv (spojité bloky kresby se sloučí
+a vybere se ten, jehož poměr stran odpovídá rozměru potisku), a spočítá, jakou
+část plochy barva doopravdy pokryje. Přidat lze **vnější odsazení v mm** — barva
+se kolem objektů rozpíjí. Výřez se pak dělá v **573 DPI**, aby výsledek nezávisel
+na rozlišení náhledu.
+
+> Naměřeno na zakázce 138823 (motiv 98,9 × 26 mm, 200 ks):
+> plocha **25,71 → 3,25 cm²**, spotřeba **3,1 → 0,4 g**.
+
+### Krok 4 — Receptura
+
+Nabízejí se **jen receptury přiřazené k technologii vybrané polohy** — na
+textilní síto se nenabídne barva pro tampontisk ani pro vypalování. Kolik
+receptur zbude na kterou technologii, je v tabulce v kapitole 1.4.
+
+Tři cesty k receptuře:
+1. **Pantone standard** z nakoupené databáze.
+2. **Custom receptura** — vlastní odstín. Vzniká **vždy odvozením z receptury,
+   která v nahraných databázích už je** (nikdy „od nuly"), a váže se na
+   kombinaci *produkt + barva produktu + technologie + poloha*. Nabízí se jen
+   u produktu, na kterém vznikla. Název nese celou adresu:
+   `PANTONE 1235 C (PMS 660) · 11003 · 124 · PDP Sportovní Láhev / Víčko lahve`.
+3. **Rozpracovaná barva** — odstín ze zakázkového listu, který v databázi není.
+   Dá se s ní dojít až k míchacímu lístku a teprve pak ji uložit natrvalo.
+
+Aplikace si pamatuje, co se na danou kombinaci použilo posledně, a sama to
+nabídne. Modré tričko drží svou recepturu odděleně od stejného trička v jiné barvě.
+
+### Krok 5 — Kolik barvy
+
+```
+plocha motivu [m²]  =  šířka × výška × (krycí plocha % / 100)
+netto [g]           =  plocha × počet kusů × g/m²
+s rezervou [g]      =  netto × (1 + ztráty % / 100)
+dávka [g]           =  max(s rezervou, minimální dávka)
+```
+
+Hodnota **g/m²** je buď paušál podle technologie (SCR 6,0 · PDP 2,5 · TXP 14,0 ·
+TRS 18,0 · FIR 8,0), nebo — a to je cíl — **spočítaná z geometrie síta**:
+
+```
+V [cm³/m²]  =  otevřená plocha × tloušťka tkaniny        (u tampontisku hloubka leptu klišé)
+g/m²        =  V × faktor přenosu × hustota barvy × kryvost × materiál × podklad × viskozita
+```
+
+Faktor přenosu je 0,70, není-li u síta uvedeno jinak. Nejsou-li v datech
+otevřená plocha a tloušťka, dopočítají se z počtu nití na cm a průměru vlákna:
+
+```
+oko o = 10000/n − d [µm] ;  otevřená plocha = (o / (o + d))² ;  tloušťka = 1,6 × d
+```
+
+Koeficient 1,6 není odhad — vyšel ze srovnání se čtyřmi skutečnými tkaninami
+(43-80, 77-55, 120-34, 150-31), kde poměr tloušťky k průměru vlákna vychází
+1,61 až 1,64. Dopočtené hodnoty aplikace **označuje jako orientační**.
+
+Celý rozpis výpočtu je v aplikaci vidět, aby šlo číslo zkontrolovat. **Ručně
+zadanou spotřebu aplikace nikdy sama nepřepíše.**
+
+### Krok 6 — Zbytek ze skladu má přednost
+
+Než se začne míchat, aplikace nabídne kelímky ze zbytků, které na dávku sednou.
+Zbytek je předem namíchaná část dávky; ubrat z něj nejde nic, jen přilévat,
+takže pro každou složku musí platit
+
+```
+zbytek × podíl_ve_zbytku  ≤  dávka × podíl_v_cíli
+```
+
+a nejmenší dávka, do které se kelímek vejde celý, je
+`zbytek × max(podíl_ve_zbytku / podíl_v_cíli)`.
+
+Obsluha si vybere:
+- **jen na zakázku** — použije se tolik, kolik se do dávky vejde, zbytek zůstane
+  ve skladu;
+- **celý kelímek** — dávka se zvětší tak, aby se kelímek spotřeboval beze zbytku
+  (aplikace řekne, o kolik gramů jde nad rámec zakázky).
+
+Zbytek nemusí být v evidenci — dá se **zadat ručně** (kolik ho je a co v něm je,
+buď po řádcích, nebo jedním klikem podle receptury, ze které se míchal).
+Je-li v kelímku složka, kterou cíl vůbec neobsahuje, aplikace ji pojmenuje
+a odmítne počítat: přiléváním se jí nezbavíte.
+
+Výstup je vždy rozpis po složkách — *ze zbytku g · přidat g · celkem g*.
+
+### Krok 7 — Míchací lístek
+
+Vytiskne se A4 s hlavičkou (produkt, barva produktu, poloha, technologie,
+zakázka, receptura, odstín potisku jako Pantone nebo CMYK), celkovou dávkou,
+tabulkou navážek s **kumulativním sloupcem** a zaškrtávacími políčky, a s podpisy.
+Míchá-li se do kelímku se zbytkem, přibudou sloupce *ze zbytku g* a *přidat g*,
+kumulativní součet jde přes přidávané množství a v poznámce stojí, že se váha
+táruje i s kelímkem.
+
+### Krok 8 — Navážení na digitální váze
+
+Asistent vede obsluhu složku po složce: ukazuje cíl, aktuální hmotnost, kolik
+zbývá, a barevně hlásí, když je navážka v toleranci. Váha se připojí přes USB
+(Web Serial); kdo ji nemá, může si celý postup projít v **simulaci**.
+
+**Přelití je jediná věc, která se nedá vzít zpět** — komponentu z nádoby nikdo
+nedostane ven. Odstín se dá zachovat jen tím, že se dorovnají všechny ostatní,
+tedy že se zvětší celá dávka. Aplikace to spočítá okamžitě a řekne, o kolik se
+dávka zvětšila.
+
+### Krok 9 — Štítek na kelímek a evidence zbytků
+
+Po namíchání se vytiskne štítek s **čárovým kódem Code 128** (kreslí se přímo
+v aplikaci, takže funguje i bez internetu), s kódem dávky, odstínem, expirací
+a časem použitelnosti (pot life, u dvousložkových barev výchozích 8 hodin).
+
+Dávka se do evidence založí rovnou celá ve stavu **„v tisku"**; kolik doopravdy
+zbylo, se ví až po zakázce — štítek se načte čtečkou a doplní se zbytek. Kelímek
+pak hlídá lhůty (v pořádku / spotřebovat brzy / prošlé) a u další zakázky se
+sám nabídne.
+
+### Krok 10 — Korekce po nátisku
+
+Nesedí-li nátisk, technolog popíše, co vidí („je to moc světlé", „málo červené",
+„vybledlé"), a aplikace vybere pigment, který táhne opačným směrem, a spočítá,
+kolik ho přidat. Síla korekce je ve třech stupních (mírně 0,5 % · znatelně
+1,5 % · výrazně 4 % dávky).
+
+## 1.3 Kde která data bydlí
+
+| kde | co |
+|---|---|
+| **`localStorage` prohlížeče** | rozdělaná práce a nastavení: produkty, receptury, vazby, zbytky, filtr databází, technologie, motiv vzhledu, heslo na mazání, adresa mostu, verze katalogu |
+| **soubory na disku (přes most)** | vlastní receptury (`receptury_vlastni.csv`, včetně sloupce `vazby`), parametry dílny, evidence zbytků |
+| **jen v paměti** | rozdělaná kalkulace při odskoku do jiné záložky |
+
+Klíče v `localStorage`:
+
+<!-- AUTO:uloziste -->
+- `irm-databaze-filtr`
+- `irm-databaze-tech`
+- `irm-databaze-verze`
+- `irm-databaze-znacky`
+- `irm-delete-pw`
+- `irm-katalog-verze`
+- `irm-links`
+- `irm-most-adresa`
+- `irm-pokryti`
+- `irm-prod-view`
+- `irm-products`
+- `irm-recipes`
+- `irm-scan-hid`
+- `irm-sgps-port`
+- `irm-technologie`
+- `irm-theme`
+- `irm-zbytky`
+<!-- /AUTO:uloziste -->
+
+Vlastní receptury se ukládají do souboru **samy při každé změně**, přes dočasný
+soubor a s ponecháním předchozí verze jako `.bak`. Znalost „tenhle produkt
+v téhle barvě se míchá takhle" tak nedrží na jednom počítači.
+
+## 1.4 Zámek technologií
+
+Technologie se dá v aplikaci **zamknout**, dokud k ní nejsou data a ověřený
+postup. Zámek se řídí souborem `parametry/technologie.csv` (ne nastavením
+v prohlížeči — musí platit na všech počítačích dílny stejně) a jde přepnout
+dvěma cestami:
+
+- příkazem `python odemkni.py FIR` / `odemkni.py SCR --zamknout`,
+- přímo v aplikaci, chráněno heslem.
+
+U každé zamčené technologie aplikace ukazuje **kontrolní seznam** toho, co ještě
+chybí (receptury, síta s údaji výrobce, koeficienty, pigmenty) — odemyká se
+podle dat, ne podle dojmu.
+
+**Současný stav technologií a jejich databází:**
+
+<!-- AUTO:technologie -->
+| kód | technologie | výchozí g/m² | stav | databáze receptur |
+|---|---|---:|---|---|
+| `SCR` | Sítotisk (plast, papír) / rotační | 6,0 | ostrá | PMS_660 (778), vlastni (3) |
+| `PDP` | Tampontisk | 2,5 | ostrá | PMS_660 (778), PMS_786 (814), vlastni (3) |
+| `TXP` | Sítotisk (textil) | 14,0 | ostrá | PMS_660 (778), vlastni (3) |
+| `TRS` | Transfer | 18,0 | ostrá | vlastni (3) |
+| `FIR` | Firing — Low Temperature | 8,0 | ostrá | PMS_Xpression (1 097), vlastni (3) |
+<!-- /AUTO:technologie -->
+
+---
+
+# 2. SEZNAM FUNKCÍ
+
+## 2.1 Hotovo a v provozu
+
+**Vstup zadání**
+- Čtení zakázkového listu z PDF — 23 polí + 9 strukturovaných vzorů, vlastní
+  parser bez závislostí, u každého pole je vidět, odkud se vzalo
+- Grafický výběr motivu v náhledu stránky, odsazení v mm, ostrý výřez v 573 DPI
+- Čtečka kódů: klávesnicový režim (HID), sériový port, kamera (QR/DataMatrix)
+- Ruční zadání; napojení na SGPS připravené (zatím demo)
+- Tlačítko zpět — odskok z rozdělané kalkulace nic nezahodí
+
+**Kalkulace**
+- Skutečná krycí plocha motivu místo obdélníku
+- Spotřeba z geometrie síta (otevřená plocha × tloušťka × přenos × koeficienty),
+  u tampontisku z hloubky leptu klišé
+- Koeficienty kryvosti, materiálu, barvy podkladu a viskozity
+- Viskozita: doporučený rozsah výtokového času k sítu, hlášení mimo rozsah
+- Ztráty v %, minimální dávka, přepočet g ↔ ml podle hustoty
+- Celý rozpis výpočtu k nahlédnutí; ruční hodnota se nikdy nepřepíše
+
+**Receptury**
+- tři nakoupené databáze + vlastní receptury dílny; databáze se načítají samy
+  ze složky (počty viz úvodní tabulka)
+- Přiřazení databází k technologiím souborem; nabízejí se jen ty, které k dané
+  technologii patří
+- Custom receptury vždy odvozené z nahrané databáze, vázané na produkt + barvu
+  + technologii + polohu, ukládané do sdíleného CSV včetně vazeb
+- Mazání vlastní receptury ve dvou krocích, pod stejným heslem jako ostatní mazání
+- Odstín potisku jako Pantone nebo CMYK, vzdálenost v Lab, nejbližší shoda
+- Import/export CSV a JSON, obnova katalogu
+
+**Zbytky barev**
+- Evidence kelímků: kód, odstín, složení, množství, zakázka, stav
+- Štítek s čárovým kódem Code 128, expirace, pot life
+- Stavy „v tisku" / „na skladě" / „spotřebovat brzy" / „prošlé"
+- Viskozita kelímku s historií měření (barva časem houstne)
+- Přepočet dávky tak, aby se zbytek využil přednostně — z evidence i zadaný ručně
+- Rozpis *ze zbytku / přidat / celkem* v aplikaci i na míchacím lístku
+
+**Míchání**
+- Míchací lístek A4 s kumulativním vážením a zaškrtávacími políčky
+- Asistent navážení s živým čtením z váhy, tolerancí a tárou
+- Simulace váhy pro nácvik a pro pracoviště bez váhy
+- Přepočet dávky při přelití se zachováním odstínu
+- Korekce po nátisku: popis vady → pigment a množství
+- Podklad jako vstup: hlášení prosvítání a nutnosti podtisku bílou
+- Pigmenty a báze odděleně, hlídání maximálního podílu pigmentu
+
+**Provoz**
+- Běh z jednoho souboru, bez instalace a bez serveru
+- Zámek technologií s kontrolním seznamem, odemykání příkazem i v aplikaci
+- Mazání chráněné heslem
+- Tmavý i světlý režim, ovládání z klávesnice, práce na tabletu
+- Kontrola vykreslení aplikace (`kontrola_aplikace.py`) zařazená před nahrání
+  na GitHub — rozbitá verze se nenahraje
+- Převod databází Printcolor z PDF do CSV (`prevod_printcolor.py`)
+
+## 2.2 Rozpracované — chybí data, ne kód
+
+| co | stav |
+|---|---|
+| **Barevné databáze pro zbývající technologie** | TRS nemá žádnou; u TXP a SCR je potřeba potvrdit u Printcolor, že MS 660 je správná řada |
+| **Parametry sít** | údaje výrobce tkaniny (otevřená plocha, tloušťka, teoretický objem). Do té doby se počítá paušálem a dopočet se označuje jako orientační. Kolik sít má skutečné údaje, je v úvodní tabulce |
+| **Hloubky leptu klišé (PDP)** | bez nich se u tampontisku spotřeba nenabízí |
+| **Koeficienty spotřeby** | všechny jsou zatím 1,00; vyjdou z porovnání uzavřených zakázek se skutečnou spotřebou |
+| **Hustoty barev Printcolor** | v PDF nejsou, počítá se s 1,20 g/ml |
+| **Odstíny (hex)** | chybí u části receptur Printcolor (počty v úvodní tabulce) — bez nich neporadí prosvítání ani korekce, míchat podle receptury ale jde |
+| **SGPS** | čeká na přístup do firemního systému |
+
+## 2.3 Plánováno
+
+- Změřit skutečný pokles počtu oprav po nasazení proti základně **1 209 oprav
+  ročně** (naměřeno 403 oprav za 2. 4. – 10. 8. 2026)
+- Vyčíslit úsporu materiálu z přesnější spotřeby a z využití zbytků
+- Role a oprávnění (technolog / obsluha)
+- Napojení na ERP nad rámec SGPS
+- Postupné odemykání technologií podle doplněných dat
+
+## 2.4 Dvě věci na pravou míru
+
+**QR kódy se negenerují, generuje se Code 128.** Štítek na kelímek nese
+jednorozměrný čárový kód Code 128, kreslený přímo v aplikaci (žádná externí
+knihovna, funguje bez internetu). Přečte ho každá běžná čtečka i kamera.
+QR a DataMatrix aplikace naopak **čte** — kamerou přes `BarcodeDetector`.
+Generování QR by se dalo doplnit, ale zatím k tomu není důvod: čárový kód nese
+kód dávky, což je krátký řetězec.
+
+**„Ztráty na sítu 90T" jsou v aplikaci dvě oddělené věci.** Označení síta se
+v aplikaci zapisuje jako *nití na cm – průměr vlákna µm* (např. `120-34`), což
+odpovídá evropskému značení typu 90T = 90 nití/cm. Z něj se počítá **teoretický
+objem nánosu** a přes faktor přenosu skutečná gramáž. **Technologické ztráty**
+(zbytek v sítu, na stěrce, v nádobě) jsou naproti tomu samostatné procento
+zadané u zakázky, které dávku navyšuje. Nemíchají se dohromady schválně: jedno
+je fyzika tkaniny, druhé zkušenost dílny.
+
+---
+
+# 3. TECHNOLOGICKÝ STACK & HARDWARE
+
+## 3.1 Na čem to běží
+
+| vrstva | technologie |
+|---|---|
+| **Aplikace** | HTML + JavaScript, **React 18** a **htm** (šablony bez JSX, tedy **bez build kroku** — žádný npm, webpack ani transpiler) |
+| **Knihovny** | pouze React, ReactDOM a htm, uložené lokálně v `lib/`. Nejsou-li tam, stránka je zkusí stáhnout z unpkg — ale běžný provoz je čistě lokální |
+| **Most** | Python 3, **jen standardní knihovna**. Volitelně `pypdfium2` pro hezčí náhled stránky PDF; bez něj se použije vlastní vykreslování |
+| **Formát dat** | CSV (středníkem, UTF-8 s BOM) a JSON. Vše čitelné v Excelu i v textovém editoru |
+| **Distribuce** | jeden soubor; volitelně GitHub Pages, aby šla aplikace otevřít odkudkoli |
+
+**Platformy**
+
+| platforma | stav |
+|---|---|
+| **Windows / macOS / Linux, Chrome nebo Edge** | plná funkčnost včetně váhy a kamery — hlavní pracovní režim |
+| **Firefox / Safari na počítači** | vše kromě váhy (Web Serial tam není) |
+| **Android tablet, Chrome** | prohlížení, kalkulace, tisk, čtení kódu kamerou. Váha přes USB **ne** — Web Serial na Androidu není |
+| **iOS / iPadOS** | prohlížení a kalkulace. Web Serial ani `BarcodeDetector` na iOS nejsou |
+| **Nativní aplikace pro Android/iOS** | není a zatím se neplánuje — nebyl by pro ni důvod, dílenská pracoviště jsou u počítače s váhou |
+
+## 3.2 Váhy
+
+- **Připojení:** USB jako virtuální sériový port (**Web Serial API**, Chrome/Edge).
+  Váhy s **RS-232** fungují přes běžný převodník USB↔RS-232 — z pohledu aplikace
+  je to tentýž virtuální COM port.
+- **Rychlosti:** 4800 / 9600 / 19200 / 38400 / 115200 Bd, volí se při připojení
+  (výchozí 9600).
+- **Protokol:** aplikace čte **průběžný výstup** váhy a z každého řádku vytáhne
+  hmotnost regulárním výrazem — zvládne formáty typu `ST,GS,  12.45 g`,
+  `+  12.45 g`, `12,45 kg` i holé číslo. Rozlišuje `g` a `kg`. Vysílá-li váha
+  jen na dotaz, doplní se posílání příkazu podle konkrétního modelu —
+  **zatím to nebylo potřeba**.
+- **Tára** je softwarová (nuluje se v aplikaci), takže nezáleží na tom, jestli
+  ji váha umí po svém.
+- **Bluetooth:** zatím **nepodporováno**. Web Bluetooth by šlo doplnit, ale
+  dílenské váhy, se kterými se počítá, mají USB nebo RS-232. Pro BT váhu by se
+  musel doplnit její konkrétní GATT profil.
+- **Bez váhy** se dá celý postup projet v **simulaci** (posuvník místo váhy) —
+  slouží k zaškolení i k ověření lístku.
+
+## 3.3 Čtečky kódů
+
+| způsob | jak funguje | poznámka |
+|---|---|---|
+| **HID (klávesnicový režim)** | čtečka se tváří jako klávesnice, aplikace odchytává rychlý sled znaků zakončený Enterem | funguje s každou běžnou čtečkou, nic se nenastavuje |
+| **Sériový port** | totéž přes Web Serial | pro čtečky v režimu COM portu |
+| **Kamera** | `BarcodeDetector` v Chrome/Edge, zadní kamera | čte QR i DataMatrix; na iOS není |
+
+## 3.4 Most — rozhraní
+
+Lokální HTTP server na `127.0.0.1:8765`, přístupný jen z tohoto počítače.
+
+<!-- AUTO:most -->
+| metoda | cesta |
+|---|---|
+| GET | `/api/databaze` |
+| GET | `/api/stav` |
+| GET | `/api/zakazky` |
+| POST | `/api/databaze/ulozit` |
+| POST | `/api/pdf` |
+| POST | `/api/vyrez` |
+
+Zapisovat smí most jen do těchto složek: `databaze barev`, `evidence`, `parametry`.
+<!-- /AUTO:most -->
+
+K čemu ty cesty jsou: `/api/stav` řekne, jestli most žije a co umí;
+`/api/databaze` vrací obsah databází receptur ze složky; `/api/zakazky`
+a `/api/zakazka/{číslo}` sahají do SGPS; `POST /api/pdf` rozebere zakázkový
+list na pojmenovaná pole; `POST /api/vyrez` udělá ostrý výřez motivu ze stránky;
+`POST /api/databaze/ulozit` zapíše soubor do povolené složky.
+
+Zapisuje se přes dočasný soubor a předchozí verze zůstává jako `.bak`.
+
+**SGPS** má tři režimy v `sgps_config.json`: `demo` (dnes), `soubor`
+(JSON/CSV/XML na disku) a `rest` (HTTP API s tokenem nebo basic autentizací).
+Mapování polí je konfigurační — na každé pole aplikace se dá vypsat seznam
+možných názvů ve firemním systému.
+
+## 3.5 Offline režim
+
+Aplikace **není offline-first, je offline-native** — internet nepotřebuje
+v žádném kroku:
+
+- knihovny leží v `lib/`, ne na CDN;
+- katalog produktů je v `data.js`, obrázky v `obrazky/` (5 583 souborů stažených
+  předem skriptem `stahni_obrazky.py`);
+- databáze receptur i parametry jsou soubory na disku;
+- čárový kód na štítek se kreslí v aplikaci, negeneruje se přes webovou službu;
+- PDF se rozebírá lokálně, nic se nikam neposílá;
+- rozdělaná práce přežije zavření prohlížeče v `localStorage`.
+
+Jediné, co internet potřebuje, je **prvotní stažení obrázků** a volitelné
+nahrání na GitHub. Chybí-li obrázek, aplikace to řekne a funguje dál.
+
+## 3.6 Data a bezpečnost
+
+- **Repozitář je veřejný**, ale `databaze barev/` (licencované databáze
+  Ferro Xpression a Printcolor + vlastní receptury dílny) a `evidence/`
+  (zbytky s čísly zakázek) jsou v `.gitignore` a **nikdy se necommitují**.
+- Most standardně poslouchá **jen na `127.0.0.1`**, tedy pouze pro tento
+  počítač. Přepínačem `--sit` se dá zpřístupnit ostatním v síti (například když
+  má míchárna jeden počítač s PDF a druhý u váhy) — pak most sám vypíše
+  varování, že to patří jen do důvěryhodné firemní sítě. Port se mění
+  přepínačem `--port`.
+- Mazání produktů, receptur a zbytků jde chránit heslem.
+- Zámek technologií je v souboru, aby platil na všech počítačích dílny stejně.
+
+## 3.7 Známá omezení
+
+| omezení | dopad | co s tím |
+|---|---|---|
+| Web Serial jen v Chrome/Edge na počítači | váha nejde na tabletu ani na iOS | pracoviště u váhy je stejně u počítače |
+| Váha se čte jen z průběžného výstupu | váhy vysílající na dotaz zatím nejsou obsloužené | doplnit příkaz podle modelu, až se objeví |
+| Bluetooth váhy | nepodporováno | doplnit GATT profil konkrétní váhy |
+| Bez mostu nejde PDF ani zápis na disk | aplikace funguje v prohlížečovém rozsahu | most se spouští sám po přihlášení do Windows |
+| Míchání je lineární model | u velmi sytých pigmentů podceňuje sílu | přesněji by to uměla Kubelka-Munk teorie, ta ale potřebuje spektrofotometr |
+| Bez spektrofotometru | odstín se neměří, jen počítá z receptury a hlásí odchylku v Lab | korekce po nátisku vychází z popisu obsluhy |
+
+---
+
+## Příloha — ověřování
+
+Aplikace se neopírá o „vypadá to, že to funguje":
+
+- **Výpočty se ověřují v Node** na známých případech — pro každou funkci sada
+  kontrol (např. 38 kontrol domíchání ze zbytku, 26 kontrol vazeb custom
+  receptur, 25 kontrol podkladu a korekce, 17 pigmentů, 16 zámku technologií).
+- **Vykreslení se ověřuje v prohlížeči bez okna** (`kontrola_aplikace.py`).
+  Rozhoduje počet potomků kořenového prvku, ne velikost stránky — statická
+  kostra zabere přes 400 kB i u aplikace, která se nevykreslila vůbec.
+  Kontrola je zařazená před nahrání na GitHub a rozbitou verzi nepustí dál.
+- **Celé toky se proklikávají v prohlížeči bez okna** a porovnávají s ručním
+  výpočtem — například navážky domíchání ze zbytku sedí do gramu.
+
+---
+
+## Jak se tenhle dokument udržuje
+
+Rozbor je **žijící dokument**, ne jednorázový snímek. Dělí se na dvě části:
+
+1. **Úseky mezi značkami `<!-- AUTO:jmeno -->`** generuje skript
+   `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — počty
+   receptur, stav technologií, rozhraní mostu, klíče úložiště, rozsah kódu.
+   Ručně se do nich nepíše; při příštím spuštění by se přepsalo.
+2. **Všechno ostatní** — popis procesů, seznam funkcí, záměry, omezení — píše
+   člověk. Stroj ví *co* je v kódu, ale ne *proč*.
+
+```
+python rozbor_aktualizuj.py              přepíše rozbor podle skutečnosti
+python rozbor_aktualizuj.py --kontrola   jen řekne, co nesedí (nic nemění)
+```
+
+Kontrola běží i před nahráním na GitHub (`nahraj_na_github.ps1`), takže se
+zastaralý rozbor nepustí dál bez povšimnutí.

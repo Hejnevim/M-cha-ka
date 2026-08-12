@@ -37,16 +37,21 @@ var _ce=console.error;console.error=function(){window.__CHYBY.push("console.erro
   Array.prototype.slice.call(arguments).join(" ").slice(0,300));_ce.apply(console,arguments);};
 </script>"""
 
+# Pozor na okamžik měření: React 18 vykresluje přes createRoot, a to je práce
+# naplánovaná, ne okamžitá. U větší aplikace se první vykreslení nestihne, než
+# doběhne skript na konci stránky — synchronní měření by pak hlásilo prázdný
+# kořen i u zdravé aplikace. Proto se čeká; prohlížeč běží ve virtuálním čase,
+# takže to nic nezdrží.
 HLASENI = """
 <div id="vysledek-kontroly">nedobehlo</div>
 <script>
-(function(){
+setTimeout(function(){
   var r=document.getElementById("root");
   document.getElementById("vysledek-kontroly").textContent =
     "DETI>>" + (r ? r.children.length : -1) +
     "<<ZNAKU>>" + (r ? r.innerHTML.length : 0) +
     "<<CHYBY>>" + (window.__CHYBY.length ? window.__CHYBY.join(" ;; ") : "zadne") + "<<KONEC";
-})();
+}, 3000);
 </script>
 """
 
