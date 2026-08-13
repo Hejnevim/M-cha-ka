@@ -120,6 +120,25 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 21:35 | Rozbalené zadání zabere celou šířku stránky, sbalený souhrn zůstává úzký |
 | 21:55 | Čísla zakázky jako sloupec vpravo přes celou výšku, viskozita samostatný řádek |
 | 22:10 | Srovnané řádkování obou sloupců, viskozita široká jako pole nad ní |
+| 22:35 | Nástroj na barvy rozdělen: stíny vlevo, barvy vpravo, oba panely rolují samy |
+| 23:00 | Laditelné i tvary a ikony — zaoblení, velikost, tah, průsvitnost |
+
+### 13. srpna — celý vzhled v proměnných
+| čas | co |
+|---|---|
+| 09:05 | Písmo podle rolí a rozestupy jako škála; zvětšené varianty se dopočítávají |
+| 10:00 | Rozbalovací nabídky přestaly být hranaté — kreslí je stránka, ne prohlížeč |
+| 13:40 | Rejstřík souboru, sonda na měření, snímkovač a šest zapsaných postupů |
+| 14:20 | Nasazena paleta a sazba naladěná dílnou: větší písmo, oblejší tvary, výraznější plocha |
+| 14:05 | Zadání rozděleno na tři karty: receptura, čísla zakázky, parametry tisku |
+| 14:45 | Výběr receptur na dvě půlky — standard a custom, každá s vlastním filtrem a hledáním |
+| 15:10 | Osm vysvětlivek pryč z rozhraní, uloženy jako podklad k návodu |
+| 15:35 | Filtry receptur jako rozbalovací nabídky místo štítků |
+| 16:05 | Opraven překryv velkých čísel; zkouška na překryvy jako stálý nástroj |
+| 16:30 | Vybraná barva pod výběrem stejně velká jako ve výsledku |
+| 16:55 | Sbalování zadání odstraněno i s celým sbaleným souhrnem |
+| 17:20 | Síto, kryvost a povrch zvětšeny na čtení od stroje |
+| 17:45 | Parametry tisku přestavěny na dlaždice jako náhled produktu |
 
 ---
 
@@ -1605,3 +1624,516 @@ na stejné řádce — naměřeno y = 965 v obou. Rozestupy vpravo se srovnaly n
 **Viskozita je pole jako každé jiné.** Roztažená přes celou šířku levého
 sloupce působila jako něco jiného než výběry nad ní. Sedí teď v témž
 trojsloupci — 356 px, přesně tolik co pole nad ní.
+
+---
+
+## 31. Nástroj na tři sloupce
+
+Ovládání barev i stínů stálo v jednom sloupci vlevo. Bylo dlouhé — čtrnáct
+posuvníků a čtrnáct barev pod sebou — takže pro nastavení dole se muselo sjet
+na konec stránky a ukázka mezitím zmizela z dohledu.
+
+**Rozděleno podle toho, co se ladí:**
+
+| kde | co |
+|---|---|
+| vlevo | **Stíny a osvětlení** — směr světla, odstávání, rozostření, síly, ražba loga |
+| uprostřed | ukázka skutečných prvků aplikace a blok k vložení |
+| vpravo | **Barevné schéma** — plocha, papír, text, ovládání, významové barvy |
+
+**Panely rolují samy.** Drží se na místě (`position: sticky`) a mají vlastní
+posuvník, takže ukázka zůstává vidět, ať se v nastavení jede kamkoli. Naměřeno:
+levý panel má obsah 1 390 px v okně vysokém 781 px a roluje uvnitř sebe, ne
+celou stránkou.
+
+**Přepínač režimu je v obou panelech** a drží se v páru — přepnutí vpravo
+označí i tlačítko vlevo. Každý panel má vlastní „vrátit původní": zvlášť pro
+stíny, zvlášť pro barvy, aby si jedno nepřepisovalo druhé.
+
+Na užším okně (do 1 280 px) se panel s barvami přesune pod ten se stíny,
+pod 900 px se všechno složí pod sebe a panely přestanou být lepivé.
+
+---
+
+## 32. Tvary a ikony jako proměnné
+
+Barvy a stíny se ladit daly, tvary ne — zaoblení bylo v CSS na dvaceti místech
+zapsané číslem a ikony měly velikost i tloušťku tahu natvrdo v SVG. Změnit
+charakter kresby znamenalo přepsat kód.
+
+**Co se stalo proměnnou:**
+
+| proměnná | co řídí |
+|---|---|
+| `--radius` | zaoblení karet |
+| `--radius-btn` | tlačítka a přepínače |
+| `--radius-pole` | vstupní pole a vzorky |
+| `--radius-dlazdice` | fotky, náhledy, dlaždice v katalogu |
+| `--radius-stitek` | štítky |
+| `--ikona` | velikost ikon |
+| `--ikona-tah` | tloušťka tahu |
+| `--ikona-konec` | zakončení tahu — kulaté, uťaté, hranaté |
+| `--ikona-pruhlednost` | průsvitnost ikon |
+| `--pruhlednost-karty` | průsvitnost karet |
+
+**Ikony nebylo potřeba přepisovat.** Jsou kreslené vektorem přímo v HTML a mají
+velikost i tah jako atributy — jenže CSS má před atributy přednost, takže
+stačilo jediné pravidlo na `svg[viewBox="0 0 24 24"]` a všechny čtyři ikony
+poslouchají proměnné. Žádný zásah do komponent.
+
+**V nástroji** přibyl v levém panelu oddíl *Tvary*: devět posuvníků a tři
+tlačítka na zakončení tahu. Nahoře v ukázce jsou ikony aplikace vedle sebe,
+takže je změna vidět okamžitě. Tvary nezávisí na světlém ani tmavém režimu,
+proto se drží jednou pro obě varianty a do výstupu jdou jen do bloku `:root`.
+
+**Ověřeno v prohlížeči:** posunutí zaoblení karet z 18 na 2 px se projeví na
+kartě, velikost ikon z 20 na 40 px na SVG, tloušťka tahu 2 → 4,5 na cestách
+uvnitř ikony, průsvitnost 0,3 na celé ikoně a volba „hranaté" na zakončení
+tahu. Výstupní blok obsahuje všechny tvary a v tmavém bloku se neopakují.
+
+## 33. Písmo a rozestupy jako škála
+
+Po tvarech zbývaly poslední dvě věci zapsané v CSS napevno: velikosti písma
+a rozestupy. Obojí bylo rozseté po stovkách řádků, takže „zvětšit písmo, hůř
+se mi to čte" znamenalo hledat a přepisovat.
+
+**Písmo se neladí po prvcích, ale po rolích.** Nemá smysl mít posuvník na
+„velikost textu v tabulce zakázek" — má smysl mít posuvník na *popisky*, na
+*nadpisy*, na *výsledek*. Prvků jsou stovky, rolí je šest.
+
+| proměnná | role |
+|---|---|
+| `--pismo` | běžný text, pole, tlačítka |
+| `--pismo-nadpis` | nadpisy karet |
+| `--pismo-popisek` | popisky polí a hlavičky tabulek |
+| `--pismo-poznamka` | vysvětlivky a poznámky |
+| `--pismo-tabulka` | text v tabulkách |
+| `--pismo-vysledek` | velká čísla výsledku |
+| `--logo-velikost` | nápis IRM v hlavičce |
+| `--prostrkani` | prostrkání verzálek |
+| `--tloustka-nadpisu` | tloušťka nadpisů a loga |
+| `--radek` | výška řádku |
+| `--sans`, `--mono` | řez písma pro text a pro čísla |
+
+**Rozestupy** jsou samostatná sada: odsazení uvnitř karty svisle i vodorovně,
+mezera mezi kartami, mezera mezi poli v řádku, odsazení uvnitř polí a tlačítek
+(to určuje jejich výšku) a okraj nad obsahem. Devět posuvníků, kterými se dá
+aplikace zahustit nebo rozvolnit.
+
+**Zvětšené varianty se dopočítávají.** Domovská stránka má vlastní, větší
+sadu velikostí — `.bigpanel` a `.bigform`. Ty měly svá vlastní čísla, takže
+kdyby zůstala, změna základní velikosti by se na domovské stránce neprojevila
+a škála by se rozpadla vejpůl. Teď jsou zapsané poměrem k základu:
+`calc(var(--pismo) * 1.21)` místo `17px`. Poměry jsou spočítané z původních
+hodnot, takže vzhled zůstal stejný, ale celá škála se hýbe najednou.
+
+**V nástroji** přibyly oddíly *Písmo* a *Rozestupy* a výběr řezu písma —
+jen řezy, které jsou na každém počítači, protože stažené písmo by aplikace
+v dílně bez sítě stejně nenačetla. Posuvníků je přes čtyřicet, proto se
+skupiny sbalují; rozbalený zůstává jen ten, ve kterém se právě pracuje.
+
+**Opravena stará nedbalost:** posuvníky tvarů měly stejnou třídu jako
+posuvníky stínů, takže je javascript obsluhoval obojím způsobem a do objektu
+se stíny zapisoval klíč `null`. Chování to nerozbilo, protože se to vzápětí
+přepsalo správnou hodnotou, ale s dalšími devatenácti posuvníky by to
+přestalo být neškodné. Stíny se teď vybírají podle `[data-klic]`.
+
+**Ověřeno měřením, ne pohledem.** Aplikace se změřila proti hodnotám, které
+v CSS stály napevno: odsazení karty 20/22 px, nadpis 14 px a tloušťka 800,
+štítek 11 px, chip 7/14 px, okraj stránky 20 px — všechno sedí. Odchylky
+jsou tři a všechny pod čtvrt pixelu (prostrkání nadpisu 0,6972 místo 0,70 px,
+popisek ve velkém formuláři 13,97 místo 14 px, malé tlačítko 12,06 místo
+12 px). Výška řádku byla dřív `normal`, teď 1,35 — na Segoe UI je to 21,6 px
+proti 21,3 px, tedy rozdíl, který není vidět, ale zato se dá ladit.
+
+V nástroji se pak posuvníky protáhly a změřil se výsledek: písmo 14 → 20 px,
+nadpis 14 → 24 px, odsazení karty 20/22 → 44/8 px, výška řádku 21,6 → 30,4 px,
+tloušťka nadpisu 800 → 300, prostrkání 0,66 → 2,2 px, řez písma na Georgii.
+Výstupní blok všechny hodnoty obsahuje, v tmavém bloku se neopakují a tlačítko
+*Vrátit* vrátí všechno na původní.
+
+## 34. Rozbalovací nabídky přestaly být cizí
+
+Pole výběru vypadalo jako zbytek aplikace, ale jakmile se rozbalilo, vyskočila
+hranatá šedá nabídka s modrým pruhem — kus Windows uprostřed měkkého prostředí.
+Nebyla to nedbalost: rozbalenou nabídku dosud kreslil sám prohlížeč a CSS na ni
+nedosáhlo. Proto to tak vypadá i v jiných aplikacích.
+
+**Chrome to od verze 135 umí předat stránce.** `appearance: base-select` udělá
+z nabídky běžný prvek, který poslouchá tytéž proměnné jako všechno ostatní —
+takže barvy, zaoblení, stín, písmo i rozestupy jdou z jednoho místa a nabídka
+se sama přizpůsobí i tmavému režimu. V dílně běží Chrome 151, takže je to
+dostupné dnes.
+
+**Bez rizika pro starší prohlížeč.** Celé pravidlo je v `@supports (appearance:
+base-select)`. Kde to prohlížeč neumí, blok přeskočí a nabídka zůstane taková,
+jaká byla — nic se nerozbije.
+
+| co se změnilo | jak |
+|---|---|
+| plocha nabídky | barva karty, zaoblení polí, stín jako u dialogu, vlásová linka na okraji |
+| položky | odsazení 9 × 12 px, vlastní zaoblení, zvýraznění pod myší barvou `--zvyraz` |
+| vybraná položka | podklad `--key`, písmo `--btn-ink`, tučně, odškrtnutí vpravo |
+| dlouhé seznamy | výška nejvýš 52 % okna, rolování uvnitř nabídky |
+| otevřené pole | zvýrazněné jako při zaostření, aby bylo vidět, odkud nabídka patří |
+| šipka | zůstává naše, kreslená pozadím; tu od prohlížeče schováváme |
+
+**Odškrtnutí drží místo i u neoznačených řádků** — jinak by se text u vybrané
+položky posunul stranou a seznam by při rolování poskakoval.
+
+**Chycená past:** výběr se nově chová jako běžný textový prvek, takže zdědil
+výšku řádku z těla stránky a vyrostl o 0,9 px. Textová pole mají `line-height:
+normal`, výběr ho měl taky dostat — jinak by se v řádku o pixel rozešel se
+sousedním polem. Přesně to řádkování, které se předevčírem srovnávalo.
+Po opravě má výběr i pole shodných 47,91 px.
+
+**Ověřeno skutečným kliknutím.** Nabídku nejde otevřít ze skriptu — prohlížeč
+to dovolí jen pravému gestu uživatele. Klik se proto posílá ladicím protokolem,
+který Chrome bere jako myš, a otevřená nabídka se vyfotí. Bez toho by se dalo
+ověřit jen to, že pravidla platí, ne jak výsledek vypadá. Zkontrolován světlý
+i tmavý režim.
+
+## 35. Nástroje a zapsané postupy
+
+Za tři měsíce se ustálilo pár rituálů, které se opakovaly při každé úpravě —
+a pokaždé se vymýšlely znovu. Teď jsou zapsané, aby se nemusely.
+
+**Tři nové nástroje v balíčku:**
+
+| nástroj | k čemu |
+|---|---|
+| `mapa.py` → `MAPA.md` | rejstřík `index.html` s čísly řádků: 54 proměnných vzhledu, 202 pravidel CSS, komponenty, funkce, konstanty |
+| `sonda.py` | změří cokoli na vykreslené stránce — polohu, velikost, spočítané styly, hodnoty proměnných |
+| `snimek.py` | proklikne aplikaci skutečnou myší a vyfotí ji |
+
+**Proč rejstřík.** Soubor má přes sedm a půl tisíce řádků. Hledat v něm
+pravidlo znamenalo pokaždé prohledávat celý soubor. Rejstřík se generuje ze
+skutečného souboru, takže nemůže zastarat, a `--kontrola` ohlásí, když je
+zastaralý. Ověřeno porovnáním všech 521 záznamů proti souboru: nula chyb.
+
+**Chycená vlastní chyba:** první verze rejstříku ukazovala špatná čísla —
+komentáře se nahrazovaly mezerou včetně konců řádků, takže se počítání
+posunulo. Rejstřík, který lže o číslech řádků, je horší než žádný.
+
+**Proč sonda.** Pro každé měření se dosud psal jednorázový program: vlož
+skript do kopie stránky, spusť prohlížeč bez okna, přečti výsledek z DOMu.
+Pokaždé stejných sto řádků. Teď se zadá výraz a odpověď přijde.
+
+**Šest zapsaných postupů** v `.claude/skills/`: úprava aplikace (mimo jiné
+past `h.push is not a function` a jak ji poznat podle odsazení), ověřování,
+data dílny, laditelné vlastnosti vzhledu, nahrávání na GitHub a názvosloví.
+Jsou to textové soubory — dají se číst i upravovat jako každý jiný.
+
+## 36. Paleta a sazba naladěná v dílně
+
+Druhé kolo ladění v `barvy.html` — tentokrát se hýbalo vším, co se za poslední
+dva dny stalo proměnnou, ne jen barvami.
+
+**Plocha se oddělila výrazněji.** Světlý režim má plochu `#949494` a karty
+`#dbdbdb`, tmavý `#545454` a `#333333`. Rozdíl mezi plochou a tím, co na ní
+leží, je teď velký — karty doopravdy vystupují a není potřeba je obtahovat.
+
+**Logo splynulo s plochou.** `--logo` se v obou režimech rovná `--bg` a vidět
+je jen ražbou: stín se zkrátil na 2 px a ztenčil. Nápis se dá spíš tušit než
+číst, což u loga, které visí nad každou stránkou, dává smysl.
+
+**Sazba povyrostla.** Základní písmo 14 → 15,5 px, nadpisy 14 → 19,5 px a
+tloušťka 800 → 900, popisky 11 → 12,5 px, tabulky 13,5 → 19 px, výsledek
+34 → 50 px, logo 90 → 116 px. Je to aplikace pro dílnu, kde se na obrazovku
+kouká z odstupu a ne vždy v čistých brýlích — větší písmo je provozní
+rozhodnutí, ne estetické.
+
+**Tvary se zaoblily, stíny ztišily.** Karty 18 → 23 px, pole 10 → 15 px,
+štítky z úplného oblouku na 15 px. Stíny jsou kratší (8 → 5 px) a měkčí, ale
+tmavší — méně nadzvednuté, víc usazené.
+
+**Významové barvy zesílily:** varování `#e8c545`, v pořádku `#3dc760`,
+nebezpečí `#b31919`. Sytější než dřív, protože nesou informaci a musí být
+vidět na první pohled i přes rameno.
+
+**Písmo je jedno pro text i čísla** (`system-ui`). Z toho ale plyne jedna
+věc, kterou bylo potřeba dořešit: běžné písmo nemá číslice stejně široké,
+takže by se sloupce gramáží v míchacím lístku rozházely. Číselné buňky proto
+dostaly `font-variant-numeric: tabular-nums` — číslice drží linku i v písmu,
+které není strojopis.
+
+**Ověřeno podle vlastního postupu:** kontrola vykreslení, sonda na hodnoty
+proměnných v obou režimech (`--bg`, `--paper`, `--pismo`, `--radius`,
+`--pismo-vysledek`) a na skutečně použité velikosti (nadpis 19,5 px / váha 900,
+výsledek 67,5 px z dopočtené škály, zaoblení karty 23 px), a snímek světlého
+i tmavého režimu. Poprvé se to celé udělalo nově zapsanými nástroji místo
+jednorázových skriptů.
+
+
+## 37. Zadání ve třech kartách
+
+Karta „Receptura a zakázka" nesla všechno najednou: výběr receptury, čísla
+zakázky, síto, kryvost, povrch, viskozitu i dopočet spotřeby. Byla to jedna
+dlouhá plocha, ve které se hledalo.
+
+**Rozdělena na tři podle toho, kdy se do nich sahá:**
+
+| karta | co obsahuje | kde stojí |
+|---|---|---|
+| **Receptura a barva** | výběr Pantone i custom receptury, štítek odstínu, mazání vlastní receptury | pod kartou produktu, **stejně široká** |
+| **Zakázka** | počet kusů, spotřeba, ztráty, min. dávka, viskozita | vedle ní, pod výsledkem |
+| **Parametry tisku** | síto nebo klišé, kryvost, povrch, přepínače | přes celou šířku ve třetím řádku |
+
+Dělicí čára je časová: receptura se vybírá jednou, čísla zakázky se mění
+u každé objednávky, parametry tisku se ladí zřídka a patří k receptuře, ne
+k zakázce. Proto jsou vespod.
+
+**Čísla zakázky dostala dva sloupce.** Dřív stála v úzkém pruhu 220 px na
+pravé straně formuláře; teď mají vlastní kartu o polovině stránky, takže se
+čtyři pole vejdou do dvou sloupců a viskozita je pod nimi ve stejné šířce.
+
+**Dopočet spotřeby ze síta zůstal u čísel**, ne u síta — tlačítko „Použít
+X g/m²" mění pole spotřeby a má být vidět vedle něj.
+
+**Přestavěno skriptem, ne ručně.** Bloky JSX se přenesly po řádcích beze
+změny. Přepisovat je ručně znamená riskovat nespárované značky — právě tak
+v tomhle souboru třikrát vznikla chyba `h.push is not a function`.
+
+**Naměřeno při šířce 1920 px:** karta produktu a karta receptury mají shodně
+892 px a stejnou levou i pravou hranu (40 a 932 px). Čísla zakázky stojí
+naproti (972–1864 px), obě karty druhého řádku mají shodnou výšku 573,83 px.
+Parametry tisku se táhnou přes obě poloviny (40–1864 px). Ověřen i sbalený
+stav: zůstane jen souhrn pod produktem, zbylé dvě karty zmizí.
+
+
+## 38. Standard a custom jako dvě půlky
+
+Karta receptur měla jednu lištu filtru přes celou šířku a pod ní dva výběry.
+Lišta mísila nakoupené databáze s vlastními recepturami, takže po klepnutí na
+`receptury_vlastni` zůstal seznam Pantone standardů prázdný — vybraná databáze
+totiž do standardů nepatří. Slepá ulička, která se tam skrývala od začátku.
+
+**Karta je teď rozdělená na dvě půlky se stejným rytmem:** popisek, filtr,
+hledání, výběr.
+
+| | vlevo | vpravo |
+|---|---|---|
+| co | Pantone standardy z nakoupených databází | vlastní barvy odvozené z nich |
+| filtr | podle databáze původu | podle databáze, ze které byla odvozená |
+| hledání | podle čísla i názvu | podle čísla i názvu |
+
+**Vlastní barvy si teď pamatují svůj podklad.** Při odvození se zapisuje
+`zakladZdroj` — soubor databáze, ze které receptura vyšla. U starších záznamů
+se název databáze vyčte ze závorky v poli `zaklad`; co se vyčíst nedá, spadne
+pod „bez podkladu". Filtr tak funguje i na datech vzniklých dřív.
+
+**Sdílené řádky mřížky.** Když se v jedné půlce zalomí lišta filtru na dva
+řádky, musí se posunout i druhá — jinak začíná hledání v každé půlce jinde.
+Řeší to `subgrid`: obě půlky sdílejí čtyři řádky mřížky, ne jen sloupce.
+
+**Chycená past subgridu:** poznámka „Zobrazeno prvních 400" byla pátým prvkem
+v půlce, která sdílí čtyři řádky — vecpala se přes výběr a překryla ho. Výběr
+a to, co pod ním visí, musí být jedna buňka. Nešlo o překlep, ale o to, jak
+sdílené řádky fungují; bez snímku by se to nepoznalo, protože naměřené polohy
+prvků byly samy o sobě v pořádku.
+
+**Ověřeno:** popisky, hledání i výběry v obou půlkách sedí na tutéž výšku
+(901,44 · 1067,03 · 1139,89 px při šířce 1920). Poznámka pod výběrem začíná
+ve 1194,8 px, výběr končí ve 1190,8 — nepřekrývají se. Filtr vlastních barev
+otestován skutečným kliknutím: po volbě „bez podkladu" zůstala ve výběru jedna
+receptura a popisek hlásí „1 z 1". Hledání ve standardech: „Reflex" zúží
+1 592 receptur na 2 a první je PANTONE REFLEX BLUE C. Levá lišta nabízí
+778 + 814 = 1 592 receptur, tedy přesně tolik, kolik je standardů — vlastní
+receptury se do ní už nepletou.
+
+
+## 39. Tiché rozhraní
+
+Pod nadpisy a poli stálo osm vysvětlujících odstavců. Kdo aplikaci zná,
+nečte je a jen mu překážejí; komu je potřeba něco vysvětlit, tomu jeden
+odstavec u pole stejně nestačí. Odstraněny.
+
+**Nezmizely.** Všech osm je doslova v `NAVOD_PODKLADY.md`, u každého poznámka,
+kde stálo a co vysvětlovalo. Z toho souboru se má napsat návod k aplikaci —
+soubor zároveň vede seznam toho, co vysvětlivky nepokrývaly a v návodu bude
+chybět (cesta zakázky, krycí plocha, domíchání ze zbytku, práce s váhou).
+
+**Co v aplikaci zůstává:** hlášení, která nesou stav nebo číslo — upozornění
+na uplatněnou minimální dávku, dopočet spotřeby ze síta, počty nabízených
+receptur v popiskách. To nejsou vysvětlivky, to jsou zprávy o tom, co se
+zrovna děje.
+
+**Co odešlo s nimi:** počty skrytých receptur („Skryto 1 097 receptur
+z databází, které k technologii PDP nepatří"). Stály uvnitř odstranného
+odstavce. Kdyby chyběly, dá se ten jeden údaj vrátit samostatně.
+
+**Pozor při mazání:** vysvětlivka u spotřeby nebyla samostatný prvek, ale
+druhá větev podmínky `${zeSita ? … : …}`. Smazat jen text by nechal viset
+půlku výrazu — musela se z podmínky udělat jednoduchá `${zeSita && …}`.
+Editor to ohlásil okamžitě, kontrola vykreslení by to zachytila taky.
+
+
+## 40. Filtry jako nabídky, ne štítky
+
+Filtry obou půlek byly řady štítků. U krátkých názvů to fungovalo, ale
+`receptury_PMS_Xpression (1 097)` se do štítku nevejde — zalomí se na dva
+řádky a lišta se rozpadne. Vedle toho `vše (1)` vyšlo jako kolečko, protože
+zaoblení 35 px je u tak krátkého textu větší než půlka jeho šířky.
+
+**Obojí řeší rozbalovací nabídka.** Je vždycky jeden řádek bez ohledu na
+délku názvu, řady se ukážou až po rozkliknutí a teprve v nich se hledá.
+Vejde se i tam, kde by se štítky nevešly.
+
+**Názvy databází se cestou vyčistily:** místo `receptury_PMS_660` se nabízí
+`PMS 660`. Prefix i přípona jsou v každém názvu stejné, takže nenesou
+informaci a jen ubírají místo.
+
+**Štítky nezmizely z aplikace** — na záložce Receptury filtr databází dál
+používá štítky, protože tam je na ně místo a vidí se všechny řady najednou.
+Přepíná se to vlastností `vyber`.
+
+**Ověřeno:** v kartě nezůstal jediný štítek, oba filtry i obě hledání sedí
+na tutéž výšku (899,47 a 976,33 px při šířce 1920). Funkčně: volba
+`receptury_PMS_786.csv` zúžila nabídku na 814 z 814, což odpovídá počtu,
+který u té databáze stál dřív na štítku.
+
+**Opravena i sonda:** ve výpisu se ukazovalo `&nbsp;` místo mezery v číslech.
+Rozebírala entity několika záměnami místo knihovnou; teď to dělá `html.unescape`.
+
+
+## 41. Text, který přetékal přes to pod sebou
+
+Na kartě výsledku přeteklo „50,0 g" přes údaj o objemu pod sebou. Ne o kus —
+o 11,5 px.
+
+**Příčina nebyla souřadnice, ale výška řádku.** `.result-big` mělo
+`line-height: 1.05`, jenže Segoe UI potřebuje 1,336 své velikosti. Utažený
+řádek vytlačil dolní dotah písmene „g" pod vlastní rámeček. **Rámečky se
+přitom neprotly** — přetéká jen kresba písma. Měření poloh prvků tedy
+nenajde nic a v kódu to není vidět vůbec.
+
+**Oprava je `line-height: normal`.** Nejdřív jsem zkusil 1,25 — pořád
+přetékalo o 2,8 px. Pevné číslo je vždycky sázka na konkrétní písmo, a to
+se v `barvy.html` dá vyměnit. `normal` je z definice přesně tolik, kolik
+dané písmo potřebuje. Stejně opravena velká čísla i nadpis v míchacím
+režimu, kde měly řádek 1 a 1,1.
+
+**Vznikla z toho stálá zkouška** — `prekryv.py` + `prekryv.js`:
+
+```
+python prekryv.py            čtyři šířky × oba režimy
+python prekryv.py --zalozky  projde i všech 14 záložek
+```
+
+Hledá dvojí: protnuté plochy sousedů a přetok kresby písma přes to, co je
+pod ním. Ve vodorovných rozvrženích hlídá jen plochy — tam sousedé stojí
+vedle sebe a přetok dolů by hlásil plané poplachy.
+
+**Dvě vlastní chyby, které to cestou odhalilo:**
+
+1. První verze zkoušky porovnávala jen plochy prvků — a chybu, kvůli které
+   vznikla, vůbec nenašla. Plochy se neprotínají, přetéká kresba.
+2. Druhá verze si u `line-height: normal` dosazovala paušálních 1,2 místo
+   skutečné výšky písma, takže po opravě hlásila přetok, který tam nebyl.
+   Zkouška, která lže oběma směry, je horší než žádná.
+
+**Ověřeno protichůdně:** na opravené aplikaci nehlásí nic ve čtyřech šířkách,
+obou režimech a na všech 14 záložkách. Na kopii s vrácenou hodnotou 1,05
+hlásí těch 11,5 px a vrací kód 1. Když se soubor nedá načíst, vrací 2 —
+nezamlčí, že neměřila.
+
+
+## 42. Vybraná barva jako kontrola
+
+Pod výběrem receptury stál drobný čtvereček s odstínem a jednořádková
+poznámka drobným písmem. Byl to údaj, ne kontrola.
+
+**Teď je vybraná barva zobrazená přesně tak jako v „Kolik namíchat":**
+plocha 40 × 40 px, název tučně v 17 px, pod ním řada a údaje o receptuře.
+Důvod není estetický — je to hlavní kontrola, že se míchá ta správná barva,
+a tu tiskař dělá okem. Když je na dvou místech zobrazená různě velká, nedá
+se porovnat.
+
+Ověřeno měřením: obě plochy mají 40 × 40 px, zaoblení 15 px a tutéž barvu.
+
+**Odstraněn popisek „Zobrazeno prvních 400 — upřesněte filtr."** na obou
+místech, kde stál — pod výběrem receptury i v dialogu odvození vlastní barvy.
+Byl jen na jednom z nich označený, ale nechat půlku by znamenalo, že aplikace
+mluví jednou tak a jednou jinak.
+
+**Omezení, které tím zmizelo z obrazovky, je zapsané v podkladech k návodu**
+a patří tam mezi to důležité: nabídka nikdy neukáže víc než 400 receptur
+naráz. Databáze mají přes tisíc položek, takže hledaná barva v seznamu prostě
+nemusí být, dokud se nezúží filtrem nebo hledáním. Kdo to neví, může si
+myslet, že v aplikaci chybí.
+
+**Opraven zbytek po převodu na proměnné:** `.bigform .swatch` mělo zaoblení
+zapsané napevno na 10 px, zatímco základní pravidlo bere `--radius-pole`.
+Kvůli tomu měly obě plochy jiný tvar. Teď obě berou proměnnou.
+
+
+## 43. Sbalování zadání pryč
+
+Zadání se dalo sbalit do jednořádkového souhrnu a zase rozbalit. Vzniklo to
+ve chvíli, kdy bylo zadání jedna dlouhá karta přes celou šířku a opravdu
+překáželo. Od rozdělení na tři karty je zadání kompaktní samo o sobě, takže
+funkce ztratila důvod — a s ním i právo zabírat tlačítko.
+
+**Odstraněno celé, ne jen tlačítko:** sbalený souhrn (kopie všech údajů
+v jiném tvaru), tlačítka *Sbalit zadání* a *Upravit zadání*, stav
+`zadaniOtevrene`, odvozená hodnota `zadaniHotove` a tři volání `zadaniHotovo()`
+při výběru receptury a potvrzení barvy. Nechat stav bez tlačítka by znamenalo
+kód, který nikdo nespustí a příště nikdo nepochopí.
+
+**Zbyl po tom prázdný obal.** Když zmizela podmínka, zůstal `${html`` s
+fragmentem, který neobaloval nic. Odstraněn — ale zavírací značka `<//>` k němu
+patřila taky, a bez ní se soubor rozpadl. Editor to ohlásil okamžitě; je to
+přesně ten způsob, jak v tomhle souboru vzniká `h.push is not a function`.
+
+Ověřeno: aplikace se vykresluje, po tlačítkách ani stavu nezůstala v souboru
+zmínka, tři karty zadání stojí na svých místech a nic se nepřekrývá.
+
+**Zálohy před zásahem** (`index_pred_rozdelenim`, `index_pred_sbalenim`)
+přejmenovány na `.bak`. Leží dál na disku, ale `.gitignore` je vylučuje, takže
+se nenahrají na GitHub. Kopie aplikace v repozitáři je zbytečný balast.
+
+
+## 44. Parametry tisku na čtení od stroje
+
+Síto, kryvost a povrch byly stejně velké jako každé jiné pole — jenže se
+nečtou od klávesnice. Tiskař stojí krok od obrazovky a potřebuje je poznat
+pohledem, ne přečíst zblízka.
+
+**Zvětšeny na dvojnásobek písma** (15,5 → 31 px, tučně) a na 88 px výšky.
+Tři pole tak zaberou většinu karty. Naměřeno při šířce 1920: každé pole
+583 × 88 px v kartě 1824 × 273 px.
+
+**Roste s nimi všechno, co k nim patří:** popisek (12,5 → 18,75 px), šipka
+rozbalení (6 → 12 px) i položky v rozbalené nabídce. Kdyby zůstaly drobné,
+vypadalo by pole jako omylem natažené, ne jako záměr.
+
+Zvětšení je zapsané poměrem k proměnným (`calc(var(--pismo) * 2)`), takže se
+hýbe spolu se zbytkem škály, když se v `barvy.html` sáhne na velikost písma.
+
+**Co záměrně zůstalo malé:** přepínače *Otestovaný* a *Vysoce odolný vůči
+vyblednutí*. Nebyly mezi označenými poli. Vedle zvětšených polí teď působí
+drobně — pokud se mají číst z téže vzdálenosti, měly by povyrůst taky.
+
+
+## 45. Parametry tisku jako dlaždice
+
+Zvětšená pole měla poměr stran 6,6 : 1 — pruh přes celou třetinu řádku.
+Z odstupu se pruh čte hůř než blok, který má tvar: oko najde dřív dlaždici
+než dlouhý řádek.
+
+**Přestavěno podle náhledu produktu.** Ten je 272 × 272 px, tedy čtverec.
+Dlaždice parametrů mají 340 × 283 px, poměr 1,2 : 1 — skoro čtverec, velikostí
+ze stejné rodiny. Hodnota stojí uprostřed, šipka rozbalení se přesunula
+zprava dolů na střed, popisek je nad dlaždicí a taky na střed.
+
+**Šířka je omezená, ale dlaždice se rozestoupí po celém řádku** — každá stojí
+uprostřed své třetiny. Karta tak zůstává přes celou šířku, jak byla, a přitom
+nejsou pole roztažená do pruhů.
+
+**Chyba, kterou to nejdřív mělo:** po zúžení dlaždic zbylo vodorovné odsazení
+64 px z doby, kdy byla šipka vpravo. Hodnota „— nevybráno —" se kvůli tomu
+lámala na dva řádky. Se šipkou dole stačí běžné odsazení.
+
+**Ověřeno napříč šířkami:** 1920 a 1400 px → 340 × 283, 1100 px → 314 × 262,
+900 px → 252 × 210. Poměr 1,2 drží všude, dlaždice se jen zmenšují. Hodnota
+„Transparentní" se vejde na jeden řádek. Nic se nepřekrývá.

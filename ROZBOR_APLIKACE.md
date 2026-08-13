@@ -1,22 +1,22 @@
 # Ink Recipe Manager — strukturovaný rozbor aplikace
 
 <!-- AUTO:stav -->
-> **Stav k 12. srpna 2026.** Čísla v úsecích označených `AUTO` generuje
+> **Stav k 13. srpna 2026.** Čísla v úsecích označených `AUTO` generuje
 > `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — nepřepisují
 > se ručně a nemohou se rozejít se skutečností. Text mimo ně píše člověk.
 
-> Poslední zapsaná změna ve vývojovém deníku: **12. srpna 22:10 — Srovnané řádkování obou sloupců, viskozita široká jako pole nad ní**
+> Poslední zapsaná změna ve vývojovém deníku: **13. srpna 17:45 — Parametry tisku přestavěny na dlaždice jako náhled produktu**
 
 | soubor | řádků | velikost |
 |---|---:|---:|
-| `index.html` | 7 600 | 418 kB |
+| `index.html` | 7 709 | 425 kB |
 | `most.py` | 694 | 29 kB |
 | `pdf_spec.py` | 1 071 | 42 kB |
 | `odemkni.py` | 213 | 8 kB |
 | `prevod_printcolor.py` | 188 | 7 kB |
 | `kontrola_aplikace.py` | 169 | 7 kB |
 | `rozbor_aktualizuj.py` | 354 | 13 kB |
-| **celkem** | **10 289** | |
+| **celkem** | **10 398** | |
 <!-- /AUTO:stav -->
 
 ---
@@ -382,8 +382,18 @@ podle dat, ne podle dojmu.
 - Kontrola vykreslení aplikace (`kontrola_aplikace.py`) zařazená před nahrání
   na GitHub — rozbitá verze se nenahraje
 - Převod databází Printcolor z PDF do CSV (`prevod_printcolor.py`)
-- Nástroj na ladění barev (`barvy_nastroj.py` → `barvy.html`): skutečné prvky
-  aplikace vedle posuvníků, výstup jako blok k vložení do index.html
+- Rejstřík souboru (`mapa.py` → `MAPA.md`): proměnné vzhledu, pravidla CSS,
+  komponenty a funkce s čísly řádků; `--kontrola` ohlásí zastarání
+- Sonda (`sonda.py`): změří cokoli na vykreslené stránce — polohu, velikost,
+  spočítané styly, hodnoty proměnných
+- Snímkovač (`snimek.py`): proklikne aplikaci skutečnou myší a vyfotí ji;
+  jediná cesta k tomu, co je vidět až po kliknutí (rozbalená nabídka)
+- Nástroj na ladění vzhledu (`barvy_nastroj.py` → `barvy.html`): skutečné prvky
+  aplikace mezi dvěma panely — vlevo tvary, ikony, písmo, rozestupy a stíny,
+  vpravo barevné schéma; výstup je hotový blok k vložení do index.html.
+  Vzhled je celý v proměnných: barva, stín, tvar, kresba ikon, velikost písma
+  i hustota rozestupů. Co se tím řídit nedá, je rozvržení — kolik je sloupců
+  a co kde stojí je struktura stránky, ne hodnota
 
 ## 2.2 Rozpracované — chybí data, ne kód
 
@@ -436,7 +446,7 @@ je fyzika tkaniny, druhé zkušenost dílny.
 | **Most** | Python 3, **jen standardní knihovna**. Volitelně `pypdfium2` pro hezčí náhled stránky PDF; bez něj se použije vlastní vykreslování |
 | **Formát dat** | CSV (středníkem, UTF-8 s BOM) a JSON. Vše čitelné v Excelu i v textovém editoru |
 | **Distribuce** | jeden soubor; volitelně GitHub Pages, aby šla aplikace otevřít odkudkoli |
-| **Vzhled** | měkký: karty vystupují z plochy stínem, ne rámečkem. Celá paleta i stíny jsou v proměnných na jednom místě a ladí se v `barvy.html` |
+| **Vzhled** | měkký: karty vystupují z plochy stínem, ne rámečkem. Paleta, stíny, tvary, kresba ikon, písmo i rozestupy jsou v proměnných na jednom místě a ladí se v `barvy.html`. Rozbalovací nabídky kreslí stránka (`appearance:base-select`), ne prohlížeč — v Chrome od verze 135; jinde se použije nabídka prohlížeče |
 
 **Platformy**
 

@@ -82,6 +82,105 @@ STINY_LOGO = [
 ]
 
 
+# Tvary a ikony nejsou barvy ani stíny — a hlavně nezávisí na režimu, proto
+# se drží jednou pro obě varianty. Klíč, popisek, od, do, krok, jednotka.
+TVARY = [
+    ("--radius", "Zaoblení karet", 0, 40, 1, "px"),
+    ("--radius-btn", "Zaoblení tlačítek", 0, 999, 1, "px"),
+    ("--radius-pole", "Zaoblení polí", 0, 30, 1, "px"),
+    ("--radius-dlazdice", "Zaoblení dlaždic a fotek", 0, 40, 1, "px"),
+    ("--radius-stitek", "Zaoblení štítků", 0, 999, 1, "px"),
+    ("--ikona", "Velikost ikon", 10, 48, 1, "px"),
+    ("--ikona-tah", "Tloušťka tahu ikon", 0.5, 5, 0.1, ""),
+    ("--ikona-pruhlednost", "Průsvitnost ikon", 0, 1, 0.05, ""),
+    ("--pruhlednost-karty", "Průsvitnost karet", 0.2, 1, 0.01, ""),
+]
+# Zakončení tahu — kulaté, uťaté, hranaté. Mění charakter kresby víc než
+# tloušťka, proto je to volba, ne posuvník.
+KONCE = [("round", "kulaté"), ("butt", "uťaté"), ("square", "hranaté")]
+
+# Písmo se neladí po prvcích, ale po rolích — co je nadpis, co popisek, co
+# výsledek. Zvětšené varianty na domovské stránce se z toho dopočítají samy.
+PISMO = [
+    ("--pismo", "Běžný text a pole", 10, 22, 0.5, "px"),
+    ("--pismo-nadpis", "Nadpisy karet", 10, 26, 0.5, "px"),
+    ("--pismo-popisek", "Popisky polí a hlavičky tabulek", 8, 18, 0.5, "px"),
+    ("--pismo-poznamka", "Vysvětlivky a poznámky", 9, 20, 0.5, "px"),
+    ("--pismo-tabulka", "Text v tabulkách", 10, 22, 0.5, "px"),
+    ("--pismo-vysledek", "Velká čísla výsledku", 20, 60, 1, "px"),
+    ("--logo-velikost", "Velikost loga", 40, 140, 2, "px"),
+    ("--prostrkani", "Prostrkání verzálek", 0, 0.2, 0.005, "em"),
+    ("--tloustka-nadpisu", "Tloušťka nadpisů", 300, 900, 100, ""),
+    ("--radek", "Výška řádku", 1, 2, 0.05, ""),
+]
+
+# Rozestupy určují, jak hustá aplikace je. Odsazení uvnitř polí a tlačítek
+# zároveň řídí jejich výšku — proto je to tady, a ne u tvarů.
+ROZESTUPY = [
+    ("--mezera-karta-y", "Odsazení v kartě — svisle", 4, 48, 1, "px"),
+    ("--mezera-karta-x", "Odsazení v kartě — vodorovně", 4, 48, 1, "px"),
+    ("--mezera-karet", "Mezera mezi kartami", 0, 48, 1, "px"),
+    ("--mezera-poli", "Mezera mezi poli v řádku", 0, 40, 1, "px"),
+    ("--pole-y", "Výška polí (odsazení svisle)", 2, 24, 1, "px"),
+    ("--pole-x", "Odsazení v poli vodorovně", 2, 30, 1, "px"),
+    ("--tlacitko-y", "Výška tlačítek", 2, 24, 1, "px"),
+    ("--tlacitko-x", "Šířka tlačítek (odsazení)", 4, 40, 1, "px"),
+    ("--okraj-stranky", "Okraj nad obsahem", 0, 60, 2, "px"),
+]
+
+# Řezy písma: jen to, co je jistě na každém počítači v dílně — stažené písmo
+# by aplikace v offline režimu stejně nenačetla.
+RODINY = [
+    ("--sans", "Písmo aplikace", [
+        ("'Segoe UI',system-ui,Arial,sans-serif", "Segoe UI (výchozí)"),
+        ("system-ui,sans-serif", "systémové"),
+        ("'Segoe UI Semibold','Segoe UI',sans-serif", "Segoe UI polotučné"),
+        ("Verdana,Geneva,sans-serif", "Verdana — širší, čitelnější z dálky"),
+        ("'Trebuchet MS',sans-serif", "Trebuchet"),
+        ("Tahoma,Geneva,sans-serif", "Tahoma — úsporné"),
+        ("Georgia,'Times New Roman',serif", "Georgia — patkové"),
+        ("Constantia,Georgia,serif", "Constantia — patkové, moderní"),
+    ]),
+    ("--mono", "Písmo čísel a kódů", [
+        ("ui-monospace,'Cascadia Mono',Consolas,monospace", "Cascadia (výchozí)"),
+        ("Consolas,monospace", "Consolas"),
+        ("'Courier New',monospace", "Courier New"),
+        ("'Lucida Console',monospace", "Lucida Console"),
+        ("'Segoe UI',system-ui,sans-serif", "žádné — stejné jako text"),
+    ]),
+]
+
+VYCHOZI_TVARY = {"--radius": "18px", "--radius-btn": "999px", "--radius-pole": "10px",
+                 "--radius-dlazdice": "12px", "--radius-stitek": "999px",
+                 "--ikona": "20px", "--ikona-tah": "2", "--ikona-pruhlednost": "1",
+                 "--pruhlednost-karty": "1", "--ikona-konec": "round",
+                 "--pismo": "14px", "--pismo-nadpis": "14px", "--pismo-popisek": "11px",
+                 "--pismo-poznamka": "12.5px", "--pismo-tabulka": "13.5px",
+                 "--pismo-vysledek": "34px", "--logo-velikost": "90px",
+                 "--prostrkani": ".06em", "--tloustka-nadpisu": "800", "--radek": "1.35",
+                 "--mezera-karta-y": "20px", "--mezera-karta-x": "22px",
+                 "--mezera-karet": "16px", "--mezera-poli": "12px",
+                 "--pole-y": "9px", "--pole-x": "12px",
+                 "--tlacitko-y": "10px", "--tlacitko-x": "18px", "--okraj-stranky": "20px",
+                 "--sans": "'Segoe UI',system-ui,Arial,sans-serif",
+                 "--mono": "ui-monospace,'Cascadia Mono',Consolas,monospace"}
+
+
+def skupina(nadpis, telo, otevreno=True):
+    """Skupina se dá sbalit — posuvníků je přes čtyřicet a rozbalené naráz
+    by se v nich nedalo nic najít."""
+    return ('<details class="skupina"%s><summary>%s</summary>%s</details>'
+            % (" open" if otevreno else "", nadpis, "\n".join(telo)))
+
+
+def posuvnik(klic, popis, od, do, krok, jed, atr="data-klic"):
+    return ('<div class="posuv" {a}="{k}">'
+            '<div class="hlava"><span>{p}</span><b data-role="cislo"></b></div>'
+            '<input type="range" min="{od}" max="{do}" step="{kr}" '
+            'data-role="posuv" data-jed="{j}" />'
+            "</div>").format(a=atr, k=klic, p=popis, od=od, do=do, kr=krok, j=jed)
+
+
 def blok(css, selektor):
     i = css.index(selektor) + len(selektor)
     j = css.index("}", i)
@@ -157,38 +256,54 @@ def main():
         "light": stiny_z_css(bl_svetly, VYCHOZI_STINY),
         "dark": stiny_z_css(bl_tmavy, VYCHOZI_STINY),
     }
+    tvary = dict(VYCHOZI_TVARY)
+    for klic in tvary:
+        v = hodnota(bl_svetly, klic)
+        if v:
+            tvary[klic] = v
 
     ovladace = []
     for nadpis, dvojice in SKUPINY:
-        ovladace.append('<div class="skupina"><h3>%s</h3>' % nadpis)
+        telo = []
         for klic, popis in dvojice:
-            ovladace.append(
+            telo.append(
                 '<label class="radek" data-klic="{k}">'
                 '<input type="color" data-role="barva" />'
                 '<span class="txt"><b>{k}</b><span class="note">{p}</span></span>'
                 '<input type="text" data-role="hex" spellcheck="false" />'
                 "</label>".format(k=klic, p=popis))
-        ovladace.append("</div>")
+        ovladace.append(skupina(nadpis, telo))
 
-    posuvniky = ['<div class="skupina"><h3>Stíny</h3>',
-                 '<div class="smery" id="smery"></div>']
-    for klic, popis, od, do, krok, jed in STINY:
-        posuvniky.append(
-            '<div class="posuv" data-klic="{k}">'
-            '<div class="hlava"><span>{p}</span><b data-role="cislo"></b></div>'
-            '<input type="range" min="{od}" max="{do}" step="{kr}" data-role="posuv" data-jed="{j}" />'
-            "</div>".format(k=klic, p=popis, od=od, do=do, kr=krok, j=jed))
-    posuvniky.append("</div>")
-    posuvniky.append('<div class="skupina"><h3>Stínování loga</h3>')
-    for klic, popis, od, do, krok, jed in STINY_LOGO:
-        posuvniky.append(
-            '<div class="posuv" data-klic="{k}">'
-            '<div class="hlava"><span>{p}</span><b data-role="cislo"></b></div>'
-            '<input type="range" min="{od}" max="{do}" step="{kr}" data-role="posuv" data-jed="{j}" />'
-            "</div>".format(k=klic, p=popis, od=od, do=do, kr=krok, j=jed))
-    posuvniky.append("</div>")
+    telo = ['<div class="smery" id="smery"></div>']
+    telo += [posuvnik(*s) for s in STINY]
+    posuvniky = [skupina("Stíny", telo)]
+    posuvniky.append(skupina("Stínování loga", [posuvnik(*s) for s in STINY_LOGO], False))
+
+    telo = [posuvnik(*t, atr="data-tvar") for t in TVARY]
+    telo.append('<div class="hlava" style="margin:14px 0 6px">'
+                "<span>Zakončení tahu ikon</span></div>")
+    telo.append('<div class="chips" id="konce">')
+    for hod, popis in KONCE:
+        telo.append('<button class="chip" data-konec="%s">%s</button>' % (hod, popis))
+    telo.append("</div>")
+    tvary_html = [skupina("Tvary a ikony", telo, False)]
+
+    telo = []
+    for klic, popis, moznosti in RODINY:
+        telo.append('<div class="posuv"><div class="hlava"><span>%s</span></div>'
+                    '<select data-rodina="%s">' % (popis, klic))
+        for hod, nazev in moznosti:
+            telo.append('<option value="%s">%s</option>'
+                        % (hod.replace('"', "&quot;"), nazev))
+        telo.append("</select></div>")
+    telo += [posuvnik(*p, atr="data-tvar") for p in PISMO]
+    tvary_html.append(skupina("Písmo", telo, False))
+    tvary_html.append(skupina("Rozestupy",
+                              [posuvnik(*r, atr="data-tvar") for r in ROZESTUPY], False))
 
     html = (SABLONA
+            .replace("<!--TVARY-->", "\n".join(tvary_html))
+            .replace("/*TVARY*/", json.dumps(tvary, ensure_ascii=False))
             .replace("/*STYLY*/", css)
             .replace("<!--OVLADACE-->", "\n".join(ovladace))
             .replace("<!--POSUVNIKY-->", "\n".join(posuvniky))
@@ -198,8 +313,10 @@ def main():
             .replace("/*BLOK_TMAVY*/", json.dumps(bl_tmavy)))
     io.open(CIL, "w", encoding="utf-8", newline="").write(html)
     print("hotovo: %s" % CIL)
-    print("barev: %d · posuvníků stínů: %d (+%d pro logo)"
-          % (len(BARVY), len(STINY), len(STINY_LOGO)))
+    print("barev: %d · stínů: %d (+%d logo) · tvarů a ikon: %d · písma: %d (+%d řezy)"
+          " · rozestupů: %d"
+          % (len(BARVY), len(STINY), len(STINY_LOGO), len(TVARY) + 1,
+             len(PISMO), len(RODINY), len(ROZESTUPY)))
     if "--open" in sys.argv:
         webbrowser.open("file:///" + CIL.replace("\\", "/"))
     return 0
@@ -211,46 +328,68 @@ SABLONA = r"""<!doctype html>
 <title>IRM — ladění barev a stínů</title>
 <style>
 /*STYLY*/
-/* ---- jen pro tuhle stránku ---- */
-.nastroj{display:grid;grid-template-columns:minmax(320px,390px) minmax(0,1fr);gap:24px;
-  padding:20px clamp(16px,3vw,40px) 60px;align-items:start}
-@media(max-width:900px){.nastroj{grid-template-columns:1fr}}
-.skupina{margin-bottom:18px}
-.skupina h3{margin:0 0 8px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+/* ---- jen pro tuhle stránku ----
+   Tři sloupce: vlevo stíny a osvětlení, uprostřed ukázka, vpravo barvy.
+   Postranní panely se drží na místě a rolují si samy, aby se pro nastavení
+   nemuselo sjíždět na konec stránky. */
+.nastroj{display:grid;grid-template-columns:330px minmax(0,1fr) 330px;gap:20px;
+  padding:16px clamp(12px,2vw,28px) 40px;align-items:start}
+@media(max-width:1280px){.nastroj{grid-template-columns:300px minmax(0,1fr)}
+  .panel-barvy{grid-column:1;grid-row:2}}
+@media(max-width:900px){.nastroj{grid-template-columns:1fr}
+  .panel-barvy{grid-column:1;grid-row:auto}
+  .panel{position:static;max-height:none}}
+.panel{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow-y:auto;overscroll-behavior:contain}
+.panel::-webkit-scrollbar{width:10px}
+.panel::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:5px}
+.panel::-webkit-scrollbar-track{background:transparent}
+/* Skupiny se sbalují — posuvníků je přes čtyřicet a rozbalené naráz by se
+   v nich nedalo nic najít. Šipka napovídá, že se dá kliknout. */
+.skupina{margin-bottom:14px}
+.skupina>summary{margin:0 0 8px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-2);cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;
+  padding:6px 0;user-select:none}
+.skupina>summary::-webkit-details-marker{display:none}
+.skupina>summary::before{content:"›";font-size:15px;line-height:1;transition:transform .15s;
+  display:inline-block;transform-origin:50% 50%}
+.skupina[open]>summary::before{transform:rotate(90deg)}
+.skupina>summary:hover{color:var(--ink)}
 .radek{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.radek input[type=color]{width:44px;height:38px;padding:3px;flex:0 0 auto}
+.radek input[type=color]{width:40px;height:36px;padding:3px;flex:0 0 auto}
 .radek .txt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
 .radek .txt b{font-family:var(--mono);font-size:12.5px}
-.radek input[type=text]{width:110px;flex:0 0 auto;font-family:var(--mono);font-size:12.5px;text-align:center}
+.radek input[type=text]{width:96px;flex:0 0 auto;font-family:var(--mono);font-size:12.5px;text-align:center}
 .posuv{margin-bottom:12px}
 .posuv .hlava{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;margin-bottom:4px}
 .posuv .hlava b{font-family:var(--mono);font-size:12.5px}
-.smery{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:130px;margin:0 0 14px}
+.smery{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:120px;margin:0 0 14px}
 .smery button{aspect-ratio:1;border:none;border-radius:10px;background:var(--paper);
   box-shadow:var(--neu-sm);cursor:pointer;color:var(--ink);font-size:14px;line-height:1}
 .smery button.on{background:var(--key);color:var(--btn-ink)}
 .smery button.stred{visibility:hidden}
 .ukazka{display:grid;gap:16px}
-.vystup textarea{min-height:280px}
+.vystup textarea{min-height:240px}
 .lista{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
 </style></head>
 <body>
 <div class="hdr"><div class="navleft"></div><h1>BARVY</h1><div></div></div>
 
 <div class="nastroj">
-  <div class="card">
-    <h2>Paleta a stíny</h2>
-    <p class="hint">Ladíte režim, který je právě zapnutý. Přepínačem se přepne
-      i to, co upravujete — světlý a tmavý režim mají vlastní sadu.</p>
+  <div class="card panel">
+    <h2>Tvary, písmo a stíny</h2>
+    <p class="hint">Odkud svítí světlo, jak věci odstávají, jak jsou zaoblené,
+      jak velké je písmo a jak hustě je všechno u sebe. Stíny se ladí pro režim,
+      který je zapnutý; ostatní platí pro oba. Klepnutím na nadpis se skupina
+      rozbalí.</p>
     <div class="lista">
-      <button class="chip on" id="rezim-svetly">Světlý režim</button>
-      <button class="chip" id="rezim-tmavy">Tmavý režim</button>
+      <button class="chip on" data-rezim="light">Světlý režim</button>
+      <button class="chip" data-rezim="dark">Tmavý režim</button>
     </div>
     <!--POSUVNIKY-->
-    <!--OVLADACE-->
-    <div class="rowline" style="margin-top:14px">
-      <button class="btn sec sm" id="zpet">Vrátit původní</button>
-      <span class="note">vrátí hodnoty, se kterými se stránka otevřela</span>
+    <!--TVARY-->
+    <div class="rowline" style="margin-top:6px">
+      <button class="btn sec sm" id="zpet-stiny">Vrátit původní stíny</button>
+      <button class="btn sec sm" id="zpet-tvary">Vrátit tvary, písmo a rozestupy</button>
     </div>
   </div>
 
@@ -258,6 +397,18 @@ SABLONA = r"""<!doctype html>
     <div class="card">
       <h2>Jak to vypadá v aplikaci</h2>
       <p class="hint">Skutečné prvky aplikace se skutečnými styly.</p>
+      <div class="rowline" style="gap:14px;margin-bottom:12px">
+        <span class="navbtn" style="width:42px;height:42px;display:inline-flex;align-items:center;justify-content:center">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" /></svg></span>
+        <span class="navbtn" style="width:42px;height:42px;display:inline-flex;align-items:center;justify-content:center">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" /></svg></span>
+        <span class="navbtn" style="width:42px;height:42px;display:inline-flex;align-items:center;justify-content:center">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" />
+          <path d="M12 3 A9 9 0 0 1 12 21 Z" fill="currentColor" /></svg></span>
+        <span class="navbtn" style="width:42px;height:42px;display:inline-flex;align-items:center;justify-content:center">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" /></svg></span>
+        <span class="note">ikony aplikace</span>
+      </div>
       <div class="rowline">
         <button class="btn">Hlavní tlačítko</button>
         <button class="btn sec">Vedlejší</button>
@@ -280,6 +431,10 @@ SABLONA = r"""<!doctype html>
         <div><label class="f">Číslo</label><input type="number" value="500"></div>
         <div><label class="f">Výběr</label><select><option>položka</option></select></div>
       </div>
+      <p style="margin:14px 0 0">Běžný text: míchá se odstín PANTONE 1235 C pro
+        sítotisk na PDP Sportovní láhev. Dávka vychází z počtu kusů, spotřeby na
+        kus a ztrát; pod minimální dávku 50 g se nejde dostat, protože menší
+        množství se v kelímku nedá poctivě promíchat.</p>
       <div class="result-big">627,9 g</div>
       <div class="result-sub">≈ 523,3 ml při hustotě 1,20 g/ml</div>
       <div class="mixbar"><span style="width:22%;background:#FDD922"></span><span style="width:50%;background:#C9CFA8"></span><span style="width:20%;background:#8FBFA0"></span><span style="width:8%;background:#7E93B8"></span></div>
@@ -308,13 +463,28 @@ SABLONA = r"""<!doctype html>
       </div>
     </div>
   </div>
+
+  <div class="card panel panel-barvy">
+    <h2>Barevné schéma</h2>
+    <p class="hint">Plocha, papír, text a barvy, které něco znamenají.
+      Ladí se režim, který je právě zapnutý.</p>
+    <div class="lista">
+      <button class="chip on" data-rezim="light">Světlý režim</button>
+      <button class="chip" data-rezim="dark">Tmavý režim</button>
+    </div>
+    <!--OVLADACE-->
+    <div class="rowline" style="margin-top:6px">
+      <button class="btn sec sm" id="zpet-barvy">Vrátit původní barvy</button>
+    </div>
+  </div>
 </div>
 
 <script>
-var VYCH_BARVY = /*BARVY*/, VYCH_STINY = /*STINY*/;
+var VYCH_BARVY = /*BARVY*/, VYCH_STINY = /*STINY*/, VYCH_TVARY = /*TVARY*/;
 var BLOK = { light: /*BLOK_SVETLY*/, dark: /*BLOK_TMAVY*/ };
 var barvy = JSON.parse(JSON.stringify(VYCH_BARVY));
 var stiny = JSON.parse(JSON.stringify(VYCH_STINY));
+var tvary = JSON.parse(JSON.stringify(VYCH_TVARY));
 var rezim = "light";
 var korenu = document.documentElement;
 
@@ -373,6 +543,19 @@ function nasad(){
     inp.value = stiny[rezim][klic];
     p.querySelector('[data-role=cislo]').textContent = inp.value + inp.getAttribute("data-jed");
   });
+  for (var k3 in tvary) korenu.style.setProperty(k3, tvary[k3]);
+  tvarPosuvy.forEach(function(p){
+    var klic = p.getAttribute("data-tvar"), inp = p.querySelector('[data-role=posuv]');
+    inp.value = parseFloat(tvary[klic]);
+    p.querySelector('[data-role=cislo]').textContent = tvary[klic];
+  });
+  rodiny.forEach(function(s){ s.value = tvary[s.getAttribute("data-rodina")] || s.value; });
+  [].slice.call(document.querySelectorAll("[data-konec]")).forEach(function(b3){
+    b3.classList.toggle("on", b3.getAttribute("data-konec") === tvary["--ikona-konec"]);
+  });
+  [].slice.call(document.querySelectorAll("[data-rezim]")).forEach(function(b2){
+    b2.classList.toggle("on", b2.getAttribute("data-rezim") === rezim);
+  });
   oznacSmer();
   vypis();
 }
@@ -380,7 +563,10 @@ function nasad(){
 function vypis(){
   var t = "";
   ["light", "dark"].forEach(function(m){
-    var blk = BLOK[m], hodnoty = Object.assign({}, barvy[m], stinyCss(stiny[m]));
+    /* Tvary nezávisí na režimu, patří tedy jen do světlého bloku — v tmavém
+       by se jen opakovaly. */
+    var blk = BLOK[m], hodnoty = Object.assign({}, barvy[m], stinyCss(stiny[m]),
+      m === "light" ? tvary : {});
     for (var k in hodnoty){
       var re = new RegExp("(" + k.replace(/[-]/g, "\\-") + "\\s*:\\s*)[^;]*;");
       if (re.test(blk)) blk = blk.replace(re, "$1" + hodnoty[k] + ";");
@@ -402,7 +588,8 @@ radky.forEach(function(r){
     korenu.style.setProperty(klic, hex.value); vypis(); });
 });
 
-var posuvy = [].slice.call(document.querySelectorAll(".posuv"));
+/* Jen posuvníky stínů — tvary, písmo a rozestupy mají data-tvar a řeší se níž. */
+var posuvy = [].slice.call(document.querySelectorAll(".posuv[data-klic]"));
 posuvy.forEach(function(p){
   var klic = p.getAttribute("data-klic"), inp = p.querySelector('[data-role=posuv]');
   inp.addEventListener("input", function(){
@@ -411,6 +598,35 @@ posuvy.forEach(function(p){
     var s = stinyCss(stiny[rezim]);
     for (var k in s) korenu.style.setProperty(k, s[k]);
     oznacSmer(); vypis();
+  });
+});
+
+var tvarPosuvy = [].slice.call(document.querySelectorAll("[data-tvar]"));
+tvarPosuvy.forEach(function(p){
+  var klic = p.getAttribute("data-tvar"), inp = p.querySelector('[data-role=posuv]');
+  inp.addEventListener("input", function(){
+    var jed = inp.getAttribute("data-jed");
+    tvary[klic] = inp.value + jed;
+    p.querySelector('[data-role=cislo]').textContent = tvary[klic];
+    korenu.style.setProperty(klic, tvary[klic]); vypis();
+  });
+});
+/* Řez písma není číslo, takže má výběr místo posuvníku — jinak se chová stejně. */
+var rodiny = [].slice.call(document.querySelectorAll("[data-rodina]"));
+rodiny.forEach(function(s){
+  s.addEventListener("change", function(){
+    var klic = s.getAttribute("data-rodina");
+    tvary[klic] = s.value;
+    korenu.style.setProperty(klic, s.value); vypis();
+  });
+});
+[].slice.call(document.querySelectorAll("[data-konec]")).forEach(function(b){
+  b.addEventListener("click", function(){
+    tvary["--ikona-konec"] = b.getAttribute("data-konec");
+    korenu.style.setProperty("--ikona-konec", tvary["--ikona-konec"]);
+    [].slice.call(document.querySelectorAll("[data-konec]")).forEach(function(x){
+      x.classList.toggle("on", x === b); });
+    vypis();
   });
 });
 
@@ -440,15 +656,15 @@ function oznacSmer(){
   });
 }
 
-document.getElementById("rezim-svetly").addEventListener("click", function(){
-  rezim = "light"; this.classList.add("on");
-  document.getElementById("rezim-tmavy").classList.remove("on"); nasad(); });
-document.getElementById("rezim-tmavy").addEventListener("click", function(){
-  rezim = "dark"; this.classList.add("on");
-  document.getElementById("rezim-svetly").classList.remove("on"); nasad(); });
-document.getElementById("zpet").addEventListener("click", function(){
-  barvy[rezim] = Object.assign({}, VYCH_BARVY[rezim]);
+[].slice.call(document.querySelectorAll("[data-rezim]")).forEach(function(b){
+  b.addEventListener("click", function(){ rezim = b.getAttribute("data-rezim"); nasad(); });
+});
+document.getElementById("zpet-stiny").addEventListener("click", function(){
   stiny[rezim] = Object.assign({}, VYCH_STINY[rezim]); nasad(); });
+document.getElementById("zpet-tvary").addEventListener("click", function(){
+  tvary = JSON.parse(JSON.stringify(VYCH_TVARY)); nasad(); });
+document.getElementById("zpet-barvy").addEventListener("click", function(){
+  barvy[rezim] = Object.assign({}, VYCH_BARVY[rezim]); nasad(); });
 document.getElementById("kopirovat").addEventListener("click", function(){
   var t = document.getElementById("vystup");
   t.removeAttribute("readonly"); t.select();

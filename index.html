@@ -14,44 +14,61 @@
   /* --bg maluje JEN plochu stránky; všechno, co na ní leží (karty, lišty,
      tlačítka, pole, štítky), bere barvu z --paper. Ty dvě proměnné jdou
      nastavit nezávisle — plocha je samostatná jednotka. */
-  --bg:#c2c2c2; --paper:#EAEAEA; --zvyraz:#DEDEDE; --logo:#c2c2c2;
+  --bg:#949494; --paper:#dbdbdb; --zvyraz:#949494; --logo:#949494;
   --ink:#141414; --ink-2:#767676; --line:#D8D8D8; --line-2:#C7C7C7;
   --cyan:#141414; --magenta:#C97B63; --yellow:#D9B44A; --key:#141414;
-  --btn-ink:#FFFFFF; --focus:rgba(20,20,20,.20); --danger:#A8382A;
-  --ok:#1F6B45; --warn:#8A5A1E;
-  --radius:18px;
-  --neu:-8px -10px 26px rgba(255,255,255,0.23), 8px 10px 26px rgba(0,0,0,0.21);
-  --neu-sm:-8px -9px 10px rgba(255,255,255,0.219), 8px 9px 10px rgba(0,0,0,0.231);
-  --neu-in:inset 3px 3px 4px rgba(0,0,0,0.189), inset -3px -3px 4px rgba(255,255,255,0.219);
-  --neu-in-lg:inset 4px 5px 6px rgba(0,0,0,0.21), inset -4px -5px 6px rgba(255,255,255,0.23);
-  --modal-shadow:0 13px 52px rgba(0,0,0,0.42);
-  --logo-shadow:-4px -4px 7px rgba(255,255,255,0.16), 4px 4px 7px rgba(0,0,0,0.22);
-  --mono:ui-monospace,'Cascadia Mono',Consolas,monospace;
-  --sans:'Segoe UI',system-ui,Arial,sans-serif;
+  --btn-ink:#FFFFFF; --focus:rgba(20,20,20,.20); --danger:#b31919;
+  --ok:#3dc760; --warn:#e8c545;
+  /* Tvary: každý druh prvku má vlastní zaoblení, aby šlo ladit zvlášť
+     karty, tlačítka, pole a dlaždice. Ikony jsou kreslené, ne obrázkové —
+     velikost, tloušťka tahu i zakončení se řídí odsud. */
+  --radius:23px; --radius-btn:35px; --radius-pole:15px; --radius-dlazdice:15px;
+  --radius-stitek:15px;
+  --ikona:27px; --ikona-tah:1.5; --ikona-konec:round; --ikona-pruhlednost:1;
+  --pruhlednost-karty:1;
+  /* Písmo se řídí podle role, ne podle prvku: co je nadpis, co popisek, co
+     výsledek. Zvětšené varianty na domovské stránce se z těchto hodnot
+     dopočítají, takže celá škála drží pohromadě. */
+  --pismo:15.5px; --pismo-nadpis:19.5px; --pismo-popisek:12.5px;
+  --pismo-poznamka:14px; --pismo-tabulka:19px; --pismo-vysledek:50px;
+  --logo-velikost:116px; --prostrkani:0.07em; --tloustka-nadpisu:900; --radek:1.4;
+  /* Rozestupy: odsazení uvnitř karty, mezera mezi kartami, mezera mezi poli
+     v řádku a odsazení uvnitř polí a tlačítek (to určuje jejich výšku). */
+  --mezera-karta-y:20px; --mezera-karta-x:22px; --mezera-karet:16px;
+  --mezera-poli:12px; --pole-y:9px; --pole-x:12px;
+  --tlacitko-y:10px; --tlacitko-x:18px; --okraj-stranky:20px;
+  --neu:-5px -5px 20px rgba(255,255,255,0.11), 5px 5px 20px rgba(0,0,0,0.43);
+  --neu-sm:-4px -4px 14px rgba(255,255,255,0.105), 4px 4px 14px rgba(0,0,0,0.473);
+  --neu-in:inset 2px 2px 4px rgba(0,0,0,0.387), inset -2px -2px 4px rgba(255,255,255,0.105);
+  --neu-in-lg:inset 3px 3px 6px rgba(0,0,0,0.43), inset -3px -3px 6px rgba(255,255,255,0.11);
+  --modal-shadow:0 7px 40px rgba(0,0,0,0.86);
+  --logo-shadow:-2px -2px 2px rgba(255,255,255,0.14), 2px 2px 2px rgba(0,0,0,0.1);
+  --mono:'Segoe UI',system-ui,sans-serif;
+  --sans:system-ui,sans-serif;
 }
 :root[data-theme="dark"]{
   /* Tmavý režim je hlubší než dřív, ale ne černý — na černé plochu nejde
      osvětlit a stíny by zmizely. Hlavní tlačítko je světlé s tmavým písmem.
      Linky se posouvají spolu s pozadím, aby zůstaly stejně zřetelné. */
-  --bg:#272525; --paper:#3b3b3b; --zvyraz:#2A2A2A; --logo:#1D1D1D;
-  --ink:#EDEDED; --ink-2:#8C8C8C; --line:#2C2C2C; --line-2:#3A3A3A;
+  --bg:#545454; --paper:#333333; --zvyraz:#545454; --logo:#545454;
+  --ink:#EDEDED; --ink-2:#8C8C8C; --line:#595959; --line-2:#7a7a7a;
   --cyan:#EDEDED; --magenta:#C97B63; --yellow:#D9B44A; --key:#EDEDED;
-  --btn-ink:#161616; --focus:rgba(237,237,237,.22); --danger:#E0705E;
-  --ok:#5CBF8A; --warn:#D9A45C;
+  --btn-ink:#000000; --focus:rgba(237,237,237,.22); --danger:#b31919;
+  --ok:#3dc760; --warn:#e8c545;
   --neu:-9px -9px 24px rgba(255,255,255,0.08), 9px 9px 24px rgba(0,0,0,0.51);
-  --neu-sm:-8px -8px 10px rgba(255,255,255,0.076), 8px 8px 10px rgba(0,0,0,0.561);
+  --neu-sm:-4px -4px 10px rgba(255,255,255,0.076), 4px 4px 10px rgba(0,0,0,0.561);
   --neu-in:inset 3px 3px 4px rgba(0,0,0,0.459), inset -3px -3px 4px rgba(255,255,255,0.076);
   --neu-in-lg:inset 4px 4px 6px rgba(0,0,0,0.51), inset -4px -4px 6px rgba(255,255,255,0.08);
   --modal-shadow:0 13px 48px rgba(0,0,0,1);
-  --logo-shadow:-4px -4px 7px rgba(255,255,255,0.25), 4px 4px 7px rgba(0,0,0,0);
+  --logo-shadow:-2px -2px 2px rgba(255,255,255,0.14), 2px 2px 2px rgba(0,0,0,0.1);
 }
 :root[data-theme="dark"] .warnbox,:root[data-theme="dark"] #chyba{background:#2C2317;border-color:#463824;color:#E0AE6B}
 :root[data-theme="dark"] .okbox{background:#182A20;border-color:#284434;color:#79CFA0}
 :root[data-theme="dark"] .imgwarn{background:#2C2317 !important;color:#E0AE6B !important}
 *{box-sizing:border-box}
-body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
-input,select,button,textarea{font-family:inherit;font-size:14px}
-input,select,textarea{border:none;border-radius:10px;padding:9px 12px;background:var(--paper);color:var(--ink);width:100%;box-shadow:var(--neu-in);transition:box-shadow .15s}
+body{margin:0;font-family:var(--sans);line-height:var(--radek);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
+input,select,button,textarea{font-family:inherit;font-size:var(--pismo)}
+input,select,textarea{border:none;border-radius:var(--radius-pole);padding:var(--pole-y) var(--pole-x);background:var(--paper);color:var(--ink);width:100%;box-shadow:var(--neu-in);transition:box-shadow .15s}
 input:focus,select:focus,textarea:focus{outline:none;box-shadow:var(--neu-in),0 0 0 3px var(--focus)}
 button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 input[type=number]{font-family:var(--mono);appearance:textfield;-moz-appearance:textfield}
@@ -60,15 +77,60 @@ select{appearance:none;-webkit-appearance:none;-moz-appearance:none;
   background-image:linear-gradient(45deg, transparent 50%, var(--ink-2) 50%), linear-gradient(135deg, var(--ink-2) 50%, transparent 50%);
   background-position: calc(100% - 20px) calc(50% - 3px), calc(100% - 14px) calc(50% - 3px);
   background-size:6px 6px, 6px 6px; background-repeat:no-repeat; padding-right:36px}
+/* Rozbalenou nabídku kreslil dosud sám prohlížeč a CSS na ni nedosáhlo —
+   proto ta hranatá šedá nabídka s modrým pruhem uprostřed měkkého prostředí.
+   Chrome ji dnes umí předat stránce: `appearance:base-select` z ní udělá
+   běžný prvek, který poslouchá tytéž proměnné jako všechno ostatní. Starší
+   prohlížeč celé pravidlo přeskočí a dostane nabídku jako dřív — aplikace
+   proto funguje v obou případech. */
+@supports (appearance: base-select){
+  select,::picker(select){appearance:base-select}
+  /* Zavřené pole musí zůstat na chlup stejné: šipku kreslíme pozadím, takže
+     tu, kterou přidává prohlížeč, schováme, a pole srovnáme jako dřív. */
+  select::picker-icon{display:none}
+  /* Výběr se nově chová jako běžný textový prvek, takže by zdědil výšku řádku
+     z těla stránky — a vyrostl by o pixel proti poli vedle sebe. Textová pole
+     mají `normal`, výběr musí mít totéž, jinak se rozjede řádkování. */
+  select{display:block;text-align:start;line-height:normal}
+  select:open{box-shadow:var(--neu-in),0 0 0 3px var(--focus)}
+  .bigform select:open{box-shadow:var(--neu-sm),0 0 0 3px var(--focus)}
+  ::picker(select){
+    appearance:base-select;border:none;
+    background:var(--paper);color:var(--ink);
+    /* Vlásová linka navíc: nabídka má stejnou barvu jako karta pod ní,
+       takže by se bez ní na okraji ztrácela. */
+    border-radius:var(--radius-pole);box-shadow:var(--modal-shadow),0 0 0 1px var(--line-2);
+    padding:6px;margin-top:8px;
+    max-height:min(52vh,440px);overflow-y:auto;overscroll-behavior:contain;
+    font-size:var(--pismo)}
+  option{
+    display:flex;align-items:center;gap:10px;
+    padding:9px 12px;border-radius:calc(var(--radius-pole) * .7);
+    background:transparent;color:var(--ink);cursor:pointer;
+    transition:background .1s}
+  option:hover,option:focus{background:var(--zvyraz);outline:none}
+  option:checked{background:var(--key);color:var(--btn-ink);font-weight:700}
+  option:disabled{opacity:.45;cursor:default}
+  /* Odškrtnutí drží místo i u neoznačených položek, jinak by se text
+     u vybrané řádky posunul stranou a seznam by poskakoval. */
+  option::checkmark{order:2;margin-left:auto;content:"✓";font-weight:700}
+  option:not(:checked)::checkmark{visibility:hidden}
+}
 input[type=color]{padding:4px;height:40px;cursor:pointer}
 input[type=color]::-webkit-color-swatch-wrapper{padding:0}
 input[type=color]::-webkit-color-swatch{border:none;border-radius:7px}
 input[type=color]::-moz-color-swatch{border:none;border-radius:7px}
 textarea{font-family:var(--mono);font-size:12.5px;min-height:160px;resize:vertical;line-height:1.5}
+/* Ikony se kreslí vektorem — velikost, tloušťka tahu a zakončení jdou
+   z proměnných, takže se dají ladit stejně jako barvy. CSS má přednost před
+   atributy v SVG, proto stačí tohle jediné pravidlo. */
+svg[viewBox="0 0 24 24"]{width:var(--ikona);height:var(--ikona);opacity:var(--ikona-pruhlednost)}
+svg[viewBox="0 0 24 24"] path,svg[viewBox="0 0 24 24"] circle,svg[viewBox="0 0 24 24"] line{
+  stroke-width:var(--ikona-tah);stroke-linecap:var(--ikona-konec);stroke-linejoin:var(--ikona-konec)}
 .hdr{background:transparent;color:var(--ink);padding:9px clamp(16px,3vw,40px);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
 .themebtn{grid-column:3;justify-self:end;flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:none;background:var(--paper);box-shadow:var(--neu-sm);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;line-height:1;transition:opacity .15s;color:var(--ink)}
 .themebtn:hover{opacity:.8}
-.hdr h1{grid-column:2;margin:0;font-size:clamp(66px,8.4vw,90px);font-weight:800;letter-spacing:.04em;text-align:center;color:var(--logo);text-shadow:var(--logo-shadow);cursor:pointer;transition:opacity .15s}
+.hdr h1{grid-column:2;margin:0;font-size:clamp(calc(var(--logo-velikost) * .73),8.4vw,var(--logo-velikost));font-weight:var(--tloustka-nadpisu);letter-spacing:.04em;text-align:center;color:var(--logo);text-shadow:var(--logo-shadow);cursor:pointer;transition:opacity .15s}
 .hdr h1:hover{opacity:.85}
 .menuwrap{position:relative}
 .navleft{grid-column:1;justify-self:start;display:flex;align-items:center;gap:8px;min-width:0}
@@ -83,8 +145,8 @@ textarea{font-family:var(--mono);font-size:12.5px;min-height:160px;resize:vertic
 .navdrop button:hover{background:var(--zvyraz)}
 .navdrop button.on{color:var(--cyan);font-weight:800}
 :root[data-theme="dark"] .navdrop button:hover{background:rgba(127,163,217,.16)}
-.wrap{max-width:none;margin:0;padding:20px clamp(16px,3vw,40px) 56px}
-.grid{display:grid;gap:16px}
+.wrap{max-width:none;margin:0;padding:var(--okraj-stranky) clamp(16px,3vw,40px) 56px}
+.grid{display:grid;gap:var(--mezera-karet)}
 /* Kalkulace stojí na dvou stejných polovinách: vlevo zadání, vpravo výsledek.
    Obě okna mají tutéž šířku a potkávají se přesně uprostřed stránky. */
 @media(min-width:960px){.grid.calc{grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:40px;align-items:stretch}}
@@ -97,50 +159,75 @@ textarea{font-family:var(--mono);font-size:12.5px;min-height:160px;resize:vertic
 @media(min-width:960px){
   .grid.calc>.karta-produkt{grid-column:1;grid-row:1}
   .grid.calc>.bigpanel{grid-column:2;grid-row:1}
+  /* Zadání stojí ve třech kartách: receptura pod produktem (stejně široká),
+     čísla zakázky vedle ní pod výsledkem, a parametry tisku přes celou šířku
+     ve třetím řádku. Sbalený souhrn zaujme místo receptury. */
   .grid.calc>.bigform{grid-column:1;grid-row:2}
-  /* Rozbalené zadání je formulář — potřebuje šířku, tak zabere obě poloviny.
-     Sbalený souhrn se vejde pod kartu produktu a zůstává úzký. */
-  .grid.calc>.bigform.siroke{grid-column:1 / -1}
+  .grid.calc>.karta-cisla{grid-column:2;grid-row:2}
+  .grid.calc>.karta-tisk{grid-column:1 / -1;grid-row:3}
   .grid.calc>.card{margin-bottom:0}
   .karta-produkt{display:flex;flex-direction:column}
 }
 .grid.calc>.bigpanel{align-content:stretch}
 .bigpanel>.card{height:100%;display:flex;flex-direction:column}
 .bigpanel .michtl{margin-top:auto}
-.bigpanel .card{padding:25px 28px;margin-bottom:20px}
-.bigpanel .card h2{font-size:19px}
-.bigpanel .card .hint{font-size:15.5px}
-.bigpanel .result-big{font-size:clamp(46px,4.6vw,68px)}
-.bigpanel .result-sub{font-size:17px}
+/* Zvětšené varianty nemají vlastní čísla — počítají se z téže škály, aby
+   změna velikosti písma nebo rozestupů platila i tady. */
+.bigpanel .card{padding:calc(var(--mezera-karta-y) * 1.25) calc(var(--mezera-karta-x) * 1.27);margin-bottom:calc(var(--mezera-karet) * 1.25)}
+.bigpanel .card h2{font-size:calc(var(--pismo-nadpis) * 1.36)}
+.bigpanel .card .hint{font-size:calc(var(--pismo-poznamka) * 1.24)}
+.bigpanel .result-big{font-size:clamp(calc(var(--pismo-vysledek) * 1.35),4.6vw,calc(var(--pismo-vysledek) * 2))}
+.bigpanel .result-sub{font-size:calc(var(--pismo) * 1.21)}
 .bigpanel .mixbar{height:30px}
-.bigpanel table.t{font-size:17px}
+.bigpanel table.t{font-size:calc(var(--pismo-tabulka) * 1.26)}
 .bigpanel table.t th{padding:10px}
 .bigpanel table.t td{padding:11px 10px}
-.bigpanel .note{font-size:15.5px}
-.bigpanel .btn{font-size:16px;padding:12px 22px}
+.bigpanel .note{font-size:calc(var(--pismo-poznamka) * 1.24)}
+.bigpanel .btn{font-size:calc(var(--pismo) * 1.14);padding:calc(var(--tlacitko-y) * 1.2) calc(var(--tlacitko-x) * 1.22)}
 .bigpanel .swatch{width:34px;height:34px}
-.bigpanel .tag{font-size:14px;padding:4px 11px}
+.bigpanel .tag{font-size:calc(var(--pismo-popisek) * 1.27);padding:4px 11px}
 .bigpanel .wbar{height:17px}
-.bigform.card>h2{font-size:19px}
-.bigform.card>.hint{font-size:15.5px}
-.bigform label.f{font-size:14px;margin-bottom:8px}
-.bigform select,.bigform input{font-size:17px;padding:13px 15px;border-radius:12px;box-shadow:var(--neu-sm)}
+.bigform.card>h2{font-size:calc(var(--pismo-nadpis) * 1.36)}
+.bigform.card>.hint{font-size:calc(var(--pismo-poznamka) * 1.24)}
+.bigform label.f{font-size:calc(var(--pismo-popisek) * 1.27);margin-bottom:8px}
+.bigform select,.bigform input{font-size:calc(var(--pismo) * 1.21);padding:calc(var(--pole-y) * 1.44) calc(var(--pole-x) * 1.25);border-radius:var(--radius-pole);box-shadow:var(--neu-sm)}
 .bigform select{padding-right:40px}
+/* Síto, kryvost a povrch se čtou od stroje, ne od klávesnice — tiskař stojí
+   krok od obrazovky a potřebuje je poznat pohledem, ne přečíst zblízka.
+   Proto jsou tahle tři pole výrazně větší než všechna ostatní a vyplní kartu.
+   Roste s nimi i popisek, šipka a nabídka, jinak by na velkém poli zůstaly
+   drobné a pole by vypadalo jako omylem zvětšené. */
+.karta-tisk label.f{font-size:calc(var(--pismo-popisek) * 1.5);margin-bottom:10px;text-align:center}
+/* Dlaždice ve stejném duchu jako náhled produktu (272 × 272 px): skoro
+   čtverec, hodnota uprostřed. Roztažené pole přes celou třetinu řádku se
+   z odstupu čte hůř než blok, který má tvar — oko najde dřív dlaždici než
+   dlouhý pruh. Šířka je omezená, ale dlaždice se rozestoupí po celém řádku. */
+.karta-tisk .frow.c3>div{justify-items:center}
+.karta-tisk select{font-size:calc(var(--pismo) * 2);font-weight:700;text-align:center;
+  width:100%;max-width:340px;aspect-ratio:1.2;justify-self:center;
+  display:flex;align-items:center;justify-content:center;
+  /* Šipka je dole uprostřed, ne vpravo — po stranách proto stačí běžné
+     odsazení. Široké okraje by lámaly hodnoty na dva řádky. */
+  padding:calc(var(--pole-y) * 2) calc(var(--pole-x) * 1.6) calc(var(--pole-y) * 5.5);
+  background-size:14px 14px,14px 14px;
+  background-position:calc(50% - 14px) calc(100% - 26px),calc(50%) calc(100% - 26px)}
+.karta-tisk select::picker(select){font-size:calc(var(--pismo) * 1.5)}
+.karta-tisk option{padding:calc(var(--pole-y) * 1.4) calc(var(--pole-x) * 1.4)}
 .bigform select:focus,.bigform input:focus{box-shadow:var(--neu-sm),0 0 0 3px var(--focus)}
-.bigform .frow{gap:16px;margin-bottom:16px}
-.bigform .note{font-size:14.5px}
-.bigform .swatch{width:36px;height:36px;border-radius:10px}
+.bigform .frow{gap:calc(var(--mezera-poli) * 1.33);margin-bottom:calc(var(--mezera-poli) * 1.33)}
+.bigform .note{font-size:calc(var(--pismo-poznamka) * 1.16)}
+.bigform .swatch{width:36px;height:36px;border-radius:var(--radius-pole)}
 .bigform .tgl{font-size:15.5px;gap:12px}
 .bigform .tglt{width:50px;height:27px;border-radius:14px}
 .bigform .tglt::after{width:23px;height:23px}
 .bigform .tgl input:checked + .tglt::after{transform:translateX(23px)}
 .bigform .flags{gap:28px}
-.card{background:var(--paper);border-radius:var(--radius);padding:20px 22px;margin-bottom:16px;box-shadow:var(--neu)}
-.card h2{margin:0 0 4px;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--ink)}
-.card .hint{color:var(--ink-2);font-size:12.5px;margin:0 0 14px}
-.frow{display:grid;gap:12px;margin-bottom:12px}
+.card{background:var(--paper);border-radius:var(--radius);opacity:var(--pruhlednost-karty);padding:var(--mezera-karta-y) var(--mezera-karta-x);margin-bottom:var(--mezera-karet);box-shadow:var(--neu)}
+.card h2{margin:0 0 4px;font-size:var(--pismo-nadpis);font-weight:var(--tloustka-nadpisu);text-transform:uppercase;letter-spacing:calc(var(--prostrkani) * .83);color:var(--ink)}
+.card .hint{color:var(--ink-2);font-size:var(--pismo-poznamka);margin:0 0 14px}
+.frow{display:grid;gap:var(--mezera-poli);margin-bottom:var(--mezera-poli)}
 @media(min-width:640px){.frow.c2{grid-template-columns:1fr 1fr}.frow.c3{grid-template-columns:1fr 1fr 1fr}.frow.c4{grid-template-columns:1fr 1fr 1fr 1fr}}
-label.f{display:block;font-size:11px;line-height:1.25;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);margin-bottom:5px}
+label.f{display:block;font-size:var(--pismo-popisek);line-height:1.25;font-weight:700;letter-spacing:var(--prostrkani);text-transform:uppercase;color:var(--ink-2);margin-bottom:5px}
 /* Popisek se v užším okně zalomí na dva řádky a pole pod ním se propadne níž
    než sousední. Popisek v mřížce má proto vždy výšku dvou řádků a text sedí
    u jeho spodní hrany — pole v řádku tak drží linku při každé šířce okna. */
@@ -149,25 +236,33 @@ label.f{display:block;font-size:11px;line-height:1.25;font-weight:700;letter-spa
    vedle ní — srovnáme ji na spodní hranu řádku, na střed sousedního pole. */
 .frow>.flags{align-self:end;margin-top:0;padding-bottom:8px}}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
-.chip{border:none;background:var(--paper);border-radius:999px;padding:7px 14px;cursor:pointer;font-weight:600;font-size:13px;display:inline-flex;align-items:center;justify-content:center;text-align:center;transition:box-shadow .15s,background .15s,color .15s;box-shadow:var(--neu-sm)}
+.chip{border:none;background:var(--paper);border-radius:var(--radius-btn);padding:calc(var(--tlacitko-y) * .7) calc(var(--tlacitko-x) * .78);cursor:pointer;font-weight:600;font-size:calc(var(--pismo) - 1px);display:inline-flex;align-items:center;justify-content:center;text-align:center;transition:box-shadow .15s,background .15s,color .15s;box-shadow:var(--neu-sm)}
 .chip.on{background:var(--key);color:var(--btn-ink)}
-.btn{border:none;border-radius:999px;padding:10px 18px;font-weight:700;cursor:pointer;background:var(--key);color:var(--btn-ink);transition:opacity .15s;box-shadow:var(--neu-sm)}
+.btn{border:none;border-radius:var(--radius-btn);padding:var(--tlacitko-y) var(--tlacitko-x);font-weight:700;cursor:pointer;background:var(--key);color:var(--btn-ink);transition:opacity .15s;box-shadow:var(--neu-sm)}
 .btn:hover{opacity:.82}
 .btn.sec{background:var(--paper);color:var(--ink)}
 .btn.sec:hover{opacity:1}
-.btn.sm{padding:6px 12px;font-size:12.5px}
+.btn.sm{padding:calc(var(--tlacitko-y) * .6) calc(var(--tlacitko-x) * .67);font-size:var(--pismo-poznamka)}
 .btn.danger{background:var(--paper);color:var(--danger)}
 .btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
-table.t{width:100%;border-collapse:collapse;font-size:13.5px}
-table.t th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);border-bottom:1.5px solid var(--ink);padding:8px}
+table.t{width:100%;border-collapse:collapse;font-size:var(--pismo-tabulka)}
+table.t th{text-align:left;font-size:var(--pismo-popisek);letter-spacing:var(--prostrkani);text-transform:uppercase;color:var(--ink-2);border-bottom:1.5px solid var(--ink);padding:8px}
 table.t td{border-bottom:1px solid var(--line);padding:9px 8px;vertical-align:top}
-td.num,th.num{text-align:right;font-family:var(--mono)}
-.swatch{width:26px;height:26px;border-radius:7px;border:1px solid rgba(0,0,0,.12);display:inline-block;vertical-align:middle}
+/* Číslice musí mít stejnou šířku, jinak se sloupce gramáží rozházejí. Když je
+   --mono skutečně strojopis, platí to samo; u běžného písma to musí zapnout
+   tohle pravidlo. */
+td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.swatch{width:26px;height:26px;border-radius:var(--radius-pole);border:1px solid rgba(0,0,0,.12);display:inline-block;vertical-align:middle}
 /* text-align kvůli úzkému sloupci: jakmile se štítek zalomí na víc řádků,
    zarovnaný doleva vypadá roztřepeně — uvnitř oblého tvaru patří na střed */
-.tag{display:inline-block;text-align:center;font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:999px;background:var(--paper);box-shadow:var(--neu-in);color:var(--ink-2)}
+.tag{display:inline-block;text-align:center;font-family:var(--mono);font-size:var(--pismo-popisek);padding:3px 9px;border-radius:var(--radius-stitek);background:var(--paper);box-shadow:var(--neu-in);color:var(--ink-2)}
 .tag.tech{background:var(--key);color:var(--btn-ink);box-shadow:var(--neu-sm)}
-.result-big{font-family:var(--mono);font-size:34px;font-weight:600;line-height:1.05;color:var(--ink)}
+/* Velká čísla mají výšku řádku `normal`, ne utaženou hodnotu. Utažený řádek
+   vytlačí dolní dotah písmene („g" ve „50,0 g") pod vlastní rámeček a text
+   přeteče přes údaj pod sebou — a protože se rámečky neprotnou, nepozná se to
+   jinak než měřením kresby písma. `normal` je přesně tolik, kolik dané písmo
+   potřebuje, takže to platí i po výměně písma v barvy.html. */
+.result-big{font-family:var(--mono);font-size:var(--pismo-vysledek);font-weight:600;line-height:normal;color:var(--ink)}
 .result-sub{font-family:var(--mono);color:var(--ink-2);font-size:13px}
 .mixbar{display:flex;height:20px;border-radius:8px;overflow:hidden;box-shadow:var(--neu-in);margin:10px 0 4px}
 .warnbox{background:#F6EEDF;border:1px solid #E3CFA6;color:#8A5A1E;border-radius:10px;padding:10px 12px;font-size:13px;margin-top:12px}
@@ -176,7 +271,7 @@ td.num,th.num{text-align:right;font-family:var(--mono)}
 .okbox{background:#E7F1EA;border:1px solid #C0D9C9;color:#1E6B44;border-radius:10px;padding:10px 12px;font-size:13px;margin-top:12px}
 .empty{color:var(--ink-2);font-size:13.5px;padding:20px;text-align:center;border-radius:var(--radius);box-shadow:var(--neu-in)}
 .rowline{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
-.note{font-size:12px;color:var(--ink-2)}
+.note{font-size:calc(var(--pismo-poznamka) - .5px);color:var(--ink-2)}
 .search{max-width:340px}
 pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;overflow:auto;font-family:var(--mono);box-shadow:var(--neu-in)}
 /* Fotka produktu a plocha pro zakázkový list jsou dvě stejné dlaždice vedle
@@ -186,17 +281,21 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
    tiskne, kam se to tiskne a kam pustit zakázkový list. Text a volby jdou pod
    ně na celou šířku; ve sloupcích vedle textu se název při užším okně rozsypal
    na jedno slovo na řádek. */
-/* Zadání zakázky: vlevo všechna pole receptury a tisku pod sebou, vpravo
-   samostatný úzký sloupec se čtyřmi čísly zakázky. Táhne se přes celou výšku
-   formuláře, takže počet kusů a spotřeba jsou vidět hned nahoře, ne až dole
-   pod poli. */
-.zadani-mrizka{display:grid;grid-template-columns:minmax(0,1fr) minmax(170px,220px);
-  gap:24px;align-items:start}
-.zakazka-cisla{display:grid;gap:16px;align-content:start}
-@media(max-width:820px){
-  .zadani-mrizka{grid-template-columns:1fr;gap:0}
-  .zakazka-cisla{grid-template-columns:1fr 1fr;gap:12px 16px;margin-top:16px}
+/* Čísla zakázky mají vlastní kartu o polovině stránky — ve dvou sloupcích,
+   protože pod sebou by byla zbytečně dlouhá a pole by byla přes celou šířku.
+   V úzkém okně se srovnají pod sebe. */
+/* Obě půlky výběru receptur mají stejný rytmus: popisek, filtr, hledání,
+   výběr. Když se v jedné zalomí lišta filtru na dva řádky, musela by se
+   druhá posunout taky — proto sdílejí řádky mřížky, ne jen sloupce.
+   Co je pod výběrem (poznámka, mazání) už na řádcích nezávisí. */
+@supports (grid-template-rows: subgrid){
+  @media(min-width:640px){
+    .recept-pulky{grid-template-rows:auto auto auto auto}
+    .recept-pulky>div{display:grid;grid-template-rows:subgrid;grid-row:span 4;align-content:start}
+  }
 }
+.zakazka-cisla{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-content:start}
+@media(max-width:560px){.zakazka-cisla{grid-template-columns:1fr}}
 .produkt-dlazdice{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
 .produkt-dlazdice .dlazdice{min-width:0;display:flex;flex-direction:column}
 .produkt-dlazdice .prodphoto,.produkt-dlazdice .pdfdrop{
@@ -205,15 +304,15 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
 .produkt-dlazdice .popiska b{color:var(--ink);font-size:13.5px}
 .produkt-dlazdice button.prodphoto{border:none;color:var(--ink-2);font-size:13px;padding:10px}
 .pdfdrop{min-width:0;cursor:pointer}
-.prodphoto{width:128px;height:128px;object-fit:contain;border-radius:12px;background:var(--paper);flex:0 0 auto;box-shadow:var(--neu-sm)}
+.prodphoto{width:128px;height:128px;object-fit:contain;border-radius:var(--radius-dlazdice);background:var(--paper);flex:0 0 auto;box-shadow:var(--neu-sm)}
 .poscards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:8px 0 6px}
-.poscard{border:none;border-radius:12px;background:var(--paper);padding:8px;cursor:pointer;text-align:center;transition:box-shadow .15s;box-shadow:var(--neu)}
+.poscard{border:none;border-radius:var(--radius-dlazdice);background:var(--paper);padding:8px;cursor:pointer;text-align:center;transition:box-shadow .15s;box-shadow:var(--neu)}
 .poscard.on{box-shadow:0 0 0 3px var(--focus),var(--neu)}
 .poscard img{width:100%;height:92px;object-fit:contain;background:transparent}
 .poscard .nm{font-size:12px;font-weight:700;margin-top:6px;line-height:1.25}
 .poscard .dm{font-family:var(--mono);font-size:11px;color:var(--ink-2);margin-top:3px}
 .noimg{width:100%;height:92px;display:flex;align-items:center;justify-content:center;color:var(--ink-2);font-size:11px;background:transparent;border-radius:8px;text-align:center;padding:4px}
-.thumb{width:46px;height:46px;object-fit:contain;border-radius:8px;background:var(--paper);box-shadow:var(--neu-sm)}
+.thumb{width:46px;height:46px;object-fit:contain;border-radius:var(--radius-dlazdice);background:var(--paper);box-shadow:var(--neu-sm)}
 .wbar{height:14px;background:var(--paper);border-radius:7px;overflow:hidden;box-shadow:var(--neu-in)}
 .wbar>span{display:block;height:100%;transition:width .15s}
 .cdot{display:inline-block;width:13px;height:13px;border-radius:4px;margin-right:4px;vertical-align:-2px;border:1px solid rgba(0,0,0,.18)}
@@ -226,10 +325,10 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
 .michbg{position:fixed;inset:0;z-index:80;background:var(--bg);overflow:auto;display:flex;flex-direction:column}
 .michhlav{position:sticky;top:0;z-index:2;background:var(--bg);display:flex;align-items:center;gap:16px;
   flex-wrap:wrap;padding:14px 22px;box-shadow:0 6px 16px rgba(24,23,15,.10)}
-.michhlav .nazev{font-size:26px;font-weight:800;line-height:1.1;color:var(--ink)}
+.michhlav .nazev{font-size:26px;font-weight:800;line-height:normal;color:var(--ink)}
 .michhlav .kde{font-size:14px;color:var(--ink-2);font-family:var(--mono)}
 .michdavka{margin-left:auto;text-align:right;font-family:var(--mono)}
-.michdavka b{display:block;font-size:34px;font-weight:700;line-height:1}
+.michdavka b{display:block;font-size:34px;font-weight:700;line-height:normal}
 .michdavka span{font-size:13px;color:var(--ink-2)}
 .michvzorek{width:52px;height:52px;border-radius:14px;box-shadow:var(--neu-sm);flex:none}
 .michtelo{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:22px;padding:18px 22px 28px;align-items:start}
@@ -289,7 +388,7 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
 @media(max-width:800px){.pgrid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:480px){.pgrid{grid-template-columns:1fr}}
 .pgcard{background:var(--paper);border-radius:var(--radius);box-shadow:var(--neu);padding:14px;display:flex;flex-direction:column;gap:8px}
-.pgcard-img{aspect-ratio:1/1;border-radius:12px;background:var(--paper);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:var(--neu-in)}
+.pgcard-img{aspect-ratio:1/1;border-radius:var(--radius-dlazdice);background:var(--paper);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:var(--neu-in)}
 .pgcard-img img{width:100%;height:100%;object-fit:contain;padding:14px}
 .pgcard-nm{font-weight:700;font-size:13.5px;line-height:1.3}
 .pgcard-ref{font-family:var(--mono);font-size:11px;color:var(--ink-2)}
@@ -3439,6 +3538,8 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
   const [dvouslozkova, setDvouslozkova] = useState(false);    // barva s tužidlem — hlídat pot life
 
   const [recQ, setRecQ] = useState("");
+  const [custQ, setCustQ] = useState("");
+  const [custFiltr, setCustFiltr] = useState("");
   // Rozhoduje technologie vybrané polohy, ne pracovní režim. Na textilní síto
   // se nebude míchat receptura z databáze pro tampontisk ani pro vypalování —
   // nabízet ji je jen lákání k chybě.
@@ -3470,6 +3571,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
       type: "Custom", series: "odvozeno z " + base.name + (base.zdroj ? " · " + nazevDb(base.zdroj) : ""),
       // z čeho a ze které databáze receptura vznikla — zapíše se i do CSV
       zaklad: base.name + (base.zdroj ? " (" + nazevDb(base.zdroj) + ")" : ""),
+      zakladZdroj: base.zdroj || "",
       density: base.density, hex: base.hex,
       components: base.components.map((c) => ({ id: uid(), name: c.name, pct: c.pct })),
     }});
@@ -3521,6 +3623,29 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     if (guardDelete) guardDelete(provest, "smazání custom receptury " + r.name);
     else provest();
   };
+  /* Vlastní barvy se třídí podle databáze, ze které byly odvozené — stejně
+     jako standardy podle databáze, ze které pocházejí. Obě půlky karty tak
+     mají stejný filtr i stejné hledání. */
+  const customZdroje = useMemo(() => {
+    const m = new Map();
+    for (const { r } of customList) {
+      const z = zdrojOdvozeni(r) || "bez podkladu";
+      m.set(z, (m.get(z) || 0) + 1);
+    }
+    return Array.from(m.entries()).map(([nazev, pocet]) => ({ nazev, pocet }))
+      .sort((a, b) => b.pocet - a.pocet);
+  }, [customList]);
+  // Zvolený zdroj, který u tohohle produktu není, by tiše ukazoval prázdno.
+  useEffect(() => {
+    if (custFiltr && !customZdroje.some((z) => z.nazev === custFiltr)) setCustFiltr("");
+  }, [custFiltr, customZdroje]);
+  const customVidet = useMemo(() => {
+    const q = custQ.trim().toLowerCase();
+    return customList.filter(({ r }) => {
+      if (custFiltr && (zdrojOdvozeni(r) || "bez podkladu") !== custFiltr) return false;
+      return !q || (r.name + " " + (r.series || "")).toLowerCase().includes(q);
+    });
+  }, [customList, custFiltr, custQ]);
   const customVybrany = (customList.find((x) => x.r.id === recId) || {}).r || null;
 
   /* Po přepnutí produktu se custom receptura toho předchozího nesmí vézt dál.
@@ -3899,15 +4024,6 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     w.document.close();
   };
 
-  /* Zadání se po vyplnění sbalí do jednoho řádku. Dokud tiskař vybírá, je
-     všechno otevřené; jakmile je vybraná receptura, poloha i počet kusů, není
-     důvod držet na obrazovce dvacet polí, která už udělala svou práci. */
-  const zadaniHotove = !!(recipe && position && n(qty) > 0 && calcAkt);
-  const [zadaniOtevrene, setZadaniOtevrene] = useState(true);
-  // Sbaluje se na vyslovnou volbu obsluhy, ne podle změn stavu: receptura se
-  // mění i sama (dotažení databází, vazba na produkt) a zadání by se zavíralo
-  // pod rukama dřív, než si ho stačí někdo přečíst.
-  const zadaniHotovo = () => setZadaniOtevrene(false);
 
   /* Rady k barvě — prosvítání podkladu a poměr pigment/báze. Jsou k něčemu
      ve chvíli míchání, ne při vybírání zakázky. */
@@ -4299,78 +4415,48 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
             </div>
           </div>
 
-          <div className=${"card bigform" + (zadaniHotove && !zadaniOtevrene ? "" : " siroke")}
-            style=${{ margin: 0 }}>
-            ${zadaniHotove && !zadaniOtevrene ? html`<${React.Fragment}>
-              <div className="rowline" style=${{ marginTop: 0, marginBottom: 0 }}>
-                <h2 style=${{ margin: 0 }}>Zadání zakázky</h2>
-                <span style=${{ marginLeft: "auto" }}></span>
-                <button className="btn sec sm" onClick=${() => setZadaniOtevrene(true)}>Upravit zadání</button>
-              </div>
-              <div className="kv" style=${{ marginTop: 14, fontSize: 15, gap: "10px 18px" }}>
-                <div className="k">Receptura</div>
-                <div className="v">
-                  <span className="swatch" style=${{ background: recipe.hex || "#888", width: 18, height: 18,
-                    display: "inline-block", verticalAlign: -4, marginRight: 8 }} />
-                  ${recipe.name}${recipe.series ? html`<span className="note" style=${{ fontWeight: 400 }}> · ${recipe.series}</span>` : ""}
-                </div>
-                <div className="k">Produkt</div>
-                <div className="v">${product ? (product.ref ? product.ref + " · " : "") + product.name : "—"}</div>
-                ${colorSel && html`<${React.Fragment}>
-                  <div className="k">Barva produktu</div>
-                  <div className="v">
-                    <span className="cdot" style=${{ background: colorSel.hex || "#CCC" }}></span>
-                    ${(colorSel.code || "") + (colorSel.name ? " " + colorSel.name : "")}
-                  </div>
-                <//>`}
-                <div className="k">Poloha a technologie</div>
-                <div className="v">${position ? position.name + " · " + position.tech + " — "
-                  + (TECHS[position.tech] ? TECHS[position.tech].name : "") : tech}</div>
-                <div className="k">Rozměr potisku</div>
-                <div className="v">${fmt(sirka, 1)} × ${fmt(vyska, 1)} mm${rozmerListu ? " (ze zakázkového listu)" : ""}
-                  <span className="note" style=${{ fontWeight: 400 }}> · krycí plocha ${fmt(pokryti, 1)} %</span></div>
-                <div className="k">Zakázka</div>
-                <div className="v">${fmt(n(qty), 0)} ks · ${fmt(n(gm2), 1)} g/m²${
-                  n(loss) > 0 ? " · ztráty " + fmt(n(loss), 0) + " %" : ""}${
-                  n(minBatch) > 0 ? " · min. dávka " + fmt(n(minBatch), 0) + " g" : ""}</div>
-                ${(recipe.mesh || recipe.opacity || n(viskoz) > 0) && html`<${React.Fragment}>
-                  <div className="k">Tisk</div>
-                  <div className="v">${[recipe.mesh, recipe.opacity, recipe.surface,
-                    n(viskoz) > 0 ? fmt(n(viskoz), 1) + " s" : ""].filter(Boolean).join(" · ")}</div>
-                <//>`}
-              </div>
-            <//>` : html`<${React.Fragment}>
-            <h2>Receptura a zakázka</h2>
-            <p className="hint">Vyberte recepturu — technologie a rozměry se doplní z vybrané polohy potisku.</p>
-            <${FiltrDatabaze} recipes=${recepturyTech} hodnota=${dbFiltr} setHodnota=${setDbFiltr}
-              tech=${recTech} skryto=${recipes.length - recepturyTech.length}
-              popis="Vybírá se jen z označené databáze — tatáž receptura může mít v jiné databázi jiné složení." />
-            <div className="zadani-mrizka">
-            <div className="zadani-pole">
-            <div className="frow c2">
+            <div className="card bigform karta-recept" style=${{ margin: 0 }}>
+            <h2>Receptura a barva</h2>
+            <!-- Dvě půlky, obě se stejným rytmem: filtr → hledání → výběr.
+                 Vlevo standardy z nakoupených databází, vpravo vlastní odstíny
+                 odvozené z nich. Vysvětlivky jsou až pod oběma sloupci, aby
+                 hledání i výběry začínaly v obou půlkách ve stejné výšce. -->
+            <div className="frow c2 recept-pulky">
               <div>
-                <label className="f">Receptura (Pantone standard) — ${pantoneList.length} z ${pantoneAll.length}</label>
-                <input value=${recQ} onChange=${(e) => setRecQ(e.target.value)} placeholder="Filtr: např. 485 nebo Reflex…" style=${{ marginBottom: 6 }} />
-                <select value=${pantoneList.some((r) => r.id === recId) ? recId : ""}
-                  onChange=${(e) => { if (e.target.value) { setRecId(e.target.value); zadaniHotovo(); } }}>
-                  <option value="">— vyberte Pantone recepturu —</option>
-                  ${pantoneList.slice(0, 400).map((r) => html`<option key=${r.id} value=${r.id}>${r.name} · ${r.series}</option>`)}
-                </select>
-                ${pantoneList.length > 400 && html`<div className="note" style=${{ marginTop: 4 }}>Zobrazeno prvních 400 — upřesněte filtr.</div>`}
+                <label className="f">Pantone standard — ${pantoneList.length} z ${pantoneAll.length}</label>
+                <${FiltrDatabaze} recipes=${zakladAll} hodnota=${dbFiltr} setHodnota=${setDbFiltr}
+                  nadpis=${false} vzdy=${true} vyber=${true} />
+                <input value=${recQ} onChange=${(e) => setRecQ(e.target.value)} placeholder="Hledat: např. 485 nebo Reflex…" style=${{ marginBottom: 6 }} />
+                <!-- Výběr i to, co pod ním visí, musí být jedna buňka: obě půlky
+                     sdílejí čtyři řádky mřížky a pátý prvek by se do nich vecpal
+                     přes výběr. -->
+                <div>
+                  <select value=${pantoneList.some((r) => r.id === recId) ? recId : ""}
+                    onChange=${(e) => { if (e.target.value) setRecId(e.target.value); }}>
+                    <option value="">— vyberte Pantone recepturu —</option>
+                    ${pantoneList.slice(0, 400).map((r) => html`<option key=${r.id} value=${r.id}>${r.name} · ${r.series}</option>`)}
+                  </select>
+                </div>
               </div>
               <div>
-                <label className="f">Custom receptura${product ? " — " + (product.ref || product.name) : ""}</label>
-                <select value=${customList.some((x) => x.r.id === recId) ? recId : ""}
-                  onChange=${(e) => { if (e.target.value) { setRecId(e.target.value); zadaniHotovo(); } }}>
-                  <option value="">${customList.length ? "— vyberte custom recepturu —" : "— žádná pro tento produkt —"}</option>
-                  ${customList.map(({ r, presna, volna }) => html`<option key=${r.id} value=${r.id}>${
-                    r.name}${presna ? " ✓ tato kombinace" : (volna ? " · bez vazby" : "")}</option>`)}
-                </select>
-                <div className="note" style=${{ marginTop: 4 }}>
-                  Nabízejí se jen vlastní barvy vytvořené na tento produkt${tech ? " a technologii " + tech : ""}.
-                  ${customSkryto > 0 ? " Skryto " + fmt(customSkryto, 0) + " custom receptur jiných produktů." : ""}
+                <label className="f">Custom${product ? " — " + (product.ref || product.name) : ""} — ${customVidet.length} z ${customList.length}</label>
+                <div style=${{ marginBottom: 10 }}>
+                  <select value=${custFiltr} onChange=${(e) => setCustFiltr(e.target.value)}>
+                    <option value="">Všechny řady (${fmt(customList.length, 0)})</option>
+                    ${customZdroje.map((z) => html`<option key=${z.nazev} value=${z.nazev}>
+                      ${z.nazev} (${fmt(z.pocet, 0)})</option>`)}
+                  </select>
                 </div>
-                ${customVybrany && html`
+                <input value=${custQ} onChange=${(e) => setCustQ(e.target.value)} placeholder="Hledat mezi vlastními barvami…" style=${{ marginBottom: 6 }} />
+                <div>
+                  <select value=${customVidet.some((x) => x.r.id === recId) ? recId : ""}
+                    onChange=${(e) => { if (e.target.value) setRecId(e.target.value); }}>
+                    <option value="">${customVidet.length ? "— vyberte custom recepturu —"
+                      : (customList.length ? "— nic neodpovídá filtru —" : "— žádná pro tento produkt —")}</option>
+                    ${customVidet.map(({ r, presna, volna }) => html`<option key=${r.id} value=${r.id}>${
+                      r.name}${presna ? " ✓ tato kombinace" : (volna ? " · bez vazby" : "")}</option>`)}
+                  </select>
+                  ${customVybrany && html`
                   <div className="rowline" style=${{ marginTop: 6, marginBottom: 0 }}>
                     ${smazPotvrd === customVybrany.id ? html`
                       <span className="note">Smazat <b style=${{ color: "var(--ink)" }}>${customVybrany.name}</b> i s vazbami na produkt? Vrátit to nejde.</span>
@@ -4381,6 +4467,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                       <span className="note">smaže se i ze souboru vlastních receptur</span>
                     `}
                   </div>`}
+                </div>
               </div>
             </div>
             ${!recipe && html`
@@ -4408,12 +4495,24 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                   <span className="note">uloží se jako Custom a naváže na ${(colorSel ? (colorSel.code || colorSel.name || "") : "barvu")}${position ? " · " + position.tech + " · " + position.name : ""}</span>
                 </div>
               </div>`}
-            <div className="rowline" style=${{ marginTop: 4 }}>
-              <span className="swatch" style=${{ background: recipe ? recipe.hex : "#888" }} />
-              <span className="note">${recipe ? recipe.name : "— bez receptury —"} · ${recipe && recipe.type === "Custom" ? "Custom" : "Pantone standard"} · hustota ${fmt(n(recipe ? recipe.density : 1, 1), 2)} g/ml · ${recipe ? recipe.components.length : 0} komponent${vazRec && recipe && vazRec.id === recipe.id
-                ? " · vázaná na " + (colorSel ? (colorSel.code || colorSel.name || "") : "")
-                  + (vazbaSiroka ? " (všechny polohy)" : (position ? " · " + position.tech + " " + position.name : ""))
-                : ""}</span>
+            <!-- Vybraná barva stejně velká jako v „Kolik namíchat". Je to hlavní
+                 kontrola, že se míchá ta správná — a kontrola, kterou tiskař dělá
+                 okem, musí být na obou místech stejná, jinak se nedají porovnat. -->
+            <div className="rowline" style=${{ marginTop: 12, marginBottom: 0 }}>
+              <span className="swatch" style=${{ background: (recipe && recipe.hex) || "#888", width: 40, height: 40 }} />
+              <span>
+                <b style=${{ fontSize: 17 }}>${recipe ? recipe.name : "— bez receptury —"}</b>
+                ${recipe && recipe.series ? html`<span className="note"> · ${recipe.series}</span>` : ""}
+                <br /><span className="note">
+                  ${recipe && recipe.type === "Custom" ? "Custom" : "Pantone standard"}
+                  ${" · hustota " + fmt(n(recipe ? recipe.density : 1, 1), 2) + " g/ml"}
+                  ${" · " + (recipe ? recipe.components.length : 0) + " komponent"}
+                  ${vazRec && recipe && vazRec.id === recipe.id
+                    ? " · vázaná na " + (colorSel ? (colorSel.code || colorSel.name || "") : "")
+                      + (vazbaSiroka ? " (všechny polohy)" : (position ? " · " + position.tech + " " + position.name : ""))
+                    : ""}
+                </span>
+              </span>
             </div>
             ${barvaPotisku && html`
               <div className="rowline" style=${{ marginTop: 2, marginBottom: 0 }}>
@@ -4432,7 +4531,83 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                       + " (odchylka ΔE " + fmt(barvaPotisku.blizky.dE, 1) + ")" : ""}
                 </span>
               </div>`}
+            </div>
+
+            <div className="card bigform karta-cisla" style=${{ margin: 0 }}>
+            <h2>Zakázka</h2>
+            <div className="zakazka-cisla">
+              <div>
+                <label className="f">Počet kusů</label>
+                <input type="number" min="1" value=${qty} onChange=${(e) => setQty(e.target.value)} />
+              </div>
+              <div>
+                <label className="f">Spotřeba (g/m²)</label>
+                <input type="number" step="0.1" value=${gm2} onChange=${(e) => setGm2(e.target.value)} />
+              </div>
+              <div>
+                <label className="f">Ztráty (%)</label>
+                <input type="number" step="1" value=${loss} onChange=${(e) => setLoss(e.target.value)} />
+              </div>
+              <div>
+                <label className="f">Min. dávka (g)</label>
+                <input type="number" step="10" value=${minBatch} onChange=${(e) => setMinBatch(e.target.value)} />
+              </div>
+            </div>
+            <div className="frow c2">
+              <div>
+                <label className="f">Viskozita — výtokový čas (s)</label>
+                <div className="rowline" style=${{ marginBottom: 0 }}>
+                <input type="number" step="0.5" min="0" style=${{ flex: 1 }} value=${viskoz}
+                  placeholder=${zeSita && zeSita.dopVisk
+                    ? "doporučeno " + fmt(zeSita.dopVisk.od, 0) + "–" + fmt(zeSita.dopVisk.do, 0) + " s"
+                    : "změřeno výtokovým pohárkem"}
+                  onChange=${(e) => setViskoz(e.target.value)} />
+                  ${recipe && n(viskoz) > 0 && n(viskoz) !== n(recipe.viskozita) && html`
+                    <button className="btn sec sm" title="uložit jako referenční hodnotu receptury"
+                      onClick=${() => upravRecepturu({ viskozita: n(viskoz) })}>Uložit k receptuře</button>`}
+                </div>
+              </div>
+              ${zeSita && zeSita.dopVisk && html`
+                <div className=${zeSita.mimoRozsah ? "warnbox" : "okbox"} style=${{ marginTop: 22 }}>
+                  <b>Doporučeno k ${recipe.mesh}:</b> ${fmt(zeSita.dopVisk.od, 0)}–${fmt(zeSita.dopVisk.do, 0)} s${
+                    zeSita.dopVisk.poharek ? " · " + zeSita.dopVisk.poharek : ""}
+                  ${zeSita.mimoRozsah
+                    ? html`<br /><b>Změřených ${fmt(n(viskoz), 1)} s je mimo rozsah</b> — barva
+                        ${n(viskoz) < zeSita.dopVisk.od ? "je řidší, protéká víc" : "je hustší, protéká míň"}.`
+                    : (n(viskoz) > 0 ? html`<br />Změřených ${fmt(n(viskoz), 1)} s sedí.` : "")}
+                </div>`}
+            </div>
+            ${zeSita && html`
+                <div className=${Math.abs(zeSita.gm2 - n(gm2)) > 0.05 ? "okbox" : "specbar"} style=${{ marginTop: 4 }}>
+                  ${Math.abs(zeSita.gm2 - n(gm2)) > 0.05
+                    ? html`<${React.Fragment}>
+                        <b>${zeSita.sito.klise ? "Z klišé" : "Ze síta"} ${recipe.mesh} vychází ${fmt(zeSita.gm2, 1)} g/m²</b>
+                        ${" — teď je nastaveno " + fmt(n(gm2), 1) + " g/m²."}
+                        <div className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
+                          <button className="btn sm" onClick=${() => setGm2(fmt(zeSita.gm2, 1).replace(",", "."))}>
+                            Použít ${fmt(zeSita.gm2, 1)} g/m²
+                          </button>
+                        </div>
+                      <//>`
+                    : html`<${React.Fragment}>
+                        <span className="dot" style=${{ background: "var(--ok)" }}></span>
+                        <span>Spotřeba odpovídá ${zeSita.sito.klise ? "klišé" : "sítu"} ${recipe.mesh}.</span>
+                      <//>`}
+                  <div className="note" style=${{ marginTop: 6 }}>
+                    ${fmt(zeSita.sito.vth, 1)} cm³/m² teoreticky${zeSita.sito.klise ? " (hloubka leptu)" : ""}
+                    ${zeSita.sito.dopocteno ? " (dopočteno z geometrie tkaniny — orientační)" : ""}
+                    ${" × " + fmt(zeSita.prenos, 2) + " přenos × " + fmt(n(recipe.density, 1), 2) + " g/ml hustota"}
+                    ${zeSita.kKryvost !== 1 ? " × " + fmt(zeSita.kKryvost, 2) + " " + (recipe.opacity || "kryvost") : ""}
+                    ${zeSita.kMaterial !== 1 ? " × " + fmt(zeSita.kMaterial, 2) + " " + zeSita.materialKlic : ""}
+                    ${zeSita.kPodklad !== 1 ? " × " + fmt(zeSita.kPodklad, 2) + " podklad " + zeSita.tridaPodkladu : ""}
+                    ${zeSita.kViskozita !== 1 ? " × " + fmt(zeSita.kViskozita, 2) + " viskozita " + fmt(zeSita.viskozita, 1) + " s" : ""}
+                  </div>
+                </div>`}
+            </div>
+
             ${recipe && html`
+            <div className="card bigform karta-tisk" style=${{ margin: 0 }}>
+              <h2>Parametry tisku</h2>
               <!-- sloupce podle toho, kolik polí se doopravdy vykreslí: u tampontisku
                    je místo síta klišé, a není-li žádné zapsané, zbudou jen dvě pole -->
               <div className=${"frow " + (maSito || klisePro.length > 0 ? "c3" : "c2")} style=${{ marginTop: 8 }}>
@@ -4475,90 +4650,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 <label className="tgl"><input type="checkbox" checked=${!!recipe.tested} onChange=${(e) => upravRecepturu({ tested: e.target.checked })} /><span className="tglt"></span>Otestovaný</label>
                 <label className="tgl"><input type="checkbox" checked=${!!recipe.fade} onChange=${(e) => upravRecepturu({ fade: e.target.checked })} /><span className="tglt"></span>Vysoce odolný vůči vyblednutí</label>
               </div>
-              <p className="note" style=${{ marginTop: 4 }}>Parametry se ukládají přímo k receptuře (i k Pantone standardu).</p>`}
-
-            <div className="frow c3">
-              <div>
-                <label className="f">Viskozita — výtokový čas (s)</label>
-                <div className="rowline" style=${{ marginBottom: 0 }}>
-                <input type="number" step="0.5" min="0" style=${{ flex: 1 }} value=${viskoz}
-                  placeholder=${zeSita && zeSita.dopVisk
-                    ? "doporučeno " + fmt(zeSita.dopVisk.od, 0) + "–" + fmt(zeSita.dopVisk.do, 0) + " s"
-                    : "změřeno výtokovým pohárkem"}
-                  onChange=${(e) => setViskoz(e.target.value)} />
-                  ${recipe && n(viskoz) > 0 && n(viskoz) !== n(recipe.viskozita) && html`
-                    <button className="btn sec sm" title="uložit jako referenční hodnotu receptury"
-                      onClick=${() => upravRecepturu({ viskozita: n(viskoz) })}>Uložit k receptuře</button>`}
-                </div>
-              </div>
-              ${zeSita && zeSita.dopVisk && html`
-                <div className=${zeSita.mimoRozsah ? "warnbox" : "okbox"} style=${{ marginTop: 22 }}>
-                  <b>Doporučeno k ${recipe.mesh}:</b> ${fmt(zeSita.dopVisk.od, 0)}–${fmt(zeSita.dopVisk.do, 0)} s${
-                    zeSita.dopVisk.poharek ? " · " + zeSita.dopVisk.poharek : ""}
-                  ${zeSita.mimoRozsah
-                    ? html`<br /><b>Změřených ${fmt(n(viskoz), 1)} s je mimo rozsah</b> — barva
-                        ${n(viskoz) < zeSita.dopVisk.od ? "je řidší, protéká víc" : "je hustší, protéká míň"}.`
-                    : (n(viskoz) > 0 ? html`<br />Změřených ${fmt(n(viskoz), 1)} s sedí.` : "")}
-                </div>`}
-            </div>
-            ${zeSita
-              ? html`
-                <div className=${Math.abs(zeSita.gm2 - n(gm2)) > 0.05 ? "okbox" : "specbar"} style=${{ marginTop: 4 }}>
-                  ${Math.abs(zeSita.gm2 - n(gm2)) > 0.05
-                    ? html`<${React.Fragment}>
-                        <b>${zeSita.sito.klise ? "Z klišé" : "Ze síta"} ${recipe.mesh} vychází ${fmt(zeSita.gm2, 1)} g/m²</b>
-                        ${" — teď je nastaveno " + fmt(n(gm2), 1) + " g/m²."}
-                        <div className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
-                          <button className="btn sm" onClick=${() => setGm2(fmt(zeSita.gm2, 1).replace(",", "."))}>
-                            Použít ${fmt(zeSita.gm2, 1)} g/m²
-                          </button>
-                        </div>
-                      <//>`
-                    : html`<${React.Fragment}>
-                        <span className="dot" style=${{ background: "var(--ok)" }}></span>
-                        <span>Spotřeba odpovídá ${zeSita.sito.klise ? "klišé" : "sítu"} ${recipe.mesh}.</span>
-                      <//>`}
-                  <div className="note" style=${{ marginTop: 6 }}>
-                    ${fmt(zeSita.sito.vth, 1)} cm³/m² teoreticky${zeSita.sito.klise ? " (hloubka leptu)" : ""}
-                    ${zeSita.sito.dopocteno ? " (dopočteno z geometrie tkaniny — orientační)" : ""}
-                    ${" × " + fmt(zeSita.prenos, 2) + " přenos × " + fmt(n(recipe.density, 1), 2) + " g/ml hustota"}
-                    ${zeSita.kKryvost !== 1 ? " × " + fmt(zeSita.kKryvost, 2) + " " + (recipe.opacity || "kryvost") : ""}
-                    ${zeSita.kMaterial !== 1 ? " × " + fmt(zeSita.kMaterial, 2) + " " + zeSita.materialKlic : ""}
-                    ${zeSita.kPodklad !== 1 ? " × " + fmt(zeSita.kPodklad, 2) + " podklad " + zeSita.tridaPodkladu : ""}
-                    ${zeSita.kViskozita !== 1 ? " × " + fmt(zeSita.kViskozita, 2) + " viskozita " + fmt(zeSita.viskozita, 1) + " s" : ""}
-                  </div>
-                </div>`
-              : html`<p className="note">Spotřeba se předvyplňuje dle technologie (${Object.entries(TECHS).map(([k, t]) => k + " " + t.gm2).join(" · ")} g/m²) — upravte podle síta / hloubky leptu klišé a viskozity.${
-                  (sita && sita.length) ? " Vyberte síto u receptury a spotřeba se spočítá z jeho parametrů." : ""}</p>`}
-            </div>
-
-            <div className="zakazka-cisla">
-              <div>
-                <label className="f">Počet kusů</label>
-                <input type="number" min="1" value=${qty} onChange=${(e) => setQty(e.target.value)} />
-              </div>
-              <div>
-                <label className="f">Spotřeba (g/m²)</label>
-                <input type="number" step="0.1" value=${gm2} onChange=${(e) => setGm2(e.target.value)} />
-              </div>
-              <div>
-                <label className="f">Ztráty (%)</label>
-                <input type="number" step="1" value=${loss} onChange=${(e) => setLoss(e.target.value)} />
-              </div>
-              <div>
-                <label className="f">Min. dávka (g)</label>
-                <input type="number" step="10" value=${minBatch} onChange=${(e) => setMinBatch(e.target.value)} />
-              </div>
-            </div>
-            </div>
-
-              ${zadaniHotove && html`
-                <div className="rowline" style=${{ marginTop: 12, marginBottom: 0 }}>
-                  <button className="btn sec sm" onClick=${() => setZadaniOtevrene(false)}>Sbalit zadání</button>
-                  <span className="note">na obrazovce zůstane jen dávka a barva</span>
-                </div>`}
-            <//>`}
-          </div>
+            </div>`}
 
         ${calcAkt && html`
           <div className="bigpanel" style=${{ display: "grid", gap: 20 }}>
@@ -4612,10 +4704,6 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 title="Celá obrazovka jen pro míchání (zavřít klávesou Esc)">⛶ Míchací režim</button>
               <button className="btn sec" onClick=${tiskLisku}>🖨 Míchací lístek</button>
             </div>
-            <p className="note" style=${{ marginTop: 8 }}>
-              V míchacím režimu je celý rozpis navážek, krycí plocha z náhledu motivu,
-              zbytky ze skladové evidence, štítek na kelímek a asistent navážení s váhou.
-            </p>
           </div>
           <${MichaciRezim} aktivni=${michRezim} onZavrit=${zavriMichani}
             recipe=${recipe} calcAkt=${calcAkt} rozpis=${rozpisZbytku} vyuziti=${vyuzitiZbytku}
@@ -4696,7 +4784,6 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                               ${baseList.slice(0, 400).map((r) => html`<option key=${r.id} value=${r.id}>${
                                 r.name}${r.zdroj ? " · " + nazevDb(r.zdroj) : (r.series ? " · " + r.series : "")}</option>`)}
                             </select>
-                            ${baseList.length > 400 && html`<div className="note" style=${{ marginTop: 4 }}>Zobrazeno prvních 400 — upřesněte filtr.</div>`}
                             <div className="note" style=${{ marginTop: 4 }}>
                               Vybírá se jen z databází nahraných pro technologii ${tech} — vlastní barva
                               tak vždycky vychází z dohledatelné formule.
@@ -4729,7 +4816,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
               </div>
 
               <div style=${{ marginTop: 16 }}>
-                <button className="btn" onClick=${() => { setPickerOpen(false); zadaniHotovo(); }}>Potvrdit výběr</button>
+                <button className="btn" onClick=${() => setPickerOpen(false)}>Potvrdit výběr</button>
               </div>
             </div>
           </div>
@@ -6252,6 +6339,15 @@ function nazevDb(zdroj) {
     .replace(/_/g, " ").trim();
 }
 
+/* Ze které databáze vlastní barva vyšla. Nové odvozeniny si zdroj nesou samy;
+   u starších se vyčte z názvu podkladu, kde stojí na konci v závorce. */
+function zdrojOdvozeni(r) {
+  if (!r) return "";
+  if (r.zakladZdroj) return nazevDb(r.zakladZdroj);
+  const m = /\(([^)]+)\)\s*$/.exec(String(r.zaklad || ""));
+  return m ? m[1].trim() : "";
+}
+
 /* Název odvozené receptury. Nejdřív barva a databáze, ze které vznikla, pak
    číslo produktu, barva produktu a poloha potisku. Z názvu je tak vidět
    ze které řady receptura vyšla i ke které kombinaci patří — a dvě custom
@@ -7328,7 +7424,13 @@ function zdrojeReceptur(recipes) {
    databáze, které k dané technologii patří — na textilní síto nemá co dělat
    databáze pro tampontisk. Kolik receptur technologie odfiltrovala, se řekne
    nahlas; jinak by čísla nesouhlasila s tím, co je ve složce. */
-function FiltrDatabaze({ recipes, hodnota, setHodnota, popis, tech, skryto }) {
+/* `nadpis={false}` skryje vlastní popisek — když prvek stojí pod popiskem
+   sloupce, dva nadpisy nad sebou jen matou. `vzdy` ukáže lištu i tehdy, když
+   je databáze jediná: v rozdělené kartě má mít každá půlka svůj filtr, i kdyby
+   měl jen říct, že se není z čeho vybírat. `vyber` udělá z přepínače rozbalovací
+   nabídku — u dlouhých názvů databází zabírají štítky celé dva řádky a rozpadají
+   se, kdežto nabídka je vždycky jeden řádek a řady se ukážou až po rozkliknutí. */
+function FiltrDatabaze({ recipes, hodnota, setHodnota, popis, tech, skryto, nadpis, vzdy, vyber }) {
   const zdroje = useMemo(() => zdrojeReceptur(recipes), [recipes]);
   // Zvolená databáze, která k téhle technologii nepatří, by tiše ukazovala
   // prázdný seznam — proto se výběr vrátí na "vše".
@@ -7337,10 +7439,16 @@ function FiltrDatabaze({ recipes, hodnota, setHodnota, popis, tech, skryto }) {
     const je = zdroje.some((z) => (z.zdroj || "@vlastni") === hodnota);
     if (!je) setHodnota("");
   }, [hodnota, zdroje]);
-  if (zdroje.filter((z) => z.zdroj).length < 2) return null;
+  if (!vzdy && zdroje.filter((z) => z.zdroj).length < 2) return null;
   return html`
     <div style=${{ marginBottom: 10 }}>
-      <label className="f">Databáze receptur${tech ? " pro " + tech : ""}</label>
+      ${nadpis !== false && html`<label className="f">Databáze receptur${tech ? " pro " + tech : ""}</label>`}
+      ${vyber ? html`
+        <select value=${hodnota} onChange=${(e) => setHodnota(e.target.value)}>
+          <option value="">Všechny řady (${fmt(recipes.length, 0)})</option>
+          ${zdroje.map((z) => html`<option key=${z.zdroj || "-"} value=${z.zdroj || "@vlastni"}>
+            ${nazevDb(z.zdroj) || z.nazev} (${fmt(z.pocet, 0)})</option>`)}
+        </select>` : html`
       <div className="chips">
         <button className=${"chip" + (hodnota ? "" : " on")} onClick=${() => setHodnota("")}>
           vše (${fmt(recipes.length, 0)})
@@ -7351,7 +7459,7 @@ function FiltrDatabaze({ recipes, hodnota, setHodnota, popis, tech, skryto }) {
             onClick=${() => setHodnota(z.zdroj || "@vlastni")}>
             ${z.nazev} (${fmt(z.pocet, 0)})
           </button>`)}
-      </div>
+      </div>`}
       ${skryto > 0 && html`<p className="note" style=${{ marginTop: 6 }}>
         Skryto ${fmt(skryto, 0)} receptur z databází, které k technologii
         ${tech ? " " + tech : ""} nepatří.
@@ -7598,3 +7706,4 @@ ReactDOM.createRoot(document.getElementById("root")).render(html`<${App} />`);
 </script>
 </body>
 </html>
+
