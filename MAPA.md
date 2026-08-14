@@ -1,13 +1,13 @@
 # Rejstřík index.html
 
 > Generuje `mapa.py` ze skutečného souboru — neupravovat ručně.
-> Čísla jsou řádky. Soubor má 7793 řádků.
+> Čísla jsou řádky. Soubor má 9264 řádků.
 
 | úsek | řádky |
 |---|---|
 | styly (`<style>`) | 7–471 |
 | knihovny a data | 472–489 |
-| aplikace (`<script>`) | 490–7793 |
+| aplikace (`<script>`) | 490–9264 |
 
 ## Proměnné vzhledu (94)
 
@@ -108,63 +108,76 @@
 `@media (max-width:1000px)` 414 · `@media print` 419 · `@media(max-width:1500px)` 446
 `@media(max-width:1150px)` 447 · `@media(max-width:800px)` 448 · `@media(max-width:480px)` 449
 
-## Komponenty (25)
+## Komponenty (28)
 
-`Img` 680 · `SpecPole` 1123 · `SpecVysledek` 1150 · `PdfTab` 1159 · `ZoomLista` 1583 · `PokrytiModal` 1600
-`PdfVKalkulaci` 1964 · `PripojeniTab` 2065 · `ZakazkyTab` 2267 · `ScanTab` 2472 · `App` 2644 · `PwGate` 3385
-`OdemykaniTab` 3416 · `Calc` 3487 · `MichaciRezim` 5063 · `Vazeni` 5174 · `StitekZbytku` 5491
-`ZbytkyTab` 5549 · `Products` 5881 · `ProductForm` 5993 · `Recipes` 6031 · `RecipeForm` 6108
-`PruhSlozeni` 7490 · `FiltrDatabaze` 7516 · `Importer` 7579
+`Img` 692 · `SpecPole` 1135 · `SpecVysledek` 1162 · `PdfTab` 1171 · `ZoomLista` 1595 · `PokrytiModal` 1612
+`PdfVKalkulaci` 1976 · `PripojeniTab` 2077 · `ZakazkyTab` 2279 · `ScanTab` 2484 · `App` 2656 · `PwGate` 3511
+`OdemykaniTab` 3542 · `Calc` 3613 · `FinancniBox` 5425 · `PotlifePruh` 5557 · `MichaciRezim` 5624
+`Vazeni` 5736 · `StitekZbytku` 6073 · `ZbytkyTab` 6131 · `Products` 6463 · `ProductForm` 6575 · `Recipes` 6613
+`CenyMaterialu` 6717 · `RecipeForm` 6854 · `PruhSlozeni` 8958 · `FiltrDatabaze` 8984 · `Importer` 9047
 
-## Funkce (196)
+## Funkce (241)
 
-`techMaSito` 509 · `produktUmi` 537 · `polohyTech` 539 · `mapTech` 552 · `toLocalImg` 560 · `uid` 575
-`n` 576 · `fmt` 577 · `hexNaRgb` 585 · `rgbNaCmyk` 591 · `cmykText` 598 · `rgbNaLab` 602 · `t` 608
-`deltaE` 612 · `pantoneZNazvu` 615 · `nejblizsiPantone` 625 · `vzornikProHodnotu` 640
-`popisBarvyPotisku` 653 · `loadLS` 671 · `saveLS` 675 · `fixTech` 690 · `bezDiakritiky` 743
-`rozborKoduPolohy` 749 · `polohaDleKodu` 755 · `posTokeny` 761 · `parseSpec` 765 · `put` 769
-`resolveSpec` 794 · `num` 798 · `vyber` 835 · `dleSlov` 845 · `presne` 878 · `najdi` 904 · `sgpsKandidati` 959
-`sgpsAdresa` 970 · `sgpsBase` 971 · `zakazkaNaSpec` 994 · `put` 996 · `useSgps` 1005 · `poleNaSpec` 1062
-`put` 1064 · `uprav` 1163 · `setPole` 1164 · `naSoubor` 1182 · `naPusteni` 1183 · `vzdalenostOdBarvy` 1267
-`najdiBloky` 1301 · `najdiBarvy` 1381 · `analyzujPokryti` 1414 · `px` 1435 · `secti` 1440 · `useKolecko` 1558
-`f` 1562 · `krok` 1585 · `klicBarvy` 1598 · `prepniBarvu` 1627 · `panStart` 1632 · `panPohyb` 1638
-`panKonec` 1644 · `naBod` 1729 · `tahStart` 1737 · `tahPohyb` 1744 · `tahKonec` 1751 · `ramecek` 1760
-`zeSouboru` 1769 · `setPole` 1989 · `vratVychozi` 2105 · `zapniPort` 2285 · `useSerialScanner` 2377
-`useCamScanner` 2424 · `stop` 2432 · `podat` 2478 · `useZalozky` 2598 · `setTab` 2605 · `zpet` 2618
-`naZpet` 2628 · `naKlavesu` 2629 · `onDocClick` 2661 · `guardDelete` 2677 · `pouzitSpec` 3057 · `onCode` 3138
-`otevriZakazku` 3141 · `obnovPole` 3158 · `onKey` 3166 · `zapis` 3334 · `submit` 3388 · `ulozPokryti` 3503
-`pickProduct` 3541 · `klicBarva` 3546 · `klicUplny` 3547 · `novaAdHoc` 3578 · `odvodit` 3627
-`ulozOdvozenou` 3639 · `zrusVazbu` 3646 · `smazCustom` 3670 · `provest` 3672 · `customVybrany` 3709
-`upravRecepturu` 3815 · `zapsatParametry` 3822 · `zbytekPodleKodu` 3870 · `odepisZbytku` 3909
-`oznacDavku` 3923 · `ulozZbytekZKalkulace` 3944 · `esc` 3966 · `tiskLisku` 3967 · `useScale` 4964
-`prepocetDavky` 5034 · `fmtG` 5052 · `naKlavesu` 5068 · `zacatek` 5180 · `zacniZnovu` 5192
-`prijmoutPrepocet` 5227 · `dalsiKrok` 5235 · `vytiskni` 5492 · `e` 5495 · `uprav` 5582 · `smaz` 5584
-`zapisViskozitu` 5606 · `ulozNovy` 5617 · `save` 5894 · `exportCsv` 5903 · `setPos` 5995 · `save` 6041
-`exportCsv` 6050 · `setC` 6116 · `parseCsv` 6191 · `rowsToItems` 6226 · `jsonToItems` 6247
-`csvToRecipes` 6278 · `idx` 6282 · `klicReceptury` 6334 · `sloucReceptury` 6336 · `vazbyReceptury` 6385
-`nazevDb` 6392 · `zdrojOdvozeni` 6399 · `nazevCustom` 6410 · `castKlice` 6427 · `customKProduktu` 6438
-`jeVlastni` 6468 · `vlastniDoCsv` 6470 · `dopocitejSito` 6523 · `csvNaSita` 6538 · `i` 6542
-`koefProHodnotu` 6585 · `csvNaKoeficienty` 6604 · `i` 6608 · `sitaPro` 6627 · `tridaPodkladu` 6638
-`odstinNazev` 6671 · `analyzaPodkladu` 6682 · `csvNaTechStav` 6726 · `i` 6730 · `csvNaDbTech` 6751 · `i` 6755
-`vychoziTechCsv` 6771 · `rozdelRadek` 6783 · `zmenStavVCsv` 6802 · `pripravenostTech` 6834 · `techOstra` 6878
-`csvNaPigmenty` 6896 · `i` 6900 · `rozborSlozeni` 6922 · `korekceOdstinu` 6955 · `doporucKorekci` 6998
-`spotrebaZeSita` 7036 · `novyKodZbytku` 7085 · `jeKodZbytku` 7094 · `maBazi` 7099 · `normKomp` 7100
-`stavZbytku` 7112 · `zbyvaText` 7138 · `viskHistDoTextu` 7155 · `viskHistZTextu` 7158
-`vyuzitelnyZbytek` 7170 · `zbytekCelyPlan` 7216 · `domichaniZeZbytku` 7256 · `sluc` 7258 · `code128Pruhy` 7330
-`code128Svg` 7347 · `code128Url` 7361 · `cislo` 7373 · `zbytkyDoCsv` 7375 · `csvNaZbytky` 7395 · `i` 7399
-`sloucZbytky` 7439 · `nabidkyZbytku` 7452 · `zdrojeReceptur` 7464 · `podleDatabaze` 7556
-`techReceptury` 7565 · `podleTechnologie` 7571 · `savePw` 7590 · `analyze` 7599 · `doImport` 7617
-`analyzeRecipes` 7644 · `doImportRecipes` 7656 · `readFile` 7666
+`techMaSito` 509 · `produktUmi` 537 · `polohyTech` 539 · `mapTech` 552 · `toLocalImg` 560 · `uid` 587
+`n` 588 · `fmt` 589 · `hexNaRgb` 597 · `rgbNaCmyk` 603 · `cmykText` 610 · `rgbNaLab` 614 · `t` 620
+`deltaE` 624 · `pantoneZNazvu` 627 · `nejblizsiPantone` 637 · `vzornikProHodnotu` 652
+`popisBarvyPotisku` 665 · `loadLS` 683 · `saveLS` 687 · `fixTech` 702 · `bezDiakritiky` 755
+`rozborKoduPolohy` 761 · `polohaDleKodu` 767 · `posTokeny` 773 · `parseSpec` 777 · `put` 781
+`resolveSpec` 806 · `num` 810 · `vyber` 847 · `dleSlov` 857 · `presne` 890 · `najdi` 916 · `sgpsKandidati` 971
+`sgpsAdresa` 982 · `sgpsBase` 983 · `zakazkaNaSpec` 1006 · `put` 1008 · `useSgps` 1017 · `poleNaSpec` 1074
+`put` 1076 · `uprav` 1175 · `setPole` 1176 · `naSoubor` 1194 · `naPusteni` 1195 · `vzdalenostOdBarvy` 1279
+`najdiBloky` 1313 · `najdiBarvy` 1393 · `analyzujPokryti` 1426 · `px` 1447 · `secti` 1452 · `useKolecko` 1570
+`f` 1574 · `krok` 1597 · `klicBarvy` 1610 · `prepniBarvu` 1639 · `panStart` 1644 · `panPohyb` 1650
+`panKonec` 1656 · `naBod` 1741 · `tahStart` 1749 · `tahPohyb` 1756 · `tahKonec` 1763 · `ramecek` 1772
+`zeSouboru` 1781 · `setPole` 2001 · `vratVychozi` 2117 · `zapniPort` 2297 · `useSerialScanner` 2389
+`useCamScanner` 2436 · `stop` 2444 · `podat` 2490 · `useZalozky` 2610 · `setTab` 2617 · `zpet` 2630
+`naZpet` 2640 · `naKlavesu` 2641 · `onDocClick` 2673 · `guardDelete` 2689 · `pouzitSpec` 3178 · `onCode` 3259
+`otevriZakazku` 3262 · `obnovPole` 3279 · `onKey` 3287 · `zapis` 3460 · `submit` 3514 · `ulozPokryti` 3629
+`pickProduct` 3667 · `klicBarva` 3672 · `klicUplny` 3673 · `novaAdHoc` 3704 · `odvodit` 3782
+`ulozOdvozenou` 3794 · `zrusVazbu` 3801 · `smazCustom` 3825 · `provest` 3827 · `customVybrany` 3864
+`upravRecepturu` 3970 · `zapsatParametry` 3977 · `zbytekPodleKodu` 4034 · `zalozDavku` 4098
+`spustitPotlife` 4118 · `uzavritDavku` 4133 · `odpojDavku` 4152 · `odepisZbytku` 4170 · `oznacDavku` 4184
+`ulozZbytekZKalkulace` 4223 · `esc` 4255 · `tiskLisku` 4256 · `useScale` 5326 · `prepocetDavky` 5396
+`fmtG` 5414 · `useTikot` 5540 · `naKlavesu` 5629 · `zacatek` 5743 · `zacniZnovu` 5755
+`prijmoutPrepocet` 5790 · `dalsiKrok` 5798 · `vytiskni` 6074 · `e` 6077 · `uprav` 6164 · `smaz` 6166
+`zapisViskozitu` 6188 · `ulozNovy` 6199 · `save` 6476 · `exportCsv` 6485 · `setPos` 6577 · `save` 6624
+`exportCsv` 6633 · `pridej` 6724 · `hodnota` 6747 · `uprav` 6755 · `ulozit` 6767 · `setC` 6862
+`zapniTuzidlo` 6872 · `parseCsv` 7000 · `rowsToItems` 7035 · `jsonToItems` 7056 · `csvToRecipes` 7087
+`idx` 7091 · `klicReceptury` 7162 · `sloucReceptury` 7164 · `drz` 7193 · `vazbyReceptury` 7223
+`nazevDb` 7230 · `zdrojOdvozeni` 7237 · `nazevCustom` 7248 · `castKlice` 7265 · `customKProduktu` 7276
+`jeVlastni` 7306 · `vlastniDoCsv` 7308 · `dopocitejSito` 7366 · `csvNaSita` 7381 · `i` 7385
+`koefProHodnotu` 7428 · `csvNaKoeficienty` 7447 · `i` 7451 · `sitaPro` 7470 · `tridaPodkladu` 7481
+`odstinNazev` 7514 · `analyzaPodkladu` 7525 · `csvNaTechStav` 7569 · `i` 7573 · `csvNaDbTech` 7594 · `i` 7598
+`vychoziTechCsv` 7614 · `rozdelRadek` 7626 · `zmenStavVCsv` 7645 · `zapisCenyDoCsv` 7683 · `najdi` 7687
+`dopln` 7694 · `pripravenostTech` 7746 · `techOstra` 7790 · `roleMaterialu` 7817 · `znakMeny` 7828
+`cenaZaGram` 7834 · `csvNaPigmenty` 7844 · `i` 7848 · `rozborSlozeni` 7877 · `korekceOdstinu` 7911
+`doporucKorekci` 7954 · `spotrebaZeSita` 7992 · `novyKodZbytku` 8041 · `jeKodZbytku` 8050 · `maBazi` 8055
+`normKomp` 8056 · `kodHustnuti` 8090 · `naPodil` 8098 · `potlifeReceptury` 8109 · `potlifeHodin` 8122
+`davkaTuzidla` 8128 · `stavPotlife` 8138 · `stavZbytku` 8153 · `dobaText` 8186 · `zbyvaText` 8197
+`menaDilny` 8217 · `materialPodleJmena` 8232 · `materialRole` 8237 · `cenaDavky` 8256 · `pridej` 8262
+`cenaNaKus` 8303 · `usporaZeZbytku` 8310 · `cenaText` 8317 · `viskHistDoTextu` 8326 · `viskHistZTextu` 8329
+`vyuzitelnyZbytek` 8341 · `zbytekCelyPlan` 8396 · `domichaniZeZbytku` 8437 · `sluc` 8439 · `code128Pruhy` 8514
+`code128Svg` 8531 · `code128Url` 8545 · `cislo` 8559 · `zbytkyDoCsv` 8561 · `csvNaZbytky` 8587 · `i` 8591
+`sloucZbytky` 8644 · `jePresnaShoda` 8678 · `stariZbytku` 8682 · `nabidkyZbytku` 8696
+`presneShodyZbytku` 8720 · `novyKodDavky` 8761 · `jeKodDavky` 8776 · `novaDavka` 8782 · `davkaSTuzidlem` 8814
+`davkaUzavrena` 8830 · `stavDavky` 8839 · `davkyKHlidani` 8861 · `davkyDoCsv` 8874 · `csvNaDavky` 8887
+`sloucDavky` 8921 · `zdrojeReceptur` 8932 · `podleDatabaze` 9024 · `techReceptury` 9033
+`podleTechnologie` 9039 · `savePw` 9059 · `analyze` 9068 · `doImport` 9086 · `analyzeRecipes` 9113
+`doImportRecipes` 9125 · `readFile` 9135
 
-## Konstanty (50)
+## Konstanty (66)
 
 `TECHS` 502 · `SITA` 514 · `KRYVOSTI` 520 · `POVRCHY` 521 · `TECH_PORADI` 534 · `TECH_MAP` 542
-`REMOTE_BASE` 559 · `SEED_RECIPES` 562 · `SPEC_ALIAS` 699 · `SPEC_LABEL` 720 · `POS_SLOVNIK` 731
-`MOST_VYCHOZI` 952 · `PDF_NA_SPEC` 1040 · `PDF_PORADI` 1047 · `PDF_POPIS` 1051 · `NEKONECNO` 1268 · `MAX` 1302
-`MAX` 1425 · `ZOOM_MAX` 1556 · `ZALOZKY_NAZVY` 2588 · `HDR` 6215 · `SOUBOR_VLASTNI` 6382
-`SLOZKA_PARAMETRY` 6509 · `SOUBOR_SITA` 6510 · `SOUBOR_KOEF` 6511 · `PRENOS_VYCHOZI` 6512 · `MEZ_PODTISK` 6654
-`MEZ_RIZIKO` 6655 · `MEZ_SYTOST_PODKLADU` 6656 · `PASMA_ODSTINU` 6667 · `SOUBOR_TECHNOLOGIE` 6724
-`SOUBOR_DATABAZE` 6749 · `SOUBOR_PIGMENTY` 6893 · `MAX_PODIL_PIGMENTU` 6894 · `KROKY_KOREKCE` 6949 · `T` 6957
-`SMERY_KOREKCE` 6986 · `POSUN_KOREKCE` 6996 · `SOUBOR_ZBYTKY` 7080 · `SLOZKA_EVIDENCE` 7081
-`ZNAKY_KODU` 7084 · `VZOR_BAZE` 7098 · `ZBYTEK_RUCNI` 7103 · `HODINA` 7109 · `POTLIFE_VYCHOZI` 7110
-`POHARKY` 7154 · `L` 7219 · `L` 7257 · `C128` 7316 · `ZBYTKY_HLAVICKA` 7366
+`REMOTE_BASE` 559 · `SEED_RECIPES` 572 · `SPEC_ALIAS` 711 · `SPEC_LABEL` 732 · `POS_SLOVNIK` 743
+`MOST_VYCHOZI` 964 · `PDF_NA_SPEC` 1052 · `PDF_PORADI` 1059 · `PDF_POPIS` 1063 · `NEKONECNO` 1280 · `MAX` 1314
+`MAX` 1437 · `ZOOM_MAX` 1568 · `ZALOZKY_NAZVY` 2600 · `HDR` 7024 · `SOUBOR_VLASTNI` 7220
+`SLOZKA_PARAMETRY` 7352 · `SOUBOR_SITA` 7353 · `SOUBOR_KOEF` 7354 · `PRENOS_VYCHOZI` 7355 · `MEZ_PODTISK` 7497
+`MEZ_RIZIKO` 7498 · `MEZ_SYTOST_PODKLADU` 7499 · `PASMA_ODSTINU` 7510 · `SOUBOR_TECHNOLOGIE` 7567
+`SOUBOR_DATABAZE` 7592 · `SOUBOR_PIGMENTY` 7805 · `MAX_PODIL_PIGMENTU` 7806 · `ROLE_MATERIALU` 7811
+`MENA_VYCHOZI` 7826 · `MENA_ZNAK` 7827 · `JEDNOTKY_CENY` 7833 · `KROKY_KOREKCE` 7905 · `T` 7913
+`SMERY_KOREKCE` 7942 · `POSUN_KOREKCE` 7952 · `SOUBOR_ZBYTKY` 8036 · `SLOZKA_EVIDENCE` 8037
+`ZNAKY_KODU` 8040 · `VZOR_BAZE` 8054 · `ZBYTEK_RUCNI` 8059 · `HODINA` 8065 · `MINUTA` 8066
+`POTLIFE_VYCHOZI` 8067 · `POTLIFE_MIN_VYCHOZI` 8074 · `POMER_TUZIDLA_VYCHOZI` 8075
+`MEZ_POTLIFE_VYCHOZI` 8076 · `HUSTNUTI` 8081 · `HUSTNUTI_VYCHOZI` 8089 · `POHARKY` 8325
+`MEZ_ZVETSENI_DAVKY` 8394 · `L` 8399 · `L` 8438 · `C128` 8500 · `ZBYTKY_HLAVICKA` 8550 · `ODCHYLKA_SHODY` 8677
+`SOUBOR_DAVKY` 8740 · `DAVKA_STAVY` 8744 · `DAVKA_UZAVRENI` 8752 · `DAVKY_HLAVICKA` 8869

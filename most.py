@@ -68,8 +68,8 @@ DATABAZE = os.path.join(SLOZKA, "databaze barev")
 # nelze — aplikace běžící v prohlížeči se tak nedostane jinam než sem.
 SLOZKY = {
     "databaze barev": DATABAZE,          # nakoupené i vlastní receptury
-    "evidence": os.path.join(SLOZKA, "evidence"),   # zbytky barev, sklad
-    "parametry": os.path.join(SLOZKA, "parametry"),  # síta, koeficienty spotřeby
+    "evidence": os.path.join(SLOZKA, "evidence"),   # zbytky barev, sklad, cena dávek
+    "parametry": os.path.join(SLOZKA, "parametry"),  # síta, koeficienty, ceník materiálů
 }
 
 
@@ -103,13 +103,30 @@ def _vzpomen_pdf(klic):
 # Ve složce "databaze barev" leží CSV s recepturami. Most je nabídne aplikaci,
 # aby si je natáhla sama a nikdo je nemusel po každé změně ručně importovat.
 def _druh_csv(hlavicka):
-    """Podle hlavičky pozná, jestli jde o receptury, nebo o produkty."""
+    """Podle hlavičky pozná, co v souboru je: receptury, produkty, nebo ceník."""
     h = hlavicka.lower()
     if "komponent" in h and ("procent" in h or "pct" in h):
         return "receptury"
+    # Tabulka materiálů dílny s nákupními cenami (pigmenty, báze, tužidla,
+    # ředidla). Pozná se podle dvojice druh + nazev; cena je nepovinná,
+    # protože soubor může existovat dřív, než dílna ceny doplní.
+    if "druh" in h and ("nazev" in h or "název" in h):
+        return "material"
     if "ref" in h and ("nazev" in h or "název" in h or "name" in h):
         return "produkty"
     return "?"
+
+
+# Ceny v tabulce materiálů: cena za kg nebo litr a měna, ve které se nakupuje.
+# Most je jen podává dál — počítá se s nimi v aplikaci, kde je i navážka.
+# Cena za litr se na gramy převádí hustotou receptury (g/ml = kg/l).
+SLOUPCE_CENIKU = ("cena", "mena", "jednotka")
+
+
+def _ma_ceny(hlavicka):
+    """Má tabulka materiálů vůbec sloupce s cenou?"""
+    h = [c.strip().strip('"').lower() for c in str(hlavicka or "").split(";")]
+    return all(any(s == c or c.startswith(s) for c in h) for s in SLOUPCE_CENIKU)
 
 
 def _cti_csv(cesta):
@@ -141,15 +158,22 @@ def _seznam_databazi(slozka=None):
         except OSError:
             continue
         radky = text.splitlines()
-        out.append({
+        hlavicka = radky[0] if radky else ""
+        druh = _druh_csv(hlavicka)
+        zaznam = {
             "jmeno": jmeno,
             "velikost": st.st_size,
             "zmeneno": int(st.st_mtime),
             # verze se mění s obsahem — aplikace podle ní pozná, že má načíst znovu
             "verze": "%d-%d" % (st.st_size, int(st.st_mtime)),
-            "druh": _druh_csv(radky[0] if radky else ""),
+            "druh": druh,
             "radku": max(0, len(radky) - 1),
-        })
+        }
+        # u ceníku se hlásí i to, jestli v něm sloupce s cenou vůbec jsou —
+        # starší soubor je nemá a aplikace si je při zápisu doplní sama
+        if druh == "material":
+            zaznam["ceny"] = _ma_ceny(hlavicka)
+        out.append(zaznam)
     return out
 
 

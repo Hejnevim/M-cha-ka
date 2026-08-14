@@ -152,6 +152,10 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 11:35 | Míchací režim má vlastní barvy; světlá sada se vymezila proti tmavému režimu |
 | 11:40 | Asistent navážení stojí z plochy jako karta, ne jako holý sloupec |
 | 11:51 | Rozvržení hlavní stránky se dá přestavět v nástroji, karta po kartě |
+| 13:48 | Dvousložkové barvy: pot life je vlastnost receptury a v míchacím režimu běží odpočet |
+| 14:38 | Cena namíchané dávky a cena barvy na kus rovnou v kalkulaci; úspora ze zbytku v korunách |
+| 14:49 | Namíchaná dávka je samostatný záznam s vlastním životem — odpočet pot life přežije přepnutí barvy i zavření aplikace |
+| 15:11 | Kelímek s totožným složením se pozná a jde v nabídce první; dopočty, které by dávku nafoukly přes dvojnásobek, se přestaly nabízet |
 
 ---
 
@@ -2469,3 +2473,298 @@ ukázce (944 × 877 px) a stránka se nikam vodorovně neroztahuje.
 pixelu tam, kde stály — dva sloupce po 732 px, parametry tisku 732 px na
 středu. V ukázce ověřeno i to, že šířka stránky 1 400 px sloupce zúží na
 640 px a stránku vystředí, a že při 900 px se karty poskládají pod sebe.
+
+---
+
+## 55. Pot life patří receptuře, ne kelímku
+
+**Problém.** Dvousložkové barvy tuhnou od chvíle, kdy se do báze přidá tužidlo.
+Aplikace o tom dosud věděla až u zbytku: v evidenci kelímků byl přepínač
+„s tužidlem" a lhůta v hodinách, kterou musel někdo vyplnit ručně, pokaždé
+znovu a pokaždé stejně. Receptura — tedy místo, kde je ta vlastnost doopravdy
+zapsaná — o tužidle nevěděla nic. Kolik tužidla přidat, se v aplikaci nedalo
+zjistit vůbec; stálo to v technickém listu na polici.
+
+**Co se změnilo.** Receptura nese pět údajů:
+
+| pole | co znamená |
+|---|---|
+| `tuzidlo` | ano/ne — barva se bez tužidla nevytvrdí |
+| `pomerTuzidla` | podíl tužidla k **váze báze** (0,1 = 10 %) |
+| `potlifeMin` | doba zpracovatelnosti smíchané barvy v minutách |
+| `mezPotlife` | podíl lhůty, po kterém se začne varovat (0,8 = po 80 %) |
+| `hustnuti` | jak rychle houstne: `SLOW` / `MEDIUM` / `FAST` |
+
+Chybějící pole se dopočítají výchozími hodnotami (10 %, 480 min, 80 %,
+`MEDIUM`), takže 1 097 receptur Ferro Xpression ani 1 603 receptur Printcolor
+nemuselo být nijak upraveno.
+
+**Poměr je z váhy báze, ne ze směsi.** 10 % znamená 100 g báze + 10 g tužidla
+= 110 g směsi. Kdyby se počítalo ze směsi, namíchalo by se tužidla o desetinu
+míň a barva by nevytvrdila. Dávka spočítaná pro zakázku je báze; tužidlo je
+navíc a v míchacím lístku má vlastní rámeček s časem smíchání k dopsání.
+
+**Minuty u receptury, hodiny u kelímku.** Dvousložkové barvy se liší po
+desítkách minut — 4 h a 4,5 h je rozdíl, který by se v hodinách ztratil.
+U kelímku ve skladu jde naopak o hrubý odhad, kdy ho vyhodit, a hodiny tam
+jsou zapsané od začátku. Převádí se to na jednom místě, při zakládání kelímku.
+
+**Odpočet se spouští ručně, ne sám.** Pot life neběží od namíchání báze, ale
+od chvíle, kdy se přidá tužidlo — a to je poslední krok navážení. Asistent
+proto po navážení všech složek řekne, kolik tužidla přidat a na jakou hodnotu
+dojet váhu, a teprve tlačítkem „Tužidlo přidáno" se rozjede odpočet. Míchací
+režim pak ukazuje pruh se zbývajícím časem: zelený, po 80 % lhůty oranžový,
+po vypršení červený. Překresluje se sám po půl minutě, jinak by tiskař u váhy
+koukal na hodnotu, která už neplatí.
+
+**Hranice varování byla dosud napevno.** Zbytek varoval poslední pětinu lhůty,
+nejméně ale hodinu dopředu. U dvouhodinové směsi to znamenalo, že se varovalo
+od poloviny. Teď u pot life rozhoduje `mezPotlife` bez podlahy a stropu —
+u dvouhodinové směsi tedy 24 minut předem. Datum spotřeby si původní pravidlo
+(pětina, nejvýš den dopředu) ponechalo: roční expirace nemá řvát dva měsíce.
+
+**Změřeno na hranicích:** lhůta 240 min, mez 80 % → 190 min „ok", 193 min
+„kriticky", 240 min „prošlé". Kelímek s pot life 2 h → 90 min „ok",
+100 min „brzy", 130 min „prošlé". Kelímek ze staršího souboru bez sloupce
+`mez_potlife` se chová jako dřív.
+
+**Co projde přes soubory.** Nové sloupce v CSV receptur i evidence:
+`tuzidlo`, `pomer_tuzidla`, `potlife_min`, `mez_potlife`, `hustnuti`. Čtou se
+i anglické názvy ze zadání (`requires_hardener`, `hardener_ratio`,
+`pot_life_minutes`, `critical_pot_life_ratio`, `viscosity_loss_rate`), protože
+podklady od dodavatelů chodí obojí. Poměr smí být zapsaný jako `0,1` i jako
+`10` — v Excelu to lidé píšou obojím způsobem a spletená desetina by znamenala
+desetkrát víc tužidla. Ověřeno protočením receptury tam a zpět přes CSV
+skutečnými funkcemi ze souboru.
+
+**Co si soubor nechá.** Databáze od dodavatele sloupce s tužidlem nemá. Kdyby
+se při obnově přepsaly prázdnem, tiše by se vyplo hlídání pot life u receptur,
+kde ho technolog nastavil — proto si receptura při obnově ze souboru nechává,
+co v souboru není, stejně jako síto nebo kryvost.
+
+---
+
+## 56. Co ta dávka stojí — cena rovnou u míchačky
+
+**Problém.** Dokud se cena barvy počítala až ve fakturaci, u míchačky se nedalo
+poznat, co která volba stojí. Že dvě stě gramů navíc přijde dráž než celý tisk,
+nebo že kelímek ve skladu má cenu oběda, se zjistilo se čtrnáctidenním
+zpožděním — tedy nikdy, protože to už nikdo nespojil s konkrétní zakázkou.
+
+**Ceník je tatáž tabulka materiálů, ze které se berou odstíny pigmentů.**
+Nezaváděl se druhý seznam složek dílny vedle prvního. `parametry/pigmenty.csv`
+dostal tři sloupce — `cena`, `mena`, `jednotka` — a dva nové druhy: `tuzidlo`
+a `redidlo`. Ty se do receptury nezapisují (nejsou to složky odstínu), ale platí
+se za ně stejně.
+
+| pole | co znamená |
+|---|---|
+| `cena` | nákupní cena za kilogram nebo za litr |
+| `mena` | CZK / EUR / USD / PLN / GBP |
+| `jednotka` | `kg` nebo `l` |
+
+**Litr se na gramy převede hustotou** — g/ml a kg/l je totéž číslo, takže
+`cena / hustota / 1000` je cena gramu. Bez hustoty se cena za litr nepřepočítá
+a složka se počítá jako bez ceny; hádat hustotu by znamenalo hádat cenu.
+
+**Co se počítá:**
+
+```
+cena dávky   = Σ (navážka složky [g] × cena gramu)  + tužidlo + ředidlo
+cena na kus  = cena dávky / počet kusů v zakázce
+úspora       = váha použitého zbytku × průměrná cena gramu receptury
+```
+
+Ztráty na sítu se nepřičítají zvlášť — v dávce už jsou (`dávka = netto ×
+(1 + ztráty %)`). Barva propadlá sítem je prostě součástí toho, co se navažuje,
+a připočíst ji podruhé by cenu nafouklo o desítky procent.
+
+**Tužidlo se počítá z váhy báze**, stejně jako se navažuje: 10 % z 628 g je
+75,4 g tužidla navíc, ne uvnitř. **Ředidlo zadává obsluha** — kolik se ho nalilo,
+se pozná až podle naměřené viskozity, takže si to aplikace vymýšlet nemůže
+a má na to políčko v ceníkovém boxu.
+
+**Neúplný ceník se nezakrývá.** Chybí-li u složky cena, spočítá se zbytek
+a napíše se, co chybí a že skutečná cena je vyšší. Průměrná cena gramu se
+přitom počítá jen z té části, u které cena známá byla — kdyby se dělilo všemi
+gramy, vyšla by u poloprázdného ceníku cena nižší, než jaká je, a úspora ze
+zbytku by se podhodnotila. Změřeno: 1 000 g se známou cenou ze 1 200 g dávky →
+součet 489 Kč, pokrytí 83 %, cena gramu 0,489 Kč (ne 0,408 Kč).
+
+**Měny se nesčítají.** Kurz aplikace nezná a vymyslet si ho by znamenalo tvrdit
+číslo, které neplatí. Materiál v jiné měně než ta, která v ceníku převažuje,
+zůstane mimo součet a je vypsaný jménem.
+
+**Ceny vidí ten, kdo je vidět má.** U váhy jsou peníze na obtíž, mistrovi
+naopak rozhodují. Box má přepínač a jeho stav si drží prohlížeč; schované ceny
+se netisknou ani na míchací lístek.
+
+**Zapisovat do ceníku se dá z aplikace** — záložka Receptury a Import / data,
+karta „Ceny materiálů". Vypíše všechny složky ze všech nahraných receptur
+seřazené podle toho, jak často se používají (u nahraných databází 82 položek,
+z toho 68 z receptur), a označí ty, které v tabulce ještě nejsou. Ukládá se
+jedním vědomým krokem, ne při každém stisku klávesy — sahá se do souboru,
+ze kterého míchá celá dílna.
+
+**Soubor se nepřepisuje celý, mění se buňky.** `pigmenty.csv` je pro dílnu
+čitelný dokument: jsou v něm vysvětlivky, poznámky a odstíny naladěné podle
+vzorníku. Zápis proto mění jen buňky s cenou, chybějící sloupce doplní do
+hlavičky i do všech řádků a nové materiály připíše na konec. Ověřeno na
+skutečném souboru dílny: 29 řádků → 31, všechny vysvětlivky, odstíny
+i `maxpodil` na místě, středník uvnitř uvozovek nerozsypaný.
+
+**Cena jde s dávkou do evidence.** Aplikace do SGPS nezapisuje — čte z něj
+zakázky. Předávacím místem je proto `evidence/zbytky.csv`, kde už každá dávka
+má svůj kód, zakázku a produkt; přibyly sloupce `ks`, `cena`, `cena_ks`,
+`mena`, `uspora` a `cena_uplna`. Odtud si cenu zakázky přečte účtárna i ERP
+a most ji podává stejnou cestou jako všechno ostatní.
+
+**V mostu** přibylo rozpoznání ceníku (`_druh_csv` → `material`) a hlášení,
+jestli v něm sloupce s cenou vůbec jsou — starší soubor je nemá a aplikace si
+je při prvním zápisu doplní sama.
+
+---
+
+## 57. Namíchaná dávka jako samostatný záznam
+
+**Problém.** Odpočet doby zpracovatelnosti si držela obrazovka kalkulace —
+jedno číslo v paměti komponenty, čas přidání tužidla. Stačilo přepnout barvu
+a bylo pryč; stačilo zavřít aplikaci a bylo pryč taky. Kelímek na stole mezitím
+tuhnul dál a nehlídal ho nikdo. A míchá-li se na dvě zakázky najednou, což je
+běžné, dala se stejně sledovat jen jedna směs — druhá neexistovala.
+
+Horší než ztracený odpočet je ale odpočet spuštěný podruhé. Kdo se po obnovení
+stránky vrátil k rozmíchané barvě, uviděl zase nabídku „spustit odpočet" —
+a lhůta se tím posunula o celou dobu, co byla aplikace zavřená. Osmihodinový
+pot life se takhle natáhne na dvanáct a barva ztuhne v sítu.
+
+**Dávka je teď záznam s vlastním životem**, vedený nad záložkami v
+`evidence/davky.csv`. Nese si to, co se o směsi ví ve chvíli, kdy vzniká:
+
+| pole | co znamená |
+|---|---|
+| `kod` | `DAVKA-20260814-001` — datum a pořadí toho dne |
+| `receptura`, `nazev` | z čeho se míchá |
+| `zakazka`, `produkt`, `technologie` | pro co |
+| `kelimek` | kód kelímku, jakmile se vytiskne štítek |
+| `zalozeno` | kdy se začalo míchat |
+| `tuzidlo_kdy` | **přesný čas potvrzení tužidla na váze** |
+| `vyprsi` | `tuzidlo_kdy` + pot life receptury |
+| `baze_g`, `tuzidlo_g` | skutečná navážka, ne plán |
+| `uzavrena`, `uzavrena_kdy` | spotřebovaná / vyhozená a kdy |
+
+**Kód dávky není kód kelímku.** Jsou to dvě různé věci: dávka je směs, která
+tuhne, kelímek je nádoba, která pak stojí ve skladu. Kelímek si drží svůj
+sedmiznakový kód s čárovým kódem na štítku, dávka ukazuje na něj polem
+`kelimek`. Kód dávky je datum a pořadí, protože se u míchačky čte nahlas
+a opisuje rukou — sedm náhodných znaků je na to zbytečně moc.
+
+**Stav se neukládá, počítá se z hodin.** Uložené „zpracovatelná" by po ránu
+tvrdilo, že včerejší směs pořád běží. Zapsané je jen to, co čas nedopočítá —
+rozhodnutí člověka:
+
+```
+míchá se      založená, tužidlo ještě není v bázi
+zpracovatelná lhůta běží
+končí lhůta   uplynula kritická část (výchozí 80 %)
+po lhůtě      směs tuhne v kelímku
+spotřebovaná  doběhla do tisku          ← rozhodnutí obsluhy, ukládá se
+vyhozená      ztuhla nebo se nepovedla  ← rozhodnutí obsluhy, ukládá se
+```
+
+Rozdíl mezi posledními dvěma je to jediné, z čeho se dá poznat, kolik barvy
+dílna vyhodí. Prošlá lhůta to neříká — aplikace od stolu nepozná, jestli se
+směs ještě stihla vytisknout.
+
+**Váha přebíjí kalkulaci.** Tužidlo se potvrzuje tlačítkem u váhy a s ním se
+zapíše, kolik báze je v nádobě doopravdy. Po korekci odstínu nebo po domíchání
+ze zbytku je to jiné číslo, než se kterým počítala zakázka — a tužidlo se
+počítá z něj, protože z čeho jiného. Ověřeno: 236,5 g báze → 23,65 g tužidla,
+ne 20 g z plánované dvoustovky.
+
+**Kalkulace se k rozmíchané dávce vrací sama.** Po obnovení stránky i po
+návratu k té barvě se odpočet napojí zpátky a druhý se už nenabízí. Nepoznává
+se to podle id receptury, i když by to bylo přesnější: receptury z databází
+dostávají id při každém načtení znovu, takže po obnovení stránky na sebe
+neukazují — změřeno, `o1q8sxt` → `p3es7l1` → `r36k2yg` u téže barvy. Váže se
+proto na název barvy, který vydrží a v dílně je to stejně to, čemu kelímek
+na stole říkají. Kdo zmáčkne „Nová směs", odpojí se vědomě a ta dávka se už
+nenabídne.
+
+**Prošlá dávka se ozve sama**, ať je otevřená kterákoli záložka — u dvousložkové
+barvy to není upozornění, ale vyhozený kelímek. Hlásí se jen nárůst; uzavřením
+číslo klesne a druhé hlášení by bylo k ničemu.
+
+**Ověřeno:** 50 kontrol modelu spuštěných proti kódu vytaženému ze samotného
+`index.html` (kódy dávek přes den, přechody stavů po minutách, cesta přes CSV
+a zpět, sloučení ze dvou počítačů) a proklikání skutečnou myší v prohlížeči —
+tužidlo → `DAVKA-20260814-003`, `vyprsi − tuzidlo_kdy` = 480 min, 724,5 g báze
+→ 72,45 g tužidla, obnovení stránky → odpočet zpátky a druhý se nenabízí,
+„Spotřebováno" → zapsáno do souboru.
+
+---
+
+## 58. Kelímek, na který stačí sáhnout
+
+**Problém.** Sklad zbytků uměl od začátku počítat těžší úlohu než tu snadnou.
+Vzal starý kelímek, porovnal jeho složení s cílovým odstínem a dopočítal, kolik
+čisté barvy do něj dolít, aby z něj vznikla ta žádaná — kaskádový dopočet.
+Nerozlišoval ale mezi tím a případem, kdy je v kelímku **přesně ta barva**,
+která se má míchat. Oboje spadlo do jednoho seznamu, seřazeného podle toho, kde
+se ušetří nejvíc gramů — a protože kaskáda vychází z většího kelímku častěji,
+přímá shoda se propadla pod ni.
+
+Pro tiskaře u míchačky je to přitom rozdíl mezi dvěma úplně jinými úkony:
+
+| co uvidí v nabídce | co doopravdy udělá |
+|---|---|
+| přímá shoda | odšroubuje kelímek a nalije |
+| dopočet | naváží tři složky, promíchá, zkontroluje odstín |
+
+Změřeno na modelové zakázce: tři kelímky s totožným složením (80 g, 50 g, 40 g)
+proti jedné kaskádě z 200 g kelímku. Ve starém pořadí vyšla první ta kaskáda —
+tiskař dostal jako nejlepší nabídku tu, u které se váží.
+
+**Přímá shoda se pozná ze složení, ne z názvu a ne z čísla receptury.** Číslo si
+kelímek nenese a nést by ho ani nemohl: receptury dostávají id při každém
+načtení souboru znovu, takže by po obnovení stránky ukazovalo na jinou barvu —
+naráželo se na to už u napojení rozmíchané dávky. Název na štítku bývá zkrácený
+nebo dopsaný rukou. Rozhoduje tedy jediné, co o odstínu doopravdy rozhoduje:
+obě složení se přepočtou na podíly ze sta a musí sedět složku po složce.
+Kelímek zapsaný jako 600/300/100 je proto shodou s recepturou 60/30/10.
+
+Počítat se to nemusí zvlášť. Aplikace už měřila, jak těsně kelímek sedí — a ta
+míra je nejvýš 1. Vyjde-li rovná 1, musí být složení totožná: kdyby byl kelímek
+v jedné složce chudší, je nutně v jiné bohatší, protože obojí je sto procent,
+a míra by spadla pod 1. Přímá shoda je tedy `shoda == 1`, s tolerancí 0,1 % na
+zaokrouhlení v CSV — desetina procenta se na váhu stejně nenaváží.
+
+**Pořadí nabídek** teď odpovídá tomu, co dá nejmíň práce: nejdřív přímé shody,
+mezi nimi od nejstaršího kelímku (barva ve skladu se nemá dožít data spotřeby
+a mladší počká), pak dopočty od největší úspory. Napříč oběma skupinami
+předbíhá to, čemu končí lhůta — spotřebovat, nebo vyhodit. Na obrazovku se
+vejdou tři řádky a jeden se drží pro druhý způsob použití, aby tři drobné
+shody neschovaly nejvýhodnější dopočet.
+
+**Dopočty, které dávku nafouknou, se přestaly nabízet.** Vejít celý kelímek do
+dávky jde jen tak, že se dávka zvětší — z kelímku se ubrat nedá, přilévá se.
+U kelímku sytého v málo zastoupené složce to utíká: 200 g čisté báze proti
+receptuře, kde je báze z desetiny, si vynutí dvoukilovou dávku místo tří set
+gramů. Uspoří se tím dvě stě gramů staré barvy a vyrobí se přes kilo nové,
+kterou nikdo neobjednal — z jednoho zbytku vznikne šestkrát větší. Nabídka
+„celý kelímek" se proto nad dvojnásobek objednané dávky sama nenabízí. Ručně
+zadaný kelímek se počítá dál a jen se to řekne nahlas: tam se ptá obsluha,
+která ví, že si míchá do zásoby.
+
+**Ověřeno:** 20 kontrol modelu spuštěných proti kódu vytaženému ze samotného
+`index.html` — rozpoznání shody napříč jednotkami procent (60/30/10 vs.
+600/300/100), pořadí od nejstaršího kelímku, vyřazení prošlých i těch na
+stroji, kelímek nad dávku (500 g na 300 g dávku → vezme se 300 g, zůstane 200 g,
+nemíchá se nic), mez zvětšení (200 g báze → dávka 2 000 g, označeno jako příliš
+velké; 200 g kelímku 65/30/5 → dávka zůstane na 300 g). Zkouška ověřena
+protichůdně: na kopii s vráceným starým pořadím hlásí, že první vyšla kaskáda,
+a vrací kód 1.
+
+**Zbývá proklikat myší.** Evidence zbytků je na tomhle počítači prázdná, takže
+nabídkový box se nedal vyvolat na skutečných datech — vykreslení aplikace
+projde, ale samotný box čeká na první kelímek ve skladu.

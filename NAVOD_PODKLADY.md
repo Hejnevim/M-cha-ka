@@ -103,3 +103,10 @@ Vysvětlivky pokrývaly jen to, u čeho stály. Návod bude potřebovat i:
 - domíchání ze zbytku — proč lze barvu jen přidávat, ne ubírat
 - práci s váhou: připojení, tolerance, co dělat při přelití
 - co aplikace umí bez mostu a co s ním
+- **dvousložkové barvy a namíchané dávky:** že odpočet spouští až tlačítko
+  *Tužidlo přidáno*, ne navážení báze; že dávka má vlastní kód
+  (`DAVKA-20260814-001`) a je to něco jiného než kód kelímku na štítku; že
+  *Nová směs* jen odpojí kalkulaci a dávka běží dál, kdežto *Spotřebováno*
+  a *Vyhozeno* ji uzavřou — a proč se tyhle dvě rozlišují (jen z toho se pozná,
+  kolik barvy dílna vyhodí); a že se po obnovení stránky odpočet napojí zpátky
+  sám, takže druhý spouštět netřeba a nemá

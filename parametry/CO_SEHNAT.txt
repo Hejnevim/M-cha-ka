@@ -122,7 +122,39 @@ CO V PDF NENÍ a musí se doplnit jinak:
                             ani s korekcí, míchat podle receptury ale jde.
 
 
-5) K ČEMU SE TO POUŽIJE
+5) NÁKUPNÍ CENY MATERIÁLŮ  →  pigmenty.csv (sloupce cena, mena, jednotka)
+--------------------------------------------------------------------------------
+Bez cen aplikace nespočítá, co dávka stojí, ani cenu barvy na kus. Nedopočítává
+je odhadem — složka bez ceny se do součtu nedostane a aplikace to napíše.
+
+CO SEHNAT:
+    - nákupní cenu každé složky, která se objevuje ve složení receptur
+      (u nahraných databází je jich dohromady 68 — Binder, 9000 Weiss,
+      3000 Rot a spol.)
+    - cenu tužidla a ředidla, pokud se používají
+    - měnu, ve které se nakupuje
+
+JAK TO ZAPSAT:
+    cena       450.00      za kilogram nebo za litr, desetinná tečka i čárka
+    mena       CZK         CZK | EUR | USD | PLN | GBP
+    jednotka   kg          kg nebo l (litr se na gramy přepočítá hustotou)
+
+    druh       pigment | baze | tuzidlo | redidlo
+
+Nejrychlejší cesta: v aplikaci záložka RECEPTURY, karta „Ceny materiálů".
+Vypíše všechny složky ze všech nahraných receptur, seřazené podle toho,
+jak často se používají, a uloží je sem do souboru. Vysvětlivky a odstíny
+pigmentů v souboru přitom zůstanou — přepisují se jen buňky s cenou.
+
+POZOR NA JMÉNA: cena se páruje podle názvu složky. Musí se shodovat přesně
+s tím, co je ve složení receptury; "Binder" a "Binder 745" jsou pro aplikaci
+dvě různé věci a nespáruje je.
+
+MĚNY SE NESČÍTAJÍ: kurz aplikace nezná. Materiál v jiné měně než ta, která
+v ceníku převažuje, se do součtu nezapočítá a řekne se to.
+
+
+6) K ČEMU SE TO POUŽIJE
 --------------------------------------------------------------------------------
     V [cm³/m²] = otevřená plocha × tloušťka tkaniny  (u klišé hloubka leptu)
     g/m² = V × přenos × hustota barvy

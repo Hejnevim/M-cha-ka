@@ -5,18 +5,18 @@
 > `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — nepřepisují
 > se ručně a nemohou se rozejít se skutečností. Text mimo ně píše člověk.
 
-> Poslední zapsaná změna ve vývojovém deníku: **14. srpna 11:51 — Rozvržení hlavní stránky se dá přestavět v nástroji, karta po kartě**
+> Poslední zapsaná změna ve vývojovém deníku: **14. srpna 15:11 — Kelímek s totožným složením se pozná a jde v nabídce první; dopočty, které by dávku nafoukly přes dvojnásobek, se přestaly nabízet**
 
 | soubor | řádků | velikost |
 |---|---:|---:|
-| `index.html` | 7 792 | 431 kB |
-| `most.py` | 694 | 29 kB |
+| `index.html` | 9 263 | 507 kB |
+| `most.py` | 718 | 30 kB |
 | `pdf_spec.py` | 1 071 | 42 kB |
 | `odemkni.py` | 213 | 8 kB |
 | `prevod_printcolor.py` | 188 | 7 kB |
 | `kontrola_aplikace.py` | 169 | 7 kB |
 | `rozbor_aktualizuj.py` | 354 | 13 kB |
-| **celkem** | **10 481** | |
+| **celkem** | **11 976** | |
 <!-- /AUTO:stav -->
 
 ---
@@ -66,7 +66,8 @@ Systém má tři vrstvy a žádnou z nich nepotřebuje internet.
 | **PDF parser** | `pdf_spec.py` | Vlastní čtečka PDF napsaná od nuly (dekomprese, mapování znaků včetně Identity-H, poloha textu na stránce) + PNG kodér. Žádná externí závislost. |
 | **Databáze barev** | `databaze barev/*.csv` | Nakoupené i vlastní receptury. Načítají se samy, přiřazení k technologiím je v `parametry/databaze.csv`. |
 | **Parametry dílny** | `parametry/*.csv` | Síta, koeficienty spotřeby, pigmenty a báze, zámek technologií. |
-| **Evidence zbytků** | `evidence/` | Kelímky se zbytky barev, jejich stav a lhůty. |
+| **Evidence zbytků** | `evidence/zbytky.csv` | Kelímky se zbytky barev, jejich stav a lhůty. |
+| **Namíchané dávky** | `evidence/davky.csv` | Dvousložkové směsi od přidání tužidla: čas, kdy začaly tuhnout, kdy vyprší, a jak skončily (spotřebovaná / vyhozená). |
 
 **Záložky aplikace**
 
@@ -263,10 +264,12 @@ kolik ho přidat. Síla korekce je ve třech stupních (mírně 0,5 % · znateln
 Klíče v `localStorage`:
 
 <!-- AUTO:uloziste -->
+- `irm-ceny-videt`
 - `irm-databaze-filtr`
 - `irm-databaze-tech`
 - `irm-databaze-verze`
 - `irm-databaze-znacky`
+- `irm-davky`
 - `irm-delete-pw`
 - `irm-katalog-verze`
 - `irm-links`
