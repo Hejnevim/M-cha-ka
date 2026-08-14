@@ -139,6 +139,19 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 16:55 | Sbalování zadání odstraněno i s celým sbaleným souhrnem |
 | 17:20 | Síto, kryvost a povrch zvětšeny na čtení od stroje |
 | 17:45 | Parametry tisku přestavěny na dlaždice jako náhled produktu |
+| 18:10 | Karta parametrů zúžena na šířku karty produktu a posazena na střed |
+| 18:30 | Hodnota a šipka v dlaždici jako jedna dvojice na středu |
+
+### 14. srpna — pruh složení na obou místech
+| čas | co |
+|---|---|
+| 09:20 | Čtverec s odstínem nahrazen pruhem složení, stejným jako ve výsledku |
+| 10:15 | Míchací režim laditelný v barvy.html, i s vlastní ukázkou |
+| 10:40 | Ukázky v nástroji patří doprostřed; přes celou šířku se podsouvaly pod panely |
+| 11:30 | Barvy se dají nastavit zvlášť pro každou stránku |
+| 11:35 | Míchací režim má vlastní barvy; světlá sada se vymezila proti tmavému režimu |
+| 11:40 | Asistent navážení stojí z plochy jako karta, ne jako holý sloupec |
+| 11:51 | Rozvržení hlavní stránky se dá přestavět v nástroji, karta po kartě |
 
 ---
 
@@ -2137,3 +2150,322 @@ lámala na dva řádky. Se šipkou dole stačí běžné odsazení.
 **Ověřeno napříč šířkami:** 1920 a 1400 px → 340 × 283, 1100 px → 314 × 262,
 900 px → 252 × 210. Poměr 1,2 drží všude, dlaždice se jen zmenšují. Hodnota
 „Transparentní" se vejde na jeden řádek. Nic se nepřekrývá.
+
+
+## 46. Parametry tisku na středu, dlaždice na chlup stejné
+
+Karta parametrů se táhla přes celou šířku stránky, zatímco dlaždice v ní byly
+omezené na 340 px — zbytek byla prázdná plocha. Nesymetrické a zbytečně velké.
+
+**Karta je teď široká přesně jako jeden sloupec mřížky** — tedy jako karta
+produktu nad ní — a stojí na středu stránky. Zapsané je to jako
+`width: calc((100% - 40px) / 2)`, kde 40 px je mezera mezi sloupci.
+
+**Tím se vyřešila i shoda velikostí, a to samo od sebe.** Karta má stejnou
+šířku i stejné odsazení jako karta produktu a uvnitř tytéž tři sloupce se
+stejnou mezerou. Dlaždice parametrů proto vycházejí na chlup stejně velké
+jako náhledy produktu — ne proto, že by se to někam napsalo číslem, ale
+protože je dělí tatáž šířka. Platí to při každé šířce okna.
+
+| šířka okna | náhled produktu | dlaždice parametru |
+|---|---|---|
+| 1920 px | 272 × 272 | 272 × 272 |
+| 1600 px | 219 × 219 | 219 × 219 |
+| 1400 px | 185 × 185 | 185 × 185 |
+| 1100 px | 138 × 138 | 138 × 138 |
+| 980 px | 119 × 119 | 119 × 119 |
+
+Střed karty se ve všech těch šířkách kryje se středem stránky.
+
+**Pevná velikost písma to nejdřív kazila.** Při 31 px držel čtverec jen na
+široké obrazovce; jakmile se dlaždice zmenšila, hodnota se zalomila na tři
+řádky, dlaždice se protáhla na výšku (138 × 191 px) a přestala odpovídat
+náhledu. Písmo, odsazení i šipka se proto měří od šířky dlaždice
+(`cqw`), ne v pixelech — zmenší se celá kresba naráz a tvar drží.
+
+Popisky nad dlaždicemi jsou na střed a mají šířku dlaždice.
+
+
+## 47. Hodnota a šipka jako jedna dvojice
+
+V dlaždici stála hodnota nad středem a šipka dole u okraje. Vypadalo to
+nesymetricky, a bylo — nešlo o špatná čísla, ale o to, čím se šipka kreslila.
+
+**Šipka byla obrázek na pozadí.** Pozadí se umisťuje vůči okrajům prvku, ne
+vůči textu, takže obojí žilo vlastním životem: text se centroval v odsazení,
+šipka se lepila ke spodnímu okraji. Aby se nepřekrývaly, muselo být spodní
+odsazení skoro trojnásobné proti hornímu — a tím se text vytlačil nad střed.
+
+**Teď se používá šipka, kterou k výběru přidává sám prohlížeč**
+(`::picker-icon`). Je to skutečný prvek, ne obrázek, takže se dá postavit pod
+text a obojí vycentrovat naráz: dlaždice je sloupcová, odsazení symetrické ze
+všech stran, mezi hodnotou a šipkou je mezera.
+
+**Dvě věci, které bylo potřeba prohlížeči vzít:**
+
+1. Šipku sám odsouvá k pravému okraji (`margin-inline-start:auto`) — počítá
+   s tím, že stojí vedle textu, ne pod ním. Ve sloupci ji to vytlačilo do
+   pravého dolního rohu. Okraj se ruší.
+2. Text vedle ní se roztahuje na celou šířku. Ve sloupci by tím dvojici
+   rozhodil, takže se roztahování vypíná.
+
+**Navíc zadarmo:** při otevřené nabídce se šipka otočí vzhůru. Je to jeden
+řádek, protože otáčení jde na skutečný prvek, na obrázek v pozadí by nešlo.
+
+Ověřeno snímkem s otevřenou nabídkou i zavřenými dlaždicemi: hodnota i šipka
+stojí na svislé ose dlaždice a dvojice je na středu. Nic se nepřekrývá.
+
+
+## 48. Pruh složení místo čtverce
+
+U vybrané receptury stál čtverec s odstínem. Ukazoval jednu barvu, přestože
+receptura je směs — a v „Kolik namíchat" pod dávkou je přitom pruh, který
+poměry složek vidět nechá.
+
+**Teď je pruh na obou místech.** Není opsaný dvakrát: vznikla z něj komponenta
+`PruhSlozeni`, kterou používá výběr receptury i výsledek. Kdyby to byly dva
+kusy kódu, dřív nebo později by se rozešly a tentýž údaj by se na dvou místech
+tvářil jako dvě různé věci.
+
+**Co pruh ukazuje:** první úsek nese odstín receptury, ostatní se od sebe jen
+odliší, aby šly poměry rozeznat — skutečné barvy pigmentů aplikace nezná.
+Šířky úseků odpovídají podílům ve složení. Po najetí myší je v popisku výpis
+složek s procenty.
+
+**Receptura bez zapsaného složení** (rozpracovaná barva) dostane jeden pruh
+přes celou šířku ve svém odstínu. I tak je vidět, jaká barva je vybraná —
+a to byl původní důvod, proč tam ten čtverec byl.
+
+**Srovnána i výška.** Pravidlo na vyšší pruh platilo jen pro kartu výsledku,
+takže v kartě receptur vycházel o deset pixelů nižší. Teď platí pro obě
+zvětšené karty.
+
+Ověřeno měřením: oba pruhy mají 30 px na výšku, pět úseků, stejnou první barvu
+i shodné poměry (první úsek 33,9 px z 848 proti 33,4 px z 836 — tentýž podíl).
+Čtverec v kartě už není žádný.
+
+
+## 49. Míchací režim se dá ladit taky
+
+Nástroj `barvy.html` uměl ladit domovskou stránku, ale míchací režim ne —
+a přitom je to obrazovka, u které se stojí u váhy a která má úplně jiné
+nároky na velikost než zbytek aplikace. Její rozměry byly v CSS zapsané
+napevno.
+
+**Jedenáct nových posuvníků** v oddílu *Míchací režim*:
+
+| proměnná | co řídí |
+|---|---|
+| `--mich-nazev` | název receptury v hlavičce |
+| `--mich-davka` | dávka v hlavičce |
+| `--mich-vzorek` | čtverec s odstínem |
+| `--mich-hlavicka` | hlavičky sloupců tabulky |
+| `--mich-tabulka` | text v tabulce navážky |
+| `--mich-gramy` | gramy v tabulce |
+| `--mich-radek` | výška řádků tabulky |
+| `--mich-vysledek` | číslo na váze |
+| `--mich-wbar` | tloušťka pruhu navážení |
+| `--mich-tlacitko` | velikost tlačítek |
+| `--mich-mezera` | odsazení a mezery |
+
+**Vlastní sada schválně.** Míchací režim se nečte od klávesnice, ale od váhy
+— často ve stoje a v rukavicích. Kdyby visel na obecné škále aplikace, sáhnutí
+na velikost běžného písma by mu rozhodilo proporce. Zaoblení vzorku naopak
+bere společné `--radius-dlazdice`, aby držel tvar se zbytkem.
+
+**Ukázka celé obrazovky.** V nástroji přibyla simulace míchacího režimu:
+hlavička s odstínem a dávkou, tabulka navážky, asistent s ukazatelem, tlačítka.
+Jsou to skutečné třídy aplikace, ne napodobenina — takže co se v ukázce hne,
+hne se i v aplikaci.
+
+**Dvě věci, které to vyžadovalo:**
+
+1. Míchací režim v aplikaci překrývá celou obrazovku (`position:fixed`).
+   V ukázce ho to muselo pustit, jinak by zakryl celý nástroj. Zasadil se
+   proto do rámečku a chová se jako běžný blok.
+2. Ukázka nesmí být v prostředním sloupci nástroje — v půlce šířky se dva
+   sloupce míchacího režimu zmáčknou a proporce klamou. Karta proto sahá
+   přes celou šířku nástroje: 1 584 px z 1 684, tedy skoro jako na obrazovce.
+
+**Ověřeno:** posunutí posuvníků se v ukázce projeví okamžitě (gramy 26 → 44 px,
+vzorek 52 → 96, číslo na váze 52 → 90, pruh 20 → 40, řádek 11 → 24 px),
+výstupní blok nové hodnoty obsahuje a v tmavém bloku se neopakují. Skutečný
+míchací režim v aplikaci vypadá po převodu stejně jako před ním.
+
+
+## 50. Ukázky patří doprostřed
+
+Karta míchacího režimu sahala v nástroji přes celou šířku, aby se v ní
+nemačkaly dva sloupce. Byla to chyba: postranní panely stojí na místě
+(`sticky`), takže se při rolování širší obsah podsunul pod ně a překryl je.
+
+**Ukázka se vrátila do prostředního sloupce** a místo toho se rozšířil sám
+sloupec — panely z 330 na 300 px. Prostřední sloupec má teď 1 208 px z 1 920,
+což na dva sloupce míchacího režimu (587 + 511 px) stačí.
+
+**Zapsané jako pravidlo přímo v nástroji**, aby to platilo i pro stránky, které
+teprve přibudou: každá ukázaná stránka patří do prostředního sloupce, nikdy
+přes celou šířku. Prvek roztažený přes všechny sloupce se dřív nebo později
+s panely potká.
+
+Ověřeno v odrolovaném stavu: nejširší ukázka končí na 1 556 px, pravý panel
+začíná na 1 576 px. Sloupce se nepotkávají nikde.
+
+
+## 51. Barvy pro každou stránku zvlášť
+
+Aplikace měla jednu paletu na všechno. Míchací režim ale stojí u váhy v jiném
+světle než kalkulace u stolu — a je rozumné chtít mu dát vlastní barvy, aniž
+by se hnul zbytek.
+
+**Jde to bez jediného řádku navíc v komponentách**, protože proměnné se dědí:
+co se nastaví na obal stránky, platí uvnitř ní a přebije základ.
+
+```css
+.michbg{--bg:#1b3a5c; --ink:#FFFFFF;}
+:root[data-theme="dark"] .michbg{--bg:#101820;}
+```
+
+**Ukládají se jen odchylky, ne celá paleta.** To je na tom to podstatné: co
+stránka nemá vlastní, bere ze základu — takže když se pak změní základ, změní
+se to i na ní. Kdyby si stránka nesla celou paletu, jednou nastavená by se od
+aplikace nenávratně odstřihla a každá další změna by se musela dělat dvakrát.
+
+**V nástroji** přibyl nad barvami přepínač stránek. Vybraná stránka se obarvuje
+zvlášť, vlastní barvy jsou označené tečkou u názvu proměnné a dvojklik na název
+je vrátí na základ. Pod přepínačem je vidět, kolik jich stránka má.
+
+**Výstup má vlastní úsek** mezi `ZACATEK BAREV STRANEK` a `KONEC BAREV STRANEK`.
+Vkládá se spolu s bloky `:root` jako dosud a nástroj si ho při dalším spuštění
+zase načte — nastavení se tedy neztratí ani po přegenerování.
+
+**Ověřeno celým kolečkem:** nastavení `--bg` a `--ink` míchacímu režimu obarví
+jen jeho ukázku (27, 58, 92), zbytek aplikace zůstane netknutý (219, 219, 219);
+tmavý režim si drží vlastní odchylky odděleně a bez nich dědí základ; dvojklik
+zruší jednu barvu, tlačítko všechny; a úsek vložený do aplikace se načte zpátky
+i s tmavou variantou.
+
+**Chycená vlastní chyba:** hlášení o počtu vlastních barev se přepisovalo jen
+při přepnutí stránky, ne při změně barvy — tvrdilo tedy, že stránka nemá nic
+vlastního, i když už měla. Vytaženo do funkce volané z obou míst.
+
+**Přidání další stránky** je teď řádek v seznamu `STRANKY` a její náhled do
+ukázky. Zapsáno do postupu, aby to platilo i za půl roku.
+
+
+## 52. Míchací režim dostal vlastní barvy — a přepínač režimů málem přestal platit
+
+Naladěné barvy míchacího režimu se vložily do aplikace: světlá varianta má bílou
+plochu, tlumenější papír a černý inkoust, tmavá si mění jen papír a zvýraznění.
+
+**Ale nešlo to vložit tak, jak to nástroj napsal.** Světlá pravidla neměla nic,
+co by je drželo ve světlém režimu:
+
+```css
+.michbg{--ink:#000000; --bg:#ffffff;}          /* platí VŽDYCKY */
+:root[data-theme="dark"] .michbg{--paper:#2e2e2e;}
+```
+
+Proměnná nastavená na obalu stránky přebije `:root` bez ohledu na režim. V noci
+by tedy míchací režim dostal černý inkoust ze světlé sady na tmavý papír z té
+tmavé — nečitelné. A nebylo by to vidět v nástroji: ten si ukázku obarvuje
+podle právě zvoleného režimu, takže vypadala správně. Rozešel by se až výstup.
+
+Světlá pravidla se proto vymezují proti tmavému režimu:
+
+```css
+:root:not([data-theme="dark"]) .michbg{ … }
+```
+
+Ne `[data-theme="light"]` — atribut nastavuje React až po prvním vykreslení,
+takže by stránka na první okamžik zůstala bez svých barev. Čtení zpět umí
+odloupnout obojí předponu, takže se úsek pořád načte do nástroje.
+
+**Změřeno v obou režimech.** Světlý: míchací režim `--bg` #ffffff, `--paper`
+#cccccc, `--ink` #000000, zatímco základ drží #949494 / #dbdbdb / #141414.
+Tmavý: mění se jen `--paper` (#2e2e2e proti základu #333333), inkoust zůstává
+#EDEDED ze základu — tedy přesně to, co se mělo stát.
+
+**Falešný poplach po cestě:** tělo stránky měřilo ve světlém režimu tmavou
+barvu. Nebyla to chyba — `body` má `transition:background .2s` a měřilo se
+uprostřed přechodu. Po vypnutí přechodu sedí (148, 148, 148).
+
+
+## 53. Asistent navážení je karta, ne holý sloupec
+
+Míchací režim všem kartám uvnitř bral stín i odsazení (`box-shadow:none;
+padding:0`). Asistent navážení se tím rozpil do pozadí, přestože je to jediná
+věc na obrazovce, která se obsluhuje — připojuje se váha, mačká se „další
+komponenta", hlídá se tolerance. Vlevo se čte, vpravo se ovládá; to se má
+poznat na první pohled.
+
+```css
+.michbg .card{padding:var(--mich-mezera);margin-bottom:var(--mich-mezera)}
+```
+
+Stín, papír a zaoblení si karta vezme z obecného `.card` — jsou tedy stejné
+jako u „Vybraného produktu" nebo „Zakázky" (`--neu`, zaoblení 23 px). Odsazení
+se ale bere z **míchací** sady, ne z obecné: uvnitř režimu je všechno o kus
+větší, protože se na to kouká z metru. Posuvník *Odsazení a mezery* v oddílu
+míchacího režimu tím pádem hýbe i vnitřkem karty — je to v nástroji napsané
+u popisku.
+
+**Karta je tam jen jedna.** Levý sloupec (rady, tabulka, zbytky, štítek) žádnou
+kartu neobsahuje, obsah leží přímo na ploše. Ukázka v nástroji ho ale do karty
+zabalenou měla — dokud byly karty ploché, nebylo to poznat; teď by se podle ní
+ladilo něco, co v aplikaci není. Obal se z ukázky odstranil.
+
+**Změřeno v otevřeném režimu:** karta má stín `--neu`, papír (204, 204, 204),
+odsazení 22 px, zaoblení 23 px — tedy stejné hodnoty jako karty v kalkulaci,
+jen papír je jiný, protože si míchací režim nese vlastní paletu. Sloupce se
+nepřekrývají při 1 600 px ani při 900 px, kde se skládají pod sebe.
+
+
+## 54. Rozvržení hlavní stránky je taky jen několik proměnných
+
+Nástroj uměl obarvit a zvětšit cokoli, ale kde která karta stojí, bylo natvrdo
+v pravidlech — `grid-column:1;grid-row:2`. Přestavět hlavní stránku tedy
+znamenalo sáhnout do CSS. Teď je i poloha a velikost karty hodnota:
+
+```css
+.grid.calc>.karta-produkt{grid-column:var(--produkt-sloupec);grid-row:var(--produkt-radek);
+  width:var(--produkt-sirka);justify-self:var(--produkt-zarovnani);min-height:var(--produkt-vyska)}
+```
+
+Pět proměnných na kartu, k tomu šířka stránky, poměr obou sloupců a mezera
+mezi nimi — dohromady 29 hodnot. Drží se v téže mapě jako tvary a písmo, takže
+se čtou z aplikace a vracejí do ní **stejnou cestou**; žádný druhý mechanismus,
+žádný nový úsek v souboru.
+
+**Nástroj má nově dvě stránky** — *Barvy a vzhled* a *Rozvržení hlavní stránky*.
+Vlevo stránka a sloupce, uprostřed ukázka, vpravo jednotlivé karty. Výstup je
+na obou stránkách týž, aby se pro vložení nemuselo přebíhat.
+
+**Ukázka musí být `<iframe>`, ne obyčejný blok.** Zlom rozvržení se řídí šířkou
+okna, ne šířkou prvku — v obyčejném bloku by se dvousloupcové rozvržení nikdy
+neukázalo tak, jak vypadá doopravdy. Rám má vlastní okno, takže se dá projít
+šest šířek od 2 560 px po 900 px včetně zlomu na jeden sloupec. Do rámu se
+zapisuje přesně to, co je na výstupu, takže ukázka nemůže ukazovat něco jiného,
+než co se vloží do aplikace.
+
+**Dvě karty na jednom místě mřížky se překryjí.** Zakázat to nejde — jsou to
+dva samostatné výběry — ale nástroj to hlásí červeně nad ukázkou, dokud je na
+to vidět. Ověřeno: zakázka posunutá do prvního řádku ohlásila „Překrývá se:
+Kolik namíchat a Zakázka".
+
+**Dvě vlastní chyby po cestě, obě viděl až snímek:**
+
+Přepnutí stránky nic neschovalo — `display:grid` v pravidle přebíjí `hidden`
+z prohlížeče, takže obě stránky ležely přes sebe. Bez `[hidden]{display:none
+!important}` to nešlo.
+
+A ukázka se roztáhla přes celý prostřední sloupec a podsunula se pod pravý
+panel — přesně to, proti čemu je v nástroji napsané pravidlo. Rám má šířku
+celého okna aplikace; musí být proto vytažený z toku (`position:absolute`),
+aby o jeho místě rozhodovalo jen zmenšení. Změřeno: rám teď leží přesně na
+ukázce (944 × 877 px) a stránka se nikam vodorovně neroztahuje.
+
+**Aplikace se nehnula:** po přepsání pravidel na proměnné stojí karty na
+pixelu tam, kde stály — dva sloupce po 732 px, parametry tisku 732 px na
+středu. V ukázce ověřeno i to, že šířka stránky 1 400 px sloupce zúží na
+640 px a stránku vystředí, a že při 900 px se karty poskládají pod sebe.

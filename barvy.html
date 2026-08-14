@@ -1,9 +1,11 @@
 <!doctype html>
 <html lang="cs"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>IRM — ladění barev a stínů</title>
-<style>
-
+<title>IRM — ladění vzhledu a rozvržení</title>
+<!-- Styly aplikace mají vlastní značku: ukázka hlavní stránky si je z ní bere
+     a vkládá do svého rámu. Kdyby byly slepené se styly nástroje, dostal by
+     se do rámu i nástroj sám. -->
+<style id="app-css">
 :root{
   /* Vzhled zůstává měkký — karty vystupují z plochy stínem, ne rámečkem.
      Mění se jen barvy: plocha je neutrálně šedá místo teplé béžové a inkoust
@@ -33,9 +35,33 @@
   --logo-velikost:116px; --prostrkani:0.07em; --tloustka-nadpisu:900; --radek:1.4;
   /* Rozestupy: odsazení uvnitř karty, mezera mezi kartami, mezera mezi poli
      v řádku a odsazení uvnitř polí a tlačítek (to určuje jejich výšku). */
+  /* Míchací režim má vlastní sadu rozměrů. Nečte se od klávesnice, ale od
+     váhy — často ve stoje a v rukavicích — takže se ladí zvlášť od zbytku
+     aplikace a nesmí se hýbat, když se sáhne na obecnou škálu. */
+  --mich-nazev:26px; --mich-davka:34px; --mich-vzorek:52px;
+  --mich-hlavicka:12px; --mich-tabulka:20px; --mich-gramy:26px;
+  --mich-radek:11px; --mich-vysledek:52px; --mich-wbar:20px;
+  --mich-tlacitko:15px; --mich-mezera:22px;
   --mezera-karta-y:20px; --mezera-karta-x:22px; --mezera-karet:16px;
   --mezera-poli:12px; --pole-y:9px; --pole-x:12px;
   --tlacitko-y:10px; --tlacitko-x:18px; --okraj-stranky:20px;
+  /* Rozvržení hlavní stránky: kde která karta stojí, jak je široká a jak
+     vysoká. Každá karta má sloupec, řádek, šířku, zarovnání a nejmenší výšku
+     — dohromady tedy polohu i velikost. Ladí se v barvy.html na stránce
+     Rozvržení; platí od šířky okna 960 px, pod ní se karty skládají pod sebe.
+     Dvě karty ve stejném sloupci a řádku by se překryly — nástroj to hlídá. */
+  --sirka-stranky:none; --sloupec-1:1fr; --sloupec-2:1fr; --mezera-sloupcu:40px;
+  --produkt-sloupec:1; --produkt-radek:1; --produkt-sirka:auto;
+  --produkt-zarovnani:stretch; --produkt-vyska:auto;
+  --vysledek-sloupec:2; --vysledek-radek:1; --vysledek-sirka:auto;
+  --vysledek-zarovnani:stretch; --vysledek-vyska:auto;
+  --recept-sloupec:1; --recept-radek:2; --recept-sirka:auto;
+  --recept-zarovnani:stretch; --recept-vyska:auto;
+  --zakazka-sloupec:2; --zakazka-radek:2; --zakazka-sirka:auto;
+  --zakazka-zarovnani:stretch; --zakazka-vyska:auto;
+  --tisk-sloupec:1 / -1; --tisk-radek:3;
+  --tisk-sirka:calc((100% - var(--mezera-sloupcu)) / 2);
+  --tisk-zarovnani:center; --tisk-vyska:auto;
   --neu:-5px -5px 20px rgba(255,255,255,0.11), 5px 5px 20px rgba(0,0,0,0.43);
   --neu-sm:-4px -4px 14px rgba(255,255,255,0.105), 4px 4px 14px rgba(0,0,0,0.473);
   --neu-in:inset 2px 2px 4px rgba(0,0,0,0.387), inset -2px -2px 4px rgba(255,255,255,0.105);
@@ -61,6 +87,14 @@
   --modal-shadow:0 13px 48px rgba(0,0,0,1);
   --logo-shadow:-2px -2px 2px rgba(255,255,255,0.14), 2px 2px 2px rgba(0,0,0,0.1);
 }
+/* ZACATEK BAREV STRANEK */
+/* Vlastní barvy jednotlivých stránek. Proměnné se dědí, takže co se nastaví
+   na obal stránky, platí uvnitř ní a přebije základ; co se tu neuvede, bere
+   stránka z aplikace. Prázdný úsek znamená, že všechny stránky vypadají
+   stejně. Zapisuje sem barvy.html — ručně to needitujte, přepsalo by se to. */
+:root:not([data-theme="dark"]) .michbg{--paper:#cccccc; --zvyraz:#919191; --ink:#000000; --ink-2:#8b8b8b; --line:#9e9e9e; --line-2:#949494; --key:#000000; --btn-ink:#ffffff; --cyan:#000000; --bg:#ffffff;}
+:root[data-theme="dark"] .michbg{--paper:#2e2e2e; --zvyraz:#545454;}
+/* KONEC BAREV STRANEK */
 :root[data-theme="dark"] .warnbox,:root[data-theme="dark"] #chyba{background:#2C2317;border-color:#463824;color:#E0AE6B}
 :root[data-theme="dark"] .okbox{background:#182A20;border-color:#284434;color:#79CFA0}
 :root[data-theme="dark"] .imgwarn{background:#2C2317 !important;color:#E0AE6B !important}
@@ -144,24 +178,34 @@ svg[viewBox="0 0 24 24"] path,svg[viewBox="0 0 24 24"] circle,svg[viewBox="0 0 2
 .navdrop button:hover{background:var(--zvyraz)}
 .navdrop button.on{color:var(--cyan);font-weight:800}
 :root[data-theme="dark"] .navdrop button:hover{background:rgba(127,163,217,.16)}
-.wrap{max-width:none;margin:0;padding:var(--okraj-stranky) clamp(16px,3vw,40px) 56px}
+.wrap{max-width:var(--sirka-stranky);margin:0 auto;padding:var(--okraj-stranky) clamp(16px,3vw,40px) 56px}
 .grid{display:grid;gap:var(--mezera-karet)}
 /* Kalkulace stojí na dvou stejných polovinách: vlevo zadání, vpravo výsledek.
    Obě okna mají tutéž šířku a potkávají se přesně uprostřed stránky. */
-@media(min-width:960px){.grid.calc{grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:40px;align-items:stretch}}
+@media(min-width:960px){.grid.calc{grid-template-columns:minmax(0,var(--sloupec-1)) minmax(0,var(--sloupec-2));
+  column-gap:var(--mezera-sloupcu);align-items:stretch}}
 /* Obě okna končí ve stejné výšce: levý sloupec je sloupec pružný, poslední
    karta v něm dorovná zbytek místa, a karta výsledku vyplní svůj sloupec celý.
    Tlačítka se v obou drží u dolního okraje. */
-/* Vybraný produkt a Kolik namíchat stojí vedle sebe v prvním řádku, takže
-   mají tutéž šířku i výšku a potkávají se uprostřed stránky. Zadání zakázky
-   je pod produktem, ve druhém řádku. */
+/* Kde která karta stojí, se řídí proměnnými — poloha, šířka i nejmenší výška.
+   Výchozí stav: Vybraný produkt a Kolik namíchat vedle sebe v prvním řádku,
+   pod nimi receptura a zakázka, a parametry tisku ve třetím řádku na středu.
+   Karta parametrů je přitom široká přesně jako jeden sloupec mřížky, což není
+   jen kvůli symetrii: díky stejné šířce, stejnému odsazení a stejným třem
+   sloupcům vyjdou dlaždice parametrů na chlup stejně velké jako náhledy
+   produktu — a to při každé šířce okna, ne jen při jedné. Přestavuje se to
+   v barvy.html na stránce Rozvržení, ne tady. */
 @media(min-width:960px){
-  .grid.calc>.karta-produkt{grid-column:1;grid-row:1}
-  .grid.calc>.bigpanel{grid-column:2;grid-row:1}
-  .grid.calc>.bigform{grid-column:1;grid-row:2}
-  /* Rozbalené zadání je formulář — potřebuje šířku, tak zabere obě poloviny.
-     Sbalený souhrn se vejde pod kartu produktu a zůstává úzký. */
-  .grid.calc>.bigform.siroke{grid-column:1 / -1}
+  .grid.calc>.karta-produkt{grid-column:var(--produkt-sloupec);grid-row:var(--produkt-radek);
+    width:var(--produkt-sirka);justify-self:var(--produkt-zarovnani);min-height:var(--produkt-vyska)}
+  .grid.calc>.bigpanel{grid-column:var(--vysledek-sloupec);grid-row:var(--vysledek-radek);
+    width:var(--vysledek-sirka);justify-self:var(--vysledek-zarovnani);min-height:var(--vysledek-vyska)}
+  .grid.calc>.karta-recept{grid-column:var(--recept-sloupec);grid-row:var(--recept-radek);
+    width:var(--recept-sirka);justify-self:var(--recept-zarovnani);min-height:var(--recept-vyska)}
+  .grid.calc>.karta-cisla{grid-column:var(--zakazka-sloupec);grid-row:var(--zakazka-radek);
+    width:var(--zakazka-sirka);justify-self:var(--zakazka-zarovnani);min-height:var(--zakazka-vyska)}
+  .grid.calc>.karta-tisk{grid-column:var(--tisk-sloupec);grid-row:var(--tisk-radek);
+    width:var(--tisk-sirka);justify-self:var(--tisk-zarovnani);min-height:var(--tisk-vyska)}
   .grid.calc>.card{margin-bottom:0}
   .karta-produkt{display:flex;flex-direction:column}
 }
@@ -175,7 +219,9 @@ svg[viewBox="0 0 24 24"] path,svg[viewBox="0 0 24 24"] circle,svg[viewBox="0 0 2
 .bigpanel .card .hint{font-size:calc(var(--pismo-poznamka) * 1.24)}
 .bigpanel .result-big{font-size:clamp(calc(var(--pismo-vysledek) * 1.35),4.6vw,calc(var(--pismo-vysledek) * 2))}
 .bigpanel .result-sub{font-size:calc(var(--pismo) * 1.21)}
-.bigpanel .mixbar{height:30px}
+/* Pruh složení má stejnou výšku všude, kde je zvětšené zadání — jinak by se
+   tentýž údaj na dvou místech tvářil jako dvě různé věci. */
+.bigpanel .mixbar,.bigform .mixbar{height:30px}
 .bigpanel table.t{font-size:calc(var(--pismo-tabulka) * 1.26)}
 .bigpanel table.t th{padding:10px}
 .bigpanel table.t td{padding:11px 10px}
@@ -189,10 +235,43 @@ svg[viewBox="0 0 24 24"] path,svg[viewBox="0 0 24 24"] circle,svg[viewBox="0 0 2
 .bigform label.f{font-size:calc(var(--pismo-popisek) * 1.27);margin-bottom:8px}
 .bigform select,.bigform input{font-size:calc(var(--pismo) * 1.21);padding:calc(var(--pole-y) * 1.44) calc(var(--pole-x) * 1.25);border-radius:var(--radius-pole);box-shadow:var(--neu-sm)}
 .bigform select{padding-right:40px}
+/* Síto, kryvost a povrch se čtou od stroje, ne od klávesnice — tiskař stojí
+   krok od obrazovky a potřebuje je poznat pohledem, ne přečíst zblízka.
+   Proto jsou tahle tři pole výrazně větší než všechna ostatní a vyplní kartu.
+   Roste s nimi i popisek, šipka a nabídka, jinak by na velkém poli zůstaly
+   drobné a pole by vypadalo jako omylem zvětšené. */
+.karta-tisk label.f{font-size:calc(var(--pismo-popisek) * 1.5);margin-bottom:10px;text-align:center}
+/* Dlaždice přesně jako náhled produktu: čtverec vyplňující svůj sloupec,
+   hodnota uprostřed. Roztažené pole přes celou třetinu řádku se z odstupu
+   čte hůř než blok, který má tvar — oko najde dřív dlaždici než dlouhý pruh. */
+/* Písmo, odsazení i šipka se měří od šířky dlaždice, ne pevným počtem pixelů.
+   Pevná velikost drží čtverec jen na široké obrazovce — jakmile se dlaždice
+   zmenší, text se zalomí na tři řádky, dlaždice se protáhne na výšku a přestane
+   odpovídat náhledu produktu. Takhle se zmenší celá kresba naráz a tvar drží. */
+.karta-tisk .frow.c3>div{container-type:inline-size}
+.karta-tisk select{font-size:min(calc(var(--pismo) * 2), 11cqw);font-weight:700;text-align:center;
+  width:100%;aspect-ratio:1;
+  display:flex;align-items:center;justify-content:center;
+  /* Hodnota a šipka stojí pod sebou jako jedna dvojice na středu dlaždice.
+     Proto se tady nekreslí šipka pozadím jako u ostatních polí — pozadí je
+     přilepené k okraji a text by zůstal nad středem. Místo toho se použije
+     šipka, kterou prohlížeč k výběru sám přidává: je to skutečný prvek, takže
+     ji lze do dvojice postavit a vycentrovat obojí naráz. */
+  flex-direction:column;gap:4cqw;padding:5cqw;background-image:none}
+/* Prohlížeč šipku sám odsouvá k pravému okraji (`margin-inline-start:auto`),
+   protože počítá s tím, že stojí vedle textu. Ve sloupci ji to vytlačí na kraj
+   místo na střed — okraj se proto ruší. Text vedle ní se roztahuje na celou
+   šířku, což by dvojici rozhodilo taky. */
+.karta-tisk select::picker-icon{display:block;width:9cqw;height:9cqw;margin:0;flex:none;
+  color:var(--ink-2);transition:rotate .15s}
+.karta-tisk select::select-fallback-button-text{flex:0 1 auto;text-align:center}
+.karta-tisk select:open::picker-icon{rotate:180deg}
+.karta-tisk select::picker(select){font-size:calc(var(--pismo) * 1.5)}
+.karta-tisk option{padding:calc(var(--pole-y) * 1.4) calc(var(--pole-x) * 1.4)}
 .bigform select:focus,.bigform input:focus{box-shadow:var(--neu-sm),0 0 0 3px var(--focus)}
 .bigform .frow{gap:calc(var(--mezera-poli) * 1.33);margin-bottom:calc(var(--mezera-poli) * 1.33)}
 .bigform .note{font-size:calc(var(--pismo-poznamka) * 1.16)}
-.bigform .swatch{width:36px;height:36px;border-radius:10px}
+.bigform .swatch{width:36px;height:36px;border-radius:var(--radius-pole)}
 .bigform .tgl{font-size:15.5px;gap:12px}
 .bigform .tglt{width:50px;height:27px;border-radius:14px}
 .bigform .tglt::after{width:23px;height:23px}
@@ -233,7 +312,12 @@ td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabu
    zarovnaný doleva vypadá roztřepeně — uvnitř oblého tvaru patří na střed */
 .tag{display:inline-block;text-align:center;font-family:var(--mono);font-size:var(--pismo-popisek);padding:3px 9px;border-radius:var(--radius-stitek);background:var(--paper);box-shadow:var(--neu-in);color:var(--ink-2)}
 .tag.tech{background:var(--key);color:var(--btn-ink);box-shadow:var(--neu-sm)}
-.result-big{font-family:var(--mono);font-size:var(--pismo-vysledek);font-weight:600;line-height:1.05;color:var(--ink)}
+/* Velká čísla mají výšku řádku `normal`, ne utaženou hodnotu. Utažený řádek
+   vytlačí dolní dotah písmene („g" ve „50,0 g") pod vlastní rámeček a text
+   přeteče přes údaj pod sebou — a protože se rámečky neprotnou, nepozná se to
+   jinak než měřením kresby písma. `normal` je přesně tolik, kolik dané písmo
+   potřebuje, takže to platí i po výměně písma v barvy.html. */
+.result-big{font-family:var(--mono);font-size:var(--pismo-vysledek);font-weight:600;line-height:normal;color:var(--ink)}
 .result-sub{font-family:var(--mono);color:var(--ink-2);font-size:13px}
 .mixbar{display:flex;height:20px;border-radius:8px;overflow:hidden;box-shadow:var(--neu-in);margin:10px 0 4px}
 .warnbox{background:#F6EEDF;border:1px solid #E3CFA6;color:#8A5A1E;border-radius:10px;padding:10px 12px;font-size:13px;margin-top:12px}
@@ -252,17 +336,21 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
    tiskne, kam se to tiskne a kam pustit zakázkový list. Text a volby jdou pod
    ně na celou šířku; ve sloupcích vedle textu se název při užším okně rozsypal
    na jedno slovo na řádek. */
-/* Zadání zakázky: vlevo všechna pole receptury a tisku pod sebou, vpravo
-   samostatný úzký sloupec se čtyřmi čísly zakázky. Táhne se přes celou výšku
-   formuláře, takže počet kusů a spotřeba jsou vidět hned nahoře, ne až dole
-   pod poli. */
-.zadani-mrizka{display:grid;grid-template-columns:minmax(0,1fr) minmax(170px,220px);
-  gap:24px;align-items:start}
-.zakazka-cisla{display:grid;gap:16px;align-content:start}
-@media(max-width:820px){
-  .zadani-mrizka{grid-template-columns:1fr;gap:0}
-  .zakazka-cisla{grid-template-columns:1fr 1fr;gap:12px 16px;margin-top:16px}
+/* Čísla zakázky mají vlastní kartu o polovině stránky — ve dvou sloupcích,
+   protože pod sebou by byla zbytečně dlouhá a pole by byla přes celou šířku.
+   V úzkém okně se srovnají pod sebe. */
+/* Obě půlky výběru receptur mají stejný rytmus: popisek, filtr, hledání,
+   výběr. Když se v jedné zalomí lišta filtru na dva řádky, musela by se
+   druhá posunout taky — proto sdílejí řádky mřížky, ne jen sloupce.
+   Co je pod výběrem (poznámka, mazání) už na řádcích nezávisí. */
+@supports (grid-template-rows: subgrid){
+  @media(min-width:640px){
+    .recept-pulky{grid-template-rows:auto auto auto auto}
+    .recept-pulky>div{display:grid;grid-template-rows:subgrid;grid-row:span 4;align-content:start}
+  }
 }
+.zakazka-cisla{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-content:start}
+@media(max-width:560px){.zakazka-cisla{grid-template-columns:1fr}}
 .produkt-dlazdice{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
 .produkt-dlazdice .dlazdice{min-width:0;display:flex;flex-direction:column}
 .produkt-dlazdice .prodphoto,.produkt-dlazdice .pdfdrop{
@@ -290,38 +378,44 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
    Písmo je záměrně o dost větší: na displej se kouká z metru a se špinavýma
    rukama, ne z pracovní vzdálenosti. */
 .michbg{position:fixed;inset:0;z-index:80;background:var(--bg);overflow:auto;display:flex;flex-direction:column}
-.michhlav{position:sticky;top:0;z-index:2;background:var(--bg);display:flex;align-items:center;gap:16px;
-  flex-wrap:wrap;padding:14px 22px;box-shadow:0 6px 16px rgba(24,23,15,.10)}
-.michhlav .nazev{font-size:26px;font-weight:800;line-height:1.1;color:var(--ink)}
-.michhlav .kde{font-size:14px;color:var(--ink-2);font-family:var(--mono)}
+.michhlav{position:sticky;top:0;z-index:2;background:var(--bg);display:flex;align-items:center;
+  gap:calc(var(--mich-mezera) * .73);flex-wrap:wrap;
+  padding:calc(var(--mich-mezera) * .64) var(--mich-mezera);box-shadow:0 6px 16px rgba(24,23,15,.10)}
+.michhlav .nazev{font-size:var(--mich-nazev);font-weight:800;line-height:normal;color:var(--ink)}
+.michhlav .kde{font-size:calc(var(--mich-nazev) * .54);color:var(--ink-2);font-family:var(--mono)}
 .michdavka{margin-left:auto;text-align:right;font-family:var(--mono)}
-.michdavka b{display:block;font-size:34px;font-weight:700;line-height:1}
-.michdavka span{font-size:13px;color:var(--ink-2)}
-.michvzorek{width:52px;height:52px;border-radius:14px;box-shadow:var(--neu-sm);flex:none}
-.michtelo{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:22px;padding:18px 22px 28px;align-items:start}
-.michtab{width:100%;border-collapse:collapse;font-size:20px}
-.michtab th{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-2);
-  text-align:left;padding:6px 10px;border-bottom:2px solid var(--line-2)}
-.michtab td{padding:11px 10px;border-bottom:1px solid var(--line)}
+.michdavka b{display:block;font-size:var(--mich-davka);font-weight:700;line-height:normal}
+.michdavka span{font-size:calc(var(--mich-davka) * .38);color:var(--ink-2)}
+.michvzorek{width:var(--mich-vzorek);height:var(--mich-vzorek);border-radius:var(--radius-dlazdice);
+  box-shadow:var(--neu-sm);flex:none}
+.michtelo{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:var(--mich-mezera);
+  padding:calc(var(--mich-mezera) * .82) var(--mich-mezera) calc(var(--mich-mezera) * 1.27);align-items:start}
+.michtab{width:100%;border-collapse:collapse;font-size:var(--mich-tabulka)}
+.michtab th{font-size:var(--mich-hlavicka);text-transform:uppercase;letter-spacing:.6px;color:var(--ink-2);
+  text-align:left;padding:calc(var(--mich-radek) * .55) 10px;border-bottom:2px solid var(--line-2)}
+.michtab td{padding:var(--mich-radek) 10px;border-bottom:1px solid var(--line)}
 .michtab td.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
-.michtab .g{font-size:26px;font-weight:700}
+.michtab .g{font-size:var(--mich-gramy);font-weight:700}
 .michtab tr.ted{background:var(--zvyraz)}
 .michtab tr.ted td{font-weight:700}
 .michtab tr.hotovo td{color:var(--ink-2)}
 .michtab tr.hotovo .g{font-weight:400}
 .michstav{display:inline-block;width:26px;text-align:center}
 /* Ovládání uvnitř režimu je větší — míchá se ve stoje, často v rukavicích. */
-.michbg .card{box-shadow:none;padding:0}
-.michbg .card>h2{font-size:20px}
-.michbg .btn{padding:13px 22px;font-size:15px}
-.michbg .btn.sm{padding:9px 15px;font-size:13.5px}
-.michbg .result-big{font-size:52px}
-.michbg .wbar{height:20px}
-.michbg .note,.michbg .result-sub{font-size:13.5px}
+/* Karty tu stojí z plochy stejně jako v kalkulaci — asistent navážení je něco,
+   co se obsluhuje, takže má být ohraničený, ne rozpitý do pozadí. Odsazení si
+   bere z míchací sady, ne z obecné: uvnitř režimu je všechno o kus větší. */
+.michbg .card{padding:var(--mich-mezera);margin-bottom:var(--mich-mezera)}
+.michbg .card>h2{font-size:calc(var(--pismo-nadpis) * 1.03)}
+.michbg .btn{padding:calc(var(--mich-tlacitko) * .87) calc(var(--mich-tlacitko) * 1.47);font-size:var(--mich-tlacitko)}
+.michbg .btn.sm{padding:calc(var(--mich-tlacitko) * .6) calc(var(--mich-tlacitko) * 1);font-size:calc(var(--mich-tlacitko) * .9)}
+.michbg .result-big{font-size:var(--mich-vysledek)}
+.michbg .wbar{height:var(--mich-wbar)}
+.michbg .note,.michbg .result-sub{font-size:calc(var(--pismo-poznamka) * .96)}
 @media (max-width:1000px){
   .michtelo{grid-template-columns:1fr}
-  .michtab{font-size:17px}
-  .michtab .g{font-size:22px}
+  .michtab{font-size:calc(var(--mich-tabulka) * .85)}
+  .michtab .g{font-size:calc(var(--mich-gramy) * .85)}
 }
 @media print{.michbg{display:none}}
 .linkbox{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
@@ -375,14 +469,24 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
 .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:13px;margin-top:8px}
 .kv .k{color:var(--ink-2);font-size:11px;text-transform:uppercase;letter-spacing:.06em;align-self:center}
 .kv .v{font-weight:700}
-
+</style>
+<style>
 /* ---- jen pro tuhle stránku ----
-   Tři sloupce: vlevo stíny a osvětlení, uprostřed ukázka, vpravo barvy.
+   Tři sloupce: vlevo tvary a stíny, uprostřed ukázky, vpravo barvy.
    Postranní panely se drží na místě a rolují si samy, aby se pro nastavení
-   nemuselo sjíždět na konec stránky. */
-.nastroj{display:grid;grid-template-columns:330px minmax(0,1fr) 330px;gap:20px;
+   nemuselo sjíždět na konec stránky.
+
+   PRAVIDLO PRO DALŠÍ UKÁZKY: každá ukázaná stránka patří do prostředního
+   sloupce (`.ukazka`), nikdy přes celou šířku. Prvek roztažený přes všechny
+   sloupce se při rolování překryje s postranními panely — ty totiž stojí
+   na místě a širší obsah se pod ně podsune. Prostřední sloupec je proto
+   raději široký a panely úzké. */
+.nastroj{display:grid;grid-template-columns:300px minmax(0,1fr) 300px;gap:20px;
   padding:16px clamp(12px,2vw,28px) 40px;align-items:start}
-@media(max-width:1280px){.nastroj{grid-template-columns:300px minmax(0,1fr)}
+/* Vlastní `display` přebíjí `hidden` — schovaná stránka by se bez tohohle
+   vykreslila dál a obě by ležely přes sebe. */
+[hidden]{display:none !important}
+@media(max-width:1180px){.nastroj{grid-template-columns:280px minmax(0,1fr)}
   .panel-barvy{grid-column:1;grid-row:2}}
 @media(max-width:900px){.nastroj{grid-template-columns:1fr}
   .panel-barvy{grid-column:1;grid-row:auto}
@@ -406,6 +510,11 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
 .radek input[type=color]{width:40px;height:36px;padding:3px;flex:0 0 auto}
 .radek .txt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
 .radek .txt b{font-family:var(--mono);font-size:12.5px}
+/* Barva, kterou má stránka vlastní, je označená — jinak by nešlo poznat,
+   co je odchylka a co jen zděděný základ. Dvojklik na název ji vrátí. */
+.radek.vlastni .txt b{color:var(--ink)}
+.radek.vlastni .txt b::after{content:" ●";font-size:9px;vertical-align:2px}
+.radek .txt b{cursor:default}
 .radek input[type=text]{width:96px;flex:0 0 auto;font-family:var(--mono);font-size:12.5px;text-align:center}
 .posuv{margin-bottom:12px}
 .posuv .hlava{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;margin-bottom:4px}
@@ -415,14 +524,40 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
   box-shadow:var(--neu-sm);cursor:pointer;color:var(--ink);font-size:14px;line-height:1}
 .smery button.on{background:var(--key);color:var(--btn-ink)}
 .smery button.stred{visibility:hidden}
+/* Míchací režim v aplikaci překrývá celou obrazovku (`position:fixed`).
+   V ukázce ho to musí pustit, jinak by zakryl celý nástroj — proto se zasadí
+   do rámečku a chová se jako běžný blok. Jinak zůstává vše, jak je v aplikaci:
+   tytéž třídy, tytéž proměnné. */
+.michukazka{position:relative;border-radius:var(--radius);overflow:hidden;
+  box-shadow:var(--neu-in);background:var(--bg)}
+.michukazka .michbg{position:static;inset:auto;z-index:auto;height:auto;overflow:visible}
+.michukazka .michhlav{position:static}
 .ukazka{display:grid;gap:16px}
 .vystup textarea{min-height:240px}
 .lista{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+/* Ukázka hlavní stránky běží ve vlastním rámu. Musí to být rám, ne obyčejný
+   blok: zlom rozvržení se řídí šířkou okna, ne šířkou prvku, a jen rám má
+   vlastní okno. Pak se zmenší na šířku sloupce — je to tedy skutečná stránka
+   v malém, ne přiblížený výřez.
+
+   Rám je vytažený z toku (`position:absolute`): má šířku celého okna aplikace
+   a kdyby se počítal do rozvržení, roztáhl by prostřední sloupec a podsunul
+   se pod postranní panely. Takhle o jeho šířce rozhoduje jen zmenšení. */
+.platno{position:relative;overflow:hidden;border-radius:var(--radius);
+  box-shadow:var(--neu-in);background:var(--bg);min-height:80px}
+.platno iframe{position:absolute;top:0;left:0;border:0;display:block;
+  transform-origin:top left;background:var(--bg)}
+.kolize{color:var(--danger);font-weight:700}
 </style></head>
 <body>
-<div class="hdr"><div class="navleft"></div><h1>BARVY</h1><div></div></div>
+<div class="hdr"><div class="navleft"></div><h1>VZHLED</h1>
+  <div class="lista" style="margin:0">
+    <button class="chip on" data-strana="barvy">Barvy a vzhled</button>
+    <button class="chip" data-strana="rozvrzeni">Rozvržení hlavní stránky</button>
+  </div>
+</div>
 
-<div class="nastroj">
+<div class="nastroj" id="strana-barvy">
   <div class="card panel">
     <h2>Tvary, písmo a stíny</h2>
     <p class="hint">Odkud svítí světlo, jak věci odstávají, jak jsou zaoblené,
@@ -499,9 +634,20 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
 <div class="posuv" data-tvar="--tlacitko-y"><div class="hlava"><span>Výška tlačítek</span><b data-role="cislo"></b></div><input type="range" min="2" max="24" step="1" data-role="posuv" data-jed="px" /></div>
 <div class="posuv" data-tvar="--tlacitko-x"><div class="hlava"><span>Šířka tlačítek (odsazení)</span><b data-role="cislo"></b></div><input type="range" min="4" max="40" step="1" data-role="posuv" data-jed="px" /></div>
 <div class="posuv" data-tvar="--okraj-stranky"><div class="hlava"><span>Okraj nad obsahem</span><b data-role="cislo"></b></div><input type="range" min="0" max="60" step="2" data-role="posuv" data-jed="px" /></div></details>
+<details class="skupina"><summary>Míchací režim</summary><div class="posuv" data-tvar="--mich-nazev"><div class="hlava"><span>Název receptury v hlavičce</span><b data-role="cislo"></b></div><input type="range" min="14" max="56" step="1" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-davka"><div class="hlava"><span>Dávka v hlavičce</span><b data-role="cislo"></b></div><input type="range" min="16" max="72" step="1" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-vzorek"><div class="hlava"><span>Vzorek barvy v hlavičce</span><b data-role="cislo"></b></div><input type="range" min="24" max="110" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-hlavicka"><div class="hlava"><span>Hlavičky sloupců tabulky</span><b data-role="cislo"></b></div><input type="range" min="8" max="24" step="0.5" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tabulka"><div class="hlava"><span>Text v tabulce navážky</span><b data-role="cislo"></b></div><input type="range" min="12" max="38" step="1" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-gramy"><div class="hlava"><span>Gramy v tabulce</span><b data-role="cislo"></b></div><input type="range" min="14" max="52" step="1" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-radek"><div class="hlava"><span>Výška řádků tabulky</span><b data-role="cislo"></b></div><input type="range" min="4" max="30" step="1" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-vysledek"><div class="hlava"><span>Číslo na váze</span><b data-role="cislo"></b></div><input type="range" min="24" max="110" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-wbar"><div class="hlava"><span>Tloušťka pruhu navážení</span><b data-role="cislo"></b></div><input type="range" min="4" max="48" step="1" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tlacitko"><div class="hlava"><span>Velikost tlačítek</span><b data-role="cislo"></b></div><input type="range" min="10" max="30" step="0.5" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-mezera"><div class="hlava"><span>Odsazení a mezery (i uvnitř karty asistenta)</span><b data-role="cislo"></b></div><input type="range" min="6" max="56" step="1" data-role="posuv" data-jed="px" /></div></details>
     <div class="rowline" style="margin-top:6px">
       <button class="btn sec sm" id="zpet-stiny">Vrátit původní stíny</button>
-      <button class="btn sec sm" id="zpet-tvary">Vrátit tvary, písmo a rozestupy</button>
+      <button class="btn sec sm" id="zpet-tvary">Vrátit tvary, písmo a rozměry</button>
     </div>
   </div>
 
@@ -563,15 +709,92 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
       </table>
     </div>
 
+    <div class="card">
+        <h2>Míchací režim</h2>
+        <p class="hint">Celá obrazovka u váhy — skutečné prvky aplikace.
+          Ladí se posuvníky v oddílu <b>Míchací režim</b> vlevo.</p>
+        <div class="michukazka">
+          <div class="michbg">
+            <div class="michhlav">
+              <span class="michvzorek" style="background:#F2602F"></span>
+              <span>
+                <span class="nazev" style="display:block">PANTONE Cool Gray 1 C</span>
+                <span class="kde">93804 · 106 · FIR Džbánek / Tělo lahve</span>
+              </span>
+              <span class="michdavka"><b>72,4 g</b><span>≈ 60,4 ml</span></span>
+              <button class="btn sec">✕ Zpět do kalkulace</button>
+            </div>
+            <div class="michtelo">
+              <!-- Levý sloupec v aplikaci karta není, obsah leží přímo na ploše.
+                   Kartu má jen asistent navážení — ukázka to musí držet stejně,
+                   jinak by se podle ní ladilo něco, co v aplikaci není. -->
+              <div>
+                <div class="rowline">
+                  <span class="tag">krycí plocha 100,0 % · z katalogu</span>
+                  <button class="btn sec sm">Spočítat krycí plochu z náhledu</button>
+                </div>
+                <table class="michtab">
+                  <thead><tr><th>Komponenta</th><th class="num">Navážit</th><th class="num">Kumulativně</th></tr></thead>
+                  <tbody>
+                    <tr class="ted"><td><span class="michstav">▶</span>19 3601 White</td>
+                      <td class="num g">72,0</td><td class="num">72,0</td></tr>
+                    <tr><td><span class="michstav"></span>14 3601 Black (Black C)</td>
+                      <td class="num g">0,4</td><td class="num">72,4</td></tr>
+                    <tr><td><span class="michstav"></span>11 3601 Green (Green C)</td>
+                      <td class="num g">0,1</td><td class="num">72,4</td></tr>
+                    <tr class="hotovo"><td><span class="michstav">✓</span>12 3601 Blue 1 (Process Blue C)</td>
+                      <td class="num g">0,0</td><td class="num">72,4</td></tr>
+                    <tr><td><b>Navážit celkem</b></td><td class="num g">72,4</td><td class="num g">72,4</td></tr>
+                  </tbody>
+                </table>
+                <div class="rowline" style="margin-top:12px">
+                  <button class="btn sec">Zbytek není v evidenci — zadat ručně</button>
+                </div>
+                <div class="rowline">
+                  <button class="btn sec">Štítek na kelímek →</button>
+                  <button class="btn sec sm">Znám zbytek rovnou</button>
+                </div>
+              </div>
+              <div class="card">
+                <h2>Asistent navážení</h2>
+                <div class="rowline">
+                  <span class="tag tech">simulace váhy</span>
+                  <button class="btn sec sm">Tára (0)</button>
+                  <button class="btn sec sm">Odpojit</button>
+                </div>
+                <div class="result-big">0,0 g</div>
+                <div class="result-sub">na váze · receptura PANTONE Cool Gray 1 C</div>
+                <div class="wbar" style="margin-top:10px"><span style="width:34%;background:var(--cyan)"></span></div>
+                <p class="note" style="margin-top:8px"><b>19 3601 White</b> — přidat 72,0 g,
+                  navážit celkem do 72,0 g · zbývá 72,0 g</p>
+                <div class="rowline">
+                  <button class="btn">Další komponenta →</button>
+                  <span class="note">tolerance ± 0,5 g</span>
+                </div>
+                <table class="michtab" style="margin-top:10px">
+                  <thead><tr><th>Komponenta</th><th class="num">%</th><th class="num">Cíl g</th><th class="num">Zbývá g</th></tr></thead>
+                  <tbody>
+                    <tr class="ted"><td>19 3601 White</td><td class="num">99,4</td><td class="num">72,0</td><td class="num">72,0</td></tr>
+                    <tr><td>14 3601 Black</td><td class="num">0,5</td><td class="num">0,38</td><td class="num">0,38</td></tr>
+                    <tr class="hotovo"><td>11 3601 Green</td><td class="num">0,1</td><td class="num">0,07</td><td class="num">pod tol.</td></tr>
+                  </tbody>
+                </table>
+                <div class="okbox">V pořádku — navážka je v toleranci.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     <div class="card vystup">
       <h2>Blok k vložení do index.html</h2>
       <p class="hint">Celé bloky <b>:root</b> a <b>:root[data-theme="dark"]</b>
         i s tím, čeho se ladění netýká — dají se přepsat jedním vložením.
         Nebo mi je pošlete a vložím je sám.</p>
-      <textarea id="vystup" spellcheck="false" readonly></textarea>
+      <textarea data-vystup spellcheck="false" readonly></textarea>
       <div class="rowline" style="margin-top:10px;margin-bottom:0">
-        <button class="btn" id="kopirovat">Zkopírovat</button>
-        <span class="note" id="stav"></span>
+        <button class="btn" data-kopirovat>Zkopírovat</button>
+        <span class="note" data-stav></span>
       </div>
     </div>
   </div>
@@ -579,12 +802,19 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
   <div class="card panel panel-barvy">
     <h2>Barevné schéma</h2>
     <p class="hint">Plocha, papír, text a barvy, které něco znamenají.
-      Ladí se režim, který je právě zapnutý.</p>
+      Ladí se režim, který je právě zapnutý. Vyberte stránku a barvy platí jen
+      pro ni; co jí nenastavíte, bere ze základu. Dvojklik na název proměnné
+      vlastní barvu zase zruší.</p>
     <div class="lista">
       <button class="chip on" data-rezim="light">Světlý režim</button>
       <button class="chip" data-rezim="dark">Tmavý režim</button>
     </div>
-    <details class="skupina" open><summary>Plocha a papír</summary><label class="radek" data-klic="--bg"><input type="color" data-role="barva" /><span class="txt"><b>--bg</b><span class="note">plocha stránky</span></span><input type="text" data-role="hex" spellcheck="false" /></label>
+    <div class="lista" id="stranky">
+<button class="chip on" data-stranka="">Základ (celá aplikace)</button>
+<button class="chip" data-stranka=".michbg">Míchací režim</button>
+</div>
+<p class="note" id="stav-stranky" style="margin:0 0 10px"></p>
+<details class="skupina" open><summary>Plocha a papír</summary><label class="radek" data-klic="--bg"><input type="color" data-role="barva" /><span class="txt"><b>--bg</b><span class="note">plocha stránky</span></span><input type="text" data-role="hex" spellcheck="false" /></label>
 <label class="radek" data-klic="--paper"><input type="color" data-role="barva" /><span class="txt"><b>--paper</b><span class="note">karty, lišty, tlačítka, pole</span></span><input type="text" data-role="hex" spellcheck="false" /></label>
 <label class="radek" data-klic="--zvyraz"><input type="color" data-role="barva" /><span class="txt"><b>--zvyraz</b><span class="note">zvýrazněný řádek (pod myší, právě vážená složka)</span></span><input type="text" data-role="hex" spellcheck="false" /></label></details>
 <details class="skupina" open><summary>Text a linky</summary><label class="radek" data-klic="--ink"><input type="color" data-role="barva" /><span class="txt"><b>--ink</b><span class="note">hlavní text</span></span><input type="text" data-role="hex" spellcheck="false" /></label>
@@ -600,18 +830,335 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
 <details class="skupina" open><summary>Logo</summary><label class="radek" data-klic="--logo"><input type="color" data-role="barva" /><span class="txt"><b>--logo</b><span class="note">nápis IRM v hlavičce</span></span><input type="text" data-role="hex" spellcheck="false" /></label></details>
     <div class="rowline" style="margin-top:6px">
       <button class="btn sec sm" id="zpet-barvy">Vrátit původní barvy</button>
+      <button class="btn sec sm" id="zpet-stranka">Vrátit barvy této stránky</button>
     </div>
+  </div>
+
+</div>
+
+<div class="nastroj" id="strana-rozvrzeni" hidden>
+  <div class="card panel">
+    <h2>Stránka a sloupce</h2>
+    <p class="hint">Jak široká je stránka, jak jsou rozdělené sloupce a kolik
+      je mezi kartami místa. Platí od šířky okna 960 px — pod ní se karty
+      skládají pod sebe a rozvržení nemá co řešit.</p>
+    <details class="skupina" open><summary>Stránka a sloupce</summary><div class="posuv"><div class="hlava"><span>Největší šířka stránky</span></div><select data-vyber="--sirka-stranky">
+<option value="none">bez omezení — na celé okno</option>
+<option value="1200px">1200 px</option>
+<option value="1400px">1400 px</option>
+<option value="1600px">1600 px</option>
+<option value="1800px">1800 px</option>
+<option value="2000px">2000 px</option>
+<option value="2400px">2400 px</option>
+</select></div>
+<div class="posuv" data-tvar="--sloupec-1"><div class="hlava"><span>Šířka levého sloupce</span><b data-role="cislo"></b></div><input type="range" min="0.4" max="3" step="0.05" data-role="posuv" data-jed="fr" /></div>
+<div class="posuv" data-tvar="--sloupec-2"><div class="hlava"><span>Šířka pravého sloupce</span><b data-role="cislo"></b></div><input type="range" min="0.4" max="3" step="0.05" data-role="posuv" data-jed="fr" /></div>
+<div class="posuv" data-tvar="--mezera-sloupcu"><div class="hlava"><span>Mezera mezi sloupci</span><b data-role="cislo"></b></div><input type="range" min="0" max="120" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mezera-karet"><div class="hlava"><span>Mezera mezi kartami</span><b data-role="cislo"></b></div><input type="range" min="0" max="60" step="1" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--okraj-stranky"><div class="hlava"><span>Okraj stránky nahoře</span><b data-role="cislo"></b></div><input type="range" min="0" max="80" step="1" data-role="posuv" data-jed="px" /></div></details>
+    <div class="posuv" style="margin-top:14px">
+      <div class="hlava"><span>Šířka okna v ukázce</span></div>
+      <div class="chips" id="okna">
+<button class="chip" data-okno="2560">2560 px</button>
+<button class="chip" data-okno="1920">1920 px</button>
+<button class="chip on" data-okno="1600">1600 px</button>
+<button class="chip" data-okno="1366">1366 px</button>
+<button class="chip" data-okno="1100">1100 px</button>
+<button class="chip" data-okno="900">900 px</button>
+</div>
+    </div>
+    <div class="rowline" style="margin-top:12px">
+      <button class="btn sec sm" id="zpet-rozvrzeni">Vrátit původní rozvržení</button>
+    </div>
+  </div>
+
+  <div class="ukazka">
+    <div class="card">
+      <h2>Hlavní stránka</h2>
+      <p class="hint">Skutečné karty aplikace ve vlastním okně. Šířku okna si
+        vyberte vlevo; ukázka se pak zmenší na šířku sloupce, takže je to celá
+        stránka v malém, ne výřez.</p>
+      <p class="note" id="stav-rozvrzeni" style="margin:0 0 10px"></p>
+      <div class="platno" id="platno"><iframe id="ram" title="Hlavní stránka"></iframe></div>
+    </div>
+
+    <div class="card vystup">
+      <h2>Blok k vložení do index.html</h2>
+      <p class="hint">Tentýž blok jako u barev — rozvržení je taky jen několik
+        proměnných. Vloží se jedním vložením obojí.</p>
+      <textarea data-vystup spellcheck="false" readonly></textarea>
+      <div class="rowline" style="margin-top:10px;margin-bottom:0">
+        <button class="btn" data-kopirovat>Zkopírovat</button>
+        <span class="note" data-stav></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card panel">
+    <h2>Karty</h2>
+    <p class="hint">U každé karty se dá určit, ve kterém sloupci a řádku stojí,
+      jak je široká, kam se v tom místě zarovná a jak vysoká má být nejmíň.
+      Dvě karty ve stejném sloupci a řádku by se překryly — hlídám to a nahlásím
+      to nad ukázkou. Pozor na zarovnání: <b>roztáhnout</b> vyplní celé místo,
+      kdežto vlevo, na střed a vpravo kartu zúží podle obsahu.</p>
+    <details class="skupina"><summary>Vybraný produkt</summary><div class="posuv"><div class="hlava"><span>Sloupec</span></div><select data-vyber="--produkt-sloupec">
+<option value="1">vlevo</option>
+<option value="2">vpravo</option>
+<option value="1 / -1">přes oba sloupce</option>
+</select></div>
+<div class="posuv"><div class="hlava"><span>Řádek</span></div><select data-vyber="--produkt-radek">
+<option value="1">1. řádek</option>
+<option value="2">2. řádek</option>
+<option value="3">3. řádek</option>
+<option value="4">4. řádek</option>
+<option value="5">5. řádek</option>
+</select></div>
+<div class="posuv"><div class="hlava"><span>Šířka</span></div><select data-vyber="--produkt-sirka">
+<option value="auto">celá šířka místa</option>
+<option value="calc((100% - var(--mezera-sloupcu)) / 2)">přesně jako jeden sloupec</option>
+<option value="75%">tři čtvrtiny</option>
+<option value="50%">polovina</option>
+<option value="33%">třetina</option>
+</select></div>
+<div class="posuv"><div class="hlava"><span>Zarovnání v místě</span></div><select data-vyber="--produkt-zarovnani">
+<option value="stretch">roztáhnout</option>
+<option value="start">vlevo</option>
+<option value="center">na střed</option>
+<option value="end">vpravo</option>
+</select></div>
+<div class="posuv" data-tvar="--produkt-vyska"><div class="hlava"><span>Nejmenší výška</span><b data-role="cislo"></b></div><input type="range" min="0" max="900" step="10" data-role="posuv" data-jed="px" /></div></details>
+<details class="skupina"><summary>Kolik namíchat</summary><div class="posuv"><div class="hlava"><span>Sloupec</span></div><select data-vyber="--vysledek-sloupec">
+<option value="1">vlevo</option>
+<option value="2">vpravo</option>
+<option value="1 / -1">přes oba sloupce</option>
+</select></div>
+<div class="posuv"><div class="hlava"><span>Řádek</span></div><select data-vyber="--vysledek-radek">
+<option value="1">1. řádek</option>
+<option value="2">2. řádek</option>
+<option value="3">3. řádek</option>
+<option value="4">4. řádek</option>
+<option value="5">5. řádek</option>
+</select></div>
+<div class="posuv"><div class="hlava"><span>Šířka</span></div><select data-vyber="--vysledek-sirka">
+<option value="auto">celá šířka místa</option>
+<option value="calc((100% - var(--mezera-sloupcu)) / 2)">přesně jako jeden sloupec</option>
+<option value="75%">tři čtvrtiny</option>
+<option value="50%">polovina</option>
+<option value="33%">třetina</option>
+</select></div>
+<div class="posuv"><div class="hlava"><span>Zarovnání v místě</span></div><select data-vyber="--vysledek-zarovnani">
+<option value="stretch">roztáhnout</option>
+<option value="start">vlevo</option>
+<option value="center">na střed</option>
+<option value="end">vpravo</option>
+</select></div>
+<div class="posuv" data-tvar="--vysledek-vyska"><div class="hlava"><span>Nejmenší výška</span><b data-role="cislo"></b></div><input type="range" min="0" max="900" step="10" data-role="posuv" data-jed="px" /></div></details>
+<details class="skupina"><summary>Receptura a barva</summary><div class="posuv"><div class="hlava"><span>Sloupec</span></div><select data-vyber="--recept-sloupec">
+<option value="1">vlevo</option>
+<option value="2">vpravo</option>
+<option value="1 / -1">přes oba sloupce</option>
+</select></div>
+<div class="posuv"><div class="hlava"><span>Řádek</span></div><select data-vyber="--recept-radek">
+<option value="1">1. řádek</option>
+<option value="2">2. řádek</option>
+<option value="3">3. řádek</option>
+<option value="4">4. řádek</option>
+<option value="5">5. řádek</option>
+</select></div>
+<div class="posuv"><div class="hlava"><span>Šířka</span></div><select data-vyber="--recept-sirka">
+<option value="auto">celá šířka místa</option>
+<option value="calc((100% - var(--mezera-sloupcu)) / 2)">přesně jako jeden sloupec</option>
+<option value="75%">tři čtvrtiny</option>
+<option value="50%">polovina</option>
+<option value="33%">třetina</option>
+</select></div>
+<div class="posuv"><div class="hlava"><span>Zarovnání v místě</span></div><select data-vyber="--recept-zarovnani">
+<option value="stretch">roztáhnout</option>
+<option value="start">vlevo</option>
+<option value="center">na střed</option>
+<option value="end">vpravo</option>
+</select></div>
+<div class="posuv" data-tvar="--recept-vyska"><div class="hlava"><span>Nejmenší výška</span><b data-role="cislo"></b></div><input type="range" min="0" max="900" step="10" data-role="posuv" data-jed="px" /></div></details>
+<details class="skupina"><summary>Zakázka</summary><div class="posuv"><div class="hlava"><span>Sloupec</span></div><select data-vyber="--zakazka-sloupec">
+<option value="1">vlevo</option>
+<option value="2">vpravo</option>
+<option value="1 / -1">přes oba sloupce</option>
+</select></div>
+<div class="posuv"><div class="hlava"><span>Řádek</span></div><select data-vyber="--zakazka-radek">
+<option value="1">1. řádek</option>
+<option value="2">2. řádek</option>
+<option value="3">3. řádek</option>
+<option value="4">4. řádek</option>
+<option value="5">5. řádek</option>
+</select></div>
+<div class="posuv"><div class="hlava"><span>Šířka</span></div><select data-vyber="--zakazka-sirka">
+<option value="auto">celá šířka místa</option>
+<option value="calc((100% - var(--mezera-sloupcu)) / 2)">přesně jako jeden sloupec</option>
+<option value="75%">tři čtvrtiny</option>
+<option value="50%">polovina</option>
+<option value="33%">třetina</option>
+</select></div>
+<div class="posuv"><div class="hlava"><span>Zarovnání v místě</span></div><select data-vyber="--zakazka-zarovnani">
+<option value="stretch">roztáhnout</option>
+<option value="start">vlevo</option>
+<option value="center">na střed</option>
+<option value="end">vpravo</option>
+</select></div>
+<div class="posuv" data-tvar="--zakazka-vyska"><div class="hlava"><span>Nejmenší výška</span><b data-role="cislo"></b></div><input type="range" min="0" max="900" step="10" data-role="posuv" data-jed="px" /></div></details>
+<details class="skupina"><summary>Parametry tisku</summary><div class="posuv"><div class="hlava"><span>Sloupec</span></div><select data-vyber="--tisk-sloupec">
+<option value="1">vlevo</option>
+<option value="2">vpravo</option>
+<option value="1 / -1">přes oba sloupce</option>
+</select></div>
+<div class="posuv"><div class="hlava"><span>Řádek</span></div><select data-vyber="--tisk-radek">
+<option value="1">1. řádek</option>
+<option value="2">2. řádek</option>
+<option value="3">3. řádek</option>
+<option value="4">4. řádek</option>
+<option value="5">5. řádek</option>
+</select></div>
+<div class="posuv"><div class="hlava"><span>Šířka</span></div><select data-vyber="--tisk-sirka">
+<option value="auto">celá šířka místa</option>
+<option value="calc((100% - var(--mezera-sloupcu)) / 2)">přesně jako jeden sloupec</option>
+<option value="75%">tři čtvrtiny</option>
+<option value="50%">polovina</option>
+<option value="33%">třetina</option>
+</select></div>
+<div class="posuv"><div class="hlava"><span>Zarovnání v místě</span></div><select data-vyber="--tisk-zarovnani">
+<option value="stretch">roztáhnout</option>
+<option value="start">vlevo</option>
+<option value="center">na střed</option>
+<option value="end">vpravo</option>
+</select></div>
+<div class="posuv" data-tvar="--tisk-vyska"><div class="hlava"><span>Nejmenší výška</span><b data-role="cislo"></b></div><input type="range" min="0" max="900" step="10" data-role="posuv" data-jed="px" /></div></details>
   </div>
 </div>
 
+<!-- Ukázka hlavní stránky. Je to týž zápis jako v aplikaci: tytéž třídy,
+     tytéž karty, tentýž pořádek. Obsah je zkrácený, rozvržení ne — o to tu jde.
+     PŘIDÁNÍ DALŠÍ KARTY: sem její značka a řádek do seznamu KARTY. -->
+<template id="ukazka-hlavni">
+  <div class="wrap">
+    <div class="grid calc">
+      <div class="card karta-produkt" style="margin:0">
+        <h2>Vybraný produkt</h2>
+        <div class="produkt-dlazdice">
+          <div class="dlazdice"><div class="prodphoto noimg">fotka produktu</div>
+            <div class="popiska">Produkt</div></div>
+          <div class="dlazdice"><div class="prodphoto noimg">náhled potisku</div>
+            <div class="popiska"><b>Tělo lahve</b><br>SCR · 60,0 × 40,0 mm</div></div>
+          <div class="dlazdice"><div class="prodphoto noimg">zakázkový list</div>
+            <div class="popiska">Zakázkový list</div></div>
+        </div>
+        <div style="margin-top:14px">
+          <div style="font-weight:800;font-size:16px">11003 · PDP Sportovní Láhev</div>
+          <div class="note">PP / PE</div>
+        </div>
+        <div class="rowline" style="margin-top:10px;margin-bottom:0">
+          <span class="tag tech">SCR — sítotisk</span>
+          <span class="tag">60,0×40,0 mm</span>
+          <button class="btn sec sm">Barva a poloha potisku →</button>
+        </div>
+      </div>
+
+      <div class="card bigform karta-recept" style="margin:0">
+        <h2>Receptura a barva</h2>
+        <div class="frow c2">
+          <div><label class="f">Standardní receptury</label>
+            <select><option>Pantone Solid Coated</option></select></div>
+          <div><label class="f">Vlastní odvozené</label>
+            <select><option>— všechny —</option></select></div>
+        </div>
+        <div class="frow c2">
+          <div><input type="text" placeholder="hledat v standardech"></div>
+          <div><input type="text" placeholder="hledat ve vlastních"></div>
+        </div>
+        <div class="frow c2">
+          <div><select><option>PANTONE 485 C</option></select></div>
+          <div><select><option>— žádná —</option></select></div>
+        </div>
+        <div class="mixbar"><span style="width:46%;background:#F2602F"></span
+          ><span style="width:34%;background:#C4161C"></span
+          ><span style="width:20%;background:#F5F5F5"></span></div>
+      </div>
+
+      <div class="card bigform karta-cisla" style="margin:0">
+        <h2>Zakázka</h2>
+        <div class="frow c3">
+          <div><label class="f">Počet kusů</label><input type="text" value="2 500"></div>
+          <div><label class="f">Spotřeba g/ks</label><input type="text" value="0,42"></div>
+          <div><label class="f">Ztráty %</label><input type="text" value="12"></div>
+        </div>
+        <div class="frow c2">
+          <div><label class="f">Nejmenší dávka</label><input type="text" value="50"></div>
+          <div><label class="f">Viskozita</label><select><option>středně řídká</option></select></div>
+        </div>
+      </div>
+
+      <div class="card bigform karta-tisk" style="margin:0">
+        <h2>Parametry tisku</h2>
+        <div class="frow c3" style="margin-top:8px">
+          <div><label class="f">Síto</label><select><option>120-34</option></select></div>
+          <div><label class="f">Kryvost</label><select><option>krycí</option></select></div>
+          <div><label class="f">Povrch</label><select><option>lesk</option></select></div>
+        </div>
+        <div class="flags">
+          <label class="tgl"><input type="checkbox" checked><span class="tglt"></span>Otestovaný</label>
+          <label class="tgl"><input type="checkbox"><span class="tglt"></span>Vysoce odolný vůči vyblednutí</label>
+        </div>
+      </div>
+
+      <div class="bigpanel" style="display:grid;gap:20px">
+        <div class="card" style="margin:0">
+          <h2>Kolik namíchat</h2>
+          <div class="rowline" style="margin-top:2px;margin-bottom:12px">
+            <span class="swatch" style="background:#F2602F;width:40px;height:40px"></span>
+            <span><b style="font-size:17px">PANTONE 485 C</b><br>
+              <span class="note">receptura z katalogu</span></span>
+          </div>
+          <div class="result-big">72,4 g</div>
+          <div class="result-sub">≈ 60,4 ml · dávka na 2 500 ks</div>
+          <div class="mixbar" style="margin-top:12px"><span style="width:46%;background:#F2602F"></span
+            ><span style="width:34%;background:#C4161C"></span
+            ><span style="width:20%;background:#F5F5F5"></span></div>
+          <table class="t" style="margin-top:12px">
+            <thead><tr><th>Komponenta</th><th class="num">%</th><th class="num">Gramy</th></tr></thead>
+            <tbody>
+              <tr><td>9000 Weiss</td><td class="num">21,7</td><td class="num">15,7</td></tr>
+              <tr><td>1100 Mittelgelb</td><td class="num">50,5</td><td class="num">36,6</td></tr>
+              <tr><td>Binder</td><td class="num">27,8</td><td class="num">20,1</td></tr>
+            </tbody>
+          </table>
+          <div class="rowline michtl" style="margin-top:16px;margin-bottom:0">
+            <button class="btn" style="padding:15px 26px;font-size:16px">⛶ Míchací režim</button>
+            <button class="btn sec">🖨 Míchací lístek</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
 <script>
-var VYCH_BARVY = {"light": {"--bg": "#949494", "--paper": "#dbdbdb", "--zvyraz": "#949494", "--ink": "#141414", "--ink-2": "#767676", "--line": "#D8D8D8", "--line-2": "#C7C7C7", "--key": "#141414", "--btn-ink": "#FFFFFF", "--cyan": "#141414", "--ok": "#3dc760", "--warn": "#e8c545", "--danger": "#b31919", "--logo": "#949494"}, "dark": {"--bg": "#545454", "--paper": "#333333", "--zvyraz": "#545454", "--ink": "#EDEDED", "--ink-2": "#8C8C8C", "--line": "#595959", "--line-2": "#7a7a7a", "--key": "#EDEDED", "--btn-ink": "#000000", "--cyan": "#EDEDED", "--ok": "#3dc760", "--warn": "#e8c545", "--danger": "#b31919", "--logo": "#545454"}}, VYCH_STINY = {"light": {"uhel": 135, "dVelky": 7, "blurVelky": 20, "dMaly": 6, "blurMaly": 14, "dVsazeny": 3, "blurVsazeny": 4, "silaSvetla": 11, "silaStinu": 43, "logoUhel": 135, "logoD": 3, "logoBlur": 2, "logoSvetlo": 14, "logoStin": 10}, "dark": {"uhel": 135, "dVelky": 13, "blurVelky": 24, "dMaly": 6, "blurMaly": 10, "dVsazeny": 4, "blurVsazeny": 4, "silaSvetla": 8, "silaStinu": 51, "logoUhel": 135, "logoD": 3, "logoBlur": 2, "logoSvetlo": 14, "logoStin": 10}}, VYCH_TVARY = {"--radius": "23px", "--radius-btn": "35px", "--radius-pole": "15px", "--radius-dlazdice": "15px", "--radius-stitek": "15px", "--ikona": "27px", "--ikona-tah": "1.5", "--ikona-pruhlednost": "1", "--pruhlednost-karty": "1", "--ikona-konec": "round", "--pismo": "15.5px", "--pismo-nadpis": "19.5px", "--pismo-popisek": "12.5px", "--pismo-poznamka": "14px", "--pismo-tabulka": "19px", "--pismo-vysledek": "50px", "--logo-velikost": "116px", "--prostrkani": "0.07em", "--tloustka-nadpisu": "900", "--radek": "1.4", "--mezera-karta-y": "20px", "--mezera-karta-x": "22px", "--mezera-karet": "16px", "--mezera-poli": "12px", "--pole-y": "9px", "--pole-x": "12px", "--tlacitko-y": "10px", "--tlacitko-x": "18px", "--okraj-stranky": "20px", "--sans": "system-ui,sans-serif", "--mono": "'Segoe UI',system-ui,sans-serif"};
-var BLOK = { light: "\n  /* Vzhled z\u016fst\u00e1v\u00e1 m\u011bkk\u00fd \u2014 karty vystupuj\u00ed z plochy st\u00ednem, ne r\u00e1me\u010dkem.\n     M\u011bn\u00ed se jen barvy: plocha je neutr\u00e1ln\u011b \u0161ed\u00e1 m\u00edsto tepl\u00e9 b\u00e9\u017eov\u00e9 a inkoust\n     je tmav\u0161\u00ed, aby se na to dalo d\u00edvat cel\u00fd den. Barevn\u00fd akcent zmizel;\n     zv\u00fdrazn\u011bn\u00ed d\u011bl\u00e1 inkoust, barva z\u016fstala tam, kde nese v\u00fdznam (odst\u00edn\n     barvy, varov\u00e1n\u00ed, stav v\u00e1\u017een\u00ed). */\n  /* --bg maluje JEN plochu str\u00e1nky; v\u0161echno, co na n\u00ed le\u017e\u00ed (karty, li\u0161ty,\n     tla\u010d\u00edtka, pole, \u0161t\u00edtky), bere barvu z --paper. Ty dv\u011b prom\u011bnn\u00e9 jdou\n     nastavit nez\u00e1visle \u2014 plocha je samostatn\u00e1 jednotka. */\n  --bg:#949494; --paper:#dbdbdb; --zvyraz:#949494; --logo:#949494;\n  --ink:#141414; --ink-2:#767676; --line:#D8D8D8; --line-2:#C7C7C7;\n  --cyan:#141414; --magenta:#C97B63; --yellow:#D9B44A; --key:#141414;\n  --btn-ink:#FFFFFF; --focus:rgba(20,20,20,.20); --danger:#b31919;\n  --ok:#3dc760; --warn:#e8c545;\n  /* Tvary: ka\u017ed\u00fd druh prvku m\u00e1 vlastn\u00ed zaoblen\u00ed, aby \u0161lo ladit zvl\u00e1\u0161\u0165\n     karty, tla\u010d\u00edtka, pole a dla\u017edice. Ikony jsou kreslen\u00e9, ne obr\u00e1zkov\u00e9 \u2014\n     velikost, tlou\u0161\u0165ka tahu i zakon\u010den\u00ed se \u0159\u00edd\u00ed odsud. */\n  --radius:23px; --radius-btn:35px; --radius-pole:15px; --radius-dlazdice:15px;\n  --radius-stitek:15px;\n  --ikona:27px; --ikona-tah:1.5; --ikona-konec:round; --ikona-pruhlednost:1;\n  --pruhlednost-karty:1;\n  /* P\u00edsmo se \u0159\u00edd\u00ed podle role, ne podle prvku: co je nadpis, co popisek, co\n     v\u00fdsledek. Zv\u011bt\u0161en\u00e9 varianty na domovsk\u00e9 str\u00e1nce se z t\u011bchto hodnot\n     dopo\u010d\u00edtaj\u00ed, tak\u017ee cel\u00e1 \u0161k\u00e1la dr\u017e\u00ed pohromad\u011b. */\n  --pismo:15.5px; --pismo-nadpis:19.5px; --pismo-popisek:12.5px;\n  --pismo-poznamka:14px; --pismo-tabulka:19px; --pismo-vysledek:50px;\n  --logo-velikost:116px; --prostrkani:0.07em; --tloustka-nadpisu:900; --radek:1.4;\n  /* Rozestupy: odsazen\u00ed uvnit\u0159 karty, mezera mezi kartami, mezera mezi poli\n     v \u0159\u00e1dku a odsazen\u00ed uvnit\u0159 pol\u00ed a tla\u010d\u00edtek (to ur\u010duje jejich v\u00fd\u0161ku). */\n  --mezera-karta-y:20px; --mezera-karta-x:22px; --mezera-karet:16px;\n  --mezera-poli:12px; --pole-y:9px; --pole-x:12px;\n  --tlacitko-y:10px; --tlacitko-x:18px; --okraj-stranky:20px;\n  --neu:-5px -5px 20px rgba(255,255,255,0.11), 5px 5px 20px rgba(0,0,0,0.43);\n  --neu-sm:-4px -4px 14px rgba(255,255,255,0.105), 4px 4px 14px rgba(0,0,0,0.473);\n  --neu-in:inset 2px 2px 4px rgba(0,0,0,0.387), inset -2px -2px 4px rgba(255,255,255,0.105);\n  --neu-in-lg:inset 3px 3px 6px rgba(0,0,0,0.43), inset -3px -3px 6px rgba(255,255,255,0.11);\n  --modal-shadow:0 7px 40px rgba(0,0,0,0.86);\n  --logo-shadow:-2px -2px 2px rgba(255,255,255,0.14), 2px 2px 2px rgba(0,0,0,0.1);\n  --mono:'Segoe UI',system-ui,sans-serif;\n  --sans:system-ui,sans-serif;\n", dark: "\n  /* Tmav\u00fd re\u017eim je hlub\u0161\u00ed ne\u017e d\u0159\u00edv, ale ne \u010dern\u00fd \u2014 na \u010dern\u00e9 plochu nejde\n     osv\u011btlit a st\u00edny by zmizely. Hlavn\u00ed tla\u010d\u00edtko je sv\u011btl\u00e9 s tmav\u00fdm p\u00edsmem.\n     Linky se posouvaj\u00ed spolu s pozad\u00edm, aby z\u016fstaly stejn\u011b z\u0159eteln\u00e9. */\n  --bg:#545454; --paper:#333333; --zvyraz:#545454; --logo:#545454;\n  --ink:#EDEDED; --ink-2:#8C8C8C; --line:#595959; --line-2:#7a7a7a;\n  --cyan:#EDEDED; --magenta:#C97B63; --yellow:#D9B44A; --key:#EDEDED;\n  --btn-ink:#000000; --focus:rgba(237,237,237,.22); --danger:#b31919;\n  --ok:#3dc760; --warn:#e8c545;\n  --neu:-9px -9px 24px rgba(255,255,255,0.08), 9px 9px 24px rgba(0,0,0,0.51);\n  --neu-sm:-4px -4px 10px rgba(255,255,255,0.076), 4px 4px 10px rgba(0,0,0,0.561);\n  --neu-in:inset 3px 3px 4px rgba(0,0,0,0.459), inset -3px -3px 4px rgba(255,255,255,0.076);\n  --neu-in-lg:inset 4px 4px 6px rgba(0,0,0,0.51), inset -4px -4px 6px rgba(255,255,255,0.08);\n  --modal-shadow:0 13px 48px rgba(0,0,0,1);\n  --logo-shadow:-2px -2px 2px rgba(255,255,255,0.14), 2px 2px 2px rgba(0,0,0,0.1);\n" };
+var VYCH_BARVY = {"light": {"--bg": "#949494", "--paper": "#dbdbdb", "--zvyraz": "#949494", "--ink": "#141414", "--ink-2": "#767676", "--line": "#D8D8D8", "--line-2": "#C7C7C7", "--key": "#141414", "--btn-ink": "#FFFFFF", "--cyan": "#141414", "--ok": "#3dc760", "--warn": "#e8c545", "--danger": "#b31919", "--logo": "#949494"}, "dark": {"--bg": "#545454", "--paper": "#333333", "--zvyraz": "#545454", "--ink": "#EDEDED", "--ink-2": "#8C8C8C", "--line": "#595959", "--line-2": "#7a7a7a", "--key": "#EDEDED", "--btn-ink": "#000000", "--cyan": "#EDEDED", "--ok": "#3dc760", "--warn": "#e8c545", "--danger": "#b31919", "--logo": "#545454"}}, VYCH_STINY = {"light": {"uhel": 135, "dVelky": 7, "blurVelky": 20, "dMaly": 6, "blurMaly": 14, "dVsazeny": 3, "blurVsazeny": 4, "silaSvetla": 11, "silaStinu": 43, "logoUhel": 135, "logoD": 3, "logoBlur": 2, "logoSvetlo": 14, "logoStin": 10}, "dark": {"uhel": 135, "dVelky": 13, "blurVelky": 24, "dMaly": 6, "blurMaly": 10, "dVsazeny": 4, "blurVsazeny": 4, "silaSvetla": 8, "silaStinu": 51, "logoUhel": 135, "logoD": 3, "logoBlur": 2, "logoSvetlo": 14, "logoStin": 10}}, VYCH_TVARY = {"--radius": "23px", "--radius-btn": "35px", "--radius-pole": "15px", "--radius-dlazdice": "15px", "--radius-stitek": "15px", "--ikona": "27px", "--ikona-tah": "1.5", "--ikona-pruhlednost": "1", "--pruhlednost-karty": "1", "--ikona-konec": "round", "--pismo": "15.5px", "--pismo-nadpis": "19.5px", "--pismo-popisek": "12.5px", "--pismo-poznamka": "14px", "--pismo-tabulka": "19px", "--pismo-vysledek": "50px", "--logo-velikost": "116px", "--prostrkani": "0.07em", "--tloustka-nadpisu": "900", "--radek": "1.4", "--mezera-karta-y": "20px", "--mezera-karta-x": "22px", "--mezera-karet": "16px", "--mezera-poli": "12px", "--pole-y": "9px", "--pole-x": "12px", "--tlacitko-y": "10px", "--tlacitko-x": "18px", "--okraj-stranky": "20px", "--sans": "system-ui,sans-serif", "--mono": "'Segoe UI',system-ui,sans-serif", "--mich-nazev": "26px", "--mich-davka": "34px", "--mich-vzorek": "52px", "--mich-hlavicka": "12px", "--mich-tabulka": "20px", "--mich-gramy": "26px", "--mich-radek": "11px", "--mich-vysledek": "52px", "--mich-wbar": "20px", "--mich-tlacitko": "15px", "--mich-mezera": "22px", "--sirka-stranky": "none", "--sloupec-1": "1fr", "--sloupec-2": "1fr", "--mezera-sloupcu": "40px", "--produkt-sloupec": "1", "--produkt-radek": "1", "--produkt-sirka": "auto", "--produkt-zarovnani": "stretch", "--produkt-vyska": "auto", "--vysledek-sloupec": "2", "--vysledek-radek": "1", "--vysledek-sirka": "auto", "--vysledek-zarovnani": "stretch", "--vysledek-vyska": "auto", "--recept-sloupec": "1", "--recept-radek": "2", "--recept-sirka": "auto", "--recept-zarovnani": "stretch", "--recept-vyska": "auto", "--zakazka-sloupec": "2", "--zakazka-radek": "2", "--zakazka-sirka": "auto", "--zakazka-zarovnani": "stretch", "--zakazka-vyska": "auto", "--tisk-sloupec": "1 / -1", "--tisk-radek": "3", "--tisk-sirka": "calc((100% - var(--mezera-sloupcu)) / 2)", "--tisk-zarovnani": "center", "--tisk-vyska": "auto"};
+var STRANKY = [{"sel": "", "nazev": "Základ (celá aplikace)"}, {"sel": ".michbg", "nazev": "Míchací režim"}], VYCH_PRESAHY = {".michbg": {"light": {"--paper": "#cccccc", "--zvyraz": "#919191", "--ink": "#000000", "--ink-2": "#8b8b8b", "--line": "#9e9e9e", "--line-2": "#949494", "--key": "#000000", "--btn-ink": "#ffffff", "--cyan": "#000000", "--bg": "#ffffff"}, "dark": {"--paper": "#2e2e2e", "--zvyraz": "#545454"}}}, KARTY = [{"klic": "produkt", "nazev": "Vybraný produkt", "sel": ".karta-produkt"}, {"klic": "vysledek", "nazev": "Kolik namíchat", "sel": ".bigpanel"}, {"klic": "recept", "nazev": "Receptura a barva", "sel": ".karta-recept"}, {"klic": "zakazka", "nazev": "Zakázka", "sel": ".karta-cisla"}, {"klic": "tisk", "nazev": "Parametry tisku", "sel": ".karta-tisk"}];
+var ZAC_STRANEK = "/* ZACATEK BAREV STRANEK */", KON_STRANEK = "/* KONEC BAREV STRANEK */";
+var PRED_SVETLY = ":root:not([data-theme=\"dark\"]) ", PRED_TMAVY = ":root[data-theme=\"dark\"] ";
+var BLOK = { light: "\n  /* Vzhled z\u016fst\u00e1v\u00e1 m\u011bkk\u00fd \u2014 karty vystupuj\u00ed z plochy st\u00ednem, ne r\u00e1me\u010dkem.\n     M\u011bn\u00ed se jen barvy: plocha je neutr\u00e1ln\u011b \u0161ed\u00e1 m\u00edsto tepl\u00e9 b\u00e9\u017eov\u00e9 a inkoust\n     je tmav\u0161\u00ed, aby se na to dalo d\u00edvat cel\u00fd den. Barevn\u00fd akcent zmizel;\n     zv\u00fdrazn\u011bn\u00ed d\u011bl\u00e1 inkoust, barva z\u016fstala tam, kde nese v\u00fdznam (odst\u00edn\n     barvy, varov\u00e1n\u00ed, stav v\u00e1\u017een\u00ed). */\n  /* --bg maluje JEN plochu str\u00e1nky; v\u0161echno, co na n\u00ed le\u017e\u00ed (karty, li\u0161ty,\n     tla\u010d\u00edtka, pole, \u0161t\u00edtky), bere barvu z --paper. Ty dv\u011b prom\u011bnn\u00e9 jdou\n     nastavit nez\u00e1visle \u2014 plocha je samostatn\u00e1 jednotka. */\n  --bg:#949494; --paper:#dbdbdb; --zvyraz:#949494; --logo:#949494;\n  --ink:#141414; --ink-2:#767676; --line:#D8D8D8; --line-2:#C7C7C7;\n  --cyan:#141414; --magenta:#C97B63; --yellow:#D9B44A; --key:#141414;\n  --btn-ink:#FFFFFF; --focus:rgba(20,20,20,.20); --danger:#b31919;\n  --ok:#3dc760; --warn:#e8c545;\n  /* Tvary: ka\u017ed\u00fd druh prvku m\u00e1 vlastn\u00ed zaoblen\u00ed, aby \u0161lo ladit zvl\u00e1\u0161\u0165\n     karty, tla\u010d\u00edtka, pole a dla\u017edice. Ikony jsou kreslen\u00e9, ne obr\u00e1zkov\u00e9 \u2014\n     velikost, tlou\u0161\u0165ka tahu i zakon\u010den\u00ed se \u0159\u00edd\u00ed odsud. */\n  --radius:23px; --radius-btn:35px; --radius-pole:15px; --radius-dlazdice:15px;\n  --radius-stitek:15px;\n  --ikona:27px; --ikona-tah:1.5; --ikona-konec:round; --ikona-pruhlednost:1;\n  --pruhlednost-karty:1;\n  /* P\u00edsmo se \u0159\u00edd\u00ed podle role, ne podle prvku: co je nadpis, co popisek, co\n     v\u00fdsledek. Zv\u011bt\u0161en\u00e9 varianty na domovsk\u00e9 str\u00e1nce se z t\u011bchto hodnot\n     dopo\u010d\u00edtaj\u00ed, tak\u017ee cel\u00e1 \u0161k\u00e1la dr\u017e\u00ed pohromad\u011b. */\n  --pismo:15.5px; --pismo-nadpis:19.5px; --pismo-popisek:12.5px;\n  --pismo-poznamka:14px; --pismo-tabulka:19px; --pismo-vysledek:50px;\n  --logo-velikost:116px; --prostrkani:0.07em; --tloustka-nadpisu:900; --radek:1.4;\n  /* Rozestupy: odsazen\u00ed uvnit\u0159 karty, mezera mezi kartami, mezera mezi poli\n     v \u0159\u00e1dku a odsazen\u00ed uvnit\u0159 pol\u00ed a tla\u010d\u00edtek (to ur\u010duje jejich v\u00fd\u0161ku). */\n  /* M\u00edchac\u00ed re\u017eim m\u00e1 vlastn\u00ed sadu rozm\u011br\u016f. Ne\u010dte se od kl\u00e1vesnice, ale od\n     v\u00e1hy \u2014 \u010dasto ve stoje a v rukavic\u00edch \u2014 tak\u017ee se lad\u00ed zvl\u00e1\u0161\u0165 od zbytku\n     aplikace a nesm\u00ed se h\u00fdbat, kdy\u017e se s\u00e1hne na obecnou \u0161k\u00e1lu. */\n  --mich-nazev:26px; --mich-davka:34px; --mich-vzorek:52px;\n  --mich-hlavicka:12px; --mich-tabulka:20px; --mich-gramy:26px;\n  --mich-radek:11px; --mich-vysledek:52px; --mich-wbar:20px;\n  --mich-tlacitko:15px; --mich-mezera:22px;\n  --mezera-karta-y:20px; --mezera-karta-x:22px; --mezera-karet:16px;\n  --mezera-poli:12px; --pole-y:9px; --pole-x:12px;\n  --tlacitko-y:10px; --tlacitko-x:18px; --okraj-stranky:20px;\n  /* Rozvr\u017een\u00ed hlavn\u00ed str\u00e1nky: kde kter\u00e1 karta stoj\u00ed, jak je \u0161irok\u00e1 a jak\n     vysok\u00e1. Ka\u017ed\u00e1 karta m\u00e1 sloupec, \u0159\u00e1dek, \u0161\u00ed\u0159ku, zarovn\u00e1n\u00ed a nejmen\u0161\u00ed v\u00fd\u0161ku\n     \u2014 dohromady tedy polohu i velikost. Lad\u00ed se v barvy.html na str\u00e1nce\n     Rozvr\u017een\u00ed; plat\u00ed od \u0161\u00ed\u0159ky okna 960 px, pod n\u00ed se karty skl\u00e1daj\u00ed pod sebe.\n     Dv\u011b karty ve stejn\u00e9m sloupci a \u0159\u00e1dku by se p\u0159ekryly \u2014 n\u00e1stroj to hl\u00edd\u00e1. */\n  --sirka-stranky:none; --sloupec-1:1fr; --sloupec-2:1fr; --mezera-sloupcu:40px;\n  --produkt-sloupec:1; --produkt-radek:1; --produkt-sirka:auto;\n  --produkt-zarovnani:stretch; --produkt-vyska:auto;\n  --vysledek-sloupec:2; --vysledek-radek:1; --vysledek-sirka:auto;\n  --vysledek-zarovnani:stretch; --vysledek-vyska:auto;\n  --recept-sloupec:1; --recept-radek:2; --recept-sirka:auto;\n  --recept-zarovnani:stretch; --recept-vyska:auto;\n  --zakazka-sloupec:2; --zakazka-radek:2; --zakazka-sirka:auto;\n  --zakazka-zarovnani:stretch; --zakazka-vyska:auto;\n  --tisk-sloupec:1 / -1; --tisk-radek:3;\n  --tisk-sirka:calc((100% - var(--mezera-sloupcu)) / 2);\n  --tisk-zarovnani:center; --tisk-vyska:auto;\n  --neu:-5px -5px 20px rgba(255,255,255,0.11), 5px 5px 20px rgba(0,0,0,0.43);\n  --neu-sm:-4px -4px 14px rgba(255,255,255,0.105), 4px 4px 14px rgba(0,0,0,0.473);\n  --neu-in:inset 2px 2px 4px rgba(0,0,0,0.387), inset -2px -2px 4px rgba(255,255,255,0.105);\n  --neu-in-lg:inset 3px 3px 6px rgba(0,0,0,0.43), inset -3px -3px 6px rgba(255,255,255,0.11);\n  --modal-shadow:0 7px 40px rgba(0,0,0,0.86);\n  --logo-shadow:-2px -2px 2px rgba(255,255,255,0.14), 2px 2px 2px rgba(0,0,0,0.1);\n  --mono:'Segoe UI',system-ui,sans-serif;\n  --sans:system-ui,sans-serif;\n", dark: "\n  /* Tmav\u00fd re\u017eim je hlub\u0161\u00ed ne\u017e d\u0159\u00edv, ale ne \u010dern\u00fd \u2014 na \u010dern\u00e9 plochu nejde\n     osv\u011btlit a st\u00edny by zmizely. Hlavn\u00ed tla\u010d\u00edtko je sv\u011btl\u00e9 s tmav\u00fdm p\u00edsmem.\n     Linky se posouvaj\u00ed spolu s pozad\u00edm, aby z\u016fstaly stejn\u011b z\u0159eteln\u00e9. */\n  --bg:#545454; --paper:#333333; --zvyraz:#545454; --logo:#545454;\n  --ink:#EDEDED; --ink-2:#8C8C8C; --line:#595959; --line-2:#7a7a7a;\n  --cyan:#EDEDED; --magenta:#C97B63; --yellow:#D9B44A; --key:#EDEDED;\n  --btn-ink:#000000; --focus:rgba(237,237,237,.22); --danger:#b31919;\n  --ok:#3dc760; --warn:#e8c545;\n  --neu:-9px -9px 24px rgba(255,255,255,0.08), 9px 9px 24px rgba(0,0,0,0.51);\n  --neu-sm:-4px -4px 10px rgba(255,255,255,0.076), 4px 4px 10px rgba(0,0,0,0.561);\n  --neu-in:inset 3px 3px 4px rgba(0,0,0,0.459), inset -3px -3px 4px rgba(255,255,255,0.076);\n  --neu-in-lg:inset 4px 4px 6px rgba(0,0,0,0.51), inset -4px -4px 6px rgba(255,255,255,0.08);\n  --modal-shadow:0 13px 48px rgba(0,0,0,1);\n  --logo-shadow:-2px -2px 2px rgba(255,255,255,0.14), 2px 2px 2px rgba(0,0,0,0.1);\n" };
 var barvy = JSON.parse(JSON.stringify(VYCH_BARVY));
 var stiny = JSON.parse(JSON.stringify(VYCH_STINY));
 var tvary = JSON.parse(JSON.stringify(VYCH_TVARY));
+/* Barvy stránek se drží jen jako odchylky od základu. Co stránka nemá
+   nastavené, bere z aplikace — a když se pak změní základ, změní se to
+   i na ní. Kdyby se ukládala celá paleta, stránka by se od základu
+   nenávratně odstřihla. */
+var presahy = JSON.parse(JSON.stringify(VYCH_PRESAHY));
+var stranka = "";
 var rezim = "light";
 var korenu = document.documentElement;
+/* Poslední spočítaný výstup. Nedrží se jen v poli na obrazovce — vkládá se
+   i do ukázky hlavní stránky, která běží ve vlastním okně. */
+var vystupText = "";
 
 /* Ze čtyř čísel (úhel, vzdálenost, rozostření, síly) se dopočítají všechny
    stíny naráz — proto spolu drží a svítí z jedné strany. */
@@ -653,16 +1200,76 @@ function logoCss(s){
 
 function jeHex(v){ return /^#[0-9a-fA-F]{6}$/.test(v); }
 
+/* Co se má u té které stránky ukázat: vlastní hodnota, jinak základ. */
+function barvaStranky(klic){
+  var o = presahy[stranka] && presahy[stranka][rezim];
+  if (stranka && o && o[klic] != null) return o[klic];
+  return barvy[rezim][klic];
+}
+function maPresah(klic){
+  var o = presahy[stranka] && presahy[stranka][rezim];
+  return !!(stranka && o && o[klic] != null);
+}
+function nastavBarvu(klic, v){
+  if (!stranka){ barvy[rezim][klic] = v; return; }
+  if (!presahy[stranka]) presahy[stranka] = { light: {}, dark: {} };
+  presahy[stranka][rezim][klic] = v;
+}
+function zrusPresah(klic){
+  if (stranka && presahy[stranka]) delete presahy[stranka][rezim][klic];
+}
+function pocetPresahu(sel){
+  var o = presahy[sel];
+  if (!o) return 0;
+  return Object.keys(o.light || {}).length + Object.keys(o.dark || {}).length;
+}
+
+/* Hlášení pod přepínačem stránek. Musí se přepsat i při každé změně barvy,
+   ne jen při přepnutí — jinak by tvrdilo, že stránka nemá nic vlastního. */
+function stavStranky(){
+  var stav = document.getElementById("stav-stranky");
+  if (!stav) return;
+  var n = pocetPresahu(stranka);
+  stav.textContent = !stranka
+    ? "Základní barvy platí všude, kde stránka nemá vlastní."
+    : (n ? "Tato stránka má " + n + (n === 1 ? " vlastní barvu." :
+             (n < 5 ? " vlastní barvy." : " vlastních barev."))
+           + " Zbytek bere ze základu."
+         : "Tato stránka zatím bere všechny barvy ze základu.");
+}
+
+/* Přepisy se na ukázku nasadí přímo na obal stránky — proměnné se dědí,
+   takže tím zbarví všechno uvnitř. Co stránka nemá, se musí zase odebrat,
+   jinak by po zrušení zůstala viset stará hodnota. */
+function nasadStranky(){
+  STRANKY.forEach(function(s){
+    if (!s.sel) return;
+    var o = (presahy[s.sel] || {})[rezim] || {};
+    [].slice.call(document.querySelectorAll(s.sel)).forEach(function(el){
+      VYCH_BARVY[rezim] && Object.keys(VYCH_BARVY[rezim]).forEach(function(k){
+        if (o[k] != null) el.style.setProperty(k, o[k]);
+        else el.style.removeProperty(k);
+      });
+    });
+  });
+}
+
 function nasad(){
   korenu.setAttribute("data-theme", rezim);
   var b = barvy[rezim], s = stinyCss(stiny[rezim]);
   for (var k in b) korenu.style.setProperty(k, b[k]);
   for (var k2 in s) korenu.style.setProperty(k2, s[k2]);
   radky.forEach(function(r){
-    var klic = r.getAttribute("data-klic"), v = b[klic] || "";
+    var klic = r.getAttribute("data-klic"), v = barvaStranky(klic) || "";
     r.querySelector('[data-role=hex]').value = v;
     if (jeHex(v)) r.querySelector('[data-role=barva]').value = v;
+    r.classList.toggle("vlastni", maPresah(klic));
   });
+  nasadStranky();
+  [].slice.call(document.querySelectorAll("[data-stranka]")).forEach(function(b4){
+    b4.classList.toggle("on", b4.getAttribute("data-stranka") === stranka);
+  });
+  stavStranky();
   posuvy.forEach(function(p){
     var klic = p.getAttribute("data-klic"), inp = p.querySelector('[data-role=posuv]');
     inp.value = stiny[rezim][klic];
@@ -671,9 +1278,13 @@ function nasad(){
   for (var k3 in tvary) korenu.style.setProperty(k3, tvary[k3]);
   tvarPosuvy.forEach(function(p){
     var klic = p.getAttribute("data-tvar"), inp = p.querySelector('[data-role=posuv]');
-    inp.value = parseFloat(tvary[klic]);
+    /* „auto" není číslo, ale posuvník jiné hodnoty neumí — nula tedy znamená
+       auto a popisek to říká slovem, ať nikdo nehádá, co je nula výšky. */
+    var auto = tvary[klic] === "auto";
+    inp.value = auto ? 0 : parseFloat(tvary[klic]);
     p.querySelector('[data-role=cislo]').textContent = tvary[klic];
   });
+  vybery.forEach(function(s){ s.value = tvary[s.getAttribute("data-vyber")] || s.value; });
   rodiny.forEach(function(s){ s.value = tvary[s.getAttribute("data-rodina")] || s.value; });
   [].slice.call(document.querySelectorAll("[data-konec]")).forEach(function(b3){
     b3.classList.toggle("on", b3.getAttribute("data-konec") === tvary["--ikona-konec"]);
@@ -682,7 +1293,63 @@ function nasad(){
     b2.classList.toggle("on", b2.getAttribute("data-rezim") === rezim);
   });
   oznacSmer();
+  stavRozvrzeni();
   vypis();
+  nasadRam();
+}
+
+/* Dvě karty ve stejném sloupci a řádku se v mřížce překryjí. Nejde to zakázat
+   — jsou to dva samostatné výběry — ale jde to hned říct, dokud je na to
+   ukázka před očima. Karta přes oba sloupce zabírá v řádku obojí místo. */
+function stavRozvrzeni(){
+  var stav = document.getElementById("stav-rozvrzeni");
+  if (!stav) return;
+  var obsazeno = {}, kolize = [];
+  KARTY.forEach(function(k){
+    var sl = tvary["--" + k.klic + "-sloupec"], r = tvary["--" + k.klic + "-radek"];
+    (sl === "1 / -1" ? ["1", "2"] : [sl]).forEach(function(s){
+      var kde = s + ":" + r;
+      if (obsazeno[kde] && kolize.indexOf(obsazeno[kde] + " a " + k.nazev) < 0)
+        kolize.push(obsazeno[kde] + " a " + k.nazev);
+      obsazeno[kde] = k.nazev;
+    });
+  });
+  stav.className = kolize.length ? "note kolize" : "note";
+  stav.textContent = kolize.length
+    ? "Překrývá se: " + kolize.join(", ") + " — stojí ve stejném místě mřížky."
+    : "Žádné dvě karty nestojí ve stejném místě.";
+}
+
+/* Ukázka je samostatné okno, takže se do ní proměnné musí zapsat zvlášť —
+   z nástroje se nedědí. Zapíše se do ní přesně to, co vyjde na výstupu, takže
+   ukázka nemůže ukazovat něco jiného, než co se vloží do aplikace. */
+var ram = document.getElementById("ram"), platno = document.getElementById("platno");
+var sirkaOkna = 1600, ramHotov = false;
+
+function pripravRam(){
+  var d = ram.contentDocument;
+  d.open();
+  d.write('<!doctype html><html lang="cs"><head><meta charset="utf-8">'
+    + '<style id="app"></style><style id="prom"></style>'
+    + '<style>body{margin:0}</style></head><body></body></html>');
+  d.close();
+  d.getElementById("app").textContent = document.getElementById("app-css").textContent;
+  d.body.appendChild(document.getElementById("ukazka-hlavni").content.cloneNode(true));
+  ramHotov = true;
+}
+
+function nasadRam(){
+  if (!ram || !ramHotov) return;
+  var d = ram.contentDocument;
+  d.documentElement.setAttribute("data-theme", rezim);
+  d.getElementById("prom").textContent = vystupText;
+  ram.style.width = sirkaOkna + "px";
+  ram.style.height = "10px";
+  var v = Math.max(d.body.scrollHeight, 400);
+  ram.style.height = v + "px";
+  var k = platno.clientWidth / sirkaOkna;
+  ram.style.transform = "scale(" + k + ")";
+  platno.style.height = Math.round(v * k) + "px";
 }
 
 function vypis(){
@@ -699,18 +1366,48 @@ function vypis(){
     }
     t += (m === "light" ? ":root{" : ':root[data-theme="dark"]{') + blk + "}\n";
   });
-  document.getElementById("vystup").value = t;
+  /* Barvy stránek jdou do vlastního úseku, ať se dá vložit obojí najednou
+     a ať se při dalším spuštění nástroje zase načtou. */
+  t += ZAC_STRANEK + "\n";
+  STRANKY.forEach(function(s){
+    if (!s.sel) return;
+    ["light", "dark"].forEach(function(m){
+      var o = (presahy[s.sel] || {})[m] || {};
+      var klice = Object.keys(o).filter(function(k){ return o[k]; });
+      if (!klice.length) return;
+      /* Obojí se musí vymezit proti druhému režimu: proměnná na obalu stránky
+         přebije :root vždycky, takže bez toho by světlé barvy stránky platily
+         i v tmavém režimu a přesvítily by tmavý základ. */
+      t += (m === "dark" ? PRED_TMAVY : PRED_SVETLY) + s.sel + "{"
+        + klice.map(function(k){ return k + ":" + o[k] + ";"; }).join(" ") + "}\n";
+    });
+  });
+  t += KON_STRANEK + "\n";
+  vystupText = t;
+  [].slice.call(document.querySelectorAll("[data-vystup]")).forEach(function(v){
+    v.value = t;
+  });
 }
 
 var radky = [].slice.call(document.querySelectorAll(".radek"));
 radky.forEach(function(r){
   var klic = r.getAttribute("data-klic");
   var barva = r.querySelector('[data-role=barva]'), hex = r.querySelector('[data-role=hex]');
-  barva.addEventListener("input", function(){ barvy[rezim][klic] = barva.value; hex.value = barva.value;
-    korenu.style.setProperty(klic, barva.value); vypis(); });
-  hex.addEventListener("input", function(){ barvy[rezim][klic] = hex.value;
+  function zmena(v){
+    nastavBarvu(klic, v);
+    if (!stranka) korenu.style.setProperty(klic, v);
+    r.classList.toggle("vlastni", maPresah(klic));
+    nasadStranky(); stavStranky(); vypis();
+  }
+  barva.addEventListener("input", function(){ hex.value = barva.value; zmena(barva.value); });
+  hex.addEventListener("input", function(){
     if (jeHex(hex.value)) barva.value = hex.value;
-    korenu.style.setProperty(klic, hex.value); vypis(); });
+    zmena(hex.value); });
+  /* Dvojklik na název proměnné vrátí stránce základní barvu. */
+  var jmeno = r.querySelector(".txt b");
+  if (jmeno) jmeno.addEventListener("dblclick", function(){
+    if (!stranka) return;
+    zrusPresah(klic); nasad(); });
 });
 
 /* Jen posuvníky stínů — tvary, písmo a rozestupy mají data-tvar a řeší se níž. */
@@ -731,11 +1428,67 @@ tvarPosuvy.forEach(function(p){
   var klic = p.getAttribute("data-tvar"), inp = p.querySelector('[data-role=posuv]');
   inp.addEventListener("input", function(){
     var jed = inp.getAttribute("data-jed");
-    tvary[klic] = inp.value + jed;
+    /* Nejmenší výška na nule není nula, ale „auto" — karta si výšku vezme
+       podle obsahu. Nula by ji naopak pustila pod obsah a text by vylezl ven. */
+    tvary[klic] = (/-vyska$/.test(klic) && +inp.value === 0) ? "auto" : inp.value + jed;
     p.querySelector('[data-role=cislo]').textContent = tvary[klic];
-    korenu.style.setProperty(klic, tvary[klic]); vypis();
+    korenu.style.setProperty(klic, tvary[klic]);
+    /* Týž rozestup má posuvník na obou stránkách — musí ukazovat totéž. */
+    tvarPosuvy.forEach(function(q){
+      if (q !== p && q.getAttribute("data-tvar") === klic){
+        q.querySelector('[data-role=posuv]').value = inp.value;
+        q.querySelector('[data-role=cislo]').textContent = tvary[klic];
+      }
+    });
+    vypis(); nasadRam();
   });
 });
+/* Sloupec, řádek, šířka a zarovnání taky nejsou čísla — jsou to výběry.
+   Jinak se chovají stejně jako posuvníky: zapíší proměnnou a přepočítají
+   ukázku i výstup. */
+var vybery = [].slice.call(document.querySelectorAll("[data-vyber]"));
+vybery.forEach(function(s){
+  s.addEventListener("change", function(){
+    var klic = s.getAttribute("data-vyber");
+    tvary[klic] = s.value;
+    korenu.style.setProperty(klic, s.value);
+    stavRozvrzeni(); vypis(); nasadRam();
+  });
+});
+
+[].slice.call(document.querySelectorAll("[data-okno]")).forEach(function(b){
+  b.addEventListener("click", function(){
+    sirkaOkna = +b.getAttribute("data-okno");
+    [].slice.call(document.querySelectorAll("[data-okno]")).forEach(function(x){
+      x.classList.toggle("on", x === b); });
+    nasadRam();
+  });
+});
+
+/* Stránky nástroje. Ukázka se musí přeměřit až když je vidět — ve skrytém
+   prvku má nulovou šířku a zmenšení by vyšlo na nulu. */
+[].slice.call(document.querySelectorAll("[data-strana]")).forEach(function(b){
+  b.addEventListener("click", function(){
+    var kam = b.getAttribute("data-strana");
+    document.getElementById("strana-barvy").hidden = kam !== "barvy";
+    document.getElementById("strana-rozvrzeni").hidden = kam !== "rozvrzeni";
+    [].slice.call(document.querySelectorAll("[data-strana]")).forEach(function(x){
+      x.classList.toggle("on", x === b); });
+    if (kam === "rozvrzeni") nasadRam();
+  });
+});
+window.addEventListener("resize", nasadRam);
+
+document.getElementById("zpet-rozvrzeni").addEventListener("click", function(){
+  /* Vrací se jen rozvržení — barvy, písmo ani stíny se nesmí hnout. */
+  Object.keys(VYCH_TVARY).forEach(function(k){
+    if (/^--(sirka-stranky|sloupec-\d|mezera-sloupcu|mezera-karet|okraj-stranky)$/.test(k)
+        || /^--(produkt|vysledek|recept|zakazka|tisk)-/.test(k))
+      tvary[k] = VYCH_TVARY[k];
+  });
+  nasad();
+});
+
 /* Řez písma není číslo, takže má výběr místo posuvníku — jinak se chová stejně. */
 var rodiny = [].slice.call(document.querySelectorAll("[data-rodina]"));
 rodiny.forEach(function(s){
@@ -784,22 +1537,35 @@ function oznacSmer(){
 [].slice.call(document.querySelectorAll("[data-rezim]")).forEach(function(b){
   b.addEventListener("click", function(){ rezim = b.getAttribute("data-rezim"); nasad(); });
 });
+[].slice.call(document.querySelectorAll("[data-stranka]")).forEach(function(b){
+  b.addEventListener("click", function(){ stranka = b.getAttribute("data-stranka"); nasad(); });
+});
+document.getElementById("zpet-stranka").addEventListener("click", function(){
+  if (!stranka){ barvy[rezim] = Object.assign({}, VYCH_BARVY[rezim]); }
+  else { delete presahy[stranka]; }
+  nasad();
+});
 document.getElementById("zpet-stiny").addEventListener("click", function(){
   stiny[rezim] = Object.assign({}, VYCH_STINY[rezim]); nasad(); });
 document.getElementById("zpet-tvary").addEventListener("click", function(){
   tvary = JSON.parse(JSON.stringify(VYCH_TVARY)); nasad(); });
 document.getElementById("zpet-barvy").addEventListener("click", function(){
   barvy[rezim] = Object.assign({}, VYCH_BARVY[rezim]); nasad(); });
-document.getElementById("kopirovat").addEventListener("click", function(){
-  var t = document.getElementById("vystup");
-  t.removeAttribute("readonly"); t.select();
-  var ok = false;
-  try { ok = document.execCommand("copy"); } catch (e) {}
-  t.setAttribute("readonly", "readonly");
-  document.getElementById("stav").textContent = ok ? "zkopírováno do schránky"
-    : "nepodařilo se — označte text a zkopírujte ručně";
+/* Výstup je na obou stránkách, aby se nemuselo přebíhat — kopíruje se ten,
+   u kterého se stojí. */
+[].slice.call(document.querySelectorAll("[data-kopirovat]")).forEach(function(b){
+  b.addEventListener("click", function(){
+    var karta = b.closest(".vystup"), t = karta.querySelector("[data-vystup]");
+    t.removeAttribute("readonly"); t.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) {}
+    t.setAttribute("readonly", "readonly");
+    karta.querySelector("[data-stav]").textContent = ok ? "zkopírováno do schránky"
+      : "nepodařilo se — označte text a zkopírujte ručně";
+  });
 });
 
+pripravRam();
 nasad();
 </script>
 </body></html>

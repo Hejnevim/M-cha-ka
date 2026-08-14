@@ -34,9 +34,33 @@
   --logo-velikost:116px; --prostrkani:0.07em; --tloustka-nadpisu:900; --radek:1.4;
   /* Rozestupy: odsazení uvnitř karty, mezera mezi kartami, mezera mezi poli
      v řádku a odsazení uvnitř polí a tlačítek (to určuje jejich výšku). */
+  /* Míchací režim má vlastní sadu rozměrů. Nečte se od klávesnice, ale od
+     váhy — často ve stoje a v rukavicích — takže se ladí zvlášť od zbytku
+     aplikace a nesmí se hýbat, když se sáhne na obecnou škálu. */
+  --mich-nazev:26px; --mich-davka:34px; --mich-vzorek:52px;
+  --mich-hlavicka:12px; --mich-tabulka:20px; --mich-gramy:26px;
+  --mich-radek:11px; --mich-vysledek:52px; --mich-wbar:20px;
+  --mich-tlacitko:15px; --mich-mezera:22px;
   --mezera-karta-y:20px; --mezera-karta-x:22px; --mezera-karet:16px;
   --mezera-poli:12px; --pole-y:9px; --pole-x:12px;
   --tlacitko-y:10px; --tlacitko-x:18px; --okraj-stranky:20px;
+  /* Rozvržení hlavní stránky: kde která karta stojí, jak je široká a jak
+     vysoká. Každá karta má sloupec, řádek, šířku, zarovnání a nejmenší výšku
+     — dohromady tedy polohu i velikost. Ladí se v barvy.html na stránce
+     Rozvržení; platí od šířky okna 960 px, pod ní se karty skládají pod sebe.
+     Dvě karty ve stejném sloupci a řádku by se překryly — nástroj to hlídá. */
+  --sirka-stranky:none; --sloupec-1:1fr; --sloupec-2:1fr; --mezera-sloupcu:40px;
+  --produkt-sloupec:1; --produkt-radek:1; --produkt-sirka:auto;
+  --produkt-zarovnani:stretch; --produkt-vyska:auto;
+  --vysledek-sloupec:2; --vysledek-radek:1; --vysledek-sirka:auto;
+  --vysledek-zarovnani:stretch; --vysledek-vyska:auto;
+  --recept-sloupec:1; --recept-radek:2; --recept-sirka:auto;
+  --recept-zarovnani:stretch; --recept-vyska:auto;
+  --zakazka-sloupec:2; --zakazka-radek:2; --zakazka-sirka:auto;
+  --zakazka-zarovnani:stretch; --zakazka-vyska:auto;
+  --tisk-sloupec:1 / -1; --tisk-radek:3;
+  --tisk-sirka:calc((100% - var(--mezera-sloupcu)) / 2);
+  --tisk-zarovnani:center; --tisk-vyska:auto;
   --neu:-5px -5px 20px rgba(255,255,255,0.11), 5px 5px 20px rgba(0,0,0,0.43);
   --neu-sm:-4px -4px 14px rgba(255,255,255,0.105), 4px 4px 14px rgba(0,0,0,0.473);
   --neu-in:inset 2px 2px 4px rgba(0,0,0,0.387), inset -2px -2px 4px rgba(255,255,255,0.105);
@@ -62,6 +86,14 @@
   --modal-shadow:0 13px 48px rgba(0,0,0,1);
   --logo-shadow:-2px -2px 2px rgba(255,255,255,0.14), 2px 2px 2px rgba(0,0,0,0.1);
 }
+/* ZACATEK BAREV STRANEK */
+/* Vlastní barvy jednotlivých stránek. Proměnné se dědí, takže co se nastaví
+   na obal stránky, platí uvnitř ní a přebije základ; co se tu neuvede, bere
+   stránka z aplikace. Prázdný úsek znamená, že všechny stránky vypadají
+   stejně. Zapisuje sem barvy.html — ručně to needitujte, přepsalo by se to. */
+:root:not([data-theme="dark"]) .michbg{--paper:#cccccc; --zvyraz:#919191; --ink:#000000; --ink-2:#8b8b8b; --line:#9e9e9e; --line-2:#949494; --key:#000000; --btn-ink:#ffffff; --cyan:#000000; --bg:#ffffff;}
+:root[data-theme="dark"] .michbg{--paper:#2e2e2e; --zvyraz:#545454;}
+/* KONEC BAREV STRANEK */
 :root[data-theme="dark"] .warnbox,:root[data-theme="dark"] #chyba{background:#2C2317;border-color:#463824;color:#E0AE6B}
 :root[data-theme="dark"] .okbox{background:#182A20;border-color:#284434;color:#79CFA0}
 :root[data-theme="dark"] .imgwarn{background:#2C2317 !important;color:#E0AE6B !important}
@@ -145,26 +177,34 @@ svg[viewBox="0 0 24 24"] path,svg[viewBox="0 0 24 24"] circle,svg[viewBox="0 0 2
 .navdrop button:hover{background:var(--zvyraz)}
 .navdrop button.on{color:var(--cyan);font-weight:800}
 :root[data-theme="dark"] .navdrop button:hover{background:rgba(127,163,217,.16)}
-.wrap{max-width:none;margin:0;padding:var(--okraj-stranky) clamp(16px,3vw,40px) 56px}
+.wrap{max-width:var(--sirka-stranky);margin:0 auto;padding:var(--okraj-stranky) clamp(16px,3vw,40px) 56px}
 .grid{display:grid;gap:var(--mezera-karet)}
 /* Kalkulace stojí na dvou stejných polovinách: vlevo zadání, vpravo výsledek.
    Obě okna mají tutéž šířku a potkávají se přesně uprostřed stránky. */
-@media(min-width:960px){.grid.calc{grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:40px;align-items:stretch}}
+@media(min-width:960px){.grid.calc{grid-template-columns:minmax(0,var(--sloupec-1)) minmax(0,var(--sloupec-2));
+  column-gap:var(--mezera-sloupcu);align-items:stretch}}
 /* Obě okna končí ve stejné výšce: levý sloupec je sloupec pružný, poslední
    karta v něm dorovná zbytek místa, a karta výsledku vyplní svůj sloupec celý.
    Tlačítka se v obou drží u dolního okraje. */
-/* Vybraný produkt a Kolik namíchat stojí vedle sebe v prvním řádku, takže
-   mají tutéž šířku i výšku a potkávají se uprostřed stránky. Zadání zakázky
-   je pod produktem, ve druhém řádku. */
+/* Kde která karta stojí, se řídí proměnnými — poloha, šířka i nejmenší výška.
+   Výchozí stav: Vybraný produkt a Kolik namíchat vedle sebe v prvním řádku,
+   pod nimi receptura a zakázka, a parametry tisku ve třetím řádku na středu.
+   Karta parametrů je přitom široká přesně jako jeden sloupec mřížky, což není
+   jen kvůli symetrii: díky stejné šířce, stejnému odsazení a stejným třem
+   sloupcům vyjdou dlaždice parametrů na chlup stejně velké jako náhledy
+   produktu — a to při každé šířce okna, ne jen při jedné. Přestavuje se to
+   v barvy.html na stránce Rozvržení, ne tady. */
 @media(min-width:960px){
-  .grid.calc>.karta-produkt{grid-column:1;grid-row:1}
-  .grid.calc>.bigpanel{grid-column:2;grid-row:1}
-  /* Zadání stojí ve třech kartách: receptura pod produktem (stejně široká),
-     čísla zakázky vedle ní pod výsledkem, a parametry tisku přes celou šířku
-     ve třetím řádku. Sbalený souhrn zaujme místo receptury. */
-  .grid.calc>.bigform{grid-column:1;grid-row:2}
-  .grid.calc>.karta-cisla{grid-column:2;grid-row:2}
-  .grid.calc>.karta-tisk{grid-column:1 / -1;grid-row:3}
+  .grid.calc>.karta-produkt{grid-column:var(--produkt-sloupec);grid-row:var(--produkt-radek);
+    width:var(--produkt-sirka);justify-self:var(--produkt-zarovnani);min-height:var(--produkt-vyska)}
+  .grid.calc>.bigpanel{grid-column:var(--vysledek-sloupec);grid-row:var(--vysledek-radek);
+    width:var(--vysledek-sirka);justify-self:var(--vysledek-zarovnani);min-height:var(--vysledek-vyska)}
+  .grid.calc>.karta-recept{grid-column:var(--recept-sloupec);grid-row:var(--recept-radek);
+    width:var(--recept-sirka);justify-self:var(--recept-zarovnani);min-height:var(--recept-vyska)}
+  .grid.calc>.karta-cisla{grid-column:var(--zakazka-sloupec);grid-row:var(--zakazka-radek);
+    width:var(--zakazka-sirka);justify-self:var(--zakazka-zarovnani);min-height:var(--zakazka-vyska)}
+  .grid.calc>.karta-tisk{grid-column:var(--tisk-sloupec);grid-row:var(--tisk-radek);
+    width:var(--tisk-sirka);justify-self:var(--tisk-zarovnani);min-height:var(--tisk-vyska)}
   .grid.calc>.card{margin-bottom:0}
   .karta-produkt{display:flex;flex-direction:column}
 }
@@ -178,7 +218,9 @@ svg[viewBox="0 0 24 24"] path,svg[viewBox="0 0 24 24"] circle,svg[viewBox="0 0 2
 .bigpanel .card .hint{font-size:calc(var(--pismo-poznamka) * 1.24)}
 .bigpanel .result-big{font-size:clamp(calc(var(--pismo-vysledek) * 1.35),4.6vw,calc(var(--pismo-vysledek) * 2))}
 .bigpanel .result-sub{font-size:calc(var(--pismo) * 1.21)}
-.bigpanel .mixbar{height:30px}
+/* Pruh složení má stejnou výšku všude, kde je zvětšené zadání — jinak by se
+   tentýž údaj na dvou místech tvářil jako dvě různé věci. */
+.bigpanel .mixbar,.bigform .mixbar{height:30px}
 .bigpanel table.t{font-size:calc(var(--pismo-tabulka) * 1.26)}
 .bigpanel table.t th{padding:10px}
 .bigpanel table.t td{padding:11px 10px}
@@ -198,19 +240,31 @@ svg[viewBox="0 0 24 24"] path,svg[viewBox="0 0 24 24"] circle,svg[viewBox="0 0 2
    Roste s nimi i popisek, šipka a nabídka, jinak by na velkém poli zůstaly
    drobné a pole by vypadalo jako omylem zvětšené. */
 .karta-tisk label.f{font-size:calc(var(--pismo-popisek) * 1.5);margin-bottom:10px;text-align:center}
-/* Dlaždice ve stejném duchu jako náhled produktu (272 × 272 px): skoro
-   čtverec, hodnota uprostřed. Roztažené pole přes celou třetinu řádku se
-   z odstupu čte hůř než blok, který má tvar — oko najde dřív dlaždici než
-   dlouhý pruh. Šířka je omezená, ale dlaždice se rozestoupí po celém řádku. */
-.karta-tisk .frow.c3>div{justify-items:center}
-.karta-tisk select{font-size:calc(var(--pismo) * 2);font-weight:700;text-align:center;
-  width:100%;max-width:340px;aspect-ratio:1.2;justify-self:center;
+/* Dlaždice přesně jako náhled produktu: čtverec vyplňující svůj sloupec,
+   hodnota uprostřed. Roztažené pole přes celou třetinu řádku se z odstupu
+   čte hůř než blok, který má tvar — oko najde dřív dlaždici než dlouhý pruh. */
+/* Písmo, odsazení i šipka se měří od šířky dlaždice, ne pevným počtem pixelů.
+   Pevná velikost drží čtverec jen na široké obrazovce — jakmile se dlaždice
+   zmenší, text se zalomí na tři řádky, dlaždice se protáhne na výšku a přestane
+   odpovídat náhledu produktu. Takhle se zmenší celá kresba naráz a tvar drží. */
+.karta-tisk .frow.c3>div{container-type:inline-size}
+.karta-tisk select{font-size:min(calc(var(--pismo) * 2), 11cqw);font-weight:700;text-align:center;
+  width:100%;aspect-ratio:1;
   display:flex;align-items:center;justify-content:center;
-  /* Šipka je dole uprostřed, ne vpravo — po stranách proto stačí běžné
-     odsazení. Široké okraje by lámaly hodnoty na dva řádky. */
-  padding:calc(var(--pole-y) * 2) calc(var(--pole-x) * 1.6) calc(var(--pole-y) * 5.5);
-  background-size:14px 14px,14px 14px;
-  background-position:calc(50% - 14px) calc(100% - 26px),calc(50%) calc(100% - 26px)}
+  /* Hodnota a šipka stojí pod sebou jako jedna dvojice na středu dlaždice.
+     Proto se tady nekreslí šipka pozadím jako u ostatních polí — pozadí je
+     přilepené k okraji a text by zůstal nad středem. Místo toho se použije
+     šipka, kterou prohlížeč k výběru sám přidává: je to skutečný prvek, takže
+     ji lze do dvojice postavit a vycentrovat obojí naráz. */
+  flex-direction:column;gap:4cqw;padding:5cqw;background-image:none}
+/* Prohlížeč šipku sám odsouvá k pravému okraji (`margin-inline-start:auto`),
+   protože počítá s tím, že stojí vedle textu. Ve sloupci ji to vytlačí na kraj
+   místo na střed — okraj se proto ruší. Text vedle ní se roztahuje na celou
+   šířku, což by dvojici rozhodilo taky. */
+.karta-tisk select::picker-icon{display:block;width:9cqw;height:9cqw;margin:0;flex:none;
+  color:var(--ink-2);transition:rotate .15s}
+.karta-tisk select::select-fallback-button-text{flex:0 1 auto;text-align:center}
+.karta-tisk select:open::picker-icon{rotate:180deg}
 .karta-tisk select::picker(select){font-size:calc(var(--pismo) * 1.5)}
 .karta-tisk option{padding:calc(var(--pole-y) * 1.4) calc(var(--pole-x) * 1.4)}
 .bigform select:focus,.bigform input:focus{box-shadow:var(--neu-sm),0 0 0 3px var(--focus)}
@@ -323,38 +377,44 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
    Písmo je záměrně o dost větší: na displej se kouká z metru a se špinavýma
    rukama, ne z pracovní vzdálenosti. */
 .michbg{position:fixed;inset:0;z-index:80;background:var(--bg);overflow:auto;display:flex;flex-direction:column}
-.michhlav{position:sticky;top:0;z-index:2;background:var(--bg);display:flex;align-items:center;gap:16px;
-  flex-wrap:wrap;padding:14px 22px;box-shadow:0 6px 16px rgba(24,23,15,.10)}
-.michhlav .nazev{font-size:26px;font-weight:800;line-height:normal;color:var(--ink)}
-.michhlav .kde{font-size:14px;color:var(--ink-2);font-family:var(--mono)}
+.michhlav{position:sticky;top:0;z-index:2;background:var(--bg);display:flex;align-items:center;
+  gap:calc(var(--mich-mezera) * .73);flex-wrap:wrap;
+  padding:calc(var(--mich-mezera) * .64) var(--mich-mezera);box-shadow:0 6px 16px rgba(24,23,15,.10)}
+.michhlav .nazev{font-size:var(--mich-nazev);font-weight:800;line-height:normal;color:var(--ink)}
+.michhlav .kde{font-size:calc(var(--mich-nazev) * .54);color:var(--ink-2);font-family:var(--mono)}
 .michdavka{margin-left:auto;text-align:right;font-family:var(--mono)}
-.michdavka b{display:block;font-size:34px;font-weight:700;line-height:normal}
-.michdavka span{font-size:13px;color:var(--ink-2)}
-.michvzorek{width:52px;height:52px;border-radius:14px;box-shadow:var(--neu-sm);flex:none}
-.michtelo{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:22px;padding:18px 22px 28px;align-items:start}
-.michtab{width:100%;border-collapse:collapse;font-size:20px}
-.michtab th{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-2);
-  text-align:left;padding:6px 10px;border-bottom:2px solid var(--line-2)}
-.michtab td{padding:11px 10px;border-bottom:1px solid var(--line)}
+.michdavka b{display:block;font-size:var(--mich-davka);font-weight:700;line-height:normal}
+.michdavka span{font-size:calc(var(--mich-davka) * .38);color:var(--ink-2)}
+.michvzorek{width:var(--mich-vzorek);height:var(--mich-vzorek);border-radius:var(--radius-dlazdice);
+  box-shadow:var(--neu-sm);flex:none}
+.michtelo{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:var(--mich-mezera);
+  padding:calc(var(--mich-mezera) * .82) var(--mich-mezera) calc(var(--mich-mezera) * 1.27);align-items:start}
+.michtab{width:100%;border-collapse:collapse;font-size:var(--mich-tabulka)}
+.michtab th{font-size:var(--mich-hlavicka);text-transform:uppercase;letter-spacing:.6px;color:var(--ink-2);
+  text-align:left;padding:calc(var(--mich-radek) * .55) 10px;border-bottom:2px solid var(--line-2)}
+.michtab td{padding:var(--mich-radek) 10px;border-bottom:1px solid var(--line)}
 .michtab td.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
-.michtab .g{font-size:26px;font-weight:700}
+.michtab .g{font-size:var(--mich-gramy);font-weight:700}
 .michtab tr.ted{background:var(--zvyraz)}
 .michtab tr.ted td{font-weight:700}
 .michtab tr.hotovo td{color:var(--ink-2)}
 .michtab tr.hotovo .g{font-weight:400}
 .michstav{display:inline-block;width:26px;text-align:center}
 /* Ovládání uvnitř režimu je větší — míchá se ve stoje, často v rukavicích. */
-.michbg .card{box-shadow:none;padding:0}
-.michbg .card>h2{font-size:20px}
-.michbg .btn{padding:13px 22px;font-size:15px}
-.michbg .btn.sm{padding:9px 15px;font-size:13.5px}
-.michbg .result-big{font-size:52px}
-.michbg .wbar{height:20px}
-.michbg .note,.michbg .result-sub{font-size:13.5px}
+/* Karty tu stojí z plochy stejně jako v kalkulaci — asistent navážení je něco,
+   co se obsluhuje, takže má být ohraničený, ne rozpitý do pozadí. Odsazení si
+   bere z míchací sady, ne z obecné: uvnitř režimu je všechno o kus větší. */
+.michbg .card{padding:var(--mich-mezera);margin-bottom:var(--mich-mezera)}
+.michbg .card>h2{font-size:calc(var(--pismo-nadpis) * 1.03)}
+.michbg .btn{padding:calc(var(--mich-tlacitko) * .87) calc(var(--mich-tlacitko) * 1.47);font-size:var(--mich-tlacitko)}
+.michbg .btn.sm{padding:calc(var(--mich-tlacitko) * .6) calc(var(--mich-tlacitko) * 1);font-size:calc(var(--mich-tlacitko) * .9)}
+.michbg .result-big{font-size:var(--mich-vysledek)}
+.michbg .wbar{height:var(--mich-wbar)}
+.michbg .note,.michbg .result-sub{font-size:calc(var(--pismo-poznamka) * .96)}
 @media (max-width:1000px){
   .michtelo{grid-template-columns:1fr}
-  .michtab{font-size:17px}
-  .michtab .g{font-size:22px}
+  .michtab{font-size:calc(var(--mich-tabulka) * .85)}
+  .michtab .g{font-size:calc(var(--mich-gramy) * .85)}
 }
 @media print{.michbg{display:none}}
 .linkbox{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
@@ -4498,21 +4558,19 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
             <!-- Vybraná barva stejně velká jako v „Kolik namíchat". Je to hlavní
                  kontrola, že se míchá ta správná — a kontrola, kterou tiskař dělá
                  okem, musí být na obou místech stejná, jinak se nedají porovnat. -->
-            <div className="rowline" style=${{ marginTop: 12, marginBottom: 0 }}>
-              <span className="swatch" style=${{ background: (recipe && recipe.hex) || "#888", width: 40, height: 40 }} />
-              <span>
-                <b style=${{ fontSize: 17 }}>${recipe ? recipe.name : "— bez receptury —"}</b>
-                ${recipe && recipe.series ? html`<span className="note"> · ${recipe.series}</span>` : ""}
-                <br /><span className="note">
-                  ${recipe && recipe.type === "Custom" ? "Custom" : "Pantone standard"}
-                  ${" · hustota " + fmt(n(recipe ? recipe.density : 1, 1), 2) + " g/ml"}
-                  ${" · " + (recipe ? recipe.components.length : 0) + " komponent"}
-                  ${vazRec && recipe && vazRec.id === recipe.id
-                    ? " · vázaná na " + (colorSel ? (colorSel.code || colorSel.name || "") : "")
-                      + (vazbaSiroka ? " (všechny polohy)" : (position ? " · " + position.tech + " " + position.name : ""))
-                    : ""}
-                </span>
+            <div style=${{ marginTop: 12 }}>
+              <b style=${{ fontSize: 17 }}>${recipe ? recipe.name : "— bez receptury —"}</b>
+              ${recipe && recipe.series ? html`<span className="note"> · ${recipe.series}</span>` : ""}
+              <br /><span className="note">
+                ${recipe && recipe.type === "Custom" ? "Custom" : "Pantone standard"}
+                ${" · hustota " + fmt(n(recipe ? recipe.density : 1, 1), 2) + " g/ml"}
+                ${" · " + (recipe ? recipe.components.length : 0) + " komponent"}
+                ${vazRec && recipe && vazRec.id === recipe.id
+                  ? " · vázaná na " + (colorSel ? (colorSel.code || colorSel.name || "") : "")
+                    + (vazbaSiroka ? " (všechny polohy)" : (position ? " · " + position.tech + " " + position.name : ""))
+                  : ""}
               </span>
+              <${PruhSlozeni} recipe=${recipe} />
             </div>
             ${barvaPotisku && html`
               <div className="rowline" style=${{ marginTop: 2, marginBottom: 0 }}>
@@ -4674,10 +4732,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
             <div className="result-sub">≈ ${fmt(calcAkt.totalMl)} ml při hustotě ${fmt(n(recipe.density, 1), 2)} g/ml${
               calcAkt.zvetseno ? " · zakázka potřebuje " + fmt(calcAkt.davkaZakazky) + " g" : ""}</div>
 
-            ${calcAkt.comps.length > 0 && html`
-              <div className="mixbar" title=${calcAkt.comps.map((c) => c.name + " " + fmt(c.norm) + " %").join(" · ")}>
-                ${calcAkt.comps.map((c, i) => html`<span key=${c.id} style=${{ width: c.norm + "%", background: i === 0 ? recipe.hex : "hsl(" + ((i * 67) % 360) + " 25% " + (78 - i * 8) + "%)" }} />`)}
-              </div>`}
+            ${calcAkt.comps.length > 0 && html`<${PruhSlozeni} recipe=${recipe} comps=${calcAkt.comps} />`}
 
             ${calcAkt.minApplied && html`<div className="warnbox">Uplatněna minimální dávka ${fmt(n(minBatch), 0)} g (výpočtová potřeba je nižší).</div>`}
             ${calcAkt.comps.length === 0
@@ -7424,6 +7479,34 @@ function zdrojeReceptur(recipes) {
    databáze, které k dané technologii patří — na textilní síto nemá co dělat
    databáze pro tampontisk. Kolik receptur technologie odfiltrovala, se řekne
    nahlas; jinak by čísla nesouhlasila s tím, co je ve složce. */
+/* Barevný pruh složení. Stojí na dvou místech — u výběru receptury a pod
+   dávkou ve výsledku — a na obou musí vypadat stejně, jinak se nedají porovnat
+   pohledem. Proto je to jedna komponenta, ne dvakrát opsaný kus kódu.
+
+   První složka nese odstín receptury, ostatní se jen odliší od sebe, aby šly
+   poměry rozeznat; nejsou to skutečné barvy pigmentů, ty aplikace nezná.
+   Receptura bez zapsaného složení dostane jeden pruh přes celou šířku — i tak
+   je vidět, jaký odstín je vybraný. */
+function PruhSlozeni({ recipe, comps }) {
+  if (!recipe) return null;
+  let slozky = comps;
+  if (!slozky) {
+    const zdroj = recipe.components || [];
+    const suma = zdroj.reduce((s, c) => s + n(c.pct), 0);
+    slozky = zdroj.map((c) => Object.assign({}, c, { norm: suma ? n(c.pct) / suma * 100 : 0 }));
+  }
+  if (!slozky.length) {
+    return html`<div className="mixbar" title=${recipe.hex || ""}>
+      <span style=${{ width: "100%", background: recipe.hex || "#888" }} />
+    </div>`;
+  }
+  return html`
+    <div className="mixbar" title=${slozky.map((c) => c.name + " " + fmt(c.norm) + " %").join(" · ")}>
+      ${slozky.map((c, i) => html`<span key=${c.id} style=${{ width: c.norm + "%",
+        background: i === 0 ? recipe.hex : "hsl(" + ((i * 67) % 360) + " 25% " + (78 - i * 8) + "%)" }} />`)}
+    </div>`;
+}
+
 /* `nadpis={false}` skryje vlastní popisek — když prvek stojí pod popiskem
    sloupce, dva nadpisy nad sebou jen matou. `vzdy` ukáže lištu i tehdy, když
    je databáze jediná: v rozdělené kartě má mít každá půlka svůj filtr, i kdyby

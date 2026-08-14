@@ -1,22 +1,22 @@
 # Ink Recipe Manager — strukturovaný rozbor aplikace
 
 <!-- AUTO:stav -->
-> **Stav k 13. srpna 2026.** Čísla v úsecích označených `AUTO` generuje
+> **Stav k 14. srpna 2026.** Čísla v úsecích označených `AUTO` generuje
 > `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — nepřepisují
 > se ručně a nemohou se rozejít se skutečností. Text mimo ně píše člověk.
 
-> Poslední zapsaná změna ve vývojovém deníku: **13. srpna 17:45 — Parametry tisku přestavěny na dlaždice jako náhled produktu**
+> Poslední zapsaná změna ve vývojovém deníku: **14. srpna 11:51 — Rozvržení hlavní stránky se dá přestavět v nástroji, karta po kartě**
 
 | soubor | řádků | velikost |
 |---|---:|---:|
-| `index.html` | 7 709 | 425 kB |
+| `index.html` | 7 792 | 431 kB |
 | `most.py` | 694 | 29 kB |
 | `pdf_spec.py` | 1 071 | 42 kB |
 | `odemkni.py` | 213 | 8 kB |
 | `prevod_printcolor.py` | 188 | 7 kB |
 | `kontrola_aplikace.py` | 169 | 7 kB |
 | `rozbor_aktualizuj.py` | 354 | 13 kB |
-| **celkem** | **10 398** | |
+| **celkem** | **10 481** | |
 <!-- /AUTO:stav -->
 
 ---
@@ -392,8 +392,12 @@ podle dat, ne podle dojmu.
   aplikace mezi dvěma panely — vlevo tvary, ikony, písmo, rozestupy a stíny,
   vpravo barevné schéma; výstup je hotový blok k vložení do index.html.
   Vzhled je celý v proměnných: barva, stín, tvar, kresba ikon, velikost písma
-  i hustota rozestupů. Co se tím řídit nedá, je rozvržení — kolik je sloupců
-  a co kde stojí je struktura stránky, ne hodnota
+  i hustota rozestupů. Barvy jdou nastavit i jen pro jednu stránku (přepínač
+  nad barvami); ukládají se jen odchylky, takže co stránka nemá vlastní, se
+  hýbe spolu se základem. Druhá stránka nástroje řídí **rozvržení hlavní
+  stránky** — u každé karty sloupec, řádek, šířku, zarovnání a nejmenší výšku,
+  k tomu šířku stránky, poměr sloupců a mezery. Ukázka běží ve vlastním rámu,
+  takže se dá prohlédnout v šesti šířkách okna včetně zlomu na jeden sloupec
 
 ## 2.2 Rozpracované — chybí data, ne kód
 

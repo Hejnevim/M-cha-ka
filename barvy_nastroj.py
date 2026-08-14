@@ -58,6 +58,26 @@ SKUPINY = [
 ]
 BARVY = [k for _, dvojice in SKUPINY for k, _ in dvojice]
 
+# Stránky, které se dají obarvit zvlášť. Klíč je selektor obalu stránky —
+# proměnné se dědí, takže co se nastaví na obal, platí uvnitř něj a přebije
+# základ. Prázdný selektor je základ, tedy celá aplikace.
+#
+# PŘIDÁNÍ DALŠÍ STRÁNKY: sem přibude řádek se selektorem jejího obalu a názvem,
+# a do ukázky v prostředním sloupci její náhled. Víc není potřeba.
+STRANKY = [
+    ("", "Základ (celá aplikace)"),
+    (".michbg", "Míchací režim"),
+]
+
+# Světlá pravidla se musí vymezit proti tmavému režimu. Bez toho by přebila
+# i tmavý základ — proměnná nastavená na obalu stránky vyhraje nad :root bez
+# ohledu na režim a stránka by v noci svítila světlými barvami.
+PRED_SVETLY = ':root:not([data-theme="dark"]) '
+PRED_TMAVY = ':root[data-theme="dark"] '
+
+ZAC_STRANEK = "/* ZACATEK BAREV STRANEK */"
+KON_STRANEK = "/* KONEC BAREV STRANEK */"
+
 # Posuvníky stínů: klíč, popisek, od, do, krok
 STINY = [
     ("uhel", "Odkud svítí světlo", 0, 360, 5, "°"),
@@ -128,6 +148,67 @@ ROZESTUPY = [
     ("--okraj-stranky", "Okraj nad obsahem", 0, 60, 2, "px"),
 ]
 
+# Míchací režim se ladí zvlášť. Nečte se od klávesnice, ale od váhy — často
+# ve stoje a v rukavicích — takže má vlastní velikosti, které se nesmí hnout,
+# když se sáhne na obecnou škálu aplikace.
+MICHANI = [
+    ("--mich-nazev", "Název receptury v hlavičce", 14, 56, 1, "px"),
+    ("--mich-davka", "Dávka v hlavičce", 16, 72, 1, "px"),
+    ("--mich-vzorek", "Vzorek barvy v hlavičce", 24, 110, 2, "px"),
+    ("--mich-hlavicka", "Hlavičky sloupců tabulky", 8, 24, 0.5, "px"),
+    ("--mich-tabulka", "Text v tabulce navážky", 12, 38, 1, "px"),
+    ("--mich-gramy", "Gramy v tabulce", 14, 52, 1, "px"),
+    ("--mich-radek", "Výška řádků tabulky", 4, 30, 1, "px"),
+    ("--mich-vysledek", "Číslo na váze", 24, 110, 2, "px"),
+    ("--mich-wbar", "Tloušťka pruhu navážení", 4, 48, 1, "px"),
+    ("--mich-tlacitko", "Velikost tlačítek", 10, 30, 0.5, "px"),
+    ("--mich-mezera", "Odsazení a mezery (i uvnitř karty asistenta)", 6, 56, 1, "px"),
+]
+
+# ---------------------------------------------------------------------------
+# Rozvržení hlavní stránky. Poloha ani velikost karet už nejsou zapsané
+# v pravidlech CSS, ale v proměnných — hlavní stránka se tedy dá přestavět
+# odsud, aniž by se sahalo do aplikace. Platí od šířky okna 960 px; pod ní
+# se karty skládají pod sebe a rozvržení nemá co řešit.
+KARTY = [
+    ("produkt", "Vybraný produkt", ".karta-produkt"),
+    ("vysledek", "Kolik namíchat", ".bigpanel"),
+    ("recept", "Receptura a barva", ".karta-recept"),
+    ("zakazka", "Zakázka", ".karta-cisla"),
+    ("tisk", "Parametry tisku", ".karta-tisk"),
+]
+
+SLOUPCE = [("1", "vlevo"), ("2", "vpravo"), ("1 / -1", "přes oba sloupce")]
+RADKY = [(str(i), "%d. řádek" % i) for i in range(1, 6)]
+# „Jako jeden sloupec" není totéž co polovina: polovina nepočítá s mezerou
+# mezi sloupci, a karta by pak byla o její půlku širší než karta nad ní.
+SIRKY = [
+    ("auto", "celá šířka místa"),
+    ("calc((100% - var(--mezera-sloupcu)) / 2)", "přesně jako jeden sloupec"),
+    ("75%", "tři čtvrtiny"),
+    ("50%", "polovina"),
+    ("33%", "třetina"),
+]
+ZAROVNANI = [("stretch", "roztáhnout"), ("start", "vlevo"),
+             ("center", "na střed"), ("end", "vpravo")]
+SIRKY_STRANKY = [("none", "bez omezení — na celé okno")] + \
+    [("%dpx" % s, "%d px" % s) for s in (1200, 1400, 1600, 1800, 2000, 2400)]
+
+# Posuvníky rozvržení. Mezera mezi kartami a okraj stránky jsou tytéž
+# proměnné jako v Rozestupech — schválně, aby se rozvržení dalo doladit
+# na jednom místě; oba posuvníky se drží v souladu.
+ROZVRZENI = [
+    ("--sloupec-1", "Šířka levého sloupce", 0.4, 3, 0.05, "fr"),
+    ("--sloupec-2", "Šířka pravého sloupce", 0.4, 3, 0.05, "fr"),
+    ("--mezera-sloupcu", "Mezera mezi sloupci", 0, 120, 2, "px"),
+    ("--mezera-karet", "Mezera mezi kartami", 0, 60, 1, "px"),
+    ("--okraj-stranky", "Okraj stránky nahoře", 0, 80, 1, "px"),
+]
+
+# Šířky okna, ve kterých se ukázka hlavní stránky dá prohlédnout. Ukázka
+# běží ve vlastním rámu, takže zlom rozvržení se v ní chová jako doopravdy.
+SIRKY_OKNA = [2560, 1920, 1600, 1366, 1100, 900]
+
 # Řezy písma: jen to, co je jistě na každém počítači v dílně — stažené písmo
 # by aplikace v offline režimu stejně nenačetla.
 RODINY = [
@@ -163,7 +244,25 @@ VYCHOZI_TVARY = {"--radius": "18px", "--radius-btn": "999px", "--radius-pole": "
                  "--pole-y": "9px", "--pole-x": "12px",
                  "--tlacitko-y": "10px", "--tlacitko-x": "18px", "--okraj-stranky": "20px",
                  "--sans": "'Segoe UI',system-ui,Arial,sans-serif",
-                 "--mono": "ui-monospace,'Cascadia Mono',Consolas,monospace"}
+                 "--mono": "ui-monospace,'Cascadia Mono',Consolas,monospace",
+                 "--mich-nazev": "26px", "--mich-davka": "34px", "--mich-vzorek": "52px",
+                 "--mich-hlavicka": "12px", "--mich-tabulka": "20px", "--mich-gramy": "26px",
+                 "--mich-radek": "11px", "--mich-vysledek": "52px", "--mich-wbar": "20px",
+                 "--mich-tlacitko": "15px", "--mich-mezera": "22px",
+                 "--sirka-stranky": "none", "--sloupec-1": "1fr", "--sloupec-2": "1fr",
+                 "--mezera-sloupcu": "40px"}
+
+# Poloha a velikost každé karty. Drží se v téže mapě jako tvary a písmo, takže
+# se čtou z aplikace a vracejí do ní stejnou cestou — žádný druhý mechanismus.
+for _k, _sl, _r in (("produkt", "1", "1"), ("vysledek", "2", "1"),
+                    ("recept", "1", "2"), ("zakazka", "2", "2")):
+    VYCHOZI_TVARY.update({
+        "--%s-sloupec" % _k: _sl, "--%s-radek" % _k: _r, "--%s-sirka" % _k: "auto",
+        "--%s-zarovnani" % _k: "stretch", "--%s-vyska" % _k: "auto"})
+VYCHOZI_TVARY.update({
+    "--tisk-sloupec": "1 / -1", "--tisk-radek": "3",
+    "--tisk-sirka": "calc((100% - var(--mezera-sloupcu)) / 2)",
+    "--tisk-zarovnani": "center", "--tisk-vyska": "auto"})
 
 
 def skupina(nadpis, telo, otevreno=True):
@@ -179,6 +278,41 @@ def posuvnik(klic, popis, od, do, krok, jed, atr="data-klic"):
             '<input type="range" min="{od}" max="{do}" step="{kr}" '
             'data-role="posuv" data-jed="{j}" />'
             "</div>").format(a=atr, k=klic, p=popis, od=od, do=do, kr=krok, j=jed)
+
+
+def vyber(klic, popis, moznosti):
+    """Výběr pro hodnoty, které nejsou číslo — sloupec, řádek, zarovnání."""
+    out = ['<div class="posuv"><div class="hlava"><span>%s</span></div>'
+           '<select data-vyber="%s">' % (popis, klic)]
+    for hod, nazev in moznosti:
+        out.append('<option value="%s">%s</option>'
+                   % (hod.replace('"', "&quot;"), nazev))
+    out.append("</select></div>")
+    return "\n".join(out)
+
+
+def barvy_stranek(css):
+    """Přečte z aplikace barvy nastavené jednotlivým stránkám.
+
+    Ukládají se jen odchylky od základu, takže úsek bývá prázdný a stránky
+    berou barvy z aplikace."""
+    out = {}
+    i, j = css.find(ZAC_STRANEK), css.find(KON_STRANEK)
+    if i < 0 or j < 0:
+        return out
+    usek = re.sub(r"/\*.*?\*/", " ", css[i + len(ZAC_STRANEK):j], flags=re.S)
+    for m in re.finditer(r"([^{}]+)\{([^{}]*)\}", usek):
+        sel = " ".join(m.group(1).split())
+        tmavy = sel.startswith(PRED_TMAVY)
+        sel = sel[len(PRED_TMAVY if tmavy else PRED_SVETLY):].strip() \
+            if sel.startswith(PRED_TMAVY if tmavy else PRED_SVETLY) else sel
+        hodnoty = dict(re.findall(r"(--[a-z0-9-]+)\s*:\s*([^;]+);", m.group(2)))
+        if not hodnoty:
+            continue
+        out.setdefault(sel, {"light": {}, "dark": {}})
+        out[sel]["dark" if tmavy else "light"].update(
+            (k, v.strip()) for k, v in hodnoty.items())
+    return out
 
 
 def blok(css, selektor):
@@ -256,13 +390,19 @@ def main():
         "light": stiny_z_css(bl_svetly, VYCHOZI_STINY),
         "dark": stiny_z_css(bl_tmavy, VYCHOZI_STINY),
     }
+    presahy = barvy_stranek(css)
     tvary = dict(VYCHOZI_TVARY)
     for klic in tvary:
         v = hodnota(bl_svetly, klic)
         if v:
             tvary[klic] = v
 
-    ovladace = []
+    ovladace = ['<div class="lista" id="stranky">']
+    for sel, nazev in STRANKY:
+        ovladace.append('<button class="chip%s" data-stranka="%s">%s</button>'
+                        % (" on" if not sel else "", sel, nazev))
+    ovladace.append("</div>")
+    ovladace.append('<p class="note" id="stav-stranky" style="margin:0 0 10px"></p>')
     for nadpis, dvojice in SKUPINY:
         telo = []
         for klic, popis in dvojice:
@@ -300,6 +440,31 @@ def main():
     tvary_html.append(skupina("Písmo", telo, False))
     tvary_html.append(skupina("Rozestupy",
                               [posuvnik(*r, atr="data-tvar") for r in ROZESTUPY], False))
+    tvary_html.append(skupina("Míchací režim",
+                              [posuvnik(*m, atr="data-tvar") for m in MICHANI], False))
+
+    # ---- stránka Rozvržení: vlevo stránka a sloupce, vpravo jednotlivé karty
+    stranka_html = [vyber("--sirka-stranky", "Největší šířka stránky", SIRKY_STRANKY)]
+    stranka_html += [posuvnik(*r, atr="data-tvar") for r in ROZVRZENI]
+    stranka_html = [skupina("Stránka a sloupce", stranka_html)]
+
+    karty_html = []
+    for klic, nazev, _sel in KARTY:
+        telo = [
+            vyber("--%s-sloupec" % klic, "Sloupec", SLOUPCE),
+            vyber("--%s-radek" % klic, "Řádek", RADKY),
+            vyber("--%s-sirka" % klic, "Šířka", SIRKY),
+            vyber("--%s-zarovnani" % klic, "Zarovnání v místě", ZAROVNANI),
+            posuvnik("--%s-vyska" % klic, "Nejmenší výška", 0, 900, 10, "px",
+                     atr="data-tvar"),
+        ]
+        karty_html.append(skupina(nazev, telo, False))
+
+    okna_html = ['<div class="chips" id="okna">']
+    for s in SIRKY_OKNA:
+        okna_html.append('<button class="chip%s" data-okno="%d">%d px</button>'
+                         % (" on" if s == 1600 else "", s, s))
+    okna_html.append("</div>")
 
     html = (SABLONA
             .replace("<!--TVARY-->", "\n".join(tvary_html))
@@ -310,13 +475,26 @@ def main():
             .replace("/*BARVY*/", json.dumps(barvy, ensure_ascii=False))
             .replace("/*STINY*/", json.dumps(stiny))
             .replace("/*BLOK_SVETLY*/", json.dumps(bl_svetly))
-            .replace("/*BLOK_TMAVY*/", json.dumps(bl_tmavy)))
+            .replace("/*BLOK_TMAVY*/", json.dumps(bl_tmavy))
+            .replace("/*STRANKY*/", json.dumps(
+                [{"sel": s, "nazev": n} for s, n in STRANKY], ensure_ascii=False))
+            .replace("/*PRESAHY*/", json.dumps(presahy, ensure_ascii=False))
+            .replace("<!--STRANKA-->", "\n".join(stranka_html))
+            .replace("<!--KARTY-->", "\n".join(karty_html))
+            .replace("<!--OKNA-->", "\n".join(okna_html))
+            .replace("/*KARTY*/", json.dumps(
+                [{"klic": k, "nazev": n, "sel": s} for k, n, s in KARTY],
+                ensure_ascii=False))
+            .replace("/*PRED_SVETLY*/", json.dumps(PRED_SVETLY))
+            .replace("/*PRED_TMAVY*/", json.dumps(PRED_TMAVY))
+            .replace("/*ZAC_STRANEK*/", json.dumps(ZAC_STRANEK))
+            .replace("/*KON_STRANEK*/", json.dumps(KON_STRANEK)))
     io.open(CIL, "w", encoding="utf-8", newline="").write(html)
     print("hotovo: %s" % CIL)
     print("barev: %d · stínů: %d (+%d logo) · tvarů a ikon: %d · písma: %d (+%d řezy)"
-          " · rozestupů: %d"
+          " · rozestupů: %d · míchacího režimu: %d · rozvržení: %d karet"
           % (len(BARVY), len(STINY), len(STINY_LOGO), len(TVARY) + 1,
-             len(PISMO), len(RODINY), len(ROZESTUPY)))
+             len(PISMO), len(RODINY), len(ROZESTUPY), len(MICHANI), len(KARTY)))
     if "--open" in sys.argv:
         webbrowser.open("file:///" + CIL.replace("\\", "/"))
     return 0
@@ -325,16 +503,28 @@ def main():
 SABLONA = r"""<!doctype html>
 <html lang="cs"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>IRM — ladění barev a stínů</title>
+<title>IRM — ladění vzhledu a rozvržení</title>
+<!-- Styly aplikace mají vlastní značku: ukázka hlavní stránky si je z ní bere
+     a vkládá do svého rámu. Kdyby byly slepené se styly nástroje, dostal by
+     se do rámu i nástroj sám. -->
+<style id="app-css">/*STYLY*/</style>
 <style>
-/*STYLY*/
 /* ---- jen pro tuhle stránku ----
-   Tři sloupce: vlevo stíny a osvětlení, uprostřed ukázka, vpravo barvy.
+   Tři sloupce: vlevo tvary a stíny, uprostřed ukázky, vpravo barvy.
    Postranní panely se drží na místě a rolují si samy, aby se pro nastavení
-   nemuselo sjíždět na konec stránky. */
-.nastroj{display:grid;grid-template-columns:330px minmax(0,1fr) 330px;gap:20px;
+   nemuselo sjíždět na konec stránky.
+
+   PRAVIDLO PRO DALŠÍ UKÁZKY: každá ukázaná stránka patří do prostředního
+   sloupce (`.ukazka`), nikdy přes celou šířku. Prvek roztažený přes všechny
+   sloupce se při rolování překryje s postranními panely — ty totiž stojí
+   na místě a širší obsah se pod ně podsune. Prostřední sloupec je proto
+   raději široký a panely úzké. */
+.nastroj{display:grid;grid-template-columns:300px minmax(0,1fr) 300px;gap:20px;
   padding:16px clamp(12px,2vw,28px) 40px;align-items:start}
-@media(max-width:1280px){.nastroj{grid-template-columns:300px minmax(0,1fr)}
+/* Vlastní `display` přebíjí `hidden` — schovaná stránka by se bez tohohle
+   vykreslila dál a obě by ležely přes sebe. */
+[hidden]{display:none !important}
+@media(max-width:1180px){.nastroj{grid-template-columns:280px minmax(0,1fr)}
   .panel-barvy{grid-column:1;grid-row:2}}
 @media(max-width:900px){.nastroj{grid-template-columns:1fr}
   .panel-barvy{grid-column:1;grid-row:auto}
@@ -358,6 +548,11 @@ SABLONA = r"""<!doctype html>
 .radek input[type=color]{width:40px;height:36px;padding:3px;flex:0 0 auto}
 .radek .txt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
 .radek .txt b{font-family:var(--mono);font-size:12.5px}
+/* Barva, kterou má stránka vlastní, je označená — jinak by nešlo poznat,
+   co je odchylka a co jen zděděný základ. Dvojklik na název ji vrátí. */
+.radek.vlastni .txt b{color:var(--ink)}
+.radek.vlastni .txt b::after{content:" ●";font-size:9px;vertical-align:2px}
+.radek .txt b{cursor:default}
 .radek input[type=text]{width:96px;flex:0 0 auto;font-family:var(--mono);font-size:12.5px;text-align:center}
 .posuv{margin-bottom:12px}
 .posuv .hlava{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;margin-bottom:4px}
@@ -367,14 +562,40 @@ SABLONA = r"""<!doctype html>
   box-shadow:var(--neu-sm);cursor:pointer;color:var(--ink);font-size:14px;line-height:1}
 .smery button.on{background:var(--key);color:var(--btn-ink)}
 .smery button.stred{visibility:hidden}
+/* Míchací režim v aplikaci překrývá celou obrazovku (`position:fixed`).
+   V ukázce ho to musí pustit, jinak by zakryl celý nástroj — proto se zasadí
+   do rámečku a chová se jako běžný blok. Jinak zůstává vše, jak je v aplikaci:
+   tytéž třídy, tytéž proměnné. */
+.michukazka{position:relative;border-radius:var(--radius);overflow:hidden;
+  box-shadow:var(--neu-in);background:var(--bg)}
+.michukazka .michbg{position:static;inset:auto;z-index:auto;height:auto;overflow:visible}
+.michukazka .michhlav{position:static}
 .ukazka{display:grid;gap:16px}
 .vystup textarea{min-height:240px}
 .lista{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+/* Ukázka hlavní stránky běží ve vlastním rámu. Musí to být rám, ne obyčejný
+   blok: zlom rozvržení se řídí šířkou okna, ne šířkou prvku, a jen rám má
+   vlastní okno. Pak se zmenší na šířku sloupce — je to tedy skutečná stránka
+   v malém, ne přiblížený výřez.
+
+   Rám je vytažený z toku (`position:absolute`): má šířku celého okna aplikace
+   a kdyby se počítal do rozvržení, roztáhl by prostřední sloupec a podsunul
+   se pod postranní panely. Takhle o jeho šířce rozhoduje jen zmenšení. */
+.platno{position:relative;overflow:hidden;border-radius:var(--radius);
+  box-shadow:var(--neu-in);background:var(--bg);min-height:80px}
+.platno iframe{position:absolute;top:0;left:0;border:0;display:block;
+  transform-origin:top left;background:var(--bg)}
+.kolize{color:var(--danger);font-weight:700}
 </style></head>
 <body>
-<div class="hdr"><div class="navleft"></div><h1>BARVY</h1><div></div></div>
+<div class="hdr"><div class="navleft"></div><h1>VZHLED</h1>
+  <div class="lista" style="margin:0">
+    <button class="chip on" data-strana="barvy">Barvy a vzhled</button>
+    <button class="chip" data-strana="rozvrzeni">Rozvržení hlavní stránky</button>
+  </div>
+</div>
 
-<div class="nastroj">
+<div class="nastroj" id="strana-barvy">
   <div class="card panel">
     <h2>Tvary, písmo a stíny</h2>
     <p class="hint">Odkud svítí světlo, jak věci odstávají, jak jsou zaoblené,
@@ -389,7 +610,7 @@ SABLONA = r"""<!doctype html>
     <!--TVARY-->
     <div class="rowline" style="margin-top:6px">
       <button class="btn sec sm" id="zpet-stiny">Vrátit původní stíny</button>
-      <button class="btn sec sm" id="zpet-tvary">Vrátit tvary, písmo a rozestupy</button>
+      <button class="btn sec sm" id="zpet-tvary">Vrátit tvary, písmo a rozměry</button>
     </div>
   </div>
 
@@ -451,15 +672,92 @@ SABLONA = r"""<!doctype html>
       </table>
     </div>
 
+    <div class="card">
+        <h2>Míchací režim</h2>
+        <p class="hint">Celá obrazovka u váhy — skutečné prvky aplikace.
+          Ladí se posuvníky v oddílu <b>Míchací režim</b> vlevo.</p>
+        <div class="michukazka">
+          <div class="michbg">
+            <div class="michhlav">
+              <span class="michvzorek" style="background:#F2602F"></span>
+              <span>
+                <span class="nazev" style="display:block">PANTONE Cool Gray 1 C</span>
+                <span class="kde">93804 · 106 · FIR Džbánek / Tělo lahve</span>
+              </span>
+              <span class="michdavka"><b>72,4 g</b><span>≈ 60,4 ml</span></span>
+              <button class="btn sec">✕ Zpět do kalkulace</button>
+            </div>
+            <div class="michtelo">
+              <!-- Levý sloupec v aplikaci karta není, obsah leží přímo na ploše.
+                   Kartu má jen asistent navážení — ukázka to musí držet stejně,
+                   jinak by se podle ní ladilo něco, co v aplikaci není. -->
+              <div>
+                <div class="rowline">
+                  <span class="tag">krycí plocha 100,0 % · z katalogu</span>
+                  <button class="btn sec sm">Spočítat krycí plochu z náhledu</button>
+                </div>
+                <table class="michtab">
+                  <thead><tr><th>Komponenta</th><th class="num">Navážit</th><th class="num">Kumulativně</th></tr></thead>
+                  <tbody>
+                    <tr class="ted"><td><span class="michstav">▶</span>19 3601 White</td>
+                      <td class="num g">72,0</td><td class="num">72,0</td></tr>
+                    <tr><td><span class="michstav"></span>14 3601 Black (Black C)</td>
+                      <td class="num g">0,4</td><td class="num">72,4</td></tr>
+                    <tr><td><span class="michstav"></span>11 3601 Green (Green C)</td>
+                      <td class="num g">0,1</td><td class="num">72,4</td></tr>
+                    <tr class="hotovo"><td><span class="michstav">✓</span>12 3601 Blue 1 (Process Blue C)</td>
+                      <td class="num g">0,0</td><td class="num">72,4</td></tr>
+                    <tr><td><b>Navážit celkem</b></td><td class="num g">72,4</td><td class="num g">72,4</td></tr>
+                  </tbody>
+                </table>
+                <div class="rowline" style="margin-top:12px">
+                  <button class="btn sec">Zbytek není v evidenci — zadat ručně</button>
+                </div>
+                <div class="rowline">
+                  <button class="btn sec">Štítek na kelímek →</button>
+                  <button class="btn sec sm">Znám zbytek rovnou</button>
+                </div>
+              </div>
+              <div class="card">
+                <h2>Asistent navážení</h2>
+                <div class="rowline">
+                  <span class="tag tech">simulace váhy</span>
+                  <button class="btn sec sm">Tára (0)</button>
+                  <button class="btn sec sm">Odpojit</button>
+                </div>
+                <div class="result-big">0,0 g</div>
+                <div class="result-sub">na váze · receptura PANTONE Cool Gray 1 C</div>
+                <div class="wbar" style="margin-top:10px"><span style="width:34%;background:var(--cyan)"></span></div>
+                <p class="note" style="margin-top:8px"><b>19 3601 White</b> — přidat 72,0 g,
+                  navážit celkem do 72,0 g · zbývá 72,0 g</p>
+                <div class="rowline">
+                  <button class="btn">Další komponenta →</button>
+                  <span class="note">tolerance ± 0,5 g</span>
+                </div>
+                <table class="michtab" style="margin-top:10px">
+                  <thead><tr><th>Komponenta</th><th class="num">%</th><th class="num">Cíl g</th><th class="num">Zbývá g</th></tr></thead>
+                  <tbody>
+                    <tr class="ted"><td>19 3601 White</td><td class="num">99,4</td><td class="num">72,0</td><td class="num">72,0</td></tr>
+                    <tr><td>14 3601 Black</td><td class="num">0,5</td><td class="num">0,38</td><td class="num">0,38</td></tr>
+                    <tr class="hotovo"><td>11 3601 Green</td><td class="num">0,1</td><td class="num">0,07</td><td class="num">pod tol.</td></tr>
+                  </tbody>
+                </table>
+                <div class="okbox">V pořádku — navážka je v toleranci.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     <div class="card vystup">
       <h2>Blok k vložení do index.html</h2>
       <p class="hint">Celé bloky <b>:root</b> a <b>:root[data-theme="dark"]</b>
         i s tím, čeho se ladění netýká — dají se přepsat jedním vložením.
         Nebo mi je pošlete a vložím je sám.</p>
-      <textarea id="vystup" spellcheck="false" readonly></textarea>
+      <textarea data-vystup spellcheck="false" readonly></textarea>
       <div class="rowline" style="margin-top:10px;margin-bottom:0">
-        <button class="btn" id="kopirovat">Zkopírovat</button>
-        <span class="note" id="stav"></span>
+        <button class="btn" data-kopirovat>Zkopírovat</button>
+        <span class="note" data-stav></span>
       </div>
     </div>
   </div>
@@ -467,7 +765,9 @@ SABLONA = r"""<!doctype html>
   <div class="card panel panel-barvy">
     <h2>Barevné schéma</h2>
     <p class="hint">Plocha, papír, text a barvy, které něco znamenají.
-      Ladí se režim, který je právě zapnutý.</p>
+      Ladí se režim, který je právě zapnutý. Vyberte stránku a barvy platí jen
+      pro ni; co jí nenastavíte, bere ze základu. Dvojklik na název proměnné
+      vlastní barvu zase zruší.</p>
     <div class="lista">
       <button class="chip on" data-rezim="light">Světlý režim</button>
       <button class="chip" data-rezim="dark">Tmavý režim</button>
@@ -475,18 +775,186 @@ SABLONA = r"""<!doctype html>
     <!--OVLADACE-->
     <div class="rowline" style="margin-top:6px">
       <button class="btn sec sm" id="zpet-barvy">Vrátit původní barvy</button>
+      <button class="btn sec sm" id="zpet-stranka">Vrátit barvy této stránky</button>
     </div>
+  </div>
+
+</div>
+
+<div class="nastroj" id="strana-rozvrzeni" hidden>
+  <div class="card panel">
+    <h2>Stránka a sloupce</h2>
+    <p class="hint">Jak široká je stránka, jak jsou rozdělené sloupce a kolik
+      je mezi kartami místa. Platí od šířky okna 960 px — pod ní se karty
+      skládají pod sebe a rozvržení nemá co řešit.</p>
+    <!--STRANKA-->
+    <div class="posuv" style="margin-top:14px">
+      <div class="hlava"><span>Šířka okna v ukázce</span></div>
+      <!--OKNA-->
+    </div>
+    <div class="rowline" style="margin-top:12px">
+      <button class="btn sec sm" id="zpet-rozvrzeni">Vrátit původní rozvržení</button>
+    </div>
+  </div>
+
+  <div class="ukazka">
+    <div class="card">
+      <h2>Hlavní stránka</h2>
+      <p class="hint">Skutečné karty aplikace ve vlastním okně. Šířku okna si
+        vyberte vlevo; ukázka se pak zmenší na šířku sloupce, takže je to celá
+        stránka v malém, ne výřez.</p>
+      <p class="note" id="stav-rozvrzeni" style="margin:0 0 10px"></p>
+      <div class="platno" id="platno"><iframe id="ram" title="Hlavní stránka"></iframe></div>
+    </div>
+
+    <div class="card vystup">
+      <h2>Blok k vložení do index.html</h2>
+      <p class="hint">Tentýž blok jako u barev — rozvržení je taky jen několik
+        proměnných. Vloží se jedním vložením obojí.</p>
+      <textarea data-vystup spellcheck="false" readonly></textarea>
+      <div class="rowline" style="margin-top:10px;margin-bottom:0">
+        <button class="btn" data-kopirovat>Zkopírovat</button>
+        <span class="note" data-stav></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card panel">
+    <h2>Karty</h2>
+    <p class="hint">U každé karty se dá určit, ve kterém sloupci a řádku stojí,
+      jak je široká, kam se v tom místě zarovná a jak vysoká má být nejmíň.
+      Dvě karty ve stejném sloupci a řádku by se překryly — hlídám to a nahlásím
+      to nad ukázkou. Pozor na zarovnání: <b>roztáhnout</b> vyplní celé místo,
+      kdežto vlevo, na střed a vpravo kartu zúží podle obsahu.</p>
+    <!--KARTY-->
   </div>
 </div>
 
+<!-- Ukázka hlavní stránky. Je to týž zápis jako v aplikaci: tytéž třídy,
+     tytéž karty, tentýž pořádek. Obsah je zkrácený, rozvržení ne — o to tu jde.
+     PŘIDÁNÍ DALŠÍ KARTY: sem její značka a řádek do seznamu KARTY. -->
+<template id="ukazka-hlavni">
+  <div class="wrap">
+    <div class="grid calc">
+      <div class="card karta-produkt" style="margin:0">
+        <h2>Vybraný produkt</h2>
+        <div class="produkt-dlazdice">
+          <div class="dlazdice"><div class="prodphoto noimg">fotka produktu</div>
+            <div class="popiska">Produkt</div></div>
+          <div class="dlazdice"><div class="prodphoto noimg">náhled potisku</div>
+            <div class="popiska"><b>Tělo lahve</b><br>SCR · 60,0 × 40,0 mm</div></div>
+          <div class="dlazdice"><div class="prodphoto noimg">zakázkový list</div>
+            <div class="popiska">Zakázkový list</div></div>
+        </div>
+        <div style="margin-top:14px">
+          <div style="font-weight:800;font-size:16px">11003 · PDP Sportovní Láhev</div>
+          <div class="note">PP / PE</div>
+        </div>
+        <div class="rowline" style="margin-top:10px;margin-bottom:0">
+          <span class="tag tech">SCR — sítotisk</span>
+          <span class="tag">60,0×40,0 mm</span>
+          <button class="btn sec sm">Barva a poloha potisku →</button>
+        </div>
+      </div>
+
+      <div class="card bigform karta-recept" style="margin:0">
+        <h2>Receptura a barva</h2>
+        <div class="frow c2">
+          <div><label class="f">Standardní receptury</label>
+            <select><option>Pantone Solid Coated</option></select></div>
+          <div><label class="f">Vlastní odvozené</label>
+            <select><option>— všechny —</option></select></div>
+        </div>
+        <div class="frow c2">
+          <div><input type="text" placeholder="hledat v standardech"></div>
+          <div><input type="text" placeholder="hledat ve vlastních"></div>
+        </div>
+        <div class="frow c2">
+          <div><select><option>PANTONE 485 C</option></select></div>
+          <div><select><option>— žádná —</option></select></div>
+        </div>
+        <div class="mixbar"><span style="width:46%;background:#F2602F"></span
+          ><span style="width:34%;background:#C4161C"></span
+          ><span style="width:20%;background:#F5F5F5"></span></div>
+      </div>
+
+      <div class="card bigform karta-cisla" style="margin:0">
+        <h2>Zakázka</h2>
+        <div class="frow c3">
+          <div><label class="f">Počet kusů</label><input type="text" value="2 500"></div>
+          <div><label class="f">Spotřeba g/ks</label><input type="text" value="0,42"></div>
+          <div><label class="f">Ztráty %</label><input type="text" value="12"></div>
+        </div>
+        <div class="frow c2">
+          <div><label class="f">Nejmenší dávka</label><input type="text" value="50"></div>
+          <div><label class="f">Viskozita</label><select><option>středně řídká</option></select></div>
+        </div>
+      </div>
+
+      <div class="card bigform karta-tisk" style="margin:0">
+        <h2>Parametry tisku</h2>
+        <div class="frow c3" style="margin-top:8px">
+          <div><label class="f">Síto</label><select><option>120-34</option></select></div>
+          <div><label class="f">Kryvost</label><select><option>krycí</option></select></div>
+          <div><label class="f">Povrch</label><select><option>lesk</option></select></div>
+        </div>
+        <div class="flags">
+          <label class="tgl"><input type="checkbox" checked><span class="tglt"></span>Otestovaný</label>
+          <label class="tgl"><input type="checkbox"><span class="tglt"></span>Vysoce odolný vůči vyblednutí</label>
+        </div>
+      </div>
+
+      <div class="bigpanel" style="display:grid;gap:20px">
+        <div class="card" style="margin:0">
+          <h2>Kolik namíchat</h2>
+          <div class="rowline" style="margin-top:2px;margin-bottom:12px">
+            <span class="swatch" style="background:#F2602F;width:40px;height:40px"></span>
+            <span><b style="font-size:17px">PANTONE 485 C</b><br>
+              <span class="note">receptura z katalogu</span></span>
+          </div>
+          <div class="result-big">72,4 g</div>
+          <div class="result-sub">≈ 60,4 ml · dávka na 2 500 ks</div>
+          <div class="mixbar" style="margin-top:12px"><span style="width:46%;background:#F2602F"></span
+            ><span style="width:34%;background:#C4161C"></span
+            ><span style="width:20%;background:#F5F5F5"></span></div>
+          <table class="t" style="margin-top:12px">
+            <thead><tr><th>Komponenta</th><th class="num">%</th><th class="num">Gramy</th></tr></thead>
+            <tbody>
+              <tr><td>9000 Weiss</td><td class="num">21,7</td><td class="num">15,7</td></tr>
+              <tr><td>1100 Mittelgelb</td><td class="num">50,5</td><td class="num">36,6</td></tr>
+              <tr><td>Binder</td><td class="num">27,8</td><td class="num">20,1</td></tr>
+            </tbody>
+          </table>
+          <div class="rowline michtl" style="margin-top:16px;margin-bottom:0">
+            <button class="btn" style="padding:15px 26px;font-size:16px">⛶ Míchací režim</button>
+            <button class="btn sec">🖨 Míchací lístek</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
 <script>
 var VYCH_BARVY = /*BARVY*/, VYCH_STINY = /*STINY*/, VYCH_TVARY = /*TVARY*/;
+var STRANKY = /*STRANKY*/, VYCH_PRESAHY = /*PRESAHY*/, KARTY = /*KARTY*/;
+var ZAC_STRANEK = /*ZAC_STRANEK*/, KON_STRANEK = /*KON_STRANEK*/;
+var PRED_SVETLY = /*PRED_SVETLY*/, PRED_TMAVY = /*PRED_TMAVY*/;
 var BLOK = { light: /*BLOK_SVETLY*/, dark: /*BLOK_TMAVY*/ };
 var barvy = JSON.parse(JSON.stringify(VYCH_BARVY));
 var stiny = JSON.parse(JSON.stringify(VYCH_STINY));
 var tvary = JSON.parse(JSON.stringify(VYCH_TVARY));
+/* Barvy stránek se drží jen jako odchylky od základu. Co stránka nemá
+   nastavené, bere z aplikace — a když se pak změní základ, změní se to
+   i na ní. Kdyby se ukládala celá paleta, stránka by se od základu
+   nenávratně odstřihla. */
+var presahy = JSON.parse(JSON.stringify(VYCH_PRESAHY));
+var stranka = "";
 var rezim = "light";
 var korenu = document.documentElement;
+/* Poslední spočítaný výstup. Nedrží se jen v poli na obrazovce — vkládá se
+   i do ukázky hlavní stránky, která běží ve vlastním okně. */
+var vystupText = "";
 
 /* Ze čtyř čísel (úhel, vzdálenost, rozostření, síly) se dopočítají všechny
    stíny naráz — proto spolu drží a svítí z jedné strany. */
@@ -528,16 +996,76 @@ function logoCss(s){
 
 function jeHex(v){ return /^#[0-9a-fA-F]{6}$/.test(v); }
 
+/* Co se má u té které stránky ukázat: vlastní hodnota, jinak základ. */
+function barvaStranky(klic){
+  var o = presahy[stranka] && presahy[stranka][rezim];
+  if (stranka && o && o[klic] != null) return o[klic];
+  return barvy[rezim][klic];
+}
+function maPresah(klic){
+  var o = presahy[stranka] && presahy[stranka][rezim];
+  return !!(stranka && o && o[klic] != null);
+}
+function nastavBarvu(klic, v){
+  if (!stranka){ barvy[rezim][klic] = v; return; }
+  if (!presahy[stranka]) presahy[stranka] = { light: {}, dark: {} };
+  presahy[stranka][rezim][klic] = v;
+}
+function zrusPresah(klic){
+  if (stranka && presahy[stranka]) delete presahy[stranka][rezim][klic];
+}
+function pocetPresahu(sel){
+  var o = presahy[sel];
+  if (!o) return 0;
+  return Object.keys(o.light || {}).length + Object.keys(o.dark || {}).length;
+}
+
+/* Hlášení pod přepínačem stránek. Musí se přepsat i při každé změně barvy,
+   ne jen při přepnutí — jinak by tvrdilo, že stránka nemá nic vlastního. */
+function stavStranky(){
+  var stav = document.getElementById("stav-stranky");
+  if (!stav) return;
+  var n = pocetPresahu(stranka);
+  stav.textContent = !stranka
+    ? "Základní barvy platí všude, kde stránka nemá vlastní."
+    : (n ? "Tato stránka má " + n + (n === 1 ? " vlastní barvu." :
+             (n < 5 ? " vlastní barvy." : " vlastních barev."))
+           + " Zbytek bere ze základu."
+         : "Tato stránka zatím bere všechny barvy ze základu.");
+}
+
+/* Přepisy se na ukázku nasadí přímo na obal stránky — proměnné se dědí,
+   takže tím zbarví všechno uvnitř. Co stránka nemá, se musí zase odebrat,
+   jinak by po zrušení zůstala viset stará hodnota. */
+function nasadStranky(){
+  STRANKY.forEach(function(s){
+    if (!s.sel) return;
+    var o = (presahy[s.sel] || {})[rezim] || {};
+    [].slice.call(document.querySelectorAll(s.sel)).forEach(function(el){
+      VYCH_BARVY[rezim] && Object.keys(VYCH_BARVY[rezim]).forEach(function(k){
+        if (o[k] != null) el.style.setProperty(k, o[k]);
+        else el.style.removeProperty(k);
+      });
+    });
+  });
+}
+
 function nasad(){
   korenu.setAttribute("data-theme", rezim);
   var b = barvy[rezim], s = stinyCss(stiny[rezim]);
   for (var k in b) korenu.style.setProperty(k, b[k]);
   for (var k2 in s) korenu.style.setProperty(k2, s[k2]);
   radky.forEach(function(r){
-    var klic = r.getAttribute("data-klic"), v = b[klic] || "";
+    var klic = r.getAttribute("data-klic"), v = barvaStranky(klic) || "";
     r.querySelector('[data-role=hex]').value = v;
     if (jeHex(v)) r.querySelector('[data-role=barva]').value = v;
+    r.classList.toggle("vlastni", maPresah(klic));
   });
+  nasadStranky();
+  [].slice.call(document.querySelectorAll("[data-stranka]")).forEach(function(b4){
+    b4.classList.toggle("on", b4.getAttribute("data-stranka") === stranka);
+  });
+  stavStranky();
   posuvy.forEach(function(p){
     var klic = p.getAttribute("data-klic"), inp = p.querySelector('[data-role=posuv]');
     inp.value = stiny[rezim][klic];
@@ -546,9 +1074,13 @@ function nasad(){
   for (var k3 in tvary) korenu.style.setProperty(k3, tvary[k3]);
   tvarPosuvy.forEach(function(p){
     var klic = p.getAttribute("data-tvar"), inp = p.querySelector('[data-role=posuv]');
-    inp.value = parseFloat(tvary[klic]);
+    /* „auto" není číslo, ale posuvník jiné hodnoty neumí — nula tedy znamená
+       auto a popisek to říká slovem, ať nikdo nehádá, co je nula výšky. */
+    var auto = tvary[klic] === "auto";
+    inp.value = auto ? 0 : parseFloat(tvary[klic]);
     p.querySelector('[data-role=cislo]').textContent = tvary[klic];
   });
+  vybery.forEach(function(s){ s.value = tvary[s.getAttribute("data-vyber")] || s.value; });
   rodiny.forEach(function(s){ s.value = tvary[s.getAttribute("data-rodina")] || s.value; });
   [].slice.call(document.querySelectorAll("[data-konec]")).forEach(function(b3){
     b3.classList.toggle("on", b3.getAttribute("data-konec") === tvary["--ikona-konec"]);
@@ -557,7 +1089,63 @@ function nasad(){
     b2.classList.toggle("on", b2.getAttribute("data-rezim") === rezim);
   });
   oznacSmer();
+  stavRozvrzeni();
   vypis();
+  nasadRam();
+}
+
+/* Dvě karty ve stejném sloupci a řádku se v mřížce překryjí. Nejde to zakázat
+   — jsou to dva samostatné výběry — ale jde to hned říct, dokud je na to
+   ukázka před očima. Karta přes oba sloupce zabírá v řádku obojí místo. */
+function stavRozvrzeni(){
+  var stav = document.getElementById("stav-rozvrzeni");
+  if (!stav) return;
+  var obsazeno = {}, kolize = [];
+  KARTY.forEach(function(k){
+    var sl = tvary["--" + k.klic + "-sloupec"], r = tvary["--" + k.klic + "-radek"];
+    (sl === "1 / -1" ? ["1", "2"] : [sl]).forEach(function(s){
+      var kde = s + ":" + r;
+      if (obsazeno[kde] && kolize.indexOf(obsazeno[kde] + " a " + k.nazev) < 0)
+        kolize.push(obsazeno[kde] + " a " + k.nazev);
+      obsazeno[kde] = k.nazev;
+    });
+  });
+  stav.className = kolize.length ? "note kolize" : "note";
+  stav.textContent = kolize.length
+    ? "Překrývá se: " + kolize.join(", ") + " — stojí ve stejném místě mřížky."
+    : "Žádné dvě karty nestojí ve stejném místě.";
+}
+
+/* Ukázka je samostatné okno, takže se do ní proměnné musí zapsat zvlášť —
+   z nástroje se nedědí. Zapíše se do ní přesně to, co vyjde na výstupu, takže
+   ukázka nemůže ukazovat něco jiného, než co se vloží do aplikace. */
+var ram = document.getElementById("ram"), platno = document.getElementById("platno");
+var sirkaOkna = 1600, ramHotov = false;
+
+function pripravRam(){
+  var d = ram.contentDocument;
+  d.open();
+  d.write('<!doctype html><html lang="cs"><head><meta charset="utf-8">'
+    + '<style id="app"></style><style id="prom"></style>'
+    + '<style>body{margin:0}</style></head><body></body></html>');
+  d.close();
+  d.getElementById("app").textContent = document.getElementById("app-css").textContent;
+  d.body.appendChild(document.getElementById("ukazka-hlavni").content.cloneNode(true));
+  ramHotov = true;
+}
+
+function nasadRam(){
+  if (!ram || !ramHotov) return;
+  var d = ram.contentDocument;
+  d.documentElement.setAttribute("data-theme", rezim);
+  d.getElementById("prom").textContent = vystupText;
+  ram.style.width = sirkaOkna + "px";
+  ram.style.height = "10px";
+  var v = Math.max(d.body.scrollHeight, 400);
+  ram.style.height = v + "px";
+  var k = platno.clientWidth / sirkaOkna;
+  ram.style.transform = "scale(" + k + ")";
+  platno.style.height = Math.round(v * k) + "px";
 }
 
 function vypis(){
@@ -574,18 +1162,48 @@ function vypis(){
     }
     t += (m === "light" ? ":root{" : ':root[data-theme="dark"]{') + blk + "}\n";
   });
-  document.getElementById("vystup").value = t;
+  /* Barvy stránek jdou do vlastního úseku, ať se dá vložit obojí najednou
+     a ať se při dalším spuštění nástroje zase načtou. */
+  t += ZAC_STRANEK + "\n";
+  STRANKY.forEach(function(s){
+    if (!s.sel) return;
+    ["light", "dark"].forEach(function(m){
+      var o = (presahy[s.sel] || {})[m] || {};
+      var klice = Object.keys(o).filter(function(k){ return o[k]; });
+      if (!klice.length) return;
+      /* Obojí se musí vymezit proti druhému režimu: proměnná na obalu stránky
+         přebije :root vždycky, takže bez toho by světlé barvy stránky platily
+         i v tmavém režimu a přesvítily by tmavý základ. */
+      t += (m === "dark" ? PRED_TMAVY : PRED_SVETLY) + s.sel + "{"
+        + klice.map(function(k){ return k + ":" + o[k] + ";"; }).join(" ") + "}\n";
+    });
+  });
+  t += KON_STRANEK + "\n";
+  vystupText = t;
+  [].slice.call(document.querySelectorAll("[data-vystup]")).forEach(function(v){
+    v.value = t;
+  });
 }
 
 var radky = [].slice.call(document.querySelectorAll(".radek"));
 radky.forEach(function(r){
   var klic = r.getAttribute("data-klic");
   var barva = r.querySelector('[data-role=barva]'), hex = r.querySelector('[data-role=hex]');
-  barva.addEventListener("input", function(){ barvy[rezim][klic] = barva.value; hex.value = barva.value;
-    korenu.style.setProperty(klic, barva.value); vypis(); });
-  hex.addEventListener("input", function(){ barvy[rezim][klic] = hex.value;
+  function zmena(v){
+    nastavBarvu(klic, v);
+    if (!stranka) korenu.style.setProperty(klic, v);
+    r.classList.toggle("vlastni", maPresah(klic));
+    nasadStranky(); stavStranky(); vypis();
+  }
+  barva.addEventListener("input", function(){ hex.value = barva.value; zmena(barva.value); });
+  hex.addEventListener("input", function(){
     if (jeHex(hex.value)) barva.value = hex.value;
-    korenu.style.setProperty(klic, hex.value); vypis(); });
+    zmena(hex.value); });
+  /* Dvojklik na název proměnné vrátí stránce základní barvu. */
+  var jmeno = r.querySelector(".txt b");
+  if (jmeno) jmeno.addEventListener("dblclick", function(){
+    if (!stranka) return;
+    zrusPresah(klic); nasad(); });
 });
 
 /* Jen posuvníky stínů — tvary, písmo a rozestupy mají data-tvar a řeší se níž. */
@@ -606,11 +1224,67 @@ tvarPosuvy.forEach(function(p){
   var klic = p.getAttribute("data-tvar"), inp = p.querySelector('[data-role=posuv]');
   inp.addEventListener("input", function(){
     var jed = inp.getAttribute("data-jed");
-    tvary[klic] = inp.value + jed;
+    /* Nejmenší výška na nule není nula, ale „auto" — karta si výšku vezme
+       podle obsahu. Nula by ji naopak pustila pod obsah a text by vylezl ven. */
+    tvary[klic] = (/-vyska$/.test(klic) && +inp.value === 0) ? "auto" : inp.value + jed;
     p.querySelector('[data-role=cislo]').textContent = tvary[klic];
-    korenu.style.setProperty(klic, tvary[klic]); vypis();
+    korenu.style.setProperty(klic, tvary[klic]);
+    /* Týž rozestup má posuvník na obou stránkách — musí ukazovat totéž. */
+    tvarPosuvy.forEach(function(q){
+      if (q !== p && q.getAttribute("data-tvar") === klic){
+        q.querySelector('[data-role=posuv]').value = inp.value;
+        q.querySelector('[data-role=cislo]').textContent = tvary[klic];
+      }
+    });
+    vypis(); nasadRam();
   });
 });
+/* Sloupec, řádek, šířka a zarovnání taky nejsou čísla — jsou to výběry.
+   Jinak se chovají stejně jako posuvníky: zapíší proměnnou a přepočítají
+   ukázku i výstup. */
+var vybery = [].slice.call(document.querySelectorAll("[data-vyber]"));
+vybery.forEach(function(s){
+  s.addEventListener("change", function(){
+    var klic = s.getAttribute("data-vyber");
+    tvary[klic] = s.value;
+    korenu.style.setProperty(klic, s.value);
+    stavRozvrzeni(); vypis(); nasadRam();
+  });
+});
+
+[].slice.call(document.querySelectorAll("[data-okno]")).forEach(function(b){
+  b.addEventListener("click", function(){
+    sirkaOkna = +b.getAttribute("data-okno");
+    [].slice.call(document.querySelectorAll("[data-okno]")).forEach(function(x){
+      x.classList.toggle("on", x === b); });
+    nasadRam();
+  });
+});
+
+/* Stránky nástroje. Ukázka se musí přeměřit až když je vidět — ve skrytém
+   prvku má nulovou šířku a zmenšení by vyšlo na nulu. */
+[].slice.call(document.querySelectorAll("[data-strana]")).forEach(function(b){
+  b.addEventListener("click", function(){
+    var kam = b.getAttribute("data-strana");
+    document.getElementById("strana-barvy").hidden = kam !== "barvy";
+    document.getElementById("strana-rozvrzeni").hidden = kam !== "rozvrzeni";
+    [].slice.call(document.querySelectorAll("[data-strana]")).forEach(function(x){
+      x.classList.toggle("on", x === b); });
+    if (kam === "rozvrzeni") nasadRam();
+  });
+});
+window.addEventListener("resize", nasadRam);
+
+document.getElementById("zpet-rozvrzeni").addEventListener("click", function(){
+  /* Vrací se jen rozvržení — barvy, písmo ani stíny se nesmí hnout. */
+  Object.keys(VYCH_TVARY).forEach(function(k){
+    if (/^--(sirka-stranky|sloupec-\d|mezera-sloupcu|mezera-karet|okraj-stranky)$/.test(k)
+        || /^--(produkt|vysledek|recept|zakazka|tisk)-/.test(k))
+      tvary[k] = VYCH_TVARY[k];
+  });
+  nasad();
+});
+
 /* Řez písma není číslo, takže má výběr místo posuvníku — jinak se chová stejně. */
 var rodiny = [].slice.call(document.querySelectorAll("[data-rodina]"));
 rodiny.forEach(function(s){
@@ -659,22 +1333,35 @@ function oznacSmer(){
 [].slice.call(document.querySelectorAll("[data-rezim]")).forEach(function(b){
   b.addEventListener("click", function(){ rezim = b.getAttribute("data-rezim"); nasad(); });
 });
+[].slice.call(document.querySelectorAll("[data-stranka]")).forEach(function(b){
+  b.addEventListener("click", function(){ stranka = b.getAttribute("data-stranka"); nasad(); });
+});
+document.getElementById("zpet-stranka").addEventListener("click", function(){
+  if (!stranka){ barvy[rezim] = Object.assign({}, VYCH_BARVY[rezim]); }
+  else { delete presahy[stranka]; }
+  nasad();
+});
 document.getElementById("zpet-stiny").addEventListener("click", function(){
   stiny[rezim] = Object.assign({}, VYCH_STINY[rezim]); nasad(); });
 document.getElementById("zpet-tvary").addEventListener("click", function(){
   tvary = JSON.parse(JSON.stringify(VYCH_TVARY)); nasad(); });
 document.getElementById("zpet-barvy").addEventListener("click", function(){
   barvy[rezim] = Object.assign({}, VYCH_BARVY[rezim]); nasad(); });
-document.getElementById("kopirovat").addEventListener("click", function(){
-  var t = document.getElementById("vystup");
-  t.removeAttribute("readonly"); t.select();
-  var ok = false;
-  try { ok = document.execCommand("copy"); } catch (e) {}
-  t.setAttribute("readonly", "readonly");
-  document.getElementById("stav").textContent = ok ? "zkopírováno do schránky"
-    : "nepodařilo se — označte text a zkopírujte ručně";
+/* Výstup je na obou stránkách, aby se nemuselo přebíhat — kopíruje se ten,
+   u kterého se stojí. */
+[].slice.call(document.querySelectorAll("[data-kopirovat]")).forEach(function(b){
+  b.addEventListener("click", function(){
+    var karta = b.closest(".vystup"), t = karta.querySelector("[data-vystup]");
+    t.removeAttribute("readonly"); t.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) {}
+    t.setAttribute("readonly", "readonly");
+    karta.querySelector("[data-stav]").textContent = ok ? "zkopírováno do schránky"
+      : "nepodařilo se — označte text a zkopírujte ručně";
+  });
 });
 
+pripravRam();
 nasad();
 </script>
 </body></html>
