@@ -62,17 +62,32 @@
       var d = rodic.children[k];
       if (d.tagName === "svg" || d.closest("svg")) continue;
       if (!viditelny(d)) continue;
-      var r = d.getBoundingClientRect();
-      if (r.width < 1 || r.height < 1) continue;
-      deti.push({ el: d, r: r });
+      /* Řádkový prvek zalomený přes dva řádky má dílčích obdélníků víc a jeho
+         OBALOVÝ rámeček pokrývá i konec prvního řádku, kde nic nekreslí.
+         Měřit se proto musí kus po kusu. Na tomhle to jednou lhalo: text
+         " · Printcolor MS 660" zalomený pod název receptury hlásil překryv
+         22 px, kterých se na obrazovce nic netýkalo. */
+      var rs = d.getClientRects(), kusy = [];
+      for (var m2 = 0; m2 < rs.length; m2++)
+        if (rs[m2].width >= 1 && rs[m2].height >= 1) kusy.push(rs[m2]);
+      if (!kusy.length) continue;
+      deti.push({ el: d, kusy: kusy });
     }
 
     for (var a = 0; a + 1 < deti.length; a++) {
       var p = deti[a], q = deti[a + 1];
-      var vodo = Math.min(p.r.right, q.r.right) - Math.max(p.r.left, q.r.left);
-      if (vodo <= 1.5) continue;
 
-      var plochy = Math.min(p.r.bottom, q.r.bottom) - Math.max(p.r.top, q.r.top);
+      /* Protnuté plochy: hledá se nejhorší dvojice kusů. Stačí jedna —
+         překrytý text je chyba, i když se zbytek prvku vejde jinam. */
+      var plochy = 0;
+      for (var x = 0; x < p.kusy.length; x++) {
+        for (var y = 0; y < q.kusy.length; y++) {
+          var pr = p.kusy[x], qr = q.kusy[y];
+          if (Math.min(pr.right, qr.right) - Math.max(pr.left, qr.left) <= 1.5) continue;
+          var sv = Math.min(pr.bottom, qr.bottom) - Math.max(pr.top, qr.top);
+          if (sv > plochy) plochy = sv;
+        }
+      }
       if (plochy > 1.5) {
         nalezy.push({ druh: "plochy", prekryv: Math.round(plochy * 10) / 10,
           horni: popis(p.el), dolni: popis(q.el) });
@@ -80,7 +95,13 @@
       }
       if (vodorovne) continue;
 
-      var kresba = pretokDolu(p.el) - (q.r.top - p.r.bottom);
+      /* Kresba písma: sousedí spolu poslední řádek horního prvku a první
+         řádek dolního — mezi nimi se dolní dotah může přetéct. */
+      var pPosl = p.kusy[p.kusy.length - 1], qPrvni = q.kusy[0];
+      var vodo = Math.min(pPosl.right, qPrvni.right) - Math.max(pPosl.left, qPrvni.left);
+      if (vodo <= 1.5) continue;
+
+      var kresba = pretokDolu(p.el) - (qPrvni.top - pPosl.bottom);
       if (kresba > 0.5) {
         nalezy.push({ druh: "kresba pisma", prekryv: Math.round(kresba * 10) / 10,
           horni: popis(p.el), dolni: popis(q.el) });

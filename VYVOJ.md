@@ -155,7 +155,33 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 13:48 | Dvousložkové barvy: pot life je vlastnost receptury a v míchacím režimu běží odpočet |
 | 14:38 | Cena namíchané dávky a cena barvy na kus rovnou v kalkulaci; úspora ze zbytku v korunách |
 | 14:49 | Namíchaná dávka je samostatný záznam s vlastním životem — odpočet pot life přežije přepnutí barvy i zavření aplikace |
-| 15:11 | Kelímek s totožným složením se pozná a jde v nabídce první; dopočty, které by dávku nafoukly přes dvojnásobek, se přestaly nabízet |
+
+### 16. srpna — zbytky a aditiva
+| čas | co |
+|---|---|
+| 13:45 | Kelímek s totožným složením se pozná a jde v nabídce první; dopočty, které by dávku nafoukly přes dvojnásobek, se přestaly nabízet |
+| 14:20 | Ředidlo a zpomalovač jsou vážené složky dávky — hlídá se strop ředění a dopočítá se, o kolik naředěním klesl pigment |
+| 14:41 | Pole, hlášení a štítky v míchacím režimu mají vlastní velikost a jdou ladit v barvy.html |
+| 15:39 | Každý posuvník i šířka karty berou ručně zapsanou hodnotu; opraveno měření překryvu u zalomeného textu |
+| 15:55 | Tři karty ve 2. řádku vedle sebe — receptura 67 % sloupce, parametry 33 % na střed, zakázka 32,7 % vpravo |
+| 16:21 | Receptury jdou zobrazit jako mřížku odstínů, ne jen jako tabulku |
+| 17:13 | Mluvená animovaná ukázka funkcí — deset scén od zakázkového listu po štítek |
+| 17:31 | Ukázka má druhé dějství — čtyři scény o tom, co v aplikaci teprve bude |
+| 17:42 | Dodatek k ukázce: dopočet úspory materiálu a času, měřené odděleně od odhadů |
+| 18:15 | Dodatek postaven na A3 P26-31-01: 293 482 CZK/rok za opravy, −30 % ≈ 88 000 |
+| 18:32 | Úspora rozdělená na míchárnu a výrobu — dvě třetiny jsou vrácený strojový čas |
+
+### 17. srpna — pohled ven
+| čas | co |
+|---|---|
+| 09:40 | Průzkum konkurence a návrh pořadí — 18 funkcí porovnáno, 6 doporučení |
+| 10:09 | Riziko opravy před mícháním a předpověď zbytku z historie |
+| 10:17 | konkurence.html vede stav zavedení — aktualizuje se s každou funkcí ze svého seznamu |
+| 10:51 | Nátisk z malé dávky — velikost určuje nejmenší složka, ne cit |
+| 14:35 | Skládání dvou zbytků — dva kelímky, z nichž ani jeden sám nesedí, sednou dohromady |
+| 15:02 | Pořadí míchání ve frontě — zbytek z jedné zakázky sedne na další, když se ta míchá potom |
+| 15:18 | Zámek u technologie je kreslený jako ostatní ikony; ikona v řádku textu bere velikost z písma kolem sebe |
+| 15:30 | Zakázka se načítá tam, kde se s ní počítá — čárový kód i PDF v kartě Vybraný produkt, dvě položky z nabídky pryč |
 
 ---
 
@@ -236,6 +262,14 @@ takže potištěná plocha je vždy o kus větší než motiv.
 
 Tedy **necelá sedmina** původního odhadu. U barvy za tisíce korun za kilo je to
 přímá úspora a méně likvidovaného zbytku.
+
+> **Doplněno 16. 8. 2026:** 3,25 cm² a 0,4 g jsou naměřené hodnoty **včetně rozpití
+> barvy** a platí i navenek — potvrzuje je A3 `P26-31-01`, strana JAK. Číslo
+> **10,94 cm² / 1,3 g**, které stojí v `files/ROZBOR_NOVE_VERZE.md`, je jen
+> **mezikrok** (obrys motivu) a A3 ho označuje za dopočet pro ilustraci postupu.
+> Uvádí se tedy 3,1 → 0,4 g, osmkrát menší plocha.
+
+
 
 **Ověření správnosti** — počítáno na obrazcích se známým výsledkem:
 - čtverce pokrývající přesně 25 % plochy → aplikace 25,0 %
@@ -2753,8 +2787,10 @@ receptuře, kde je báze z desetiny, si vynutí dvoukilovou dávku místo tří 
 gramů. Uspoří se tím dvě stě gramů staré barvy a vyrobí se přes kilo nové,
 kterou nikdo neobjednal — z jednoho zbytku vznikne šestkrát větší. Nabídka
 „celý kelímek" se proto nad dvojnásobek objednané dávky sama nenabízí. Ručně
-zadaný kelímek se počítá dál a jen se to řekne nahlas: tam se ptá obsluha,
-která ví, že si míchá do zásoby.
+zadaný kelímek se počítá dál, jen se u něj vypíšou čísla („ze zbytku se využije
+200 g, namíchá se 2 000 g — nové barvy vznikne 1 800 g"): tam se ptá obsluha,
+která ví, že si míchá do zásoby. Vysvětlení, proč ta dávka vyjde tak velká,
+šlo do `NAVOD_PODKLADY.md` — rozhraní hlásí stav, nevykládá.
 
 **Ověřeno:** 20 kontrol modelu spuštěných proti kódu vytaženému ze samotného
 `index.html` — rozpoznání shody napříč jednotkami procent (60/30/10 vs.
@@ -2768,3 +2804,905 @@ a vrací kód 1.
 **Zbývá proklikat myší.** Evidence zbytků je na tomhle počítači prázdná, takže
 nabídkový box se nedal vyvolat na skutečných datech — vykreslení aplikace
 projde, ale samotný box čeká na první kelímek ve skladu.
+
+---
+
+## 59. Ředidlo přestalo být mimo systém
+
+**Problém.** Barva se z kelímku nikdy netiskne tak, jak se namíchala. Podle síta,
+teploty v dílně a toho, jak dlouho už stojí, se do ní přilévá ředidlo; na jemná
+síta a velké formáty ještě zpomalovač schnutí. Aplikace o tom věděla jedinou
+věc — kolik ředidla se nalilo, aby se to dalo připočítat k ceně. Jedno políčko
+ve finančním boxu, které nikam dál nevedlo.
+
+Důsledky se sčítaly na třech místech naráz:
+
+| kde | co bylo špatně |
+|---|---|
+| dávka | v nádobě bylo víc, než na kolik byla spočítaná |
+| štítek a lístek | mlčely o tom, že barva je naředěná |
+| asistent navážení | ředidlo nevedl, lilo se od oka mimo postup |
+
+**Aditiva jsou teď vážené složky dávky.** Ředidlo a zpomalovač mají v ceníku
+vlastní roli (zpomalovač stojí obvykle násobek ředidla, schovaný pod „ředidlo“
+by dávku podhodnocoval), receptura si nese doporučené ředění a jeho strop,
+a v asistentu se váží jako každá jiná složka — do téže nádoby, na tutéž váhu,
+kumulativně.
+
+Vedou se ale **za** komponentami a odděleně, protože složky odstínu to nejsou.
+Vyplynula z toho jedna past, kterou stálo za to obejít vědomě: tužidlo se počítá
+z váhy báze, ne z obsahu nádoby. Kdyby se do základu započítalo ředidlo, vyšlo
+by tužidla o jeho podíl víc — u 200 g barvy a 18 g ředidla 21,8 g místo 20 g —
+a barva by vytvrdla jinak, než má. Základem je proto součet barevných složek,
+ne to, co ukazuje váha. Ze stejného důvodu se aditiv netýká ani korekce odstínu.
+
+Že jsou aditiva v seznamu složek, má jediný důvod: **přelití pak řeší tentýž
+algoritmus jako u barvy.** Přelité ředidlo se z nádoby nedostane, takže se poměr
+zachrání jedině dorovnáním všeho ostatního. Ověřeno: 200 g barvy ve dvou
+složkách plus 10 g ředidla, nalito 20 g ředidla → dávka 420 g, dolít 120 g modré
+a 80 g žluté. Žádná druhá kopie toho výpočtu nevznikla.
+
+**Kolik pigmentu naředěním ubude.** Zadání navrhovalo vzorec
+`(zadané − doporučené) / váha_bází`, který odečítá poměr od gramů a měří
+přebytek proti bázím. Referencí ale není neředěná barva — receptura s ředěním
+počítá a spotřeba v g/m² je naměřená na barvě připravené k tisku. Poměřuje se
+tedy proti doporučenému ředění a proti celé směsi:
+
+```
+pokles = 1 − koncentrace / koncentrace_při_doporučeném
+       = (aditiva − doporučeno) / (báze + aditiva)
+```
+
+Na 200 g barvy s doporučením 5 %: nalito 18 g místo 10 g → v gramu je o **3,7 %**
+míň pigmentu, ne o 4 % (proti bázím) ani o 8,3 % (proti neředěné barvě).
+
+**Kompenzace zvětšuje dávku, nedorovnává koncentraci.** Dorovnat báze zpátky na
+původní koncentraci by ředění zrušilo — viskozita by se vrátila tam, odkud ji
+tiskař ředěním dostával. Zvětší se proto celá dávka i s aditivy v poměru
+1 / (1 − pokles): poměr ředění a s ním viskozita zůstanou, jen je barvy víc.
+Z 218 g se stane **226,3 g** (barva 207,6 g, aditiva 18,7 g) a pigmentu je v ní
+přesně tolik, kolik zakázka žádala — 200 g. Je to tlačítko, ne automatika,
+a při změně barvy, polohy nebo počtu kusů se samo ruší.
+
+Co tím kompenzované **není**: kolik barvy projde sítem. To závisí na skutečně
+naměřené viskozitě a bere se z tabulky koeficientů, kde u vzorce stojí proč —
+„je to věc konkrétní barvy a stroje, proto se to bere z tabulky, ne ze vzorce“.
+Zadání k tomu chtělo ještě `pigment_density_factor` u receptury; nepřidal se,
+tvrdil by totéž číslo z druhé strany a s naměřenou tabulkou by se rozešel.
+
+**Strop ředění** se hlídá v kalkulaci i u váhy. Nad ním barva neteče, ale stéká;
+výchozích 12 % váhy barvy si každá receptura může přepsat. Strop nikdy nespadne
+pod doporučení — jinak by hlásil překročení hned po nalití doporučeného množství.
+
+**Ověřeno:** 37 kontrol modelu proti kódu vytaženému ze samotného `index.html` —
+poměry čtené jako 8 i jako 0,08, dvě aditiva sečtená dohromady, překročení
+stropu, kompenzace a její invariant (po zvětšení dávky vyjde pigment na 200 g),
+přelití ředidla přes společný algoritmus, cesta receptury přes CSV a zpět,
+starší soubor bez nových sloupců i anglická hlavička od dodavatele
+(`recommended_thinner_ratio`). Pět kontrol jde na zdroj, protože kód uvnitř
+asistenta se zvenčí zavolat nedá. Zkoušky ověřeny protichůdně na třech kopiích
+s vrácenými chybami: vzorec ze zadání shodil 6 kontrol, strop pod doporučením 1,
+tužidlo počítané z naředěné směsi 1 — a bez kontrol zdrojem by ta poslední
+prošla nepovšimnutá.
+
+**Zbývá proklikat myší.** Model neukáže, že se na to dá zmáčknout. Vykreslení
+prochází, ale ověření u váhy čeká na skutečnou dávku.
+
+---
+
+## 60. U váhy se poprvé zadává, ne jen odečítá
+
+**Problém.** Míchací režim měl vlastní sadu velikostí od začátku — čte se od
+váhy, ve stoje a v rukavicích, takže tabulka, gramy, tlačítka i pruh navážení
+jsou o kus větší než ve zbytku aplikace. Sada ale pokrývala jen to, co se
+**odečítá**. Dokud se v režimu jenom četlo a mačkala tlačítka, stačilo to.
+
+S aditivy se u váhy poprvé zadává: kolik ředidla se nalilo, se píše do pole.
+To pole zůstalo na obecné škále — 15,5 px písma a 9 px odsazení uprostřed
+prvků, které mají 20 až 26. Stejně tak hlášení o překročení stropu ředění
+a štítek „aditivum" u složky: čísla, podle kterých se tiskař rozhoduje,
+vycházela drobnější než tabulka vedle.
+
+**Tři proměnné do míchací sady** — `--mich-pole`, `--mich-hlaseni`,
+`--mich-stitek`. Poměry v `calc()` jsou ty ze základní škály (pole 9/12 px
+při písmu 15,5; hlášení 10/12 při 13; štítek 3/9 při 12,5), takže se tvar
+prvku nemění, jen roste. Naměřeno sondou:
+
+| prvek | mimo režim | v režimu |
+|---|---|---|
+| pole pro zadání gramů | 15,5 px | **20 px**, odsazení 11,6 / 15,4 px |
+| varování a potvrzení | 13 px | **15 px** |
+| štítek u složky | 12,5 px | **14 px** |
+| poznámka | 13,5 px | 13,44 px — **schválně beze změny** |
+
+**Poznámky zůstaly malé, a je to rozhodnutí.** Jsou to doprovodné věty, ne
+čísla k jednání — kdo stojí u váhy, čte z nich nanejvýš jednou. Kdyby se měly
+číst z téže vzdálenosti jako gramy, musí povyrůst taky; do té doby ať se to
+neřeší znovu.
+
+Cestou se přepsalo napevno zapsaných 13 px v `.warnbox` a `.okbox` na
+`calc(var(--pismo-poznamka) - 1px)`. Vychází z toho stejné číslo — ověřeno
+sondou, `.warnbox` má pořád přesně 13 px — ale velikost hlášení teď jde ladit
+i v základní škále, ne jen v míchacím režimu.
+
+**Ověřeno:** sondou na stránce postavené ze skutečného `<style>` bloku
+aplikace (míchací režim se v nástroji vykresluje bez polí, takže se v něm
+změřit nedal); `prekryv.py` čistý ve všech šesti šířkách a obou režimech;
+`barvy.html` přegenerováno — 14 posuvníků míchacího režimu, 52 prvků
+s `data-tvar`.
+
+---
+
+## 61. Posuvník je na hledání, ne na trefu
+
+**Problém.** Rozvržení hlavní stránky i celý vzhled se ladí posuvníky
+a nabídkami. Na hledání je to správný nástroj — táhne se, dokud to nesedí
+okem. Jenže pak přijde chvíle, kdy je hledání u konce a ví se, že karta má být
+široká přesně 420 px, a posuvník s krokem 10 na to nestačí. Rozsah je navíc
+odhad: ikona nad 48 px je legitimní přání, ne překlep, ale posuvník ji neumí.
+
+U šířky karet to bylo nejhorší — nabídka měla pět předvoleb (celá šířka,
+jako jeden sloupec, tři čtvrtiny, polovina, třetina) a nic mezi tím.
+
+**Každý posuvník má teď vedle sebe pole s hodnotou.** Není to jen odečet, dá se
+do něj psát — a bere se, co se napíše, i mimo rozsah a s jinou jednotkou (em,
+rem, %). Posuvník se k hodnotě jen přisune, jak nejblíž umí, a orámuje se, když
+je mimo něj; jinak by tiše stál na kraji a vypadal rozbitě. **Šířka karty** má
+pod nabídkou pole na přesnou hodnotu v CSS — projde i `calc()` nebo `min()` —
+a nabídka se sama přepne na „vlastní", aby neukazovala něco jiného, než co
+platí. Sedí-li napsaná hodnota na předvolbu, ukáže se ta: `přesně jako jeden
+sloupec` se čte líp než `calc((100% - var(--mezera-sloupcu)) / 2)`.
+
+Velikost dlaždic v Parametrech tisku se tím řídí taky, jen nepřímo — jsou to
+tři sloupce v kartě s `aspect-ratio: 1`, takže vycházejí ze šířky karty. Vlastní
+proměnnou nemají a mít nemusí; přesně tak to má být podle pravidla, že se
+velikost bere ze sousedního prvku.
+
+**Sedm hodnot rozvržení se ztratilo cestou.** Nástroj nic sám nezapisuje —
+vyrobí blok k vložení a v jeho vlastní nápovědě stojí „nebo mi je pošlete
+a vložím je sám". Blok poslaný přesně tímhle způsobem jsem přečetl jako kontext
+a zeptal se, co s ním; pak jsem spustil `barvy_nastroj.py`, který nástroj
+přegeneroval z aplikace, takže se vrátil na výchozí hodnoty a vypadalo to, že
+se nastavení neuložilo. Nastavení se doplnilo dodatečně: karta Zakázka přes oba
+sloupce třetinou šířky vpravo, Receptura a barva v šířce jednoho sloupce vlevo,
+Parametry tisku ve 2. řádku třetinou šířky na střed.
+
+**A našla se zkouška, která lhala.** Po vložení hlásil `prekryv.py` čtyři
+překryvy — pokaždé týž: text „ · Printcolor MS 660" prý přes název receptury
+o 22 px. Nebylo to tam. Ten text se v zúžené kartě zalomí přes dva řádky, takže
+má tři dílčí obdélníky, ale měřil se **obalový** rámeček — a ten pokrývá i konec
+prvního řádku, kde nic nekreslí. Měří se proto kus po kusu; u kresby písma
+sousedí poslední řádek horního prvku s prvním řádkem dolního.
+
+**Rozvržení dotažené volnou hodnotou.** Hned první použití nového pole:
+receptura dostala 67 % svého sloupce a zakázka 32,7 % celé šířky — čísla, která
+se z pěti předvoleb vybrat nedala. Ve 2. řádku tak stojí tři karty vedle sebe.
+Změřeno, že se nedotýkají: při 1920 px jsou mezery 13,4 a 14,6 px, při 1400 px
+13,4 a 10,4 px; `prekryv.py` čistý ve všech šesti šířkách a obou režimech.
+
+Mezery si nejsou rovné a jsou menší než `--mezera-karet` (16 px) — nevypadávají
+z mřížky, ale zbývají po zarovnání tří samostatně umístěných karet. Chtít je
+přesně stejné jde, ale musely by se odvodit vzorcem, ne trefit procentem.
+
+Je to potřetí, co `prekryv.py` hlásil něco, co na obrazovce není. Ověřeno tedy
+protichůdně a obě větve zvlášť: na opravené aplikaci mlčí, na kopii s výškou
+řádku 0,4 hlásí 8 překryvů (větev kresby písma) a na kopii se záporným odstupem
+polí hlásí protnuté plochy 26 a 30 px (větev ploch, kterou jsem měnil). První
+pokus o protikontrolu byl k ničemu — záporný `gap` je neplatné CSS a prohlížeč
+ho ignoruje, takže „čistý" výsledek nic nedokazoval.
+
+---
+
+## 62. Receptura se hledá dvěma způsoby
+
+**Problém.** Záložka Receptury uměla jen tabulku. Na 2 692 receptur je to
+správný nástroj, dokud se ví, jak se hledaná barva jmenuje — vypíše se do
+hledání „1235" a je hotovo. Jenže druhá polovina případů zní jinak: **ví se,
+jak má barva vypadat**, a jméno se hledá právě podle toho. V tabulce je odstín
+čtvereček 18 px na začátku řádku a listovat se dá jen jménem, které neznám.
+
+Katalog produktů měl přepínač tabulka/mřížka od začátku. Receptury ne, i když
+je u nich vizuální listování potřebnější — produkt se pozná podle názvu,
+odstín ne.
+
+**Mřížka odstínů**, přepínač na stejném místě a se stejnými značkami jako
+u produktů, volba se drží i po zavření aplikace. Karta má stejnou šířku jako
+karta produktu — dělí je tatáž mřížka `.pgrid`, takže se obě záložky listují
+stejně.
+
+**Dlaždice odstínu ale není čtverec.** U produktu je čtvercová správně: je
+v ní fotka a ta se prohlíží. Odstín je plocha jedné barvy a čtverec o ní
+neřekne víc než pruh — jen ubere řadu z obrazovky. Změřeno: se čtvercem měla
+karta 279 × 435 px a odstín zabíral 58 % její výšky, takže na obrazovku vyšla
+**jedna řada**. S poměrem 16:9 má karta 279 × 325 px, odstín 43 % — a vidět
+jsou **dvě řady**. O barvě to neřekne o nic míň, receptur ukáže dvakrát tolik.
+
+Na kartě je odstín, databáze, název, typ a řada, pruh složení (tentýž
+`PruhSlozeni` jako v kalkulaci — ne druhá kopie), počet komponent, hustota,
+u dvousložkových 2K s pot life a výstraha, když součet složení nesedí na sto.
+
+**Mřížka vykreslí 300 receptur, tabulka 100.** Řádek tabulky vypisuje celé
+složení pod sebe a je vysoký; karta je nižší, takže se jich na obrazovku vejde
+víc a má smysl jich víc vyrobit. Obě čísla se hlásí („Zobrazeno prvních 300
+z 2 692") — je to skutečné omezení, ne vysvětlivka.
+
+**Ověřeno proklikáním skutečnou myší:** menu → Receptury → přepínač na mřížku
+vykreslí 300 karet a 300 pruhů složení, první je PANTONE 1235 C; přepnutí zpět
+mřížku odstraní a vrátí tabulku. Ve světlém i tmavém režimu, `prekryv.py`
+čistý ve všech šesti šířkách.
+
+---
+
+## 63. Ukázka, která mluví
+
+**Problém.** Prezentace v `prezentace/index.html` odpovídá na otázku „jak ta
+práce probíhala" — chronologie den po dni, stavěná z časové osy v tomhle
+deníku. Nikde ale nebylo nic, co odpoví na otázku, kterou položí každý, kdo
+aplikaci vidí poprvé: **co to vlastně umí.** Ukázat se to dá u počítače, jenže
+to znamená mít u toho někoho, kdo aplikaci zná.
+
+**`prezentace/ukazka.html`** je deset scén, zhruba dvě a půl minuty: jeden
+soubor bez instalace → zadání z PDF → krycí plocha → dávka → zbytek ze skladu
+→ aditiva → pot life → vážení na váze → cena → štítek a návrat do evidence.
+Poslední scéna se vrací k páté, protože tím se ten kruh doopravdy uzavírá.
+
+**Mluví prohlížeč, ne zvukový soubor.** Web Speech API čte český text
+systémovým hlasem, takže stránka nepotřebuje internet ani megabajty zvuku
+a nedá se rozejít s textem — ten je jen jeden. Na tomhle počítači to bere
+hlas Microsoft Jakub. Kde český hlas není, řekne se to nahlas a **titulky
+běží stejně**; ukázka dává smysl i potichu, což je stejně nejčastější případ,
+protože zvuk pustí málokdo hned.
+
+Dvě věci, na které se muselo myslet: prohlížeč nepustí řeč bez kliknutí
+uživatele, takže se začíná tlačítkem — a Chrome utne delší promluvu zhruba
+po patnácti vteřinách, když se syntéza nepošťouchne, na což je oživovací
+interval po osmi vteřinách.
+
+**Vzhled je z aplikace, ne k prezentaci vymyšlený:** šedá plocha, karty z ní
+vystupují stínem, těžké prostrkané verzálky v nadpisech. Sytá barva je na celé
+stránce jediná — PANTONE 485 C, tedy sama barva, o kterou jde. Ovládá se
+i klávesnicí (šipky, mezerník) a respektuje `prefers-reduced-motion`.
+
+**Čísla jsou skutečná tam, kde být mají:** rozsah dat, 14 údajů z PDF,
+3,1 → 0,4 g krycí plochy, 724,5 g báze → 72,45 g tužidla, pokles pigmentu
+−3,7 % — všechno z tohohle deníku. Ceny a kód kelímku jsou vymyšlené pro
+názornost. Z licencovaných databází v ukázce **není nic**.
+
+**Ověřeno proklikáním:** deset scén, přechody tam i zpět, ukazatel scény sedí
+s obsahem, animace doběhnou (a1 i a4 na opacity 1) ve světlém i tmavém režimu.
+Cestou se našla vlastní chyba: `#titulek` je sám ten odstavec, takže
+`querySelector("p")` vracel null a vykreslení scény padalo hned na druhém
+řádku — poznalo se to podle toho, že nadpis se nastavil a titulek zůstal
+prázdný. Zvláštnost k zapamatování: `sonda.py` hlásí u animací opacity 0,
+i když `animationName` sedí a stav je „running" — vyhodnocuje dřív, než se
+animace pohne. Na animace je průkazný `snimek.py`, ne sonda.
+
+---
+
+## 64. Ukázka říká i to, co aplikace neumí
+
+**Problém.** Ukázka z předchozí kapitoly odpovídala jen na jednu polovinu
+otázky. Kdo ji viděl, věděl, co aplikace umí — ale ne, co se do ní teprve
+chystá a co jí zatím chybí. Přitom právě to je u rozdělané práce ta zajímavější
+polovina: databáze pro zbývající technologie jsou hlavní úkol a bez nich se
+technologie nedají odemknout.
+
+**Čtyři scény druhého dějství**, obsahem z oddílu *Co zbývá* v tomhle deníku:
+stav databází podle technologie (TRS nemá žádnou), chybějící hustota
+a 416 receptur bez odstínu, neznámé barvy bází u nakoupených databází,
+a napojení na SGPS čekající na informaci od IT.
+
+**Musí to jít poznat, i když je zvuk vypnutý.** Prezentace, která ukáže
+plánovanou funkci stejně jako hotovou, lže — a lže tím hůř, čím líp vypadá.
+Druhé dějství se proto liší na čtyřech místech naráz: štítek *v aplikaci ještě
+není* vedle čísla scény, čárkovaný rámeček kolem plátna, karty jen obtažené
+a bez výplně, ztlumený nadpis i čísla, a čárkované body na liště scén.
+Rozlišení visí na příznaku u scény, ne na pořadí, takže se dějství nerozejde
+s obsahem, když se scéna přidá doprostřed.
+
+Platí to i pro toho, kdo skočí rovnou na scénu jedenáct — proto se ten stav
+přepíná při každém vykreslení, ne při spuštění přehrávání.
+
+**Ověřeno proklikáním:** 14 scén, 4 z nich značené; skok na scénu 11 zapne
+štítek i čárkované plátno, skok zpět na scénu 1 je zase vypne; pozdní řádky
+(TRS „chybí celá") doběhnou na plnou viditelnost ve světlém i tmavém režimu.
+
+---
+
+## 65. Dodatek, který přizná, co je odhad
+
+**Zadání znělo** doplnit do ukázky analýzu úspory peněz a času, „kterou jsme
+spolu probírali". Taková analýza ale v projektu nikde není — v
+`ROZBOR_APLIKACE.md` je naopak vedená mezi plánovanými: *„Vyčíslit úsporu
+materiálu z přesnější spotřeby a z využití zbytků."* Vzniká tedy teď, ne že
+se někam opisuje.
+
+**Naměřené jsou dvě věci**, obě z tohohle deníku: spotřeba 3,1 → 0,4 g na kus
+na zakázce 138823 a základna 1 209 oprav ročně (z 403 oprav za 2. 4. — 10. 8.
+2026). Všechno ostatní — cena barvy, počet zakázek, hodinová sazba, doba jedné
+opravy — dílna ví a aplikace ne. Dodatek je proto **dopočet s poli k přepsání**,
+ne hotové číslo.
+
+| složka | vzorec |
+|---|---|
+| barva | (spotřeba dřív − teď) × kusů × zakázek × podíl malých motivů × cena gramu |
+| zbytky | kelímků měsíčně × váha × 12 × cena gramu |
+| čas | opravy × pokles % × minut na opravu ÷ 60 × sazba |
+
+**Past, do které se snadno spadne.** První verze hnala naměřenou sedminu přes
+všechny zakázky a vyšlo z toho 729 000 Kč ročně za barvu. To číslo neobstojí:
+sedmina platí pro malé logo, kolem kterého je hodně volného místa, u plných
+ploch je rozdíl mnohem menší. Přibylo proto pole **Zakázek s malým motivem
+(%)** — se třiceti procenty vychází 218 700 Kč, a hlavně je vidět, na čem to
+stojí. Číslo, které se dá zpochybnit jednou otázkou, je v prezentaci horší než
+žádné.
+
+**Měřené se pozná od dosazeného.** Zelená tečka u pole znamená naměřeno,
+čárkovaný kroužek odhad. Pod výsledkem se počítá, kolik z devíti odhadů je
+ještě na výchozí hodnotě, a dokud je jich víc než nula, stojí tam varování,
+že ta čísla nejsou z dílny. Zmizí, teprve když si je někdo doopravdy přepíše.
+
+**Ověřeno:** dopočet sedí ručně přepočítaný — 2,7 g × 250 ks × 600 zakázek ×
+30 % = 121,5 kg × 1,80 Kč/g = 218 700 Kč; zbytky 12 × 180 g × 12 = 25,9 kg =
+46 656 Kč; čas 1 209 × 20 % = 242 oprav × 25 min = 101 hodin × 450 Kč =
+45 338 Kč. Varování hlásí 9 z 9 výchozích, dokud se do polí nesáhne.
+
+---
+
+## 66. Analýza úspory existuje — je v A3, ne v deníku
+
+**Dvě chyby za sebou.** Do ukázky jsem přidal dodatek o úspoře postavený na
+vlastním modelu, protože jsem žádnou hotovou analýzu nenašel. Pak jsem ho
+„opravil" podle `files/ROZBOR_NOVE_VERZE.md` na 3,1 → 1,3 g. Obojí bylo špatně.
+
+Analýza existuje: **A3 `P26-31-01 INK and DAC improvements`**, zdroj dat
+`INK repairs.xlsx` (problemove_barvy.xlsm), měřeno 2. 4. — 10. 8. 2026. Nehledal
+jsem ji, protože v `balicek/` ani ve `files/` není — je to dokument mimo
+repozitář.
+
+**Co v ní stojí:**
+
+| položka | na 1 opravu | za rok (1 209 oprav) |
+|---|---|---|
+| míchárna | 15,9 min | 320 h · 97 575 CZK |
+| výroba čeká | 31,9 min | 642 h · 195 907 CZK |
+| celkem | 47,8 min | 962 h · **293 482 CZK** (12 127 EUR) |
+
+Sazba MH 305 CZK, kurz 24,2. Cíl je snížit počet oprav, **cílové % je k
+potvrzení** a A3 počítá s −30 % ≈ 88 000 CZK/rok. Investice nulová (žádné
+licence, stávající počítače, už pořízená váha a čtečka), náklad = interní
+vývojový čas, návratnost okamžitá.
+
+Nejdůležitější věta celé analýzy není číslo: **dvě třetiny ztraceného času
+nejsou v míchárně** — je to stojící výroba, která čeká na správný odstín.
+
+**Ta druhá chyba — 1,3 g.** A3 na straně JAK ukazuje tři kroky téže zakázky
+138823 (potisk 63 × 40,8 mm, tampontisk):
+
+| krok | plocha | spotřeba | co to je |
+|---|---|---|---|
+| dnes — obdélník | 25,71 cm² | 3,1 g | naměřeno |
+| mezikrok — obrys motivu | 10,94 cm² | 1,3 g | **dopočet pro ilustraci postupu** |
+| aplikace — skutečné pokrytí | 3,25 cm² | 0,4 g | naměřeno, včetně rozpití |
+
+Těch 1,3 g je mezikrok, ne výsledek — A3 to říká výslovně v poznámce pod
+obrázkem. Platí **3,1 → 0,4 g, osmkrát menší plocha**. Poznámka v kapitole 6,
+kterou jsem tam vložil o pár hodin dřív, se opravila.
+
+**Dodatek se přestavěl.** Vymyšlený model šel pryč. Zůstala tabulka nákladů
+z A3 a jediný posuvník — o kolik oprav ubude — protože přesně to je jediná
+hodnota, kterou A3 sama označuje za nepotvrzenou. Při 30 % vychází 88 045 Kč,
+což na korunu sedí s tím, co A3 uvádí zaokrouhleně.
+
+Úspora materiálu v dodatku **není vyčíslená**, protože v A3 vyčíslená není —
+naměřená je jediná zakázka a na celý provoz se přepočítat nedá.
+
+**Poučení:** nenašel-li se podklad, neznamená to, že neexistuje. Znamená to,
+že se hledalo na špatných místech — a než se začne stavět vlastní model, je
+levnější se zeptat, jestli podklad není mimo repozitář.
+
+---
+
+## 67. Úspora není věc míchárny
+
+**Chyba v podání, ne ve výpočtu.** Dodatek z předchozí kapitoly měl náklady
+správně rozdělené na míchárnu a výrobu, ale **úsporu ukazoval jedním číslem**.
+Součet 88 045 Kč nic neříká o tom, kde se ty peníze vezmou — a přitom je to ta
+nejdůležitější informace celé analýzy.
+
+**Dvě třetiny ztraceného času nejsou v míchárně.** Je to stojící výroba, která
+čeká na správný odstín. V A3 je to napsané rovnou pod pruhem, ale v dodatku to
+platilo jen pro náklad, ne pro úsporu. Kdo si přečetl jen výsledek, mohl si
+odnést, že projekt šetří práci míchárny — což je z 33 %.
+
+**Rozdělené i v úspoře** (při −30 %):
+
+| | vrácený čas | úspora |
+|---|---|---|
+| míchárna — přemíchávání | 96 h | 29 273 Kč |
+| výroba — stroj nečeká | 193 h | **58 772 Kč** |
+| dohromady | 289 h | 88 045 Kč · 3 638 EUR |
+
+Pod dlaždicemi se dopočítává podíl: **67 % je výroba**, ne ušetřená práce
+míchárny.
+
+**Počítá se z vlastních čísel, ne z poměru.** Míchárna i výroba mají v A3
+vlastní naměřenou částku i hodiny, takže se každá škáluje zvlášť — dopočet
+přes podíl ze součtu by dal skoro totéž, ale byl by to odhad tam, kde je
+měření. Ověřeno na krajní hodnotě: při 100 % vyjde 97 575 + 195 907 =
+293 482 Kč, 12 127 EUR a 962 h — přesně to, co A3 uvádí jako dnešní stav.
+
+---
+
+## 68. Co umí konkurence
+
+**Průzkum** formulačního a míchárenského softwaru: X-Rite InkFormulation,
+GSE Ink manager, Avient Wilflex IMS 3.0, Nazdar ColorStar, k tomu odborný
+tisk a studie o měření barvy telefonem. Výstup je
+`prezentace/konkurence.html` — 18 funkcí porovnaných proti dnešnímu stavu
+aplikace a šest doporučení seřazených podle přínosu.
+
+**Nejdřív, co z toho plyne pro sebevědomí:** krycí plochu z náhledu PDF nedělá
+nikdo. Konkurence počítá spotřebu z plochy potisku a hustoty síta — což vy taky
+umíte — ale skutečný motiv ze zakázkového listu nečte žádný z nich. To je
+jediný opravdový náskok; zbytek je dohánění nebo vědomé vynechání.
+
+**Co má konkurence a vy ne** (výběr toho, co dává smysl):
+
+| funkce | odkud | proč |
+|---|---|---|
+| shluky zbytků („cluster") | GSE | podobné odstíny slité do jedné nádoby vedené jako běžná báze; press-return prý bývá až třetina vydaného množství |
+| pravidla zástupnosti | GSE | dražší složka smí zaskočit za levnější, opačně ne |
+| zámek „jen čerstvá barva" | GSE | některý zákazník zbytky nepřipustí |
+| sklad surovin | IMS, ColorStar | spotřebu aplikace zná, zůstatek nevede |
+| šarže a dohledatelnost | GSE, IMS | při reklamaci odstínu jediná cesta zpět |
+| VOC a bezpečnostní listy | ColorStar, IMS | povinnost, ne funkce |
+
+**Doporučené pořadí míří na cíl z A3, ne na to, co se dobře prezentuje.**
+První je **záznam opravy** — aplikace dnes korekci po nátisku spočítá, ale
+nikde nezůstane, že k opravě došlo. Bez toho se slíbený pokles proti základně
+1 209 oprav ročně nedá změřit vlastními daty. Druhý jsou **koeficienty spotřeby
+z uzavřených zakázek**: rozdíl mezi plánovanou dávkou a vráceným zbytkem je
+skutečná spotřeba, ze které koeficienty vyjdou samy. Ani jedno nepotřebuje nová
+data ani přístroj — obojí se dnes už sbírá a jen se nepoužívá.
+
+**Měření odstínu je až šesté a s výhradou.** Spektrofotometr by odemkl
+formulaci z barvy i spektrální zbytky, telefon s referenční kartou je levnější,
+ale srovnávací studie uvádějí u telefonu ΔE kolem 1,85 a shodu 54—77 % vzorků
+proti 0,5—1,05 u pořádného přístroje. Na schválení Pantone to nestačí; jako
+čidlo, jestli se dávka odchýlila od minule, ano. V dokumentu je to napsané tak,
+ne jako „aplikace bude umět měřit barvu".
+
+**Co jsem doporučil nedělat:** řízení zakázek (Printavo, YoPrint to dělají celé
+a levně), cloud a víceuživatelský provoz (jeden soubor bez serveru je přednost),
+a formulaci odstínu z ničeho bez kalibrovaných bází.
+
+---
+
+## 69. Aplikace ví, co skončí opravou — jen to dosud neřekla
+
+**Ze dvanácti vlastních návrhů se zavedly dva**, oba stojící na datech, která
+aplikace už sbírá, a oba mířící na 1 209 oprav ročně dřív, než oprava vznikne.
+
+### Riziko opravy před mícháním
+
+Nepočítá nic nového. Sbírá hotové závěry ostatních funkcí, které se dosud
+hlásily každý zvlášť a na jiném místě obrazovky, takže je nikdo nesečetl:
+
+| signál | odkud |
+|---|---|
+| barva na podkladu prosvítá | `analyzaPodkladu` |
+| průsvitná barva se posune do odstínu podkladu | `analyzaPodkladu.tahneDo` |
+| viskozita mimo rozsah síta | `spotrebaZeSita.mimoRozsah` |
+| k sítu nejsou uložené parametry | chybějící `zeSita` |
+| receptura není otestovaná | `recipe.tested` |
+| u receptury není odstín | `hex` = `#888888`, což je náhradní hodnota z importu |
+| složku aplikace nezná | `rozborSlozeni.nezname` |
+| míchá se z kelímku jiného odstínu | `vyuzitiZbytku.shoda` |
+| aditiv je nad stropem | `rozborNaredeni.prilisRidke` |
+| složení nesedí na sto / chybí | `calc.pctSum` |
+
+Každý bod nese i to, **co s tím** — „naředit před tiskem", „namíchejte nejdřív
+malou dávku na nátisk". Vysoká rizika se řadí dopředu, aby první řádek byl to
+nejhorší. Krabice je nad tlačítkem do míchacího režimu a ještě jednou uvnitř
+režimu, protože u váhy stojí často někdo jiný než ten, kdo zakázku zadával.
+
+Na skutečných datech se rovnou ukázalo, k čemu to je: u seed receptury
+PANTONE 485 C hlásí dva body — není otestovaná a pět jejích složek aplikace
+nezná.
+
+### Předpověď zbytku
+
+Každý kelímek v evidenci si nese dávku, ze které vznikl (`davkaG`) a kolik ho
+bylo (`puvodne`). Z toho vyjde podíl, který u té receptury zbývá. Opakuje-li
+se, nejsou to ztráty — je to rezerva navíc.
+
+**Bere se medián, ne průměr.** Jedna zakázka, kde se rozlila půlka dávky, by
+průměr utáhla tam, kam nepatří, a aplikace by pak radila míchat míň, než je
+zdrávo. Změřeno na trojici 10 / 12 / 90 %: medián 12 %, průměr 37,3 %.
+
+Z podílu se dopočítají ztráty, při kterých by nezbylo nic:
+
+```
+nové ztráty = ((1 + ztráty/100) × (1 − podíl) − 1) × 100
+```
+
+Vyjde-li to záporně, nadsazené je netto a ztráty za to nemůžou — pak se
+nenavrhuje nic. Nikdy se nemění nic samo: rezerva na nátisky je vědomé
+rozhodnutí dílny, ne chyba k opravě, takže je to tlačítko.
+
+Poloha upřesňuje, ale jen když je vzorků dost — táž barva se na hruď a na záda
+míchá jinak, jenže dva záznamy z polohy jsou lepší základ než jeden.
+
+**Ověřeno:** 26 kontrol modelu proti kódu vytaženému ze samotného `index.html`
+(medián proti výkyvu, vyřazení překlepů v evidenci, přechod na širší základ při
+málo vzorcích, pořadí rizik, obě strany rady u viskozity). Protichůdně na dvou
+kopiích: průměr místo mediánu shodí kontrolu výkyvu, zrušené řazení shodí
+pořadí rizik. Proklikáno v prohlížeči — krabice se ukáže a nese dva body.
+
+**Cestou se opravila drobnost, která by kazila dojem:** `.rowline` zalamuje
+a `.dot` má v CSS `align-self:center`, takže u dvouřádkového bodu spadl text
+pod tečku a tečka sjela doprostřed. Změřeno po opravě: obě tečky sedí 7 px pod
+horní hranou textu bez ohledu na to, jestli je řádek jeden nebo dva.
+
+**Zbývá deset návrhů**, z nichž část potřebuje rozhodnutí dílny — velikosti
+nádob, cena likvidace, jména míchačů.
+
+**A seznam se stal živým dokumentem.** `prezentace/konkurence.html` teď vede
+u každého návrhu stav a počitadlo hotových; u zavedených přibude datum a jedna
+dvě věty o tom, co se doopravdy udělalo, včetně naměřeného čísla. Aktualizuje se
+v témže kroku jako tenhle deník, ne až na vyžádání — seznam, ve kterém hotové
+věci svítí jako návrh, vede k tomu, že se něco udělá podruhé, nebo se plánuje
+kolem stavu, který už neplatí.
+
+---
+
+## 70. Nátisk, který něco dokáže
+
+**Zadání znělo** namíchat nejdřív malou dávku, vytisknout nátisk a teprve po
+schválení domíchat zbytek. Jádro ale není v tom, že se namíchá míň — to je
+snadné. Jádro je v tom, **jak malý nátisk ještě něco dokáže.**
+
+**Past.** Má-li receptura složku, které jsou dvě procenta, je jí v šedesátce
+1,2 g. Váha na barvy váží po desetinách gramu, takže z toho dělá nepřesnost
+osminu až polovinu. Takový nátisk neukáže odstín receptury, ale odstín toho,
+jak přesně se to zrovna povedlo navážit — schválí se něco, co se v plné dávce
+nezopakuje, a oprava přijde stejně, jen o nátisk později. **Nejmenší rozumný
+nátisk proto určuje nejmenší složka, ne velikost dávky ani cit.**
+
+```
+nátisk ≥ rozlišení váhy × 5 / podíl nejmenší složky
+```
+
+U složky na 2 % vyjde 25 g, ale pod nejmenší dávku dílny se stejně nejde,
+takže z 550 g dávky se navrhne 50 g. Napíše-li obsluha 60 g u receptury se
+složkou na 0,1 %, aplikace spočítá, že té složky bude 0,06 g při nepřesnosti
+±0,10 g — **167 %** — a nabídne zvětšení.
+
+**Rozlišení není tolerance.** První verze počítala z ±0,5 g, což je tolerance
+přijetí v asistentu vážení — kdy je navážka hotová. Tady jde o něco jiného:
+jestli se ta složka dá vůbec trefit. Dílenská váha váží po desetinách, takže
+se to oddělilo do vlastní konstanty. Před opravou by se nátisk nenabídl skoro
+nikde; po ní vychází u **85,8 % receptur při dávce 300 g a 91,8 % při 550 g**
+(spočítáno přes všech 2 692 receptur v databázi — nejmenší složka je u mediánu
+2 % dávky, u desátého percentilu 0,2 %).
+
+**Nátisk se nenabízí, kde by neušetřil.** Nad 60 % dávky se dvakrát vážit
+nevyplatí — kdo má míchat 50 g na zkoušku ze sedmdesáti, ať namíchá celou.
+
+**Po schválení se nátisk chová jako zbytek.** Do asistenta vážení jde stejnou
+cestou jako kelímek ze skladu — jako předem nalitá část dávky. Nebyl potřeba
+druhý mechanismus; obojí je pole gramů po složkách, takže se sečte.
+
+**Ověřeno:** 39 kontrol modelu proti kódu vytaženému ze samotného
+`index.html`, protichůdně na kopii bez meze přesnosti (shodí čtyři kontroly).
+Proklikáno v prohlížeči: u seed receptury se nátisk správně odmítne (složka
+0,1 %), při dávce 1 056,6 g se nabídne 500 g, a při ručně zmenšeném nátisku
+naskočí varování se 167 %.
+
+**Zjištění mimo zadání:** v `index.html` přibyly funkce `dvojiceZbytku`,
+`podilyZbytku` a `podilyCile` — skládání dvou zbytků, které jsem nepsal.
+Zkoušky na zbytky o nové pomocné funkce zakoply a doplnily se; všechny tři
+sady pak procházejí. Stav v `konkurence.html` jsem u té položky **nezměnil**,
+protože jsem její zavedení neověřoval.
+
+
+---
+
+## 71. Skládání dvou zbytků
+
+**Problém.** Kelímek ze skladu se do dávky vejde jen potud, dokud žádná jeho
+složka nepřesáhne svůj podíl v cíli. Tou nejsytější složkou se zarazí — a co
+chybí do dávky, se pak váží z čerstvého, přestože vedle na polici stojí druhý
+kelímek, který je právě v té složce chudý. Aplikace uměla nabídnout jeden
+kelímek, nebo žádný. Dva se sečíst neuměly, i když ta úloha je táž.
+
+**Co se změnilo.** Hledají se dvě gramáže x a y — z prvního a z druhého
+kelímku — pro které u každé složky platí
+
+```
+x × podíl_v_prvním + y × podíl_v_druhém ≤ dávka × podíl_v_cíli
+```
+
+a jejichž součet je co největší; k tomu se z kelímku nedá nabrat víc, než v něm
+je, ani záporně. Samé nerovnosti o dvou neznámých, takže hledaná dvojice leží
+vždycky v **rohu** oblasti, kterou vytnou, a každý roh je průsečík dvou z nich.
+Rohů je pár desítek, projdou se tedy všechny. Není to odhad ani výběr z několika
+možností — víc než tohle do dávky dostat nejde.
+
+**Nová data k tomu nejsou žádná.** Je to táž matematika jako u jednoho kelímku,
+jen o jednu neznámou dál; `vyuzitelnyZbytek` se cestou rozdělil na `podilyZbytku`
+a `podilyCile`, aby obě úlohy počítaly složení z jednoho místa.
+
+| co se hlídá | pravidlo |
+|---|---|
+| kdy se dvojice nabídne | ušetří aspoň desetinu dávky **a zároveň** aspoň 20 g |
+| který kelímek jde první | ten, kterému dřív končí lhůta, jinak starší |
+| shodné řešení víc způsoby | nabere se víc z toho, který jde první |
+| kolik dvojic se počítá | ze 14 nejlepších nabídek, tedy 91 dvojic |
+| kolik se jich ukáže | jedna, ta nejvýhodnější |
+
+Mez zisku hlídá i to, že oba kelímky doopravdy přispějí — a hlídat to zvlášť
+netřeba: je-li možná dvojice x + y, je možné i vzít z prvního samotného těch x,
+takže zisk proti němu nikdy nevyjde větší než y, a stejně tak ani větší než x.
+Projde-li zisk mezí, přinesl každý z kelímků aspoň tolik.
+
+**Dvojice se chová jako jeden zbytek.** Výsledek má schválně stejný tvar jako
+výsledek pro jeden kelímek, takže míchací lístek, asistent vážení, štítek, cena
+i riziko opravy počítají dál se svým a o dvou kelímcích vědět nemusejí. Navíc
+je jen pole `kusy` — a to používají dvě místa: rozpis pro obsluhu a odpis ze
+skladu, který teď odepisuje oba kelímky jedním průchodem, aby se druhý zápis
+nepočítal ze stavu, který ještě neplatí.
+
+**Změřeno** na dávce 800 g PANTONE 485 C (Warm Red 496 g · Yellow 012 224 g ·
+báze 80 g) a dvou kelímcích ve skladu — 900 g čisté Warm Red a 500 g žluté
+s bází v poměru 70 : 30:
+
+| | z kelímku | domíchat |
+|---|---|---|
+| ZB-0001 sám | 496,0 g | 304,0 g |
+| ZB-0002 sám | 266,7 g | 533,3 g |
+| **oba dohromady** | **762,7 g** | **37,3 g** |
+
+Dohromady tedy o **266,7 g čerstvé barvy míň**, než dá lepší z nich sám.
+Kelímky se přitom doplňují přesně tak, jak má úloha vyjít: bázi pokryjí na
+gram (80,0 g), warm red taky (496,0 g) a dovážit zbývá jediná složka —
+37,3 g Yellow 012. V kelímcích zůstane 637,3 g.
+
+**Ověřeno:** 89 kontrol modelu proti kódu vytaženému ze samotného `index.html`,
+z toho **200 náhodných zadání porovnaných s hrubou silou** — projitím mřížky
+po půl gramu. Rohová úvaha nevyšla ani jednou hůř než hrubá síla a ani jednou
+nepřetekla složka. Protichůdně na sedmi kopiích s vrácenou chybou: zrušená mez
+na obsah kelímku shodí 7 kontrol, chybějící mez zisku 4, zisk počítaný jinak
+než proti sólu 10, obrovská tolerance rohu 14, povolené záporné nabrání 1.
+
+**Dvě sabotáže zkouška napoprvé nechytila — a obě ukázaly na skutečnou vadu:**
+
+1. **Přednost při shodném řešení** se dala zrušit beze změny výsledku, protože
+   zkouška zkoušela jen pořadí, ve kterém kelímky do funkce vstoupily. Doplněna
+   obě pořadí; přednost teď patří staršímu kelímku bez ohledu na vstup.
+2. **Kontrola na cizí složku** v dvojici se dala vyhodit a nic se nestalo —
+   byla to mrtvá větev, protože kelímek s cizí složkou neprojde už přes
+   `vyuzitelnyZbytek`. Při jejím odstranění se ale ukázalo, že by naopak
+   shodila dvojici tam, kde kelímek nese složku **zapsanou s nulou**: sám by
+   se použít dal, ve dvojici ne. Teď se nulové řádky přeskakují a rozdíl je
+   pryč.
+
+**Proklikáno v prohlížeči** skutečnou myší: nabídka se ukáže v míchacím režimu
+pod jednotlivými kelímky, po „Použít oba" naskočí pruh se soupisem obou kódů,
+v asistentu vážení se odškrtnou dvě ze tří složek a k navážení zbude jediný
+řádek — 37,3 g. Riziko opravy si dvojici všimne taky: *„Míchá se z kelímků
+jiných odstínů — složení sedí na 33 %."*
+
+**Do `snimek.py` přibyly `--pred` a `--po`.** Obrazovka závislá na skladu
+zbytků se dosud vyfotit nedala: sklad si aplikace načte při prvním vykreslení
+a `--js` běželo až po klicích. `--pred` proto zapíše stav ještě před
+vykreslením a stránku načte znovu, `--js` se přesunulo před kliky (ať jde
+vyplnit pole a teprve pak na něco kliknout) a `--po` čte, co se po kliknutí
+objevilo. Zkouška díky tomu běží bez mostu — a tedy bez rizika, že sáhne na
+evidenci nebo na databáze barev.
+
+**Co se rozhodlo nechat být.** Dvojic vyjde běžně víc a liší se o gramy —
+u tří kelímků ze zkoušky vyšly všechny tři dvojice na týž zisk 200 g. Na
+obrazovku proto jde jedna, ne seznam variant: kdo chce namíchat barvu,
+nepotřebuje rozhodovat mezi rovnocennými možnostmi. Trojice se nezavádí ze
+stejného důvodu — tři kelímky u váhy jsou práce, kterou úspora nezaplatí.
+
+## 72. Pořadí míchání ve frontě
+
+**Problém.** Zbytek z jedné zakázky sedne na druhou — ale jen tehdy, když se ta
+druhá míchá **potom**. Kelímek, který by za dvě zakázky posloužil jako základ,
+vzniká až po nich, protože o pořadí rozhoduje to, co komu leží na stole.
+Aplikace přitom už věděla všechno potřebné: co se má míchat, kolik po které
+dávce zbude i co ze kterého kelímku jde použít. Nikdy to ale nepostavila do
+řady, takže dnešní pořadí vychází náhodou.
+
+**Co se změnilo.** Fronta je seznam toho, co se dnes namíchá — položka se do ní
+přidá z kalkulace tlačítkem **＋ Do fronty**. Plán je tentýž seznam v pořadí, ve
+kterém se z něj ušetří nejvíc čerstvé barvy.
+
+Nová matematika k tomu není žádná, všechno počítají hotové funkce:
+
+| co se ptá | čím se odpovídá |
+|---|---|
+| co ze kterého kelímku jde použít | `vyuzitelnyZbytek` |
+| které kelímky se na dávku hodí a v jakém pořadí | `nabidkyZbytku` |
+| kolik po dávce zbude | `predpovedZbytku` |
+| co ta barva stojí | `cenaDavky`, `usporaZeZbytku` |
+
+Nové je jediné pravidlo, a je to celý rozdíl mezi frontou a hromadou: **kelímek
+ze skladu je k mání od začátku, zbytek po položce až po ní.** Do sedmi položek
+se projdou všechna pořadí (7 položek = 5 040), takže se nehledá nejlepší
+nalezené, ale nejlepší, jaké existuje; nad tím se fronta skládá postupně a pak
+zlepšuje přesouváním jednotlivých položek — a plán to o sobě řekne, protože
+úplnost už tvrdit nemůže.
+
+**Čeho se plán nedopouští.** Nehádá zbytek tam, kde ho evidence neumí
+předpovědět: bez dvou minulých dávek téže barvy položka jako zdroj nevstupuje
+a řekne se to jménem. Nepřerovnává nic sám — co je naspěch, ví mistr, ne
+aplikace, takže je to tlačítko. A nepočítá s dvojicemi kelímků (kapitola 71):
+na položku jde v plánu jeden kelímek, dvojici nabídne míchací režim, jakmile se
+k položce dojde.
+
+**Fronta je záznam v souboru, ne stav obrazovky.** `evidence/fronta.csv` má
+řádek na složku jako evidence zbytků, kód položky je datum a pořadí toho dne
+(`FRONTA-20260817-002`) a sloučení ze dvou míchaček rozhoduje časem poslední
+změny — odškrtnuté „namícháno" nesmí druhý počítač vrátit zpátky do fronty.
+Pořadí je uložené číslo, ne pozice v poli; ruční přesun šipkami se tedy taky
+propíše do souboru.
+
+**Chyba, kterou to nejdřív mělo.** Pořadí se řadilo podle korun, jakmile byla
+cena gramu vůbec známá. Cena gramu se ale počítá i z poloprázdného ceníku — je
+to průměr té části, která cenu má. Na ukázání úspory to stačí, na **srovnání
+položek mezi sebou** ne: položka se známou cenou dvou složek ze tří vypadá
+levněji, než jaká je, a pořadí by rozhodovala mezera v ceníku. Podle korun se
+proto řadí, teprve když je cena úplná u všech položek fronty; jinak podle gramů
+čerstvé barvy, které jsou známé vždycky. Chytily to dvě zkoušky z devadesáti
+sedmi — bez nich by to nikdo nepoznal, protože obě čísla vypadají stejně.
+
+**Změřeno na modelu — 97 kontrol** proti kódu vytaženému ze samotného
+`index.html`. Nejdůležitější:
+
+- Fronta bílá 500 g + žlutá 400 g (bílá = 100 % binder, žlutá = 50 % binder):
+  ve špatném pořadí ze zbytků **0 g**, v dobrém **100 g** — 20 % z bílé dávky
+  je 100 g binderu a do žluté se ho vejde 200 g. Obráceně nejde nic: bílá
+  žlutou složku nemá.
+- Kelímek se použije jednou: 100 g předpovězeného binderu na dvě žluté dávky
+  dá dohromady **100 g, ne 200**.
+- Přímé shody: kelímek ze skladu (500 g) pokryl první dávku celou (400 g,
+  domíchat 0) a druhá vzala **zbylých 100 g**, ne 80 g z předpovědi — kelímek
+  na polici stárne, předpověď se teprve vyplní.
+- Peníze: 100 g binderu ušetřeného ve žluté receptuře (0,5 × 0,30 + 0,5 × 0,90
+  Kč/g) = **60 Kč**. Bez ceníku **0 Kč a 100 g** — koruny se nehádají.
+- Čtyři položky = **25 vyhodnocených pořadí** (4! a zadané), osm položek už
+  úplnost netvrdí.
+- Nepočítá se prošlý kelímek, dávka na stroji, jediná minulá dávka ani položka
+  bez složení; zisk 3 g frontu nepřerovná (mez 5 g).
+- Cesta přes CSV tam a zpět: dávka 437,25 g, poznámka s uvozovkami i
+  středníkem, stav „namícháno" i pořadí vydržely; plán z protočené fronty vyšel
+  na tentýž gram. Starší soubor bez nových sloupců se dopočítá výchozími
+  hodnotami (hustota 1,2, stav „čeká", bez tužidla).
+
+**Zkouška ověřená protichůdně** (`irm-zkouska`, bod 3). Na hotové aplikaci
+nehlásí nic; na kopii, kde je zbytek k mání od začátku, spadne osm kontrol
+a ze 100 g úspory se stane 180 g v obou pořadích — tedy přesně to tvrzení, že
+na pořadí nezáleží. Na kopii, kde předpověď stačí z jedné dávky, spadnou dvě.
+
+**Proklikáno skutečnou myší.** Tři položky (300 C 380 g, transparentní báze
+520 g, 485 C 460 g) a sklad s jedním kelímkem 485 C:
+
+- v zadaném pořadí vyjde ze zbytků **180 g** (přímá shoda na 485 C),
+- návrh hlásí **o 103 g víc** — 283 g místo 180 g,
+- po kliknutí na *Přerovnat frontu* je báze první, 300 C bere **103 g** ze
+  zbytku po ní (dopočet, složení sedí na 40 %, domíchat 277 g) a 485 C bere
+  180 g z kelímku; pruh se změní na „zadané pořadí je z téhle fronty to
+  nejlepší — vyzkoušeno všech 7 pořadí",
+- pořadí se propsalo do úložiště (1: báze, 2: 300 C, 3: 485 C),
+- z kalkulace přidá `＋ Do fronty` položku 50 g a hlásí „Čeká 1 položka";
+  počet svítí i v nabídce.
+
+Rozvržení: `prekryv.py --zalozky` čisté ve všech osmi kombinacích šířky a témat
+i na nové záložce (tu si nástroj najde sám, protože záložky bere z nabídky).
+
+**Dvě chyby v češtině, které ukázal až snímek.** „U 1 položek evidence nemá
+dost minulých dávek" — číslo v textu potřebuje obě varianty, ne jednu
+s dosazeným číslem. Teď je jednotné číslo psané zvlášť („U položky PANTONE
+300 C… s jejím zbytkem"), protože zájmeno se v množném čísle neshodne.
+
+**Co se rozhodlo nechat být.** Odškrtnutí „namícháno" nezakládá kelímek ani
+dávku — to patří štítku a míchacímu režimu, kde se váží skutečnost. Fronta je
+plán; splést jedno s druhým by znamenalo, že v evidenci přibude kelímek, který
+nikdo nezvážil.
+
+
+## 73. Zámek u technologie je kreslený, ne vylepený
+
+**Problém.** Zamčená technologie se v nabídce poznala podle emoji 🔒. Emoji
+nekreslí aplikace, ale písmo systému: je barevné, na každém počítači jiné
+a nebere ani barvu textu, ani tloušťku tahu, kterou drží zbytek rozhraní. Vedle
+kreslených ikon — nabídky, šipky zpět, přepínače režimu — to působilo jako
+nalepený obrázek, a v tmavém režimu navíc svítilo žlutě uprostřed jednobarevné
+obrazovky. Ladit se nedalo vůbec: velikost ikon ani průsvitnost na emoji
+neplatí, protože to není kresba, ale znak.
+
+**Co se změnilo.** Zámek je vektor na téže mřížce 24 × 24 jako ostatní ikony —
+jen obrys, barvu bere z textu (`currentColor`), tloušťku tahu a zakončení
+z proměnných vzhledu. Kreslí ho jedna komponenta `IkonaZamek` ve dvou stavech:
+zavřený u zamčené technologie, otevřený na tlačítku *Odemknout*. Nasazený je na
+třech místech, kde dřív stálo emoji: v nabídce technologií, v hlavičce řádku
+v *Odemykání technologií* a na tom tlačítku.
+
+Nová je jedna proměnná: `--ikona-radek: 1.2em`. Ikona stojící **uvnitř řádku
+textu** se neřídí velikostí samostatných ikon (`--ikona`, dnes 27 px), ale
+písmem, ve kterém je vysázená — tentýž zámek se totiž objevuje v nabídce
+s písmem 13,5 px i v tučné hlavičce s 15 px a pevná velikost by byla na jednom
+místě velká a na druhém malá. V `barvy.html` je pro ni posuvník *Velikost ikon
+v řádku textu*.
+
+**Co se nechalo být.** Tlačítko *Zamknout* zůstává bez ikony, stejně jako dřív
+— zámek je znamení stavu („tohle je zavřené"), ne ozdoba tlačítka. A ostatní
+znaky v aplikaci (✓, ✕, ▶) jsou typografie, ne ikony; ty se nepřekreslují.
+
+**Změřeno:**
+
+- nabídka technologií: text 13,5 px → zámek **16,19 × 16,19 px**; ikona nabídky
+  vedle něj 27 × 27 px (samostatná ikona, `--ikona`)
+- hlavička v odemykání: text 15 px → **18 px**; tlačítko *Odemknout*: text
+  14 px → **16,8 px** — všude týž poměr 1,2
+- tah **1,5 px** = `--ikona-tah`, zakončení kulaté, barva zděděná z textu
+  (v tmavém režimu rgb(237, 237, 237)) — tedy shodně s ostatními ikonami
+- `kontrola_aplikace.py` 0, `prekryv.py --zalozky` 0 (čtyři šířky × dva režimy
+  a všechny záložky), `barvy.html` po přegenerování 53 posuvníků `[data-tvar]`
+- proklikáno skutečnou myší: zámek vyfocen v rozbalené nabídce i v záložce
+  *Odemykání technologií*, zavřený i otevřený
+
+## 74. Zakázka se načítá tam, kde se s ní počítá
+
+**Problém.** Načtení zakázky mělo v nabídce dvě vlastní položky — *Načíst spec
+z PDF* a *Načíst spec (čárový kód)*. Jenže obě vedly na obrazovku, ze které se
+stejně muselo zpátky do kalkulace: ať se zakázka načte odkudkoli, výsledek
+skončí v kartě *Vybraný produkt*. U PDF to už dávno platilo doslova — dlaždice
+*Zakázkový list* je v té kartě od zavedení mostu a záložku nikdo nepotřeboval.
+Čárový kód takovou cestu neměl: kdo chtěl načíst zakázku čtečkou nebo kamerou,
+odklikl se do nabídky, přepnul obrazovku, načetl kód a aplikace ho poslala
+zpátky. Dvě položky v nabídce tak slibovaly dvě místa, kde se pracuje, i když
+pracovní místo je jedno.
+
+**Co se změnilo.** Obě položky z nabídky zmizely a v kartě *Vybraný produkt*
+přibylo vedle *Barva a poloha potisku →* tlačítko **Načíst kód**. Otevře okno
+s tím, co míchač u stroje potřebuje:
+
+| v okně | k čemu |
+|---|---|
+| pole pro kód (rovnou zaostřené) | píše do něj i USB čtečka v režimu klávesnice, potvrzuje Enterem |
+| přepínač *Poslouchat čtečku kdekoli v aplikaci* | tentýž stav jako v záložce, žádná druhá kopie |
+| *Zapnout kameru* | čtení QR/DataMatrix ze zakázkového listu |
+| *Nastavení čtečky →* | sériový port, rychlost, formát kódu — to zůstalo v záložce |
+
+Kód jde do téhož `handleCode` jako dřív, takže se nic nerozdvojilo: okno se
+zavře a zakázka se objeví v kalkulaci. Platí to i pro kód z kelímku — ten
+aplikace pozná sama a otevře zbytky.
+
+**Obě záložky zůstávají v kódu.** Nejsou to mrtvé obrazovky, jen se na ně
+nechodí z nabídky: *Načíst spec z PDF* se otevře tlačítkem *Upravit spec*, když
+je potřeba opravit rozpoznaná pole, a *Čárový kód* jednak přes *Nastavení
+čtečky →*, jednak sama, když se načtený kód nepodaří přiřadit — tam je vidět
+surový kód, historie načtení a popis formátu.
+
+**Popisek tlačítka je krátký schválně.** Řádek pod dlaždicemi nese i štítky
+technologie a rozměru, a ty jsou dlouhé podle toho, co je vybráno. S popiskem
+*Načíst čárový kód* (141 px) se řádek při technologii *FIR — Firing — Low
+Temperature* zalomil a *Barva a poloha potisku →* spadlo samo na druhý řádek.
+Zkráceno na *Načíst kód* (94 px) se vejde všechno na jeden řádek; celý název
+zůstal v bublině tlačítka a v nadpisu okna.
+
+**Změřeno:**
+
+- řádek karty 688 px široký; štítky 200 + 104 + 55 px, tlačítka 94 + 192 px —
+  s dlouhým popiskem výška řádku **70 px** (dva řádky), s krátkým **31 px**
+- proklikáno skutečnou myší: okno otevřeno z karty, do pole vloženo `93804`
+  a odesláno — okno se zavřelo a hlášení ukázalo
+  *Načteno: 93804 · KENNY II. Skleněný hrnek 340 mL*
+- v rozbalené nabídce vyfoceno, že po *Co chybí k odemčení…* následuje rovnou
+  *Zakázky (SGPS)* — obě položky pryč
+- `kontrola_aplikace.py` 0, `prekryv.py` 0 (čtyři šířky × dva režimy)

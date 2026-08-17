@@ -7366,7 +7366,7 @@ function PropadTab({ zbytky, davky, fronta, materialy, setDavky,
                       </td>
                     </tr>
                     ${d.radky.map((x) => {
-                      const barvaStavu = x.poLhute ? "#B23B2A"
+                      const barvaStavu = x.den < 0 ? "#B23B2A"
                         : (x.den === 0 ? "var(--warn)" : "var(--ink-2)");
                       return html`
                       <tr key=${x.druh + "-" + x.kod}>
@@ -7382,43 +7382,34 @@ function PropadTab({ zbytky, davky, fronta, materialy, setDavky,
                           <div className="note">${(x.slozeni || []).map((c) => c.name).join(" · ")
                             || "složení neuvedeno"}</div>
                         </td>
-                        <td className="num" style=${{ whiteSpace: "nowrap" }}>
-                          <b>${fmt(x.gramu)} g</b></td>
+                        <td className="num"><b>${fmt(x.gramu)} g</b></td>
                         <td style=${{ minWidth: 130 }}>
-                          <div style=${{ color: barvaStavu,
-                            fontWeight: (x.poLhute || x.den === 0) ? 700 : 400 }}>
-                            ${x.poLhute ? "po lhůtě " + zbyvaText(x.zbyva) : zbyvaText(x.zbyva)}</div>
+                          <div style=${{ color: barvaStavu, fontWeight: x.den > 0 ? 400 : 700 }}>
+                            ${x.den < 0 ? "po lhůtě " + zbyvaText(x.zbyva) : zbyvaText(x.zbyva)}</div>
                           <div className="note">${x.duvod}</div>
                         </td>
                         <td style=${{ minWidth: 180 }}>
                           ${x.naStroji
-                            ? (x.poLhute
-                              ? html`<span className="note">Lhůta doběhla${x.zakazka
-                                  ? " — zakázka " + x.zakazka : ""}. Rozhodnout, jestli se to
-                                  stihlo vytisknout, nebo šlo do koše.</span>`
-                              : html`<span className="note">Tiskne se${x.zakazka
-                                  ? " — zakázka " + x.zakazka : ""}. Dotisknout do lhůty,
-                                  jinak je to vyhozená dávka.</span>`)
-                            : (x.poLhute
-                              ? html`<span className="note">Po lhůtě — barva už není použitelná
-                                  a aplikace ji nenabízí. Zbývá ji odepsat.</span>`
-                              : (x.navrh
-                                ? html`<div><b>${fmt(x.navrh.poradi, 0)}. ${x.navrh.polozka.nazev
-                                      || "bez názvu"}</b>${x.navrh.polozka.zakazka
-                                      ? " · " + x.navrh.polozka.zakazka : ""}</div>
-                                    <div className="note">Vejde se ${fmt(x.navrh.pouzit)} g${
-                                      x.navrh.cely ? " — celý kelímek" : ""}, domíchat
-                                      ${" " + fmt(x.navrh.domichat)} g · ${x.navrh.presna
-                                        ? "přímá shoda"
-                                        : "dopočet, složení sedí na " + fmt(x.navrh.shoda * 100, 0) + " %"}</div>`
-                                : (x.kam.length
-                                  ? html`<span className="note">Sedne na
-                                      ${" " + fmt(x.kam.length, 0) + " "}
-                                      ${kusy(x.kam.length, "položku", "položky", "položek")} fronty,
-                                      ale každou z nich si bere kelímek s bližší lhůtou.</span>`
-                                  : html`<span className="note">Ve frontě nesedne na nic.</span>`)))}
+                            ? html`<div className="note">Tiskne se${x.zakazka
+                                ? " — zakázka " + x.zakazka : ""}. Dotisknout do lhůty,
+                                jinak je to vyhozená dávka.</div>`
+                            : (x.navrh
+                              ? html`<div><b>${fmt(x.navrh.poradi, 0)}. ${x.navrh.polozka.nazev
+                                    || "bez názvu"}</b>${x.navrh.polozka.zakazka
+                                    ? " · " + x.navrh.polozka.zakazka : ""}</div>
+                                  <div className="note">Vejde se ${fmt(x.navrh.pouzit)} g${
+                                    x.navrh.cely ? " — celý kelímek" : ""}, domíchat
+                                    ${" " + fmt(x.navrh.domichat)} g · ${x.navrh.presna
+                                      ? "přímá shoda"
+                                      : "dopočet, složení sedí na " + fmt(x.navrh.shoda * 100, 0) + " %"}</div>`
+                              : (x.kam.length
+                                ? html`<span className="note">Sedne na
+                                    ${" " + fmt(x.kam.length, 0) + " "}
+                                    ${kusy(x.kam.length, "položku", "položky", "položek")} fronty,
+                                    ale každou z nich si bere kelímek s bližší lhůtou.</span>`
+                                : html`<span className="note">Ve frontě nesedne na nic.</span>`))}
                         </td>
-                        <td className="num" style=${{ whiteSpace: "nowrap" }}>${hodnotaText(x.hodnota)
+                        <td className="num">${hodnotaText(x.hodnota)
                           || html`<span className="note">—</span>`}
                           ${x.hodnota && x.hodnota.znama && !x.hodnota.uplna
                             && html`<div className="note" title="ceník nezná cenu všech složek">a víc</div>`}</td>
@@ -11160,22 +11151,11 @@ function prehledPropadu({ zbytky, davky, fronta, materialy, ted, dni }) {
       const den = denPropadu(x.doKdy, nyni);
       return den <= horizont && den >= -horizont;
     })
-    .map((x) => {
-      /* Rozhoduje zbývající čas, ne kalendářní den: kelímek, kterému lhůta
-         doběhla dnes v devět, propadá dnes — použít ho už ale nejde. */
-      const poLhute = n(x.zbyva) <= 0;
-      return Object.assign(x, {
-        den: denPropadu(x.doKdy, nyni),
-        poLhute: poLhute,
-        /* Kam to ještě sedne se hledá jen u nádoby, se kterou se dá pohnout.
-           Nádoba na stroji se nepřesměrovává, ta se má stihnout dotisknout.
-           Kelímek po lhůtě se nenabízí vůbec — barva v něm je, použitelná
-           není. Je to totéž pravidlo, jakým se řídí nabidkyZbytku u míchačky;
-           bez něj by přehled radil kelímek, který aplikace u váhy odmítne,
-           a ještě by tím vzal položku fronty kelímku, který ještě žije. */
-        kam: (x.naStroji || poLhute) ? [] : kamPropadSedne(x, podklad),
-      });
-    })
+    .map((x) => Object.assign(x, {
+      den: denPropadu(x.doKdy, nyni),
+      // nádobu na stroji přesměrovat nejde — ta se má stihnout dotisknout
+      kam: x.naStroji ? [] : kamPropadSedne(x, podklad),
+    }))
     .sort((a, b) => a.doKdy - b.doKdy);
 
   /* Kam co půjde. Jedna položka fronty si v přehledu vezme jednu nádobu: do
@@ -11206,12 +11186,11 @@ function prehledPropadu({ zbytky, davky, fronta, materialy, ted, dni }) {
       uplne: ks.every((x) => x.hodnota && x.hodnota.uplna),
     };
   };
-  const nikam = vybrane.filter((x) => !x.naStroji && !x.poLhute && !x.kam.length);
   const sedne = vybrane.filter((x) => x.navrh);
   return {
     radky: vybrane, horizont: horizont, mena: menaDilny(materialy),
     frontaKs: podklad.length,
-    prosle: soucet((x) => x.poLhute),
+    prosle: soucet((x) => x.den < 0),
     dnes: soucet((x) => x.den === 0),
     celkem: soucet(() => true),
     /* Co se dá zachránit: gramy, které se vejdou do přiřazené položky fronty,
@@ -11222,11 +11201,10 @@ function prehledPropadu({ zbytky, davky, fronta, materialy, ted, dni }) {
       uspora: sedne.reduce((s, x) => s + n(x.navrh.uspora), 0),
       likvidace: sedne.reduce((s, x) => s + cenaLikvidace(x.navrh.pouzit, x.likvidaceGram), 0),
     },
-    /* Kelímky, na které ve frontě nesedne nic — bez další zakázky se vyhodí.
-       Prošlé sem nepatří: ty se nevyhodí „až nebude zakázka", ty jsou
-       vyhozené už teď a patří k prošlým. */
-    nikam: nikam,
-    nikamLikvidace: nikam.reduce((s, x) => s + cenaLikvidace(x.gramu, x.likvidaceGram), 0),
+    // kelímky, na které ve frontě nesedne nic — bez další zakázky se vyhodí
+    nikam: vybrane.filter((x) => !x.naStroji && !x.kam.length),
+    nikamLikvidace: vybrane.filter((x) => !x.naStroji && !x.kam.length)
+      .reduce((s, x) => s + cenaLikvidace(x.gramu, x.likvidaceGram), 0),
     // dávky bez kelímku: štítek se ještě netiskl, takže se nezná složení ani cena
     bezSlozeni: vybrane.filter((x) => !((x.slozeni || []).length)),
     starsiProsle: { ks: starsi.length, gramu: starsi.reduce((s, x) => s + x.gramu, 0) },

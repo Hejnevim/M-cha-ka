@@ -1,0 +1,444 @@
+<title>Co umí konkurence a co z toho stojí za převzetí</title>
+<style>
+  /* Táž paleta jako aplikace a jako ukázka — tři dokumenty, jeden vzhled. */
+  :root{
+    --bg:#949494; --paper:#dbdbdb; --paper-2:#e6e6e6;
+    --ink:#141414; --ink-2:#767676; --line:#c7c7c7;
+    --inkoust:#DA291C;
+    --ok:#2f9e4f; --warn:#b8860b; --stin-tmavy:rgba(0,0,0,.43);
+    --stin-svetly:rgba(255,255,255,.55);
+    --neu:-5px -5px 20px var(--stin-svetly), 5px 5px 20px var(--stin-tmavy);
+    --neu-sm:-3px -3px 10px var(--stin-svetly), 3px 3px 10px var(--stin-tmavy);
+    --neu-in:inset 2px 2px 5px var(--stin-tmavy), inset -2px -2px 5px var(--stin-svetly);
+    --radius:23px; --radius-pole:15px;
+    --sans:system-ui,"Segoe UI",sans-serif;
+    --mono:ui-monospace,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#545454; --paper:#333333; --paper-2:#3d3d3d;
+      --ink:#EDEDED; --ink-2:#9a9a9a; --line:#5e5e5e; --inkoust:#F0523F;
+      --ok:#3dc760; --warn:#e8c545;
+      --stin-tmavy:rgba(0,0,0,.55); --stin-svetly:rgba(255,255,255,.07);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#545454; --paper:#333333; --paper-2:#3d3d3d;
+    --ink:#EDEDED; --ink-2:#9a9a9a; --line:#5e5e5e; --inkoust:#F0523F;
+    --ok:#3dc760; --warn:#e8c545;
+    --stin-tmavy:rgba(0,0,0,.55); --stin-svetly:rgba(255,255,255,.07);
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans);
+    font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased;
+    display:flex; flex-direction:column; align-items:center; gap:18px;
+    padding:26px 16px 48px}
+  h1,h2,h3{margin:0; text-wrap:balance}
+  p{margin:0; max-width:72ch}
+
+  .hlava{width:min(1060px,100%)}
+  .hlava h1{font-size:clamp(22px,3.6vw,32px); font-weight:900; letter-spacing:.01em}
+  .hlava .pod{color:var(--ink-2); font-size:14px; margin-top:6px; max-width:80ch}
+
+  .karta{width:min(1060px,100%); background:var(--paper); border-radius:var(--radius);
+    box-shadow:var(--neu); padding:clamp(16px,3vw,28px);
+    display:flex; flex-direction:column; gap:16px}
+  .karta > h2{font-size:clamp(18px,2.6vw,23px); font-weight:900}
+  .oko{font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-2)}
+  h3{font-size:15.5px; font-weight:800}
+  .pozn{color:var(--ink-2); font-size:13.5px; max-width:76ch}
+  code{font-family:var(--mono); font-size:12.5px}
+  a{color:inherit; text-decoration-color:var(--ink-2); text-underline-offset:3px}
+
+  .tab{width:100%; overflow-x:auto}
+  table{border-collapse:collapse; width:100%; font-size:14px; min-width:760px}
+  th{text-align:left; font-size:10.5px; letter-spacing:.11em; text-transform:uppercase;
+    color:var(--ink-2); font-weight:400; padding:0 12px 8px 0;
+    border-bottom:1px solid var(--line); vertical-align:bottom}
+  td{padding:10px 12px 10px 0; border-bottom:1px solid var(--line); vertical-align:top}
+  tbody tr:last-child td{border-bottom:none}
+  td.f{font-weight:700; width:24%}
+  td.k{color:var(--ink-2); font-size:13px; width:18%}
+  td.s{white-space:nowrap; width:11%}
+
+  .zn{display:inline-block; padding:2px 9px; border-radius:99px; font-size:11.5px;
+    font-weight:700; white-space:nowrap}
+  .zn.ano{color:var(--ok); box-shadow:var(--neu-in)}
+  .zn.cast{color:var(--warn); box-shadow:var(--neu-in)}
+  .zn.ne{color:var(--ink-2); box-shadow:var(--neu-in)}
+  .zn.hot{color:var(--paper); background:var(--ok); box-shadow:none}
+  .zn.ceka{color:var(--ink-2); box-shadow:var(--neu-in)}
+  .postup{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+    font-size:13.5px; color:var(--ink-2)}
+  .postup b{font-size:19px; color:var(--ink); font-variant-numeric:tabular-nums}
+
+  .navrh{display:grid; grid-template-columns:auto 1fr; gap:14px 16px; align-items:start}
+  .poradi{font-family:var(--mono); font-size:26px; font-weight:900; color:var(--ink-2);
+    line-height:1; padding-top:2px; font-variant-numeric:tabular-nums}
+  .navrh h3{margin-bottom:4px}
+  .stitky{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px}
+  .stitek{font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--ink-2); padding:3px 10px; border-radius:99px; box-shadow:var(--neu-in)}
+  .stitek.hl{color:var(--inkoust)}
+  .cara{height:1px; background:var(--line); border:none; margin:2px 0}
+
+  .dve{display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:16px}
+  .blok{background:var(--paper); border-radius:var(--radius-pole); box-shadow:var(--neu-sm);
+    padding:16px 18px; display:flex; flex-direction:column; gap:8px}
+  .blok .oko{color:var(--ok)}
+  .blok.mimo .oko{color:var(--ink-2)}
+  ul{margin:0; padding-left:20px; display:flex; flex-direction:column; gap:6px; font-size:14.5px}
+  li::marker{color:var(--ink-2)}
+</style>
+
+<div class="hlava">
+  <h1>Co umí konkurence a co z toho stojí za převzetí</h1>
+  <p class="pod">Průzkum formulačního a míchárenského softwaru — X-Rite InkFormulation,
+    GSE Ink manager, Avient Wilflex IMS 3.0, Nazdar ColorStar — a návrh, v jakém pořadí
+    to zavádět do Ink Recipe Manageru. Řazeno podle toho, co pomůže cíli z A3:
+    snížit 1 209 oprav ročně a s nimi 293 482 CZK.</p>
+</div>
+
+<div class="karta">
+  <h2>Nejdřív férově: v čem už jste napřed</h2>
+  <div class="dve">
+    <div class="blok">
+      <span class="oko">jen vaše aplikace</span>
+      <ul>
+        <li><b>Krycí plocha z náhledu PDF.</b> Konkurence počítá spotřebu z plochy potisku
+          a hustoty síta — nikdo nečte skutečný motiv ze zakázkového listu. Tohle je váš
+          jediný opravdový náskok, ne dohánění.</li>
+        <li><b>Nulová investice.</b> IMS 3.0 i InkFormulation jsou předplatné vázané na
+          dodavatele barev; GSE je software k dávkovači za miliony. Vy běžíte z jednoho
+          souboru na stávajících počítačích.</li>
+        <li><b>Pot life a dvousložkové barvy</b> jako samostatný záznam. V míchárenském
+          softwaru pro textil se to neřeší, protože tam se netuží.</li>
+      </ul>
+    </div>
+    <div class="blok mimo">
+      <span class="oko">co dělá konkurence a vy schválně ne</span>
+      <ul>
+        <li><b>Formulace ze spektrofotometru</b> (Kubelka-Munk). Dílna přístroj nemá
+          a předstírat měření by bylo horší než ho nemít.</li>
+        <li><b>Automatické dávkovače.</b> GSE, Corob — jiná liga investice.</li>
+        <li><b>Řízení zakázek</b> (Printavo, YoPrint): nabídky, plánování, fakturace.
+          To je jiný nástroj, ne míchárna.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="karta">
+  <h2>Funkce konkurence, položka po položce</h2>
+  <p class="pozn">Sloupec „u vás“ je stav aplikace k dnešku. Šedivé řádky nejsou
+    doporučení — jsou to věci, které konkurence má a vy je mít nemusíte.</p>
+  <div class="tab">
+    <table>
+      <thead><tr><th>funkce</th><th>kdo to má</th><th>u vás</th><th>co by to dalo</th></tr></thead>
+      <tbody>
+        <tr><td class="f">Shluky zbytků („cluster“)</td><td class="k">GSE</td>
+          <td class="s"><span class="zn ne">nemáte</span></td>
+          <td>Podobné odstíny se slijí do jedné nádoby a ta se pak vede jako <b>běžná
+            báze</b>, ne jako kelímek. GSE uvádí, že press-return tvoří až třetinu
+            vydaného množství.</td></tr>
+        <tr><td class="f">Pravidla zástupnosti</td><td class="k">GSE</td>
+          <td class="s"><span class="zn ne">nemáte</span></td>
+          <td>Dražší složka smí zaskočit za levnější, opačně ne. Rozšíří to počet
+            zbytků, které na zakázku sednou, bez rizika horší kvality.</td></tr>
+        <tr><td class="f">Zámek „jen čerstvá barva“</td><td class="k">GSE</td>
+          <td class="s"><span class="zn ne">nemáte</span></td>
+          <td>Některý zákazník zbytky nepřipustí. Bez zámku to hlídá člověk pamětí.</td></tr>
+        <tr><td class="f">Sklad surovin a objednávky</td><td class="k">IMS, ColorStar, GSE</td>
+          <td class="s"><span class="zn cast">částečně</span></td>
+          <td>Ceník máte, stav zásob ne. Chybí zůstatek, minimální zásoba, upozornění na
+            docházející bázi — přitom spotřebu už aplikace zná.</td></tr>
+        <tr><td class="f">Šarže a dohledatelnost</td><td class="k">GSE, IMS</td>
+          <td class="s"><span class="zn ne">nemáte</span></td>
+          <td>Která šarže báze šla do které zakázky. Při reklamaci odstínu je to jediná
+            cesta, jak zjistit, čím to bylo.</td></tr>
+        <tr><td class="f">Zpětná vazba z kontroly</td><td class="k">X-Rite</td>
+          <td class="s"><span class="zn cast">částečně</span></td>
+          <td>Korekci po nátisku máte. Chybí <b>záznam, že oprava nastala</b> a proč —
+            bez něj se pokles 1 209 oprav nedá změřit.</td></tr>
+        <tr><td class="f">Přepočet celého sortimentu na síto</td><td class="k">X-Rite</td>
+          <td class="s"><span class="zn cast">částečně</span></td>
+          <td>Spotřebu ze síta počítáte pro zakázku. X-Rite umí zadat síto jako parametr
+            a přepočítat <b>všechny</b> receptury naráz.</td></tr>
+        <tr><td class="f">Parametry tisku u receptury</td><td class="k">ColorStar</td>
+          <td class="s"><span class="zn ano">máte</span></td>
+          <td>Síto, kryvost, povrch se u vás ukládají k receptuře. ColorStar k tomu vede
+            i napnutí síta a emulzi — to by šlo doplnit.</td></tr>
+        <tr><td class="f">Vzorek odstínu u receptury</td><td class="k">IMS 3.0</td>
+          <td class="s"><span class="zn ano">máte</span></td>
+          <td>Od mřížky receptur máte totéž, co IMS prodává jako přednost.</td></tr>
+        <tr><td class="f">Váha s hlídáním navážky</td><td class="k">IMS, ColorStar</td>
+          <td class="s"><span class="zn ano">máte</span></td>
+          <td>Asistent navážení i přepočet přelití. Tady jste na úrovni placených systémů.</td></tr>
+        <tr><td class="f">Štítek s čárovým kódem</td><td class="k">IMS, GSE</td>
+          <td class="s"><span class="zn ano">máte</span></td>
+          <td>Kód, expirace, pot life, návrat do evidence čtečkou.</td></tr>
+        <tr><td class="f">Cena dávky a na kus</td><td class="k">ColorStar, IMS</td>
+          <td class="s"><span class="zn ano">máte</span></td>
+          <td>Včetně tužidla a aditiv, se skrytím pro tiskaře u váhy.</td></tr>
+        <tr><td class="f">VOC a bezpečnostní listy</td><td class="k">ColorStar, IMS</td>
+          <td class="s"><span class="zn ne">nemáte</span></td>
+          <td>Odkaz na bezpečnostní list u složky a výkaz těkavých látek. Jestli to po
+            vás někdo chce, je to povinnost, ne funkce.</td></tr>
+        <tr><td class="f">Sestavy a trendy</td><td class="k">IMS, GSE</td>
+          <td class="s"><span class="zn ne">nemáte</span></td>
+          <td>Spotřeba po měsících, nejčastější odstíny, kolik se vyhodilo. Data už
+            v souborech jsou, jen se nesčítají.</td></tr>
+        <tr><td class="f">Role a schvalování</td><td class="k">IMS, X-Rite</td>
+          <td class="s"><span class="zn ne">nemáte</span></td>
+          <td>Technolog schvaluje novou vlastní recepturu, tiskař ji jen používá.
+            Máte to už v plánu.</td></tr>
+        <tr><td class="f">Napojení na podnikový systém</td><td class="k">X-Rite (MIS, CxF)</td>
+          <td class="s"><span class="zn cast">částečně</span></td>
+          <td>SGPS je rozdělaný. X-Rite navíc přijímá zakázku <b>jako úkol do míchárny</b>
+            s cílovou barvou — to je model, který stojí za okopírování.</td></tr>
+        <tr><td class="f">Odeslání receptury e-mailem</td><td class="k">IMS, ColorStar</td>
+          <td class="s"><span class="zn cast">částečně</span></td>
+          <td>Export do CSV a tisk lístku máte; sdílení jedné receptury ne.</td></tr>
+        <tr><td class="f">Spektrální data zbytků</td><td class="k">GSE, X-Rite</td>
+          <td class="s"><span class="zn ne">nemáte</span></td>
+          <td>Změřený kelímek jde použít, i když se neví, co v něm je. <b>Vyžaduje
+            spektrofotometr</b> — viz níž, návrh 6.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="karta">
+  <h2>Návrh pořadí</h2>
+  <p class="pozn">Řazeno podle poměru přínosu a práce, ne podle toho, jak dobře to vypadá
+    v prezentaci. První dva body míří přímo na cíl z A3.</p>
+
+  <div class="navrh">
+    <div class="poradi">1</div>
+    <div>
+      <h3>Záznam opravy — aby se dal změřit pokles</h3>
+      <p>A3 slibuje změřit pokles proti základně 1 209 oprav ročně. Dnes to aplikace
+        neumí — korekci po nátisku spočítá, ale nikde nezůstane, že k opravě došlo.
+        Stačí u korekce a u znovunamíchání zapsat čas, recepturu, technologii, podklad
+        a důvod. Za tři měsíce z toho vypadne nejen číslo do A3, ale i to, <b>u kterých
+        barev a materiálů se chybuje nejčastěji</b> — a to je návod, kde ubírat dál.</p>
+      <div class="stitky"><span class="stitek hl">cíl z A3</span><span class="stitek">malá práce</span>
+        <span class="stitek">bez nových dat</span></div>
+    </div>
+
+    <hr class="cara">
+
+    <div class="poradi">2</div>
+    <div>
+      <h3>Koeficienty spotřeby z uzavřených zakázek</h3>
+      <p>Máte to v plánu a je to nejrychlejší cesta k přesnosti. Aplikace zná plánovanou
+        dávku a po zakázce se ptá, kolik zbylo — rozdíl je <b>skutečná spotřeba</b>.
+        Z pár desítek zakázek vyjdou koeficienty pro síto, materiál a kryvost samy, místo
+        dnešních paušálních 1,00. Konkurence tohle nemá: ColorStar předpovídá z parametrů,
+        ale zpětně se z reality neučí.</p>
+      <div class="stitky"><span class="stitek hl">nikdo z konkurence</span>
+        <span class="stitek">data už sbíráte</span></div>
+    </div>
+
+    <hr class="cara">
+
+    <div class="poradi">3</div>
+    <div>
+      <h3>Shluky zbytků a pravidla zástupnosti</h3>
+      <p>Od GSE. Dnes hledáte shodu kelímek po kelímku; shluk je <b>jedna velká nádoba
+        podobných odstínů vedená jako běžná báze</b>. K tomu tabulka zástupnosti: která
+        složka smí zaskočit za kterou a jen jedním směrem. Vaše
+        <code>vyuzitelnyZbytek</code> na to nemusí nijak zvlášť měnit — shluk je pro ni
+        jen další zbytek, jen se nikdy nevyprázdní.</p>
+      <div class="stitky"><span class="stitek">GSE</span><span class="stitek">staví na hotovém</span></div>
+    </div>
+
+    <hr class="cara">
+
+    <div class="poradi">4</div>
+    <div>
+      <h3>Sklad surovin a docházející báze</h3>
+      <p>Ceník rozšířit o zůstatek a minimální zásobu. Spotřebu aplikace zná z každé
+        dávky, takže odečítání je hotová věc. Přínos není v evidenci samotné, ale v tom,
+        že <b>zakázka se nerozjede na bázi, která ve skladu není</b> — dnes se to pozná
+        až u váhy a je z toho oprava.</p>
+      <div class="stitky"><span class="stitek">IMS · ColorStar</span><span class="stitek">váže na cíl z A3</span></div>
+    </div>
+
+    <hr class="cara">
+
+    <div class="poradi">5</div>
+    <div>
+      <h3>Šarže a sestavy</h3>
+      <p>K dávce doplnit šarži použitých bází — při reklamaci odstínu je to jediná cesta
+        zpět. A jednoduché sestavy: spotřeba po měsících, kolik zbytků se využilo a kolik
+        vyhodilo. <b>Až tohle poběží, přestane být úspora materiálu „zatím nevyčísleno“</b>
+        a doplní se do A3 měřeným číslem, ne odhadem.</p>
+      <div class="stitky"><span class="stitek">GSE · IMS</span><span class="stitek">doplní A3</span></div>
+    </div>
+
+    <hr class="cara">
+
+    <div class="poradi">6</div>
+    <div>
+      <h3>Měření odstínu — až naposled, a s otevřenýma očima</h3>
+      <p>Spektrofotometr by odemkl formulaci z barvy i spektrální zbytky. Levnější cesta
+        je fotoaparát s tištěnou referenční kartou, ale měření je slabší: srovnávací
+        studie uvádějí u telefonu ΔE kolem 1,85 a shodu 54—77 % vzorků proti 0,5—1,05
+        u pořádného přístroje. <b>Na schválení Pantone to nestačí</b>, na sledování, jestli
+        se dávka odchýlila od minule, ano. Doporučuji to brát jako trendové čidlo, ne
+        jako měřidlo — a nedávat to do aplikace dřív, než poběží body 1 a 2.</p>
+      <div class="stitky"><span class="stitek">X-Rite · GSE</span><span class="stitek">nejdražší</span>
+        <span class="stitek">nejmenší jistota</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="karta">
+  <h2>Vlastní návrhy — co konkurence nemá</h2>
+  <p class="pozn">Kritérium bylo stejné jako u tabulky výš: každý bod musí stát na datech,
+    která aplikace <b>už sbírá</b>, a mířit buď na 1 209 oprav, nebo na materiál.
+    Žádný nepotřebuje nový přístroj.</p>
+  <div class="postup"><b>5</b> z 12 hotových &middot; stav k 17. 8. 2026 &middot;
+    tenhle dokument se aktualizuje s každou zavedenou funkcí</div>
+
+  <h3 style="margin-top:6px">Aby oprava nevznikla</h3>
+  <div class="tab">
+    <table>
+      <thead><tr><th>návrh</th><th>co k tomu už máte</th><th>stav</th><th>proč to stojí za to</th></tr></thead>
+      <tbody>
+        <tr><td class="f">Riziko opravy před mícháním</td>
+          <td class="k">analýza podkladu, viskozita mimo rozsah síta, kryvost, příznak
+            „otestovaný“, složky neznámé v pigmentech</td>
+          <td class="s"><span class="zn hot">hotovo</span></td>
+          <td>Všechny ty signály aplikace <b>už počítala</b>, jen ležely každý zvlášť
+            a nikdo je nesečetl.<br><b>Zavedeno 17. 8. 2026:</b> deset signálů v jedné
+            krabici nad tlačítkem do míchacího režimu a ještě jednou uvnitř režimu, protože
+            u váhy stojí často někdo jiný. Každý bod nese i to, co s tím; vysoká rizika jdou
+            dopředu. Na seed receptuře PANTONE 485 C hlásí dva body.</td></tr>
+        <tr><td class="f">Nátisk z malé dávky</td>
+          <td class="k">výpočet dávky, nejmenší dávka, asistent navážení</td>
+          <td class="s"><span class="zn hot">hotovo</span></td>
+          <td>Oprava stojí 47,8 min; špatný odstín pak zahodí zkušební dávku místo celé.
+            <br><b>Zavedeno 17. 8. 2026</b>, a jádrem není to, že se namíchá míň —
+            ale <b>jak malý nátisk ještě něco dokáže</b>. Velikost určuje nejmenší
+            složka: musí vážit aspoň pětinásobek toho, co váha rozliší. U receptury
+            se složkou na 2 % vyjde nátisk 125 g z 550; při 60 g by té složky bylo
+            1,2 g a nepřesnost váhy z toho 42 % — schválil by se odstín, který se
+            v plné dávce nezopakuje. Po schválení se nátisk předá asistentovi jako
+            předem nalitý, stejnou cestou jako zbytek z kelímku.</td></tr>
+        <tr><td class="f">Fotka a poznámka od nátisku</td>
+          <td class="k">receptury vázané na produkt, technologii a polohu</td>
+          <td class="s"><span class="zn ceka">čeká</span></td>
+          <td>„Na tomhle materiálu potřebuje dva průchody“ je znalost, která dnes odchází
+            s člověkem. Cíl z A3 zní <b>postup nezávislý na tom, kdo míchá</b> — tohle je
+            nejlevnější cesta k němu.</td></tr>
+        <tr><td class="f">Kdo míchal a čím</td>
+          <td class="k">dávka jako samostatný záznam</td>
+          <td class="s"><span class="zn ceka">čeká</span></td>
+          <td>Ne kvůli viníkovi. Kvůli tomu, aby šlo rozlišit, jestli je oprava vlastnost
+            <b>receptury, materiálu, nebo postupu</b> — bez toho se z 1 209 oprav nedá nic
+            vyčíst.</td></tr>
+        <tr><td class="f">Nádoby a jejich objem</td>
+          <td class="k">dávka v gramech i ml, hustota receptury</td>
+          <td class="s"><span class="zn ceka">čeká</span></td>
+          <td>340 g do dvěstěpadesátky nejde. Aplikace to spočítá dřív, než to tiskař
+            zjistí u váhy s rozlitou barvou.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="margin-top:14px">Aby zbytek nevznikl, nebo se využil</h3>
+  <div class="tab">
+    <table>
+      <thead><tr><th>návrh</th><th>co k tomu už máte</th><th>stav</th><th>proč to stojí za to</th></tr></thead>
+      <tbody>
+        <tr><td class="f">Předpověď zbytku</td>
+          <td class="k">plánovaná dávka, evidence zbytků, vazba na zakázku</td>
+          <td class="s"><span class="zn hot">hotovo</span></td>
+          <td><b>Zbytek se nejlíp využije tak, že nevznikne</b> — a tuhle stranu nedělá
+            nikdo z konkurence.<br><b>Zavedeno 17. 8. 2026:</b> medián podílu z minulých
+            dávek téže receptury (na trojici 10 / 12 / 90 % dá medián 12 %, průměr 37,3 %),
+            k tomu dopočet ztrát, při kterých by nezbylo nic. Nemění se nic samo — je to
+            tlačítko, protože rezerva na nátisky je vědomé rozhodnutí.</td></tr>
+        <tr><td class="f">Skládání dvou zbytků</td>
+          <td class="k">vyuzitelnyZbytek počítá jeden kelímek</td>
+          <td class="s"><span class="zn hot">hotovo</span></td>
+          <td>Dva kelímky, z nichž ani jeden sám nesedí, můžou sednout dohromady.
+            Rozšíření matematiky, kterou už máte — žádná nová data, jen kombinace.<br>
+            <b>Zavedeno 17. 8. 2026:</b> hledá se největší součet dvou gramáží, při
+            kterém žádná složka nepřeteče svůj podíl. Úloha o dvou neznámých má
+            řešení vždycky v rohu, takže se projdou všechny rohy — není to odhad.
+            Na dávce 800 g dá první kelímek sám 496 g, druhý 267 g, oba dohromady
+            <b>762,7 g</b> — o 266,7 g čerstvé barvy míň, a dovážit zbývá jediná
+            složka. Nabídne se, jen když ušetří aspoň desetinu dávky a 20 g.</td></tr>
+        <tr><td class="f">Pořadí míchání ve frontě</td>
+          <td class="k">zakázky, receptury, kaskádový dopočet</td>
+          <td class="s"><span class="zn hot">hotovo</span></td>
+          <td>Ví-li se, co se dnes míchá, dá se pořadí zvolit tak, aby <b>zbytek z jedné
+            zakázky sedl na další</b>. Dnes to vychází náhodou.<br>
+            <b>Zavedeno 17. 8. 2026:</b> fronta je seznam dnešních dávek, plán je totéž
+            v pořadí, ve kterém z ní vyjde nejvíc zbytků. Nová matematika žádná — nové je
+            jedno pravidlo: <b>kelímek ze skladu je k mání od začátku, zbytek po položce
+            až po ní.</b> Do sedmi položek se projdou všechna pořadí (5 040), takže to
+            není nejlepší nalezené, ale nejlepší možné. Na trojici z dílny dá zadané
+            pořadí 180 g ze zbytků, přerovnané <b>283 g</b> — o 103 g čerstvé barvy míň
+            za jediné přehození dne. Bez dvou minulých dávek téže barvy se zbytek
+            nepředpovídá a řekne se to jménem; přerovnává se tlačítkem, protože co je
+            naspěch, ví mistr.</td></tr>
+        <tr><td class="f">Co propadne tento týden</td>
+          <td class="k">expirace, pot life, stavZbytku</td>
+          <td class="s"><span class="zn ceka">čeká</span></td>
+          <td>Dnes se prošlost pozná až při míchání, tedy pozdě. Přehled dopředu plus
+            návrh, na kterou z rozpracovaných zakázek to ještě sedne.</td></tr>
+        <tr><td class="f">Likvidace jako náklad</td>
+          <td class="k">úspora ze zbytku v korunách</td>
+          <td class="s"><span class="zn ceka">čeká</span></td>
+          <td>A3 zmiňuje méně likvidovaného nebezpečného odpadu. Vyhozený kelímek stojí
+            <b>dvakrát</b> — jednou barva, podruhé likvidace. Druhá půlka se dnes nepočítá.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="margin-top:14px">Z dat, která už v souborech leží</h3>
+  <div class="tab">
+    <table>
+      <thead><tr><th>návrh</th><th>co k tomu už máte</th><th>stav</th><th>proč to stojí za to</th></tr></thead>
+      <tbody>
+        <tr><td class="f">Cenové dvojníky napříč databázemi</td>
+          <td class="k">2 692 receptur, ceník, tentýž pantone ve dvou databázích vedle sebe</td>
+          <td class="s"><span class="zn ceka">čeká</span></td>
+          <td>Táž barva z jiné databáze může být znatelně levnější. <b>Aplikace to ví
+            a neřekne to.</b> Nulová práce s daty, okamžitý efekt na cenu dávky.</td></tr>
+        <tr><td class="f">Zdraví databáze</td>
+          <td class="k">kontroly na chybějící odstín, cenu a technologii</td>
+          <td class="s"><span class="zn ceka">čeká</span></td>
+          <td>Dnes se hlásí u jedné receptury. Jeden přehled = plán, co doplnit —
+            a rovnou podklad pro oddíl <b>Zbývá doplnit</b> v A3.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="karta">
+  <h2>Co bych nedělal</h2>
+  <ul>
+    <li><b>Řízení zakázek</b> (nabídky, plánování, fakturace). Printavo a YoPrint to
+      dělají celé a levně; míchárna je jiná úloha. Napojení na SGPS dává větší smysl
+      než vlastní ERP.</li>
+    <li><b>Cloud a víceuživatelský provoz.</b> Jeden soubor bez serveru je vaše přednost,
+      ne omezení — sdílení už řeší soubory ve složce a most.</li>
+    <li><b>Formulace odstínu z ničeho.</b> Bez kalibrovaných bází a měřeného podkladu to
+      nejde poctivě. Cesta, kterou jste zvolili — úsudek obsluhy plus data, co aplikace
+      má — je správná.</li>
+  </ul>
+  <p class="pozn">Zdroje: <a href="https://www.xrite.com/categories/formulation-and-quality-assurance-software/inkformulation-software">X-Rite InkFormulation</a> ·
+    <a href="https://gsedispensing.com/products/ink-management-software/gse-return-ink-management/">GSE Return ink management</a> ·
+    <a href="https://gsedispensing.com/re-using-return-inks-by-the-cluster-method/">GSE cluster metoda</a> ·
+    <a href="https://www.avientspecialtyinks.com/services/ink-room-management/ink-management-software-ims-30">Avient Wilflex IMS 3.0</a> ·
+    <a href="https://www.nazdar.com/en-us/ColorStar">Nazdar ColorStar</a> ·
+    <a href="https://screenprintingmag.com/ink-management-software/">Screen Printing Mag: Ink-Management Software</a> ·
+    <a href="https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0230561">PLOS One: kolorimetrie telefonem</a> ·
+    <a href="https://www.mdpi.com/1424-8220/24/24/8208">MDPI Sensors: přesnost levných přístrojů</a></p>
+</div>

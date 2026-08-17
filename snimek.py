@@ -14,6 +14,13 @@ Použití:
     python snimek.py --klik ".bigform select" --cil nabidka.png
     python snimek.py --klik ".michtl button" --klik ".michtab select" --tema dark
     python snimek.py --js "document.querySelector('.frow input').value='500'"
+    python snimek.py --pred "localStorage.setItem('irm-zbytky', ...)" --klik ".michtl button"
+
+Pořadí: načtení → `--pred` a znovunačtení → `--tema` → `--js` → kliky → `--po`
+→ snímek.
+Výraz jde tedy před kliky, aby se dalo vyplnit pole a teprve pak na něco
+kliknout; `--pred` jde ještě před vykreslením aplikace, protože sklad zbytků
+si aplikace načte při prvním vykreslení a později už ho z úložiště nečte.
 
 Vrací 0, když se všechny kliky povedly.
 """
@@ -135,7 +142,18 @@ def main():
     ap.add_argument("--soubor", default="index.html")
     ap.add_argument("--klik", action="append", default=[],
                     help="selektor prvku, na který se má kliknout (lze opakovat)")
-    ap.add_argument("--js", default="", help="výraz spuštěný před snímkem")
+    ap.add_argument("--js", default="",
+                    help="výraz spuštěný po vykreslení a PŘED kliky — tudy se "
+                         "vyplňují pole, na která se pak kliká")
+    ap.add_argument("--po", default="",
+                    help="výraz spuštěný PO klicích, ještě před snímkem; jeho "
+                         "hodnota se vypíše — tudy se čte, co se po kliknutí "
+                         "objevilo")
+    ap.add_argument("--pred", default="",
+                    help="výraz spuštěný PŘED vykreslením aplikace; po něm se "
+                         "stránka načte znovu. Tudy se dá nastavit sklad zbytků "
+                         "nebo dávky — jinak se obrazovka, která je na nich "
+                         "závislá, vyfotit nedá")
     ap.add_argument("--tema", default="", choices=["", "light", "dark"])
     ap.add_argument("--cil", default="snimek.png")
     ap.add_argument("--sirka", type=int, default=1600)
@@ -184,11 +202,20 @@ def main():
         w.posli("Page.enable")
         w.posli("Runtime.enable")
         w.posli("Page.navigate", url="file:///" + os.path.abspath(zdroj).replace("\\", "/"))
+        if a.pred:
+            # stav se ukládá do úložiště prohlížeče a aplikace ho čte při prvním
+            # vykreslení — zapsat se proto musí dřív a stránka načíst znovu
+            time.sleep(1.5)
+            print("  před vykreslením: %s" % w.js(a.pred))
+            w.posli("Page.reload")
         time.sleep(a.cekani)
 
         if a.tema:
             w.js("document.documentElement.setAttribute('data-theme','%s')" % a.tema)
             time.sleep(0.4)
+        if a.js:
+            print("  výraz: %s" % w.js(a.js))
+            time.sleep(0.6)
         for sel in a.klik:
             s = w.klikni(sel)
             if s is None:
@@ -197,9 +224,9 @@ def main():
             else:
                 print("  klik na %s (%.0f, %.0f)" % (sel, s["x"], s["y"]))
             time.sleep(1.0)
-        if a.js:
-            print("  výraz: %s" % w.js(a.js))
-            time.sleep(0.6)
+        if a.po:
+            print("  po klicích: %s" % w.js(a.po))
+            time.sleep(0.4)
 
         r = w.posli("Page.captureScreenshot", format="png", captureBeyondViewport=False)
         cil = os.path.abspath(a.cil)

@@ -2701,8 +2701,8 @@ function KodVKalkulaci({ hidOn, setHidOn, onCode, onNastaveni }) {
 const ZALOZKY_NAZVY = {
   calc: "Kalkulace", pdf: "Načtení specu z PDF", scan: "Čárový kód",
   zak: "Zakázky (SGPS)", most: "Připojení k mostu", prod: "Produkty",
-  rec: "Receptury", propad: "Co propadne", zbytky: "Zbytky barev",
-  fronta: "Fronta míchání", imp: "Import / data",
+  rec: "Receptury", zbytky: "Zbytky barev", fronta: "Fronta míchání",
+  imp: "Import / data",
 };
 
 /* Pohyb po záložkách s možností vrátit se.
@@ -3537,7 +3537,6 @@ function App() {
               <button className=${tab === "most" ? "on" : ""} onClick=${() => { setTab("most"); setMenuOpen(false); }}>Připojení k mostu</button>
               <button className=${tab === "prod" ? "on" : ""} onClick=${() => { setTab("prod"); setMenuOpen(false); }}>Produkty</button>
               <button className=${tab === "rec" ? "on" : ""} onClick=${() => { setTab("rec"); setMenuOpen(false); }}>Receptury</button>
-              <button className=${tab === "propad" ? "on" : ""} onClick=${() => { setTab("propad"); setMenuOpen(false); }}>Co propadne</button>
               <button className=${tab === "zbytky" ? "on" : ""} onClick=${() => { setTab("zbytky"); setMenuOpen(false); }}>
                 Zbytky barev
 ${lhutyPocet.prosle + lhutyPocet.brzy > 0 && html`<span className="tag"
@@ -3628,12 +3627,7 @@ ${lhutyPocet.prosle + lhutyPocet.brzy > 0 && html`<span className="tag"
           dbFiltr=${dbFiltr} setDbFiltr=${setDbFiltr} technologie=${technologie} dbTech=${dbTech} sita=${sita}
           materialy=${pigmenty} onUlozitCeny=${ulozCeny} cenyStav=${cenyZapis}
           mostOk=${sgps.stav.stav === "ok"} />`}
-        ${tab === "propad" && html`<${PropadTab} zbytky=${zbytky} davky=${davky} setDavky=${setDavky}
-          fronta=${fronta} materialy=${pigmenty}
-          onOtevritKelimek=${(kod) => { setZbytekKod(kod); setTab("zbytky"); }}
-          onOtevritFrontu=${() => setTab("fronta")} />`}
         ${tab === "zbytky" && html`<${ZbytkyTab} zbytky=${zbytky} setZbytky=${setZbytky} recipes=${recipes}
-          materialy=${pigmenty}
           guardDelete=${guardDelete} otevrenyKod=${zbytekKod} onOtevreno=${() => setZbytekKod("")}
           onDoplnit=${(kod) => setDoplnitZbytek({ kod: kod, gramu: "" })} />`}
         ${tab === "fronta" && html`<${FrontaTab} fronta=${fronta} setFronta=${setFronta}
@@ -4392,14 +4386,6 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
   const usporaZbytku = useMemo(() => (naklady && vyuzitiZbytku)
     ? usporaZeZbytku(vyuzitiZbytku.pouzit, naklady.gramCena) : 0, [naklady, vyuzitiZbytku]);
 
-  /* Druhá půlka: gram vzatý z kelímku nepůjde do nebezpečného odpadu. Vede se
-     zvlášť, protože cenu téhle dávky nesnižuje — ušetří se na svozu, ne na
-     nákupu barvy. */
-  const usporaLikvidace = useMemo(() => (naklady && vyuzitiZbytku)
-    ? cenaLikvidace(vyuzitiZbytku.pouzit,
-        sazbaLikvidace(pigmenty, n(recipe && recipe.density, 1.2), naklady.mena))
-    : 0, [naklady, vyuzitiZbytku, pigmenty, recipe]);
-
   /* ---- život namíchané dávky ----
      Až tady, protože dávka si zapisuje, kolik báze se do ní naváží, a to
      spočítá teprve calcAkt. */
@@ -4525,7 +4511,6 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
       ks: n(qty), cena: naklady && naklady.znama ? naklady.celkem : null,
       cenaKs: naklady && naklady.znama ? cenaNaKus(naklady.celkem, n(qty)) : null,
       mena: naklady ? naklady.mena : "", uspora: usporaZbytku > 0 ? usporaZbytku : null,
-      usporaLikvidace: usporaLikvidace > 0 ? usporaLikvidace : null,
       cenaUplna: !!(naklady && naklady.uplna),
       pozn: "", zdroj: recipe.zdroj || "",
       slozeni: recipe.components.map((c) => ({ name: c.name, pct: n(c.pct) / pct * 100 })),
@@ -4562,7 +4547,6 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
       ks: n(qty), cena: naklady && naklady.znama ? naklady.celkem : null,
       cenaKs: naklady && naklady.znama ? cenaNaKus(naklady.celkem, n(qty)) : null,
       mena: naklady ? naklady.mena : "", uspora: usporaZbytku > 0 ? usporaZbytku : null,
-      usporaLikvidace: usporaLikvidace > 0 ? usporaLikvidace : null,
       cenaUplna: !!(naklady && naklady.uplna),
       pozn: ulozitZbytek.pozn || "", zdroj: recipe.zdroj || "",
       slozeni: recipe.components.map((c) => ({ name: c.name, pct: n(c.pct) / pct * 100 })),
@@ -4726,8 +4710,6 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
           + esc(popisKelimku(vyuzitiZbytku.zbytek)) : ""}</div></div>
     <div><div class="lbl">Nakoupí se na tuhle dávku</div><div class="val">${
       esc(cenaText(Math.max(0, naklady.celkem - usporaZbytku), naklady.mena))}</div></div>` : ""}
-    ${usporaLikvidace > 0 ? `<div><div class="lbl">Likvidace, která odpadne</div><div class="val">${
-      esc(cenaText(usporaLikvidace, naklady.mena))}</div></div>` : ""}
     ${naklady.bezCeny.length ? `<div style="grid-column:1/-1"><div class="lbl">Pozor</div><div class="val" style="font-weight:400">Cena je neúplná — chybí u ${
       esc(naklady.bezCeny.slice(0, 6).join(", "))}${naklady.bezCeny.length > 6 ? " …" : ""}. Skutečná cena je vyšší.</div></div>` : ""}
   </div>`;
@@ -5667,7 +5649,6 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
             ${!michRezim && blokPotlife}
 
             <${FinancniBox} naklady=${naklady} ks=${n(qty)} uspora=${usporaZbytku}
-              likvidace=${usporaLikvidace}
               usporaKod=${popisKelimku(vyuzitiZbytku && vyuzitiZbytku.zbytek)}
               videt=${cenyVidet} onPrepnout=${() => setCenyVidet(!cenyVidet)} />
 
@@ -5994,7 +5975,7 @@ const fmtG = (v) => fmt(v, Math.abs(v) > 0 && Math.abs(v) < 1 ? 2 : 1);
 
    Neúplný ceník se nezakrývá. Chybí-li u složky cena, součet je jen část
    pravdy a musí to být vidět dřív, než se podle něj někdo rozhodne. */
-function FinancniBox({ naklady, ks, uspora, likvidace, usporaKod, videt, onPrepnout, velky }) {
+function FinancniBox({ naklady, ks, uspora, usporaKod, videt, onPrepnout, velky }) {
   if (!naklady) return null;
   if (!videt) return html`
     <div className="rowline" style=${{ marginTop: 12, marginBottom: 0 }}>
@@ -6045,11 +6026,6 @@ function FinancniBox({ naklady, ks, uspora, likvidace, usporaKod, videt, onPrepn
                 <div className="k">Nakoupí se na tuhle dávku</div>
                 <div className="v"><b>${cenaText(Math.max(0, naklady.celkem - uspora), naklady.mena)}</b></div>
               <//>`}
-              ${likvidace > 0 && html`<${React.Fragment}>
-                <div className="k">Likvidace, která odpadne</div>
-                <div className="v">${cenaText(likvidace, naklady.mena)}
-                  <span className="note"> ušetří se na svozu odpadu, ne na nákupu barvy</span></div>
-              <//>`}
               <div className="k">Cena gramu</div>
               <div className="v"><span className="note">${cenaText(naklady.gramCena, naklady.mena, 3)} / g
                 — z toho se počítá i úspora ze zbytku</span></div>
@@ -6090,15 +6066,12 @@ function FinancniBox({ naklady, ks, uspora, likvidace, usporaKod, videt, onPrepn
 
       </div>
 
-      ${(uspora > 0 || likvidace > 0) && html`
+      ${uspora > 0 && html`
         <div className="okbox" style=${{ marginTop: 8, borderLeft: "4px solid var(--ok)" }}>
-          <b>💡 Použitím zbytku ${usporaKod ? usporaKod + " " : ""}ušetříte${
-            uspora > 0 ? " " + cenaText(uspora, naklady.mena) + " na čerstvé barvě" : ""}${
-            uspora > 0 && likvidace > 0 ? " a" : ""}${
-            likvidace > 0 ? " " + cenaText(likvidace, naklady.mena) + " na likvidaci odpadu" : ""}.</b>
+          <b>💡 Použitím zbytku ${usporaKod ? usporaKod + " " : ""}ušetříte
+            ${" " + cenaText(uspora, naklady.mena)} na čerstvé barvě.</b>
           <div className="note" style=${{ marginTop: 4 }}>
             Zbytek je už zaplacený — ušetří se barva, kterou by bylo nutné navážit místo něj.
-            ${likvidace > 0 ? " Do nebezpečného odpadu ty gramy nepůjdou, a svoz se platí podle váhy." : ""}
             ${naklady.kryto < 1 ? " Ceník je neúplný, skutečná úspora je vyšší." : ""}
           </div>
         </div>`}
@@ -6749,7 +6722,7 @@ function StitekZbytku({ zbytek, onClose }) {
     </div>`;
 }
 
-function ZbytkyTab({ zbytky, setZbytky, recipes, materialy, guardDelete, otevrenyKod, onOtevreno, onDoplnit }) {
+function ZbytkyTab({ zbytky, setZbytky, recipes, guardDelete, otevrenyKod, onOtevreno, onDoplnit }) {
   const [q, setQ] = useState("");
   const [baze, setBaze] = useState("");          // "" | "s" | "bez"
   const [lhuta, setLhuta] = useState("");        // "" | "brzy" | "prosle"
@@ -6804,11 +6777,6 @@ function ZbytkyTab({ zbytky, setZbytky, recipes, materialy, guardDelete, otevren
   const hlidane = (zbytky || []).filter((z) => n(z.gramu) > 0 && z.stav !== "vtisku");
   const prosleKs = hlidane.filter((z) => stavy[z.kod] && stavy[z.kod].stav === "prosle");
   const brzyKs = hlidane.filter((z) => stavy[z.kod] && stavy[z.kod].stav === "brzy");
-  /* Barva po lhůtě z kelímku nezmizí — půjde do svozu nebezpečného odpadu a ten
-     se platí podle váhy. Sazba se bere u každého kelímku zvlášť, protože je-li
-     zapsaná za litr, převádí ji na gramy hustota té které barvy. */
-  const likvidaceProslych = prosleKs.reduce((s, z) =>
-    s + cenaLikvidace(z.gramu, sazbaLikvidace(materialy, n(z.hustota, 1.2))), 0);
 
   const [merim, setMerim] = useState(null);   // {kod, s, pohar}
   const zapisViskozitu = () => {
@@ -6868,10 +6836,6 @@ function ZbytkyTab({ zbytky, setZbytky, recipes, materialy, guardDelete, otevren
             ${prosleKs.length > 0 && html`<${React.Fragment}>
               <b>${fmt(prosleKs.length, 0)} ${prosleKs.length === 1 ? "kelímek má" : "kelímků má"} po lhůtě</b>
               ${" (" + fmt(prosleKs.reduce((s, z) => s + n(z.gramu), 0)) + " g) — barva už není použitelná, aplikace ji nenabízí."}
-              ${likvidaceProslych > 0
-                ? " Svoz do nebezpečného odpadu vyjde na "
-                  + cenaText(likvidaceProslych, menaDilny(materialy)) + "."
-                : ""}
               <br /><//>`}
             ${brzyKs.length > 0 && html`<${React.Fragment}>
               <b>${fmt(brzyKs.length, 0)} ${brzyKs.length === 1 ? "kelímku" : "kelímkům"} končí lhůta:</b>
@@ -7159,9 +7123,6 @@ function FrontaTab({ fronta, setFronta, zbytky, materialy }) {
           <p className="note" style=${{ marginTop: 0 }}>
             Celkem se má namíchat <b>${fmt(celkemG)} g</b> barvy${dnes && dnes.gramu > 0
               ? ", z toho " + fmt(dnes.gramu) + " g v tomhle pořadí vyjde ze zbytků" : ""}.
-            ${dnes && dnes.usporaLikvidace > 0
-              ? "Za jejich svoz do nebezpečného odpadu se nezaplatí "
-                + cenaText(dnes.usporaLikvidace, vysledek.mena) + "." : ""}
           </p>
 
           ${vysledek && vysledek.prerovnat && html`
@@ -7268,231 +7229,6 @@ function FrontaTab({ fronta, setFronta, zbytky, materialy }) {
               neexistuje, se u téhle velikosti netvrdí.
             </p>`}
         <//>`}
-      </div>
-    <//>`;
-}
-
-/* ============================ CO PROPADNE ============================ */
-/* Přehled dopředu: co dnes, zítra a do konce týdne propadne, kolik je to
-   gramů a korun, a na kterou položku fronty to ještě sedne. Řádky jsou
-   seskupené po dnech, protože podle dnů se plánuje — odpočet „za 53 hodin"
-   se na kalendář okem nepřevádí.
-
-   Lhůty běží samy, i když se nikdo nedívá, takže se tabulka po minutě
-   překresluje: dávce s pot life by se jinak ukazoval čas, který už neplatí. */
-function PropadTab({ zbytky, davky, fronta, materialy, setDavky,
-                     onOtevritKelimek, onOtevritFrontu }) {
-  const [ted, setTed] = useState(Date.now());
-  useEffect(() => {
-    const t = setInterval(() => setTed(Date.now()), 60000);
-    return () => clearInterval(t);
-  }, []);
-
-  const prehled = useMemo(() => prehledPropadu({ zbytky: zbytky, davky: davky,
-    fronta: fronta, materialy: materialy, ted: ted }),
-    [zbytky, davky, fronta, materialy, ted]);
-
-  /* Uzavření dávky je jediné, co tahle obrazovka mění — a mění to týmž
-     výpočtem jako míchací režim, aby vyhozená dávka znamenala v souboru
-     pokaždé totéž. */
-  const uzavri = (kodDavky, jak) => setDavky((prev) => (prev || []).map((d) =>
-    d.kod === kodDavky ? davkaUzavrena(d, jak) : d));
-
-  // 1 kelímek, 2–4 kelímky, 5 a víc kelímků — opakuje se to na čtyřech místech
-  const kusy = (k, a, b, c) => k === 1 ? a : (k < 5 ? b : c);
-
-  // řádky po dnech; všechno prošlé je jeden oddíl, viz nazevDnePropadu
-  const dny = [];
-  for (const x of prehled.radky) {
-    const klic = x.den < 0 ? -1 : x.den;
-    const posledni = dny[dny.length - 1];
-    if (posledni && posledni.klic === klic) posledni.radky.push(x);
-    else dny.push({ klic: klic, doKdy: x.doKdy, radky: [x] });
-  }
-
-  const hodnotaText = (h) => (h && h.znama && h.celkem > 0)
-    ? cenaText(h.celkem, h.mena) : "";
-
-  return html`
-    <${React.Fragment}>
-      <div className="card">
-        <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "center",
-          marginBottom: 12, gap: 10, flexWrap: "wrap" }}>
-          <h2 style=${{ margin: 0 }}>Co propadne (${fmt(prehled.celkem.ks, 0)})</h2>
-          <span className="note">${prehled.frontaKs > 0
-            ? "Ve frontě čeká " + fmt(prehled.frontaKs, 0) + " "
-              + kusy(prehled.frontaKs, "položka", "položky", "položek") + " k namíchání."
-            : "Fronta je prázdná, takže není kam sáhnout."}</span>
-        </div>
-
-        <div className="specbar" style=${{ marginTop: 0 }}>
-          <span className="dot" style=${{ background: prehled.prosle.ks ? "#B23B2A"
-            : (prehled.dnes.ks ? "var(--warn)" : "var(--ok)") }}></span>
-          <span>Dnes <b>${fmt(prehled.dnes.gramu)} g</b>${prehled.dnes.hodnota > 0
-            ? " · " + cenaText(prehled.dnes.hodnota, prehled.mena) : ""}</span>
-          <span>Do ${fmt(prehled.horizont, 0)} dnů <b>${fmt(prehled.celkem.gramu)} g</b>${
-            prehled.celkem.hodnota > 0 ? " · " + cenaText(prehled.celkem.hodnota, prehled.mena) : ""}</span>
-          ${prehled.celkem.likvidace > 0 && html`
-            <span>Svoz do odpadu <b>${cenaText(prehled.celkem.likvidace, prehled.mena)}</b></span>`}
-          ${prehled.zachranitelne.ks > 0
-            ? html`<span>Do fronty se z toho vejde <b>${fmt(prehled.zachranitelne.gramu)} g</b>${
-                prehled.zachranitelne.uspora > 0
-                  ? " · ušetří " + cenaText(prehled.zachranitelne.uspora, prehled.mena) : ""}</span>`
-            : html`<span className="note">Do fronty se nevejde nic.</span>`}
-        </div>
-
-        ${!prehled.radky.length ? html`
-          <div className="empty">
-            Do ${fmt(prehled.horizont, 0)} dnů nepropadá nic. Sledují se kelímky s datem
-            spotřeby nebo s pot life a rozpracované dávky, ve kterých už je tužidlo.
-          </div>` : html`
-          <${React.Fragment}>
-            <table className="t">
-              <thead><tr><th /><th>Kód</th><th>Barva</th><th className="num">g</th>
-                <th>Lhůta</th><th>Kam to ještě sedne</th><th className="num">Hodnota</th>
-                <th /></tr></thead>
-              <tbody>
-                ${dny.map((d) => html`
-                  <${React.Fragment} key=${d.klic}>
-                    <tr>
-                      <td colSpan="8" style=${{ paddingTop: 16, paddingBottom: 4,
-                        borderBottom: "1.5px solid var(--ink)" }}>
-                        <b style=${{ textTransform: "uppercase", letterSpacing: "var(--prostrkani)",
-                          fontSize: "var(--pismo-popisek)" }}>${nazevDnePropadu(d.klic, d.doKdy)}</b>
-                        <span className="note" style=${{ marginLeft: 10 }}>
-                          ${fmt(d.radky.reduce((s, x) => s + x.gramu, 0))} g ·
-                          ${" " + fmt(d.radky.length, 0) + " "}
-                          ${kusy(d.radky.length, "nádoba", "nádoby", "nádob")}</span>
-                      </td>
-                    </tr>
-                    ${d.radky.map((x) => {
-                      const barvaStavu = x.poLhute ? "#B23B2A"
-                        : (x.den === 0 ? "var(--warn)" : "var(--ink-2)");
-                      return html`
-                      <tr key=${x.druh + "-" + x.kod}>
-                        <td><span className="swatch" style=${{ background: x.hex }} /></td>
-                        <td style=${{ fontFamily: "var(--mono)", fontWeight: 700 }}>${x.kod}
-                          ${x.kodDavky && x.kodDavky !== x.kod
-                            && html`<div className="note">${x.kodDavky}</div>`}</td>
-                        <td>
-                          <div style=${{ fontWeight: 700 }}>${x.nazev || "bez názvu"}
-                            ${x.naStroji && html`<span className="tag" style=${{ marginLeft: 6,
-                              background: "var(--key)", color: "#fff", boxShadow: "none" }}
-                              title="nádoba je na stroji — tiskne se z ní">${x.stavPopis}</span>`}</div>
-                          <div className="note">${(x.slozeni || []).map((c) => c.name).join(" · ")
-                            || "složení neuvedeno"}</div>
-                        </td>
-                        <td className="num" style=${{ whiteSpace: "nowrap" }}>
-                          <b>${fmt(x.gramu)} g</b></td>
-                        <td style=${{ minWidth: 130 }}>
-                          <div style=${{ color: barvaStavu,
-                            fontWeight: (x.poLhute || x.den === 0) ? 700 : 400 }}>
-                            ${x.poLhute ? "po lhůtě " + zbyvaText(x.zbyva) : zbyvaText(x.zbyva)}</div>
-                          <div className="note">${x.duvod}</div>
-                        </td>
-                        <td style=${{ minWidth: 180 }}>
-                          ${x.naStroji
-                            ? (x.poLhute
-                              ? html`<span className="note">Lhůta doběhla${x.zakazka
-                                  ? " — zakázka " + x.zakazka : ""}. Rozhodnout, jestli se to
-                                  stihlo vytisknout, nebo šlo do koše.</span>`
-                              : html`<span className="note">Tiskne se${x.zakazka
-                                  ? " — zakázka " + x.zakazka : ""}. Dotisknout do lhůty,
-                                  jinak je to vyhozená dávka.</span>`)
-                            : (x.poLhute
-                              ? html`<span className="note">Po lhůtě — barva už není použitelná
-                                  a aplikace ji nenabízí. Zbývá ji odepsat.</span>`
-                              : (x.navrh
-                                ? html`<div><b>${fmt(x.navrh.poradi, 0)}. ${x.navrh.polozka.nazev
-                                      || "bez názvu"}</b>${x.navrh.polozka.zakazka
-                                      ? " · " + x.navrh.polozka.zakazka : ""}</div>
-                                    <div className="note">Vejde se ${fmt(x.navrh.pouzit)} g${
-                                      x.navrh.cely ? " — celý kelímek" : ""}, domíchat
-                                      ${" " + fmt(x.navrh.domichat)} g · ${x.navrh.presna
-                                        ? "přímá shoda"
-                                        : "dopočet, složení sedí na " + fmt(x.navrh.shoda * 100, 0) + " %"}</div>`
-                                : (x.kam.length
-                                  ? html`<span className="note">Sedne na
-                                      ${" " + fmt(x.kam.length, 0) + " "}
-                                      ${kusy(x.kam.length, "položku", "položky", "položek")} fronty,
-                                      ale každou z nich si bere kelímek s bližší lhůtou.</span>`
-                                  : html`<span className="note">Ve frontě nesedne na nic.</span>`)))}
-                        </td>
-                        <td className="num" style=${{ whiteSpace: "nowrap" }}>${hodnotaText(x.hodnota)
-                          || html`<span className="note">—</span>`}
-                          ${x.hodnota && x.hodnota.znama && !x.hodnota.uplna
-                            && html`<div className="note" title="ceník nezná cenu všech složek">a víc</div>`}</td>
-                        <td style=${{ whiteSpace: "nowrap" }}>
-                          ${x.druh === "davka"
-                            ? html`<${React.Fragment}>
-                                <button className="btn sm" title="doběhla do tisku"
-                                  onClick=${() => uzavri(x.kodDavky, "spotrebovana")}>Spotřebovaná</button>${" "}
-                                <button className="btn danger sm"
-                                  title="ztuhla nebo se nepovedla — zapíše se jako ztráta"
-                                  onClick=${() => uzavri(x.kodDavky, "vyhozena")}>Vyhozená</button>
-                              <//>`
-                            : html`<button className="btn sec sm"
-                                onClick=${() => onOtevritKelimek && onOtevritKelimek(x.kod)}>Kelímek</button>`}
-                          ${x.navrh && html`<${React.Fragment}>${" "}
-                            <button className="btn sec sm" title="otevřít frontu míchání"
-                              onClick=${() => onOtevritFrontu && onOtevritFrontu()}>Fronta</button><//>`}
-                        </td>
-                      </tr>`;
-                    })}
-                  <//>`)}
-              </tbody>
-            </table>
-
-            ${prehled.nikam.length > 0 && html`
-              <div className="warnbox">
-                <b>${fmt(prehled.nikam.length, 0)}
-                  ${" " + kusy(prehled.nikam.length, "kelímek", "kelímky", "kelímků")} nesedne
-                  ve frontě na nic</b>${" (" + fmt(prehled.nikam.reduce((s, x) => s + x.gramu, 0)) + " g)"}
-                — bez další zakázky s tímhle odstínem se vyhodí${prehled.nikamLikvidace > 0
-                  ? " a svoz do nebezpečného odpadu k tomu stojí "
-                    + cenaText(prehled.nikamLikvidace, prehled.mena) : ""}. Přidejte položku
-                v kalkulaci, nebo kelímek dolijte do zásoby na příští zakázku.
-              </div>`}
-            ${prehled.zachranitelne.ks > 0 && html`
-              <div className="okbox">
-                <div className="rowline" style=${{ marginBottom: 0 }}>
-                  <span><b>${fmt(prehled.zachranitelne.gramu)} g se dá uplatnit hned</b>${
-                    prehled.zachranitelne.uspora > 0
-                      ? " — ušetří " + cenaText(prehled.zachranitelne.uspora, prehled.mena) : ""}${
-                    prehled.zachranitelne.likvidace > 0
-                      ? (prehled.zachranitelne.uspora > 0 ? " a " : " — ušetří ")
-                        + cenaText(prehled.zachranitelne.likvidace, prehled.mena)
-                        + " na svozu odpadu" : ""}
-                    ${" na "}${fmt(prehled.zachranitelne.ks, 0)}
-                    ${" " + kusy(prehled.zachranitelne.ks, "položce", "položkách", "položkách")} fronty.
-                    Pořadí, ve kterém z fronty vyjde nejvíc zbytků, spočítá Fronta míchání.</span>
-                  <span style=${{ marginLeft: "auto" }}></span>
-                  <button className="btn sm" onClick=${() => onOtevritFrontu && onOtevritFrontu()}>
-                    Fronta míchání</button>
-                </div>
-              </div>`}
-            ${!prehled.celkem.uplne && html`
-              <p className="note">
-                Ceník nezná cenu všech složek, takže sečtené koruny jsou jen ta část, která
-                cenu má — skutečná ztráta je <b>vyšší</b>. Ceny se doplňují v Recepturách.
-              </p>`}
-            ${prehled.bezSlozeni.length > 0 && html`
-              <p className="note">
-                U ${fmt(prehled.bezSlozeni.length, 0)}
-                ${" " + kusy(prehled.bezSlozeni.length, "dávky", "dávek", "dávek")} se ještě
-                netiskl štítek na kelímek, takže evidence nezná jejich složení: lhůta se hlídá,
-                hodnota ani uplatnění se nepočítá.
-              </p>`}
-            ${prehled.starsiProsle.ks > 0 && html`
-              <p className="note">
-                Starší než ${fmt(prehled.horizont, 0)} dnů po lhůtě je ještě
-                ${" " + fmt(prehled.starsiProsle.ks, 0) + " "}
-                ${kusy(prehled.starsiProsle.ks, "nádoba", "nádoby", "nádob")}
-                ${" (" + fmt(prehled.starsiProsle.gramu) + " g)"} — v tomhle přehledu nejsou,
-                aby nepřebily to, co je teď na spadnutí. Jsou v Zbytcích barev pod filtrem
-                <b> po lhůtě</b>.
-              </p>`}
-          <//>`}
       </div>
     <//>`;
 }
@@ -8935,11 +8671,6 @@ const ROLE_MATERIALU = {
   // Zpomalovač stojí obvykle násobek ředidla, takže se do ceníku musí dostat
   // zvlášť — schovaný pod "ředidlo" by dávku podhodnocoval.
   zpomalovac: { popis: "zpomalovač", vzor: /^zpomalova|^retard|zpomaluj/ },
-  // Likvidace není složka, ale sazba za kilogram odpadu. Vyhozený kelímek se
-  // platí dvakrát: jednou barvou, podruhé svozem nebezpečného odpadu. V ceníku
-  // proto stojí jako vlastní druh — a do ceny dávky se nepřičítá nikdy, protože
-  // se míchá barva, ne odpad.
-  likvidace:  { popis: "likvidace odpadu", vzor: /^likvidac|^odpad|^svoz|^waste|^disposal/ },
 };
 const roleMaterialu = (s) => {
   const t = String(s || "").toLowerCase().trim();
@@ -9561,31 +9292,6 @@ function usporaZeZbytku(pouzitG, gramCena) {
   return (g > 0 && c > 0) ? g * c : 0;
 }
 
-/* ---- druhá půlka ceny vyhozeného kelímku ----
-   Nespotřebovaná barva nekončí v koši, ale ve svozu nebezpečného odpadu, a ten
-   se platí podle váhy. Za kelímek se tedy platí dvakrát: jednou dodavateli za
-   barvu, podruhé svozové firmě za to, že se jí dílna zbaví.
-
-   Sazba je jedna pro celou dílnu a stojí v témž ceníku jako materiál, jen jako
-   vlastní druh. Není-li vyplněná, vrací se nula a aplikace o likvidaci mlčí —
-   ceník svozové firmy se odhadnout nedá. Cizí měna zůstane mimo součet ze
-   stejného důvodu jako u ceny dávky: kurz aplikace nezná. */
-function sazbaLikvidace(materialy, hustota, mena) {
-  const m = materialRole(materialy, "likvidace");
-  if (!m) return 0;
-  const men = String(mena || menaDilny(materialy) || MENA_VYCHOZI).toUpperCase();
-  if (String(m.mena || MENA_VYCHOZI).toUpperCase() !== men) return 0;
-  const zaGram = cenaZaGram(m, hustota);
-  return zaGram > 0 ? zaGram : 0;
-}
-
-/* Co stojí likvidace daného množství barvy. S cenou dávky se to nesčítá:
-   cenu téhle dávky to nemění, jsou to peníze pro svozovou firmu, ne pro
-   dodavatele barvy. Sečíst obojí do jednoho čísla by znamenalo tvrdit, že se
-   za dávku nakoupí míň, než se doopravdy nakoupí. */
-const cenaLikvidace = (gramu, sazba) =>
-  (n(gramu) > 0 && n(sazba) > 0) ? n(gramu) * n(sazba) : 0;
-
 /* Peníze česky: desetinná čárka a značka měny. Drobné položky potřebují víc
    desetinných míst — cena na kus bývá haléřová a "0,00 Kč" by neřeklo nic. */
 function cenaText(v, mena, des) {
@@ -9840,7 +9546,7 @@ const code128Url = (text, vyska, modul) =>
 const ZBYTKY_HLAVICKA = ["kod", "nazev", "gramu", "puvodne", "hustota", "hex", "zakazka",
   "produkt", "barva", "technologie", "poloha", "ulozeno", "zmeneno", "expirace", "pozn",
   "zdroj", "namichano", "potlife_h", "tuzidlo", "mez_potlife", "pomer_tuzidla", "hustnuti",
-  "ks", "cena", "cena_ks", "mena", "uspora", "uspora_likvidace", "cena_uplna",
+  "ks", "cena", "cena_ks", "mena", "uspora", "cena_uplna",
   "viskozita_s", "viskozita_pohar",
   "viskozita_kdy", "viskozita_historie", "stav", "davka_g", "komponenta", "procento"];
 
@@ -9863,9 +9569,7 @@ function zbytkyDoCsv(zbytky) {
         z.pomerTuzidla == null ? "" : cislo(z.pomerTuzidla, 4), z.hustnuti || "",
         z.ks == null ? "" : cislo(z.ks, 0), z.cena == null ? "" : cislo(z.cena, 2),
         z.cenaKs == null ? "" : cislo(z.cenaKs, 4), z.mena || "",
-        z.uspora == null ? "" : cislo(z.uspora, 2),
-        z.usporaLikvidace == null ? "" : cislo(z.usporaLikvidace, 2),
-        z.cenaUplna ? "ano" : "",
+        z.uspora == null ? "" : cislo(z.uspora, 2), z.cenaUplna ? "ano" : "",
         z.viskozita == null || z.viskozita === "" ? "" : cislo(z.viskozita, 1),
         z.viskPohar || "", z.viskKdy || "", viskHistDoTextu(z.viskHist),
         z.stav || "sklad", z.davkaG == null ? "" : cislo(z.davkaG, 2),
@@ -9914,9 +9618,6 @@ function csvNaZbytky(text) {
         cenaKs: ci.cena_ks >= 0 && r[ci.cena_ks] !== "" ? n(r[ci.cena_ks]) : null,
         mena: ci.mena >= 0 ? String(r[ci.mena] || "").trim().toUpperCase() : "",
         uspora: ci.uspora >= 0 && r[ci.uspora] !== "" ? n(r[ci.uspora]) : null,
-        // starší soubory sloupec nemají — pak se o ušetřené likvidaci mlčí
-        usporaLikvidace: ci.uspora_likvidace >= 0 && r[ci.uspora_likvidace] !== ""
-          ? n(r[ci.uspora_likvidace]) : null,
         cenaUplna: ci.cena_uplna >= 0 && /^(1|ano|yes|true|x)$/i.test(String(r[ci.cena_uplna] || "").trim()),
         viskozita: ci.viskozita_s >= 0 && r[ci.viskozita_s] !== "" ? n(r[ci.viskozita_s]) : "",
         viskPohar: r[ci.viskozita_pohar] || "", viskKdy: n(r[ci.viskozita_kdy]) || 0,
@@ -10739,9 +10440,6 @@ function frontaPodklad({ polozky, zbytky, materialy, ted }) {
          proto řadí, teprve když je cena úplná u všech. */
       cenaUplna: !!(cena && cena.uplna),
       mena: cena ? cena.mena : MENA_VYCHOZI,
-      /* Sazba za svoz je jedna pro celou dílnu, ale přepočet na gram může viset
-         na hustotě položky — počítá se proto tady, u ní. */
-      likvidaceGram: sazbaLikvidace(materialy, n(p.hustota, 1.2), cena ? cena.mena : ""),
       predpoved: pred,
       /* Kelímek, který po položce zůstane. Složení má po ní — zbytek je tatáž
          barva. Stáří se počítá od teď, takže mezi přímými shodami dá pořadí
@@ -10781,7 +10479,7 @@ function planFronty({ podklad, kelimky, kandidati, poradi, ted }) {
   const police = new Map();
   for (const z of (kelimky || [])) if (!z.predpoved) police.set(z.kod, Object.assign({}, z));
   const kroky = [];
-  let gramu = 0, uspora = 0, usporaLikvidace = 0, zeSkladu = 0, zFronty = 0, bezCeny = 0;
+  let gramu = 0, uspora = 0, zeSkladu = 0, zFronty = 0, bezCeny = 0;
   for (const i of (poradi || [])) {
     const p = podklad[i];
     if (!p) continue;
@@ -10802,10 +10500,6 @@ function planFronty({ podklad, kelimky, kandidati, poradi, ted }) {
         krok.uspora = usporaZeZbytku(nej.pouzit, p.gramCena);
         uspora += krok.uspora;
       } else bezCeny++;
-      /* Ušetřená likvidace se sčítá zvlášť a do výběru pořadí nevstupuje:
-         sazba je pro všechny položky táž, takže by přerovnávala frontu podle
-         gramů zrovna tam, kde se pořadí vybírá podle korun. */
-      usporaLikvidace += cenaLikvidace(nej.pouzit, p.likvidaceGram);
       if (kelimek) kelimek.gramu = Math.max(0, n(kelimek.gramu) - nej.pouzit);
     }
     // teprve teď je zbytek po položce na světě — a právě proto na pořadí záleží
@@ -10813,7 +10507,7 @@ function planFronty({ podklad, kelimky, kandidati, poradi, ted }) {
     kroky.push(krok);
   }
   return { poradi: (poradi || []).slice(), kroky: kroky, gramu: gramu, uspora: uspora,
-    usporaLikvidace: usporaLikvidace, zeSkladu: zeSkladu, zFronty: zFronty, bezCeny: bezCeny };
+    zeSkladu: zeSkladu, zFronty: zFronty, bezCeny: bezCeny };
 }
 
 /* Kolik pořadí se zkusí.
@@ -10986,251 +10680,6 @@ function sloucFrontu(mistni, ze_souboru) {
   }
   return Array.from(mapa.values())
     .sort((a, b) => n(a.poradi) - n(b.poradi) || n(a.pridano) - n(b.pridano));
-}
-
-/* ======================= CO PROPADNE =======================
-   Dosud se prošlost poznala až u míchačky: kelímek po lhůtě aplikace
-   nenabídla a tím to skončilo — barva se vyhodila, aniž by o tom dílna
-   předem věděla. Přehled se proto dívá dopředu: co propadne dnes, co zítra,
-   co do konce týdne, kolik je to gramů a korun, a na kterou položku fronty
-   to ještě sedne.
-
-   Nová data k tomu nejsou žádná. Lhůtu kelímku počítá stavZbytku, lhůtu
-   rozpracované dávky stavDavky, kolik se kam vejde vyuzitelnyZbytek —
-   všechno se jen srovná podle času a přiloží se k tomu, co ve frontě čeká.
-
-   Dvě věci přehled rozlišuje a bez nich by radil špatně:
-
-     · Rozpracovaná dávka a kelímek ve stavu „v tisku" jsou tatáž nádoba na
-       stroji. Ta se nepřesměrovává, ta se má stihnout dotisknout. Existuje-li
-       k nádobě dávka, platí dávka: nese lhůtu na minuty a dá se uzavřít.
-     · Kelímek ve skladu přesměrovat jde, a proto se u něj hledá, na kterou
-       položku fronty sedne.
-
-   Čemu se přehled vyhýbá:
-
-     · Nehádá, kdy se která položka fronty bude míchat. Fronta má pořadí,
-       hodiny ne — řekne se tedy, že to sedne, ne že se to stihne.
-     · Nesčítá koruny, které nezná. Chybí-li v ceníku cena složky, spočítá se
-       hodnota známé části a řekne se, že skutečná ztráta je vyšší. */
-const PROPAD_DNI = 7;                 // jak daleko dopředu se přehled dívá
-const PROPAD_NEJMENSI_ZBYTEK = 1;     // g — pod gram je to šum evidence, ne kelímek
-
-/* Do kterého dne položka patří: 0 = dnes, 1 = zítra, záporně už po lhůtě.
-   Počítá se přes kalendářní dny, ne přes 24hodinové úseky — kelímek, kterému
-   lhůta končí dnes ve 23:00, propadá dnes, ne „za jedenáct hodin". */
-function denPropadu(doKdy, ted) {
-  const rano = new Date(ted || Date.now()).setHours(0, 0, 0, 0);
-  const den = new Date(n(doKdy)).setHours(0, 0, 0, 0);
-  return Math.round((den - rano) / (24 * HODINA));
-}
-
-/* Jak se dni říká v přehledu. Od pozítří dál se den v týdnu čte lépe než
-   odpočet: mistr plánuje podle dnů, ne podle toho, kolik zbývá hodin.
-   Všechno prošlé je jeden den — kdyby se dělilo po dnech, vznikne pět
-   nadpisů se stejným jménem. */
-const PROPAD_DNY_NAZVY = ["dnes", "zítra", "pozítří"];
-function nazevDnePropadu(den, doKdy) {
-  if (den < 0) return "už po lhůtě";
-  if (den < PROPAD_DNY_NAZVY.length) return PROPAD_DNY_NAZVY[den];
-  return new Date(n(doKdy)).toLocaleDateString("cs-CZ",
-    { weekday: "long", day: "numeric", month: "numeric" });
-}
-
-/* Co je v kelímku za peníze — vyhozená barva je zaplacená barva.
-
-   Dávka označená při míchání si svou cenu nese zapsanou: spočítala se
-   s tužidlem i aditivy v okamžiku, kdy se vážila, a přepočtem ze složení by
-   se ta část zahodila. Platí to jen dokud se z kelímku neubralo; po odpisu
-   patří zapsaná cena k jinému množství a počítá se znovu ze složení.
-
-   Nezná-li ceník cenu všech složek, vrátí se hodnota známé části a `uplna`
-   je nepravda. Dopočítat chybějící cenu odhadem by znamenalo tvrdit ztrátu,
-   kterou nikdo nezměřil. */
-function hodnotaKelimku(z, materialy) {
-  const gramu = n(z && z.gramu);
-  const mena = (z && z.mena) || menaDilny(materialy);
-  if (n(z && z.cena) > 0 && gramu > 0 && Math.abs(gramu - n(z.davkaG)) < 0.05)
-    return { celkem: n(z.cena), uplna: !!z.cenaUplna, znama: true, mena: mena };
-  const radky = (z && z.slozeni) || [];
-  const soucet = radky.reduce((s, c) => s + n(c.pct), 0);
-  if (!(soucet > 0) || !(gramu > 0))
-    return { celkem: 0, uplna: false, znama: false, mena: mena };
-  const cena = cenaDavky({
-    comps: radky.map((c) => ({ name: c.name, g: gramu * n(c.pct) / soucet })),
-    totalG: gramu, materialy: materialy, hustota: n(z.hustota, 1.2) });
-  return { celkem: cena.celkem, uplna: cena.uplna, znama: cena.znama, mena: cena.mena };
-}
-
-/* Fronta přepočtená na to, co přehled potřebuje: složky v gramech a cena
-   gramu. Spočítá se jednou pro celou frontu — u každého kelímku znovu by to
-   bylo tolikrát totéž číslo. `poradi` je číslo položky, jak ji dílna vidí ve
-   frontě; podle něj se u míchačky říká „ber trojku". */
-function podkladFrontyPropadu(cekaji, materialy) {
-  return (cekaji || []).map((p, i) => {
-    const comps = compsFronty(p);
-    const cena = comps.length ? cenaDavky({ comps: comps, totalG: n(p.davkaG),
-      materialy: materialy, hustota: n(p.hustota, 1.2) }) : null;
-    return { polozka: p, poradi: i + 1, comps: comps, davkaG: n(p.davkaG),
-      gramCena: (cena && cena.znama) ? cena.gramCena : 0,
-      mena: cena ? cena.mena : MENA_VYCHOZI };
-  }).filter((x) => x.comps.length > 0 && x.davkaG > 0);
-}
-
-/* Na které položky fronty nádoba ještě sedne. Ptá se týmž výpočtem, jakým se
-   kelímky nabízejí u míchačky (vyuzitelnyZbytek) — dvě podobná pravidla vedle
-   sebe by se časem rozešla a přehled by radil něco jiného, než co pak
-   aplikace u váhy nabídne.
-
-   Nahoře je přímá shoda, mezi shodami ta položka, do které se vejde nejvíc:
-   z kelímku ubere nejvíc a nejspíš ho spotřebuje celý. */
-function kamPropadSedne(nadoba, podklad) {
-  if (!nadoba || !(n(nadoba.gramu) > 0) || !((nadoba.slozeni || []).length)) return [];
-  const out = [];
-  for (const x of (podklad || [])) {
-    const v = vyuzitelnyZbytek(nadoba, x.comps, x.davkaG);
-    if (!v) continue;
-    out.push({ polozka: x.polozka, poradi: x.poradi, pouzit: v.pouzit,
-      domichat: v.domichat, shoda: v.shoda, presna: jePresnaShoda(v),
-      cely: v.zbudeVKelimku <= 0.05,
-      uspora: usporaZeZbytku(v.pouzit, x.gramCena), mena: x.mena });
-  }
-  return out.sort((a, b) => (a.presna ? 0 : 1) - (b.presna ? 0 : 1) || b.pouzit - a.pouzit);
-}
-
-/* Přehled propadů: rozpracované dávky a kelímky ze skladu v jednom seznamu od
-   nejbližší lhůty. Prošlé jdou do přehledu taky — ztráta, kterou se ještě dá
-   vzít do ruky a hlavně spočítat, je poznatek, ne uzavřená položka. Dozadu se
-   ale dívá jen tak daleko jako dopředu; starší kelímky po lhůtě jsou v
-   evidenci zbytků a v týdenním přehledu by přebily to, co je teď na spadnutí. */
-function prehledPropadu({ zbytky, davky, fronta, materialy, ted, dni }) {
-  const nyni = ted || Date.now();
-  const horizont = n(dni) > 0 ? n(dni) : PROPAD_DNI;
-  const podklad = podkladFrontyPropadu(frontaKMichani(fronta), materialy);
-  const podleKodu = new Map((zbytky || []).map((z) => [z.kod, z]));
-  const radky = [];
-
-  /* Nádoby na stroji. Kelímek, ke kterému dávka existuje, se přeskočí —
-     jinak by tatáž barva byla v přehledu dvakrát, jednou po hodinách a jednou
-     po minutách. Kelímek si dávka zabere i tehdy, když lhůta ještě neběží:
-     dokud tužidlo není v bázi, směs netuhne a propadat nemá co. */
-  const obsazene = new Set();
-  for (const x of davkyKHlidani(davky, nyni)) {
-    const kelimek = x.davka.kodKelimku ? podleKodu.get(x.davka.kodKelimku) : null;
-    if (kelimek) obsazene.add(kelimek.kod);
-    if (!x.stav.doKdy) continue;
-    const gramu = n(x.davka.bazeG) + n(x.davka.tuzidloG);
-    if (!(gramu > PROPAD_NEJMENSI_ZBYTEK)) continue;
-    radky.push({
-      druh: "davka", kod: x.davka.kodKelimku || x.davka.kod, kodDavky: x.davka.kod,
-      nazev: x.davka.nazev || (kelimek ? kelimek.nazev : ""),
-      hex: (kelimek && kelimek.hex) || "#888888", gramu: gramu,
-      zakazka: x.davka.zakazka || (kelimek ? kelimek.zakazka : ""),
-      doKdy: x.stav.doKdy, zbyva: x.stav.zbyva, stavPopis: x.stav.popis,
-      duvod: "pot life " + fmt(n(x.davka.minut) / 60, 1) + " h od tužidla",
-      slozeni: (kelimek && kelimek.slozeni) || [],
-      hodnota: kelimek ? hodnotaKelimku(kelimek, materialy) : null,
-      likvidaceGram: sazbaLikvidace(materialy, n(kelimek && kelimek.hustota, 1.2)),
-      naStroji: true, kam: [], navrh: null,
-    });
-  }
-
-  /* Kelímky. Dobrané a ty pod gram do přehledu nepatří, kelímek bez data
-     spotřeby a bez pot life nemá čemu propadnout. */
-  for (const z of (zbytky || [])) {
-    if (obsazene.has(z.kod)) continue;
-    if (!(n(z.gramu) > PROPAD_NEJMENSI_ZBYTEK)) continue;
-    const st = stavZbytku(z, nyni);
-    if (!st.doKdy) continue;
-    const naStroji = z.stav === "vtisku";
-    radky.push({
-      druh: "kelimek", kod: z.kod, kodDavky: "", nazev: z.nazev || "",
-      hex: z.hex || "#888888", gramu: n(z.gramu), zakazka: z.zakazka || "",
-      doKdy: st.doKdy, zbyva: st.zbyva, duvod: st.duvod,
-      stavPopis: naStroji ? "v tisku" : "ve skladu",
-      slozeni: z.slozeni || [], hodnota: hodnotaKelimku(z, materialy),
-      likvidaceGram: sazbaLikvidace(materialy, n(z.hustota, 1.2)),
-      naStroji: naStroji, kam: [], navrh: null,
-    });
-  }
-
-  const starsi = radky.filter((x) => denPropadu(x.doKdy, nyni) < -horizont);
-  const vybrane = radky
-    .filter((x) => {
-      const den = denPropadu(x.doKdy, nyni);
-      return den <= horizont && den >= -horizont;
-    })
-    .map((x) => {
-      /* Rozhoduje zbývající čas, ne kalendářní den: kelímek, kterému lhůta
-         doběhla dnes v devět, propadá dnes — použít ho už ale nejde. */
-      const poLhute = n(x.zbyva) <= 0;
-      return Object.assign(x, {
-        den: denPropadu(x.doKdy, nyni),
-        poLhute: poLhute,
-        /* Kam to ještě sedne se hledá jen u nádoby, se kterou se dá pohnout.
-           Nádoba na stroji se nepřesměrovává, ta se má stihnout dotisknout.
-           Kelímek po lhůtě se nenabízí vůbec — barva v něm je, použitelná
-           není. Je to totéž pravidlo, jakým se řídí nabidkyZbytku u míchačky;
-           bez něj by přehled radil kelímek, který aplikace u váhy odmítne,
-           a ještě by tím vzal položku fronty kelímku, který ještě žije. */
-        kam: (x.naStroji || poLhute) ? [] : kamPropadSedne(x, podklad),
-      });
-    })
-    .sort((a, b) => a.doKdy - b.doKdy);
-
-  /* Kam co půjde. Jedna položka fronty si v přehledu vezme jednu nádobu: do
-     dávky se sice dají složit i dva kelímky (dvojiceZbytku v míchacím režimu),
-     ale sečíst gramy ze všech kelímků, které na položku sednou, by nasčítalo
-     víc barvy, než se do ní vejde. Přednost má nádoba s nejbližší lhůtou —
-     seznam je v tom pořadí, takže stačí projít odshora. */
-  const obsazenaFronta = new Set();
-  for (const x of vybrane) {
-    for (const k of x.kam) {
-      if (obsazenaFronta.has(k.polozka.kod)) continue;
-      obsazenaFronta.add(k.polozka.kod);
-      x.navrh = k;
-      break;
-    }
-  }
-
-  const soucet = (kde) => {
-    const ks = vybrane.filter(kde);
-    return {
-      ks: ks.length,
-      gramu: ks.reduce((s, x) => s + x.gramu, 0),
-      hodnota: ks.reduce((s, x) => s + ((x.hodnota && x.hodnota.znama) ? x.hodnota.celkem : 0), 0),
-      /* Druhá půlka ztráty: za vyhozený kelímek se platí dvakrát — jednou
-         dodavateli za barvu, podruhé svozové firmě za nebezpečný odpad. Sčítá
-         se zvlášť, protože zaplacenou barvu to nezlevňuje. */
-      likvidace: ks.reduce((s, x) => s + cenaLikvidace(x.gramu, x.likvidaceGram), 0),
-      uplne: ks.every((x) => x.hodnota && x.hodnota.uplna),
-    };
-  };
-  const nikam = vybrane.filter((x) => !x.naStroji && !x.poLhute && !x.kam.length);
-  const sedne = vybrane.filter((x) => x.navrh);
-  return {
-    radky: vybrane, horizont: horizont, mena: menaDilny(materialy),
-    frontaKs: podklad.length,
-    prosle: soucet((x) => x.poLhute),
-    dnes: soucet((x) => x.den === 0),
-    celkem: soucet(() => true),
-    /* Co se dá zachránit: gramy, které se vejdou do přiřazené položky fronty,
-       a co se tím ušetří na čerstvé barvě. */
-    zachranitelne: {
-      ks: sedne.length,
-      gramu: sedne.reduce((s, x) => s + x.navrh.pouzit, 0),
-      uspora: sedne.reduce((s, x) => s + n(x.navrh.uspora), 0),
-      likvidace: sedne.reduce((s, x) => s + cenaLikvidace(x.navrh.pouzit, x.likvidaceGram), 0),
-    },
-    /* Kelímky, na které ve frontě nesedne nic — bez další zakázky se vyhodí.
-       Prošlé sem nepatří: ty se nevyhodí „až nebude zakázka", ty jsou
-       vyhozené už teď a patří k prošlým. */
-    nikam: nikam,
-    nikamLikvidace: nikam.reduce((s, x) => s + cenaLikvidace(x.gramu, x.likvidaceGram), 0),
-    // dávky bez kelímku: štítek se ještě netiskl, takže se nezná složení ani cena
-    bezSlozeni: vybrane.filter((x) => !((x.slozeni || []).length)),
-    starsiProsle: { ks: starsi.length, gramu: starsi.reduce((s, x) => s + x.gramu, 0) },
-  };
 }
 
 /* Databáze, ze kterých receptury pocházejí — podklad pro filtr. */

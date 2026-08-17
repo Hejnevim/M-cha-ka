@@ -111,6 +111,7 @@ TVARY = [
     ("--radius-dlazdice", "Zaoblení dlaždic a fotek", 0, 40, 1, "px"),
     ("--radius-stitek", "Zaoblení štítků", 0, 999, 1, "px"),
     ("--ikona", "Velikost ikon", 10, 48, 1, "px"),
+    ("--ikona-radek", "Velikost ikon v řádku textu", 0.8, 2, 0.05, "em"),
     ("--ikona-tah", "Tloušťka tahu ikon", 0.5, 5, 0.1, ""),
     ("--ikona-pruhlednost", "Průsvitnost ikon", 0, 1, 0.05, ""),
     ("--pruhlednost-karty", "Průsvitnost karet", 0.2, 1, 0.01, ""),
@@ -163,6 +164,9 @@ MICHANI = [
     ("--mich-wbar", "Tloušťka pruhu navážení", 4, 48, 1, "px"),
     ("--mich-tlacitko", "Velikost tlačítek", 10, 30, 0.5, "px"),
     ("--mich-mezera", "Odsazení a mezery (i uvnitř karty asistenta)", 6, 56, 1, "px"),
+    ("--mich-pole", "Pole pro zadávání (aditiva, tolerance)", 10, 36, 1, "px"),
+    ("--mich-hlaseni", "Varování a potvrzení", 9, 28, 0.5, "px"),
+    ("--mich-stitek", "Štítky u složek", 8, 24, 0.5, "px"),
 ]
 
 # ---------------------------------------------------------------------------
@@ -234,6 +238,7 @@ RODINY = [
 VYCHOZI_TVARY = {"--radius": "18px", "--radius-btn": "999px", "--radius-pole": "10px",
                  "--radius-dlazdice": "12px", "--radius-stitek": "999px",
                  "--ikona": "20px", "--ikona-tah": "2", "--ikona-pruhlednost": "1",
+                 "--ikona-radek": "1.2em",
                  "--pruhlednost-karty": "1", "--ikona-konec": "round",
                  "--pismo": "14px", "--pismo-nadpis": "14px", "--pismo-popisek": "11px",
                  "--pismo-poznamka": "12.5px", "--pismo-tabulka": "13.5px",
@@ -249,6 +254,7 @@ VYCHOZI_TVARY = {"--radius": "18px", "--radius-btn": "999px", "--radius-pole": "
                  "--mich-hlavicka": "12px", "--mich-tabulka": "20px", "--mich-gramy": "26px",
                  "--mich-radek": "11px", "--mich-vysledek": "52px", "--mich-wbar": "20px",
                  "--mich-tlacitko": "15px", "--mich-mezera": "22px",
+                 "--mich-pole": "20px", "--mich-hlaseni": "15px", "--mich-stitek": "14px",
                  "--sirka-stranky": "none", "--sloupec-1": "1fr", "--sloupec-2": "1fr",
                  "--mezera-sloupcu": "40px"}
 
@@ -273,21 +279,43 @@ def skupina(nadpis, telo, otevreno=True):
 
 
 def posuvnik(klic, popis, od, do, krok, jed, atr="data-klic"):
+    """Posuvník s polem na přesnou hodnotu.
+
+    Posuvník je na hledání — táhne se, dokud to nesedí okem. Jenže rozvržení
+    se občas musí trefit na pixel a krok posuvníku na to nestačí; a rozsah je
+    odhad, ne zákon (ikona nad 48 px je legitimní přání, ne překlep). Pole
+    proto bere hodnotu i mimo rozsah a posuvník se k ní jen přisune, jak
+    nejblíž umí."""
     return ('<div class="posuv" {a}="{k}">'
-            '<div class="hlava"><span>{p}</span><b data-role="cislo"></b></div>'
+            '<div class="hlava"><span>{p}</span>'
+            '<input class="rucne" data-role="cislo" spellcheck="false" '
+            'title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div>'
             '<input type="range" min="{od}" max="{do}" step="{kr}" '
             'data-role="posuv" data-jed="{j}" />'
             "</div>").format(a=atr, k=klic, p=popis, od=od, do=do, kr=krok, j=jed)
 
 
-def vyber(klic, popis, moznosti):
-    """Výběr pro hodnoty, které nejsou číslo — sloupec, řádek, zarovnání."""
-    out = ['<div class="posuv"><div class="hlava"><span>%s</span></div>'
-           '<select data-vyber="%s">' % (popis, klic)]
+def vyber(klic, popis, moznosti, volny=False):
+    """Výběr pro hodnoty, které nejsou číslo — sloupec, řádek, zarovnání.
+
+    S volny=True se pod nabídku přidá pole na přesnou hodnotu. Nabídka pokrývá
+    obvyklé případy (polovina, třetina, jako jeden sloupec), ale karta se občas
+    musí trefit na konkrétní šířku a předvolby na to nestačí. Napsaná hodnota
+    jde do proměnné tak, jak je — projde tedy i calc() nebo min(). Nabídka se
+    pak přepne na „vlastní", aby neukazovala něco jiného, než co platí."""
+    out = ['<div class="posuv"%s><div class="hlava"><span>%s</span></div>'
+           '<select data-vyber="%s">'
+           % ((' data-volny="%s"' % klic) if volny else "", popis, klic)]
     for hod, nazev in moznosti:
         out.append('<option value="%s">%s</option>'
                    % (hod.replace('"', "&quot;"), nazev))
-    out.append("</select></div>")
+    if volny:
+        out.append('<option value="__vlastni">vlastní</option>')
+    out.append("</select>")
+    if volny:
+        out.append('<input class="rucne siroke" data-role="volny" spellcheck="false" '
+                   'title="přesná hodnota v CSS — px, %, fr, calc(), auto" />')
+    out.append("</div>")
     return "\n".join(out)
 
 
@@ -453,7 +481,7 @@ def main():
         telo = [
             vyber("--%s-sloupec" % klic, "Sloupec", SLOUPCE),
             vyber("--%s-radek" % klic, "Řádek", RADKY),
-            vyber("--%s-sirka" % klic, "Šířka", SIRKY),
+            vyber("--%s-sirka" % klic, "Šířka", SIRKY, volny=True),
             vyber("--%s-zarovnani" % klic, "Zarovnání v místě", ZAROVNANI),
             posuvnik("--%s-vyska" % klic, "Nejmenší výška", 0, 900, 10, "px",
                      atr="data-tvar"),
@@ -557,6 +585,11 @@ SABLONA = r"""<!doctype html>
 .posuv{margin-bottom:12px}
 .posuv .hlava{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;margin-bottom:4px}
 .posuv .hlava b{font-family:var(--mono);font-size:12.5px}
+.rucne{width:92px;flex:none;text-align:right;font-family:var(--mono);
+  font-size:12.5px;padding:3px 7px;border-radius:8px}
+.rucne.siroke{width:100%;text-align:left;margin-top:6px}
+.rucne.mimo{box-shadow:var(--neu-in),0 0 0 2px var(--warn)}
+.posuv .hlava{display:flex;align-items:center;gap:8px;justify-content:space-between}
 .smery{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:120px;margin:0 0 14px}
 .smery button{aspect-ratio:1;border:none;border-radius:10px;background:var(--paper);
   box-shadow:var(--neu-sm);cursor:pointer;color:var(--ink);font-size:14px;line-height:1}
@@ -1069,7 +1102,7 @@ function nasad(){
   posuvy.forEach(function(p){
     var klic = p.getAttribute("data-klic"), inp = p.querySelector('[data-role=posuv]');
     inp.value = stiny[rezim][klic];
-    p.querySelector('[data-role=cislo]').textContent = inp.value + inp.getAttribute("data-jed");
+    p.querySelector('[data-role=cislo]').value = inp.value + inp.getAttribute("data-jed");
   });
   for (var k3 in tvary) korenu.style.setProperty(k3, tvary[k3]);
   tvarPosuvy.forEach(function(p){
@@ -1078,9 +1111,15 @@ function nasad(){
        auto a popisek to říká slovem, ať nikdo nehádá, co je nula výšky. */
     var auto = tvary[klic] === "auto";
     inp.value = auto ? 0 : parseFloat(tvary[klic]);
-    p.querySelector('[data-role=cislo]').textContent = tvary[klic];
+    p.querySelector('[data-role=cislo]').value = tvary[klic];
   });
-  vybery.forEach(function(s){ s.value = tvary[s.getAttribute("data-vyber")] || s.value; });
+  vybery.forEach(function(s){
+    var v = tvary[s.getAttribute("data-vyber")] || s.value;
+    var obal = s.closest(".posuv"), volne = obal.querySelector('[data-role=volny]');
+    if (volne) volne.value = v;
+    var sedi = [].slice.call(s.options).filter(function(o){ return o.value === v; })[0];
+    s.value = sedi ? v : (volne ? "__vlastni" : s.value);
+  });
   rodiny.forEach(function(s){ s.value = tvary[s.getAttribute("data-rodina")] || s.value; });
   [].slice.call(document.querySelectorAll("[data-konec]")).forEach(function(b3){
     b3.classList.toggle("on", b3.getAttribute("data-konec") === tvary["--ikona-konec"]);
@@ -1212,7 +1251,7 @@ posuvy.forEach(function(p){
   var klic = p.getAttribute("data-klic"), inp = p.querySelector('[data-role=posuv]');
   inp.addEventListener("input", function(){
     stiny[rezim][klic] = +inp.value;
-    p.querySelector('[data-role=cislo]').textContent = inp.value + inp.getAttribute("data-jed");
+    p.querySelector('[data-role=cislo]').value = inp.value + inp.getAttribute("data-jed");
     var s = stinyCss(stiny[rezim]);
     for (var k in s) korenu.style.setProperty(k, s[k]);
     oznacSmer(); vypis();
@@ -1227,29 +1266,78 @@ tvarPosuvy.forEach(function(p){
     /* Nejmenší výška na nule není nula, ale „auto" — karta si výšku vezme
        podle obsahu. Nula by ji naopak pustila pod obsah a text by vylezl ven. */
     tvary[klic] = (/-vyska$/.test(klic) && +inp.value === 0) ? "auto" : inp.value + jed;
-    p.querySelector('[data-role=cislo]').textContent = tvary[klic];
+    p.querySelector('[data-role=cislo]').value = tvary[klic];
     korenu.style.setProperty(klic, tvary[klic]);
     /* Týž rozestup má posuvník na obou stránkách — musí ukazovat totéž. */
     tvarPosuvy.forEach(function(q){
       if (q !== p && q.getAttribute("data-tvar") === klic){
         q.querySelector('[data-role=posuv]').value = inp.value;
-        q.querySelector('[data-role=cislo]').textContent = tvary[klic];
+        q.querySelector('[data-role=cislo]').value = tvary[klic];
       }
     });
     vypis(); nasadRam();
   });
+  /* Ruční hodnota. Bere se, jak je napsaná — i mimo rozsah posuvníku, i s jinou
+     jednotkou, než nabízí posuvník (em, rem, %). Posuvník se k ní jen přisune,
+     jak nejblíž umí, a orámuje se, když je hodnota mimo něj: jinak by tiše
+     ukazoval kraj a vypadal by rozbitě. */
+  var rucne = p.querySelector('[data-role=cislo]');
+  function zRuky(){
+    var v = rucne.value.trim();
+    if (!v) return;
+    tvary[klic] = v;
+    korenu.style.setProperty(klic, v);
+    var c = parseFloat(v);
+    if (!isNaN(c)){
+      var lo = +inp.min, hi = +inp.max;
+      inp.value = Math.min(hi, Math.max(lo, c));
+      rucne.classList.toggle("mimo", c < lo || c > hi);
+    } else {
+      rucne.classList.toggle("mimo", true);   // auto, calc(), dědí se
+    }
+    tvarPosuvy.forEach(function(q){
+      if (q !== p && q.getAttribute("data-tvar") === klic){
+        q.querySelector('[data-role=posuv]').value = inp.value;
+        q.querySelector('[data-role=cislo]').value = v;
+      }
+    });
+    vypis(); nasadRam();
+  }
+  rucne.addEventListener("change", zRuky);
+  rucne.addEventListener("keydown", function(e){ if (e.key === "Enter") zRuky(); });
+  inp.addEventListener("input", function(){ rucne.classList.remove("mimo"); });
 });
 /* Sloupec, řádek, šířka a zarovnání taky nejsou čísla — jsou to výběry.
    Jinak se chovají stejně jako posuvníky: zapíší proměnnou a přepočítají
    ukázku i výstup. */
 var vybery = [].slice.call(document.querySelectorAll("[data-vyber]"));
 vybery.forEach(function(s){
+  var obal = s.closest(".posuv"), volne = obal.querySelector('[data-role=volny]');
   s.addEventListener("change", function(){
     var klic = s.getAttribute("data-vyber");
+    /* „vlastní" není hodnota, je to pobídka: nabídka na ni skočí sama, když
+       se do pole napíše něco, co v ní není. Vybrat ji ručně jen přesune
+       kurzor do pole — proměnná se nemění, dokud se nenapíše hodnota. */
+    if (s.value === "__vlastni"){ if (volne) volne.focus(); return; }
     tvary[klic] = s.value;
+    if (volne) volne.value = s.value;
     korenu.style.setProperty(klic, s.value);
     stavRozvrzeni(); vypis(); nasadRam();
   });
+  if (!volne) return;
+  function zRuky(){
+    var klic = s.getAttribute("data-vyber"), v = volne.value.trim();
+    if (!v) return;
+    tvary[klic] = v;
+    korenu.style.setProperty(klic, v);
+    /* Sedí-li napsaná hodnota na předvolbu, ukáže se ta — je čitelnější než
+       calc((100% - var(--mezera-sloupcu)) / 2). */
+    var sedi = [].slice.call(s.options).filter(function(o){ return o.value === v; })[0];
+    s.value = sedi ? v : "__vlastni";
+    stavRozvrzeni(); vypis(); nasadRam();
+  }
+  volne.addEventListener("change", zRuky);
+  volne.addEventListener("keydown", function(e){ if (e.key === "Enter") zRuky(); });
 });
 
 [].slice.call(document.querySelectorAll("[data-okno]")).forEach(function(b){
@@ -1317,7 +1405,7 @@ SMERY.forEach(function(s){
       for (var k in s2) korenu.style.setProperty(k, s2[k]);
       var p = posuvy.filter(function(x){ return x.getAttribute("data-klic") === "uhel"; })[0];
       p.querySelector('[data-role=posuv]').value = s[0];
-      p.querySelector('[data-role=cislo]').textContent = s[0] + "°";
+      p.querySelector('[data-role=cislo]').value = s[0] + "°";
       oznacSmer(); vypis();
     }); }
   smeryEl.appendChild(b);

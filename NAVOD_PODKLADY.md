@@ -93,6 +93,83 @@ samy. Platí to i pro nakoupené Pantone standardy, ne jen pro vlastní barvy.
 
 ---
 
+## Zbytky ze skladu
+
+> Kelímek je v některé složce mnohem sytější než cílová receptura, proto ta
+> dávka. Namícháte víc barvy, než kolik jí ze zbytku využijete — zvažte,
+> jestli se to vyplatí, nebo použijte kelímek až na zakázku, která tenhle
+> odstín potřebuje víc.
+
+**Stálo u:** dopočtu ručně zadaného zbytku, když dávka narostla přes
+dvojnásobek objednané.
+**Vysvětluje:** proč u některých kelímků vyjde nesmyslně velká dávka. Z kelímku
+se ubrat nedá, jen přilévat, takže se celý vejde až do dávky, ve které ani jedna
+jeho složka nepřesahuje svůj cílový podíl. Je-li kelímek sytý v složce, které
+je v cíli málo, vyjde ta dávka násobně větší než objednávka. V aplikaci zůstalo
+jen hlášení s čísly — kolik se ze zbytku využije, kolik se namíchá a kolik nové
+barvy tím vznikne.
+
+**Omezení, které tím zmizelo z očí a v návodu být musí:** nabídka *celý kelímek*
+se u zbytků ze skladu **nad dvojnásobek objednané dávky vůbec neukáže**. Kdo to
+neví, může si myslet, že se ten kelímek spotřebovat nedá — jde to, ale musí se
+zadat ručně, protože tam rozhoduje obsluha, která ví, že si míchá do zásoby.
+
+---
+
+## Aditiva — ředidlo a zpomalovač
+
+> Kolik ředidla se do dávky nalilo — aplikace to neví, protože se ředí až podle
+> naměřené viskozity.
+
+**Stálo u:** políčka *Přidané ředidlo* ve finančním boxu, než se z ředidla stala
+vážená složka dávky.
+**Vysvětluje:** proč aplikace množství ředidla nepředepisuje. Ředí se na
+výtokový čas, ne na procenta — procenta jsou jen doporučení, od kterého se
+začíná.
+
+**Co v návodu být musí, protože to z čísel na obrazovce neplyne:**
+
+1. **Tužidlo se počítá z barvy, ne z obsahu nádoby.** Je-li v kelímku 200 g
+   barvy a 18 g ředidla, tužidla se přidá 20 g (10 % z barvy), ne 21,8 g.
+   Aplikace to tak počítá sama, ale kdo si to přepočítává na papíře, musí
+   vědět, ze kterého čísla.
+2. **Kompenzace pigmentace nevrací viskozitu.** Tlačítko zvětší celou dávku
+   i s aditivy, takže barva zůstane stejně řídká, jak si ji tiskař naředil —
+   jen jí je víc. Dorovnat báze zpátky na původní koncentraci by ředění
+   zrušilo, a proto to aplikace nedělá.
+3. **Kompenzace nenahrazuje měření viskozity.** Kolik barvy projde sítem,
+   se počítá z naměřeného výtokového času a z tabulky koeficientů. Po naředění
+   se má viskozita změřit a zapsat; kompenzace řeší jen pigment, ne průchod
+   sítem.
+4. **Strop ředění.** Výchozí je 12 % váhy barvy a každá receptura si ho může
+   přepsat. Nad ním se hlásí varování, ale aplikace v ničem nebrání —
+   rozhodnutí zůstává na tiskaři.
+
+---
+
+## Načtení zakázky — kudy se k němu jde
+
+> Načíst spec z PDF · Načíst spec (čárový kód)
+
+**Stálo u:** dvě položky v hlavní nabídce.
+**Vysvětluje:** kde se zakázka načítá. Obojí se dnes dělá v kartě *Vybraný
+produkt*: PDF dlaždicí *Zakázkový list*, čárový kód tlačítkem *Načíst kód*.
+
+**Omezení, které tím zmizelo z očí:** obě obrazovky v aplikaci pořád jsou, jen
+se na ně nechodí z nabídky — a kdo je zná ze starší verze, hledá je marně.
+
+- *Načíst spec z PDF* se otevře tlačítkem **Upravit spec** v pruhu zakázky,
+  tedy až když je nějaké PDF načtené. Tam se opravují rozpoznaná pole.
+- *Čárový kód* se otevře odkazem **Nastavení čtečky →** v okně načtení kódu.
+  Je tam připojení čtečky na sériovém portu, volba rychlosti a popis formátu
+  kódu. Aplikace tam přepne i sama, když načtený kód nedokáže přiřadit —
+  v ten okamžik je vidět surový kód a historie posledních 25 načtení.
+
+V okně *Načíst kód* je jen pole pro kód, přepínač poslechu čtečky a kamera.
+Přepínač je tentýž stav jako v záložce, ne druhé nastavení.
+
+---
+
 ## Co v návodu ještě chybí
 
 Vysvětlivky pokrývaly jen to, u čeho stály. Návod bude potřebovat i:

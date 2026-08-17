@@ -1,22 +1,22 @@
 # Ink Recipe Manager — strukturovaný rozbor aplikace
 
 <!-- AUTO:stav -->
-> **Stav k 14. srpna 2026.** Čísla v úsecích označených `AUTO` generuje
+> **Stav k 17. srpna 2026.** Čísla v úsecích označených `AUTO` generuje
 > `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — nepřepisují
 > se ručně a nemohou se rozejít se skutečností. Text mimo ně píše člověk.
 
-> Poslední zapsaná změna ve vývojovém deníku: **14. srpna 15:11 — Kelímek s totožným složením se pozná a jde v nabídce první; dopočty, které by dávku nafoukly přes dvojnásobek, se přestaly nabízet**
+> Poslední zapsaná změna ve vývojovém deníku: **17. srpna 15:30 — Zakázka se načítá tam, kde se s ní počítá — čárový kód i PDF v kartě Vybraný produkt, dvě položky z nabídky pryč**
 
 | soubor | řádků | velikost |
 |---|---:|---:|
-| `index.html` | 9 263 | 507 kB |
+| `index.html` | 11 568 | 632 kB |
 | `most.py` | 718 | 30 kB |
 | `pdf_spec.py` | 1 071 | 42 kB |
 | `odemkni.py` | 213 | 8 kB |
 | `prevod_printcolor.py` | 188 | 7 kB |
 | `kontrola_aplikace.py` | 169 | 7 kB |
 | `rozbor_aktualizuj.py` | 354 | 13 kB |
-| **celkem** | **11 976** | |
+| **celkem** | **14 281** | |
 <!-- /AUTO:stav -->
 
 ---
@@ -79,8 +79,10 @@ Systém má tři vrstvy a žádnou z nich nepotřebuje internet.
 5. **Připojení k mostu** (`most`)
 6. **Produkty** (`prod`)
 7. **Receptury** (`rec`)
-8. **Zbytky barev** (`zbytky`)
-9. **Import / data** (`imp`)
+8. **Co propadne** (`propad`)
+9. **Zbytky barev** (`zbytky`)
+10. **Fronta míchání** (`fronta`)
+11. **Import / data** (`imp`)
 <!-- /AUTO:zalozky -->
 
 **Bez mostu aplikace funguje dál** — v čistě prohlížečovém rozsahu (ruční
@@ -93,8 +95,8 @@ zadání, `localStorage`). Aplikace si most sama hledá na `localhost:8765`,
 
 | vstup | jak to jde | stav |
 |---|---|---|
-| **PDF zakázkový list** | Přetáhne se do aplikace. Most ho rozebere, aplikace ukáže rozpoznaná pole s uvedením zdroje u každého. | funkční, hlavní cesta |
-| **Čárový/2D kód** | Čtečka v režimu klávesnice, čtečka na sériovém portu, nebo kamera (QR/DataMatrix). | funkční |
+| **PDF zakázkový list** | Přetáhne se na dlaždici *Zakázkový list* v kartě *Vybraný produkt*. Most ho rozebere, aplikace ukáže rozpoznaná pole s uvedením zdroje u každého. | funkční, hlavní cesta |
+| **Čárový/2D kód** | Tlačítkem *Načíst kód* tamtéž: čtečka v režimu klávesnice, čtečka na sériovém portu, nebo kamera (QR/DataMatrix). | funkční |
 | **Ručně** | Vybere se produkt, poloha, barva, počet kusů. | funkční |
 | **SGPS (firemní systém)** | Seznam otevřených zakázek, otevření přímo do kalkulace. | připraveno, běží v režimu **demo** — ostré napojení čeká na přístup |
 
@@ -271,12 +273,14 @@ Klíče v `localStorage`:
 - `irm-databaze-znacky`
 - `irm-davky`
 - `irm-delete-pw`
+- `irm-fronta`
 - `irm-katalog-verze`
 - `irm-links`
 - `irm-most-adresa`
 - `irm-pokryti`
 - `irm-prod-view`
 - `irm-products`
+- `irm-rec-view`
 - `irm-recipes`
 - `irm-scan-hid`
 - `irm-sgps-port`
@@ -308,10 +312,10 @@ podle dat, ne podle dojmu.
 <!-- AUTO:technologie -->
 | kód | technologie | výchozí g/m² | stav | databáze receptur |
 |---|---|---:|---|---|
-| `SCR` | Sítotisk (plast, papír) / rotační | 6,0 | ostrá | PMS_660 (778), vlastni (3) |
-| `PDP` | Tampontisk | 2,5 | ostrá | PMS_660 (778), PMS_786 (814), vlastni (3) |
-| `TXP` | Sítotisk (textil) | 14,0 | ostrá | PMS_660 (778), vlastni (3) |
-| `TRS` | Transfer | 18,0 | ostrá | vlastni (3) |
+| `SCR` | Sítotisk (plast, papír) / rotační | 6,0 | v přípravě | PMS_660 (778), vlastni (3) |
+| `PDP` | Tampontisk | 2,5 | v přípravě | PMS_660 (778), PMS_786 (814), vlastni (3) |
+| `TXP` | Sítotisk (textil) | 14,0 | v přípravě | PMS_660 (778), vlastni (3) |
+| `TRS` | Transfer | 18,0 | v přípravě | vlastni (3) |
 | `FIR` | Firing — Low Temperature | 8,0 | ostrá | PMS_Xpression (1 097), vlastni (3) |
 <!-- /AUTO:technologie -->
 
