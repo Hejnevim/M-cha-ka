@@ -1,0 +1,74 @@
+.card{background:var(--paper);border-radius:var(--radius);opacity:var(--pruhlednost-karty);padding:var(--mezera-karta-y) var(--mezera-karta-x);margin-bottom:var(--mezera-karet);box-shadow:var(--neu)}
+.card h2{margin:0 0 4px;font-size:var(--pismo-nadpis);font-weight:var(--tloustka-nadpisu);text-transform:uppercase;letter-spacing:calc(var(--prostrkani) * .83);color:var(--ink)}
+.card .hint{color:var(--ink-2);font-size:var(--pismo-poznamka);margin:0 0 14px}
+.frow{display:grid;gap:var(--mezera-poli);margin-bottom:var(--mezera-poli)}
+@media(min-width:640px){.frow.c2{grid-template-columns:1fr 1fr}.frow.c3{grid-template-columns:1fr 1fr 1fr}.frow.c4{grid-template-columns:1fr 1fr 1fr 1fr}}
+label.f{display:block;font-size:var(--pismo-popisek);line-height:1.25;font-weight:700;letter-spacing:var(--prostrkani);text-transform:uppercase;color:var(--ink-2);margin-bottom:5px}
+/* Popisek se v užším okně zalomí na dva řádky a pole pod ním se propadne níž
+   než sousední. Popisek v mřížce má proto vždy výšku dvou řádků a text sedí
+   u jeho spodní hrany — pole v řádku tak drží linku při každé šířce okna. */
+@media(min-width:640px){.frow.c2>div>label.f:first-child,.frow.c3>div>label.f:first-child,.frow.c4>div>label.f:first-child,.zakazka-cisla>div>label.f:first-child{display:flex;align-items:flex-end;min-height:2.5em}
+/* Buňka s přepínači popisek nemá, takže by v mřížce začínala výš než pole
+   vedle ní — srovnáme ji na spodní hranu řádku, na střed sousedního pole. */
+.frow>.flags{align-self:end;margin-top:0;padding-bottom:8px}}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:none;background:var(--paper);border-radius:var(--radius-btn);padding:calc(var(--tlacitko-y) * .7) calc(var(--tlacitko-x) * .78);cursor:pointer;font-weight:600;font-size:calc(var(--pismo) - 1px);display:inline-flex;align-items:center;justify-content:center;text-align:center;transition:box-shadow .15s,background .15s,color .15s;box-shadow:var(--neu-sm)}
+.chip.on{background:var(--key);color:var(--btn-ink)}
+.btn{border:none;border-radius:var(--radius-btn);padding:var(--tlacitko-y) var(--tlacitko-x);font-weight:700;cursor:pointer;background:var(--key);color:var(--btn-ink);transition:opacity .15s;box-shadow:var(--neu-sm)}
+.btn:hover{opacity:.82}
+.btn.sec{background:var(--paper);color:var(--ink)}
+.btn.sec:hover{opacity:1}
+.btn.sm{padding:calc(var(--tlacitko-y) * .6) calc(var(--tlacitko-x) * .67);font-size:var(--pismo-poznamka)}
+.btn.danger{background:var(--paper);color:var(--danger)}
+.btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+table.t{width:100%;border-collapse:collapse;font-size:var(--pismo-tabulka)}
+table.t th{text-align:left;font-size:var(--pismo-popisek);letter-spacing:var(--prostrkani);text-transform:uppercase;color:var(--ink-2);border-bottom:1.5px solid var(--ink);padding:8px}
+table.t td{border-bottom:1px solid var(--line);padding:9px 8px;vertical-align:top}
+/* Číslice musí mít stejnou šířku, jinak se sloupce gramáží rozházejí. Když je
+   --mono skutečně strojopis, platí to samo; u běžného písma to musí zapnout
+   tohle pravidlo. */
+td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.swatch{width:26px;height:26px;border-radius:var(--radius-pole);border:1px solid rgba(0,0,0,.12);display:inline-block;vertical-align:middle}
+/* text-align kvůli úzkému sloupci: jakmile se štítek zalomí na víc řádků,
+   zarovnaný doleva vypadá roztřepeně — uvnitř oblého tvaru patří na střed */
+.tag{display:inline-block;text-align:center;font-family:var(--mono);font-size:var(--pismo-popisek);padding:3px 9px;border-radius:var(--radius-stitek);background:var(--paper);box-shadow:var(--neu-in);color:var(--ink-2)}
+.tag.tech{background:var(--key);color:var(--btn-ink);box-shadow:var(--neu-sm)}
+/* Velká čísla mají výšku řádku `normal`, ne utaženou hodnotu. Utažený řádek
+   vytlačí dolní dotah písmene („g" ve „50,0 g") pod vlastní rámeček a text
+   přeteče přes údaj pod sebou — a protože se rámečky neprotnou, nepozná se to
+   jinak než měřením kresby písma. `normal` je přesně tolik, kolik dané písmo
+   potřebuje, takže to platí i po výměně písma v barvy.html. */
+.result-big{font-family:var(--mono);font-size:var(--pismo-vysledek);font-weight:600;line-height:normal;color:var(--ink)}
+.result-sub{font-family:var(--mono);color:var(--ink-2);font-size:13px}
+.mixbar{display:flex;height:20px;border-radius:8px;overflow:hidden;box-shadow:var(--neu-in);margin:10px 0 4px}
+.warnbox{background:#F6EEDF;border:1px solid #E3CFA6;color:#8A5A1E;border-radius:10px;padding:10px 12px;font-size:calc(var(--pismo-poznamka) - 1px);margin-top:12px}
+.imgwarn{background:#FBF1E4 !important;color:#8A5A1E !important}
+.rowactive td{background:var(--zvyraz)}
+.okbox{background:#E7F1EA;border:1px solid #C0D9C9;color:#1E6B44;border-radius:10px;padding:10px 12px;font-size:calc(var(--pismo-poznamka) - 1px);margin-top:12px}
+.empty{color:var(--ink-2);font-size:13.5px;padding:20px;text-align:center;border-radius:var(--radius);box-shadow:var(--neu-in)}
+.rowline{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+.note{font-size:calc(var(--pismo-poznamka) - .5px);color:var(--ink-2)}
+.search{max-width:340px}
+pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;overflow:auto;font-family:var(--mono);box-shadow:var(--neu-in)}
+/* Fotka produktu a plocha pro zakázkový list jsou dvě stejné dlaždice vedle
+   sebe. Text a volby jdou pod ně na celou šířku — ve třech sloupcích vedle
+   sebe se při užším okně název rozsypal na jedno písmeno na řádek. */
+/* Horní pruh karty produktu: tři stejné dlaždice přes celou šířku — co se
+   tiskne, kam se to tiskne a kam pustit zakázkový list. Text a volby jdou pod
+   ně na celou šířku; ve sloupcích vedle textu se název při užším okně rozsypal
+   na jedno slovo na řádek. */
+/* Čísla zakázky mají vlastní kartu o polovině stránky — ve dvou sloupcích,
+   protože pod sebou by byla zbytečně dlouhá a pole by byla přes celou šířku.
+   V úzkém okně se srovnají pod sebe. */
+/* Obě půlky výběru receptur mají stejný rytmus: popisek, filtr, hledání,
+   výběr. Když se v jedné zalomí lišta filtru na dva řádky, musela by se
+   druhá posunout taky — proto sdílejí řádky mřížky, ne jen sloupce.
+   Co je pod výběrem (poznámka, mazání) už na řádcích nezávisí. */
+@supports (grid-template-rows: subgrid){
+  @media(min-width:640px){
+    .recept-pulky{grid-template-rows:auto auto auto auto}
+    .recept-pulky>div{display:grid;grid-template-rows:subgrid;grid-row:span 4;align-content:start}
+  }
+}
+.zakazka-cisla{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-content:start}
+@media(max-width:560px){.zakazka-cisla{grid-template-columns:1fr}}

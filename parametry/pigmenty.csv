@@ -1,33 +1,43 @@
-druh;nazev;hex;maxpodil;pozn;cena;mena;jednotka
-;;;;"druh = pigment | baze | tuzidlo | redidlo | zpomalovac | likvidace. hex = odstin pigmentu, podle nej aplikace radi cim korigovat.";;;
-;;;;"maxpodil = jen u bazi: kolik procent pigmentu snese (Matsui ma 10-15 %).";;;
-;;;;"Nazev se musi shodovat s nazvem slozky v recepture, jinak se nespari.";;;
-;;;;"HEX NIZE JSOU ORIENTACNI - prepiste je podle sveho vzorniku.";;;
-;;;;"cena = nakupni cena za jednotku, mena = CZK | EUR | USD | PLN | GBP.";;;
-;;;;"jednotka = kg nebo l. Cena za litr se na gramy prepocita hustotou receptury.";;;
-;;;;"Z cen se pocita cena namichane davky a cena barvy na kus. Slozka bez ceny";;;
-;;;;"se do souctu nedostane a aplikace to rekne - nedopocitava odhadem.";;;
-;;;;"Ceny jde vyplnit i v aplikaci: zalozka Receptury, karta Ceny materialu.";;;
-;;;;"likvidace = sazba svozove firmy za kilogram nebezpecneho odpadu.";;;
-;;;;"Z ni se pocita, co usetri pouziti zbytku a co stoji vyhodit kelimek po lhute.";;;
-;;;;"Neni-li vyplnena, aplikace o likvidaci mlci - sazbu svozove firmy neodhaduje.";;;
-pigment;Žlutá;#FFD100;;"zakladni zluty pigment";400;CZK;kg
-pigment;Oranžová;#FF6A00;;;;;
-pigment;Červená;#E4002B;;;;;
-pigment;Rubínová;#CE0058;;;;;
-pigment;Purpurová;#C6007E;;;;;
-pigment;Fialová;#6D2077;;;;;
-pigment;Modrá;#0057B8;;;250;CZK;kg
-pigment;Tyrkysová;#00A3E0;;;;;
-pigment;Zelená;#00A651;;;;;
-pigment;Hnědá;#7A4405;;;;;
-pigment;Černá;#101820;;"velmi silna - koriguje se po desetinach procenta";;;
-pigment;Bílá;#FFFFFF;;"kryci bily pigment, ne baze";;;
-baze;Standardní báze;;15;"bezna baze na svetly material";150;CZK;kg
-baze;Transparentní báze;;15;"nechava podklad prosvitat, na svetle materialy";;;
-baze;Krycí bílá báze;;12;"na tmavy material - kryje podklad";;;
-baze;Discharge báze;;10;"odbarvovaci, na tmavou bavlnu";;;
-baze;Strečová báze;;12;"na pruzne materialy";;;
-tuzidlo;;;;"SEM DOPLNTE NAZEV TUZIDLA presne tak, jak ho ma dilna oznacene.";;;
-redidlo;;;;"SEM DOPLNTE NAZEV REDIDLA. Redidlo se pripocita jen kdyz zadate kolik.";;;
-likvidace;Likvidace nebezpečného odpadu;;;"zkusebni sazba";30;CZK;kg
+druh;nazev;hex;maxpodil;pozn;cena;mena;jednotka;zastupuje;voc;bezplist
+;;;;"druh = pigment | baze | tuzidlo | redidlo | zpomalovac | likvidace. hex = odstin pigmentu, podle nej aplikace radi cim korigovat.";;;;;;
+;;;;"maxpodil = jen u bazi: kolik procent pigmentu snese (Matsui ma 10-15 %).";;;;;;
+;;;;"Nazev se musi shodovat s nazvem slozky v recepture, jinak se nespari.";;;;;;
+;;;;"HEX NIZE JSOU ORIENTACNI - prepiste je podle sveho vzorniku.";;;;;;
+;;;;"cena = nakupni cena za jednotku, mena = CZK | EUR | USD | PLN | GBP.";;;;;;
+;;;;"jednotka = kg nebo l. Cena za litr se na gramy prepocita hustotou receptury.";;;;;;
+;;;;"Z cen se pocita cena namichane davky a cena barvy na kus. Slozka bez ceny";;;;;;
+;;;;"se do souctu nedostane a aplikace to rekne - nedopocitava odhadem.";;;;;;
+;;;;"Ceny jde vyplnit i v aplikaci: zalozka Receptury, karta Ceny materialu.";;;;;;
+;;;;"likvidace = sazba svozove firmy za kilogram nebezpecneho odpadu.";;;;;;
+;;;;"Z ni se pocita, co usetri pouziti zbytku a co stoji vyhodit kelimek po lhute.";;;;;;
+;;;;"Neni-li vyplnena, aplikace o likvidaci mlci - sazbu svozove firmy neodhaduje.";;;;;;
+;;;;"zastupuje = za koho ta slozka smi zaskocit, kdyz se hleda pouzitelny zbytek.";;;;;;
+;;;;"Drazsi slozka smi zaskocit za levnejsi, opacne ne. Vic jmen oddelte svislitkem.";;;;;;
+;;;;"Priklad: u drazsi baze se napise jmeno levnejsi baze, kterou plnohodnotne nahradi.";;;;;;
+;;;;"Plati jen jednim smerem a jen kdyz ta slozka v recepture vubec neni.";;;;;;
+;;;;"Nevyplnujte to od stolu - musi to byt technicky overene, aplikace to neuhodne.";;;;;;
+;;;;"voc = podil tekavych latek v % hmotnosti z bezpecnostniho listu (oddil 9, pripadne 3).";;;;;;
+;;;;"Z nej kalkulace pocita gramy VOC v davce - vykaz pro urad se sklada z techto cisel.";;;;;;
+;;;;"Nula je platny udaj (vodou reditelne barvy), prazdne pole znamena neuvedeno.";;;;;;
+;;;;"bezplist = odkaz na bezpecnostni list slozky: adresa (https://...) nebo cesta k souboru.";;;;;;
+;;;;"Odkaz se nabidne v ceniku a v kalkulaci u kazde davky, ve ktere slozka je.";;;;;;
+pigment;Žlutá;#FFD100;;"zakladni zluty pigment";;;;;;
+pigment;Oranžová;#FF6A00;;;;;;;;
+pigment;Červená;#E4002B;;;;;;;;
+pigment;Rubínová;#CE0058;;;;;;;;
+pigment;Purpurová;#C6007E;;;;;;;;
+pigment;Fialová;#6D2077;;;;;;;;
+pigment;Modrá;#0057B8;;;;;;;;
+pigment;Tyrkysová;#00A3E0;;;;;;;;
+pigment;Zelená;#00A651;;;;;;;;
+pigment;Hnědá;#7A4405;;;;;;;;
+pigment;Černá;#101820;;"velmi silna - koriguje se po desetinach procenta";;;;;;
+pigment;Bílá;#FFFFFF;;"kryci bily pigment, ne baze";;;;;;
+baze;Standardní báze;;15;"bezna baze na svetly material";;;;;;
+baze;Transparentní báze;;15;"nechava podklad prosvitat, na svetle materialy";;;;;;
+baze;Krycí bílá báze;;12;"na tmavy material - kryje podklad";;;;;;
+baze;Discharge báze;;10;"odbarvovaci, na tmavou bavlnu";;;;;;
+baze;Strečová báze;;12;"na pruzne materialy";;;;;;
+tuzidlo;;;;"SEM DOPLNTE NAZEV TUZIDLA presne tak, jak ho ma dilna oznacene.";;;;;;
+redidlo;;;;"SEM DOPLNTE NAZEV REDIDLA. Redidlo se pripocita jen kdyz zadate kolik.";;;;;;
+likvidace;Likvidace nebezpečného odpadu;;;"SEM DOPLNTE SAZBU za kilogram odpadu ze smlouvy se svozovou firmou.";;CZK;kg;;;

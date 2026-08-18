@@ -1,0 +1,99 @@
+.wrap{max-width:var(--sirka-stranky);margin:0 auto;padding:var(--okraj-stranky) clamp(16px,3vw,40px) 56px}
+.grid{display:grid;gap:var(--mezera-karet)}
+/* Kalkulace stojí na dvou stejných polovinách: vlevo zadání, vpravo výsledek.
+   Obě okna mají tutéž šířku a potkávají se přesně uprostřed stránky. */
+@media(min-width:960px){.grid.calc{grid-template-columns:minmax(0,var(--sloupec-1)) minmax(0,var(--sloupec-2));
+  column-gap:var(--mezera-sloupcu);align-items:stretch}}
+/* Obě okna končí ve stejné výšce: levý sloupec je sloupec pružný, poslední
+   karta v něm dorovná zbytek místa, a karta výsledku vyplní svůj sloupec celý.
+   Tlačítka se v obou drží u dolního okraje. */
+/* Kde která karta stojí, se řídí proměnnými — poloha, šířka i nejmenší výška.
+   Výchozí stav: Vybraný produkt a Kolik namíchat vedle sebe v prvním řádku,
+   pod nimi receptura a zakázka, a parametry tisku ve třetím řádku na středu.
+   Karta parametrů je přitom široká přesně jako jeden sloupec mřížky, což není
+   jen kvůli symetrii: díky stejné šířce, stejnému odsazení a stejným třem
+   sloupcům vyjdou dlaždice parametrů na chlup stejně velké jako náhledy
+   produktu — a to při každé šířce okna, ne jen při jedné. Přestavuje se to
+   v barvy.html na stránce Rozvržení, ne tady. */
+@media(min-width:960px){
+  .grid.calc>.karta-produkt{grid-column:var(--produkt-sloupec);grid-row:var(--produkt-radek);
+    width:var(--produkt-sirka);justify-self:var(--produkt-zarovnani);min-height:var(--produkt-vyska)}
+  .grid.calc>.bigpanel{grid-column:var(--vysledek-sloupec);grid-row:var(--vysledek-radek);
+    width:var(--vysledek-sirka);justify-self:var(--vysledek-zarovnani);min-height:var(--vysledek-vyska)}
+  .grid.calc>.karta-recept{grid-column:var(--recept-sloupec);grid-row:var(--recept-radek);
+    width:var(--recept-sirka);justify-self:var(--recept-zarovnani);min-height:var(--recept-vyska)}
+  .grid.calc>.karta-cisla{grid-column:var(--zakazka-sloupec);grid-row:var(--zakazka-radek);
+    width:var(--zakazka-sirka);justify-self:var(--zakazka-zarovnani);min-height:var(--zakazka-vyska)}
+  .grid.calc>.karta-tisk{grid-column:var(--tisk-sloupec);grid-row:var(--tisk-radek);
+    width:var(--tisk-sirka);justify-self:var(--tisk-zarovnani);min-height:var(--tisk-vyska)}
+  .grid.calc>.card{margin-bottom:0}
+  .karta-produkt{display:flex;flex-direction:column}
+}
+.grid.calc>.bigpanel{align-content:stretch}
+.bigpanel>.card{height:100%;display:flex;flex-direction:column}
+.bigpanel .michtl{margin-top:auto}
+/* Zvětšené varianty nemají vlastní čísla — počítají se z téže škály, aby
+   změna velikosti písma nebo rozestupů platila i tady. */
+.bigpanel .card{padding:calc(var(--mezera-karta-y) * 1.25) calc(var(--mezera-karta-x) * 1.27);margin-bottom:calc(var(--mezera-karet) * 1.25)}
+.bigpanel .card h2{font-size:calc(var(--pismo-nadpis) * 1.36)}
+.bigpanel .card .hint{font-size:calc(var(--pismo-poznamka) * 1.24)}
+.bigpanel .result-big{font-size:clamp(calc(var(--pismo-vysledek) * 1.35),4.6vw,calc(var(--pismo-vysledek) * 2))}
+.bigpanel .result-sub{font-size:calc(var(--pismo) * 1.21)}
+/* Pruh složení má stejnou výšku všude, kde je zvětšené zadání — jinak by se
+   tentýž údaj na dvou místech tvářil jako dvě různé věci. */
+.bigpanel .mixbar,.bigform .mixbar{height:30px}
+.bigpanel table.t{font-size:calc(var(--pismo-tabulka) * 1.26)}
+.bigpanel table.t th{padding:10px}
+.bigpanel table.t td{padding:11px 10px}
+.bigpanel .note{font-size:calc(var(--pismo-poznamka) * 1.24)}
+.bigpanel .btn{font-size:calc(var(--pismo) * 1.14);padding:calc(var(--tlacitko-y) * 1.2) calc(var(--tlacitko-x) * 1.22)}
+.bigpanel .swatch{width:34px;height:34px}
+.bigpanel .tag{font-size:calc(var(--pismo-popisek) * 1.27);padding:4px 11px}
+.bigpanel .wbar{height:17px}
+.bigform.card>h2{font-size:calc(var(--pismo-nadpis) * 1.36)}
+.bigform.card>.hint{font-size:calc(var(--pismo-poznamka) * 1.24)}
+.bigform label.f{font-size:calc(var(--pismo-popisek) * 1.27);margin-bottom:8px}
+.bigform select,.bigform input{font-size:calc(var(--pismo) * 1.21);padding:calc(var(--pole-y) * 1.44) calc(var(--pole-x) * 1.25);border-radius:var(--radius-pole);box-shadow:var(--neu-sm)}
+.bigform select{padding-right:40px}
+/* Síto, kryvost a povrch se čtou od stroje, ne od klávesnice — tiskař stojí
+   krok od obrazovky a potřebuje je poznat pohledem, ne přečíst zblízka.
+   Proto jsou tahle tři pole výrazně větší než všechna ostatní a vyplní kartu.
+   Roste s nimi i popisek, šipka a nabídka, jinak by na velkém poli zůstaly
+   drobné a pole by vypadalo jako omylem zvětšené. */
+.karta-tisk label.f{font-size:calc(var(--pismo-popisek) * 1.5);margin-bottom:10px;text-align:center}
+/* Dlaždice přesně jako náhled produktu: čtverec vyplňující svůj sloupec,
+   hodnota uprostřed. Roztažené pole přes celou třetinu řádku se z odstupu
+   čte hůř než blok, který má tvar — oko najde dřív dlaždici než dlouhý pruh. */
+/* Písmo, odsazení i šipka se měří od šířky dlaždice, ne pevným počtem pixelů.
+   Pevná velikost drží čtverec jen na široké obrazovce — jakmile se dlaždice
+   zmenší, text se zalomí na tři řádky, dlaždice se protáhne na výšku a přestane
+   odpovídat náhledu produktu. Takhle se zmenší celá kresba naráz a tvar drží. */
+.karta-tisk .frow.c3>div{container-type:inline-size}
+.karta-tisk select{font-size:min(calc(var(--pismo) * 2), 11cqw);font-weight:700;text-align:center;
+  width:100%;aspect-ratio:1;
+  display:flex;align-items:center;justify-content:center;
+  /* Hodnota a šipka stojí pod sebou jako jedna dvojice na středu dlaždice.
+     Proto se tady nekreslí šipka pozadím jako u ostatních polí — pozadí je
+     přilepené k okraji a text by zůstal nad středem. Místo toho se použije
+     šipka, kterou prohlížeč k výběru sám přidává: je to skutečný prvek, takže
+     ji lze do dvojice postavit a vycentrovat obojí naráz. */
+  flex-direction:column;gap:4cqw;padding:5cqw;background-image:none}
+/* Prohlížeč šipku sám odsouvá k pravému okraji (`margin-inline-start:auto`),
+   protože počítá s tím, že stojí vedle textu. Ve sloupci ji to vytlačí na kraj
+   místo na střed — okraj se proto ruší. Text vedle ní se roztahuje na celou
+   šířku, což by dvojici rozhodilo taky. */
+.karta-tisk select::picker-icon{display:block;width:9cqw;height:9cqw;margin:0;flex:none;
+  color:var(--ink-2);transition:rotate .15s}
+.karta-tisk select::select-fallback-button-text{flex:0 1 auto;text-align:center}
+.karta-tisk select:open::picker-icon{rotate:180deg}
+.karta-tisk select::picker(select){font-size:calc(var(--pismo) * 1.5)}
+.karta-tisk option{padding:calc(var(--pole-y) * 1.4) calc(var(--pole-x) * 1.4)}
+.bigform select:focus,.bigform input:focus{box-shadow:var(--neu-sm),0 0 0 3px var(--focus)}
+.bigform .frow{gap:calc(var(--mezera-poli) * 1.33);margin-bottom:calc(var(--mezera-poli) * 1.33)}
+.bigform .note{font-size:calc(var(--pismo-poznamka) * 1.16)}
+.bigform .swatch{width:36px;height:36px;border-radius:var(--radius-pole)}
+.bigform .tgl{font-size:15.5px;gap:12px}
+.bigform .tglt{width:50px;height:27px;border-radius:14px}
+.bigform .tglt::after{width:23px;height:23px}
+.bigform .tgl input:checked + .tglt::after{transform:translateX(23px)}
+.bigform .flags{gap:28px}

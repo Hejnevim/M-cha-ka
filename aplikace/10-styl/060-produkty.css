@@ -1,0 +1,26 @@
+.produkt-dlazdice{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+.produkt-dlazdice .dlazdice{min-width:0;display:flex;flex-direction:column}
+.produkt-dlazdice .prodphoto,.produkt-dlazdice .pdfdrop{
+  width:100%;height:auto;aspect-ratio:1;flex:none}
+.produkt-dlazdice .popiska{margin-top:7px;font-size:12.5px;line-height:1.35;color:var(--ink-2);text-align:center}
+.produkt-dlazdice .popiska b{color:var(--ink);font-size:13.5px}
+.produkt-dlazdice button.prodphoto{border:none;color:var(--ink-2);font-size:13px;padding:10px}
+.pdfdrop{min-width:0;cursor:pointer}
+.prodphoto{width:128px;height:128px;object-fit:contain;border-radius:var(--radius-dlazdice);background:var(--paper);flex:0 0 auto;box-shadow:var(--neu-sm)}
+.poscards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:8px 0 6px}
+.poscard{border:none;border-radius:var(--radius-dlazdice);background:var(--paper);padding:8px;cursor:pointer;text-align:center;transition:box-shadow .15s;box-shadow:var(--neu)}
+.poscard.on{box-shadow:0 0 0 3px var(--focus),var(--neu)}
+.poscard img{width:100%;height:92px;object-fit:contain;background:transparent}
+.poscard .nm{font-size:12px;font-weight:700;margin-top:6px;line-height:1.25}
+.poscard .dm{font-family:var(--mono);font-size:11px;color:var(--ink-2);margin-top:3px}
+.noimg{width:100%;height:92px;display:flex;align-items:center;justify-content:center;color:var(--ink-2);font-size:11px;background:transparent;border-radius:8px;text-align:center;padding:4px}
+.thumb{width:46px;height:46px;object-fit:contain;border-radius:var(--radius-dlazdice);background:var(--paper);box-shadow:var(--neu-sm)}
+.wbar{height:14px;background:var(--paper);border-radius:7px;overflow:hidden;box-shadow:var(--neu-in)}
+.wbar>span{display:block;height:100%;transition:width .15s}
+.cdot{display:inline-block;width:13px;height:13px;border-radius:4px;margin-right:4px;vertical-align:-2px;border:1px solid rgba(0,0,0,.18)}
+.modalbg{position:fixed;inset:0;background:rgba(24,23,15,.4);z-index:90;display:flex;align-items:flex-start;justify-content:center;padding:30px 16px;overflow:auto}
+.modalbox{width:min(860px,100%)}
+.modalbox .card{margin:0;box-shadow:var(--modal-shadow)}
+/* Míchací režim — celá obrazovka jen pro to, co tiskař u váhy potřebuje.
+   Písmo je záměrně o dost větší: na displej se kouká z metru a se špinavýma
+   rukama, ne z pracovní vzdálenosti. */

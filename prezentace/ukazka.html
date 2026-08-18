@@ -133,7 +133,7 @@
   .scena.bezi .leti{animation:leti .7s ease-out forwards}
   @keyframes leti{from{transform:translateX(-46px); opacity:0} to{transform:translateX(0); opacity:1}}
 
-  /* ---- druhé dějství: co v aplikaci ještě není ----
+  /* ---- třetí dějství: co v aplikaci ještě chybí ----
      Musí to jít poznat na první pohled a bez zvuku — ukázka nesmí slíbit, co
      aplikace neumí. Karty jsou proto jen obtažené čárkovaně a bez výplně,
      čísla ztlumená a nad scénou visí štítek. */
@@ -204,14 +204,14 @@
 <div class="hlavicka">
   <div>
     <div class="znacka">Ink Recipe Manager</div>
-    <div class="podznacka">Deset scén o tom, co aplikace umí — a čtyři o tom, co teprve přijde</div>
+    <div class="podznacka">Osmnáct scén o tom, co aplikace umí — a tři o tom, co ještě chybí</div>
   </div>
   <button class="drobne" id="zvuk" aria-pressed="true">🔊 Mluvené slovo</button>
 </div>
 
 <div class="jeviste">
   <div>
-    <div class="cislo"><span id="cislo">Scéna 1 / 14</span><span class="stitek-brzy">v aplikaci ještě není</span></div>
+    <div class="cislo"><span id="cislo">Scéna 1 / 21</span><span class="stitek-brzy">v aplikaci ještě není</span></div>
     <h2 class="nadpis" id="nadpis">Jeden soubor, žádná instalace</h2>
   </div>
 
@@ -229,7 +229,7 @@
         <g class="anim a3"><rect class="karta" x="430" y="40" width="170" height="150" rx="16"/>
           <text class="val" x="515" y="105" font-size="34" text-anchor="middle">5 583</text>
           <text class="lbl" x="515" y="130" text-anchor="middle">obrázků</text></g>
-        <g class="anim a4"><text class="txt2" x="310" y="220" text-anchor="middle">běží z jednoho souboru v prohlížeči, i bez internetu</text></g>
+        <g class="anim a4"><text class="txt2" x="310" y="220" text-anchor="middle">sedmnáct záložek, jeden soubor v prohlížeči — i bez internetu</text></g>
       </svg>
     </section>
 
@@ -435,78 +435,271 @@
       </svg>
     </section>
 
-    <!-- 11. databáze pro zbývající technologie -->
-    <section class="scena" data-s="10" data-budouci>
-      <svg viewBox="0 0 620 240" role="img" aria-label="Stav barevných databází podle technologie">
+    <!-- 11. fronta míchání -->
+    <section class="scena" data-s="10">
+      <svg viewBox="0 0 620 240" role="img" aria-label="Fronta míchání seřazená tak, aby zbytky navazovaly">
+        <g class="anim a1"><text class="lbl" x="24" y="30">fronta — co se dnes namíchá</text>
+          <rect class="karta" x="24" y="42" width="280" height="42" rx="10"/>
+          <text class="val" x="42" y="68" font-size="15">1</text>
+          <circle cx="70" cy="63" r="8" fill="var(--inkoust)"/>
+          <text class="txt" x="88" y="68">PANTONE 485 C · 546 g</text></g>
+        <g class="anim a2"><rect class="karta" x="24" y="94" width="280" height="42" rx="10"/>
+          <text class="val" x="42" y="120" font-size="15">2</text>
+          <circle cx="70" cy="115" r="8" fill="#2E5EA8"/>
+          <text class="txt" x="88" y="120">PANTONE 300 C · 380 g</text></g>
+        <g class="anim a3"><rect class="karta" x="24" y="146" width="280" height="42" rx="10"/>
+          <text class="val" x="42" y="172" font-size="15">3</text>
+          <circle cx="70" cy="167" r="8" fill="#B23A48"/>
+          <text class="txt" x="88" y="172">tmavší odstín z téže řady</text></g>
+        <g class="anim a4"><path class="cara" d="M312 63c46 0 46 104 0 104" transform="translate(310) scale(-1,1)" style="display:none"/>
+          <path class="cara" d="M310 63h28c14 0 14 0 14 20v64c0 20 0 20-14 20h-28"/>
+          <path class="cara" d="M322 159l-12 8 12 8" transform="translate(0,-59)"/>
+          <text class="txt2" x="368" y="90">zbytek po položce 1</text>
+          <text class="txt2" x="368" y="108">je základ položky 3</text></g>
+        <g class="anim a5">
+          <text class="lbl" x="368" y="150">do sedmi položek</text>
+          <text class="val" x="368" y="178" font-size="24">všech 5 040 pořadí</text>
+          <text class="txt2" x="368" y="202">nehledá se nejlepší nalezené,</text>
+          <text class="txt2" x="368" y="220">ale nejlepší, jaké existuje</text></g>
+      </svg>
+    </section>
+
+    <!-- 12. šarže -->
+    <section class="scena" data-s="11">
+      <svg viewBox="0 0 620 240" role="img" aria-label="Otevřená konev se otiskne do každé dávky">
+        <g class="anim a1"><rect class="karta" x="24" y="52" width="170" height="136" rx="14"/>
+          <rect x="46" y="74" width="52" height="66" rx="6" fill="var(--ink-2)" opacity=".5"/>
+          <text class="lbl" x="112" y="86">otevřená konev</text>
+          <text class="txt" x="112" y="108">Báze transp.</text>
+          <text class="val" x="46" y="168" font-size="16">šarže L240732</text></g>
+        <g class="anim a2"><path class="cara" d="M206 120h44M238 112l12 8-12 8"/>
+          <text class="txt2" x="204" y="106">otiskne se sama</text></g>
+        <g class="anim a3"><rect class="karta" x="262" y="52" width="150" height="60" rx="10"/>
+          <text class="txt" x="280" y="76">dávka 546 g</text>
+          <text class="txt2" x="280" y="96">šarže L240732</text>
+          <rect class="karta" x="262" y="126" width="150" height="60" rx="10"/>
+          <text class="txt" x="280" y="150">dávka 380 g</text>
+          <text class="txt2" x="280" y="170">šarže L240732</text></g>
+        <g class="anim a5"><rect class="karta" x="436" y="52" width="164" height="136" rx="14"/>
+          <text class="lbl" x="456" y="82">reklamace</text>
+          <text class="txt" x="456" y="106">„ze které konve?"</text>
+          <text class="txt" x="456" y="130">odpověď v evidenci —</text>
+          <text class="txt" x="456" y="150">i které další zakázky</text>
+          <text class="txt" x="456" y="170">z ní braly</text></g>
+      </svg>
+    </section>
+
+    <!-- 13. co propadne + likvidace -->
+    <section class="scena" data-s="12">
+      <svg viewBox="0 0 620 240" role="img" aria-label="Přehled propadů po dnech a cena svozu">
+        <g class="anim a1"><text class="lbl" x="24" y="30">co propadne — sedm dnů dopředu</text>
+          <text class="txt" x="24" y="62" fill="var(--warn)">dnes</text>
+          <text class="txt" x="110" y="62">kelímek 120 g</text>
+          <text class="txt2" x="250" y="62">sedne na položku 2 fronty</text></g>
+        <g class="anim a2">
+          <text class="txt" x="24" y="94" fill="var(--warn)">zítra</text>
+          <text class="txt" x="110" y="94">dávka 2K · zbývá 5:40</text>
+          <text class="txt2" x="250" y="94">dotisknout, nebo uzavřít</text></g>
+        <g class="anim a3">
+          <text class="txt" x="24" y="126">pátek 21. 8.</text>
+          <text class="txt" x="110" y="126" transform="translate(30,0)">kelímek 480 g</text>
+          <text class="txt2" x="250" y="126" transform="translate(30,0)">nic na něj nesedne</text>
+          <line class="cara" x1="24" y1="146" x2="596" y2="146"/></g>
+        <g class="anim a4"><rect class="karta" x="24" y="162" width="330" height="56" rx="12"/>
+          <text class="lbl" x="44" y="186">vyhozená barva se platí dvakrát</text>
+          <text class="txt" x="44" y="206">dodavateli za barvu · svozové firmě za odpad</text></g>
+        <g class="anim a5">
+          <text class="lbl" x="392" y="186">svoz do odpadu</text>
+          <text class="txt" x="392" y="206">sazba za kilogram je v ceníku — a hlásí se, co se jí ušetří</text></g>
+      </svg>
+    </section>
+
+    <!-- 14. shluky + zástupnost -->
+    <section class="scena" data-s="13">
+      <svg viewBox="0 0 620 240" role="img" aria-label="Tři kelímky slité do jedné nádoby a pravidlo zástupnosti">
+        <g class="anim a1">
+          <rect class="karta" x="24" y="70" width="54" height="70" rx="8"/>
+          <rect x="30" y="106" width="42" height="28" rx="4" fill="var(--inkoust)"/>
+          <text class="lbl" x="51" y="160" text-anchor="middle">60 g</text>
+          <rect class="karta" x="90" y="70" width="54" height="70" rx="8"/>
+          <rect x="96" y="112" width="42" height="22" rx="4" fill="var(--inkoust)"/>
+          <text class="lbl" x="117" y="160" text-anchor="middle">48 g</text>
+          <rect class="karta" x="156" y="70" width="54" height="70" rx="8"/>
+          <rect x="162" y="116" width="42" height="18" rx="4" fill="var(--inkoust)"/>
+          <text class="lbl" x="183" y="160" text-anchor="middle">41 g</text></g>
+        <g class="anim a2"><path class="cara" d="M222 105h34M244 97l12 8-12 8"/></g>
+        <g class="anim a3"><rect class="karta" x="270" y="52" width="110" height="110" rx="12"/>
+          <rect x="280" y="90" width="90" height="62" rx="6" fill="var(--inkoust)"/>
+          <text class="lbl" x="325" y="80" text-anchor="middle">nádoba</text>
+          <text class="val" x="325" y="186" font-size="17" text-anchor="middle">149 g</text>
+          <text class="txt2" x="325" y="208" text-anchor="middle">jeden štítek</text></g>
+        <g class="anim a4">
+          <text class="lbl" x="412" y="66">slévá se jen bezpečné</text>
+          <text class="txt2" x="412" y="88">táž sada složek · poměry do desetiny</text>
+          <text class="txt2" x="412" y="106">nic s tužidlem · nic po lhůtě</text></g>
+        <g class="anim a5">
+          <text class="lbl" x="412" y="146">zástupnost</text>
+          <text class="txt" x="412" y="168">prémiová báze smí zaskočit</text>
+          <text class="txt" x="412" y="188">za standardní</text>
+          <text class="txt2" x="412" y="208">jen jedním směrem — dražší za levnější</text></g>
+      </svg>
+    </section>
+
+    <!-- 15. opravy po nátisku -->
+    <section class="scena" data-s="14">
+      <svg viewBox="0 0 620 240" role="img" aria-label="Záznam opravy a přehled opakovaných oprav">
+        <g class="anim a1"><rect class="karta" x="24" y="40" width="260" height="150" rx="14"/>
+          <text class="lbl" x="44" y="68">OPRAVA-20260818-001</text>
+          <text class="txt" x="44" y="96">důvod · „je to moc světlé"</text>
+          <text class="txt" x="44" y="120">krok · +2,7 g černé, mírně</text>
+          <text class="txt2" x="44" y="144">receptura · zakázka · kód dávky</text>
+          <text class="txt2" x="44" y="172">zapsáno jedním tlačítkem u váhy</text></g>
+        <g class="anim a3">
+          <text class="val" x="392" y="76" font-size="34" text-anchor="middle">1 209</text>
+          <text class="lbl" x="392" y="98" text-anchor="middle">oprav ročně · 47,8 min jedna</text></g>
+        <g class="anim a4">
+          <text class="lbl" x="330" y="136">u které receptury se opakují</text>
+          <text class="txt" x="330" y="160">PANTONE 302 C</text>
+          <rect x="452" y="150" width="84" height="10" rx="5" fill="var(--warn)"/>
+          <text class="txt" x="330" y="182">PANTONE 485 C</text>
+          <rect x="452" y="172" width="36" height="10" rx="5" fill="var(--warn)"/></g>
+        <text class="txt2 anim a5" x="310" y="222" text-anchor="middle">záznam nevzniká sám — jestli šlo o opravu, ví jen člověk u váhy</text>
+      </svg>
+    </section>
+
+    <!-- 16. sestavy a trendy -->
+    <section class="scena" data-s="15">
+      <svg viewBox="0 0 620 240" role="img" aria-label="Spotřeba po měsících a nejčastější odstíny">
+        <g class="anim a1"><text class="lbl" x="24" y="30">spotřeba po měsících</text>
+          <rect x="24" y="140" width="44" height="40" rx="5" fill="var(--ink-2)"/>
+          <rect x="80" y="110" width="44" height="70" rx="5" fill="var(--ink-2)"/>
+          <rect x="136" y="124" width="44" height="56" rx="5" fill="var(--ink-2)"/>
+          <rect x="192" y="82" width="44" height="98" rx="5" fill="var(--ink)"/>
+          <text class="lbl" x="46" y="200" text-anchor="middle">V</text>
+          <text class="lbl" x="102" y="200" text-anchor="middle">VI</text>
+          <text class="lbl" x="158" y="200" text-anchor="middle">VII</text>
+          <text class="lbl" x="214" y="200" text-anchor="middle">VIII</text></g>
+        <g class="anim a3">
+          <text class="lbl" x="300" y="30">nejčastější odstíny</text>
+          <circle cx="310" cy="56" r="8" fill="var(--inkoust)"/>
+          <text class="txt" x="328" y="61">485 C · 14× · 6,2 kg</text>
+          <circle cx="310" cy="86" r="8" fill="#2E5EA8"/>
+          <text class="txt" x="328" y="91">300 C · 9× · 3,8 kg</text></g>
+        <g class="anim a4">
+          <text class="lbl" x="300" y="130">zbytky</text>
+          <text class="txt" x="300" y="154">co leží ve skladu · co se vrátilo do tisku</text>
+          <text class="txt" x="300" y="176">co propadlo — v gramech i korunách</text></g>
+        <text class="txt2 anim a5" x="310" y="222" text-anchor="middle">nová data se nesbírají — dávka a její kelímek jsou táž směs, počítá se jednou</text>
+      </svg>
+    </section>
+
+    <!-- 17. sklad surovin -->
+    <section class="scena" data-s="16">
+      <svg viewBox="0 0 620 240" role="img" aria-label="Zůstatek skladu z inventury a zapsaných dávek">
+        <g class="anim a1"><rect class="karta" x="20" y="60" width="150" height="66" rx="12"/>
+          <text class="lbl" x="95" y="86" text-anchor="middle">inventura</text>
+          <text class="val" x="95" y="112" font-size="19" text-anchor="middle">5,00 kg</text></g>
+        <text class="val anim a2" x="182" y="100" font-size="20">−</text>
+        <g class="anim a2"><rect class="karta" x="200" y="60" width="170" height="66" rx="12"/>
+          <text class="lbl" x="285" y="86" text-anchor="middle">spotřeba dávek</text>
+          <text class="val" x="285" y="112" font-size="19" text-anchor="middle">260 g</text></g>
+        <g class="anim a3"><path class="cara" d="M382 93h24M398 85l10 8-10 8"/>
+          <rect class="karta" x="418" y="60" width="182" height="66" rx="12"/>
+          <text class="lbl" x="509" y="86" text-anchor="middle">zůstatek</text>
+          <text class="val" x="509" y="112" font-size="19" text-anchor="middle" fill="var(--ok)">4,74 kg</text></g>
+        <g class="anim a4">
+          <text class="lbl" x="20" y="164">denní tempo → dosah ve dnech</text>
+          <text class="txt" x="20" y="188">barva ze zbytku se neodečítá podruhé — z konve odešla už poprvé</text></g>
+        <g class="anim a5">
+          <text class="lbl" x="20" y="216" fill="var(--ok)">co objednat: do minima, po celých baleních</text>
+          <text class="txt2" x="360" y="216">bez inventury je zůstatek „nepočítáno" — ne nula</text></g>
+      </svg>
+    </section>
+
+    <!-- 18. role a schvalování -->
+    <section class="scena" data-s="17">
+      <svg viewBox="0 0 620 240" role="img" aria-label="Role technologa a tiskaře, čekající receptura">
+        <g class="anim a1"><rect class="karta" x="24" y="40" width="180" height="150" rx="14"/>
+          <text class="lbl" x="44" y="68">tiskař · u váhy</text>
+          <text class="txt" x="44" y="94">kalkulace, navážení,</text>
+          <text class="txt" x="44" y="114">štítek, zbytky, fronta,</text>
+          <text class="txt" x="44" y="134">záznam opravy</text>
+          <text class="txt2" x="44" y="168">vše, čím odesílá zakázku</text></g>
+        <g class="anim a2"><rect class="karta" x="222" y="40" width="180" height="150" rx="14"/>
+          <text class="lbl" x="242" y="68">technolog</text>
+          <text class="txt" x="242" y="94">receptury, ceník,</text>
+          <text class="txt" x="242" y="114">odemykání technologií,</text>
+          <text class="txt" x="242" y="134">mazání</text>
+          <text class="txt2" x="242" y="168">podklady pro celou dílnu</text></g>
+        <g class="anim a4"><rect class="karta" x="420" y="40" width="180" height="150" rx="14" stroke="var(--warn)"/>
+          <text class="lbl" x="440" y="68" fill="var(--warn)">čekající receptura</text>
+          <text class="txt" x="440" y="94">platí jen na kombinaci,</text>
+          <text class="txt" x="440" y="114">kvůli které vznikla</text>
+          <text class="txt2" x="440" y="144">jinde až po schválení —</text>
+          <text class="txt2" x="440" y="164">s rozdílem po složkách</text></g>
+        <text class="txt2 anim a5" x="310" y="222" text-anchor="middle">zamítnutí si žádá důvod — kdo podle ní míchal, se musí dozvědět proč</text>
+      </svg>
+    </section>
+
+    <!-- 19. databáze a data sít — co dobíhá -->
+    <section class="scena" data-s="18" data-budouci>
+      <svg viewBox="0 0 620 240" role="img" aria-label="Stav barevných databází a dat podle technologie">
         <g class="anim a1">
           <text class="lbl" x="20" y="26">technologie</text>
           <text class="lbl" x="130" y="26">databáze</text>
           <text class="lbl" x="400" y="26" text-anchor="end">receptur</text>
           <text class="lbl" x="440" y="26">stav</text>
           <line class="cara" x1="20" y1="36" x2="600" y2="36"/></g>
-        <g class="anim a2" class="txt">
-          <text class="txt" x="20" y="64">FIR</text><text class="txt" x="130" y="64">Ferro Xpression</text>
-          <text class="val" x="400" y="64" text-anchor="end">1 097</text><text class="mame" x="440" y="64" font-size="13">máme</text>
-          <text class="txt" x="20" y="94">PDP</text><text class="txt" x="130" y="94">Printcolor MS 786 + 660</text>
-          <text class="val" x="400" y="94" text-anchor="end">1 592</text><text class="mame" x="440" y="94" font-size="13">máme</text></g>
-        <g class="anim a4">
-          <text class="txt" x="20" y="124">TXP</text><text class="txt" x="130" y="124">Printcolor MS 660</text>
-          <text class="val" x="400" y="124" text-anchor="end">778</text><text class="txt2" x="440" y="124">ověřit — řada na textil?</text>
-          <text class="txt" x="20" y="154">SCR</text><text class="txt" x="130" y="154">Printcolor MS 660</text>
-          <text class="val" x="400" y="154" text-anchor="end">778</text><text class="txt2" x="440" y="154">ověřit — plast a papír?</text></g>
-        <g class="anim a5">
-          <text class="txt" x="20" y="186">TRS</text><text class="txt2" x="130" y="186">žádná</text>
-          <text class="val" x="400" y="186" text-anchor="end">0</text><text class="chybi" x="440" y="186" font-size="13">chybí celá</text>
-          <line class="cara" x1="20" y1="200" x2="600" y2="200"/>
-          <text class="txt2" x="20" y="224">převod z PDF easyMEMO je hotový — stačí dodat podklady</text></g>
-      </svg>
-    </section>
-
-    <!-- 12. hustota a chybějící odstíny -->
-    <section class="scena" data-s="11" data-budouci>
-      <svg viewBox="0 0 620 240" role="img" aria-label="Chybějící hustota a odstíny u receptur">
-        <g class="anim a1"><rect class="karta" x="20" y="34" width="270" height="130" rx="14"/>
-          <text class="lbl" x="44" y="66">hustota v podkladech</text>
-          <text class="val" x="44" y="108" font-size="30">chybí</text>
-          <text class="txt2" x="44" y="138">aplikace zatím počítá paušálně 1,20 g/ml</text></g>
-        <g class="anim a3"><rect class="karta" x="316" y="34" width="284" height="130" rx="14"/>
-          <text class="lbl" x="340" y="66">receptur bez odstínu</text>
-          <text class="val" x="340" y="108" font-size="30">193</text><text class="txt2" x="392" y="108">MS 786</text>
-          <text class="val" x="470" y="108" font-size="30">223</text><text class="txt2" x="524" y="108">MS 660</text>
-          <text class="txt2" x="340" y="138">odstín se dohledal podle názvu pantonu, tady ne</text></g>
-        <g class="anim a5"><text class="txt" x="20" y="200">Bez odstínu aplikace neporadí ani s prosvítáním na podkladu,</text>
-          <text class="txt" x="20" y="222">ani s korekcí po nátisku — obojí z odstínu vychází.</text></g>
-      </svg>
-    </section>
-
-    <!-- 13. barvy bází -->
-    <section class="scena" data-s="12" data-budouci>
-      <svg viewBox="0 0 620 240" role="img" aria-label="U složek z nakoupených databází chybí odstín">
-        <g class="anim a1"><text class="lbl" x="20" y="30">složka receptury nese jen název a procento</text></g>
         <g class="anim a2">
-          <rect class="karta" x="20" y="46" width="126" height="76" rx="10"/>
-          <text class="val" x="83" y="76" font-size="22" text-anchor="middle" fill="var(--ink-2)">?</text>
-          <text class="txt2" x="83" y="102" text-anchor="middle">Weiss 4,0 %</text>
-          <rect class="karta" x="158" y="46" width="126" height="76" rx="10"/>
-          <text class="val" x="221" y="76" font-size="22" text-anchor="middle" fill="var(--ink-2)">?</text>
-          <text class="txt2" x="221" y="102" text-anchor="middle">Schwarz 8,1 %</text>
-          <rect class="karta" x="296" y="46" width="126" height="76" rx="10"/>
-          <text class="val" x="359" y="76" font-size="22" text-anchor="middle" fill="var(--ink-2)">?</text>
-          <text class="txt2" x="359" y="102" text-anchor="middle">Binder 20,0 %</text></g>
+          <text class="txt" x="20" y="62">FIR</text><text class="txt" x="130" y="62">Ferro Xpression</text>
+          <text class="val" x="400" y="62" text-anchor="end">1 097</text><text class="mame" x="440" y="62" font-size="13">ostrá</text>
+          <text class="txt" x="20" y="88">PDP</text><text class="txt" x="130" y="88">Printcolor MS 786 + 660</text>
+          <text class="val" x="400" y="88" text-anchor="end">1 592</text><text class="mame" x="440" y="88" font-size="13">ostrá</text></g>
         <g class="anim a4">
-          <rect class="karta" x="452" y="46" width="148" height="76" rx="10" stroke="var(--ok)"/>
-          <circle cx="486" cy="76" r="13" fill="var(--inkoust)"/>
-          <text class="mame" x="510" y="72" font-size="12">pigmenty</text>
-          <text class="txt2" x="510" y="88">zná z tabulky</text>
-          <text class="txt2" x="466" y="112">parametry/pigmenty.csv</text></g>
-        <g class="anim a5"><text class="txt" x="20" y="166">Dokud se odstíny bází nedoplní, radí aplikace s korekcí</text>
-          <text class="txt" x="20" y="188">jen tam, kde složku pozná — u zbytku řekne, že neví.</text>
-          <text class="txt2" x="20" y="218">u nakoupených databází je složek nejvíc, takže tady to chybí nejcitelněji</text></g>
+          <text class="txt" x="20" y="114">TXP</text><text class="txt" x="130" y="114">Printcolor MS 660</text>
+          <text class="val" x="400" y="114" text-anchor="end">778</text><text class="txt2" x="440" y="114">ověřit — řada na textil?</text>
+          <text class="txt" x="20" y="140">SCR</text><text class="txt" x="130" y="140">Printcolor MS 660</text>
+          <text class="val" x="400" y="140" text-anchor="end">778</text><text class="txt2" x="440" y="140">ověřit — plast a papír?</text></g>
+        <g class="anim a5">
+          <text class="txt" x="20" y="166">TRS</text><text class="txt2" x="130" y="166">jen vlastní receptury</text>
+          <text class="val" x="400" y="166" text-anchor="end">3</text><text class="chybi" x="440" y="166" font-size="13">bez nakoupené databáze</text>
+          <line class="cara" x1="20" y1="182" x2="600" y2="182"/></g>
+        <g class="anim a6">
+          <text class="txt2" x="20" y="206">síta s údaji výrobce: 2 z 28 · koeficienty spotřeby: zatím všechny 1,00</text>
+          <text class="txt2" x="20" y="226">převod z PDF easyMEMO je hotový — stačí dodat podklady</text></g>
       </svg>
     </section>
 
-    <!-- 14. napojení na SGPS -->
-    <section class="scena" data-s="13" data-budouci>
+    <!-- 20. hustota, odstíny a barvy bází -->
+    <section class="scena" data-s="19" data-budouci>
+      <svg viewBox="0 0 620 240" role="img" aria-label="Chybějící hustota, odstíny receptur a barvy bází">
+        <g class="anim a1"><rect class="karta" x="20" y="34" width="270" height="110" rx="14"/>
+          <text class="lbl" x="44" y="64">hustota v podkladech</text>
+          <text class="val" x="44" y="98" font-size="26">chybí</text>
+          <text class="txt2" x="44" y="126">počítá se paušálně 1,20 g/ml</text></g>
+        <g class="anim a2"><rect class="karta" x="316" y="34" width="284" height="110" rx="14"/>
+          <text class="lbl" x="340" y="64">receptur bez odstínu</text>
+          <text class="val" x="340" y="98" font-size="26">413</text>
+          <text class="txt2" x="404" y="98">223 MS 660 · 190 MS 786</text>
+          <text class="txt2" x="340" y="126">odstín se dohledal podle názvu pantonu, tady ne</text></g>
+        <g class="anim a4">
+          <rect class="karta" x="20" y="160" width="96" height="52" rx="9"/>
+          <text class="val" x="68" y="182" font-size="17" text-anchor="middle" fill="var(--ink-2)">?</text>
+          <text class="txt2" x="68" y="202" text-anchor="middle">Weiss</text>
+          <rect class="karta" x="126" y="160" width="96" height="52" rx="9"/>
+          <text class="val" x="174" y="182" font-size="17" text-anchor="middle" fill="var(--ink-2)">?</text>
+          <text class="txt2" x="174" y="202" text-anchor="middle">Schwarz</text>
+          <rect class="karta" x="232" y="160" width="96" height="52" rx="9"/>
+          <text class="val" x="280" y="182" font-size="17" text-anchor="middle" fill="var(--ink-2)">?</text>
+          <text class="txt2" x="280" y="202" text-anchor="middle">Binder</text>
+          <text class="mame" x="348" y="182" font-size="12">pigmenty zná</text>
+          <text class="txt2" x="348" y="200">z tabulky dílny</text></g>
+        <g class="anim a5"><text class="txt" x="20" y="234">Bez odstínu neporadí prosvítání ani korekci po nátisku — a poctivě řekne, že neví.</text></g>
+      </svg>
+    </section>
+
+    <!-- 21. napojení na SGPS -->
+    <section class="scena" data-s="20" data-budouci>
       <svg viewBox="0 0 620 240" role="img" aria-label="Napojení na podnikový systém SGPS">
         <g class="anim a1"><rect class="karta" x="20" y="72" width="150" height="96" rx="14"/>
           <text class="val" x="95" y="112" font-size="24" text-anchor="middle">SGPS</text>
@@ -523,8 +716,8 @@
           <rect class="karta" x="478" y="72" width="122" height="96" rx="14"/>
           <text class="txt" x="539" y="112" text-anchor="middle">aplikace</text>
           <text class="txt2" x="539" y="134" text-anchor="middle">ukázkový režim</text></g>
-        <g class="anim a6"><text class="txt2" x="20" y="206">Čeká se na informaci od IT, jaké rozhraní SGPS nabízí. Vazby na nakoupené</text>
-          <text class="txt2" x="20" y="226">pantonové receptury se zatím drží jen v prohlížeči — do souboru nejdou.</text></g>
+        <g class="anim a6"><text class="txt2" x="20" y="206">Čeká se na informaci od IT, jaké rozhraní SGPS nabízí. Mapování polí je</text>
+          <text class="txt2" x="20" y="226">konfigurační — na každé pole se vypíšou možné názvy ve firemním systému.</text></g>
       </svg>
     </section>
   </div>
@@ -613,8 +806,9 @@
       (plocha 25,71 → 3,25 cm², osmkrát méně). Přepočítat to na celý provoz nejde —
       procenta úspor pro celý provoz nemáme a jedna zakázka na ně nestačí.</p>
     <p class="pozn" style="margin-top:8px">K tomu přijde materiál, který se dnes vyhodí
-      jako neoznačený zbytek. Evidence zbytků ho vrací do oběhu, ale kolik toho ročně je,
-      se začne vědět, až se pár měsíců povede evidenci.</p>
+      jako neoznačený zbytek. Evidence zbytků ho vrací do oběhu a sestavy to od
+      18. 8. 2026 sčítají — kolik toho ročně je, se začne vědět, až evidence poběží
+      pár měsíců.</p>
   </div>
 </section>
 
@@ -622,9 +816,13 @@
 (function(){
   "use strict";
 
-  /* Mluvené slovo dělá prohlížeč sám (Web Speech API) — žádný zvukový soubor,
-     takže stránka funguje i bez internetu. Titulky běží vždycky: český hlas
-     nemusí být v systému nainstalovaný a ukázka musí dávat smysl i potichu. */
+  /* Mluvené slovo má tři stupně a ukázka si sáhne po nejlepším dostupném:
+     1. nahraný hlas ze složky audio/ vedle ukázky (scena-01.mp3 … scena-21.mp3)
+        — jediná cesta k hlasu, který nezní strojově, a funguje bez internetu;
+     2. hlas prohlížeče (Web Speech API) — žádný soubor, ale český hlas nemusí
+        být v systému nainstalovaný;
+     3. titulky, které běží vždycky — ukázka musí dávat smysl i potichu
+        a nesmí spadnout na chybějícím souboru. */
   var SCENY = [
     { nadpis:"Jeden soubor, žádná instalace",
       text:"Ink Recipe Manager je celá aplikace v jednom souboru. Otevře se v prohlížeči, běží bez serveru i bez internetu — a nese katalog 1 320 produktů, 2 692 receptur a 5 583 obrázků.",
@@ -643,9 +841,9 @@
       rec:"Z plochy, počtu kusů, hustoty síta a ztrát vyjde dávka. Pod nejmenší dávku se nejde: menší množství se nedá poctivě promíchat.",
       cas:10 },
     { nadpis:"Nejdřív sklad, potom čerstvá barva",
-      text:"Ve skladu stojí kelímky po minulých zakázkách. Má-li některý <b>totožné složení</b>, nemíchá se nic — jen se přelije. U jiného odstínu aplikace dopočítá, co do něj přidat, aby z něj vznikl ten žádaný.",
-      rec:"Ve skladu stojí kelímky po minulých zakázkách. Má-li některý totožné složení, nemíchá se nic, jen se přelije. U jiného odstínu aplikace dopočítá, co do něj přidat, aby z něj vznikl ten žádaný.",
-      cas:14 },
+      text:"Ve skladu stojí kelímky po minulých zakázkách. Má-li některý <b>totožné složení</b>, nemíchá se nic — jen se přelije. U jiného odstínu aplikace dopočítá, co přidat — a umí vzít i <b>dva kelímky naráz</b>, když spolu do dávky dostanou víc než každý sám.",
+      rec:"Ve skladu stojí kelímky po minulých zakázkách. Má-li některý totožné složení, nemíchá se nic, jen se přelije. U jiného odstínu aplikace dopočítá, co přidat. A umí vzít i dva kelímky naráz, když spolu do dávky dostanou víc než každý sám.",
+      cas:15 },
     { nadpis:"Ředidlo přestalo být mimo systém",
       text:"Ředidlo a zpomalovač se váží jako každá jiná složka. Hlídá se strop ředění a spočítá se, o kolik naředěním klesl pigment v každém gramu — a o kolik proto zvětšit dávku.",
       rec:"Ředidlo a zpomalovač se váží jako každá jiná složka. Hlídá se strop ředění a spočítá se, o kolik naředěním klesl pigment v každém gramu, a o kolik proto zvětšit dávku.",
@@ -655,9 +853,9 @@
       rec:"Odpočet začíná přidáním tužidla, ne navážením báze. A tužidlo se počítá z váhy báze, ne z obsahu nádoby. Dávka je samostatný záznam, takže odpočet přežije i zavření aplikace.",
       cas:14 },
     { nadpis:"Míchací režim se čte od váhy",
-      text:"Vlastní sada velikostí pro čtení ve stoje a v rukavicích. Váha se připojí přes USB a asistent vede navažování složku po složce. Přelije-li se, dávka se přepočítá a odstín zůstane přesný.",
-      rec:"Míchací režim má vlastní sadu velikostí pro čtení ve stoje a v rukavicích. Váha se připojí přes u es bé a asistent vede navažování složku po složce. Přelije-li se, dávka se přepočítá a odstín zůstane přesný.",
-      cas:14 },
+      text:"Vlastní sada velikostí pro čtení ve stoje a v rukavicích. Váha se připojí přes USB a asistent vede navažování složku po složce. Po ruce jsou i bezpečnostní listy složek a gramy těkavých látek v dávce.",
+      rec:"Míchací režim má vlastní sadu velikostí pro čtení ve stoje a v rukavicích. Váha se připojí přes u es bé a asistent vede navažování složku po složce. Po ruce jsou i bezpečnostní listy složek a gramy těkavých látek v dávce.",
+      cas:15 },
     { nadpis:"Co ta dávka stojí",
       text:"U každé dávky je vidět cena i to, kolik z ní padne na jeden kus. Ceny vidí mistr — u váhy se dají schovat a pak se netisknou ani na míchací lístek.",
       rec:"U každé dávky je vidět cena i to, kolik z ní padne na jeden kus. Ceny vidí mistr: u váhy se dají schovat a pak se netisknou ani na míchací lístek.",
@@ -667,23 +865,53 @@
       rec:"Na kelímek se vytiskne štítek s čárovým kódem. Po zakázce se načte, aplikace se zeptá, kolik zbylo, a zbytek se vrátí do evidence. Tím se kruh uzavírá.",
       cas:13 },
 
-    /* --- co v aplikaci ještě není --- */
-    { nadpis:"Databáze pro zbývající technologie", budouci:true,
-      text:"Hlavní úkol, a bez něj se technologie nedají odemknout. Vypalování a tampontisk databázi mají. U řady MS 660 se musí ověřit, jestli platí pro textil i pro plast — a pro <b>transfer nemáme žádnou</b>. Převod z PDF je hotový, stačí dodat podklady.",
-      rec:"Teď to, co v aplikaci ještě není. Hlavní úkol jsou barevné databáze pro zbývající technologie: bez nich se ty technologie nedají odemknout. Vypalování a tampontisk databázi mají. U řady em es šest set šedesát se musí ověřit, jestli platí pro textil i pro plast. A pro transfer nemáme zatím žádnou. Převod z pé dé ef je ale hotový, stačí dodat podklady.",
-      cas:19 },
-    { nadpis:"Hustota a chybějící odstíny", budouci:true,
-      text:"Printcolorové podklady neuvádějí hustotu, takže aplikace zatím počítá paušálně 1,20 g/ml. A u <b>416 receptur</b> se nepodařilo dohledat odstín — bez něj neporadí ani s prosvítáním, ani s korekcí po nátisku.",
-      rec:"Printcolorové podklady neuvádějí hustotu, takže aplikace zatím počítá paušálně s jednou celou dvěma desetinami gramu na mililitr. A u čtyř set šestnácti receptur se nepodařilo dohledat odstín. Bez něj neporadí ani s prosvítáním na podkladu, ani s korekcí po nátisku, protože obojí z odstínu vychází.",
-      cas:17 },
-    { nadpis:"Aplikace nezná barvy bází", budouci:true,
-      text:"Složka receptury nese jen název a procento. U pigmentů je odstín vyřešený tabulkou, u složek z nakoupených databází — Weiss, Schwarz, Binder — zatím ne. Dokud se nedoplní, radí aplikace s korekcí jen tam, kde složku pozná.",
-      rec:"Složka receptury nese jen název a procento. U pigmentů je odstín vyřešený tabulkou, u složek z nakoupených databází, tedy Weiss, Schwarz nebo Binder, zatím ne. Dokud se nedoplní, radí aplikace s korekcí jen tam, kde složku pozná. U zbytku poctivě řekne, že neví.",
+    /* --- co kolem míchání vyrostlo --- */
+    { nadpis:"Fronta míchání — pořadí, ve kterém se ušetří nejvíc",
+      text:"Co se dnes namíchá, se poskládá do fronty. Plán ví, že <b>zbytek po dávce existuje až po ní</b> — a najde pořadí, ve kterém se z kelímků využije nejvíc. Do sedmi položek projde všechna pořadí, takže lepší plán neexistuje.",
+      rec:"Co se dnes namíchá, se poskládá do fronty. Plán ví, že zbytek po dávce existuje až po ní, a najde pořadí, ve kterém se z kelímků využije nejvíc. Do sedmi položek projde všechna pořadí, celých pět tisíc čtyřicet, takže lepší plán neexistuje.",
+      cas:15 },
+    { nadpis:"Ze které konve to bylo",
+      text:"U každého materiálu stojí u váhy jedna otevřená konev. Její šarže se opíše <b>jednou</b> — a otiskne se sama do každé dávky. Při reklamaci se dohledá konev i všechny další zakázky, které z ní braly.",
+      rec:"U každého materiálu stojí u váhy jedna otevřená konev. Její šarže se opíše jednou a otiskne se sama do každé dávky. Při reklamaci se dohledá konev i všechny další zakázky, které z ní braly.",
+      cas:13 },
+    { nadpis:"Co propadne tento týden",
+      text:"Přehled se dívá sedm dnů dopředu, po dnech. U kelímku ze skladu poradí, <b>na kterou položku fronty ještě sedne</b>. A protože se vyhozená barva platí dvakrát — dodavateli a svozu odpadu — počítá obě strany.",
+      rec:"Přehled se dívá sedm dnů dopředu, po dnech. U kelímku ze skladu poradí, na kterou položku fronty ještě sedne. A protože se vyhozená barva platí dvakrát, jednou dodavateli a podruhé svozové firmě za odpad, počítá aplikace obě strany.",
+      cas:15 },
+    { nadpis:"Deset kelímků jedné barvy je jedna nádoba",
+      text:"Kelímky s touž sadou složek a poměry do desetiny se slijí do jedné nádoby s vlastním štítkem. A dílna může zapsat, která složka smí zaskočit za kterou — <b>dražší za levnější, opačně ne</b>.",
+      rec:"Kelímky s touž sadou složek a poměry do desetiny se slijí do jedné nádoby s vlastním štítkem. A dílna může zapsat, která složka smí zaskočit za kterou. Dražší za levnější, opačně nikdy.",
+      cas:13 },
+    { nadpis:"Oprava je záznam, ne vzpomínka",
+      text:"Dílna dělá <b>1 209 oprav ročně</b> po 47,8 minutách. Každá korekce po nátisku se teď dá jedním tlačítkem zapsat — s důvodem i kroky. Záložka pak ukáže, kolik oprav bylo a u které receptury se opakují.",
+      rec:"Dílna dělá tisíc dvě stě devět oprav ročně, každou skoro za čtyřicet osm minut. Každá korekce po nátisku se teď dá jedním tlačítkem zapsat, s důvodem i kroky. Záložka pak ukáže, kolik oprav bylo a u které receptury se opakují pořád dokola.",
+      cas:15 },
+    { nadpis:"Evidence umí sečíst sama sebe",
+      text:"Spotřeba po měsících, nejčastější odstíny a co se ze zbytků vrátilo do tisku — v gramech i korunách. Nová data se nesbírají; sčítá se evidence, která už existuje. Dávka a její kelímek jsou táž směs — <b>počítá se jednou</b>.",
+      rec:"Sestavy ukážou spotřebu po měsících, nejčastější odstíny a co se ze zbytků vrátilo do tisku, v gramech i v korunách. Nová data se k tomu nesbírají, sčítá se evidence, která už existuje. A dávka a její kelímek jsou táž směs, počítá se jednou.",
+      cas:15 },
+    { nadpis:"Sklad surovin — konec prázdných konví u váhy",
+      text:"Zapíše se inventura a zůstatek se dál počítá sám z každé dávky. Denní tempo ukáže dosah ve dnech a karta <b>Co objednat</b> doplní do minima po celých baleních. Co nemá inventuru, je „nepočítáno“ — ne nula.",
+      rec:"Zapíše se inventura a zůstatek se dál počítá sám z každé zapsané dávky. Denní tempo ukáže dosah ve dnech a karta Co objednat doplní do minima po celých baleních. Co nemá inventuru, je nepočítáno, ne nula.",
+      cas:14 },
+    { nadpis:"Kdo za odstín ručí",
+      text:"Tiskař u váhy má všechno, čím odesílá zakázku. Podklady dílny — receptury, ceník, odemykání — mění technolog. Vlastní odstín smí odvodit i tiskař, ale platí jen na své kombinaci, <b>dokud ho technolog neschválí</b>.",
+      rec:"Tiskař u váhy má všechno, čím odesílá zakázku. Podklady dílny, tedy receptury, ceník a odemykání technologií, mění technolog. Vlastní odstín smí odvodit i tiskař, ale platí jen na kombinaci, kvůli které vznikl, dokud ho technolog neschválí.",
+      cas:15 },
+
+    /* --- co ještě chybí --- */
+    { nadpis:"Všech pět technologií je ostrých — data dobíhají", budouci:true,
+      text:"Teď co chybí. Technologie jsou odemčené, ale u řady MS 660 se musí ověřit, jestli platí pro textil i plast, a <b>transfer nemá nakoupenou databázi žádnou</b>. Údaje výrobce mají 2 síta z 28 a koeficienty spotřeby jsou zatím všechny 1,00.",
+      rec:"Teď to, co ještě chybí. Všech pět technologií je odemčených, ale u řady em es šest set šedesát se musí ověřit, jestli platí pro textil i pro plast, a transfer nemá nakoupenou databázi žádnou. Údaje výrobce mají zatím dvě síta z dvaceti osmi a koeficienty spotřeby jsou všechny na jedné celé.",
+      cas:18 },
+    { nadpis:"Hustota, odstíny a barvy bází", budouci:true,
+      text:"Printcolor neuvádí hustotu — počítá se paušál 1,20 g/ml. U <b>413 receptur</b> se nedohledal odstín a odstín chybí i složkám jako Weiss či Binder. Bez něj aplikace neporadí s prosvítáním ani s korekcí — a poctivě to řekne.",
+      rec:"Printcolorové podklady neuvádějí hustotu, počítá se paušálně s jednou celou dvěma desetinami gramu na mililitr. U čtyř set třinácti receptur se nedohledal odstín a odstín chybí i složkám z nakoupených databází, jako Weiss nebo Binder. Bez něj aplikace neporadí s prosvítáním ani s korekcí po nátisku, a poctivě řekne, že neví.",
       cas:17 },
     { nadpis:"Napojení na podnikový systém", budouci:true,
-      text:"SGPS běží v ukázkovém režimu — čeká se na informaci od IT, jaké rozhraní nabízí. Most je připravený na obě varianty, soubor i HTTP. A vazby na nakoupené pantonové receptury se zatím drží jen v prohlížeči.",
-      rec:"Napojení na podnikový systém es gé pé es běží v ukázkovém režimu. Čeká se na informaci od ajťáků, jaké rozhraní nabízí; most je připravený na obě varianty, soubor s exportem i háteté pé. A vazby na nakoupené pantonové receptury se zatím drží jen v prohlížeči, do souboru nejdou.",
-      cas:18 }
+      text:"SGPS běží v ukázkovém režimu — čeká se na informaci od IT, jaké rozhraní nabízí. Most je připravený na obě varianty, soubor s exportem i HTTP, a mapování polí je konfigurační — bez zásahu do kódu.",
+      rec:"Napojení na podnikový systém es gé pé es běží v ukázkovém režimu. Čeká se na informaci od ajťáků, jaké rozhraní nabízí. Most je připravený na obě varianty, soubor s exportem i háteté pé, a mapování polí je konfigurační, bez zásahu do kódu.",
+      cas:15 }
   ];
 
   var scenyEl = [].slice.call(document.querySelectorAll(".scena"));
@@ -700,6 +928,7 @@
   var elJeviste = document.querySelector(".jeviste");
 
   var i = 0, bezi = false, zvuk = true, casovac = null, tikac = null, hlas = null;
+  var prehravac = null;               // právě hrající zvukový soubor
   var syn = window.speechSynthesis || null;
 
   SCENY.forEach(function(s, k){
@@ -721,9 +950,10 @@
   function stavHlasu(){
     if (!syn){ elPozn.textContent = "Tenhle prohlížeč neumí mluvené slovo — ukázka běží s titulky."; return; }
     hlas = najdiHlas();
-    elPozn.textContent = hlas
-      ? "Mluví systémový hlas " + hlas.name + ". Titulky běží vždycky."
-      : "V systému není český hlas, ukázka běží s titulky. Doplnit ho jde ve Windows: Nastavení → Čas a jazyk → Řeč.";
+    elPozn.textContent = (hlas
+      ? "Mluví systémový hlas " + hlas.name + "."
+      : "V systému není český hlas, ukázka běží s titulky. Doplnit ho jde ve Windows: Nastavení → Čas a jazyk → Řeč.")
+      + " Leží-li vedle ukázky složka audio/ s nahrávkami scena-01.mp3 až scena-21.mp3, hraje se z ní.";
   }
   if (syn){ syn.addEventListener("voiceschanged", stavHlasu); }
   stavHlasu();
@@ -733,8 +963,8 @@
     elCislo.textContent = "Scéna " + (i + 1) + " / " + SCENY.length;
     elNadpis.textContent = s.nadpis;
     elTitulek.innerHTML = s.text;
-    /* Druhé dějství se musí poznat i bez zvuku a i když někdo skočí rovnou
-       na scénu jedenáct — proto štítek, čárkované karty a ztlumená čísla. */
+    /* Třetí dějství se musí poznat i bez zvuku a i když někdo skočí rovnou
+       na scénu devatenáct — proto štítek, čárkované karty a ztlumená čísla. */
     elJeviste.classList.toggle("brzy", !!s.budouci);
     scenyEl.forEach(function(el, k){
       el.classList.toggle("aktivni", k === i);
@@ -752,6 +982,10 @@
   function stopni(){
     if (casovac){ clearTimeout(casovac); casovac = null; }
     if (tikac){ clearInterval(tikac); tikac = null; }
+    if (prehravac){
+      prehravac.onended = null; prehravac.onerror = null;
+      prehravac.pause(); prehravac = null;
+    }
     if (syn){ syn.cancel(); }
   }
 
@@ -765,10 +999,30 @@
     casovac = setTimeout(hotovo, ms);
   }
 
+  /* Nejdřív se zkusí nahrávka; teprve když není (soubor chybí nebo ho
+     prohlížeč nepustí), mluví syntéza. Oba neúspěchy — onerror i zamítnutý
+     play() — vedou na týž ústup, hlídá se proto, aby se nespustil dvakrát. */
   function mluv(){
     var s = SCENY[i];
     var ms = s.cas * 1000;
-    if (!zvuk || !syn || !hlas){ odpocet(ms, dalsi); return; }
+    if (!zvuk){ odpocet(ms, dalsi); return; }
+    var cislo = (i + 1 < 10 ? "0" : "") + (i + 1);
+    var a = new Audio("audio/scena-" + cislo + ".mp3");
+    prehravac = a;
+    var ustup = function(){
+      if (prehravac !== a) return;
+      prehravac = null;
+      mluvSyntezou(s, ms);
+    };
+    a.onended = function(){ if (prehravac === a && bezi) dalsi(); };
+    a.onerror = ustup;
+    a.play().then(function(){
+      if (prehravac === a){ odpocet(ms, function(){ /* přechod řídí nahrávka */ }); }
+    }).catch(ustup);
+  }
+
+  function mluvSyntezou(s, ms){
+    if (!syn || !hlas){ odpocet(ms, dalsi); return; }
     var u = new SpeechSynthesisUtterance(s.rec);
     u.voice = hlas; u.lang = hlas.lang; u.rate = 0.98; u.pitch = 1;
     /* Chrome utne delší promluvu zhruba po patnácti vteřinách, když se

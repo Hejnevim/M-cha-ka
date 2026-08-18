@@ -170,6 +170,66 @@ Přepínač je tentýž stav jako v záložce, ne druhé nastavení.
 
 ---
 
+## Ceny materiálů — sazba za likvidaci
+
+V aplikaci u toho nic napsané není, a přitom se to bez vysvětlení nedá uhodnout:
+v *Recepturách* na kartě **Ceny materiálů** je vedle pigmentu, báze, tužidla,
+ředidla a zpomalovače i druh **likvidace odpadu**. Není to složka, kterou by
+kdy někdo navážil — je to **sazba svozové firmy za kilogram nebezpečného
+odpadu**, jedna pro celou dílnu. Zapisuje se do téhož souboru jako ostatní ceny
+(`parametry/pigmenty.csv`, řádek `likvidace`).
+
+Návod musí říct tři věci:
+
+1. **K čemu to je.** Vyhozený kelímek se platí dvakrát: jednou dodavateli za
+   barvu, podruhé svozové firmě za to, že se jí dílna zbaví. Ze sazby se počítá
+   obojí — kolik použití zbytku ušetří na svozu a kolik stojí nechat kelímek
+   propadnout (*Co propadne*, *Zbytky barev*, *Fronta míchání*, kalkulace).
+2. **Že se to nesčítá s cenou dávky.** Ušetřená likvidace cenu namíchané dávky
+   nesnižuje — je to jiná kapsa. V *Nákladech na barvu* proto stojí jako
+   samostatný řádek a *Nakoupí se na tuhle dávku* zůstává beze změny.
+3. **Že bez vyplněné sazby aplikace o likvidaci mlčí.** Nic nechybí a nic se
+   nerozbilo — jen se nedá odhadnout ceník svozové firmy. Totéž nastane, když
+   jsou sazby zapsané dvě (aplikace za dílnu nevybírá) nebo když je sazba
+   v jiné měně než dávka.
+
+Sazba se dá zapsat i za litr; na gramy se pak přepočítá hustotou receptury,
+stejně jako u barev. Obvyklejší je za kilogram — odpad se váží.
+
+---
+
+## Pravidla zástupnosti — co smí zaskočit za co
+
+V aplikaci to nikde vysvětlené není a uhodnout se to nedá: v souboru
+`parametry/pigmenty.csv` je sloupec **`zastupuje`**. U složky se do něj napíše,
+za koho smí naskočit, když aplikace hledá použitelný zbytek. Víc jmen se
+odděluje svislítkem. Přehled toho, co je zapsané, je v *Recepturách* na kartě
+**Ceny materiálů**.
+
+Návod musí říct čtyři věci:
+
+1. **K čemu to je.** Zbytek se dá použít jen do receptury, ve které jsou
+   všechny jeho složky. Kelímek prémiové báze proto na recepturu se standardní
+   bází nesedne — přestože by ho mistr použil bez rozmýšlení. Zapsané pravidlo
+   ho pustí do dávky, místo aby se dožil data spotřeby.
+2. **Že platí jen jedním směrem.** Dražší složka smí zaskočit za levnější,
+   opačně ne. Naopak by to znamenalo namíchat lacinější barvu, než za jakou
+   zákazník platí. Kdo chce obojí, musí napsat dva řádky.
+3. **Že to musí být technicky ověřené.** Aplikace pravidlo neuhodne a z ceny
+   ho neodvodí: discharge báze je dražší než standardní a nahradit ji nemůže,
+   protože odbarvuje. Napsat ho může jen technolog. Ceník ho jen zkontroluje
+   a upozorní, když míří proti ceně — poslechne ho i tak.
+4. **Že se zastupovalo, se pozná.** Nabídka zbytku má štítek *zástupnost*,
+   míchací lístek to má v poznámce k vážení a kelímek, který z dávky vznikne,
+   si větu odnese v poznámce. Složení se ukládá podle receptury, takže bez ní
+   by se při reklamaci odstínu nedohledalo, čím to bylo.
+
+Míří-li pravidlo na dvě složky téže receptury naráz, nezastoupí se nic —
+aplikace nevybírá za dílnu. Dokud není zapsané žádné pravidlo, počítá aplikace
+zbytky přesně jako dřív.
+
+---
+
 ## Co v návodu ještě chybí
 
 Vysvětlivky pokrývaly jen to, u čeho stály. Návod bude potřebovat i:
@@ -187,3 +247,39 @@ Vysvětlivky pokrývaly jen to, u čeho stály. Návod bude potřebovat i:
   a *Vyhozeno* ji uzavřou — a proč se tyhle dvě rozlišují (jen z toho se pozná,
   kolik barvy dílna vyhodí); a že se po obnovení stránky odpočet napojí zpátky
   sám, takže druhý spouštět netřeba a nemá
+- **kde se berou peníze:** že ceny materiálů i sazba za likvidaci jsou
+  jeden ceník dílny, že se ceny dají schovat přepínačem a schované se
+  netisknou ani na míchací lístek
+- **opravy po nátisku:** že záznam opravy nevzniká sám — zapisuje ho člověk
+  u váhy tlačítkem *Zapsat opravu do evidence* hned po korekci, protože jen on
+  ví, že korigoval kvůli nátisku, a ne ze zvědavosti; že oprava má vlastní kód
+  (`OPRAVA-20260818-001`) a nese důvod, přidané složky v gramech a kód dávky;
+  že záložka *Opravy po nátisku* ukazuje, u které receptury se opravuje pořád
+  dokola — a že opravit složení v databázi stojí jednou to, co nátisk stojí
+  pokaždé; a proč se podíl dávek s opravou počítá jen z oprav se zapsanou
+  dávkou (oprava bez kódu dávky by podíl nafoukla, vypisuje se zvlášť)
+- **sestavy a trendy:** co se do spotřeby po měsících počítá a co ne — dávka
+  a kelímek jsou často tatáž směs a sečtou se jednou (rozhoduje dávka, protože
+  nese i tužidlo); slitý kelímek je přelitá stará barva, ne nová dávka, takže
+  do namíchaného nevstupuje; ručně uložený zbytek bez zapsané velikosti dávky
+  taky ne, protože je to zbytek, ne dávka. Že vyhozená dávka patří k měsíci,
+  ve kterém se míchala, ne ve kterém se vyhodila. Že **smazaný kelímek se
+  v evidenci nevede**, a do propadlého se proto nemůže dostat — kdo chce mít
+  propadlé gramy úplné, kelímek nemaže. Že *Nejčastější odstíny* ukazují
+  prvních 15 a zbytek se rozklikne. A že se u kelímků z doby před sloupcem
+  `zbytek_g` vědí ušetřené koruny, ale ne gramy — zpětně se dopočítat nedají,
+  protože cena gramu se od té doby změnila
+- **role a schvalování:** že role si drží **počítač**, ne přihlášení — u váhy
+  se jednou přepne na *Tiskaře* a tak to zůstane; že přepnutí zpět na
+  *Technologa* se ptá na heslo dílny, ale jen když je nějaké nastavené
+  (Import / data → *Zabezpečení mazání*), jinak přepne bez ptaní. Že tiskaři
+  nechybí nic, čím odesílá zakázku, a **mizí mu tlačítka**, ne že by hlásila
+  chybu — v Recepturách nejsou *Upravit*, *Smazat* ani *Nová receptura*.
+  Hlavně ale: že **čekající receptura se nenabídne jinde než na kombinaci,
+  kvůli které vznikla** — kdo to neví, hledá vlastní barvu u druhého produktu
+  a myslí si, že se neuložila. Nabídne se, jakmile ji technolog schválí
+  v záložce *Ke schválení*. Že zamítnutá receptura se nemaže, ale zůstane
+  s důvodem, a technolog ji může vrátit zpátky ke schválení. A že prázdný
+  sloupec schválení v souboru znamená **schválená** — receptury z dřívějška
+  i databáze od dodavatele se tím pádem chovají jako dřív a nic se
+  neblokuje

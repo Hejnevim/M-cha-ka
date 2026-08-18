@@ -1,0 +1,85 @@
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--sans);line-height:var(--radek);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
+input,select,button,textarea{font-family:inherit;font-size:var(--pismo)}
+input,select,textarea{border:none;border-radius:var(--radius-pole);padding:var(--pole-y) var(--pole-x);background:var(--paper);color:var(--ink);width:100%;box-shadow:var(--neu-in);transition:box-shadow .15s}
+input:focus,select:focus,textarea:focus{outline:none;box-shadow:var(--neu-in),0 0 0 3px var(--focus)}
+button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+input[type=number]{font-family:var(--mono);appearance:textfield;-moz-appearance:textfield}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+select{appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  background-image:linear-gradient(45deg, transparent 50%, var(--ink-2) 50%), linear-gradient(135deg, var(--ink-2) 50%, transparent 50%);
+  background-position: calc(100% - 20px) calc(50% - 3px), calc(100% - 14px) calc(50% - 3px);
+  background-size:6px 6px, 6px 6px; background-repeat:no-repeat; padding-right:36px}
+/* Rozbalenou nabídku kreslil dosud sám prohlížeč a CSS na ni nedosáhlo —
+   proto ta hranatá šedá nabídka s modrým pruhem uprostřed měkkého prostředí.
+   Chrome ji dnes umí předat stránce: `appearance:base-select` z ní udělá
+   běžný prvek, který poslouchá tytéž proměnné jako všechno ostatní. Starší
+   prohlížeč celé pravidlo přeskočí a dostane nabídku jako dřív — aplikace
+   proto funguje v obou případech. */
+@supports (appearance: base-select){
+  select,::picker(select){appearance:base-select}
+  /* Zavřené pole musí zůstat na chlup stejné: šipku kreslíme pozadím, takže
+     tu, kterou přidává prohlížeč, schováme, a pole srovnáme jako dřív. */
+  select::picker-icon{display:none}
+  /* Výběr se nově chová jako běžný textový prvek, takže by zdědil výšku řádku
+     z těla stránky — a vyrostl by o pixel proti poli vedle sebe. Textová pole
+     mají `normal`, výběr musí mít totéž, jinak se rozjede řádkování. */
+  select{display:block;text-align:start;line-height:normal}
+  select:open{box-shadow:var(--neu-in),0 0 0 3px var(--focus)}
+  .bigform select:open{box-shadow:var(--neu-sm),0 0 0 3px var(--focus)}
+  ::picker(select){
+    appearance:base-select;border:none;
+    background:var(--paper);color:var(--ink);
+    /* Vlásová linka navíc: nabídka má stejnou barvu jako karta pod ní,
+       takže by se bez ní na okraji ztrácela. */
+    border-radius:var(--radius-pole);box-shadow:var(--modal-shadow),0 0 0 1px var(--line-2);
+    padding:6px;margin-top:8px;
+    max-height:min(52vh,440px);overflow-y:auto;overscroll-behavior:contain;
+    font-size:var(--pismo)}
+  option{
+    display:flex;align-items:center;gap:10px;
+    padding:9px 12px;border-radius:calc(var(--radius-pole) * .7);
+    background:transparent;color:var(--ink);cursor:pointer;
+    transition:background .1s}
+  option:hover,option:focus{background:var(--zvyraz);outline:none}
+  option:checked{background:var(--key);color:var(--btn-ink);font-weight:700}
+  option:disabled{opacity:.45;cursor:default}
+  /* Odškrtnutí drží místo i u neoznačených položek, jinak by se text
+     u vybrané řádky posunul stranou a seznam by poskakoval. */
+  option::checkmark{order:2;margin-left:auto;content:"✓";font-weight:700}
+  option:not(:checked)::checkmark{visibility:hidden}
+}
+input[type=color]{padding:4px;height:40px;cursor:pointer}
+input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+input[type=color]::-webkit-color-swatch{border:none;border-radius:7px}
+input[type=color]::-moz-color-swatch{border:none;border-radius:7px}
+textarea{font-family:var(--mono);font-size:12.5px;min-height:160px;resize:vertical;line-height:1.5}
+/* Ikony se kreslí vektorem — velikost, tloušťka tahu a zakončení jdou
+   z proměnných, takže se dají ladit stejně jako barvy. CSS má přednost před
+   atributy v SVG, proto stačí tohle jediné pravidlo. */
+svg[viewBox="0 0 24 24"]{width:var(--ikona);height:var(--ikona);opacity:var(--ikona-pruhlednost)}
+svg[viewBox="0 0 24 24"] path,svg[viewBox="0 0 24 24"] circle,svg[viewBox="0 0 24 24"] line{
+  stroke-width:var(--ikona-tah);stroke-linecap:var(--ikona-konec);stroke-linejoin:var(--ikona-konec)}
+/* Ikona uvnitř řádku textu (zámek u zamčené technologie) sedí v písmu, ne
+   vedle něj — velikost bere z textu kolem sebe, aby v menu i v nadpisu držela
+   stejný poměr. Kresba i tah zůstávají z pravidla výše. */
+svg[viewBox="0 0 24 24"].ikona-radek{width:var(--ikona-radek);height:var(--ikona-radek);
+  vertical-align:-.24em;margin-right:.3em}
+.hdr{background:transparent;color:var(--ink);padding:9px clamp(16px,3vw,40px);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
+.themebtn{grid-column:3;justify-self:end;flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:none;background:var(--paper);box-shadow:var(--neu-sm);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;line-height:1;transition:opacity .15s;color:var(--ink)}
+.themebtn:hover{opacity:.8}
+.hdr h1{grid-column:2;margin:0;font-size:clamp(calc(var(--logo-velikost) * .73),8.4vw,var(--logo-velikost));font-weight:var(--tloustka-nadpisu);letter-spacing:.04em;text-align:center;color:var(--logo);text-shadow:var(--logo-shadow);cursor:pointer;transition:opacity .15s}
+.hdr h1:hover{opacity:.85}
+.menuwrap{position:relative}
+.navleft{grid-column:1;justify-self:start;display:flex;align-items:center;gap:8px;min-width:0}
+.backbtn{height:42px;border:none;border-radius:21px;background:var(--paper);box-shadow:var(--neu-sm);cursor:pointer;color:var(--ink);display:flex;align-items:center;gap:7px;padding:0 16px 0 12px;font-weight:700;font-size:13px;white-space:nowrap;transition:opacity .15s}
+.backbtn:hover{opacity:.8}
+.backbtn:active{box-shadow:var(--neu-in)}
+@media(max-width:720px){.backbtn{padding:0;width:42px;border-radius:50%;justify-content:center}.backbtn span{display:none}}
+.navbtn{width:42px;height:42px;border-radius:50%;border:none;background:var(--paper);box-shadow:var(--neu-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink);transition:opacity .15s}
+.navbtn:hover{opacity:.8}
+.navdrop{position:absolute;top:calc(100% + 10px);left:0;background:var(--paper);border-radius:14px;box-shadow:var(--neu);padding:6px;z-index:45;min-width:180px;display:flex;flex-direction:column;gap:2px}
+.navdrop button{background:none;border:none;text-align:left;padding:10px 14px;border-radius:10px;font-weight:600;font-size:13.5px;color:var(--ink);cursor:pointer;transition:background .15s}
+.navdrop button:hover{background:var(--zvyraz)}
+.navdrop button.on{color:var(--cyan);font-weight:800}
+:root[data-theme="dark"] .navdrop button:hover{background:rgba(127,163,217,.16)}

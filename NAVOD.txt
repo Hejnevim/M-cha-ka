@@ -7,6 +7,9 @@ CO JE V BALÍČKU
   seznam_obrazku.json   seznam 5 583 obrázků ke stažení
   stahni_obrazky.py     stahovací skript (obrázky + knihovny pro offline běh)
   vzor_receptury.csv    vzorový formát pro hromadný import receptur
+  aplikace/             kód aplikace rozdělený do souborů po oblastech;
+                        index.html si ho odtamtud načítá — složka musí
+                        zůstat vedle něj
 
 PRVNÍ SPUŠTĚNÍ (jednorázově, cca 5–15 minut)
   1. Rozbalte celý balíček do jedné složky (např. C:\InkManager)

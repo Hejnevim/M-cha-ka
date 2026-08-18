@@ -1,9 +1,9 @@
-"""Vytvoří MAPA.md — rejstřík index.html s čísly řádků.
+"""Vytvoří MAPA.md — rejstřík kódu aplikace s čísly řádků.
 
-Proč to existuje: aplikace je jeden soubor o víc než sedmi tisících řádcích.
-Hledat v něm pravidlo nebo komponentu znamená pokaždé znovu prohledávat celý
-soubor. Rejstřík to zkrátí na jedno nahlédnutí — a protože se generuje ze
-skutečného souboru, nemůže zastarat.
+Proč to existuje: kód aplikace má přes třináct tisíc řádků rozdělených do
+desítek souborů. Hledat v nich pravidlo nebo komponentu znamená prohledávat
+celou složku. Rejstřík to zkrátí na jedno nahlédnutí — a protože se generuje
+ze skutečných souborů, nemůže zastarat.
 
 Zapisuje se hustě, ne hezky: rejstřík se čte strojově a každý řádek navíc
 stojí čas i peníze.
@@ -16,10 +16,11 @@ Použití:
 import io
 import os
 import re
+
+import zdrojak
 import sys
 
 SLOZKA = os.path.dirname(os.path.abspath(__file__))
-ZDROJ = os.path.join(SLOZKA, "index.html")
 CIL = os.path.join(SLOZKA, "MAPA.md")
 
 
@@ -90,9 +91,18 @@ def js_definice(radky, od, do):
     return komponenty, funkce, konstanty
 
 
+def casti_kodu():
+    """Části v pořadí načítání: (pořadí, cesta, počet řádků)."""
+    return [(i, c, len(zdrojak.obsah(c).splitlines()))
+            for i, c in enumerate(zdrojak.casti(), 1)]
+
+
 def husty_seznam(polozky, sirka=110):
-    """Položky do co nejmenšího počtu řádků — rejstřík se čte, ne obdivuje."""
-    kusy = ["`%s` %d" % (jm, cislo) for cislo, jm in polozky]
+    """Položky do co nejmenšího počtu řádků — rejstřík se čte, ne obdivuje.
+
+    Zápis `jmeno 12:34` znamená část číslo 12 z tabulky nahoře, řádek 34
+    v ní. Psát ke každé z stovek položek celou cestu by rejstřík nafouklo."""
+    kusy = ["`%s` %d:%d" % (jm, cast, radek) for cast, radek, jm in polozky]
     radky, akt = [], ""
     for k in kusy:
         if akt and len(akt) + len(k) + 3 > sirka:
@@ -106,47 +116,51 @@ def husty_seznam(polozky, sirka=110):
 
 
 def sestav():
-    radky = io.open(ZDROJ, encoding="utf-8").read().split("\n")
-    text = "\n".join(radky)
+    casti = casti_kodu()
+    if not casti:
+        return ""
 
-    i_style = next(i for i, r in enumerate(radky) if "<style>" in r)
-    j_style = next(i for i, r in enumerate(radky) if "</style>" in r)
-    css = "\n".join(radky[i_style + 1:j_style])
+    pravidla, tokeny, komponenty, funkce, konstanty = [], [], [], [], []
+    for poradi, cesta, _ in casti:
+        text = zdrojak.obsah(cesta)
+        radky = text.split("\n")
+        if cesta.endswith(".css"):
+            for radek, hloubka, sel in css_pravidla(text, 1):
+                pravidla.append((poradi, radek, hloubka, sel))
+            # Proměnné vzhledu stojí za vlastní oddíl — sahá se do nich nejčastěji.
+            for i, r in enumerate(radky):
+                for m in re.finditer(r"(--[a-z0-9-]+)\s*:", r):
+                    tokeny.append((poradi, i + 1, m.group(1)))
+        elif cesta.endswith(".js"):
+            k, f, ko = js_definice(radky, 0, len(radky))
+            komponenty += [(poradi, c, j) for c, j in k]
+            funkce += [(poradi, c, j) for c, j in f]
+            konstanty += [(poradi, c, j) for c, j in ko]
 
-    # Hlavní skript aplikace je ten poslední — před ním jsou jen knihovny.
-    i_skript = max(i for i, r in enumerate(radky) if r.strip() == "<script>")
-    j_skript = len(radky) - 1
-
-    pravidla = css_pravidla(css, i_style + 2)
-    komponenty, funkce, konstanty = js_definice(radky, i_skript, j_skript)
-
-    # Proměnné vzhledu stojí za vlastní oddíl — sahá se do nich nejčastěji.
-    tokeny = []
-    for i in range(i_style, j_style):
-        for m in re.finditer(r"(--[a-z0-9-]+)\s*:", radky[i]):
-            tokeny.append((i + 1, m.group(1)))
     videne = set()
     tokeny_unik = []
-    for cislo, jm in tokeny:
+    for cast, radek, jm in tokeny:
         if jm not in videne:
             videne.add(jm)
-            tokeny_unik.append((cislo, jm))
+            tokeny_unik.append((cast, radek, jm))
 
-    vrchni = [(c, s) for c, h, s in pravidla if h == 0 and not s.startswith("@")]
-    vnorene = [(c, s) for c, h, s in pravidla if h == 1]
-    obaly = [(c, s) for c, h, s in pravidla if h == 0 and s.startswith("@")]
+    vrchni = [(c, r, s) for c, r, h, s in pravidla if h == 0 and not s.startswith("@")]
+    vnorene = [(c, r, s) for c, r, h, s in pravidla if h == 1]
+    obaly = [(c, r, s) for c, r, h, s in pravidla if h == 0 and s.startswith("@")]
 
+    celkem = sum(n for _, _, n in casti)
     t = []
-    t.append("# Rejstřík index.html")
+    t.append("# Rejstřík kódu aplikace")
     t.append("")
-    t.append("> Generuje `mapa.py` ze skutečného souboru — neupravovat ručně.")
-    t.append("> Čísla jsou řádky. Soubor má %d řádků." % len(radky))
+    t.append("> Generuje `mapa.py` ze skutečných souborů — neupravovat ručně.")
+    t.append("> Kód není v `index.html`, leží v `aplikace/` v %d částech (%d řádků)."
+             % (len(casti), celkem))
+    t.append("> Čísla u položek jsou `část:řádek` — část podle tabulky níž.")
     t.append("")
-    t.append("| úsek | řádky |")
-    t.append("|---|---|")
-    t.append("| styly (`<style>`) | %d–%d |" % (i_style + 1, j_style + 1))
-    t.append("| knihovny a data | %d–%d |" % (j_style + 2, i_skript))
-    t.append("| aplikace (`<script>`) | %d–%d |" % (i_skript + 1, j_skript + 1))
+    t.append("| # | část | řádků |")
+    t.append("|---:|---|---:|")
+    for poradi, cesta, n in casti:
+        t.append("| %d | `%s` | %d |" % (poradi, cesta, n))
     t.append("")
     t.append("## Proměnné vzhledu (%d)" % len(tokeny_unik))
     t.append("")
@@ -184,8 +198,8 @@ def main():
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     except Exception:
         pass
-    if not os.path.exists(ZDROJ):
-        print("NELZE: %s neexistuje." % ZDROJ)
+    if not zdrojak.casti():
+        print("NELZE: nenašel jsem části v aplikace/")
         return 2
     novy = sestav()
     if "--kontrola" in sys.argv:

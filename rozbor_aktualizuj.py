@@ -26,6 +26,8 @@ import io
 import json
 import os
 import re
+
+import zdrojak
 import sys
 from datetime import date
 
@@ -94,7 +96,7 @@ def databaze():
 
 def technologie():
     """Technologie z aplikace + jejich stav ze zámku."""
-    src = cti(cesta("index.html"))
+    src = zdrojak.javascript()
     m = re.search(r"const TECHS = \{(.*?)\n\};", src, re.S)
     out = []
     if m:
@@ -111,7 +113,7 @@ def technologie():
 
 
 def zalozky():
-    m = re.search(r"const ZALOZKY_NAZVY = \{(.*?)\n\};", cti(cesta("index.html")), re.S)
+    m = re.search(r"const ZALOZKY_NAZVY = \{(.*?)\n\};", zdrojak.javascript(), re.S)
     if not m:
         return []
     return [(r.group(1), r.group(2)) for r in re.finditer(r'(\w+):\s*"([^"]+)"', m.group(1))]
@@ -180,6 +182,9 @@ def parametry_stav():
 
 def rozsah_kodu():
     out = []
+    souboru, radku, bajtu = zdrojak.rozsah()
+    if souboru:
+        out.append(("aplikace/ (%d souborů)" % souboru, radku, bajtu))
     for f in ("index.html", "most.py", "pdf_spec.py", "odemkni.py",
               "prevod_printcolor.py", "kontrola_aplikace.py", "rozbor_aktualizuj.py"):
         p = cesta(f)
@@ -216,7 +221,7 @@ def produkty():
 
 
 def uloziste():
-    return sorted(set(re.findall(r'loadLS\("([a-z0-9-]+)"', cti(cesta("index.html")))))
+    return sorted(set(re.findall(r'loadLS\("([a-z0-9-]+)"', zdrojak.javascript())))
 
 
 # ------------------------------------------------------------ stavba úseků

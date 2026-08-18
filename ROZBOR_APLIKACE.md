@@ -1,22 +1,23 @@
 # Ink Recipe Manager — strukturovaný rozbor aplikace
 
 <!-- AUTO:stav -->
-> **Stav k 17. srpna 2026.** Čísla v úsecích označených `AUTO` generuje
+> **Stav k 18. srpna 2026.** Čísla v úsecích označených `AUTO` generuje
 > `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — nepřepisují
 > se ručně a nemohou se rozejít se skutečností. Text mimo ně píše člověk.
 
-> Poslední zapsaná změna ve vývojovém deníku: **17. srpna 15:30 — Zakázka se načítá tam, kde se s ní počítá — čárový kód i PDF v kartě Vybraný produkt, dvě položky z nabídky pryč**
+> Poslední zapsaná změna ve vývojovém deníku: **18. srpna 16:03 — Ukázka namluvena hlasem cs-CZ-AntoninNeural — 21 souborů v prezentace/audio/**
 
 | soubor | řádků | velikost |
 |---|---:|---:|
-| `index.html` | 11 568 | 632 kB |
-| `most.py` | 718 | 30 kB |
+| `aplikace/ (80 souborů)` | 15 711 | 842 kB |
+| `index.html` | 108 | 6 kB |
+| `most.py` | 727 | 31 kB |
 | `pdf_spec.py` | 1 071 | 42 kB |
 | `odemkni.py` | 213 | 8 kB |
 | `prevod_printcolor.py` | 188 | 7 kB |
 | `kontrola_aplikace.py` | 169 | 7 kB |
-| `rozbor_aktualizuj.py` | 354 | 13 kB |
-| **celkem** | **14 281** | |
+| `rozbor_aktualizuj.py` | 359 | 13 kB |
+| **celkem** | **18 546** | |
 <!-- /AUTO:stav -->
 
 ---
@@ -39,9 +40,9 @@ v dílně.
 |---|---|
 | produktů v katalogu | 1 320 |
 | receptur celkem | 2 692 |
+| — `receptury_Ferro_Xpresssion.csv` (FIR) | 1 097 receptur / 3 986 řádků složení |
 | — `receptury_PMS_660.csv` (TXP,PDP,SCR) | 778 receptur / 3 617 řádků složení, 223 bez odstínu |
 | — `receptury_PMS_786.csv` (PDP) | 814 receptur / 3 092 řádků složení, 190 bez odstínu |
-| — `receptury_PMS_Xpression.csv` (FIR) | 1 097 receptur / 3 986 řádků složení |
 | — `receptury_vlastni.csv` (platí všude) | 3 receptur / 12 řádků složení |
 | obrázků produktů a poloh | 5 583 stažených z 9 209 v seznamu |
 | sít a klišé v parametrech | 28 zapsaných, z toho 2 s údaji výrobce |
@@ -79,10 +80,16 @@ Systém má tři vrstvy a žádnou z nich nepotřebuje internet.
 5. **Připojení k mostu** (`most`)
 6. **Produkty** (`prod`)
 7. **Receptury** (`rec`)
-8. **Co propadne** (`propad`)
-9. **Zbytky barev** (`zbytky`)
-10. **Fronta míchání** (`fronta`)
-11. **Import / data** (`imp`)
+8. **Přepočet na síto** (`sito`)
+9. **Co propadne** (`propad`)
+10. **Šarže** (`sarze`)
+11. **Zbytky barev** (`zbytky`)
+12. **Fronta míchání** (`fronta`)
+13. **Opravy po nátisku** (`opravy`)
+14. **Sestavy a trendy** (`sestavy`)
+15. **Sklad surovin** (`sklad`)
+16. **Ke schválení** (`schval`)
+17. **Import / data** (`imp`)
 <!-- /AUTO:zalozky -->
 
 **Bez mostu aplikace funguje dál** — v čistě prohlížečovém rozsahu (ruční
@@ -209,9 +216,23 @@ Obsluha si vybere:
 Zbytek nemusí být v evidenci — dá se **zadat ručně** (kolik ho je a co v něm je,
 buď po řádcích, nebo jedním klikem podle receptury, ze které se míchal).
 Je-li v kelímku složka, kterou cíl vůbec neobsahuje, aplikace ji pojmenuje
-a odmítne počítat: přiléváním se jí nezbavíte.
+a odmítne počítat: přiléváním se jí nezbavíte. Výjimkou jsou **pravidla
+zástupnosti** — u složky se v `parametry/pigmenty.csv` (sloupec `zastupuje`)
+vyjmenuje, za koho smí naskočit, a od té chvíle se počítá jako ona. Platí to
+jen jedním směrem: dražší složka smí zaskočit za levnější, opačně ne. Že se
+zastupovalo, se říká všude, kde se takový kelímek nabízí, i v poznámce kelímku,
+který z dávky vznikne.
 
 Výstup je vždy rozpis po složkách — *ze zbytku g · přidat g · celkem g*.
+
+Kelímků téhož odstínu se ve skladu sejde víc a na zakázku se z nich stejně
+nabídne jeden. Záložka *Zbytky barev* proto nabídne, které jde **slít do jedné
+nádoby**. Slévá se jen to, co tím nic neztratí: kelímek se dá použít do
+receptury, právě když je každá jeho složka v receptuře — o dosahu tedy
+rozhoduje sada složek, ne poměry, a slévat se smějí jen kelímky s touž sadou.
+K tomu poměry do desetiny, nic s tužidlem (tuhne od namíchání), nic po lhůtě
+a nic v tisku. Nádoba je stará jako nejstarší barva v ní a platí jí nejbližší
+datum spotřeby ze všeho, co do ní šlo.
 
 ### Krok 7 — Míchací lístek
 
@@ -277,15 +298,20 @@ Klíče v `localStorage`:
 - `irm-katalog-verze`
 - `irm-links`
 - `irm-most-adresa`
+- `irm-opravy`
 - `irm-pokryti`
 - `irm-prod-view`
 - `irm-products`
 - `irm-rec-view`
 - `irm-recipes`
+- `irm-role`
+- `irm-role-jmeno`
+- `irm-sarze`
 - `irm-scan-hid`
 - `irm-sgps-port`
 - `irm-technologie`
 - `irm-theme`
+- `irm-typy-poloh`
 - `irm-zbytky`
 <!-- /AUTO:uloziste -->
 
@@ -312,11 +338,11 @@ podle dat, ne podle dojmu.
 <!-- AUTO:technologie -->
 | kód | technologie | výchozí g/m² | stav | databáze receptur |
 |---|---|---:|---|---|
-| `SCR` | Sítotisk (plast, papír) / rotační | 6,0 | v přípravě | PMS_660 (778), vlastni (3) |
-| `PDP` | Tampontisk | 2,5 | v přípravě | PMS_660 (778), PMS_786 (814), vlastni (3) |
-| `TXP` | Sítotisk (textil) | 14,0 | v přípravě | PMS_660 (778), vlastni (3) |
-| `TRS` | Transfer | 18,0 | v přípravě | vlastni (3) |
-| `FIR` | Firing — Low Temperature | 8,0 | ostrá | PMS_Xpression (1 097), vlastni (3) |
+| `SCR` | Sítotisk (plast, papír) / rotační | 6,0 | ostrá | PMS_660 (778), vlastni (3) |
+| `PDP` | Tampontisk | 2,5 | ostrá | PMS_660 (778), PMS_786 (814), vlastni (3) |
+| `TXP` | Sítotisk (textil) | 14,0 | ostrá | PMS_660 (778), vlastni (3) |
+| `TRS` | Transfer | 18,0 | ostrá | vlastni (3) |
+| `FIR` | Firing — Low Temperature | 8,0 | ostrá | Ferro_Xpresssion (1 097), vlastni (3) |
 <!-- /AUTO:technologie -->
 
 ---
@@ -341,6 +367,9 @@ podle dat, ne podle dojmu.
 - Viskozita: doporučený rozsah výtokového času k sítu, hlášení mimo rozsah
 - Ztráty v %, minimální dávka, přepočet g ↔ ml podle hustoty
 - Celý rozpis výpočtu k nahlédnutí; ruční hodnota se nikdy nepřepíše
+- Těkavé látky (VOC): u složky se v ceníku vede podíl z bezpečnostního listu
+  a odkaz na něj; kalkulace z navážky spočítá gramy VOC v dávce a listy
+  nabídne u váhy. Co v ceníku není, se vyjmenuje a nedopočítává
 
 **Receptury**
 - tři nakoupené databáze + vlastní receptury dílny; databáze se načítají samy
@@ -360,6 +389,36 @@ podle dat, ne podle dojmu.
 - Viskozita kelímku s historií měření (barva časem houstne)
 - Přepočet dávky tak, aby se zbytek využil přednostně — z evidence i zadaný ručně
 - Rozpis *ze zbytku / přidat / celkem* v aplikaci i na míchacím lístku
+- **Shluky**: kelímky s touž sadou složek a blízkými poměry se slijí do jedné
+  nádoby s vlastním kódem a štítkem; ta se pak vede jako běžný kelímek, jen se
+  nevyprazdňuje — co se z ní odebere, se do ní příště zase dolije
+- **Pravidla zástupnosti**: dílna zapíše, která složka smí zaskočit za kterou;
+  zbytek s takovou složkou pak na dávku sedne, i když ta složka v receptuře
+  není. Jen jedním směrem (dražší za levnější), ceník směr kontroluje
+
+**Sestavy a trendy**
+- Spotřeba po měsících z dávek a kelímků, s pruhem a změnou proti minulému
+  měsíci; prázdný měsíc uvnitř řady zůstává, měsíce před prvním zápisem se
+  useknou a řekne se kolik
+- Nejčastější odstíny: kolikrát, kolik gramů, jaký podíl, naposledy
+- Zbytky: co leží ve skladu, co se z nich vrátilo do tisku (gramy i koruny)
+  a co propadlo, včetně ceny svozu do nebezpečného odpadu
+- Nová data se k tomu nesbírají. Dvě pravidla drží součty poctivé: dávka
+  a kelímek bývají táž směs zapsaná dvakrát (počítá se jednou, z dávky) a slitý
+  kelímek není nová barva, jen přelitá stará
+
+**Sklad surovin**
+- Zásoba z inventury (v kilech, s datem) v téže tabulce materiálů jako ceny;
+  zůstatek = inventura − spotřeba zapsaných dávek rozpadlá po složkách
+- Barva vzatá ze zbytku se neodečítá podruhé — z konve odešla už při prvním
+  míchání; odečítá se složením zdrojového kelímku (sloupec `zbytek_kod`)
+- Denní tempo z posledních 90 dní (děleno dobou, po kterou evidence běží),
+  dosah ve dnech, objednávka do minima po celých baleních, dodavatel
+  z poslední otevřené konve
+- Složka bez inventury je „nepočítáno", ne nula; ředidlo a zpomalovač se
+  neodečítají (v evidenci nejsou v gramech) a říká se to štítkem
+- Kalkulace u váhy hlásí, když na dávku zásoba nestačí a když po ní složka
+  spadne pod minimum
 
 **Míchání**
 - Míchací lístek A4 s kumulativním vážením a zaškrtávacími políčky
@@ -379,10 +438,27 @@ podle dat, ne podle dojmu.
 - Podklad jako vstup: hlášení prosvítání a nutnosti podtisku bílou
 - Pigmenty a báze odděleně, hlídání maximálního podílu pigmentu
 
+**Role a schvalování**
+- Dvě role, technolog a tiskař; roli si drží počítač (u váhy stojí tiskař
+  pořád), přepnutí zpět na technologa jde přes heslo dílny
+- Tiskaři zůstává všechno, čím odesílá zakázku — kalkulace, navážení, štítek,
+  zbytky, fronta, záznam opravy. Ubrané je jen to, co mění podklady pro celou
+  dílnu: zakládání a mazání receptur, ceník, odemykání technologií
+- Vlastní odstín smí odvodit i tiskař, ale vzniká jako **čekající**: míchat
+  podle ní jde na kombinaci, kvůli které vznikla, jinde se nenabídne, dokud ji
+  technolog neschválí. Od technologa je schválená rovnou tím, že ji založil
+- Záložka **Ke schválení** s odznakem počtu: u každé čekající receptury je
+  vidět podklad, rozdíl proti němu ve složkách, kdo ji zadal a na co platí.
+  Zamítnutí si žádá důvod a receptura se nemaže — kdo podle ní míchal, se musí
+  dozvědět proč
+- Razítko jde do souboru vlastních receptur (`schvaleni`, `schvalil`,
+  `schvaleno_kdy`, `duvod_zamitnuti`, `zadal`, `zadano_kdy`). Prázdný sloupec
+  znamená schválená, aby se receptury z dřívějška chovaly jako dřív
+
 **Provoz**
 - Běh z jednoho souboru, bez instalace a bez serveru
 - Zámek technologií s kontrolním seznamem, odemykání příkazem i v aplikaci
-- Mazání chráněné heslem
+- Mazání chráněné heslem, navíc jen pro roli technologa
 - Světlý i tmavý režim v neutrálních šedých, bez barevného akcentu — barva
   zůstává jen tam, kde nese význam (odstín barvy, varování, stav vážení).
   Ovládání z klávesnice, práce na tabletu
@@ -422,8 +498,9 @@ podle dat, ne podle dojmu.
 
 - Změřit skutečný pokles počtu oprav po nasazení proti základně **1 209 oprav
   ročně** (naměřeno 403 oprav za 2. 4. – 10. 8. 2026)
-- Vyčíslit úsporu materiálu z přesnější spotřeby a z využití zbytků
-- Role a oprávnění (technolog / obsluha)
+- Vyčíslit úsporu materiálu z přesnější spotřeby a z využití zbytků — sestavy to
+  od 18. 8. 2026 sčítají, chybí odběhnutá doba; gramy vzaté ze zbytku se navíc
+  zapisují až od té doby, u starších kelímků jsou jen koruny
 - Napojení na ERP nad rámec SGPS
 - Postupné odemykání technologií podle doplněných dat
 

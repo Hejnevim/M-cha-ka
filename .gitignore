@@ -10,3 +10,30 @@ receptury*.csv
 vzor_receptury.csv
 *.bak
 *.tmp
+
+# sestavené a stažené závislosti — v tomhle projektu zatím nevznikají
+# (aplikace běží bez build kroku), ať se sem nedostanou omylem
+node_modules/
+dist/
+build/
+out/
+.next/
+venv/
+.venv/
+
+# otisk posledního sestavení index.html — je to místní stav sestavovače,
+# ne součást zdroje; na jiném počítači by jen falešně hlásil ruční zásah
+aplikace/.sestaveno
+
+# nastavení editoru, běhové logy, výstupy testů
+.vscode/
+*.log
+coverage/
+
+# tajemství — do repozitáře nikdy
+.env*
+!.env.example
+
+# Vědomě se NEIGNORUJE *.min.js: lib/react.production.min.js
+# a lib/react-dom.production.min.js jsou součást balíčku, ze kterého
+# aplikace v dílně běží bez internetu. Bez nich se nespustí.

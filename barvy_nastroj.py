@@ -2,16 +2,17 @@
 
 Proč to existuje: barvu ani stín nejde posoudit z hodnot v souboru, ani ze
 screenshotu — musí se vidět na skutečných prvcích, vedle sebe, v obou režimech.
-Tenhle nástroj vezme **skutečné styly aplikace** z index.html a postaví z nich
-ukázkovou stránku s ovládáním. Co si na ní nastavíte, to se rovnou vypíše jako
-hotový blok k vložení zpět do index.html.
+Tenhle nástroj vezme **skutečné styly aplikace** ze složky aplikace/10-styl
+a postaví z nich ukázkovou stránku s ovládáním. Co si na ní nastavíte, to se
+rovnou vypíše jako hotový blok k vložení zpět do aplikace/10-styl/020-promenne.css.
 
 Stíny se neladí jako text, ale jako fyzika: odkud svítí světlo, jak daleko
 předmět odstává, jak je stín rozostřený a jak silné je světlo a stín. Z toho
 se dopočítají všechny odstíny naráz, takže spolu drží.
 
-Protože se styly čtou z index.html, nemůže se ukázka rozejít s aplikací —
-stačí nástroj spustit znovu.
+Protože se styly čtou ze skutečných částí (přes zdrojak.py, v pořadí, v jakém
+je načítá prohlížeč), nemůže se ukázka rozejít s aplikací — stačí nástroj
+spustit znovu.
 
 Použití:
     python barvy_nastroj.py          vytvoří balicek/barvy.html
@@ -22,12 +23,13 @@ import io
 import json
 import math
 import os
+
+import zdrojak
 import re
 import sys
 import webbrowser
 
 SLOZKA = os.path.dirname(os.path.abspath(__file__))
-APLIKACE = os.path.join(SLOZKA, "index.html")
 CIL = os.path.join(SLOZKA, "barvy.html")
 
 SKUPINY = [
@@ -400,12 +402,10 @@ VYCHOZI_STINY = {"uhel": 135, "dVelky": 25, "blurVelky": 34, "dMaly": 7, "blurMa
 
 
 def main():
-    if not os.path.exists(APLIKACE):
-        print("NELZE: %s neexistuje." % APLIKACE)
+    css = zdrojak.styly()
+    if not css:
+        print("NELZE: nenašel jsem styly v aplikace/")
         return 2
-    css = io.open(APLIKACE, encoding="utf-8").read()
-    i = css.index("<style>") + len("<style>")
-    css = css[i:css.index("</style>", i)]
 
     bl_svetly = blok(css, ":root{")
     bl_tmavy = blok(css, ':root[data-theme="dark"]{')
@@ -783,7 +783,7 @@ SABLONA = r"""<!doctype html>
       </div>
 
     <div class="card vystup">
-      <h2>Blok k vložení do index.html</h2>
+      <h2>Blok k vložení do aplikace/10-styl/020-promenne.css</h2>
       <p class="hint">Celé bloky <b>:root</b> a <b>:root[data-theme="dark"]</b>
         i s tím, čeho se ladění netýká — dají se přepsat jedním vložením.
         Nebo mi je pošlete a vložím je sám.</p>
@@ -841,7 +841,7 @@ SABLONA = r"""<!doctype html>
     </div>
 
     <div class="card vystup">
-      <h2>Blok k vložení do index.html</h2>
+      <h2>Blok k vložení do aplikace/10-styl/020-promenne.css</h2>
       <p class="hint">Tentýž blok jako u barev — rozvržení je taky jen několik
         proměnných. Vloží se jedním vložením obojí.</p>
       <textarea data-vystup spellcheck="false" readonly></textarea>

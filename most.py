@@ -103,10 +103,19 @@ def _vzpomen_pdf(klic):
 # Ve složce "databaze barev" leží CSV s recepturami. Most je nabídne aplikaci,
 # aby si je natáhla sama a nikdo je nemusel po každé změně ručně importovat.
 def _druh_csv(hlavicka):
-    """Podle hlavičky pozná, co v souboru je: receptury, produkty, nebo ceník."""
+    """Podle hlavičky pozná, co v souboru je: receptury, produkty, ceník, šarže."""
     h = hlavicka.lower()
     if "komponent" in h and ("procent" in h or "pct" in h):
         return "receptury"
+    # Evidence otevřených konví: která šarže kterého materiálu stojí u váhy.
+    # Pozná se dvojicí materiál + otevřeno; sloupec "druh" nemá, takže se
+    # s tabulkou materiálů nezamění.
+    if "material" in h and ("otevreno" in h or "dojeto" in h or "sarze" in h):
+        return "sarze"
+    # Zapsané opravy po nátisku: proč se korigovalo a čím. Pozná se dvojicí
+    # duvod + kroky, kterou žádný jiný soubor evidence nemá.
+    if "duvod" in h and ("kroky" in h or "pridano_g" in h):
+        return "opravy"
     # Tabulka materiálů dílny s nákupními cenami (pigmenty, báze, tužidla,
     # ředidla). Pozná se podle dvojice druh + nazev; cena je nepovinná,
     # protože soubor může existovat dřív, než dílna ceny doplní.

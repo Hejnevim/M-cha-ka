@@ -1,0 +1,96 @@
+:root{
+  /* Vzhled zůstává měkký — karty vystupují z plochy stínem, ne rámečkem.
+     Mění se jen barvy: plocha je neutrálně šedá místo teplé béžové a inkoust
+     je tmavší, aby se na to dalo dívat celý den. Barevný akcent zmizel;
+     zvýraznění dělá inkoust, barva zůstala tam, kde nese význam (odstín
+     barvy, varování, stav vážení). */
+  /* --bg maluje JEN plochu stránky; všechno, co na ní leží (karty, lišty,
+     tlačítka, pole, štítky), bere barvu z --paper. Ty dvě proměnné jdou
+     nastavit nezávisle — plocha je samostatná jednotka. */
+  --bg:#949494; --paper:#dbdbdb; --zvyraz:#949494; --logo:#949494;
+  --ink:#141414; --ink-2:#767676; --line:#D8D8D8; --line-2:#C7C7C7;
+  --cyan:#141414; --magenta:#C97B63; --yellow:#D9B44A; --key:#141414;
+  --btn-ink:#FFFFFF; --focus:rgba(20,20,20,.20); --danger:#b31919;
+  --ok:#3dc760; --warn:#e8c545;
+  /* Tvary: každý druh prvku má vlastní zaoblení, aby šlo ladit zvlášť
+     karty, tlačítka, pole a dlaždice. Ikony jsou kreslené, ne obrázkové —
+     velikost, tloušťka tahu i zakončení se řídí odsud. Ikona stojící uvnitř
+     řádku textu se neřídí velikostí samostatných ikon, ale písmem kolem sebe
+     — proto je v em a zmenší se s ním. */
+  --radius:23px; --radius-btn:35px; --radius-pole:15px; --radius-dlazdice:15px;
+  --radius-stitek:15px;
+  --ikona:27px; --ikona-tah:1.5; --ikona-konec:round; --ikona-pruhlednost:1;
+  --ikona-radek:1.2em;
+  --pruhlednost-karty:1;
+  /* Písmo se řídí podle role, ne podle prvku: co je nadpis, co popisek, co
+     výsledek. Zvětšené varianty na domovské stránce se z těchto hodnot
+     dopočítají, takže celá škála drží pohromadě. */
+  --pismo:15.5px; --pismo-nadpis:19.5px; --pismo-popisek:12.5px;
+  --pismo-poznamka:14px; --pismo-tabulka:19px; --pismo-vysledek:50px;
+  --logo-velikost:116px; --prostrkani:0.07em; --tloustka-nadpisu:900; --radek:1.4;
+  /* Rozestupy: odsazení uvnitř karty, mezera mezi kartami, mezera mezi poli
+     v řádku a odsazení uvnitř polí a tlačítek (to určuje jejich výšku). */
+  /* Míchací režim má vlastní sadu rozměrů. Nečte se od klávesnice, ale od
+     váhy — často ve stoje a v rukavicích — takže se ladí zvlášť od zbytku
+     aplikace a nesmí se hýbat, když se sáhne na obecnou škálu. */
+  --mich-nazev:26px; --mich-davka:34px; --mich-vzorek:52px;
+  --mich-hlavicka:12px; --mich-tabulka:20px; --mich-gramy:26px;
+  --mich-radek:11px; --mich-vysledek:52px; --mich-wbar:20px;
+  --mich-tlacitko:15px; --mich-mezera:22px;
+  --mich-pole:20px; --mich-hlaseni:15px; --mich-stitek:14px;
+  --mezera-karta-y:20px; --mezera-karta-x:22px; --mezera-karet:16px;
+  --mezera-poli:12px; --pole-y:9px; --pole-x:12px;
+  --tlacitko-y:10px; --tlacitko-x:18px; --okraj-stranky:20px;
+  /* Rozvržení hlavní stránky: kde která karta stojí, jak je široká a jak
+     vysoká. Každá karta má sloupec, řádek, šířku, zarovnání a nejmenší výšku
+     — dohromady tedy polohu i velikost. Ladí se v barvy.html na stránce
+     Rozvržení; platí od šířky okna 960 px, pod ní se karty skládají pod sebe.
+     Dvě karty ve stejném sloupci a řádku by se překryly — nástroj to hlídá. */
+  --sirka-stranky:none; --sloupec-1:1fr; --sloupec-2:1fr; --mezera-sloupcu:40px;
+  --produkt-sloupec:1; --produkt-radek:1; --produkt-sirka:auto;
+  --produkt-zarovnani:stretch; --produkt-vyska:auto;
+  --vysledek-sloupec:2; --vysledek-radek:1; --vysledek-sirka:auto;
+  --vysledek-zarovnani:stretch; --vysledek-vyska:auto;
+  --recept-sloupec:1; --recept-radek:2; --recept-sirka:67%;
+  --recept-zarovnani:start; --recept-vyska:auto;
+  --zakazka-sloupec:1 / -1; --zakazka-radek:2; --zakazka-sirka:32.7%;
+  --zakazka-zarovnani:end; --zakazka-vyska:auto;
+  --tisk-sloupec:1 / -1; --tisk-radek:2;
+  --tisk-sirka:33%;
+  --tisk-zarovnani:center; --tisk-vyska:auto;
+  --neu:-5px -5px 20px rgba(255,255,255,0.11), 5px 5px 20px rgba(0,0,0,0.43);
+  --neu-sm:-4px -4px 14px rgba(255,255,255,0.105), 4px 4px 14px rgba(0,0,0,0.473);
+  --neu-in:inset 2px 2px 4px rgba(0,0,0,0.387), inset -2px -2px 4px rgba(255,255,255,0.105);
+  --neu-in-lg:inset 3px 3px 6px rgba(0,0,0,0.43), inset -3px -3px 6px rgba(255,255,255,0.11);
+  --modal-shadow:0 7px 40px rgba(0,0,0,0.86);
+  --logo-shadow:-2px -2px 2px rgba(255,255,255,0.14), 2px 2px 2px rgba(0,0,0,0.1);
+  --mono:'Segoe UI',system-ui,sans-serif;
+  --sans:system-ui,sans-serif;
+}
+:root[data-theme="dark"]{
+  /* Tmavý režim je hlubší než dřív, ale ne černý — na černé plochu nejde
+     osvětlit a stíny by zmizely. Hlavní tlačítko je světlé s tmavým písmem.
+     Linky se posouvají spolu s pozadím, aby zůstaly stejně zřetelné. */
+  --bg:#545454; --paper:#333333; --zvyraz:#545454; --logo:#545454;
+  --ink:#EDEDED; --ink-2:#8C8C8C; --line:#595959; --line-2:#7a7a7a;
+  --cyan:#EDEDED; --magenta:#C97B63; --yellow:#D9B44A; --key:#EDEDED;
+  --btn-ink:#000000; --focus:rgba(237,237,237,.22); --danger:#b31919;
+  --ok:#3dc760; --warn:#e8c545;
+  --neu:-9px -9px 24px rgba(255,255,255,0.08), 9px 9px 24px rgba(0,0,0,0.51);
+  --neu-sm:-4px -4px 10px rgba(255,255,255,0.076), 4px 4px 10px rgba(0,0,0,0.561);
+  --neu-in:inset 3px 3px 4px rgba(0,0,0,0.459), inset -3px -3px 4px rgba(255,255,255,0.076);
+  --neu-in-lg:inset 4px 4px 6px rgba(0,0,0,0.51), inset -4px -4px 6px rgba(255,255,255,0.08);
+  --modal-shadow:0 13px 48px rgba(0,0,0,1);
+  --logo-shadow:-2px -2px 2px rgba(255,255,255,0.14), 2px 2px 2px rgba(0,0,0,0.1);
+}
+/* ZACATEK BAREV STRANEK */
+/* Vlastní barvy jednotlivých stránek. Proměnné se dědí, takže co se nastaví
+   na obal stránky, platí uvnitř ní a přebije základ; co se tu neuvede, bere
+   stránka z aplikace. Prázdný úsek znamená, že všechny stránky vypadají
+   stejně. Zapisuje sem barvy.html — ručně to needitujte, přepsalo by se to. */
+:root:not([data-theme="dark"]) .michbg{--paper:#cccccc; --zvyraz:#919191; --ink:#000000; --ink-2:#8b8b8b; --line:#9e9e9e; --line-2:#949494; --key:#000000; --btn-ink:#ffffff; --cyan:#000000; --bg:#ffffff;}
+:root[data-theme="dark"] .michbg{--paper:#2e2e2e; --zvyraz:#545454;}
+/* KONEC BAREV STRANEK */
+:root[data-theme="dark"] .warnbox,:root[data-theme="dark"] #chyba{background:#2C2317;border-color:#463824;color:#E0AE6B}
+:root[data-theme="dark"] .okbox{background:#182A20;border-color:#284434;color:#79CFA0}
+:root[data-theme="dark"] .imgwarn{background:#2C2317 !important;color:#E0AE6B !important}

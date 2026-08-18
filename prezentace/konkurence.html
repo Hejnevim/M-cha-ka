@@ -138,33 +138,65 @@
       <thead><tr><th>funkce</th><th>kdo to má</th><th>u vás</th><th>co by to dalo</th></tr></thead>
       <tbody>
         <tr><td class="f">Shluky zbytků („cluster“)</td><td class="k">GSE</td>
-          <td class="s"><span class="zn ne">nemáte</span></td>
+          <td class="s"><span class="zn hot">hotovo</span></td>
           <td>Podobné odstíny se slijí do jedné nádoby a ta se pak vede jako <b>běžná
             báze</b>, ne jako kelímek. GSE uvádí, že press-return tvoří až třetinu
-            vydaného množství.</td></tr>
+            vydaného množství.<br><b>Zavedeno 18. 8. 2026:</b> záložka <i>Zbytky barev</i>
+            nabídne, které kelímky jde slít; nádoba dostane vlastní kód a štítek a dál
+            se chová jako běžný kelímek, jen se nevyprazdňuje. Slévá se jen to, co tím
+            nic neztratí — táž sada složek, poměry do desetiny, nic s tužidlem, nic po
+            lhůtě. Tři kelímky 62 + 48 + 41 g dají nádobu 151 g o složení 81,0 % ku
+            19,0 %.</td></tr>
         <tr><td class="f">Pravidla zástupnosti</td><td class="k">GSE</td>
-          <td class="s"><span class="zn ne">nemáte</span></td>
+          <td class="s"><span class="zn hot">hotovo</span></td>
           <td>Dražší složka smí zaskočit za levnější, opačně ne. Rozšíří to počet
-            zbytků, které na zakázku sednou, bez rizika horší kvality.</td></tr>
+            zbytků, které na zakázku sednou, bez rizika horší kvality.<br><b>Zavedeno
+            18. 8. 2026:</b> sloupec <code>zastupuje</code> v tabulce materiálů — u složky
+            se vyjmenuje, za koho smí naskočit. Kelímek 200 g s prémiovou bází sedne na
+            recepturu se standardní jako <b>přímá shoda</b>; opačným směrem neprojde.
+            Cena o pravidle nerozhoduje, jen ho kontroluje — záměna se říká nahlas
+            v nabídce, na míchacím lístku i v poznámce vzniklého kelímku.</td></tr>
         <tr><td class="f">Zámek „jen čerstvá barva“</td><td class="k">GSE</td>
           <td class="s"><span class="zn ne">nemáte</span></td>
           <td>Některý zákazník zbytky nepřipustí. Bez zámku to hlídá člověk pamětí.</td></tr>
         <tr><td class="f">Sklad surovin a objednávky</td><td class="k">IMS, ColorStar, GSE</td>
-          <td class="s"><span class="zn cast">částečně</span></td>
+          <td class="s"><span class="zn hot">hotovo</span></td>
           <td>Ceník máte, stav zásob ne. Chybí zůstatek, minimální zásoba, upozornění na
-            docházející bázi — přitom spotřebu už aplikace zná.</td></tr>
+            docházející bázi — přitom spotřebu už aplikace zná.<br><b>Zavedeno
+            18. 8. 2026:</b> tabulka materiálů vede zásobu z inventury (v kilech,
+            i u materiálu za litr) a zůstatek je dopočet: inventura minus spotřeba
+            zapsaných dávek po složkách. Záložka <i>Sklad surovin</i> ukáže denní
+            tempo, dosah ve dnech a co objednat do minima po celých baleních;
+            kalkulace řekne u váhy, že na dávku zásoba nestačí. Složka bez
+            inventury je „nepočítáno", ne nula — a barva vzatá ze zbytku se
+            neodečítá podruhé.</td></tr>
         <tr><td class="f">Šarže a dohledatelnost</td><td class="k">GSE, IMS</td>
-          <td class="s"><span class="zn ne">nemáte</span></td>
-          <td>Která šarže báze šla do které zakázky. Při reklamaci odstínu je to jediná
-            cesta, jak zjistit, čím to bylo.</td></tr>
+          <td class="s"><span class="zn ano">máte</span></td>
+          <td>U každého materiálu se vede otevřená konev a její šarže se otiskne do každé
+            dávky. Při reklamaci se z kódu na konvi vypíšou zakázky a produkty, které
+            z ní braly — i zpětně, po dojetí konve.</td></tr>
         <tr><td class="f">Zpětná vazba z kontroly</td><td class="k">X-Rite</td>
-          <td class="s"><span class="zn cast">částečně</span></td>
-          <td>Korekci po nátisku máte. Chybí <b>záznam, že oprava nastala</b> a proč —
-            bez něj se pokles 1 209 oprav nedá změřit.</td></tr>
+          <td class="s"><span class="zn hot">hotovo</span></td>
+          <td>Korekci po nátisku máte — a teď po ní zůstává <b>záznam, že oprava
+            nastala</b> a proč. Bez něj se pokles 1 209 oprav nedá změřit.<br>
+            <b>Zavedeno 18. 8. 2026:</b> opravu zapíše člověk u váhy jedním
+            tlačítkem hned po korekci; záznam nese důvod („je moc světlé"…),
+            přidané složky v gramech i kód dávky. Záložka <i>Opravy po nátisku</i>
+            pak ukáže, u které receptury se opravuje pořád dokola a proč — tam se
+            vyplatí opravit složení v databázi, ne pokaždé znovu nátisk. Podíl
+            dávek s opravou se počítá jen z oprav se zapsanou dávkou; co kód
+            nemá, vypíše se zvlášť.</td></tr>
         <tr><td class="f">Přepočet celého sortimentu na síto</td><td class="k">X-Rite</td>
-          <td class="s"><span class="zn cast">částečně</span></td>
+          <td class="s"><span class="zn hot">hotovo</span></td>
           <td>Spotřebu ze síta počítáte pro zakázku. X-Rite umí zadat síto jako parametr
-            a přepočítat <b>všechny</b> receptury naráz.</td></tr>
+            a přepočítat <b>všechny</b> receptury naráz.<br><b>Zavedeno 18. 8. 2026:</b>
+            záložka <i>Přepočet na síto</i> obrací zadání — síto a podmínky zakázky platí
+            pro celý sortiment, z receptury se bere hustota, kryvost a referenční
+            viskozita. Vidět je i rozdíl proti sítu, které má receptura zapsané: přechod
+            ze 77-55 na 120-34 je pokles o <b>34,8 %</b>, a to u každé hustoty stejně —
+            spotřeba je v objemu tkaniny lineární. Proto je nad seznamem tabulka
+            <i>odkud kam</i> po skupinách, ne 2 692 řádků s týmž číslem. Zapisovat se
+            nebude nic: síto do receptury patří technologovi, ne hromadnému tlačítku.</td></tr>
         <tr><td class="f">Parametry tisku u receptury</td><td class="k">ColorStar</td>
           <td class="s"><span class="zn ano">máte</span></td>
           <td>Síto, kryvost, povrch se u vás ukládají k receptuře. ColorStar k tomu vede
@@ -182,17 +214,30 @@
           <td class="s"><span class="zn ano">máte</span></td>
           <td>Včetně tužidla a aditiv, se skrytím pro tiskaře u váhy.</td></tr>
         <tr><td class="f">VOC a bezpečnostní listy</td><td class="k">ColorStar, IMS</td>
-          <td class="s"><span class="zn ne">nemáte</span></td>
-          <td>Odkaz na bezpečnostní list u složky a výkaz těkavých látek. Jestli to po
-            vás někdo chce, je to povinnost, ne funkce.</td></tr>
+          <td class="s"><span class="zn ano">máte</span></td>
+          <td>Podíl těkavých látek a odkaz na bezpečnostní list u složky v ceníku;
+            kalkulace z navážky počítá gramy VOC v dávce a listy nabízí u váhy.
+            Co v ceníku není, se nedopočítává — vyjmenuje se. Zavedené 18. 8. 2026.</td></tr>
         <tr><td class="f">Sestavy a trendy</td><td class="k">IMS, GSE</td>
-          <td class="s"><span class="zn ne">nemáte</span></td>
-          <td>Spotřeba po měsících, nejčastější odstíny, kolik se vyhodilo. Data už
-            v souborech jsou, jen se nesčítají.</td></tr>
+          <td class="s"><span class="zn ano">máte</span></td>
+          <td>Spotřeba po měsících se změnou proti minulému, nejčastější odstíny
+            a co se ze zbytků vrátilo. Zavedené 18. 8. 2026 — nová data se k tomu
+            nesbírají, sčítá se evidence.</td></tr>
         <tr><td class="f">Role a schvalování</td><td class="k">IMS, X-Rite</td>
-          <td class="s"><span class="zn ne">nemáte</span></td>
-          <td>Technolog schvaluje novou vlastní recepturu, tiskař ji jen používá.
-            Máte to už v plánu.</td></tr>
+          <td class="s"><span class="zn hot">hotovo</span></td>
+          <td>Technolog schvaluje novou vlastní recepturu, tiskař ji jen používá.<br>
+            <b>Zavedeno 18. 8. 2026:</b> dvě role, <i>technolog</i> a <i>tiskař</i>.
+            Roli si drží počítač — u váhy stojí tiskař pořád — a přepnutí zpět na
+            technologa jde přes heslo dílny. Tiskaři nechybí nic, čím odesílá zakázku;
+            ubrané je jen zakládání a mazání receptur, ceník a odemykání technologií.
+            Vlastní odstín <b>smí odvodit i tiskař</b>, po nátisku ho potřebuje hned —
+            vzniká ale jako <b>čekající</b> a platí jen pro kombinaci, kvůli které
+            vznikl. Jinde se nenabídne, dokud ho technolog neschválí; od technologa je
+            schválený rovnou tím, že ho založil. Záložka <i>Ke schválení</i> ukazuje
+            podklad, <b>rozdíl proti němu po složkách</b>, kdo odstín zadal a na co
+            platí. Zamítnutí si žádá důvod a receptura se nemaže — kdo podle ní míchal,
+            se musí dozvědět proč. Razítko jde do souboru vlastních receptur; prázdný
+            sloupec znamená schválená, aby se receptury z dřívějška chovaly jako dřív.</td></tr>
         <tr><td class="f">Napojení na podnikový systém</td><td class="k">X-Rite (MIS, CxF)</td>
           <td class="s"><span class="zn cast">částečně</span></td>
           <td>SGPS je rozdělaný. X-Rite navíc přijímá zakázku <b>jako úkol do míchárny</b>
@@ -223,6 +268,11 @@
         Stačí u korekce a u znovunamíchání zapsat čas, recepturu, technologii, podklad
         a důvod. Za tři měsíce z toho vypadne nejen číslo do A3, ale i to, <b>u kterých
         barev a materiálů se chybuje nejčastěji</b> — a to je návod, kde ubírat dál.</p>
+      <p><b>Zavedeno 18. 8. 2026.</b> Jedno rozhodnutí navíc proti návrhu: záznam
+        <b>nevzniká sám</b>. Aplikace nepozná, jestli technolog přidal půl procenta modré
+        kvůli nátisku, nebo jen zkoušel odstín — a vymyšlený záznam je horší než chybějící.
+        Zapisuje ho člověk jedním tlačítkem hned u korekce; podíl dávek s opravou se pak
+        počítá jen z oprav se zapsanou dávkou, co kód nemá, stojí v přehledu zvlášť.</p>
       <div class="stitky"><span class="stitek hl">cíl z A3</span><span class="stitek">malá práce</span>
         <span class="stitek">bez nových dat</span></div>
     </div>
@@ -251,6 +301,17 @@
         složka smí zaskočit za kterou a jen jedním směrem. Vaše
         <code>vyuzitelnyZbytek</code> na to nemusí nijak zvlášť měnit — shluk je pro ni
         jen další zbytek, jen se nikdy nevyprázdní.</p>
+      <p><b>Obojí zavedeno 18. 8. 2026</b> — a odhad, že se <code>vyuzitelnyZbytek</code>
+        měnit nemusí, vyšel: nezměnil se v ní jediný řádek. Cenu má na tom pravidlo, které
+        v původním návrhu nestálo: slévat se smějí jen kelímky s <b>touž sadou složek</b>.
+        Kelímek se dá použít do receptury, právě když je každá jeho složka v receptuře —
+        čistá modrá sedne na čtyři z pěti zkušebních receptur, slitá s modrou a bílou už
+        jen na tři. Sada rozhoduje o dosahu, poměry ne.</p>
+      <p>U <b>zástupnosti</b> vyšel odhad taky: sešlo se to na jedno místo — převodní
+        tabulku jmen dostaly podíly složek kelímku, a od té chvíle se zastupovaná složka
+        i zástupce počítají jako táž položka. Nové v úvaze bylo, že směr se z ceny
+        <b>odvodit nedá</b>: discharge báze je dražší než standardní a nahradit ji nemůže,
+        protože odbarvuje. Pravidlo je proto údaj dílny a ceník ho jen kontroluje.</p>
       <div class="stitky"><span class="stitek">GSE</span><span class="stitek">staví na hotovém</span></div>
     </div>
 
@@ -263,6 +324,14 @@
         dávky, takže odečítání je hotová věc. Přínos není v evidenci samotné, ale v tom,
         že <b>zakázka se nerozjede na bázi, která ve skladu není</b> — dnes se to pozná
         až u váhy a je z toho oprava.</p>
+      <p><b>Zavedeno 18. 8. 2026</b> — a „odečítání je hotová věc" platilo jen zpola:
+        sčítat se dalo rovnou, ale nejdřív se muselo rozhodnout, <b>co</b> se sčítá.
+        Dávka a kelímek bývají táž směs zapsaná dvakrát (pravidlo ze Sestav se
+        použilo beze změny) a barva vzatá ze zbytku není nová spotřeba — z konve
+        odešla už při prvním míchání, takže se odečítá složením zdrojového kelímku,
+        ne receptury. Jediný údaj, který se odvodit nedá, je inventura: zapisuje se
+        v kilech s datem, a od něj se jede dopředu. Bez inventury se o složce mlčí —
+        nula je tvrzení, ne prázdné místo.</p>
       <div class="stitky"><span class="stitek">IMS · ColorStar</span><span class="stitek">váže na cíl z A3</span></div>
     </div>
 
@@ -270,11 +339,18 @@
 
     <div class="poradi">5</div>
     <div>
-      <h3>Šarže a sestavy</h3>
-      <p>K dávce doplnit šarži použitých bází — při reklamaci odstínu je to jediná cesta
-        zpět. A jednoduché sestavy: spotřeba po měsících, kolik zbytků se využilo a kolik
-        vyhodilo. <b>Až tohle poběží, přestane být úspora materiálu „zatím nevyčísleno“</b>
-        a doplní se do A3 měřeným číslem, ne odhadem.</p>
+      <h3>Sestavy</h3>
+      <p>Šarže hotové: otevřená konev se otiskne do dávky a z kódu na konvi se dohledají
+        zakázky. Zbývají jednoduché sestavy: spotřeba po měsících, kolik zbytků se
+        využilo a kolik vyhodilo. <b>Až tohle poběží, přestane být úspora materiálu
+        „zatím nevyčísleno“</b> a doplní se do A3 měřeným číslem, ne odhadem.</p>
+      <p><b>Zavedeno 18. 8. 2026.</b> Dvě pravidla, která v návrhu nestála a bez nichž by
+        součty lhaly: <b>dávka a kelímek bývají táž směs zapsaná dvakrát</b> (počítá se
+        jednou, z dávky, protože ta nese i tužidlo) a <b>slitý kelímek není nová barva</b>,
+        jen přelitá stará. Jeden údaj v souborech přece jen chyběl: kolik korun zbytek
+        ušetřil, evidence věděla, kolik <b>gramů</b> se z něj vzalo ne — kelímek proto
+        dostal sloupec <code>zbytek_g</code>. Zpětně se to dopočítat nedá, cena gramu se
+        od té doby změnila, takže se u starších kelímků o gramech mlčí.</p>
       <div class="stitky"><span class="stitek">GSE · IMS</span><span class="stitek">doplní A3</span></div>
     </div>
 
@@ -300,7 +376,7 @@
   <p class="pozn">Kritérium bylo stejné jako u tabulky výš: každý bod musí stát na datech,
     která aplikace <b>už sbírá</b>, a mířit buď na 1 209 oprav, nebo na materiál.
     Žádný nepotřebuje nový přístroj.</p>
-  <div class="postup"><b>5</b> z 12 hotových &middot; stav k 17. 8. 2026 &middot;
+  <div class="postup"><b>7</b> z 12 hotových &middot; stav k 18. 8. 2026 &middot;
     tenhle dokument se aktualizuje s každou zavedenou funkcí</div>
 
   <h3 style="margin-top:6px">Aby oprava nevznikla</h3>
@@ -389,14 +465,35 @@
             naspěch, ví mistr.</td></tr>
         <tr><td class="f">Co propadne tento týden</td>
           <td class="k">expirace, pot life, stavZbytku</td>
-          <td class="s"><span class="zn ceka">čeká</span></td>
+          <td class="s"><span class="zn hot">hotovo</span></td>
           <td>Dnes se prošlost pozná až při míchání, tedy pozdě. Přehled dopředu plus
-            návrh, na kterou z rozpracovaných zakázek to ještě sedne.</td></tr>
+            návrh, na kterou z rozpracovaných zakázek to ještě sedne.<br>
+            <b>Zavedeno 17. 8. 2026:</b> vlastní záložka se sedmidenním výhledem,
+            řádky po dnech. Nová matematika žádná — lhůty i uplatnění počítají
+            tytéž funkce jako dosud. Nové jsou dvě pravidla:
+            <b>dávka a její kelímek jsou jedna nádoba</b> (platí dávka, nese lhůtu
+            na minuty a dá se uzavřít) a <b>na stroji ani po lhůtě se
+            nepřesměrovává</b> — prošlou barvu nenabízí ani míchačka. Jedna položka
+            fronty vezme jednu nádobu, jinak by se nasčítalo víc barvy, než se do
+            dávky vejde. Hodnota se u označené dávky bere ze zapsané ceny; chybí-li
+            v ceníku složka, sečte se známá část a řekne se, že ztráta je vyšší.
+            Na zkušebním skladu šesti nádob se ze 2 345 g propadajících do týdne
+            dalo <b>970 g</b> nalít rovnou do tří čekajících položek fronty.</td></tr>
         <tr><td class="f">Likvidace jako náklad</td>
           <td class="k">úspora ze zbytku v korunách</td>
-          <td class="s"><span class="zn ceka">čeká</span></td>
+          <td class="s"><span class="zn hot">hotovo</span></td>
           <td>A3 zmiňuje méně likvidovaného nebezpečného odpadu. Vyhozený kelímek stojí
-            <b>dvakrát</b> — jednou barva, podruhé likvidace. Druhá půlka se dnes nepočítá.</td></tr>
+            <b>dvakrát</b> — jednou barva, podruhé likvidace. Druhá půlka se dnes nepočítá.<br>
+            <b>Zavedeno 17. 8. 2026:</b> ceník má nový druh <b>likvidace odpadu</b> —
+            sazbu za kilogram ze smlouvy se svozovou firmou, jednu pro celou dílnu.
+            Z ní se počítají obě strany téže věci: co použití zbytku ušetří na svozu
+            a co stojí nechat kelímek propadnout. Vidět je to v kalkulaci, na míchacím
+            lístku, v <i>Co propadne</i>, ve <i>Zbytcích barev</i> i ve <i>Frontě
+            míchání</i>. Dvě čísla se přitom nesmějí sečíst: likvidace cenu dávky
+            nemění, jsou to peníze pro svozovou firmu — u dávky za 135,00 Kč se ze
+            180 g zbytku ušetří <b>60,75 Kč</b> na barvě a <b>5,40 Kč</b> na svozu,
+            ale nakoupí se dál za 74,25 Kč. Bez vyplněné sazby aplikace mlčí:
+            ceník svozové firmy se neodhaduje.</td></tr>
       </tbody>
     </table>
   </div>

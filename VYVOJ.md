@@ -182,6 +182,34 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 15:02 | Pořadí míchání ve frontě — zbytek z jedné zakázky sedne na další, když se ta míchá potom |
 | 15:18 | Zámek u technologie je kreslený jako ostatní ikony; ikona v řádku textu bere velikost z písma kolem sebe |
 | 15:30 | Zakázka se načítá tam, kde se s ní počítá — čárový kód i PDF v kartě Vybraný produkt, dvě položky z nabídky pryč |
+| 16:47 | Co propadne tento týden — přehled sedm dnů dopředu a návrh, na kterou položku fronty to ještě sedne |
+| 19:53 | Likvidace jako náklad — vyhozený kelímek se platí dvakrát a druhá půlka je teď v ceníku i na obrazovce |
+
+### 18. srpna — zbytky do jedné nádoby
+| čas | co |
+|---|---|
+| 08:56 | Shluky zbytků — kelímky s touž sadou složek jdou slít do jedné nádoby, která se pak vede jako běžný kelímek |
+| 09:04 | Pravidla zástupnosti — dražší složka smí podle tabulky dílny zaskočit za levnější, a zbytek s ní sedne na dávku |
+| 09:46 | Šarže a dohledatelnost — otevřená konev se otiskne do každé dávky, při reklamaci se z kódu na konvi dohledají zakázky |
+| 10:36 | Zpětná vazba z kontroly — oprava po nátisku je záznam s důvodem a kroky, záložka ukáže, u které receptury se opravuje pořád dokola |
+| 11:18 | Přepočet celého sortimentu na síto — zvolí se síto a všechny receptury se přepočítají naráz, včetně toho, o kolik se to liší od toho, co mají zapsané |
+| 11:09 | Aplikace se skládá ze 72 částí — index.html je od teď výstup, edituje se zdroj/ |
+| 11:58 | Kód se přestěhoval do aplikace/ — index.html má sto řádků a části si prohlížeč načte sám, sestavovat se při úpravě nemusí nic |
+| 12:31 | Sestavy a trendy — spotřeba po měsících, nejčastější odstíny a co se ze zbytků vrátilo; sčítá se evidence, která už existuje |
+| 12:37 | Role a schvalování — tiskař míchá a smí si odvodit vlastní odstín, ale ten platí jen na své kombinaci, dokud ho technolog neschválí |
+| 12:42 | Vzorník receptur zůstával bílý — v kartě odstínu přebývala zavírací značka a shodila celou aplikaci |
+| 13:37 | Typ barvy proti materiálu produktu — řada v nabídce nese ✓/×, nevhodný typ zvedne upozornění, řídí to nový sloupec v parametrech |
+| 13:53 | Databázi z jiné technologie nešlo v Recepturách zapnout — schovaná kalkulace přepisovala společný filtr dřív, než se volba stihla ukázat |
+| 13:58 | Poloha potisku dostala vlastní typy barev — technolog je přiřadí štítky v Produktech, kalkulace pak na poloze nabídne jen je |
+| 14:01 | Databáze Ferro Xpression se vrátila k původnímu názvu souboru — soubor, přiřazení k technologii i zdroj odvozených receptur mluví stejně |
+| 14:36 | Přejmenovaná databáze si receptury odvede s sebou a v nabídce se jmenuje typ barvy, ne řada |
+| 14:07 | Typy barev jdou přiřadit i ve formuláři Upravit produkt — stejná komponenta jako v tabulce, zápis hned kliknutím |
+| 14:23 | Typy barev jdou přiřadit i bez mostu — v prohlížeči hned, do souboru dílny jakmile most běží; zámek na server byl moc tvrdý |
+| 14:40 | Dlaždice parametrů se u receptury bez síta nafoukla do sloupu a roztáhla vedlejší karty na prázdno — měřítko se bralo z šířky okna místo z šířky dlaždice |
+| 15:28 | Těkavé látky a bezpečnostní listy — podíl VOC a odkaz na list u složky v ceníku, kalkulace z navážky počítá gramy VOC v dávce a listy nabízí u váhy |
+| 15:32 | Sklad surovin a objednávky — inventura v kilech, zůstatek z dávek, denní tempo a co objednat po celých baleních |
+| 15:52 | Ukázka dohnala aplikaci — 21 scén ve třech dějstvích a přednost nahraného hlasu ze složky audio/ před syntézou |
+| 16:03 | Ukázka namluvena hlasem cs-CZ-AntoninNeural — 21 souborů v prezentace/audio/ |
 
 ---
 
@@ -3706,3 +3734,1439 @@ zůstal v bublině tlačítka a v nadpisu okna.
 - v rozbalené nabídce vyfoceno, že po *Co chybí k odemčení…* následuje rovnou
   *Zakázky (SGPS)* — obě položky pryč
 - `kontrola_aplikace.py` 0, `prekryv.py` 0 (čtyři šířky × dva režimy)
+
+---
+
+## 75. Co propadne tento týden
+
+**Problém.** Prošlost se dosud poznala až u míchačky: kelímek po lhůtě
+aplikace prostě nenabídla mezi zbytky a tím to skončilo. Nikdo se dopředu
+nedozvěděl, že v pátek propadne půl kila barvy, ani že to, co propadne, se
+dalo ještě ve středu nalít do zakázky, která stejně čekala ve frontě.
+Dvousložková rozpracovaná dávka na tom byla hůř: pot life jí běžel a jediné
+místo, kde ji bylo vidět, byla obrazovka míchání — kdo od ní odešel, ztratil
+ji z očí.
+
+**Co se změnilo.** Nová záložka *Co propadne* dívající se sedm dnů dopředu.
+Řádky jsou seskupené po dnech (*už po lhůtě · dnes · zítra · pozítří · pátek
+21. 8.*), protože podle dnů se plánuje — odpočet „za 53 hodin" se na kalendář
+okem nepřevádí.
+
+Nová data k tomu nejsou žádná. Lhůtu kelímku počítá `stavZbytku`, lhůtu
+rozpracované dávky `stavDavky`, kolik se kam vejde `vyuzitelnyZbytek`;
+přehled to jen srovná podle času a přiloží k tomu, co ve frontě čeká.
+
+Dvě rozlišení, bez kterých by radil špatně:
+
+| nádoba | co se s ní dá dělat | co přehled řekne |
+|---|---|---|
+| rozpracovaná dávka / kelímek „v tisku" | je na stroji, nepřesměrovává se | dotisknout do lhůty, nebo uzavřít |
+| kelímek ve skladu | dá se nalít jinam | na kterou položku fronty sedne |
+
+Dávka a její kelímek jsou **tatáž nádoba**. Existuje-li k nádobě dávka, platí
+dávka: nese lhůtu na minuty (`vyprsi`) místo hodin a dá se rovnou uzavřít
+tlačítky *Spotřebovaná* / *Vyhozená*. Bez toho by tatáž barva byla v přehledu
+dvakrát, jednou po hodinách a jednou po minutách.
+
+Jedna položka fronty si v přehledu vezme **jednu** nádobu. Do dávky se sice
+dají složit i dva kelímky (`dvojiceZbytku` v míchacím režimu), ale sečíst
+gramy ze všech kelímků, které na položku sednou, by nasčítalo víc barvy, než
+se do ní vejde. Přednost má nádoba s nejbližší lhůtou.
+
+Hodnota se u dávky označené při míchání bere ze **zapsané ceny** — spočítala
+se s tužidlem i aditivy v okamžiku, kdy se vážila, a přepočtem ze složení by
+se ta část zahodila. Platí to jen dokud se z kelímku neubralo; po odpisu patří
+zapsaná cena k jinému množství a počítá se znovu ze složení. Nezná-li ceník
+cenu všech složek, sečte se jen ta část, která cenu má, a **řekne se, že
+skutečná ztráta je vyšší** — dopočítat chybějící cenu odhadem by znamenalo
+tvrdit ztrátu, kterou nikdo nezměřil.
+
+Čemu se přehled vyhýbá: **nehádá, kdy se která položka fronty bude míchat.**
+Fronta má pořadí, hodiny ne — řekne se tedy, že to sedne, ne že se to stihne.
+
+**Chyba, kterou to nejdřív mělo — a našel ji až snímek.** První verze hledala
+uplatnění u každého kelímku, který složením seděl. Na snímku pak stálo, že
+prošlý kelímek `ZB6HK9F` (95 g, po lhůtě 19 h) půjde do 1. položky fronty —
+a živý kelímek se 240 g, kterému lhůta teprve končila, dostal *„sedne na 2
+položky, ale každou si bere kelímek s bližší lhůtou"*. Mrtvá barva vzala
+místo živé. U míchačky přitom `nabidkyZbytku` prošlé vyhazuje, takže přehled
+radil něco, co by aplikace o obrazovku dál odmítla. Opraveno: hledá se jen
+u nádoby, se kterou se dá pohnout (`(x.naStroji || poLhute) ? [] : …`).
+
+Rozhoduje **zbývající čas, ne kalendářní den**. Kelímek, kterému lhůta
+doběhla dnes v devět, patří do oddílu *dnes* — použít ho už ale nejde.
+Protizkouška ukázala, že tenhle rozdíl původní zkouška vůbec nechytala: mezi
+`den < 0` a `zbyva <= 0` se lišil jediný nezkoušený případ, a musel se
+dopsat.
+
+**Změřeno:**
+
+- 89 kontrol modelu proti kódu vytaženému ze samotného `index.html`, žádná
+  chyba; protizkouška vrátila do kódu 7 chyb a zkouška našla **všech 7**
+- 200 g kelímku (60 % modrá 500 Kč/kg, 40 % žlutá 300 Kč/kg) = **84,00 Kč**;
+  týž kelímek s poloviční složkou bez ceny = **50,00 Kč** a příznak „neúplná"
+- zapsaná cena dávky 321,50 Kč platí při 500 g z 500 g; po odpisu na 100 g se
+  přepočte na **42,00 Kč** ze složení
+- pot life 8 h: po 4 h zbývají 4 h, po 8 h nula, po 9 h **hodinu po lhůtě**;
+  u kelímku s pot life 4 h a spotřebou za 5 dnů rozhodne pot life (3 h)
+- dvě nádoby na jednu položku fronty: zachrání se **200 g**, ne 400
+- na vymyšleném skladu (6 nádob, fronta 3 položky): dnes 1 760,0 g ·
+  612,40 Kč, do 7 dnů 2 345,0 g, do fronty se vejde **970,0 g** na 3
+  položkách — před opravou to bylo 825,0 g, protože prošlý kelímek bral
+  položku živému
+- `kontrola_aplikace.py` 0, `prekryv.py --zalozky` 0 (čtyři šířky × dva
+  režimy), snímek proklikán skutečnou myší ve světlém i tmavém režimu
+- `evidence/*.csv` beze změny (kontrolní součty před testem i po něm) — most
+  se testu schválně přesměroval na mrtvý port, takže aplikace na data dílny
+  nemohla sáhnout
+
+**Co se nechalo být.** Kelímek se pořád nedá označit za *vyhozený* — u dávky
+to jde (`davkaUzavrena`), u kelímku se jen srazí gramáž na nulu, takže se
+z evidence nepozná rozdíl mezi spotřebovaným a vyhozeným kelímkem. Je to
+nový sloupec v `zbytky.csv`, ne úprava přehledu. Štítek *zpracovatelná*
+u dávky má v tmavém režimu bílý text na světlém podkladu — je to týž zápis
+jako u štítku *v tisku* v Zbytcích barev (`var(--key)` + `#fff`), takže se to
+má opravit na obou místech naráz, ne jen tady.
+
+**Do menu nepřibyl další počet.** Zbytky barev už štítek s počtem mají a
+tentýž údaj na dvou místech se dřív nebo později rozejde; *Co propadne* je
+plánovací obrazovka, ne budík.
+
+## 76. Likvidace jako náklad
+
+**Problém.** Zbytek, který se nepoužije, dílna nevyhodí do koše — odveze ho
+svozová firma jako nebezpečný odpad a účtuje si to podle váhy. Za vyhozený
+kelímek se tedy platí **dvakrát**: jednou dodavateli za barvu, podruhé za to,
+že se jí dílna zbaví. Aplikace uměla jen tu první půlku. U zbytku psala
+„ušetříte 60,75 Kč na čerstvé barvě", i když se týmž kelímkem ušetřila i
+likvidace, a přehled *Co propadne* sčítal jen cenu barvy, která propadne.
+Druhá půlka nebyla ani kde zapsat: ceník zná pigment, bázi, tužidlo, ředidlo
+a zpomalovač, sazbu za odpad nikde.
+
+**Co se změnilo.** Ceník má nový druh **likvidace odpadu** — sazba za kilogram
+odpadu ze smlouvy se svozovou firmou. Vyplňuje se tam, kde všechny ostatní
+ceny (*Receptury → Ceny materiálů*, nebo `parametry/pigmenty.csv`), a platí
+pro celou dílnu. Z ní se počítají obě strany téže věci:
+
+| kde | co se ukáže |
+|---|---|
+| kalkulace, *Náklady na barvu* | řádek *Likvidace, která odpadne* a v tipu druhá věta: „ušetříte 60,75 Kč na čerstvé barvě a 5,40 Kč na likvidaci odpadu" |
+| míchací lístek | tentýž údaj, ale jen když jsou ceny odkryté |
+| *Co propadne* | *Svoz do odpadu* v pruhu souhrnu a u kelímků, na které nic nesedne, kolik jejich vyhození stojí navíc |
+| *Zbytky barev* | u kelímků po lhůtě, na kolik vyjde jejich svoz |
+| *Fronta míchání* | kolik se dnešním pořadím na svozu nezaplatí |
+| `evidence/zbytky.csv` | nový sloupec `uspora_likvidace` vedle `uspora` |
+
+**Dvě čísla, která se nesmějí sečíst.** Likvidace se **nikdy** nepřičítá k ceně
+dávky ani se od ní neodečítá. Cenu téhle dávky nemění: jsou to peníze pro
+svozovou firmu, ne pro dodavatele barvy. Kdyby se sečetly, tvrdila by aplikace,
+že se za dávku nakoupí míň, než se doopravdy nakoupí — proto *Nakoupí se na
+tuhle dávku* zůstává 135,00 − 60,75 = **74,25 Kč** i ve chvíli, kdy vedle svítí
+ušetřených 5,40 Kč na svozu.
+
+**Když se sazba neví, aplikace mlčí.** Ceník svozové firmy se odhadnout nedá,
+takže bez vyplněné sazby se nezobrazí ani slovo a všechno počítá jako dřív.
+Totéž, když jsou sazby v ceníku dvě (vybrat za dílnu to nejde) nebo když je
+sazba v jiné měně než dávka — kurz aplikace nezná, stejné pravidlo jako
+u ceny složek.
+
+**Do výběru pořadí ve frontě to nevstupuje.** Sazba je pro všechny položky
+táž, takže by pořadí přerovnávala podle gramů zrovna tam, kde se vybírá podle
+korun. Fronta tedy dál vybírá pořadí podle ceny čerstvé barvy a ušetřený svoz
+jen sečte a ukáže.
+
+**Chyba, kterou to nejdřív mělo — zkouška, která lhala.** Model měl na čísla
+toleranci 0,005 Kč. Když se do kódu vrátila chyba „sazba v cizí měně se pustí
+do součtu", zkouška ji **nenašla**: sazba 1,2 EUR/kg dělá 0,0012 Kč/g a to se
+do tolerance vešlo. Nula se od té doby porovnává přesně a teprve pak zkouška
+protizkoušku chytila.
+
+**Co se nechalo být.** U tlačítka *Vyhozeno* v odpočtu pot life peníze nejsou,
+i když by tam významem seděly nejlíp. Ceny mají v aplikaci přepínač a u váhy
+jsou na obtíž — patří mistrovi, ne tiskaři v rukavicích. Kdo si je odkryje,
+uvidí je v kalkulaci i na míchacím lístku.
+
+**Změřeno** (zkušební sazba 30 Kč/kg = 0,03 Kč/g; skutečnou určí dílna):
+
+- dávka 400 g za 135,00 Kč, cena gramu 0,3375 Kč; ze 180 g zbytku **60,75 Kč**
+  na barvě a **5,40 Kč** na svozu, *Nakoupí se* dál **74,25 Kč**
+- *Co propadne* na vymyšleném skladu (3 kelímky, 860 g): dnes 260,0 g ·
+  57,20 Kč, do 7 dnů 860,0 g · 255,20 Kč, **svoz do odpadu 25,80 Kč**;
+  dva kelímky, na které nic nesedne (440,0 g), stojí na svozu **13,20 Kč**
+- *Zbytky barev*: 1 kelímek po lhůtě (420,0 g) → svoz **12,60 Kč**
+- neúplný ceník: cena gramu se počítá z 75 % navážky, ale svoz se váží celý —
+  400 g × 0,03 = **12,00 Kč** i tehdy, když u složky chybí cena
+- sazba za litr: 30 Kč/l při hustotě 1,5 → **0,02 Kč/g**; bez hustoty se
+  nepřepočítává vůbec
+- **31 kontrol modelu** proti kódu vytaženému ze samotného `index.html`, žádná
+  chyba; protizkouška vrátila do kódu dvě chyby (cizí měna do součtu, záporné
+  gramy) a zkouška našla **obě**, u chybějícího souboru vrátila kód 2
+- starší `zbytky.csv` bez sloupce `uspora_likvidace` se přečte beze změny
+  (180 g, úspora 60,75 Kč) a o ušetřeném svozu mlčí
+- `kontrola_aplikace.py` 0, `prekryv.py --zalozky` 0 (čtyři šířky × dva režimy,
+  všechny záložky), proklikáno skutečnou myší přes nabídku do *Co propadne*
+  i do *Zbytků barev*
+- `evidence/*.csv` i `parametry/pigmenty.csv` po testu shodné se zálohou —
+  zkušební ceny se do ceníku dílny psaly jen po dobu snímků
+
+**Finanční box se fotil s dosazenými hodnotami.** Aby se v kalkulaci ukázala
+úspora ze zbytku, musel by ve skladu stát kelímek se složením přesně podle
+receptury a ceník by musel znát všech pět složek té databáze — to je zásah do
+receptur dílny. Snímek proto vznikl na kopii `index.html`, do které se
+`FinancniBox` dosadila hotová čísla; co je na něm vidět, platí o vykreslení,
+ne o výpočtu. Výpočet dokazuje model výše.
+
+---
+
+## 77. Shluky zbytků — deset kelímků jedné barvy je jedna nádoba
+
+**Problém.** Ve skladu stojí kelímky, které vznikly jeden po druhém z téže
+barvy: šedesát gramů z jedné zakázky, osmačtyřicet z další, jedenačtyřicet
+z třetí. Každý má svůj štítek, své místo na polici a svůj řádek v evidenci —
+a na zakázku se z nich stejně nabídne jeden. Dohromady je to sto padesát gramů,
+se kterými jde počítat naráz; rozdělené na tři je to tři cesty k polici a tři
+vážení, ze kterých dvě obsluha stejně neudělá. GSE tomu říká *cluster method*
+a uvádí, že vrácená barva ze stroje bývá až třetina vydaného množství.
+
+**Co se změnilo.** Záložka *Zbytky barev* nabídne pod tabulkou, které kelímky
+se dají slít do jedné nádoby. Nádoba dostane vlastní kód a štítek a od té chvíle
+se chová jako běžný kelímek — jen se nevyprazdňuje: co se z ní odebere, se do ní
+příště zase dolije. Aplikace kvůli tomu nemusela měnit nic z toho, co počítá
+s kelímky; `vyuzitelnyZbytek` bere shluk jako kterýkoli jiný zbytek.
+
+Slití je nevratné, a tak se neslévá nic, co by tím ztratilo cenu:
+
+| pravidlo | proč |
+|---|---|
+| **táž sada složek** u všech kelímků | kelímek se dá použít do receptury, právě když je každá jeho složka v receptuře; sada složek tedy rozhoduje o dosahu, poměry ne |
+| **poměry do desetiny** (`podobnost ≥ 0,9`) | shluk je vážený průměr — slitím vzdálených poměrů ztratí každý z kelímků svou přímou shodu |
+| **kelímky s tužidlem nikdy** | tuhnou od namíchání a do společné nádoby by přinesly lhůtu, která se z ní už nedá vyjmout |
+| **nic po lhůtě a nic v tisku** | jedno je k ničemu, druhé se teprve uvidí, co z něj zbude |
+| **od tří kelímků** (do hotové nádoby stačí jeden) | dva kelímky umí `dvojiceZbytku` vzít na zakázku vedle sebe, aniž by se cokoli přelilo |
+| **nejmíň 100 g** dohromady | pod tím se cesta k polici nevrátí |
+
+Podobnost dvou kelímků je součet menšího z podílů složka po složce: 80/20 proti
+90/10 je **0,90**, 50/50 proti 90/10 je **0,60**. Složení nádoby je vážený průměr
+podle gramů, ne průměr procent — sto gramů a deset gramů nemají v nádobě stejné
+slovo. Lhůty se berou přísně: nádoba je stará jako **nejstarší** barva v ní
+a platí jí **nejbližší** datum spotřeby ze všeho, co do ní šlo. Naměřená
+viskozita se nedědí — měřila se jiná barva, než je v nádobě teď.
+
+`zbytky.csv` má dva nové sloupce: `shluk` a `slito` (kódy kelímků, které se
+do nádoby vylily). Kam který kelímek odešel, se z toho odvozuje — zapsané je to
+jen na jednom místě, aby se dvě místa nerozešla při prvním sloučení evidence
+ze dvou počítačů.
+
+**Proč zrovna shoda sad složek.** Zkoušeno proti pěti recepturám: kelímek čisté
+modré sedne na **čtyři** z nich. Kdyby se slil s kelímkem modré s bílou, sedne
+výsledek už jen na **tři** — o receptury bez bílé přijde. Kdežto tři kelímky
+z téže sady {modrá, báze} sedly před slitím i po něm na **tentýž počet**.
+Proto se nabízí jen shodná sada a proto to potvrzení říká nahlas: *sada složek
+se tím nemění — nádoba sedne na tytéž receptury jako kelímky teď*.
+
+**Změřeno:**
+
+- tři kelímky 62 + 48 + 41 g → nádoba **151,0 g**, složení
+  (62·80 + 48·85 + 41·78)/151 = **81,0 %** ku 19,0 %
+- hustota váženě: 100 g × 1,0 + 60 g × 1,5 → **1,1875**
+- ze dvou dat spotřeby 15. 10. a 5. 9. platí nádobě **5. 9. 2026**; stáří se
+  bere po nejstarším kelímku (40 dní, ne 5)
+- **54 kontrol modelu** proti kódu vytaženému ze samotného `index.html`, žádná
+  chyba; protizkouška ukázala, že pravidlo o sadě složek není formalita
+  (4 → 3 receptury)
+- protočení přes CSV tam a zpět: `shluk`, `slito` i složení se vrátily stejné;
+  starší `zbytky.csv` bez obou sloupců se přečte beze změny (120 g) a do návrhů
+  vstupuje normálně
+- proklikáno skutečnou myší: nabídka → *Zbytky barev* → *Slít* → potvrzení →
+  vznikl kód `ZNGUDEG`, 151,0 g, štítek s čárovým kódem, tři zdrojové kelímky
+  na nule se štítkem *slito do ZNGUDEG*
+- `kontrola_aplikace.py` 0, `prekryv.py --zalozky` 0 (čtyři šířky × dva režimy)
+
+**Co se rozhodlo nechat být.** Dvě nádoby se do sebe nepřelévají — slévat shluk
+do shluku by z evidence udělalo strom, ve kterém by se původ kelímku dohledával
+přes několik kroků. Potvrzení taky nejde přes heslo jako mazání: gate se ptá
+„Potvrdit smazání" a tady se nic nemaže, jen přelévá. Vlastní potvrzovací okno
+říká rovnou, co se stane a s čím.
+
+---
+
+## 78. Dražší báze smí zaskočit za levnější
+
+**Problém.** Kelímek se dosud dal použít jen tam, kde se každá jeho složka
+objevila i v cílové receptuře. Jenže dílna vede složky, které se navzájem
+zastanou: prémiová báze zvládne totéž co standardní a ještě něco navíc.
+Kelímek prémiové stojí na polici, receptura žádá standardní — a aplikace ho
+nenabídne vůbec, přestože by z něj mistr namíchal bez rozmýšlení. Zaplacená
+barva čeká na datum spotřeby a pak jde do odpadu. GSE má na to tabulku
+zástupnosti a jedno pravidlo: **dražší složka smí zaskočit za levnější,
+opačně ne.** Naopak by to znamenalo namíchat lacinější barvu, než za jakou
+zákazník platí — a to se nepozná jinak než reklamací.
+
+**Co se změnilo.** `parametry/pigmenty.csv` má nový sloupec `zastupuje`:
+u složky se vyjmenuje, za koho smí naskočit (víc jmen se odděluje svislítkem).
+Zbytek, ve kterém takový zástupce je, pak na dávku sedne, i když ta složka
+v receptuře vůbec není. Dokud je sloupec prázdný, počítá aplikace přesně jako
+dosud — a starší soubor bez sloupce se přečte beze změny.
+
+Sáhlo se na jedno jediné místo výpočtu. `podilyZbytku` dostalo převodní tabulku
+jmen a od té chvíle se zastupovaná složka i zástupce počítají jako táž položka;
+`vyuzitelnyZbytek`, `zbytekCelyPlan`, `dvojiceZbytku`, fronta i přehled propadů
+z toho žijí, aniž by o zástupnosti musely vědět. Kelímek, který obsahuje obojí,
+se slévá do jedné složky.
+
+| pravidlo | proč |
+|---|---|
+| **zastupuje se jen to, co v cíli chybí** | je-li složka v receptuře sama o sobě, není co nahrazovat |
+| **jen jeden směr** | pravidlo je zapsané u zástupce, ne u obou; obrácené pravidlo je jiný řádek |
+| **míří-li pravidlo na dvě složky téže receptury, nezastoupí se nic** | která z nich to má být, aplikace neví a hádat nebude |
+| **zástupný kelímek jde v nabídce až za jinak stejný bez zástupnosti** | zaskakuje dražší složka; sáhnout se má nejdřív po tom, co odpovídá receptuře doslova |
+| **cena o pravidle nerozhoduje, jen ho kontroluje** | že jsou dvě báze technicky zaměnitelné, z ceny neplyne — dva drahé pigmenty se nezastanou vůbec |
+
+**Proč to není odvozené z ceny.** Nabízelo se počítat směr z ceníku a tabulku
+si odpustit. Nejde to: cena říká, která složka je dražší, ale ne, jestli se
+vůbec zastanou. Discharge báze je dražší než standardní a nahradit ji nemůže —
+odbarvuje. Pravidlo je proto **údaj dílny**, ne dopočet, a ceník ho jen
+kontroluje: v *Recepturách* na kartě *Ceny materiálů* přibyl přehled zapsaných
+pravidel a varování, když některé míří proti ceně. Aplikace ho i tak poslechne
+(zapsal ho člověk), jen to řekne nahlas.
+
+**Že se zastupovalo, se nikde nezamlčí.** Nabídka má štítek *zástupnost*,
+míchací lístek to má napsané v poznámce k vážení, přehled propadů i plán fronty
+to píšou k návrhu — a kelímek, který z takové dávky vznikne, si větu
+*zástupnost: Prémiová báze místo Standardní báze* odnese v poznámce. Složení se
+totiž ukládá podle receptury: v nádobě je něco jiného, než co v ní stojí, a bez
+té věty by se to při reklamaci odstínu nedohledalo.
+
+**Změřeno** (kelímek 200 g o složení Modrá 10 % + Prémiová báze 90 %,
+receptura Modrá 10 % + Standardní báze 90 %, dávka 1 000 g):
+
+- bez pravidla se kelímek nenabídne vůbec; s pravidlem je to **přímá shoda**,
+  použije se **200,0 g** a domíchat zbývá **800,0 g**
+- kelímek, který obsahuje obě báze (45 % + 45 %), se slije do jedné složky —
+  90 %, tedy zase přímá shoda
+- opačný směr neprojde: kelímek standardní báze proti receptuře s prémiovou
+  zůstane nepoužitelný
+- pořadí: čistý kelímek 100 g namíchaný 10. 8. předběhne zástupný kelímek
+  300 g namíchaný 1. 1., přestože je mladší a je ho míň
+- dva kelímky 500 + 500 g (30/70 a 2/98) dají dohromady **800 g** proti 500 g
+  z lepšího z nich samotného
+- ceny 480 Kč/kg proti 300 Kč/kg → směr sedí, ceník mlčí; obrácené pravidlo
+  (100 proti 300) se v ceníku označí, stejně jako pravidlo, u kterého se ceny
+  porovnat nedají (jiná měna, jiná jednotka, chybějící cena)
+- **33 kontrol modelu** proti kódu vytaženému ze samotného `index.html`, žádná
+  chyba; táž zkouška proti verzi před změnou vrátila **25 nálezů z 33** — těch
+  8, které projdou obojí, jsou právě ty, které dokazují, že bez zapsaného
+  pravidla se nezměnilo nic
+- proklikáno skutečnou myší: *Co propadne* → řádek kelímku hlásí
+  *„Vejde se 200,0 g — celý kelímek, domíchat 800,0 g · přímá shoda ·
+  zástupnost: Prémiová báze místo Standardní báze"*, hodnota kelímku 86,40 Kč,
+  úspora 60,00 Kč; v *Recepturách* stojí *„Pravidla zástupnosti (1) · Prémiová
+  báze smí zaskočit za Standardní báze"*
+- `kontrola_aplikace.py` 0, `prekryv.py --zalozky` 0 (čtyři šířky × dva režimy)
+
+**Co zůstalo neproklikané.** Řádek plánu ve *Frontě míchání* se myší
+nepodařilo otevřít — nabídka záložek posílá klik ladicího protokolu jinam, než
+kam míří. Je to táž věta složená z týchž dat jako v přehledu propadů, který
+proklikaný je, ale změřené to není.
+
+**Co se rozhodlo nechat být.** Pravidla se v aplikaci nezapisují, jen ukazují.
+Napsat je může jen ten, kdo ví, že se ty dvě složky doopravdy zastanou — a to
+je rozhodnutí technologa, ne dvě políčka v tabulce cen. Sloupec se taky nesnaží
+být chytrý: jako oddělovač bere svislítko a čárku, ale ne středník. Ten
+odděluje sloupce CSV, a je-li v uvozovkách, je to jméno.
+
+
+## 79. Šarže a dohledatelnost — ze které konve to bylo
+
+**Problém.** Přijde reklamace na odstín. Receptura sedí, navážka seděla,
+míchací lístek je v pořádku — a přesto je to vedle. Dvě konve téže báze od
+dodavatele se odstínem liší a poznat to jde až na nátisku. Otázka pak zní „ze
+které konve to bylo namícháno", a dosud na ni nebylo z čeho odpovědět: dávka
+si pamatovala recepturu, zakázku, gramy i lhůtu tuhnutí, ale ne materiál,
+který jí prošel. Bez toho se reklamace vyšetřit nedá — nedá se ani zjistit,
+které další zakázky z téže konve braly a jestli se má čekat, že přijdou taky.
+
+**Zadává se jednou, otiskuje pokaždé.** Zvažovaly se dvě cesty. Vypisovat
+šarži u každé navážené složky je přesnější, ale znamená to tři až pět
+opsaných čísel na jednu dávku — v rukavicích u váhy se to dělat nebude
+a záznam by pak lhal víc, než kdyby nebyl. Vede se to proto podle toho, jak
+to v dílně skutečně chodí: **u každého materiálu stojí u váhy právě jedna
+otevřená konev.** Její číslo se opíše jednou, když se konev otevře, a
+aplikace ho pak sama otiskne do každé dávky, která z ní bere. Otevřením nové
+konve se předchozí uzavře jako dojetá — ze souboru ale nezmizí, protože
+dohledání jde právě po historii, ne po tom, co je otevřené teď.
+
+**Konev dojde uprostřed navažování** častěji, než by se čekalo, a dávka pak
+bere ze dvou. Tlačítko *Nová konev* stojí přímo u vážené složky: zapíše novou
+konev do evidence **a zároveň ji v otisku právě míchané dávky nahradí za tu,
+ze které se dovažovalo.** Ta je totiž ta, se kterou se reklamace dohledá.
+
+**Nový druh záznamu.** `evidence/sarze.csv`:
+
+| sloupec | co v něm je |
+|---|---|
+| `kod` | označení šarže, jak je natištěné na konvi |
+| `material` | název složky — tentýž jako v receptuře a v ceníku |
+| `dodavatel`, `expirace` | nepovinné, doplňují se při otevření |
+| `otevreno`, `dojeto` | kdy se konev načala a kdy dojela |
+| `stav` | `otevrena` / `dojeta` |
+
+Šarže se pozná **dvojicí materiál + kód**, ne kódem samotným: dodavatelé
+číslují každý po svém a dvě různé báze můžou mít shodné označení. Materiál se
+páruje názvem, ne id — id se receptuře mění při každém načtení databáze.
+
+`davky.csv` dostal jeden nový sloupec `sarze` na konci, ve tvaru
+`materiál=kód|materiál=kód`. Jako oddělovač bere **svislítko**: v označení
+šarže od dodavatele se nevyskytuje, na rozdíl od čárky, středníku i pomlčky.
+Druhý soubor by znamenal, že dávku bez něj nikdo nepřečte.
+
+**Dohledání se ptá odzadu.** Záložka *Šarže* má dvě karty: *Otevřené konve*
+(co stojí u váhy teď, s historií dojetých pod tlačítkem) a *Dohledání šarže* —
+zadá se kód z konve a vypíšou se dávky, zakázky a produkty, které z ní braly.
+Hledá se i podle části kódu, protože z konve se číslo opisuje rukou.
+
+**Starší soubor se chová jako dřív.** Dávka bez sloupce `sarze` se přečte
+a jen se nedohledá; čtení šarží snese i anglickou hlavičku (`lot`, `material`,
+`supplier`, `opened`, `closed`) a tabulku bez sloupce stavu — tam se konec
+pozná podle data dojetí. Prázdná složka se nedoplňuje ničím: prázdno v záznamu
+je poctivější než vymyšlené číslo.
+
+**Změřeno:**
+
+- **49 kontrol modelu** proti kódu vytaženému ze samotného `index.html`, žádná
+  chyba. Táž zkouška proti kopii, které se vrátila chyba, hlásí a vrací 1 —
+  bez zápisu šarže do CSV **1 nález**, bez uzavírání předchozí konve
+  **4 nálezy**; na souboru, ze kterého se měřit nedá, vrací 2
+- otisk dávky: složky `Process Blue` + `Transparentní báze` s otevřenými
+  konvemi, třetí složka bez konve → do dávky jdou **dvě šarže ze tří složek**,
+  třetí se nedoplní ničím
+- protočeno souborem tam a zpět: kód, šarže i zakázka sedí; staršímu souboru
+  se uřízl poslední sloupec → přečte se, šarže prázdná, ostatní údaje sedí
+- sloučení ze dvou míchaček: jedna otevřela `A4-3010` v čase 5000, druhá měla
+  v paměti `A4-2261` z času 1000 → po sloučení **obě v souboru**, platí
+  `A4-3010`, dřívější dojetá
+- proklikáno skutečnou myší: u váhy krok *19 3601 White* nese řádek
+  **„šarže A4-2261 · Nová konev"**; po zapsání `W-99031` u váhy stojí
+  *šarže W-99031* a v evidenci **`W-99031/otevrena`, `A4-2261/dojeta`**
+- dohledání `A4-2261` → **2 dávky**: `DAVKA-20260813-001` (Z-2299, MIKINA-L)
+  a `DAVKA-20260812-001` (Z-2261, TRIKO-M), obě se sloupcem *Z které konve*
+- most pozná nový druh souboru: hlavička šarží → `sarze`, tabulka materiálů
+  zůstává `material`, zbytky `?`
+- `kontrola_aplikace.py` 0, `prekryv.py --zalozky` 0 (čtyři šířky × dva režimy)
+
+**Rozhraní zůstalo tiché.** U váhy přibyl **jeden řádek**: číslo šarže a
+tlačítko. Žádný odstavec o tom, proč se šarže vede — kdo aplikaci zná, nečte
+ho, a komu je to potřeba vysvětlit, tomu odstavec u pole stejně nestačí.
+
+**Co se rozhodlo nechat být.** Aplikace nehlídá, že dávka má šarži u všech
+složek, a nebrání zapsat dávku bez šarže. Upozornění u váhy by znamenalo hlásit
+chybu tam, kde žádná není: složka, kterou dílna nekupuje v konvích, konev
+prostě nemá. Nechá se to na chvíli, kdy bude vidět, kolik dávek doopravdy
+vychází děravých.
+
+Napsaný výpočet pokrytí se proto **zase odebral**, i když byl hotový
+a odzkoušený. Funkce, kterou nikdo nevolá, vypadá při příštím čtení jako
+zapomenutá půlka práce — a než ji někdo dopíše, měl by nejdřív vědět, kolik
+těch děravých dávek je.
+
+Nezavedla se ani expirace konve, přestože sloupec v souboru je. Barva má
+vlastní expiraci u kelímku a druhá lhůta vedle ní by znamenala dvě čísla
+o tomtéž — do toho se nemá jít bez zadání od technologa.
+
+**Falešný poplach po cestě.** První snímek dohledání ukazoval prázdné pole,
+přestože se do něj psalo. Vinou nebyla aplikace: selektor `.searchbar input`
+trefil **hledání produktů ve schované kalkulaci**, která zůstává ve stromu
+(míchací režim se odpojit nesmí, přišel by o rozpracované vážení). Měřit se
+musí na selektor, který patří jen jedné obrazovce.
+
+## 80. Zpětná vazba z kontroly — oprava je záznam, ne vzpomínka
+
+**Problém.** Korekci po nátisku aplikace umí: technolog popíše, co na nátisku
+vidí, aplikace poradí čím korigovat a asistent vede dovážení. Jenže po
+zavření míchacího režimu po tom všem nezůstalo nic. Dílna dělá 1 209 oprav
+ročně po 47,8 minutách — a nemá jak zjistit, jestli jich ubývá, u kterých
+receptur se opravuje pořád dokola a co bývá nejčastěji špatně. Přehled
+konkurence to vede jako jediný řádek, kde X-Rite umí víc: záznam, že oprava
+nastala a proč.
+
+**Oprava je teď samostatný záznam** v `evidence/opravy.csv` — stejná mechanika
+jako dávky a šarže: kód `OPRAVA-RRRRMMDD-###` (čte se a opisuje jako kód
+dávky), sloučení ze dvou míchaček podle času poslední změny, zápis přes most.
+Nese to, co jinde není:
+
+| co | proč |
+|---|---|
+| že oprava nastala | počet je ta veličina, která se má snižovat |
+| proč — důvod z nabídky korekce | „je moc světlé", „je moc syté"… kódem i popisem |
+| čím a o kolik | kroky korekce `složka=gramy=síla` v jedné buňce, svislítkem jako šarže |
+| u čeho | receptura, zakázka, produkt, kód dávky |
+
+**Záznam nevzniká sám, a to schválně.** Aplikace nepozná, jestli technolog
+přidal půl procenta modré proto, že nátisk neseděl, nebo proto, že zkoušel
+odstín — a vymyšlený záznam je horší než chybějící. Zapisuje ho člověk u váhy
+jedním tlačítkem *Zapsat opravu do evidence* v boxu provedených korekcí, tedy
+přesně tam, kde korekci právě dodělal. O obrazovku dál by to už nikdo
+nezapsal.
+
+**Záložka Opravy po nátisku** odpovídá na dvě otázky: kolik oprav za období
+(30/90 dnů, rok, vše) a **u které receptury se opakují**. První číslo je
+měřítko, druhé je to, s čím se dá něco udělat: receptura, která se opravuje
+pořád dokola a pořád stejným směrem, se má opravit jednou v databázi, ne
+pokaždé znovu na nátisku. K tomu žebříček důvodů a seznam záznamů s rozpisem
+kroků.
+
+**Podíl dávek s opravou se nepočítá z ničeho půjčeného.** Oprava zapsaná bez
+kódu dávky (koriguje se i mimo míchací režim) se do podílu nepočítá a vypíše
+se zvlášť — dělit počtem všech oprav by podíl nafouklo. Bez jediné dávky za
+období se podíl nepočítá vůbec: dělit nulou nedává číslo, dává nesmysl. Čas
+oprav je počet × 47,8 minuty — jediná konstanta, cena se z něj nepočítá,
+hodinová sazba je věc účtárny.
+
+**Změřeno:**
+
+- **42 kontrol modelu** proti kódu vytaženému ze samotného `index.html`, žádná
+  chyba. Protizkouška: kopii s vrácenou chybou (podíl dělený všemi opravami
+  místo dávek s opravou) hlásí **2 nálezy** — podíl 125 % místo 75 % — a vrací 1
+- kroky přes den: `OPRAVA-20260818-001…003` v pořadí, další den `-001`
+- protočeno CSV tam a zpět: gramy, důvod, kroky, dávka před/po i čas sedí;
+  starší soubor jen se sloupci `kod;kdy;nazev;kroky` se přečte, gramy a počet
+  kroků se dopočtou z rozpisu, důvod se **nevymýšlí** — zůstane prázdný
+- sloučení ze dvou míchaček: poznámka doplněná později vyhraje v obou směrech,
+  záznam se nezdvojí
+- přehled za 30 dnů na zkušební sadě: 4 opravy / 3 dávky, s opravou 2 dávky
+  → podíl 66,7 %, 1 oprava bez dávky vypsaná zvlášť, 20,8 g, 191,2 min
+- proklikáno skutečnou myší: navážení 4 složek v simulaci → korekce „mírně"
+  přidala **0,36 g = 0,5 % z 72,45 g báze** → dovážení → *Zapsat opravu do
+  evidence* → **„Zapsáno jako OPRAVA-20260818-001"**, v úložišti záznam
+  s důvodem „je moc světlé" i poznámkou
+- záložka na zkušebních datech: Oprav 4 · Dávek 5 · s opravou 60,0 % ·
+  Přidáno 23,3 g · Čas oprav 3,2 h; PMS 300 C 3× „je moc světlé" s dovětkem,
+  že oprava složení v databázi stojí jednou to, co nátisk stojí pokaždé
+- most pozná nový druh: hlavička oprav → `opravy`, šarže, materiál i receptury
+  beze změny
+- `kontrola_aplikace.py` 0, `prekryv.py --zalozky` 0 (čtyři šířky × dva
+  režimy × všechny záložky), `mapa.py --kontrola` 0
+
+**Falešný poplach po cestě.** První průchod hlásil, že tlačítko zápisu není,
+přestože v souboru bylo. Kontrola viditelnosti přes `document.body.textContent`
+totiž čte i **zdrojový kód aplikace ve `<script>`** — text tlačítka „našla"
+ve zdrojáku, ne na obrazovce. A tlačítko opravdu vidět nebylo, ale správně:
+*Přidat do dávky* vrací asistenta ke kroku dovážení přidané složky, takže box
+provedených korekcí se ukáže až po dovážení. Ověřovat viditelnost se musí
+dotazem na prvky, ne na text stránky.
+
+**Co se rozhodlo nechat být.** Záznam se nepropisuje do receptury a nesnižuje
+sám žádné číslo — 1 209 oprav ročně je výchozí stav z rozboru A3 a klesat má
+v příštím rozboru, ne v aplikaci přepsáním konstanty. A oprava se nedá zapsat
+dvakrát k témuž kroku omylem: po zapsání se tlačítko schová za potvrzení
+„Zapsáno jako …" a další zápis patří až další korekci.
+
+## 81. Přepočet celého sortimentu na síto — obrácená kalkulace
+
+**Problém.** Spotřebu ze síta aplikace počítat uměla, ale jen odzadu dopředu:
+vybere se receptura, k ní síto, a vyjde jedno číslo pro jednu zakázku. Otázka,
+kterou dílna položí, když mění tkaninu — *„jdeme tisknout na 140-31, co to udělá
+s barvami, které máme"* — se dala zodpovědět jedině tak, že se receptury
+proklikaly jedna po druhé. X-Rite InkFormulation to má obráceně: síto je
+parametr a přepočítá se s ním celý sortiment naráz.
+
+**Co se změnilo.** Nová záložka **Přepočet na síto** a funkce
+`prepocetSortimentu`. Počítá se **týmž vzorcem** (`spotrebaZeSita`), jen se
+otočí, co je zadané: síto a podmínky zakázky platí pro všechny receptury naráz,
+z receptury se bere to, co má každá svoje — hustota, kryvost a referenční
+viskozita. Nic se nikam nezapisuje; zapsané síto receptury zůstává, jak je,
+a přepočet jen ukáže, o kolik se spotřeba proti němu liší.
+
+Nové v úvaze byly tři věci, které v zadání nestály:
+
+- **Sortiment se posouvá lineárně.** Spotřeba je přímo úměrná teoretickému
+  objemu tkaniny, takže všechny receptury se stejným zapsaným sítem se posunou
+  o týchž procent — ať mají hustotu jakoukoli. Vypsat 2 692 řádků s týmž číslem
+  by nebyl přehled, ale hluk. Proto je nad seznamem tabulka **odkud kam**: co
+  je dnes na 77-55, co na 120-34, a kolik jich to je.
+- **Rozdíl mezi barvami nedělá síto, ale cena gramu.** Síto posune všechny
+  stejně; co se receptura od receptury opravdu liší, je hustota a cena složení.
+  Proto se v seznamu řadí podle ceny zakázky, ne podle spotřeby.
+- **Cena se počítá na tisíc gramů dávky a teprve pak násobí gramy zakázky.**
+  Vyjde totéž — cena dávky je v gramech lineární — ale ví se i tehdy, když
+  plocha potisku zadaná ještě není.
+
+Podmínky zakázky (materiál, podklad) se nabízejí **jen ty, pro které má dílna
+zapsaný koeficient**. Materiál produktu bývá složený („Bambus / ABS") a klíč
+si spotřeba najde sama; nabízet dvě stě kombinací z katalogu, z nichž většina
+nezmění nic, by slibovalo vliv, který nemají.
+
+**Změřeno** (56 kontrol modelu v Node, funkce vytažené ze samotného
+`index.html`, síta a koeficienty ze skutečných parametrů dílny):
+
+- síto 120-34 dopočtené z geometrie tkaniny: oko 49,33 µm, otevřená plocha
+  35,05 %, tloušťka 54,4 µm → **Vth 19,065 cm³/m²**; při přenosu 0,70
+  a hustotě 1,2 g/ml → **16,015 g/m²**
+- hustota 1,0 → 13,346 g/m², hustota 1,4 → poměr přesně **1,4×**
+- přechod ze 77-55 na 120-34 je pokles o **34,81 %** — a stejně u hustoty 1,2
+  jako u hustoty 1,0, na čtyři desetinná místa shodně
+- zakázka 500 ks × 400 cm² se ztrátami 15 % → **368,34 g** dávky; při složení
+  90 % báze à 0,40 Kč/g a 10 % pigmentu à 1,20 Kč/g → **176,80 Kč**
+- dvousložková barva: 1 000 g báze za 500 Kč + 100 g tužidla za 80 Kč →
+  **0,58 Kč na gram dávky** → 368,34 g stojí **213,64 Kč**, a gramy zůstávají
+  dávkou báze, stejně jako v kalkulaci
+- neúplný ceník: polovina gramů se známou cenou dá **73,67 Kč** a u ceny stojí
+  „+" s výčtem složek, které ceník nezná — chybějící cena se nedoplňuje
+  průměrem, jinak by vyšla nižší, než jaká je
+- klišé pro tampontisk: hloubka leptu 18 µm jde rovnou do Vth → **15,120 g/m²**;
+  sítotiskové síto se do tampontisku nepustí vůbec
+- viskozita proti rozsahu síta 16—24 s: 12 s mimo, 20 s sedí, 30 s mimo,
+  **nezměřená se za závadu nepovažuje**
+- koeficienty se násobí, ne sčítají: kryvost 1,20 × materiál 1,30 × podklad
+  1,50 = **2,34×**
+- táž receptura na témž sítu dá v kalkulaci i v přepočtu **16,014803 g/m²** —
+  shodně na šest desetinných míst; přepočet nepočítá po svém
+- `kontrola_aplikace.py` 0, `prekryv.py --zalozky` 0 (čtyři šířky × dva režimy
+  × všechny záložky), `mapa.py --kontrola` 0
+
+**Dvě chyby po cestě.** Zkouška napoprvé hlásila šest nálezů a pět z nich byla
+**moje vlastní aritmetika**: očekávané hodnoty jsem spočítal ze zaokrouhleného
+Vth 19,07 místo skutečných 19,0648, takže gramy vycházely o dvě desetiny výš.
+Šestý nález byl horší — zkouška běžela proti **výtažku kódu z doby před
+úpravou**. Vytažený `chk.js` se musí přegenerovat po každém zásahu do
+`index.html`, jinak zkouška poctivě ověřuje minulost.
+
+Druhá věc se ukázala až na obrazovce: texty byly složené z podstatného jména
+v prvním pádě, takže hlásily *„mimo rozsah doporučený k tomuhle síto"* a
+*„1 receptur nemá zapsané žádné síto"*. Klišé se neskloňuje, síto ano — tvary
+jsou teď tři (síto, sítem, sítu) a počty se skloňují taky (1 receptura,
+2 receptury, 5 receptur).
+
+**Co se rozhodlo nechat být.** X-Rite umí síto do receptur **zapsat** hromadně.
+Tady ne: přepsat 2 692 receptur licencované databáze jedním tlačítkem je zásah,
+který se nedá vzít zpět, a síto je údaj technologa, ne výsledek výpočtu.
+Přepočet je proto na čtení. A neukazuje se součet spotřeby přes celý sortiment
+— netiskne se 1 100 barev naráz, takže by to bylo číslo, které nic neznamená.
+
+**Kdy se to dílně rozsvítí.** Zatím jsou v `parametry/sita.csv` řádky jen pro
+SCR a PDP, a ostrá je FIR — v ní tedy záložka řekne, že pro tuhle technologii
+nejsou zapsaná žádná síta s teoretickým objemem a není z čeho počítat. To je
+správná odpověď, ne chyba: dokud tkanina nemá parametry, spotřeba se nedá
+tvrdit. Jakmile se do souboru zapíšou síta pro FIR, přepočet se rozjede sám.
+
+
+---
+
+## 82. Aplikace se skládá z částí — index.html je od teď výstup
+
+**Problém.** `index.html` narostl na 13 456 řádků. Každý zásah začínal tím, že
+se v něm hledalo místo — `MAPA.md` byl jediný způsob, jak se v souboru vyznat,
+a i tak se čísla řádků posouvala po každé změně. Dvě věci se nedaly udělat
+vůbec: vzít si na starost jednu oblast, aniž by se otevřel celý soubor, a
+pracovat na dvou místech naráz, protože každá úprava sahala do stejného souboru.
+
+**Co se změnilo.** Soubor je rozřezaný do `zdroj/` na 72 částí a `index.html`
+z nich skládá `sestav.py`. Skládání je prosté zřetězení v pořadí ze
+`zdroj/poradi.txt` — žádný překlad, žádný build. Proto se nemůže stát, že
+aplikace bude obsahovat něco jiného, než co je v částech.
+
+| složka | co je uvnitř | částí |
+|---|---|---:|
+| `00-hlava/` | hlavička a kostra stránky | 2 |
+| `10-styl/` | CSS po oblastech (proměnné, rozvržení, prvky, míchání) | 7 |
+| `20-zaklad/` | technologie, barva potisku, kód, SGPS, PDF, pokrytí, čtečka | 14 |
+| `30-app/` | App, záložky, heslo | 3 |
+| `40-kalkulace/` | kalkulace, váha, míchací režim, vážení | 7 |
+| `50-zbytky/` | zbytky, fronta, propad, dávky, šarže, opravy, shluky | 20 |
+| `60-databaze/` | produkty, receptury, ceník, import, síta | 8 |
+| `70-pravidla/` | zámek technologií, zástupnost, korekce, aditiva | 8 |
+| `80-cena/` | cena dávky, úspora, likvidace, čárový kód | 3 |
+| `99-zaver/` | pomocné komponenty a spuštění | 3 |
+
+Rozdělení nebylo na výběr úplně volné. Aplikace se v dílně otevírá dvojklikem
+(`file://`), takže ES moduly nepřipadají v úvahu — prohlížeč je odtamtud
+zablokuje. Bundler by do projektu přinesl Node, který tu vědomě není. A několik
+`<script src>` za sebou by znamenalo zrušit obalovou funkci a vysypat všech
+200 funkcí do globálního jmenného prostoru. Zřetězení v Pythonu je jediná cesta,
+která nechává balíček i způsob spouštění přesně tak, jak byly.
+
+**Dvě pojistky.** Past tohohle uspořádání je jediná: někdo sáhne do `index.html`
+přímo a příští sestavení mu to zahodí. Proto si `sestav.py` pamatuje otisk
+posledního výstupu a při rozporu odmítne sestavit, dokud se nepotvrdí
+`--prepis`. Druhá pojistka jde opačně: soubor ve `zdroj/`, který není
+v `poradi.txt`, by se do aplikace tiše nedostal — sestavení proto skončí
+chybou a vypíše ho.
+
+**Změřeno:**
+
+- 72 částí, 13 456 řádků; složené zpět dávají **bajt po bajtu tentýž soubor**
+  (otisk `aea66cd3d01773cfbc2c11abf8646529` před řezem i po něm)
+- největší část `40-kalkulace/240-calc.js` má 2 164 řádků, medián části 143
+- `kontrola_aplikace.py` po sestavení: kořen 1 potomek, DOM 773 978 znaků,
+  žádná chyba
+- z kořene balíčku odešlo 18 souborů `*.bak` (11 MB) do `zaloha/`
+
+**Chyba, kterou to nejdřív mělo.** První řezačka stála na tabulce čísel řádků
+a jistila se otiskem souboru. Neprošla: `index.html` se během práce dvakrát
+změnil pod rukama (souběžná práce na přepočtu sortimentu) a tabulka byla
+pokaždé okamžitě neplatná. Přepsané na kotvy v textu — část se hledá podle
+začátku řádku, ne podle pozice — a řez pak proběhl proti souboru, který mezitím
+narostl o dvacet řádků, bez jediné úpravy tabulky.
+
+Druhá vada byla v kotvách samotných: `/* ==================== S` sedělo na
+bannerech *SPECIFIKACE* i *SÍTA*. Kotva se proto ověřuje na jedinečnost a
+při dvou trefách se nic neřeže — vypíše se, kde obě jsou.
+
+**Co se rozhodlo nechat být.** `240-calc.js` (2 164 řádků) a `210-app.js`
+(1 061) zůstávají velké, protože každý z nich je **jedna funkce**. Rozříznout
+je znamená rozdělit komponentu, ne soubor — to je vlastní zásah do aplikace,
+ne úklid, a dělá se zvlášť. Sestavení je hlásí po každém běhu, aby na ně bylo
+vidět.
+
+Do `MAPA.md` se nepsala cesta k souboru ke každé z ~450 položek rejstříku —
+nafouklo by ho to. Přibyla místo toho jedna tabulka částí s rozsahy řádků,
+takže z čísla v rejstříku je soubor na jedno nahlédnutí.
+
+
+---
+
+## 83. Kód bydlí ve složkách, index.html je jen seznam odkazů
+
+**Problém.** Rozdělení do částí (kapitola 82) mělo vadu, která se ukázala hned:
+`index.html` měl pořád 13 456 řádků. Části se při sestavení slepovaly zpátky do
+jednoho souboru, takže rozdělené to bylo jen pro toho, kdo psal — kdo soubor
+otevřel, viděl přesně to co dřív. A po každé úpravě se muselo sestavovat.
+
+**Co se změnilo.** Kód se přestěhoval do `aplikace/` a **v index.html žádný
+není**. Zůstala tam hlavička, kostra stránky a seznam odkazů:
+
+```html
+<link rel="stylesheet" href="aplikace/10-styl/020-promenne.css">
+...
+<script src="aplikace/40-kalkulace/240-calc.js"></script>
+```
+
+Části si načte prohlížeč sám, v pořadí ze seznamu. Tím **odpadl build krok**:
+změní se soubor v `aplikace/`, dá se F5 a je to. `sestav.py` se pouští jen
+tehdy, když část přibude, ubude nebo se přesune.
+
+Načítají se jako **obyčejné skripty, ne moduly**. Moduly by daly opravdovou
+zapouzdřenost, ale prohlížeč je z `file://` odmítne — a aplikace se v dílně
+otevírá dvojklikem. To rozhodlo.
+
+**Cena, kterou to má.** Obalová funkce se rozpadla; co bylo uvnitř ní, je teď
+v globálním prostoru. Než se to udělalo, ověřilo se, co to znamená: 338 názvů
+na nejvyšší úrovni proti 1 236 vlastnostem `window` v Chrome dalo **nula
+srážek**. Přísný režim, který dřív držel obal, si teď nese každý soubor sám
+prvním řádkem `"use strict";`.
+
+Pořadí načítání je pořadí, ve kterém kód běžel dřív — doslova. Kdyby se
+prohodilo, rozbila by se místa, kde se konstanta počítá při načtení z funkce
+zapsané níž; v jednom souboru to drželo vytahování deklarací nahoru, přes
+soubory už ne.
+
+**Změřeno:**
+
+- `index.html`: **13 456 → 100 řádků** (5,4 kB), odkazuje na 7 stylů a 63 skriptů
+- kód: 13 505 řádků v 72 souborech, největší `240-calc.js` 2 165, medián 143
+- vykreslení po přestěhování: kořen **1 potomek, 37 355 znaků** — přesně tolik
+  jako před zásahem; celý DOM spadl z 773 978 na 43 808 znaků, protože kód
+  v dokumentu už neleží
+- všech 70 odkazů míří na soubor, který existuje
+- 338 názvů × 1 236 vlastností `window` = 0 srážek
+
+**Nástroje, které četly index.html.** Tři z nich v něm hledaly kód, který tam
+už není — `rozbor_aktualizuj.py` (technologie, záložky, klíče úložiště),
+`barvy_nastroj.py` (proměnné vzhledu) a `mapa.py`. Dostaly společný modul
+`zdrojak.py`, který jim části poskládá do jednoho textu v pořadí načítání.
+Nálezy tak pořád platí i v aplikaci.
+
+`MAPA.md` kvůli tomu změnil zápis: čísla u položek jsou teď `část:řádek`
+(`Calc 29:2` = část 29 z tabulky, řádek 2 v ní) místo řádku v jednom velkém
+souboru. Čísla se tím přestala posouvat po každé cizí změně jinde.
+
+**Co se rozhodlo nechat být.** `240-calc.js` a `210-app.js` zůstávají velké —
+každý je jedna komponenta a rozříznout ji je zásah do aplikace, ne úklid.
+`rozdel.py` byl smazán: řez proběhl a znovu spustit ho nejde, jen by mátl.
+
+
+## 84. Sestavy a trendy — evidence konečně umí sečíst sama sebe
+
+**Problém.** Dílna zapisuje každou dávku i každý kelímek, ale nikde se to
+nesčítalo. Na otázku „kolik barvy nám projde za měsíc" nebo „která barva se
+míchá pořád dokola" se odpovídalo odhadem, a úspora materiálu zůstávala v A3
+napsaná jako „zatím nevyčísleno". Data přitom v souborech ležela — jen je
+nikdo nedal dohromady. Konkurence (GSE, IMS) tohle prodává jako přednost.
+
+**Co se změnilo.** Přibyla záložka **Sestavy a trendy** se třemi sestavami
+nad evidencí, která už existuje:
+
+| sestava | z čeho se počítá |
+|---|---|
+| spotřeba po měsících | dávky a kelímky, sečtené podle kalendářních měsíců, s pruhem a změnou proti minulému měsíci |
+| nejčastější odstíny | tytéž záznamy podle názvu barvy — kolikrát, kolik gramů, jaký podíl, naposledy |
+| zbytky | co leží ve skladu, co se z nich vrátilo do tisku, co se ušetřilo a co propadlo |
+
+Sčítání má dvě pravidla, bez kterých by čísla lhala. **Dávka a kelímek bývají
+tatáž směs zapsaná dvakrát** — ukazuje-li dávka na kelímek, počítá se jednou,
+a to z dávky, protože ta nese i tužidlo. **Slitý kelímek není nová barva**,
+jen přelitá stará, takže do namíchaného nepatří vůbec; jinak by se táž barva
+sečetla podruhé.
+
+Prázdný měsíc uvnitř řady zůstává — tehdy se opravdu nemíchalo. Prázdné
+měsíce **před** první zapsanou dávkou se useknou a řekne se kolik: to není
+údaj o dílně, jen o tom, že evidence tehdy ještě neběžela. Z nuly se taky
+nepočítá změna — „o nekonečno víc" není trend, tam se mlčí.
+
+**Jeden sloupec musel přibýt.** Kolik korun zbytek ušetřil, evidence věděla
+(`uspora`), kolik gramů se z něj vzalo, ne. Kelímek proto dostal `zbytek_g`
+a zapisuje ho totéž místo, které zapisuje úsporu. Zpětně se to dopočítat
+nedá — cena gramu se od té doby změnila —, takže se u starších kelímků
+o gramech mlčí a sestava řekne, kolika dávek se to týká.
+
+**Změřeno.** Na modelové evidenci (9 dávek, 12 měsíců zpět):
+
+- namícháno **7 800 g** v 9 dávkách, 3 odstíny; vyhozeno **550 g = 7,1 %**
+- srpen 2 100 g proti červenci 1 600 g → **+31 %**; z dvanáctiměsíčního okna
+  se useklo **8 prázdných měsíců** před první dávkou
+- PANTONE 300 C: 4× a 4 700 g = **60,3 %** namíchaného
+- sklad **736 g v 6 kelímcích**, znovu použito **240 g** ve 3 dávkách,
+  ušetřeno **111,90 Kč** a 4,20 Kč na svozu, propadlo **120 g v 1 kelímku**
+- dávka 1 000 g báze + 100 g tužidla se do měsíce započítala jako 1 100 g
+  jednou, ne dvakrát, přestože k ní kelímek existuje
+
+Model má **54 kontrol** puštěných proti skutečným částem aplikace (funkce se
+neopisovaly, načetlo se všech 76 částí v pořadí ze soupisu). Sloupec projde
+souborem tam a zpět (221,25 g), soubor **bez** sloupce `zbytek_g` se chová
+jako dřív a jde dál zapsat. Vykreslení: kořen 1 potomek, 37 355 znaků,
+`prekryv.py` čistý ve všech čtyřech kombinacích šířky a motivu.
+
+**Co se rozhodlo nechat být.** Smazaný kelímek se v evidenci nevede, takže do
+propadlého nemůže vstoupit — počítá se jen to, co v souborech zůstalo. Do
+sestav se nedostane ani ručně uložený zbytek bez zapsané velikosti dávky:
+je to zbytek, ne dávka, a hádat, kolik se pro něj namíchalo, by znamenalo
+nafouknout spotřebu.
+
+
+---
+
+## 85. Role a schvalování — kdo za odstín ručí
+
+**Problém.** U jedné aplikace stojí dva různí lidé a aplikace mezi nimi
+nerozlišovala. Technolog rozhoduje, co se v dílně míchá; tiskař u váhy podle
+toho míchá. Jenže u obou obrazovek šlo přepsat cizí recepturu, smazat ji
+i sáhnout do ceníku, ze kterého míchá celá dílna. A hlavně: u vlastního
+odstínu nikde nestálo, **kdo za něj ručí**. Barva namíchaná od oka na jednu
+zakázku se tvářila přesně jako standard, který technolog vyvzorkoval — a při
+další zakázce se nabídla stejně samozřejmě.
+
+**Co se změnilo.** Rozdělilo se to na dvě věci, které spolu nesouvisí:
+
+| | drží si to | proč |
+|---|---|---|
+| **co kdo smí** — role | prohlížeč (`irm-role`) | u váhy stojí tiskař pořád, v kanceláři technolog pořád; přepínat to při každém spuštění by nikdo nedělal |
+| **kdo za recepturu ručí** — schválení | soubor vlastních receptur | musí to vidět i druhá míchačka |
+
+Role jsou dvě. Tiskaři **nechybí nic, čím odesílá zakázku** — kalkulace,
+navážení, štítek, zbytky, fronta i záznam opravy zůstávají. Ubrané je jen to,
+co mění podklady pro celou dílnu: zakládání a mazání receptur, ceník,
+odemykání technologií, správa databází. Mazání má nově **jedno hrdlo** pro
+celou aplikaci, takže se na roli ptá i mazání kelímku a odebrání databáze.
+
+Vlastní odstín smí odvodit **i tiskař** — po nátisku ho potřebuje hned
+a zavřít mu to znamená, že aplikaci obejde. Vzniká ale jako **čekající**:
+
+- míchat podle ní jde **na kombinaci, kvůli které vznikla** (produkt, barva,
+  technologie, poloha) — tam se s ní pracuje jako s každou jinou
+- **jinde se nenabídne**, dokud ji technolog neschválí; u dalšího produktu by
+  to už byl nový standard dílny
+- od technologa je schválená rovnou tím, že ji založil. Druhé kliknutí navíc
+  by nic nedokazovalo a v dílně s jedním technologem by se odklikávalo naslepo
+
+Záložka **Ke schválení** ukazuje u každé čekající receptury podklad, ze
+kterého vyšla, **rozdíl proti němu po složkách**, kdo ji zadal a na co platí.
+Rozdíl je to hlavní, co se posuzuje: dvě desetiny modré navíc jsou něco jiného
+než přepsané složení. Zamítnutí si žádá důvod a receptura **se nemaže** — kdo
+podle ní míchal, se musí dozvědět proč.
+
+Do souboru vlastních receptur přibylo šest sloupců (`schvaleni`, `schvalil`,
+`schvaleno_kdy`, `duvod_zamitnuti`, `zadal`, `zadano_kdy`), celkem jich má 30.
+
+**Prázdný sloupec znamená schválená.** To je celé rozhodnutí, na kterém to
+stojí: databáze od dodavatele ani soubor z dřívějška sloupec nemá, a kdyby
+prázdno znamenalo „čeká", zablokovala by se pouhou výměnou verze celá dílna
+naráz. Čeká se jen tam, kde to někdo výslovně zapsal.
+
+**Změřeno:**
+
+- model **47 kontrol** proti kódu vytaženému ze všech 76 částí, ne proti opisu
+- receptura protočená souborem tam a zpět se vrátila stejná: stav `ceka`,
+  „Dvořák (tiskař)", čas zadání, obě složky (62 % a 38 %) i vazba
+  `A4-01|BLK|SCR|Hrud`
+- po schválení soubor nese `schvaleno` a „Novák (technolog)"; po zamítnutí
+  `zamitnuto` a důvod „je moc světlé"
+- starší soubor **bez nových sloupců** se vrátil jako schválený a nabízí se
+  dál; obnova z databáze bez sloupců čekající recepturu **nepřepsala** na
+  schválenou (0 přidaných, 1 obnovená, stav zůstal `ceka`)
+- skutečný soubor dílny po změně: **3 receptury, 12 složek, 2 s vazbou**, všechny
+  schválené — beze jména ani s nulovou hustotou žádná
+- proklikáno skutečnou myší: nabídka → Ke schválení → **Schválit** zapsalo
+  `schvaleno` + „Novák (technolog)" + čas; v roli tiskaře je v Recepturách
+  **0 tlačítek** Upravit, Smazat i Nová receptura a místo nich jedna věta
+- vykreslení: kořen 1 potomek, 37 355 znaků; `prekryv.py` čistý ve všech
+  čtyřech kombinacích šířky a motivu **i na všech záložkách**
+
+**Zkouška ověřená protichůdně.** Na opravené aplikaci nehlásí nic. Na kopii
+s vrácenými chybami — schválení se při nabízení ignoruje a razítko od tiskaře
+je rovnou schválené — našla **6 nálezů ze 47** a vrátila nenulový kód.
+
+**Chyba, kterou jsem udělal po cestě.** Snímkování s nasazenou zkušební
+recepturou zapsalo tu vymyšlenou barvu do skutečného `receptury_vlastni.csv` —
+most běžel a aplikace ukládá 1,5 s po každé změně. Po třetím spuštění se
+v souboru sešly tři kopie téhož názvu a aplikace u nich poctivě ukázala
+`Součet složek 200,0 %`. Soubor se vrátil ze zálohy, otisk sedí
+(`f5a9d46b…`). Poučení je v `irm-overeni` bod 7 a platilo doslova: **před
+proklikáváním, které ukládá, se zálohuje.**
+
+**Co se přitom ukázalo a nechalo být.** Receptury se ze souboru skládají
+**podle názvu**, takže dvě vlastní barvy se stejným názvem v souboru splynou
+v jednu se sečteným složením. Se schvalováním to nesouvisí — je to tak od
+začátku a název si drží proto, že id se receptuře při každém načtení mění.
+Do téhle změny to nepatří, ale stojí za to o tom vědět.
+
+**Co se rozhodlo nechat být.** Role není zámek. Přepnutí zpět na technologa se
+ptá na heslo dílny, a když žádné nastavené není, přepne se bez ptaní — což
+aplikace říká nahlas. Zamknout se sám sobě (přepnout na tiskaře) jde vždycky
+bez ptaní; není to nebezpečné. Kdo chce skutečnou ochranu, nastaví heslo
+v Import / data.
+
+## 86. Vzorník receptur zůstával bílý — jedna zavírací značka navíc
+
+**Problém.** Kdo měl u receptur přepnuto na vzorník odstínů, tomu se po
+kliknutí na *Receptury* neukázalo nic — a nejen záložka: zmizela **celá
+aplikace**, i rozdělaná kalkulace. Volba pohledu se drží v úložišti
+prohlížeče (`irm-rec-view`), takže to nebyla nahodilá porucha. Komu jednou
+vzorník naskočil, tomu se receptury nenačetly už nikdy, dokud si úložiště
+nesmazal. V tabulkovém pohledu přitom všechno chodilo, takže se to na první
+pohled tvářilo jako problém s daty.
+
+**Příčina.** V kartě odstínu v `aplikace/60-databaze/380-receptury.js` stála
+zavírací značka `</div>` o řádek dřív, než měla. Poznámka o neschválené
+vlastní receptuře tím vypadla ven z textového bloku karty a na konci zbyla
+značka navíc:
+
+```
+                  ${Math.abs(sum - 100) > 0.01 && html`…Σ…`}
+                </div>          ← tahle zavírala blok předčasně
+                  ${r.type === "Custom" && !jeSchvalena(r) && html`…`}
+                </div>
+```
+
+Odsazení to prozradilo dřív než čtení: dvě zavírací značky na téže úrovni
+(16 mezer) za sebou, mezi nimi obsah odsazený hlouběji. Odsazení do schodů
+nesedělo. Oprava je odebrání té první — poznámka o schválení patří dovnitř
+karty, ke zbylým poznámkám.
+
+**Proč to prošlo.** Nespárované značky v htm nejsou chyba syntaxe: `node
+--check` na souboru projde a `kontrola_aplikace.py` taky, protože ta otevírá
+aplikaci na kalkulaci a k vykreslení vzorníku vůbec nedojde. Šablona se
+rozpadne až ve chvíli, kdy se doopravdy vykresluje — hláškou `h.push is not a
+function`. Past číslo jedna ze skillu `irm-zmena`, potřetí ze stejné příčiny.
+
+**Změřeno:** se vzorníkem uloženým v úložišti měl kořenový prvek **0 potomků**
+a zachycená hláška zněla `TypeError: h.push is not a function`. Po opravě
+**1 potomek**, 387 821 znaků, `Receptury barev (2 692)`, žádná hláška.
+Tabulkový pohled se nezměnil: 2 692 receptur, 82 řádků ceníku.
+
+**Proklikáno zbytek aplikace.** Protože stejná past mohla čekat i jinde,
+prošlo se **14 záložek, každá ve vlastním běhu prohlížeče**, plus vzorníkový
+pohled u produktů i receptur. Všech 16 kombinací se vykreslilo bez jediné
+hlášky. Jediné rozbité místo v aplikaci byl vzorník receptur.
+
+**Co se ukázalo o kontrole.** `kontrola_aplikace.py` dokazuje jen to, že se
+vykreslí **výchozí** obrazovka. Co je vidět až po kliknutí, si musí kliknout —
+prokliknutí všech záložek trvá pár minut a najde přesně tu třídu chyb, kterou
+kontrola syntaxe ani kontrola vykreslení nezachytí.
+
+## 87. Typ barvy se měří materiálem produktu — řada ví, na co jde
+
+**Problém.** Aplikace nabízela receptury zúžené technologií polohy, ale
+technologie o povrchu nic neříká: tampontiskem se tiskne na plast stejně jako
+na kov, a barva určená na plast se z kovu sedře. Jestli řada (Printcolor
+MS 660, MS 786, Ferro Xpression) na materiál konkrétního produktu vůbec jde,
+věděl jen tiskař, který to už někdy zkusil — aplikace mu to říct neuměla.
+
+**Co se změnilo.** Řada barev JE typ barvy a k typu přibyl druhý rozměr:
+materiál. V `parametry/databaze.csv` je nový sloupec `materialy` — na jaké
+povrchy typ jde, podle údaje výrobce barvy (čárkou: `Kov, ABS, Sklo`; prázdné
+= zatím neurčeno, typ se nabízí bez omezení). V kalkulaci pak:
+
+- v nabídce řad má každý typ značku proti materiálu vybraného produktu:
+  `✓ na Kov`, nebo `× není na Silikon / Plast`,
+- vybraná receptura typu, který na materiál produktu určený není, zvedne
+  upozornění s odkazem na soubor, kde se to řídí,
+- u produktu z více materiálů se řekne nahlas, že katalog neví, z čeho je
+  potiskovaný díl — poslední slovo má tiskař.
+
+Katalog uvádí materiál jako jeden řetězec za celý produkt (`Silikon / Plast`),
+takže se rozkládá na množinu: dělí jen lomítko s mezerami, protože lomítko
+bez mezer je součást názvu (`Papír/karton`, `Kůže/imitace`). Na díly se
+množina nepřiřazuje — pořadí materiálů v katalogu pořadí poloh neodpovídá
+a tvrzení o víčku, které nikde nestojí, by se u váhy bralo jako fakt.
+Nevhodný typ se **neskrývá, jen značí**: skrytá řada by vypadala jako
+chybějící databáze. A dokud dílna sloupec nevyplní, nezúží se nic — neúplný
+podklad se nevydává za zjištění.
+
+**Změřeno:** 20 zkoušek v Node prošlo — rozklad řetězců (`Silikon / Plast` →
+2 materiály, `Kůže/imitace` → 1), shoda přes diakritiku a velikost písmen
+(`porcelan` = `Porcelán`), starý soubor bez sloupce vrátí prázdný slovník
+a nic neshodí. Katalog: 1 320 produktů, 723 s více materiály, 120 bez
+materiálu. V prohlížeči po skutečném kliknutí: nabídka řad ukázala
+`PMS 660 (778) · × není na Silikon / Plast` a pod výběrem stálo upozornění
+s oběma materiály; po doplnění materiálu typu se totéž překlopilo na hlášku
+o více materiálech. Data beze změny: `receptury_vlastni.csv` po testu binárně
+shodný se zálohou.
+
+**Vlastní chyba po cestě.** Text upozornění se lepil přes hranice značek —
+naměřeno v textu stránky: `Plast.Produkt` a `typuPMS 660`. htm zahazuje
+mezeru mezi koncem prvku a textem na dalším řádku; mezera se musí napsat
+výslovně (`${" "}`) nebo držet na řádku u výrazu.
+
+## 88. Databázi z jiné technologie nešlo v recepturách vůbec zapnout
+
+**Problém.** V Recepturách se nedalo přepínat mezi řadami. Klik na štítek
+`receptury_PMS_660` se choval, jako by se nic nestalo — svítilo dál „vše“
+a tabulka ukazovala pořád totéž. Nešlo to nahodile: při technologii FIR nešel
+zapnout PMS 660 ani PMS 786, při TXP a PDP zase Ferro Xpression. Z dílny to
+vypadá, že se databáze nenačetla, a jde se hledat do souborů — přitom soubory
+jsou v pořádku.
+
+**Příčina.** Filtr databází je jeden společný pro celou aplikaci a hlídá si,
+aby vybraná databáze patřila k technologii; když nepatří, vrátí výběr na „vše“.
+Jenže kalkulace se při odskočení jinam neruší, jen schová (`display:none`), aby
+se rozdělaná práce neztratila — a schovaná kalkulace to hlídání dělala dál,
+podle technologie své polohy potisku. Volbu udělanou v Recepturách tak přepsala
+zpátky na „vše“ dřív, než ji obrazovka stihla ukázat.
+
+Druhá půlka: i kdyby štítek zůstal rozsvícený, tabulka by byla prázdná —
+zúžení na technologii vyhodilo všech 778 receptur z PMS 660, protože ta řada
+k FIR nepatří.
+
+**Co se změnilo.**
+
+| kde | jak to je teď |
+|---|---|
+| `FiltrDatabaze` | nová vlastnost `aktivni` — vracet výběr na „vše“ smí jen filtr, na který je právě vidět |
+| `Calc` | dostává `skryta` a předává dál `aktivni=${!skryta}` |
+| Receptury | vybraná databáze má přednost před zúžením na technologii, pokud by po zúžení nezbylo vůbec nic; pod štítky stojí, že řada k technologii nepatří a v kalkulaci se nenabídne |
+| Přepočet na síto | nabídka řad se počítá z receptur zúžených jen technologií, ne z už vyfiltrovaného sortimentu — dřív po výběru zbyla v nabídce jediná řada, ta vybraná |
+
+Kalkulace zůstává přísná. Tam se míchá, a řada z cizí technologie se tam
+nenabídne ani teď — zúžení tam platí dál tvrdě.
+
+**Změřeno.** V prohlížeči po skutečném kliknutí, 2 692 receptur ze čtyř souborů:
+
+- před opravou: FIR → PMS 660 ✗, PMS 786 ✗, Xpression ✓ · TXP → 660 ✓,
+  Xpression ✗ · PDP → 660 ✓, 786 ✓, Xpression ✗; uložený filtr zůstal `""`
+- po opravě zapne štítek a udrží ho každá zkoušená kombinace technologie a řady
+- FIR + PMS 660: hlavička `Receptury barev (778 z 2 692)` a 100 vykreslených
+  řádků (strop tabulky) místo hlášky „Zatím žádné receptury“
+- návrat do Kalkulace při FIR: filtr se sám vrátil na `""`, nabídka řad
+  `Všechny řady (1 097)` + `PMS Xpression (1 097)` — PMS 660 se nenabízí
+- Přepočet na síto při PDP s vybraným PMS 660: nabídka
+  `Všechny řady (1 595) · PMS 660 (778) · PMS 786 (814) · vlastni (3)`
+  místo dosavadních dvou položek
+- `prekryv.py` 0 při osmi kombinacích šířky a režimu, `kontrola_aplikace.py` 0
+
+**Falešná stopa na začátku.** Nejdřív to vypadalo na strop `pantoneList.slice(0, 400)`
+ve výběru v kalkulaci — receptura za čtyřstou by se v nabídce neobjevila. Měření
+to nepotvrdilo: štítek nedržel ani u řady o 778 recepturách a v Recepturách žádný
+takový strop není. Strop zůstává, jak byl.
+
+**Cizí překážka po cestě.** Aplikace se v tu chvíli nevykreslovala vůbec. Nová
+část `70-pravidla/455-material.js` zavedla `klicMaterialu`, které se srazilo se
+stejnojmennou pomůckou v `50-zbytky/620-sarze.js` — části sdílejí jeden jmenný
+prostor, takže `SyntaxError: Identifier 'klicMaterialu' has already been declared`
+shodil celou stránku. Šaržová pomůcka se přejmenovala na `klicMaterialuSarze`
+(11 míst ve dvou částech), nová část zůstala beze změny.
+
+## 89. Poloha potisku dostala vlastní typy barev — technolog přiřadí, kalkulace poslechne
+
+**Problém.** Značení podle materiálu (kap. 87) je odhad z katalogu — řekne, co
+by na produkt jít mohlo, ale rozhodnutí nechává na tiskaři u každé zakázky
+znovu. Dílna přitom u zavedených produktů ví přesně, čím se která poloha
+tiskne: na víčko láhve jde tampontisková MS 786 a nic jiného. Tohle vědění
+nebylo kam zapsat, takže nabídka receptur zůstávala široká a vybrat špatný typ
+šlo mlčky.
+
+**Co se změnilo.** V záložce Produkty má každá tisková poloha štítky typů
+barev — nabízejí se jen typy, jejichž databáze patří k technologii polohy.
+Klik přiřadí nebo odebere a hned se zapíše do nového souboru
+`parametry/typy_poloh.csv` přes most (`ref;technologie;poloha;typy;pozn`),
+aby přiřazení platilo na všech počítačích. Kalkulace pak na poloze
+s přiřazením nabídne **jen receptury přiřazených typů** — u ruční zakázky
+i u načtené ze zakázkového listu, protože obojí končí výběrem téže polohy.
+
+- klíč řádku je ref + technologie + název polohy, ne id — id dostávají
+  položky při každém načtení katalogu znovu a vazba by se rozpadla,
+- ruční přiřazení smí nabídku doopravdy zúžit (na rozdíl od materiálu, který
+  jen značí): je to rozhodnutí technologa, ne odhad,
+- receptury bez zdroje (ruční, rozpracované) se nezužují — přiřazení mluví
+  o databázích a o ručně zadané barvě neříká nic,
+- poloha bez řádku v souboru se chová jako dřív; bez mostu jsou štítky
+  zamčené, protože zúžení musí platit všude, ne v jednom prohlížeči,
+- vybraná receptura nepřiřazeného typu (vazbou, výchozím výběrem) zvedne
+  upozornění — jinak by omezení šlo obejít, aniž si toho kdo všimne,
+- i odvození nové custom barvy vychází jen z přiřazených typů.
+
+**Změřeno:** 17 zkoušek v Node prošlo — zápis a čtení zpět, přepis buňky
+místo druhého řádku, poznámka dílny přežije zápis, vyprázdnění řádek nemaže,
+zápis dvou poloh po sobě (sloučení ze dvou počítačů), středník i lomítko
+v názvu polohy, cizí soubor bez sloupců vrátí prázdno. V prohlížeči celý
+oběh po skutečném kliknutí: klik na štítek PMS 786 u polohy PDP → soubor
+vznikl se správným řádkem → po čerstvém načtení nabídka řad jen
+`PMS 786 (814)` místo 1 592 receptur pro PDP, s hláškou o přiřazení;
+vybraná receptura typu PMS 660 zvedla upozornění. Data beze změny:
+`receptury_vlastni.csv` binárně shodný se zálohou, testovací
+`typy_poloh.csv` po testu smazán.
+
+**Vlastní chyba po cestě.** První verze zápisu řádek polohy nenašla
+a připsala ho podruhé — `rozdelRadek` nechává buňku i s uvozovkami, takže
+klíč z `"Sportovní Láhev / Víčko lahve"` neseděl na klíč z necitovaného
+názvu. Chytila to zkouška (2 řádky místo 1); buňky se před porovnáním
+odcitovávají.
+
+## 90. Databáze Ferro Xpression se vrátila k původnímu názvu souboru
+
+**Problém.** Soubor s licencovanými formulemi Ferro se v dílně jmenoval
+`receptury_PMS_Xpression.csv`. Předpona `PMS` patří Printcolor Mischsystem
+(MS 660, MS 786) — u Ferro nedávala smysl a v nabídce řad stály vedle sebe
+tři „PMS" databáze, z nichž jedna byla od jiného výrobce. Aplikace dělá štítek
+z názvu souboru, takže se ten omyl ukazoval technologovi pokaždé.
+
+**Co se změnilo.** Soubor se jmenuje `receptury_Ferro_Xpresssion.csv`, jak se
+jmenoval původně. Přejmenování se táhne přes tři místa, aby data zůstala celá:
+
+| místo | co se opravilo |
+|---|---|
+| `databaze barev/` | název souboru |
+| `parametry/databaze.csv` | řádek přiřazení k technologii FIR |
+| `databaze barev/receptury_vlastni.csv` | zdroj u odvozených receptur, `(receptury_PMS_Xpression)` → `(receptury_Ferro_Xpresssion)` |
+
+V kódu aplikace se název nikde nevyskytuje — databáze se hledají podle
+`parametry/databaze.csv`, štítek si aplikace odvodí odříznutím předpony
+`receptury_`. Proto se v `aplikace/` neměnilo nic.
+
+**Změřeno:** po přejmenování `rozbor_aktualizuj.py` napočítal beze změny
+1 097 receptur / 3 986 řádků složení pod novým názvem, celkem 2 692 receptur;
+`kontrola_aplikace.py` prošel bez chyb (DOM 17 043 znaků). Zdroj u odvozených
+receptur sedí ve všech 4 řádcích `receptury_vlastni.csv`, štítek v nabídce řad
+vychází na `Ferro Xpresssion`. Historické zápisy v deníku se nepřepisovaly —
+popisují stav, který tehdy platil.
+
+## 91. Typy barev jdou přiřadit i ve formuláři produktu
+
+**Problém.** Štítky typů barev (kap. 89) byly jen v tabulce katalogu. Kdo měl
+produkt otevřený ve formuláři Upravit produkt — tedy přesně tam, kde polohy
+zakládá a ladí — musel formulář zavřít a polohu si v tabulce najít znovu.
+
+**Co se změnilo.** Tytéž štítky stojí ve formuláři pod každým řádkem polohy
+(řádek „typ barvy:"). Je to stejná komponenta jako v tabulce, ne kopie — obě
+místa se nemohou rozejít. Dvě věci, které formulář dělá jinak než tabulka:
+
+- přiřazení se zapisuje **hned kliknutím**, ne tlačítkem Uložit produkt —
+  bydlí v `parametry/typy_poloh.csv`, ne v katalogu; hláška pod polohami to
+  říká výslovně,
+- štítky se schovají, dokud poloha nemá název: klíčem zápisu je
+  ref + technologie + název polohy a zápis na prázdný klíč nesmí vzniknout.
+  Z téhož důvodu se přejmenováním polohy přiřazení odpojí — tabulka
+  i formulář pak shodně ukážou polohu bez typů.
+
+**Změřeno:** v prohlížeči po skutečném kliknutí: Produkty → Upravit → klik na
+štítek PMS 786 ve formuláři → štítek se zapnul, soubor dostal řádek
+`11003;PDP;"Sportovní Láhev / Víčko lahve";receptury_PMS_786.csv;` a hláška
+o uložení se ukázala. Řádek štítků se zalomil pod polohu (rowline má
+flex-wrap, štítky flex-basis 100 %), pole polohy se nepohnula. Data beze
+změny: `receptury_vlastni.csv` binárně shodný se zálohou, testovací soubor
+po testu smazán.
+
+## 91. Přejmenovaná databáze si receptury odvede s sebou — a jmenuje se typ barvy
+
+**Problém.** Po přejmenování souboru databáze aplikace v nabídce dál ukazovala
+starý název: `PMS Xpression (1 097)`. Receptury si totiž nesou jméno souboru,
+ze kterého přišly, a leží uložené v prohlížeči — na disku se přejmenuje soubor,
+v prohlížeči se nezmění nic. Kdyby se most spustil, bylo by to horší než jen
+špatný název: soubor pod novým jménem je pro aplikaci soubor, o kterém dosud
+neslyšela, takže by se tytéž receptury načetly podruhé. V nabídce by stály dva
+typy barvy vedle sebe, každý s 1 097 recepturami, jeden z nich bez souboru,
+a technologovo nastavení (síto, kryvost, vazby na produkt a polohu) by zůstalo
+viset na tom starém.
+
+Druhá věc: řada barev **je** typ barvy — tak se jmenuje všude jinde
+v aplikaci i v parametrech. V nabídce přesto stálo „Všechny řady".
+
+**Co se změnilo.** Slučování receptur dostalo seznam souborů, které na disku
+opravdu jsou. Receptura, jejíž soubor mezi nimi není, je **sirotek** a smí ji
+převzít databáze, která se právě načítá — i s `id`, a tím i se vším, co na id
+visí. Převzít ji ale nesmí kdokoli: klíč je název receptury **i řada zapsaná
+v CSV**, protože `PANTONE 1235 C` je v Ferro i v Printcolor, ale řada u něj
+stojí pokaždé jiná.
+
+| případ | co se stane |
+|---|---|
+| soubor přejmenován | receptury přejdou pod nový název, id i nastavení zůstanou |
+| stejný název v cizí databázi | nepřevezme se — nesouhlasí řada |
+| volání bez seznamu souborů (import ze souboru) | chová se jako dřív, nepřevezme nic |
+
+V textech se „řada" nahradila „typem barvy" — v nabídce databází, u custom
+receptur, v upozorněních na materiál a polohu, na míchacím lístku i v hlášení
+o rozpoznaném kódu.
+
+**Změřeno:** zkouška v Node proti skutečným částem aplikace — 1 097 receptur
+pod starým jménem + 778 z MS 660, po načtení přejmenovaného souboru **1 875
+receptur celkem** (žádný duplikát), z toho 1 097 převzatých; `id` přežilo
+a s ním síto `120-34` i kryvost; starý název v seznamu není. Bez seznamu
+souborů: 2 972 receptur, převzato 0 — původní chování beze změny. Cizí
+databáze: Ferro a MS 660 mají 508 stejně pojmenovaných receptur (např.
+`PANTONE 1235 C`) a MS 660 nepřevzalo ani jednu.
+
+V prohlížeči s běžícím mostem, s podvrženým stavem prohlížeče ze starého jména:
+po načtení `receptury_Ferro_Xpresssion.csv` 1 097, `receptury_PMS_660.csv` 778,
+`receptury_PMS_786.csv` 814, `receptury_vlastni.csv` 3 — starý název nikde,
+podvržená receptura si nechala `id` i síto `120-34`. Nabídka po skutečném
+kliknutí: `Všechny typy barev (1 099)` / `Ferro Xpresssion (1 097)` /
+`vlastní a ruční (2)`. Delší text nabídku nezvětšil — 215 px široký výběr má
+76 px na výšku se starým „Všechny řady" i s novým textem, `prekryv.py` čistý
+ve všech čtyřech šířkách. Data beze změny: `receptury_vlastni.csv` po celém
+testování binárně shodný se zálohou.
+
+**Co zůstalo.** Sirotek, kterého si nikdo nevezme (smazaná databáze bez
+náhrady), v seznamu zůstane i s mrtvým názvem souboru. Mazat receptury,
+o kterých aplikace neví, čí jsou, by bylo horší než ukázat starý název —
+zmizely by i s tím, co k nim technolog nastavil.
+
+## 92. Typy barev jdou přiřadit i bez mostu — zámek na server byl moc tvrdý
+
+**Problém.** Štítky typů barev (kap. 89 a dál) byly bez běžícího mostu
+zamčené. Úvaha zněla „zúžení nabídky musí platit všude, tak se bez zápisu do
+společného souboru nesmí stát" — jenže v praxi to znamenalo, že na počítači,
+kde most zrovna neběží, se nedal typ přiřadit ani odebrat vůbec. Přiřazení,
+které platí aspoň na jednom počítači, je pořád lepší než žádné.
+
+**Co se změnilo.** Stejný model, jakým už léta funguje přiřazení databází
+k technologiím (dbTech): prohlížeč si drží vlastní kopii přiřazení
+(`irm-typy-poloh`), takže klik na štítek platí hned a vždycky. S běžícím
+mostem se změna zároveň zapíše do `parametry/typy_poloh.csv` pro celou dílnu;
+soubor má při načtení přednost, ale jen u poloh, které v něm opravdu jsou —
+místní přiřazení ostatních poloh zůstávají. Hlášení rozlišuje tři stavy:
+uloženo do souboru / platí jen v tomhle prohlížeči (most neběží) / do souboru
+se to nezapsalo, ale v prohlížeči změna platí.
+
+**Změřeno:** v prohlížeči s podstrčenou neplatnou adresou mostu (skutečně
+odpojeno, ne jen tvrzení): klik na štítek PMS 786 štítek zapnul, hlášení
+řeklo „platí zatím jen v tomhle prohlížeči — most neběží", nabídka řad
+v kalkulaci se zúžila na `PMS 786 (1)` a soubor na disku nedostal žádný
+řádek. S mostem zápis do souboru prokázán už v kap. 89. Cizí řádek 11081
+v souboru zůstal nedotčený, testovací řádek 11003 po testu odebrán.
+
+**Poznámka pro souběžnou práci.** Dvě sezení nad touž složkou se přetahovala
+o ladicí port 9333 snímkovače (spojení padalo na resetu) — test doběhl na
+kopii snímkovače s portem 9377 ze scratchpadu. Snímkovači by slušel přepínač
+portu.
+## 93. Dlaždice parametrů se nafoukla, když k receptuře nepatří síto
+
+**Problém.** V Parametrech tisku stojí síto (u tampontisku klišé), kryvost
+a povrch. Není-li ke stroji zapsané žádné klišé, zbudou v řádku jen dvě pole
+— a právě v tu chvíli přestaly být dlaždice čtvercové a vytáhly se do sloupu
+271 × 561 px. Roztáhly tím celý druhý řádek karet na 746 px, takže Receptura
+a barva i Zakázka vedle nich stály z poloviny prázdné. S tříslým řádkem se to
+nedělo, takže to na běžném sítotiskovém produktu nebylo vidět.
+
+**Čím to bylo.** Dlaždice se od kapitoly 46 měří sama od sebe: písmo, odsazení
+i šipka jsou v `cqw`, tedy v procentech vlastní šířky. Aby `cqw` šířku dlaždice
+znamenalo, musí být pole zapsané jako kontejner — a to pravidlo bylo navázané
+na tříslou mřížku (`.frow.c3`). U dvou polí (`.c2`) se neuplatnilo, žádný
+kontejner v okolí nebyl a prohlížeč sáhl po náhradě, kterou pro ten případ
+má: po šířce okna. Odsazení tak vyšlo 95,2 px místo 13,5 a mezera pod hodnotou
+76,2 px místo 10,8 — obsah přerostl čtverec a `aspect-ratio` mu už neporučilo.
+
+**Co se změnilo.** Kontejnerem je pole v Parametrech tisku vždycky, bez ohledu
+na to, kolik jich v řádku je:
+
+```css
+.karta-tisk .frow>div{container-type:inline-size}
+```
+
+Je to jednoslovná změna, ale stojí za ní pravidlo, které platí i jinde: co se
+měří samo od sebe, nesmí mít měřítko podmíněné počtem sousedů.
+
+**Změřeno** při 1 920 px na tampontiskovém produktu bez klišé:
+
+| | před | po |
+|---|---|---|
+| dlaždice | 271 × 561 px | 271 × 271 px |
+| odsazení v dlaždici | 95,2 px | 13,5 px |
+| mezera hodnota–šipka | 76,2 px | 10,8 px |
+| druhý řádek karet | 746 px | 501 px |
+
+Čtverec drží i po zúžení okna, stejně jako u tříslého řádku: 1 600 px →
+218 × 218, 1 400 px → 185 × 185, 1 100 px → 138 × 138, 980 px → 120 × 120.
+`prekryv.py` prošel ve čtyřech šířkách a obou režimech bez nálezu.
+
+## 94. Těkavé látky a bezpečnostní listy — výkaz v gramech, list u složky
+
+**Problém.** Výkaz těkavých látek (VOC) po dílně dřív nebo později někdo chce
+— a chce ho v gramech, ne odhadem. Podíl VOC přitom stojí v bezpečnostním
+listu každé složky a navážku aplikace zná na desetinu gramu; jen se to nikdy
+nepotkalo. Bezpečnostní listy ležely v šanonu a u váhy nebyly po ruce. V
+přehledu konkurence to byla poslední položka se stavem „nemáte" (ColorStar,
+IMS) — a je to povinnost, ne funkce.
+
+**Co se změnilo.** Tabulka materiálů `parametry/pigmenty.csv` vede u složky
+dva nové sloupce a všechno ostatní se z nich odvíjí:
+
+| sloupec | co v něm je |
+|---|---|
+| `voc` | podíl těkavých látek v % hmotnosti z bezpečnostního listu |
+| `bezplist` | odkaz na ten list — adresa nebo cesta k souboru |
+
+Ceník (Receptury → Ceny materiálů) oba údaje edituje a odkaz rovnou otevírá.
+Kalkulace pak počítá stejně jako u ceny: gramy složky × podíl, přes všechno,
+co se do kelímku doopravdy nalije — včetně tužidla, ředidla a zpomalovače
+(ředidlo bývá těkavé skoro celé). Pod náklady přibyl řádek s gramy VOC v
+dávce a s bezpečnostními listy složek, a nevisí na přepínači cen: gramy
+nejsou peníze a list má být po ruce i u váhy.
+
+Co se neví, se nehádá. Složka bez údaje se vyjmenuje a řekne se, z kolika
+procent navážky je součet spočítaný. Nula je platný údaj (vodou ředitelné
+barvy těkavé látky nemají) a od prázdného pole se rozlišuje; hodnota mimo
+0–100 % není podíl a čte se jako neuvedená. Starší soubor bez sloupců se
+chová jako dřív, zápis mění jen dotčené buňky a odkaz se středníkem v adrese
+se uzavře do uvozovek, aby nerozsypal řádek.
+
+**Co se nechalo být.** Měsíční součet VOC v Sestavách: dávky v evidenci
+složení nenesou, takže zpětný výkaz by byl odhad — a odhad vypadá jako
+měření. Počítá se tam, kde je složení známé: nad právě počítanou dávkou.
+
+**Změřeno:** 30 kontrol modelu (čtení CSV, výpočet, zápis a zpět, starý
+soubor); se záměrně vrácenou chybou (podíl /10 místo /100) zkouška hlásí
+3 nálezy a vrací kód 1. Dávka 50 g vzorové PANTONE 485 C: 31 g × 40 % +
+14 g × 35 % + 5 g × 12,5 % = 17,925 → „17,9 g v dávce", pokrytí 100 %.
+Neúplný ceník v modelu: 900 g se známým podílem z 1 000 g → 405 g VOC,
+pokrytí 90 % a složka bez údaje vyjmenovaná. Hlavička ceníku: „VOC %"
+109 × 34 px a „bezpečnostní list" 230 × 34 px na téže řádce (y 471) jako
+ostatní sloupce; `prekryv.py` čtyři šířky × oba režimy bez nálezu.
+
+**Dvě vlastní chyby po cestě.** Řádek výkazu spadl tečkou nad text: řádky
+flexu se lámou podle nezmenšené šířky obsahu, takže span delší než volné
+místo šel celý pod tečku (změřeno [854, 1195] pod tečkou [854, 1172]).
+Obsah dostal `flex: 1 1 0` a stojí vedle ní ([877, 1172]). A výchozí
+modrá/fialová odkazů nebyla v tmavém režimu skoro vidět — odkazy v liště
+teď dědí barvu a poznají se podtržením.
+
+## 95. Sklad surovin — zůstatek se počítá z inventury a zapsaných dávek
+
+**Problém.** Ceník uměl říct, co která báze stojí, ale ne kolik jí v dílně
+je. Že je konev prázdná, se poznalo až u váhy s rozmíchanou zakázkou — a
+báze se neveze hodinu, veze se den. Konkurence (IMS, ColorStar, GSE) vede
+sklad surovin jako samostatnou evidenci; tady se nová evidence nezavádí,
+protože spotřebu aplikace zná z každé dávky. Chyběl jediný údaj, který se
+z ničeho odvodit nedá: kolik toho v regálu leželo, když se naposledy počítalo.
+
+**Co se změnilo.** Tabulka materiálů (`parametry/pigmenty.csv`) dostala
+sloupce `zasoba`, `min_zasoba`, `zasoba_kdy` a `baleni`; zásoba se vede
+v kilogramech i u materiálu kupovaného za litr, protože v dílně se váží
+a přepočet litru visí na hustotě, kterou ceník nevede. Zůstatek je dopočet:
+
+    zůstatek = zásoba z inventury − spotřeba od data inventury
+
+Spotřeba se rozpadá po složkách z téhož průchodu, který sčítají Sestavy
+(`michaniZaznamy`), takže dávka a kelímek k ní se počítají jednou. Gramy
+vzaté ze zbytku nejsou nová spotřeba — barva z konve odešla už při prvním
+míchání — a odečítají se složením zdrojového kelímku; k tomu evidence
+kelímků dostala sloupec `zbytek_kod`. Záporný rozdíl složky se neodečítá.
+
+Nová záložka **Sklad surovin** ukazuje zůstatek, denní tempo z posledních
+90 dní, dosah ve dnech a kartu **Co objednat**: objednává se do minimální
+zásoby po celých baleních. Dodavatel se bere z poslední otevřené konve
+(záložka Šarže) — u složky se nevede, protože tatáž báze chodí od různých.
+Kalkulace u váhy hlásí, když na dávku podle skladu zásoba nestačí, a když
+po ní složka spadne pod minimum. Inventura se zapisuje po buňkách do téhož
+souboru jako ceny, ale vlastním zápisem — ceník mění technolog při změně od
+dodavatele, inventuru někdo jiný a jindy; datum inventury se zapisuje samo
+a nedá se nastavit zpětně.
+
+Co se neví, se nehádá: složka bez zapsané inventury má zůstatek „nepočítáno",
+ne nulu. Ředidlo a zpomalovač se v evidenci v gramech nevedou, takže se
+z jejich zásoby neodečítá a záložka to u složky říká štítkem. Směs, ke které
+už není receptura, a dávky bez `zbytek_kod` se vyjmenují i s dopadem na čísla.
+
+**Co se nechalo být.** Objednávka „na měsíc dopředu" z denního tempa —
+kolik se má držet v regálu, rozhoduje dílna minimem, tempo jen ukazuje
+dosah. A cena objednávky u složek za litr se nepočítá vůbec, místo aby se
+odhadovala hustotou.
+
+**Falešný poplach po cestě.** Zkouška hlásila u odečtu zbytku pořadí
+[100, 200, 60] místo čekaných [200, 100, 60] — chyba byla v čekání, ne
+v kódu: události spotřeby se řadí časem a starší dávka jde první.
+
+**Změřeno:** 49 kontrol modelu nad skutečnými částmi (dvojí zápis
+dávka+kelímek jednou; inventura 5 kg před 30 dny − 260 g spotřeby →
+4,74 kg; dávka 200 g s 150 g ze zbytku čisté modré → modrá se neodečte
+vůbec, báze celých 160 g; kelímek s tužidlem bez dávky: 220 g × 0,1 =
+22 g; minimum 8 kg při 7,3 kg → objednat 0,7 kg → 1 balení 25 kg za
+7 500 Kč; evidence 10 dní → tempo 200 g/10 dní = 20 g denně, ne /90).
+Protichůdně: vrácený dvojí zápis posune zůstatek 4,8 → 4,6 kg a kontrola
+spadne; přegenerovaný soubor by shodil kontrolu vysvětlivky se středníkem.
+Zápis a zpět přes CSV drží zásobu 4,5 kg, minimum 2 kg i čas inventury;
+změna samotného minima nesmaže zásobu ani datum. Starý soubor bez sloupců:
+zásoba žádná, ne nula. V prohlížeči: 17 složek dílny v tabulce, snímek po
+skutečném kliknutí; `prekryv.py --zalozky` čtyři šířky × oba režimy bez
+nálezu; `kontrola_aplikace.py` bez chyb.
+
+## 96. Ukázka dohnala aplikaci — a naučila se hrát nahraný hlas
+
+**Problém.** Ukázka vyprávěla aplikaci ve čtrnácti scénách, ale zamrzla
+v půlce srpna: druhé dějství slibovalo jako budoucnost věci, které už platí
+(všech pět technologií je odemčených), a o ničem, co vyrostlo od kapitoly 69
+— fronta míchání, šarže, propady, shluky, zástupnost, opravy, sestavy, sklad
+surovin, role — nepadlo ani slovo. Kdo ukázku pustil zákazníkovi nebo vedení,
+ukazoval aplikaci o třetinu menší, než jaká je. A mluvené slovo umělo jen
+systémový hlas z Web Speech, který v systému nemusí být a zní strojově.
+
+**Co se změnilo.** Scén je 21 ve třech dějstvích:
+
+| dějství | scény | co v něm je |
+|---|---|---|
+| cesta zakázky | 1–10 | původní tok, texty dotažené: dvojice kelímků naráz (kap. 71), bezpečnostní listy a gramy VOC u váhy (kap. 94) |
+| co kolem míchání vyrostlo | 11–18 | fronta (72), šarže (79), propady + likvidace (75, 76), shluky + zástupnost (77, 78), opravy (80), sestavy (84), sklad surovin (95), role a schvalování (85) |
+| co ještě chybí | 19–21 | TRS bez nakoupené databáze a ověření řady MS 660 + síta a koeficienty; hustota, odstíny a barvy bází; SGPS |
+
+Zastaralé scény o zamčených technologiích zmizely — dnešní stav (ostré, ale
+data dobíhají) říká scéna 19 tabulkou podle rozboru. Sloučily se dvě scény
+o odstínech do jedné, protože obě říkaly totéž z jiného konce.
+
+Mluvené slovo má nově tři stupně a sáhne po nejlepším dostupném: nahrávka
+`audio/scena-01.mp3` … `scena-21.mp3` vedle ukázky → hlas prohlížeče →
+titulky. Ústup je tichý — oba neúspěchy nahrávky (`onerror` i zamítnutý
+`play()`) vedou na jedno místo a hlídá se, aby syntéza nenaskočila dvakrát.
+Pole `rec` u každé scény tím dostalo druhou práci: je to hotový scénář pro
+namluvení, s čísly rozepsanými slovy a zkratkami foneticky.
+
+**Chyba, kterou to nejdřív mělo.** Česká uvozovka v textu scény 17 byla
+uzavřená rovnou ASCII uvozovkou — ta v JS řetězci text utne a shodí celý
+skript, takže by ukázka zůstala na první scéně bez ovládání. Našla to
+syntaktická kontrola v Node, ne oko: na obrazovce vypadají obě uvozovky
+skoro stejně.
+
+**Změřeno:** 21 sekcí v DOM = 21 položek SCENY, budoucích 3/3, `data-s`
+souvislé 0–20, skript projde syntaktickou kontrolou (`new Function`). Čísla
+ve scénách sedí na rozbor z 18. 8.: katalog 1 320 / 2 692 / 5 583, databáze
+1 097 + 778 + 814 + 3, bez odstínu 223 + 190 = 413, síta s údaji výrobce
+2 z 28, koeficienty 14 zapsaných a 0 mimo 1,00, základna oprav 1 209 ročně.
+`kontrola_aplikace.py` se nespouštěla — aplikace/ se změna nedotkla.
+
+**Namluveno.** Nahrávky vznikly stejným hlasem, jaký byl navržený —
+`cs-CZ-AntoninNeural`, tentýž neurální hlas jako v placeném Azure AI Speech,
+zdarma přes `edge-tts` (jednorázový skript ve scratchpadu, čte pole `rec`
+přímo z `ukazka.html`, aby scénář nežil na dvou místech). Rychlost snížená
+o 5 % kvůli klidnějšímu tempu. Všech 21 souborů leží v `prezentace/audio/`
+jako `scena-01.mp3` … `scena-21.mp3`, dohromady 1,9 MB.
+
+**Změřeno:** 21 souborů, každý s platnou MPEG hlavičkou (`FF F3` + LAME
+tag), velikosti 57–133 kB podle délky promluvy.
