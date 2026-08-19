@@ -1,15 +1,15 @@
 # Ink Recipe Manager — strukturovaný rozbor aplikace
 
 <!-- AUTO:stav -->
-> **Stav k 18. srpna 2026.** Čísla v úsecích označených `AUTO` generuje
+> **Stav k 19. srpna 2026.** Čísla v úsecích označených `AUTO` generuje
 > `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — nepřepisují
 > se ručně a nemohou se rozejít se skutečností. Text mimo ně píše člověk.
 
-> Poslední zapsaná změna ve vývojovém deníku: **18. srpna 16:03 — Ukázka namluvena hlasem cs-CZ-AntoninNeural — 21 souborů v prezentace/audio/**
+> Poslední zapsaná změna ve vývojovém deníku: **19. srpna 15:54 — Nová databáze se nenabízela, protože most zrovna neběžel — nastartován znovu**
 
 | soubor | řádků | velikost |
 |---|---:|---:|
-| `aplikace/ (80 souborů)` | 15 711 | 842 kB |
+| `aplikace/ (80 souborů)` | 15 775 | 846 kB |
 | `index.html` | 108 | 6 kB |
 | `most.py` | 727 | 31 kB |
 | `pdf_spec.py` | 1 071 | 42 kB |
@@ -17,7 +17,7 @@
 | `prevod_printcolor.py` | 188 | 7 kB |
 | `kontrola_aplikace.py` | 169 | 7 kB |
 | `rozbor_aktualizuj.py` | 359 | 13 kB |
-| **celkem** | **18 546** | |
+| **celkem** | **18 610** | |
 <!-- /AUTO:stav -->
 
 ---
@@ -39,10 +39,11 @@ v dílně.
 | co | kolik |
 |---|---|
 | produktů v katalogu | 1 320 |
-| receptur celkem | 2 692 |
+| receptur celkem | 3 468 |
 | — `receptury_Ferro_Xpresssion.csv` (FIR) | 1 097 receptur / 3 986 řádků složení |
 | — `receptury_PMS_660.csv` (TXP,PDP,SCR) | 778 receptur / 3 617 řádků složení, 223 bez odstínu |
 | — `receptury_PMS_786.csv` (PDP) | 814 receptur / 3 092 řádků složení, 190 bez odstínu |
+| — `receptury_RUCOLOR_10KK.csv` (PDP,SCR) | 776 receptur / 3 313 řádků složení, 47 bez odstínu |
 | — `receptury_vlastni.csv` (platí všude) | 3 receptur / 12 řádků složení |
 | obrázků produktů a poloh | 5 583 stažených z 9 209 v seznamu |
 | sít a klišé v parametrech | 28 zapsaných, z toho 2 s údaji výrobce |
@@ -338,8 +339,8 @@ podle dat, ne podle dojmu.
 <!-- AUTO:technologie -->
 | kód | technologie | výchozí g/m² | stav | databáze receptur |
 |---|---|---:|---|---|
-| `SCR` | Sítotisk (plast, papír) / rotační | 6,0 | ostrá | PMS_660 (778), vlastni (3) |
-| `PDP` | Tampontisk | 2,5 | ostrá | PMS_660 (778), PMS_786 (814), vlastni (3) |
+| `SCR` | Sítotisk (plast, papír) / rotační | 6,0 | ostrá | PMS_660 (778), RUCOLOR_10KK (776), vlastni (3) |
+| `PDP` | Tampontisk | 2,5 | ostrá | PMS_660 (778), PMS_786 (814), RUCOLOR_10KK (776), vlastni (3) |
 | `TXP` | Sítotisk (textil) | 14,0 | ostrá | PMS_660 (778), vlastni (3) |
 | `TRS` | Transfer | 18,0 | ostrá | vlastni (3) |
 | `FIR` | Firing — Low Temperature | 8,0 | ostrá | Ferro_Xpresssion (1 097), vlastni (3) |

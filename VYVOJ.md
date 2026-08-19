@@ -211,6 +211,21 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 15:52 | Ukázka dohnala aplikaci — 21 scén ve třech dějstvích a přednost nahraného hlasu ze složky audio/ před syntézou |
 | 16:03 | Ukázka namluvena hlasem cs-CZ-AntoninNeural — 21 souborů v prezentace/audio/ |
 
+### 19. srpna — riziko opravy jako popup
+| čas | co |
+|---|---|
+| 12:09 | Riziko opravy před mícháním jako popup — samo naskočí, jakmile existuje |
+| 12:23 | **Obrat:** popup se neotevírá sám, ale tlačítkem v záhlaví „Kolik namíchat" |
+| 12:38 | Popup rizika o 50 % větší — box, písmo, odsazení i tečka dopočítané ×1,5 |
+| 13:05 | Načíst kód pod dlaždicí zakázkového listu, velikostí jako Míchací režim |
+| 13:50 | Viskozita do míchacího režimu, karta Zakázka jako čtyři čtverce |
+| 14:13 | Čtverce zakázky se stropem 178 px — řádek karet zpátky na 526 px bez prázdných míst |
+| 14:23 | Dlaždice zakázky jako obdélníky přes celý sloupec — mezi poli jen mezera mřížky |
+| 14:31 | Čísla zakázky trojnásobná (23,75 → 71,24 px) — čtou se od stroje |
+| 14:56 | Čísla zakázky o čtvrtinu zpět (71,24 → 53,43 px) |
+| 15:36 | Databáze RUCOLOR 10KK (776 receptur) přiřazená k tampontisku a sítotisku |
+| 15:54 | Nová databáze se nenabízela, protože most zrovna neběžel — nastartován znovu |
+
 ---
 
 ## Co aplikace je
@@ -5170,3 +5185,203 @@ jako `scena-01.mp3` … `scena-21.mp3`, dohromady 1,9 MB.
 
 **Změřeno:** 21 souborů, každý s platnou MPEG hlavičkou (`FF F3` + LAME
 tag), velikosti 57–133 kB podle délky promluvy.
+
+## 97. Riziko opravy jako popup, otevírá ho tlačítko v „Kolik namíchat"
+
+**Problém.** Karta „Než začnete míchat" ležela vložená mezi ostatními kartami
+obrazovky (skladem, předpověď zbytku, výkaz VOC, finance) — přesně tam, kde
+padá rozhodnutí, jestli se dá do míchacího režimu. V tom návalu karet šlo
+riziko snadno přehlédnout, i když jde o věc, která rovnou předchází opravě.
+
+**Obrat.** První verze nechávala okno naskočit samo, jakmile riziko existuje.
+Po upřesnění se ukázalo, že to není ono — má to být dedikované tlačítko přímo
+v záhlaví karty „Kolik namíchat", ne automatika.
+
+**Co se změnilo.** V záhlaví karty „Kolik namíchat" se objeví tlačítko
+`⚠ Než začnete míchat (N)` — jen když nějaké riziko existuje, s počtem bodů
+a barvou podle závažnosti (`.btn.danger` pro vysoké riziko). Klik otevře
+totéž okno přes obrazovku jako dřív; zavírá se křížkem nebo kliknutím mimo
+něj. Uvnitř celoobrazovkového míchacího režimu (u váhy, kde stojí často
+někdo jiný než ten, kdo zakázku zadával) zůstal box vložený jako dřív — okno
+by tam překrývalo váhovací tabulku, kterou obsluha potřebuje mít pořád na
+očích. Text bodů rizika existuje jen na jednom místě v kódu, sdíleném oběma
+podobami (vloženou i popup).
+
+**Změřeno:** na demo datech (receptura bez příznaku „otestováno", 2 body
+rizika) se po načtení stránky neobjeví žádný `.modalbg` (0) a tlačítko v
+záhlaví nese text „⚠ Než začnete míchat (2)"; po kliknutí na tlačítko
+`.modalbg` vzroste na 1 se správným textem, po kliknutí na křížek zpátky na
+0. Uvnitř míchacího režimu box zůstává vložený pod tabulkou navážky beze
+změny. `kontrola_aplikace.py` bez chyb, `sestav.py --kontrola` v pořádku.
+
+## 98. Popup rizika o 50 % větší
+
+**Problém.** Po zavedení tlačítka v kapitole 97 chtěl uživatel okno s rizikem
+i písmo v něm viditelně větší — stejně jako ostatní popupy v aplikaci by bylo
+i s rizikem otestované jen z pracovní vzdálenosti u obrazovky, ne od váhy.
+
+**Co se změnilo.** Box popupu (`.rizikopopup`, přidaná třída vedle `warnbox`/
+`pickbox`) i okno kolem něj (`.modalbox`) jsou o 50 % větší: šířka 560 → 840 px,
+písmo nadpisu i bodů 16 → 24 px, `.note` 13,5 → 20,25 px, odsazení 12 → 18 px,
+tečka u bodu 9 → 13,5 px, zavírací tlačítko 14 → 21 px. Každá hodnota je
+dopočítaná z existující proměnné nebo čísla vynásobením 1,5 (`calc(...* 1.5)`),
+podle vzoru, jakým `.bigpanel` a `.bigform` už zvětšují domovskou stránku —
+žádné číslo není zapsané napevno bokem. Platí jen pro popup; tlačítko
+v záhlaví „Kolik namíchat" a vložený box uvnitř míchacího režimu zůstaly na
+původní velikosti.
+
+**Změřeno:** `modalboxWidth` 560→840, `boxFont`/`headingFont`/`itemFont`
+16→24 px, `noteFont` 13,5→20,25 px, `dotSize` 9→13,5 px, `boxPadding`
+12→18 px, `btnFont` 14→21 px — všechno přesně 1,5×. `prekryv.py` bez nálezu
+ve čtyřech šířkách a obou režimech, `kontrola_aplikace.py` bez chyb.
+
+## 99. Načíst kód se přestěhoval pod zakázkový list
+
+**Problém.** Tlačítko „Načíst kód" (čtení zakázky čárovým kódem) sedělo
+drobné a stranou — v řádku štítků pod dlaždicemi, vedle technologie a
+rozměru. Je to přitom druhá cesta ke stejnému cíli jako zakázkový list z PDF
+hned vedle (obojí naplní zadání zakázky), a jako drobné tlačítko v hustém
+řádku bylo snadné ho přehlédnout.
+
+**Co se změnilo.** Tlačítko je teď pod dlaždicí „Zakázkový list", na šířku
+celého sloupce, a velikostí (výška 51 px, písmo 16 px, odsazení 15×26 px)
+odpovídá hlavnímu tlačítku „Míchací režim" — jen zůstává ve světlém
+(sekundárním) provedení, barva se neměnila. Modální okno pro zadání kódu je
+beze změny, přesunula se jen spouštěcí komponenta.
+
+**Změřeno:** `Načíst kód` výška 51 px / písmo 16px / odsazení „15px 26px";
+`Míchací režim` výška 51 px / písmo 16px / odsazení „15px 26px" — shodné.
+Šířka se liší záměrně (218 px vs. 174 px), protože tlačítko vyplňuje svůj
+sloupec, druhé je auto-šířky podle textu. `prekryv.py` bez nálezu ve čtyřech
+šířkách a obou režimech, `kontrola_aplikace.py` bez chyb.
+
+## 100. Viskozita se přestěhovala do míchacího režimu, Zakázka je teď čtyři čtverce
+
+**Problém.** Karta „Zakázka" měla čtyři čísla ve dvousloupcové mřížce a pod
+nimi ještě pole na viskozitu — to se ale zapisuje až po namíchání, výtokovým
+pohárkem, ne při zadávání zakázky. Navíc bez viskozity zůstávala spodní
+polovina karty prázdná, zatímco sousední „Parametry tisku" mají tři velké
+čtvercové dlaždice přes celou kartu.
+
+**Co se změnilo.** Viskozita zmizela z karty Zakázka a přestěhovala se do
+míchacího režimu, vedle Aditiv (měří se, pak se podle ní dolaďuje ředění) —
+napojení na doporučený rozsah síta a na uložení k receptuře zůstalo stejné,
+jen v kompaktnější podobě `.pickbox` řádku. Zbylá čtyři pole (počet kusů,
+spotřeba, ztráty, min. dávka) jsou teď čtyři čtverce přes celou kartu —
+stejný vzor jako dlaždice síta/kryvosti/povrchu v Parametrech tisku
+(`.karta-tisk`), aby se tentýž typ pole na obou kartách choval stejně.
+Písmo dlaždice se počítá z její šířky (`cqw`), ne pevným počtem pixelů, takže
+čtverec drží tvar při každé šířce okna.
+
+**Změřeno:** dlaždice `.zakazka-cisla input` 215,89 × 215,89 px — přesný
+čtverec (šířka = výška). `prekryv.py` bez nálezu ve čtyřech šířkách a obou
+režimech, `kontrola_aplikace.py` bez chyb, `sestav.py --kontrola` v pořádku.
+
+## 101. Čtverce zakázky přestaly roztahovat sousední karty
+
+**Problém.** Čtverce z kapitoly 100 vyplňovaly celý sloupec mřížky, takže
+karta Zakázka narostla na 595,8 px — a protože všechny tři karty v řádku
+sdílejí výšku, roztáhla i Recepturu a Parametry tisku (přirozeně 526,0 px),
+kterým pak dole zbývala čtvrtina prázdné plochy.
+
+**Co se změnilo.** Dlaždice dostala strop `max-width:178px` a vycentrování
+ve sloupci. Hodnota není od oka: sonda změřila, při jakém stropu klesne výška
+karty Zakázka přesně na přirozenou výšku obou sousedů. Písmo se dál počítá
+z šířky dlaždice (`cqw`), takže čtverec drží tvar i v užším okně, kde je
+sloupec užší než strop.
+
+**Změřeno:** karta Zakázka 595,8 → 526,0 px; všechny tři karty v řádku teď
+526,02 px (na setinu shodné). Dlaždice 215,89 → 178,00 × 178,00 px, pořád
+přesný čtverec. `prekryv.py` bez nálezu ve čtyřech šířkách a obou režimech,
+`kontrola_aplikace.py` bez chyb.
+
+## 102. Dlaždice zakázky jsou obdélníky přes celý sloupec
+
+**Problém.** Strop 178 px z kapitoly 101 držel výšku karty, ale čtverec
+vycentrovaný v širším sloupci nechával po stranách pruhy prázdného místa —
+mezi dlaždicemi vznikaly mezery přes 50 px a mřížka nevypadala zaplněná.
+
+**Co se změnilo.** Dlaždice přestala být čtverec: šířku bere celou ze
+sloupce mřížky (mezi poli zůstává jen mezera mřížky 16 px), pevná je jen
+výška 178 px, změřená v kapitole 101 tak, aby dva řádky dlaždic daly touž
+výšku karty jako sousední Receptura a Parametry tisku. Písmo se dál počítá
+z šířky sloupce (`cqw`).
+
+**Změřeno:** všechny čtyři dlaždice 215,9 × 178,0 px, oba sloupce na setinu
+stejně široké (215,890 vs. 215,906 px) — symetrie drží. Karty v řádku dál
+shodných 526,02 px. `prekryv.py` bez nálezu ve čtyřech šířkách a obou
+režimech, `kontrola_aplikace.py` bez chyb.
+
+## 103. Čísla zakázky trojnásobná — čtou se od stroje
+
+**Problém.** Dlaždice zakázky po zvětšení na obdélníky přes celý sloupec
+nesly číslo pořád v původní velikosti — 23,7 px v poli 216 × 178 px se
+z odstupu od stroje přečíst nedá a dlaždice vypadaly prázdné.
+
+**Co se změnilo.** Písmo čísel je o 200 % větší: vzorec
+`min(calc(var(--pismo) * 2), 11cqw)` → `min(calc(var(--pismo) * 6), 33cqw)`
+— oba členy ×3, takže se zvětšení chová stejně na široké i úzké obrazovce
+(strop dál roste se šířkou dlaždice, ne s oknem).
+
+**Změřeno:** písmo 23,75 → 71,24 px, přesně 3×. Dlaždice 215,9 × 178 px
+i výška karet 526,02 px beze změny. `prekryv.py` bez nálezu ve čtyřech
+šířkách a obou režimech — zvětšené kresby číslic nikam nepřetékají.
+`kontrola_aplikace.py` bez chyb.
+
+## 104. Čísla zakázky o čtvrtinu zpět
+
+**Problém.** Trojnásobek z kapitoly 103 byl na dlaždici moc — číslo se
+tlačilo na okraje pole.
+
+**Co se změnilo.** Oba členy vzorce ×0,75:
+`min(calc(var(--pismo) * 6), 33cqw)` → `min(calc(var(--pismo) * 4.5), 24.75cqw)`.
+
+**Změřeno:** písmo 71,24 → 53,43 px, přesně 0,75×. Dlaždice i výšky karet
+beze změny, `prekryv.py` bez nálezu, `kontrola_aplikace.py` bez chyb.
+
+## 105. Čtvrtá barevná databáze — RUCOLOR 10KK pro tampontisk a sítotisk
+
+**Problém.** PDP a SCR měly recepturně jen Printcolor MS 660 — a u té není
+potvrzeno, jestli je to vůbec ta správná řada na plast a papír (viz
+`CO_SEHNAT.txt`). Druhý výrobce vedle v evidenci chyběl úplně.
+
+**Co se změnilo.** RUCOINX vydává svoje míchací poměry jako tabulku, ne jako
+seznam — v záhlaví sloupce bází (B1…B0), pod recepturou procenta v příslušném
+sloupci, prázdná buňka beze zbytku. Prostý text z PDF (i vlastní čtečka
+`pdf_spec.py`) sloupce nerozliší — čísla jdou v datovém proudu za sebou bez
+zarovnání, takže řádek se třemi hodnotami by šlo přiřadit k libovolné trojici
+z dvanácti sloupců. Nový nástroj `prevod_rucolor.py` proto čte přes
+`pypdfium2`, který dává souřadnici (x, y) každého znaku zvlášť: sloupec bázi
+pozná podle polohy čísla na stránce, ne podle pořadí. Databáze je zapsaná do
+`parametry/databaze.csv` s technologiemi `PDP,SCR` — vedle Printcolor, ne
+místo něj.
+
+**Změřeno:** 776 receptur, 3313 řádků složení, 12 různých bází (2291, 2292,
+3851, 3852, 3853, 3854, 5851, 5852, 6722, 1055, 9029, 0026). Součet složení
+u všech 776 receptur na 100 %, žádná mimo. Odstín dohledán u 729 z 776
+(94 %) podle shody pantonu s databázemi, které už ve složce byly. Namátkou
+ověřeno proti tabulce v PDF na čtyřech různých stranách (PANTONE ORANGE 021 C,
+PANTONE 101 C, PANTONE COOL GRAY 10 C, PANTONE RHODAMINE RED C) — sedí do
+setiny procenta. `kontrola_aplikace.py` bez chyb.
+
+## 106. Nová databáze se nenabízela — most zrovna neběžel
+
+**Problém.** Po kapitole 105 RUCOLOR 10KK v aplikaci u tampontisku ani
+sítotisku vůbec nešel vybrat. Databáze receptur i přiřazení k technologiím
+se ale čtou jen přes most (`most.py`) — bez něj karta „Databáze barev ze
+složky“ hlásí „Vyžaduje běžící most“ a do prohlížeče se nedostane ani nový
+soubor, ani přepsané `parametry/databaze.csv`. Most byl sice nastavený na
+autostart po přihlášení (`autostart.py zapnout`), ale zrovna neběžel —
+`autostart.py stav` to potvrdil.
+
+**Co se změnilo.** Nic v kódu — `autostart.py spustit` most znovu nastartoval
+na pozadí. Jakmile prohlížeč stránku znovu načte, most/databáze se přečtou
+odznova a RUCOLOR 10KK se objeví jako typ barvy u PDP i SCR.
+
+**Změřeno:** `/api/databaze` po startu vrací všech pět souborů včetně
+`receptury_RUCOLOR_10KK.csv` (3313 řádků), `/api/databaze?slozka=parametry&soubor=databaze.csv`
+nese `PDP,SCR` u RUCOLOR řádku. V kalkulaci (`snimek.py`, výběr typu barvy)
+nabídka po deseti sekundách načítání ukazuje `RUCOLOR 10KK (776)` vedle
+`PMS 660 (778)` a `PMS 786 (814)` — dřív, po třech sekundách, tam byly jen
+dvě ukázkové receptury z kódu, protože se ještě nestihlo načíst nic ze
+souborů.

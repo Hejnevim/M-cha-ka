@@ -248,6 +248,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
   const [michRezim, setMichRezim] = useState(false);
   const [michStav, setMichStav] = useState(null);
   const zavriMichani = useCallback(() => setMichRezim(false), []);
+  const [rizikoOtevreno, setRizikoOtevreno] = useState(false);
 
   const [smazPotvrd, setSmazPotvrd] = useState("");   // id receptury čekající na potvrzení
   const smazCustom = (r) => {
@@ -1477,26 +1478,35 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
 
   /* Co může skončit opravou. Stojí to nad tlačítkem do míchacího režimu,
      protože tam se rozhoduje — a znovu uvnitř režimu, protože u váhy stojí
-     někdo jiný než ten, kdo zakázku zadával. */
+     někdo jiný než ten, kdo zakázku zadával. Seznam bodů je společný pro
+     obě podoby (vložený box i popup), aby text neexistoval na dvou místech. */
+  const rizikoBody = (body) => body.map((b, i) => html`
+              ${/* .rowline zalamuje (flex-wrap), takže delší text spadne pod tečku.
+                    Tady se nezalamuje — bod je tečka a věta vedle ní, ne pod ní. */""}
+              <div key=${i} className="rowline" style=${{ marginTop: 6, marginBottom: 0,
+                alignItems: "flex-start", flexWrap: "nowrap" }}>
+                ${/* .dot má v CSS align-self:center — u dvouřádkového textu by
+                      sjela doprostřed. Tady patří k prvnímu řádku. */""}
+                <span className="dot" style=${{ marginTop: 7, alignSelf: "flex-start",
+                  background: b.sila === "vysoke" ? "var(--danger)" : "var(--warn)" }}></span>
+                <span style=${{ flex: 1, minWidth: 0 }}>${b.co}<span
+                  className="note"> ${b.coStim}</span></span>
+              </div>`);
+  const rizikoNadpis = riziko && riziko.stupen === "vysoke"
+    ? "Než začnete míchat — tohle končívá opravou." : "Než začnete míchat";
   const blokRizika = (riziko && riziko.body.length) ? html`
             <div className=${riziko.stupen === "vysoke" ? "warnbox" : "pickbox"}
               style=${{ marginTop: 10 }}>
-              <b>${riziko.stupen === "vysoke"
-                ? "Než začnete míchat — tohle končívá opravou."
-                : "Než začnete míchat"}</b>
-              ${riziko.body.map((b, i) => html`
-                ${/* .rowline zalamuje (flex-wrap), takže delší text spadne pod tečku.
-                      Tady se nezalamuje — bod je tečka a věta vedle ní, ne pod ní. */""}
-                <div key=${i} className="rowline" style=${{ marginTop: 6, marginBottom: 0,
-                  alignItems: "flex-start", flexWrap: "nowrap" }}>
-                  ${/* .dot má v CSS align-self:center — u dvouřádkového textu by
-                        sjela doprostřed. Tady patří k prvnímu řádku. */""}
-                  <span className="dot" style=${{ marginTop: 7, alignSelf: "flex-start",
-                    background: b.sila === "vysoke" ? "var(--danger)" : "var(--warn)" }}></span>
-                  <span style=${{ flex: 1, minWidth: 0 }}>${b.co}<span
-                    className="note"> ${b.coStim}</span></span>
-                </div>`)}
+              <b>${rizikoNadpis}</b>
+              ${rizikoBody(riziko.body)}
             </div>` : null;
+
+  /* Před míchacím režimem (kde padá rozhodnutí) se riziko otevírá tlačítkem
+     v záhlaví „Kolik namíchat" — dřív bylo vložené mezi ostatní karty a
+     splývalo s nimi. Uvnitř míchacího režimu zůstává vložené jako dřív,
+     tam by okno překrylo váhu. Zavře-li se mezitím poslední bod (např.
+     receptura se označí jako otestovaná), popup se sám schová. */
+  const rizikoPopupVidet = !michRezim && rizikoOtevreno && !!riziko && riziko.body.length > 0;
 
   /* Ředidlo a zpomalovač. Zadává se to až u míchačky, proto to stojí vedle
      zbytků a ne v zadání zakázky — v tu chvíli je barva namíchaná a tiskař
@@ -1563,6 +1573,37 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                   </div>
                 </div>`}
             </div>` : null;
+
+  /* Viskozita se měří výtokovým pohárkem až po namíchání, ne při zadávání
+     zakázky — proto tohle pole žije v míchacím režimu, vedle aditiv, ne
+     v kartě Zakázka. Napojení na recepturu a na doporučený rozsah síta
+     (zeSita, spočítané výš z proměnné viskoz) je beze změny. */
+  const blokViskozita = html`
+            <div className="pickbox" style=${{ marginTop: 10 }}>
+              <div className="rowline" style=${{ marginTop: 0, marginBottom: 0 }}>
+                <b>Viskozita — výtokový čas</b>
+                <input type="number" step="0.5" min="0" style=${{ width: 84 }} value=${viskoz}
+                  placeholder=${zeSita && zeSita.dopVisk
+                    ? fmt(zeSita.dopVisk.od, 0) + "–" + fmt(zeSita.dopVisk.do, 0) : "s"}
+                  onChange=${(e) => setViskoz(e.target.value)} />
+                <span className="note">s</span>
+                ${recipe && n(viskoz) > 0 && n(viskoz) !== n(recipe.viskozita) && html`
+                  <button className="btn sec sm" title="uložit jako referenční hodnotu receptury"
+                    onClick=${() => upravRecepturu({ viskozita: n(viskoz) })}>Uložit k receptuře</button>`}
+              </div>
+              ${zeSita && zeSita.dopVisk && html`
+                <div className="note" style=${{ marginTop: 8 }}>
+                  Doporučeno k ${recipe.mesh}: ${fmt(zeSita.dopVisk.od, 0)}–${fmt(zeSita.dopVisk.do, 0)} s${
+                    zeSita.dopVisk.poharek ? " · " + zeSita.dopVisk.poharek : ""}
+                </div>`}
+              ${zeSita && zeSita.mimoRozsah && html`
+                <div className="warnbox" style=${{ marginTop: 8 }}>
+                  <b>Změřených ${fmt(n(viskoz), 1)} s je mimo rozsah.</b> Barva
+                  ${n(viskoz) < zeSita.dopVisk.od ? "je řidší, protéká víc" : "je hustší, protéká míň"}.
+                </div>`}
+              ${zeSita && zeSita.dopVisk && !zeSita.mimoRozsah && n(viskoz) > 0 && html`
+                <div className="okbox" style=${{ marginTop: 8 }}>Změřených ${fmt(n(viskoz), 1)} s sedí.</div>`}
+            </div>`;
 
   /* Odpočet doby zpracovatelnosti. Vykresluje se dvakrát — v kalkulaci
      drobně, v míchacím režimu velkým písmem — proto je to jeden blok
@@ -1680,6 +1721,11 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                   <${PdfVKalkulaci} sgps=${sgps} products=${products} recipes=${recipes}
                     onApply=${onPouzitSpec} onNacteno=${onPdfNacteno} />
                   <div className="popiska">Zakázkový list</div>
+                  ${onCode && html`
+                    <div style=${{ marginTop: 8 }}>
+                      <${KodVKalkulaci} hidOn=${hidOn} setHidOn=${setHidOn}
+                        onCode=${onCode} onNastaveni=${onNastaveniCtecky} />
+                    </div>`}
                 </div>`}
             </div>
             <div style=${{ marginTop: 14 }}>
@@ -1692,8 +1738,6 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 ${position ? fmt(sirka, 1) + "×" + fmt(vyska, 1) : "?"} mm${rozmerListu ? " ⌂" : ""}
               </span>
               ${colorSel && html`<span className="tag"><span className="cdot" style=${{ background: colorSel.hex || "#CCCCCC" }}></span>${colorSel.code || colorSel.name || ""}</span>`}
-              ${onCode && html`<${KodVKalkulaci} hidOn=${hidOn} setHidOn=${setHidOn}
-                onCode=${onCode} onNastaveni=${onNastaveniCtecky} />`}
               <button className="btn sec sm" onClick=${() => setPickerOpen(true)} disabled=${!product}>Barva a poloha potisku →</button>
             </div>
           </div>
@@ -1876,30 +1920,6 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 <input type="number" step="10" value=${minBatch} onChange=${(e) => setMinBatch(e.target.value)} />
               </div>
             </div>
-            <div className="frow c2">
-              <div>
-                <label className="f">Viskozita — výtokový čas (s)</label>
-                <div className="rowline" style=${{ marginBottom: 0 }}>
-                <input type="number" step="0.5" min="0" style=${{ flex: 1 }} value=${viskoz}
-                  placeholder=${zeSita && zeSita.dopVisk
-                    ? "doporučeno " + fmt(zeSita.dopVisk.od, 0) + "–" + fmt(zeSita.dopVisk.do, 0) + " s"
-                    : "změřeno výtokovým pohárkem"}
-                  onChange=${(e) => setViskoz(e.target.value)} />
-                  ${recipe && n(viskoz) > 0 && n(viskoz) !== n(recipe.viskozita) && html`
-                    <button className="btn sec sm" title="uložit jako referenční hodnotu receptury"
-                      onClick=${() => upravRecepturu({ viskozita: n(viskoz) })}>Uložit k receptuře</button>`}
-                </div>
-              </div>
-              ${zeSita && zeSita.dopVisk && html`
-                <div className=${zeSita.mimoRozsah ? "warnbox" : "okbox"} style=${{ marginTop: 22 }}>
-                  <b>Doporučeno k ${recipe.mesh}:</b> ${fmt(zeSita.dopVisk.od, 0)}–${fmt(zeSita.dopVisk.do, 0)} s${
-                    zeSita.dopVisk.poharek ? " · " + zeSita.dopVisk.poharek : ""}
-                  ${zeSita.mimoRozsah
-                    ? html`<br /><b>Změřených ${fmt(n(viskoz), 1)} s je mimo rozsah</b> — barva
-                        ${n(viskoz) < zeSita.dopVisk.od ? "je řidší, protéká víc" : "je hustší, protéká míň"}.`
-                    : (n(viskoz) > 0 ? html`<br />Změřených ${fmt(n(viskoz), 1)} s sedí.` : "")}
-                </div>`}
-            </div>
             ${zeSita && html`
                 <div className=${Math.abs(zeSita.gm2 - n(gm2)) > 0.05 ? "okbox" : "specbar"} style=${{ marginTop: 4 }}>
                   ${Math.abs(zeSita.gm2 - n(gm2)) > 0.05
@@ -1978,7 +1998,18 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
         ${calcAkt && html`
           <div className="bigpanel" style=${{ display: "grid", gap: 20 }}>
           <div className="card" style=${{ margin: 0 }}>
-            <h2>Kolik namíchat</h2>
+            <div className="rowline" style=${{ marginTop: 0, marginBottom: 0 }}>
+              <h2 style=${{ margin: 0 }}>Kolik namíchat</h2>
+              ${riziko && riziko.body.length > 0 && html`
+                <${React.Fragment}>
+                  <span style=${{ marginLeft: "auto" }}></span>
+                  <button className=${"btn sm" + (riziko.stupen === "vysoke" ? " danger" : " sec")}
+                    onClick=${() => setRizikoOtevreno(true)}
+                    title="Co může skončit opravou, dřív než se sáhne po váze">
+                    ⚠ Než začnete míchat (${riziko.body.length})
+                  </button>
+                <//>`}
+            </div>
 
             <div className="rowline" style=${{ marginTop: 2, marginBottom: 12 }}>
               <span className="swatch" style=${{ background: recipe.hex || "#888", width: 40, height: 40 }} />
@@ -2059,7 +2090,6 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                     Ztráty na ${fmt(ztratyNavrh, 1)} %
                   </button>`}
               </div>`}
-            ${!michRezim && blokRizika}
             ${!michRezim && blokNatisku}
             ${!michRezim && blokPotlife}
 
@@ -2111,7 +2141,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
             tech=${tech} zak=${zak} kodDavky=${kodDavky} potlife=${michRezim ? blokPotlife : null}
             pokryti=${blokPokryti} zbytky=${blokZbytku} stitek=${blokStitku} rady=${blokRady}
             aditiva=${blokAditiv} riziko=${michRezim ? blokRizika : null}
-            natisk=${michRezim ? blokNatisku : null}>
+            natisk=${michRezim ? blokNatisku : null} viskozita=${michRezim ? blokViskozita : null}>
             <${Vazeni} comps=${calcAkt.comps} totalG=${calcAkt.totalG} recipeName=${recipe ? recipe.name : ""}
               aditiva=${DRUHY_ADITIV.map((d) => ({ druh: d, popis: ADITIVA[d].popis, g: aditivaAkt[d] }))}
               redeni=${redeniAkt}
@@ -2129,6 +2159,19 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
           <//>
           </div>`}
       </div>
+
+      ${rizikoPopupVidet && html`
+        <div className="modalbg" onClick=${(e) => { if (e.target === e.currentTarget) setRizikoOtevreno(false); }}>
+          <div className="modalbox" style=${{ width: "min(840px,100%)" }}>
+            <div className=${(riziko.stupen === "vysoke" ? "warnbox" : "pickbox") + " rizikopopup"} style=${{ margin: 0 }}>
+              <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
+                <b>${rizikoNadpis}</b>
+                <button className="btn sec sm" onClick=${() => setRizikoOtevreno(false)}>✕</button>
+              </div>
+              ${rizikoBody(riziko.body)}
+            </div>
+          </div>
+        </div>`}
 
       ${pickerOpen && product && html`
         <div className="modalbg" onClick=${(e) => { if (e.target === e.currentTarget) setPickerOpen(false); }}>

@@ -229,9 +229,11 @@ function KodVKalkulaci({ hidOn, setHidOn, onCode, onNastaveni }) {
 
   return html`
     <${React.Fragment}>
-      <!-- Krátký popisek schválně: řádek pod dlaždicemi nese i štítky
-           technologie a rozměru a při delším názvu technologie se zalomí. -->
-      <button className="btn sec sm" onClick=${() => setOpen(true)}
+      <!-- Stojí pod dlaždicí zakázkového listu, jako druhá cesta ke stejnému
+           cíli (načíst zadání) — proto stejná velikost jako hlavní tlačítko
+           do míchacího režimu, ne drobné tlačítko jako dřív v řádku štítků. -->
+      <button className="btn sec" style=${{ padding: "15px 26px", fontSize: 16, width: "100%" }}
+        onClick=${() => setOpen(true)}
         title="Načíst zakázku čárovým kódem">Načíst kód</button>
       ${open && html`
         <div className="modalbg" onClick=${(e) => { if (e.target === e.currentTarget) zavri(); }}>

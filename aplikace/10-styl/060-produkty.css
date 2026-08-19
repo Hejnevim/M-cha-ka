@@ -21,6 +21,14 @@
 .modalbg{position:fixed;inset:0;background:rgba(24,23,15,.4);z-index:90;display:flex;align-items:flex-start;justify-content:center;padding:30px 16px;overflow:auto}
 .modalbox{width:min(860px,100%)}
 .modalbox .card{margin:0;box-shadow:var(--modal-shadow)}
+/* Riziko opravy v popupu — na přání o 50 % větší box i písmo než ostatní
+   popupy, ať je čitelné i z odstupu od obrazovky. Box je v JSX o 50 % širší
+   (560px -> 840px), tady se dopočítávají zvětšené varianty stejných tříd. */
+.rizikopopup.pickbox{font-size:calc(1em * 1.5);padding:calc(12px * 1.5)}
+.rizikopopup.warnbox{font-size:calc((var(--pismo-poznamka) - 1px) * 1.5);padding:calc(10px * 1.5) calc(12px * 1.5)}
+.rizikopopup .note{font-size:calc((var(--pismo-poznamka) - .5px) * 1.5)}
+.rizikopopup .dot{width:calc(9px * 1.5);height:calc(9px * 1.5)}
+.rizikopopup .btn.sm{font-size:calc(var(--pismo-poznamka) * 1.5);padding:calc(var(--tlacitko-y) * .6 * 1.5) calc(var(--tlacitko-x) * .67 * 1.5)}
 /* Míchací režim — celá obrazovka jen pro to, co tiskař u váhy potřebuje.
    Písmo je záměrně o dost větší: na displej se kouká z metru a se špinavýma
    rukama, ne z pracovní vzdálenosti. */

@@ -1,7 +1,7 @@
 "use strict";
 function MichaciRezim({ aktivni, onZavrit, recipe, calcAkt, rozpis, vyuziti, stav,
                         product, colorSel, position, tech, zak, kodDavky,
-                        pokryti, zbytky, stitek, rady, potlife, aditiva, riziko, natisk,
+                        pokryti, zbytky, stitek, rady, potlife, aditiva, riziko, natisk, viskozita,
                         children }) {
   useEffect(() => {
     if (!aktivni) return;
@@ -106,6 +106,7 @@ function MichaciRezim({ aktivni, onZavrit, recipe, calcAkt, rozpis, vyuziti, sta
           </p>
           ${riziko}
           ${natisk}
+          ${viskozita}
           ${aditiva}
           ${zbytky}
           ${stitek}

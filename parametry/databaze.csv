@@ -7,3 +7,4 @@ receptury_Ferro_Xpresssion.csv;FIR;;"Ferro Xpression - vypalovani, nizka teplota
 receptury_PMS_786.csv;PDP;;"Printcolor Mischsystem MS 786 - tampontisk"
 receptury_PMS_660.csv;TXP,PDP,SCR;;"Printcolor Mischsystem MS 660 - textil, tampontisk, sitotisk"
 receptury_vlastni.csv;;;"vlastni receptury dilny - plati ve vsech technologiich"
+receptury_RUCOLOR_10KK.csv;PDP,SCR;;"RUCOINX RUCOLOR 10KK (B) - sitotisk na bily podklad"

@@ -7,7 +7,7 @@ label.f{display:block;font-size:var(--pismo-popisek);line-height:1.25;font-weigh
 /* Popisek se v užším okně zalomí na dva řádky a pole pod ním se propadne níž
    než sousední. Popisek v mřížce má proto vždy výšku dvou řádků a text sedí
    u jeho spodní hrany — pole v řádku tak drží linku při každé šířce okna. */
-@media(min-width:640px){.frow.c2>div>label.f:first-child,.frow.c3>div>label.f:first-child,.frow.c4>div>label.f:first-child,.zakazka-cisla>div>label.f:first-child{display:flex;align-items:flex-end;min-height:2.5em}
+@media(min-width:640px){.frow.c2>div>label.f:first-child,.frow.c3>div>label.f:first-child,.frow.c4>div>label.f:first-child{display:flex;align-items:flex-end;min-height:2.5em}
 /* Buňka s přepínači popisek nemá, takže by v mřížce začínala výš než pole
    vedle ní — srovnáme ji na spodní hranu řádku, na střed sousedního pole. */
 .frow>.flags{align-self:end;margin-top:0;padding-bottom:8px}}
@@ -60,9 +60,6 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
    tiskne, kam se to tiskne a kam pustit zakázkový list. Text a volby jdou pod
    ně na celou šířku; ve sloupcích vedle textu se název při užším okně rozsypal
    na jedno slovo na řádek. */
-/* Čísla zakázky mají vlastní kartu o polovině stránky — ve dvou sloupcích,
-   protože pod sebou by byla zbytečně dlouhá a pole by byla přes celou šířku.
-   V úzkém okně se srovnají pod sebe. */
 /* Obě půlky výběru receptur mají stejný rytmus: popisek, filtr, hledání,
    výběr. Když se v jedné zalomí lišta filtru na dva řádky, musela by se
    druhá posunout taky — proto sdílejí řádky mřížky, ne jen sloupce.
@@ -73,5 +70,18 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
     .recept-pulky>div{display:grid;grid-template-rows:subgrid;grid-row:span 4;align-content:start}
   }
 }
-.zakazka-cisla{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-content:start}
+/* Čísla zakázky jako čtyři velké dlaždice vyplňující celou kartu — stejný
+   vzor jako síto/kryvost/povrch v Parametrech tisku (`.karta-tisk`), aby se
+   tentýž typ pole choval na obou kartách stejně. Bez viskozity pod nimi
+   zůstávala karta z půlky prázdná; dlaždice ten prostor zaberou. */
+.zakazka-cisla{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.zakazka-cisla>div{container-type:inline-size}
+.zakazka-cisla label.f{font-size:calc(var(--pismo-popisek) * 1.5);margin-bottom:10px;text-align:center}
+/* Dlaždice je obdélník: šířku bere celou ze sloupce mřížky (žádné mezery
+   navíc mezi poli), ale výšku má pevnou — čtverec přes celý sloupec hnal
+   kartu na 595 px a roztahoval sousední Recepturu a Parametry tisku
+   (přirozeně 526 px). Výška 178 px je změřená sondou tak, aby dva řádky
+   dlaždic vyšly na touž výšku karty jako oba sousedé. */
+.zakazka-cisla input{font-size:min(calc(var(--pismo) * 4.5), 24.75cqw);font-weight:700;text-align:center;
+  height:178px;padding:5cqw;box-sizing:border-box}
 @media(max-width:560px){.zakazka-cisla{grid-template-columns:1fr}}
