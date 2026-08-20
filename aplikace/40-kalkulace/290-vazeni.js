@@ -130,7 +130,15 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
   return html`
     <div className="card" style=${{ margin: 0 }}>
       <h2>Asistent navážení</h2>
-      <p className="hint">Komponenty se váží kumulativně do jedné nádoby. Váha se připojuje přes USB (virtuální COM port) v prohlížeči Chrome/Edge; bez váhy lze postup vyzkoušet v simulaci.</p>
+      ${/* Tára a Odpojit bydlí v pravém horním rohu karty, pod sebou —
+            rozpoložení podle dílny: Odpojit nahoře a dál od ruky (mačká se
+            jednou za směnu), Tára pod ním (mačká se po každé nádobě).
+            Kontejner je absolutní, aby tlačítka nebrala řádek ovládání. */ ""}
+      ${sc.mode !== "off" && html`
+        <div className="asistroh">
+          <button className="btn danger sm mich-tl-odpojit" onClick=${sc.disconnect}>Odpojit</button>
+          <button className="btn sec sm mich-tl-tara" onClick=${sc.tare}>Tára (0)</button>
+        </div>`}
       ${!comps.length && html`<div className="warnbox" style=${{ marginTop: 0 }}>
         Asistent vede vážení po komponentách — zadejte nejdřív složení receptury.
         Celkovou dávku ${fmt(totalG)} g můžete zatím navážit podle míchacího lístku.
@@ -139,20 +147,16 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
       <div className="rowline" style=${comps.length ? {} : { display: "none" }}>
         ${sc.mode === "off" && html`
           <${React.Fragment}>
-            <button className="btn" onClick=${() => sc.connect(baud)}>Připojit váhu (USB)</button>
+            <button className="btn mich-tl-pripojit" onClick=${() => sc.connect(baud)}>Připojit váhu (USB)</button>
             <select style=${{ width: "auto" }} value=${baud} onChange=${(e) => setBaud(e.target.value)} title="Rychlost komunikace (baud)">
               ${["4800", "9600", "19200", "38400", "115200"].map((b) => html`<option key=${b} value=${b}>${b} Bd</option>`)}
             </select>
-            <button className="btn sec" onClick=${sc.startSim}>Vyzkoušet v simulaci</button>
+            <button className="btn sec mich-tl-simulace" onClick=${sc.startSim}>Vyzkoušet v simulaci</button>
           <//>`}
         ${sc.mode !== "off" && html`
-          <${React.Fragment}>
-            <span className="tag" style=${{ background: "var(--paper)", color: "var(--ok)" }}>
-              ${sc.mode === "serial" ? "váha připojena" : "simulace váhy"}
-            </span>
-            <button className="btn sec sm" onClick=${sc.tare}>Tára (0)</button>
-            <button className="btn danger sm" onClick=${sc.disconnect}>Odpojit</button>
-          <//>`}
+          <span className="tag" style=${{ background: "var(--paper)", color: "var(--ok)" }}>
+            ${sc.mode === "serial" ? "váha připojena" : "simulace váhy"}
+          </span>`}
       </div>
       ${sc.err && html`<div className="warnbox">${sc.err}</div>`}
 
@@ -162,7 +166,7 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
           <div className="result-sub">na váze · receptura ${recipeName}</div>
 
           ${sc.mode === "sim" && html`
-            <div style=${{ margin: "10px 0" }}>
+            <div className="simposuv">
               <label className="f">Simulace — přidávejte barvu posuvníkem</label>
               <input type="range" min="0" max=${Math.ceil(davka * 1.4)} step="0.1" value=${sc.raw}
                 onChange=${(e) => sc.setRaw(n(e.target.value))} />
@@ -208,7 +212,7 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
                     <span className="note">${sarzeTed
                       ? "šarže " + sarzeTed.kod
                       : "šarže neuvedena"}</span>
-                    <button className="btn sec sm" onClick=${() => {
+                    <button className="btn sec sm mich-tl-sarze" onClick=${() => {
                       setKonevKod(""); setKonevPro(krok); }}>
                       ${sarzeTed ? "Nová konev" : "Zadat šarži"}
                     </button>`}
@@ -232,7 +236,7 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
                   ${" " + fmt(rozborVahy.strop)} g — o ${fmt(rozborVahy.nadStropem)} g víc.
                 </div>`}
               <div className="rowline" style=${{ marginTop: 10 }}>
-                <button className="btn" style=${inTol ? { background: "var(--ok)" } : {}}
+                <button className="btn mich-tl-dalsi" style=${inTol ? { background: "var(--ok)" } : {}}
                   disabled=${over} onClick=${dalsiKrok}>
                   ${zbyvaVse.filter((z, i) => i !== krok && z > tolerance / 2).length ? "Další složka →" : "Dokončit"}
                 </button>

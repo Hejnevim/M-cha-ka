@@ -114,6 +114,22 @@ se u zbytků ze skladu **nad dvojnásobek objednané dávky vůbec neukáže**. 
 neví, může si myslet, že se ten kelímek spotřebovat nedá — jde to, ale musí se
 zadat ručně, protože tam rozhoduje obsluha, která ví, že si míchá do zásoby.
 
+> Z kelímku bez štítku se dá vyjít taky, když víte, co v něm je.
+
+**Stálo u:** tlačítka *Zbytek není v evidenci — zadat ručně* v míchacím režimu.
+**Vysvětluje:** k čemu ruční zadání je — kelímek u míchačky bez štítku a kódu
+se zadá názvem a složením a dopočítává se stejně jako kelímek z evidence, jen
+se z něj nic neodepisuje.
+
+> Štítek nalepte na kelímek hned po namíchání. Po zakázce ho načtěte čtečkou
+> a aplikace se zeptá, kolik barvy zbylo — tím se dostane do evidence zbytků.
+
+**Stálo u:** tlačítka *Znám zbytek rovnou* v míchacím režimu.
+**Vysvětluje:** celý oběh štítku — nalepit hned (kolik zbude, se teprve uvidí,
+proto kelímek visí jako „v tisku"), po zakázce načíst čtečkou a doplnit zbytek.
+Tlačítko *Znám zbytek rovnou* je zkratka pro případ, kdy je zbytek známý už
+u váhy a na čtečku se nečeká.
+
 ---
 
 ## Aditiva — ředidlo a zpomalovač
@@ -227,6 +243,64 @@ Návod musí říct čtyři věci:
 Míří-li pravidlo na dvě složky téže receptury naráz, nezastoupí se nic —
 aplikace nevybírá za dílnu. Dokud není zapsané žádné pravidlo, počítá aplikace
 zbytky přesně jako dřív.
+
+---
+
+## Asistent navážení
+
+> Komponenty se váží kumulativně do jedné nádoby. Váha se připojuje přes USB
+> (virtuální COM port) v prohlížeči Chrome/Edge; bez váhy lze postup vyzkoušet
+> v simulaci.
+
+**Stálo:** pod nadpisem karty Asistent navážení v míchacím režimu.
+**Vysvětluje:** tři věci naráz — že se nepřelévá do víc nádob (displej váhy
+má po každé složce ukazovat hodnotu ve sloupci „kumulativně"), že připojení
+váhy funguje jen v prohlížečích se sériovým portem (Chrome/Edge), a že
+tlačítko *Vyzkoušet v simulaci* je cesta, jak si postup projít bez váhy.
+Do návodu patří i to, co v kartě zůstalo: bez zadaného složení receptury
+asistent vážení nevede a hlásí, že se dávka váží podle míchacího lístku.
+
+---
+
+## Barva na podkladu
+
+> Podtisk znamená průchod navíc: bílá se počítá jako samostatná dávka
+> a k času tisku přibude sušení mezi průchody.
+
+**Stálo:** v hlášení Barva na podkladu, když posouzení došlo k nutnému podtisku.
+**Vysvětluje:** co nález „nutný podtisk" znamená pro plán zakázky — druhá
+dávka (bílá) a sušení mezi průchody, tedy čas i materiál navíc. Hlášení samo
+v aplikaci zůstává, zmizel jen výklad důsledků.
+
+> Posouzení vychází z odstínu barvy a materiálu, ne z měření — je to
+> upozornění, ne verdikt. Meze si dílna může upravit v parametrech.
+
+**Stálo:** pod celým blokem Barva na podkladu.
+**Vysvětluje:** jak moc hlášení věřit — počítá se z katalogových odstínů, ne
+ze spektrofotometru, takže je to orientační upozornění. A že prahy posouzení
+(kdy je rozdíl jasu „rizikový") si dílna ladí v parametry/parametry.csv.
+
+---
+
+## Nátisk z malé dávky — kdy se nenabídne
+
+> Nátisk z malé dávky sem nesedí: nejmenší složka ⟨jméno⟩ je jen ⟨X⟩ % dávky
+> (případně: nejmenší dávka dílny je ⟨X⟩ g), takže by zkušební dávka musela
+> mít ⟨Y⟩ g — tedy víc než celá dávka ⟨Z⟩ g (případně: z ⟨Z⟩ g, což už
+> neušetří dost). Míchejte rovnou celou.
+
+**Stálo u:** bloku nátisku v kalkulaci — na místě, kde jindy stojí tlačítko
+*Nejdřív nátisk*, když pro danou dávku nátisk neměl smysl.
+**Vysvětluje:** proč se u téhle dávky nátisk nenabízí.
+
+**Omezení, které tím zmizelo z očí:** tlačítko nátisku se nenabídne vždy.
+Nejmenší rozumný nátisk určuje nejmenší složka receptury — musí vážit aspoň
+pětinásobek rozlišení váhy (5 × 0,1 g), jinak nátisk neukáže odstín
+receptury, ale náhodu navažování. Když takhle spočítaná zkušební dávka
+(zaokrouhlená nahoru na pětigramy, případně zvednutá na nejmenší dávku
+dílny) přesáhne 60 % celé dávky, nátisk už neušetří dost a aplikace ho
+**mlčky nenabídne**. Kdo to neví, myslí si, že tlačítko chybí. Výpočet
+zdůvodnění dál vrací (pole `duvod` v rozboru nátisku), jen se nezobrazuje.
 
 ---
 

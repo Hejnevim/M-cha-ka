@@ -92,32 +92,39 @@ při koeficientech 1,00. Podíl skutečnost/výpočet je hledaný koeficient.
 
 4) BAREVNÉ DATABÁZE PRO ZBÝVAJÍCÍ TECHNOLOGIE  →  složka "databaze barev"
 --------------------------------------------------------------------------------
-Každá technologie potřebuje svoji řadu barev. Tohle je stav k 11. 8. 2026;
+Každá technologie potřebuje svoji řadu barev. Tohle je stav k 20. 8. 2026;
 přiřazení databází k technologiím se nastavuje v parametry/databaze.csv.
 
     FIR   Ferro Xpression                    1 097 receptur   MÁME
-    PDP   Printcolor MS 786 + MS 660         1 592 receptur   MÁME
+    PDP   Printcolor MS 786 + MS 660         2 368 receptur   MÁME
+          + RUCOLOR 10KK
     TXP   Printcolor MS 660                    778 receptur   ověřit, zda
                                                               je to ta správná
                                                               řada na textil
-    SCR   Printcolor MS 660                    778 receptur   ověřit totéž
-                                                              pro plast/papír
-    TRS   žádná                                    0          CHYBÍ CELÁ
+    SCR   Printcolor MS 660                  1 554 receptur   RUCOLOR sedí,
+          + RUCOLOR 10KK                                      MS 660 ověřit
+    TRS   žádná                                3 vlastní      CHYBÍ CELÁ
 
 CO SEHNAT:
+    - dalších 12 barevných řad. Podklady se teprve sbírají; každá se převede
+      a přiřadí k technologiím zvlášť, jak bude přicházet. Tabulka výš tedy
+      ještě poroste a přiřazení se bude měnit.
     - databázi barev pro TRANSFER (TRS) — zatím není vůbec žádná
     - potvrdit u Printcolor, jestli na TXP a SCR stačí MS 660, nebo jestli
       mají pro textil a pro plast vlastní míchací systém
-    - u nových databází stačí PDF z Printcolor easyMEMO, převede se příkazem:
-          python prevod_printcolor.py "cesta/k/PMS xxx.pdf"
+    - u nových databází stačí PDF, převod je hotový pro obojí, co chodí:
+          python prevod_printcolor.py "cesta/k/PMS xxx.pdf"   (easyMEMO)
+          python prevod_rucolor.py "cesta/k/RUCOLOR xxx.pdf"  (tabulka RUCOINX)
       Soubor se uloží do "databaze barev" a přiřazení se dopíše do
       parametry/databaze.csv.
 
 CO V PDF NENÍ a musí se doplnit jinak:
-    hustota barvy (g/ml)  - u Printcolor receptur zůstala prázdná, aplikace
-                            počítá s 1,20. Bývá v technickém listu barvy.
+    hustota barvy (g/ml)  - nechala ji prázdnou každá ze čtyř nakoupených
+                            databází, aplikace počítá s 1,20. Bývá
+                            v technickém listu barvy.
     odstín (hex)          - dohledal se podle názvu pantonu z jiných databází;
-                            u MS 786 chybí u 193 receptur, u MS 660 u 223.
+                            chybí u 460 receptur: 223 MS 660, 190 MS 786,
+                            47 RUCOLOR 10KK.
                             Bez odstínu aplikace neporadí s prosvítáním
                             ani s korekcí, míchat podle receptury ale jde.
 

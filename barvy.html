@@ -40,11 +40,42 @@
   /* Míchací režim má vlastní sadu rozměrů. Nečte se od klávesnice, ale od
      váhy — často ve stoje a v rukavicích — takže se ladí zvlášť od zbytku
      aplikace a nesmí se hýbat, když se sáhne na obecnou škálu. */
-  --mich-nazev:26px; --mich-davka:34px; --mich-vzorek:52px;
+  --mich-nazev:26px; --mich-davka:37px; --mich-vzorek:52px;
   --mich-hlavicka:12px; --mich-tabulka:20px; --mich-gramy:26px;
-  --mich-radek:11px; --mich-vysledek:52px; --mich-wbar:20px;
-  --mich-tlacitko:15px; --mich-mezera:22px;
-  --mich-pole:20px; --mich-hlaseni:15px; --mich-stitek:14px;
+  --mich-radek:11px; --mich-vysledek:64px; --mich-wbar:19px;
+  --mich-tlacitko:14px; --mich-mezera:15px;
+  --mich-pole:17px; --mich-hlaseni:14px; --mich-stitek:14px;
+  --mich-prepinac:16px;
+  /* Každé stálé tlačítko míchacího režimu zvlášť: hodnota je velikost písma,
+     odsazení se z ní dopočítává, takže tvar tlačítka drží a mění se jen
+     velikost. Ladí se na stránce Míchací režim v barvy.html. Tlačítka, která
+     tu vyjmenovaná nejsou (vzácné stavy), drží společné --mich-tlacitko. */
+  --mich-tl-zpet:17px; --mich-tl-plocha:16px; --mich-tl-rucne:18px;
+  --mich-tl-znam:18px; --mich-tl-viskozita:16px;
+  --mich-tl-pripojit:16px; --mich-tl-simulace:16px; --mich-tl-tara:24.5px;
+  --mich-tl-odpojit:15px; --mich-tl-sarze:15px; --mich-tl-dalsi:16px;
+  --mich-tl-stitek:23px; --mich-tl-hlaseni:14px; --mich-tl-pomocna:15px;
+  --mich-nadpis:21px; --mich-poznamka:14px; --mich-znak:25px;
+  /* Tvar a poloha tlačítek: šířka a výška „auto" nechají tlačítku tvar
+     podle textu, číslo z něj udělá blok (stejná šířka a výška = čtverec;
+     text se zalomí a vycentruje sám, je to <button>). Posun je vizuální
+     odchylka od přirozeného místa v toku — tlačítko se vykreslí jinde,
+     ale místo v řádku si dál drží, takže se rozvržení nerozsype. */
+  --mich-tl-zpet-sirka:auto; --mich-tl-zpet-vyska:50px; --mich-tl-zpet-posun-x:0px; --mich-tl-zpet-posun-y:0px;
+  --mich-tl-plocha-sirka:288px; --mich-tl-plocha-vyska:50px; --mich-tl-plocha-posun-x:0px; --mich-tl-plocha-posun-y:0px;
+  --mich-tl-rucne-sirka:auto; --mich-tl-rucne-vyska:auto; --mich-tl-rucne-posun-x:0px; --mich-tl-rucne-posun-y:0px;
+  --mich-tl-znam-sirka:auto; --mich-tl-znam-vyska:auto; --mich-tl-znam-posun-x:0px; --mich-tl-znam-posun-y:0px;
+  --mich-tl-viskozita-sirka:180px; --mich-tl-viskozita-vyska:50px; --mich-tl-viskozita-posun-x:306px; --mich-tl-viskozita-posun-y:24px;
+  --mich-tl-pripojit-sirka:auto; --mich-tl-pripojit-vyska:auto; --mich-tl-pripojit-posun-x:0px; --mich-tl-pripojit-posun-y:0px;
+  --mich-tl-simulace-sirka:auto; --mich-tl-simulace-vyska:auto; --mich-tl-simulace-posun-x:0px; --mich-tl-simulace-posun-y:0px;
+  --mich-tl-tara-sirka:116px; --mich-tl-tara-vyska:100px; --mich-tl-tara-posun-x:0px; --mich-tl-tara-posun-y:0px;
+  --mich-tl-odpojit-sirka:116px; --mich-tl-odpojit-vyska:100px; --mich-tl-odpojit-posun-x:0px; --mich-tl-odpojit-posun-y:0px;
+  --mich-tl-sarze-sirka:auto; --mich-tl-sarze-vyska:auto; --mich-tl-sarze-posun-x:65px; --mich-tl-sarze-posun-y:0px;
+  --mich-tl-dalsi-sirka:auto; --mich-tl-dalsi-vyska:auto; --mich-tl-dalsi-posun-x:0px; --mich-tl-dalsi-posun-y:0px;
+  --mich-tl-hlaseni-sirka:auto; --mich-tl-hlaseni-vyska:auto; --mich-tl-hlaseni-posun-x:0px; --mich-tl-hlaseni-posun-y:0px;
+  --mich-tl-pomocna-sirka:auto; --mich-tl-pomocna-vyska:auto; --mich-tl-pomocna-posun-x:0px; --mich-tl-pomocna-posun-y:0px;
+  --mich-tl-stitek-posun-x:0px; --mich-tl-stitek-posun-y:0px;
+  --mich-prepinac-posun-x:0px; --mich-prepinac-posun-y:0px;
   --mezera-karta-y:20px; --mezera-karta-x:22px; --mezera-karet:16px;
   --mezera-poli:12px; --pole-y:9px; --pole-x:12px;
   --tlacitko-y:10px; --tlacitko-x:18px; --okraj-stranky:20px;
@@ -256,7 +287,13 @@ svg[viewBox="0 0 24 24"].ikona-radek{width:var(--ikona-radek);height:var(--ikona
    Pevná velikost drží čtverec jen na široké obrazovce — jakmile se dlaždice
    zmenší, text se zalomí na tři řádky, dlaždice se protáhne na výšku a přestane
    odpovídat náhledu produktu. Takhle se zmenší celá kresba naráz a tvar drží. */
-.karta-tisk .frow.c3>div{container-type:inline-size}
+/* Kontejner je každé pole zvlášť, a nesmí se to vázat na počet sloupců:
+   u tampontisku bez zapsaného klišé zbudou v řádku jen dvě pole (`c2`).
+   Bez kontejneru se `cqw` nepočítá z dlaždice, ale z šířky okna — odsazení
+   vyšlo 95 px místo 14 a dlaždice se nafoukla na 271 x 561 px místo
+   271 x 271. Roztáhla tím celý druhý řádek karet, takže vedle ní stály
+   receptura i zakázka z poloviny prázdné. */
+.karta-tisk .frow>div{container-type:inline-size}
 .karta-tisk select{font-size:min(calc(var(--pismo) * 2), 11cqw);font-weight:700;text-align:center;
   width:100%;aspect-ratio:1;
   display:flex;align-items:center;justify-content:center;
@@ -294,13 +331,16 @@ label.f{display:block;font-size:var(--pismo-popisek);line-height:1.25;font-weigh
 /* Popisek se v užším okně zalomí na dva řádky a pole pod ním se propadne níž
    než sousední. Popisek v mřížce má proto vždy výšku dvou řádků a text sedí
    u jeho spodní hrany — pole v řádku tak drží linku při každé šířce okna. */
-@media(min-width:640px){.frow.c2>div>label.f:first-child,.frow.c3>div>label.f:first-child,.frow.c4>div>label.f:first-child,.zakazka-cisla>div>label.f:first-child{display:flex;align-items:flex-end;min-height:2.5em}
+@media(min-width:640px){.frow.c2>div>label.f:first-child,.frow.c3>div>label.f:first-child,.frow.c4>div>label.f:first-child{display:flex;align-items:flex-end;min-height:2.5em}
 /* Buňka s přepínači popisek nemá, takže by v mřížce začínala výš než pole
    vedle ní — srovnáme ji na spodní hranu řádku, na střed sousedního pole. */
 .frow>.flags{align-self:end;margin-top:0;padding-bottom:8px}}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 .chip{border:none;background:var(--paper);border-radius:var(--radius-btn);padding:calc(var(--tlacitko-y) * .7) calc(var(--tlacitko-x) * .78);cursor:pointer;font-weight:600;font-size:calc(var(--pismo) - 1px);display:inline-flex;align-items:center;justify-content:center;text-align:center;transition:box-shadow .15s,background .15s,color .15s;box-shadow:var(--neu-sm)}
 .chip.on{background:var(--key);color:var(--btn-ink)}
+/* drobný štítek do řádku poznámky — typy barev u polohy v katalogu produktů;
+   plná velikost chipu by řádek s polohou roztáhla přes dva */
+.chip.mini{padding:2px 10px;font-size:calc(var(--pismo-poznamka) - 1px)}
 .btn{border:none;border-radius:var(--radius-btn);padding:var(--tlacitko-y) var(--tlacitko-x);font-weight:700;cursor:pointer;background:var(--key);color:var(--btn-ink);transition:opacity .15s;box-shadow:var(--neu-sm)}
 .btn:hover{opacity:.82}
 .btn.sec{background:var(--paper);color:var(--ink)}
@@ -313,8 +353,11 @@ table.t th{text-align:left;font-size:var(--pismo-popisek);letter-spacing:var(--p
 table.t td{border-bottom:1px solid var(--line);padding:9px 8px;vertical-align:top}
 /* Číslice musí mít stejnou šířku, jinak se sloupce gramáží rozházejí. Když je
    --mono skutečně strojopis, platí to samo; u běžného písma to musí zapnout
-   tohle pravidlo. */
-td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+   tohle pravidlo. `table.t th.num` je v seznamu navíc kvůli specificitě:
+   samotné `th.num` (0,1,1) prohrává s `table.t th{text-align:left}` (0,1,2)
+   a hlavičky číselných sloupců by zůstaly vlevo, zatímco čísla pod nimi
+   stojí vpravo. */
+td.num,th.num,table.t th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
 .swatch{width:26px;height:26px;border-radius:var(--radius-pole);border:1px solid rgba(0,0,0,.12);display:inline-block;vertical-align:middle}
 /* text-align kvůli úzkému sloupci: jakmile se štítek zalomí na víc řádků,
    zarovnaný doleva vypadá roztřepeně — uvnitř oblého tvaru patří na střed */
@@ -344,9 +387,6 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
    tiskne, kam se to tiskne a kam pustit zakázkový list. Text a volby jdou pod
    ně na celou šířku; ve sloupcích vedle textu se název při užším okně rozsypal
    na jedno slovo na řádek. */
-/* Čísla zakázky mají vlastní kartu o polovině stránky — ve dvou sloupcích,
-   protože pod sebou by byla zbytečně dlouhá a pole by byla přes celou šířku.
-   V úzkém okně se srovnají pod sebe. */
 /* Obě půlky výběru receptur mají stejný rytmus: popisek, filtr, hledání,
    výběr. Když se v jedné zalomí lišta filtru na dva řádky, musela by se
    druhá posunout taky — proto sdílejí řádky mřížky, ne jen sloupce.
@@ -357,7 +397,20 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
     .recept-pulky>div{display:grid;grid-template-rows:subgrid;grid-row:span 4;align-content:start}
   }
 }
-.zakazka-cisla{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-content:start}
+/* Čísla zakázky jako čtyři velké dlaždice vyplňující celou kartu — stejný
+   vzor jako síto/kryvost/povrch v Parametrech tisku (`.karta-tisk`), aby se
+   tentýž typ pole choval na obou kartách stejně. Bez viskozity pod nimi
+   zůstávala karta z půlky prázdná; dlaždice ten prostor zaberou. */
+.zakazka-cisla{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.zakazka-cisla>div{container-type:inline-size}
+.zakazka-cisla label.f{font-size:calc(var(--pismo-popisek) * 1.5);margin-bottom:10px;text-align:center}
+/* Dlaždice je obdélník: šířku bere celou ze sloupce mřížky (žádné mezery
+   navíc mezi poli), ale výšku má pevnou — čtverec přes celý sloupec hnal
+   kartu na 595 px a roztahoval sousední Recepturu a Parametry tisku
+   (přirozeně 526 px). Výška 178 px je změřená sondou tak, aby dva řádky
+   dlaždic vyšly na touž výšku karty jako oba sousedé. */
+.zakazka-cisla input{font-size:min(calc(var(--pismo) * 4.5), 24.75cqw);font-weight:700;text-align:center;
+  height:178px;padding:5cqw;box-sizing:border-box}
 @media(max-width:560px){.zakazka-cisla{grid-template-columns:1fr}}
 .produkt-dlazdice{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
 .produkt-dlazdice .dlazdice{min-width:0;display:flex;flex-direction:column}
@@ -382,6 +435,14 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
 .modalbg{position:fixed;inset:0;background:rgba(24,23,15,.4);z-index:90;display:flex;align-items:flex-start;justify-content:center;padding:30px 16px;overflow:auto}
 .modalbox{width:min(860px,100%)}
 .modalbox .card{margin:0;box-shadow:var(--modal-shadow)}
+/* Riziko opravy v popupu — na přání o 50 % větší box i písmo než ostatní
+   popupy, ať je čitelné i z odstupu od obrazovky. Box je v JSX o 50 % širší
+   (560px -> 840px), tady se dopočítávají zvětšené varianty stejných tříd. */
+.rizikopopup.pickbox{font-size:calc(1em * 1.5);padding:calc(12px * 1.5)}
+.rizikopopup.warnbox{font-size:calc((var(--pismo-poznamka) - 1px) * 1.5);padding:calc(10px * 1.5) calc(12px * 1.5)}
+.rizikopopup .note{font-size:calc((var(--pismo-poznamka) - .5px) * 1.5)}
+.rizikopopup .dot{width:calc(9px * 1.5);height:calc(9px * 1.5)}
+.rizikopopup .btn.sm{font-size:calc(var(--pismo-poznamka) * 1.5);padding:calc(var(--tlacitko-y) * .6 * 1.5) calc(var(--tlacitko-x) * .67 * 1.5)}
 /* Míchací režim — celá obrazovka jen pro to, co tiskař u váhy potřebuje.
    Písmo je záměrně o dost větší: na displej se kouká z metru a se špinavýma
    rukama, ne z pracovní vzdálenosti. */
@@ -403,23 +464,143 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
   text-align:left;padding:calc(var(--mich-radek) * .55) 10px;border-bottom:2px solid var(--line-2)}
 .michtab td{padding:var(--mich-radek) 10px;border-bottom:1px solid var(--line)}
 .michtab td.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+/* Hlavička číselného sloupce musí stát nad čísly, tedy vpravo. Obecné `th.num`
+   z 050-prvky.css tu prohrává: má stejnou specificitu (0,1,1) jako
+   `.michtab th{text-align:left}`, které se načítá později, takže bez tohohle
+   pravidla by „navážit" a „kumulativně" zůstaly vlevo. */
+.michtab th.num{text-align:right}
 .michtab .g{font-size:var(--mich-gramy);font-weight:700}
 .michtab tr.ted{background:var(--zvyraz)}
 .michtab tr.ted td{font-weight:700}
 .michtab tr.hotovo td{color:var(--ink-2)}
 .michtab tr.hotovo .g{font-weight:400}
-.michstav{display:inline-block;width:26px;text-align:center}
+.michstav{display:inline-block;width:var(--mich-znak);text-align:center}
 /* Ovládání uvnitř režimu je větší — míchá se ve stoje, často v rukavicích. */
 /* Karty tu stojí z plochy stejně jako v kalkulaci — asistent navážení je něco,
    co se obsluhuje, takže má být ohraničený, ne rozpitý do pozadí. Odsazení si
    bere z míchací sady, ne z obecné: uvnitř režimu je všechno o kus větší. */
 .michbg .card{padding:var(--mich-mezera);margin-bottom:var(--mich-mezera)}
-.michbg .card>h2{font-size:calc(var(--pismo-nadpis) * 1.03)}
+.michbg .card>h2{font-size:var(--mich-nadpis)}
 .michbg .btn{padding:calc(var(--mich-tlacitko) * .87) calc(var(--mich-tlacitko) * 1.47);font-size:var(--mich-tlacitko)}
 .michbg .btn.sm{padding:calc(var(--mich-tlacitko) * .6) calc(var(--mich-tlacitko) * 1);font-size:calc(var(--mich-tlacitko) * .9)}
+/* Štítek na kelímek se mačká s kelímkem v druhé ruce a s odstupem od stolu
+   — proto pruh přes celou šířku sloupce, zarovnaný s kartou asistenta nad
+   ním: trefí se i bez míření, protože ruka od vážení jen sjede dolů. Výška
+   je trojnásobek písma, aby se do pruhu vešel i přepínač. */
+.michbg .stitekpruh{flex-direction:column;align-items:flex-end;justify-content:flex-start}
+.michbg .stitekpruh .stitekobal{position:relative;width:100%}
+/* Přepínač „s tužidlem" vypadá jako součást tlačítka — sedí absolutně u jeho
+   pravého okraje, svisle na středu. Je to ale sourozenec, ne potomek (proč,
+   říká komentář v JSX). Posun z barvy.html se přičítá k usazení na střed,
+   takže se přepínač dá po tlačítku posouvat jako každý jiný prvek. Velikost
+   řídí --mich-prepinac týmiž poměry jako v základní škále (13px → 38 × 20,
+   posun 18, mezera 8) — tvar se nemění, jen roste nebo zmenšuje celý. */
+.michbg .stitekpruh .tgl{font-size:var(--mich-prepinac);
+  position:absolute;top:50%;right:calc(var(--mich-tl-stitek) * .8);
+  transform:translate(var(--mich-prepinac-posun-x),var(--mich-prepinac-posun-y)) translateY(-50%);
+  gap:calc(var(--mich-prepinac) * .615)}
+.michbg .stitekpruh .tglt{width:calc(var(--mich-prepinac) * 2.923);
+  height:calc(var(--mich-prepinac) * 1.538);
+  border-radius:calc(var(--mich-prepinac) * .846)}
+.michbg .stitekpruh .tglt::after{width:calc(var(--mich-prepinac) * 1.231);
+  height:calc(var(--mich-prepinac) * 1.231);
+  top:calc(var(--mich-prepinac) * .154);left:calc(var(--mich-prepinac) * .154)}
+.michbg .stitekpruh .tgl input:checked + .tglt::after{
+  transform:translateX(calc(var(--mich-prepinac) * 1.385))}
+.michbg .stitekpruh .btn{font-size:var(--mich-tl-stitek);
+  transform:translate(var(--mich-tl-stitek-posun-x),var(--mich-tl-stitek-posun-y));
+  width:100%;height:calc(var(--mich-tl-stitek) * 3);flex:none;
+  padding:calc(var(--mich-tl-stitek) * .4) calc(var(--mich-tl-stitek) * 4.2);
+  white-space:normal;line-height:normal;
+  display:inline-flex;align-items:center;justify-content:center;text-align:center}
+/* Tára a Odpojit v pravém horním rohu karty asistenta, pod sebou: Odpojit
+   nahoře a dál od ruky (mačká se jednou za směnu), Tára pod ním (mačká se
+   po každé nádobě). Kontejner stojí absolutně, aby nebral řádek ovládání;
+   rozestup 1,5 × míchací mezery odpovídá rozpoložení z dílny. Posuny obou
+   tlačítek z barvy.html platí dál — měří se od rohu. */
+.michbg .card{position:relative}
+.michbg .asistroh{position:absolute;top:var(--mich-mezera);right:var(--mich-mezera);
+  display:flex;flex-direction:column;align-items:flex-end;
+  gap:calc(var(--mich-mezera) * 1.5);z-index:1}
+/* Posuvník simulace se táhne přes celou šířku karty a jeho pravý konec —
+   plná dávka — by zajel pod Táru v rohu. Řádek se proto o rohový sloupec
+   zkracuje. Je-li šířka Táry „auto", calc() neplatí a řádek zůstává celý —
+   auto znamená malé tlačítko textového tvaru, pod které konec nezajede. */
+.michbg .card .simposuv{margin:10px calc(var(--mich-tl-tara-sirka) + var(--mich-mezera)) 10px 0}
+.michbg .card .simposuv input[type=range]{width:100%}
+/* KAŽDÉ TLAČÍTKO ZVLÁŠŤ. Hodnota proměnné je velikost písma tlačítka;
+   odsazení se dopočítává týmiž poměry jako u společných pravidel výš
+   (velké: .87 a 1.47 z písma, malé: .667 a 1.111 — poměry 9/13,5 a 15/13,5
+   původního .btn.sm). K tomu tvar a poloha: -sirka/-vyska auto = tvar podle
+   textu, číslo = blok (border-box, odsazení se vejde dovnitř; stejná čísla
+   = čtverec a text se v <button> zalomí a vycentruje sám); -posun-x/-y je
+   odchylka přes transform, místo v řádku zůstává obsazené. Dvě rodiny bez
+   vlastní třídy: tlačítka v hlášeních levého sloupce (nabídky zbytků, pot
+   life) a drobná pomocná tlačítka v kartě asistenta (Zapsat, Zpět…).
+   Jmenovaná tlačítka v kartě mají selektor s .card, aby rodinu přebila
+   vahou, ne pořadím. */
+.michbg .okbox .btn,.michbg .warnbox .btn,.michbg .specbar .btn{font-size:var(--mich-tl-hlaseni);
+  padding:calc(var(--mich-tl-hlaseni) * .667) calc(var(--mich-tl-hlaseni) * 1.111);
+  width:var(--mich-tl-hlaseni-sirka);height:var(--mich-tl-hlaseni-vyska);
+  transform:translate(var(--mich-tl-hlaseni-posun-x),var(--mich-tl-hlaseni-posun-y))}
+.michbg .card .btn.sm{font-size:var(--mich-tl-pomocna);
+  padding:calc(var(--mich-tl-pomocna) * .667) calc(var(--mich-tl-pomocna) * 1.111);
+  width:var(--mich-tl-pomocna-sirka);height:var(--mich-tl-pomocna-vyska);
+  transform:translate(var(--mich-tl-pomocna-posun-x),var(--mich-tl-pomocna-posun-y))}
+.michbg .btn.mich-tl-zpet{font-size:var(--mich-tl-zpet);
+  padding:calc(var(--mich-tl-zpet) * .87) calc(var(--mich-tl-zpet) * 1.47);
+  width:var(--mich-tl-zpet-sirka);height:var(--mich-tl-zpet-vyska);
+  transform:translate(var(--mich-tl-zpet-posun-x),var(--mich-tl-zpet-posun-y))}
+.michbg .btn.mich-tl-plocha{font-size:var(--mich-tl-plocha);
+  padding:calc(var(--mich-tl-plocha) * .667) calc(var(--mich-tl-plocha) * 1.111);
+  width:var(--mich-tl-plocha-sirka);height:var(--mich-tl-plocha-vyska);
+  transform:translate(var(--mich-tl-plocha-posun-x),var(--mich-tl-plocha-posun-y))}
+/* Tlačítko krycí plochy stojí u pravé hrany sloupce, zarovnané s tabulkou
+   navážení pod ním — u váhy je vpravo ruka i pohled. Auto okraj místo
+   pevného posunu: štítek vlevo („krycí plocha 100,0 % · z katalogu") mění
+   délku podle hodnot a pevné číslo by s každou změnou textu přestalo sedět.
+   `first-of-type` proto, aby si dvojice tlačítek (Upravit / Zpět na katalog)
+   nerozdělila volné místo mezi sebe — okraj dostane jen první z nich. */
+.michbg .rowline .btn.mich-tl-plocha:first-of-type{margin-left:auto}
+.michbg .btn.mich-tl-rucne{font-size:var(--mich-tl-rucne);
+  padding:calc(var(--mich-tl-rucne) * .667) calc(var(--mich-tl-rucne) * 1.111);
+  width:var(--mich-tl-rucne-sirka);height:var(--mich-tl-rucne-vyska);
+  transform:translate(var(--mich-tl-rucne-posun-x),var(--mich-tl-rucne-posun-y))}
+.michbg .btn.mich-tl-znam{font-size:var(--mich-tl-znam);
+  padding:calc(var(--mich-tl-znam) * .667) calc(var(--mich-tl-znam) * 1.111);
+  width:var(--mich-tl-znam-sirka);height:var(--mich-tl-znam-vyska);
+  transform:translate(var(--mich-tl-znam-posun-x),var(--mich-tl-znam-posun-y))}
+.michbg .btn.mich-tl-viskozita{font-size:var(--mich-tl-viskozita);
+  padding:calc(var(--mich-tl-viskozita) * .667) calc(var(--mich-tl-viskozita) * 1.111);
+  width:var(--mich-tl-viskozita-sirka);height:var(--mich-tl-viskozita-vyska);
+  transform:translate(var(--mich-tl-viskozita-posun-x),var(--mich-tl-viskozita-posun-y))}
+.michbg .card .btn.mich-tl-pripojit{font-size:var(--mich-tl-pripojit);
+  padding:calc(var(--mich-tl-pripojit) * .87) calc(var(--mich-tl-pripojit) * 1.47);
+  width:var(--mich-tl-pripojit-sirka);height:var(--mich-tl-pripojit-vyska);
+  transform:translate(var(--mich-tl-pripojit-posun-x),var(--mich-tl-pripojit-posun-y))}
+.michbg .card .btn.mich-tl-simulace{font-size:var(--mich-tl-simulace);
+  padding:calc(var(--mich-tl-simulace) * .87) calc(var(--mich-tl-simulace) * 1.47);
+  width:var(--mich-tl-simulace-sirka);height:var(--mich-tl-simulace-vyska);
+  transform:translate(var(--mich-tl-simulace-posun-x),var(--mich-tl-simulace-posun-y))}
+.michbg .card .btn.mich-tl-tara{font-size:var(--mich-tl-tara);
+  padding:calc(var(--mich-tl-tara) * .667) calc(var(--mich-tl-tara) * 1.111);
+  width:var(--mich-tl-tara-sirka);height:var(--mich-tl-tara-vyska);
+  transform:translate(var(--mich-tl-tara-posun-x),var(--mich-tl-tara-posun-y))}
+.michbg .card .btn.mich-tl-odpojit{font-size:var(--mich-tl-odpojit);
+  padding:calc(var(--mich-tl-odpojit) * .667) calc(var(--mich-tl-odpojit) * 1.111);
+  width:var(--mich-tl-odpojit-sirka);height:var(--mich-tl-odpojit-vyska);
+  transform:translate(var(--mich-tl-odpojit-posun-x),var(--mich-tl-odpojit-posun-y))}
+.michbg .card .btn.mich-tl-sarze{font-size:var(--mich-tl-sarze);
+  padding:calc(var(--mich-tl-sarze) * .667) calc(var(--mich-tl-sarze) * 1.111);
+  width:var(--mich-tl-sarze-sirka);height:var(--mich-tl-sarze-vyska);
+  transform:translate(var(--mich-tl-sarze-posun-x),var(--mich-tl-sarze-posun-y))}
+.michbg .card .btn.mich-tl-dalsi{font-size:var(--mich-tl-dalsi);
+  padding:calc(var(--mich-tl-dalsi) * .87) calc(var(--mich-tl-dalsi) * 1.47);
+  width:var(--mich-tl-dalsi-sirka);height:var(--mich-tl-dalsi-vyska);
+  transform:translate(var(--mich-tl-dalsi-posun-x),var(--mich-tl-dalsi-posun-y))}
 .michbg .result-big{font-size:var(--mich-vysledek)}
 .michbg .wbar{height:var(--mich-wbar)}
-.michbg .note,.michbg .result-sub{font-size:calc(var(--pismo-poznamka) * .96)}
+.michbg .note,.michbg .result-sub{font-size:var(--mich-poznamka)}
 /* Pole, hlášení a štítky uvnitř režimu. Doteď to sem nikdo nepotřeboval —
    míchalo se podle tabulky a mačkala tlačítka. S aditivy se u váhy poprvé
    ZADÁVÁ: kolik ředidla se nalilo, se píše do pole v rukavicích, a strop
@@ -493,6 +674,9 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
 .cam{width:100%;max-width:420px;border-radius:12px;background:#000;box-shadow:var(--neu-in);display:block;margin-top:10px}
 .specbar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;border-radius:12px;padding:10px 14px;box-shadow:var(--neu-in);margin-bottom:16px;font-size:13px}
 .specbar b{font-family:var(--mono)}
+/* Odkazy (bezpečnostní listy): výchozí modrá/fialová prohlížeče není v tmavém
+   režimu skoro vidět — barva se dědí z lišty, odkaz poznáte podtržením. */
+.specbar a{color:inherit;text-decoration:underline;text-underline-offset:2px}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:13px;margin-top:8px}
 .kv .k{color:var(--ink-2);font-size:11px;text-transform:uppercase;letter-spacing:.06em;align-self:center}
 .kv .v{font-weight:700}
@@ -580,11 +764,13 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
 .platno iframe{position:absolute;top:0;left:0;border:0;display:block;
   transform-origin:top left;background:var(--bg)}
 .kolize{color:var(--danger);font-weight:700}
+#strana-michani .michukazka button,#strana-michani .michukazka .tgl{cursor:grab}
 </style></head>
 <body>
 <div class="hdr"><div class="navleft"></div><h1>VZHLED</h1>
   <div class="lista" style="margin:0">
     <button class="chip on" data-strana="barvy">Barvy a vzhled</button>
+    <button class="chip" data-strana="michani">Míchací režim</button>
     <button class="chip" data-strana="rozvrzeni">Rozvržení hlavní stránky</button>
   </div>
 </div>
@@ -667,20 +853,6 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
 <div class="posuv" data-tvar="--tlacitko-y"><div class="hlava"><span>Výška tlačítek</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="2" max="24" step="1" data-role="posuv" data-jed="px" /></div>
 <div class="posuv" data-tvar="--tlacitko-x"><div class="hlava"><span>Šířka tlačítek (odsazení)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="4" max="40" step="1" data-role="posuv" data-jed="px" /></div>
 <div class="posuv" data-tvar="--okraj-stranky"><div class="hlava"><span>Okraj nad obsahem</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="60" step="2" data-role="posuv" data-jed="px" /></div></details>
-<details class="skupina"><summary>Míchací režim</summary><div class="posuv" data-tvar="--mich-nazev"><div class="hlava"><span>Název receptury v hlavičce</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="14" max="56" step="1" data-role="posuv" data-jed="px" /></div>
-<div class="posuv" data-tvar="--mich-davka"><div class="hlava"><span>Dávka v hlavičce</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="16" max="72" step="1" data-role="posuv" data-jed="px" /></div>
-<div class="posuv" data-tvar="--mich-vzorek"><div class="hlava"><span>Vzorek barvy v hlavičce</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="24" max="110" step="2" data-role="posuv" data-jed="px" /></div>
-<div class="posuv" data-tvar="--mich-hlavicka"><div class="hlava"><span>Hlavičky sloupců tabulky</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="8" max="24" step="0.5" data-role="posuv" data-jed="px" /></div>
-<div class="posuv" data-tvar="--mich-tabulka"><div class="hlava"><span>Text v tabulce navážky</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="12" max="38" step="1" data-role="posuv" data-jed="px" /></div>
-<div class="posuv" data-tvar="--mich-gramy"><div class="hlava"><span>Gramy v tabulce</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="14" max="52" step="1" data-role="posuv" data-jed="px" /></div>
-<div class="posuv" data-tvar="--mich-radek"><div class="hlava"><span>Výška řádků tabulky</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="4" max="30" step="1" data-role="posuv" data-jed="px" /></div>
-<div class="posuv" data-tvar="--mich-vysledek"><div class="hlava"><span>Číslo na váze</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="24" max="110" step="2" data-role="posuv" data-jed="px" /></div>
-<div class="posuv" data-tvar="--mich-wbar"><div class="hlava"><span>Tloušťka pruhu navážení</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="4" max="48" step="1" data-role="posuv" data-jed="px" /></div>
-<div class="posuv" data-tvar="--mich-tlacitko"><div class="hlava"><span>Velikost tlačítek</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="10" max="30" step="0.5" data-role="posuv" data-jed="px" /></div>
-<div class="posuv" data-tvar="--mich-mezera"><div class="hlava"><span>Odsazení a mezery (i uvnitř karty asistenta)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="6" max="56" step="1" data-role="posuv" data-jed="px" /></div>
-<div class="posuv" data-tvar="--mich-pole"><div class="hlava"><span>Pole pro zadávání (aditiva, tolerance)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="10" max="36" step="1" data-role="posuv" data-jed="px" /></div>
-<div class="posuv" data-tvar="--mich-hlaseni"><div class="hlava"><span>Varování a potvrzení</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="9" max="28" step="0.5" data-role="posuv" data-jed="px" /></div>
-<div class="posuv" data-tvar="--mich-stitek"><div class="hlava"><span>Štítky u složek</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="8" max="24" step="0.5" data-role="posuv" data-jed="px" /></div></details>
     <div class="rowline" style="margin-top:6px">
       <button class="btn sec sm" id="zpet-stiny">Vrátit původní stíny</button>
       <button class="btn sec sm" id="zpet-tvary">Vrátit tvary, písmo a rozměry</button>
@@ -745,83 +917,6 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
       </table>
     </div>
 
-    <div class="card">
-        <h2>Míchací režim</h2>
-        <p class="hint">Celá obrazovka u váhy — skutečné prvky aplikace.
-          Ladí se posuvníky v oddílu <b>Míchací režim</b> vlevo.</p>
-        <div class="michukazka">
-          <div class="michbg">
-            <div class="michhlav">
-              <span class="michvzorek" style="background:#F2602F"></span>
-              <span>
-                <span class="nazev" style="display:block">PANTONE Cool Gray 1 C</span>
-                <span class="kde">93804 · 106 · FIR Džbánek / Tělo lahve</span>
-              </span>
-              <span class="michdavka"><b>72,4 g</b><span>≈ 60,4 ml</span></span>
-              <button class="btn sec">✕ Zpět do kalkulace</button>
-            </div>
-            <div class="michtelo">
-              <!-- Levý sloupec v aplikaci karta není, obsah leží přímo na ploše.
-                   Kartu má jen asistent navážení — ukázka to musí držet stejně,
-                   jinak by se podle ní ladilo něco, co v aplikaci není. -->
-              <div>
-                <div class="rowline">
-                  <span class="tag">krycí plocha 100,0 % · z katalogu</span>
-                  <button class="btn sec sm">Spočítat krycí plochu z náhledu</button>
-                </div>
-                <table class="michtab">
-                  <thead><tr><th>Komponenta</th><th class="num">Navážit</th><th class="num">Kumulativně</th></tr></thead>
-                  <tbody>
-                    <tr class="ted"><td><span class="michstav">▶</span>19 3601 White</td>
-                      <td class="num g">72,0</td><td class="num">72,0</td></tr>
-                    <tr><td><span class="michstav"></span>14 3601 Black (Black C)</td>
-                      <td class="num g">0,4</td><td class="num">72,4</td></tr>
-                    <tr><td><span class="michstav"></span>11 3601 Green (Green C)</td>
-                      <td class="num g">0,1</td><td class="num">72,4</td></tr>
-                    <tr class="hotovo"><td><span class="michstav">✓</span>12 3601 Blue 1 (Process Blue C)</td>
-                      <td class="num g">0,0</td><td class="num">72,4</td></tr>
-                    <tr><td><b>Navážit celkem</b></td><td class="num g">72,4</td><td class="num g">72,4</td></tr>
-                  </tbody>
-                </table>
-                <div class="rowline" style="margin-top:12px">
-                  <button class="btn sec">Zbytek není v evidenci — zadat ručně</button>
-                </div>
-                <div class="rowline">
-                  <button class="btn sec">Štítek na kelímek →</button>
-                  <button class="btn sec sm">Znám zbytek rovnou</button>
-                </div>
-              </div>
-              <div class="card">
-                <h2>Asistent navážení</h2>
-                <div class="rowline">
-                  <span class="tag tech">simulace váhy</span>
-                  <button class="btn sec sm">Tára (0)</button>
-                  <button class="btn sec sm">Odpojit</button>
-                </div>
-                <div class="result-big">0,0 g</div>
-                <div class="result-sub">na váze · receptura PANTONE Cool Gray 1 C</div>
-                <div class="wbar" style="margin-top:10px"><span style="width:34%;background:var(--cyan)"></span></div>
-                <p class="note" style="margin-top:8px"><b>19 3601 White</b> — přidat 72,0 g,
-                  navážit celkem do 72,0 g · zbývá 72,0 g</p>
-                <div class="rowline">
-                  <button class="btn">Další komponenta →</button>
-                  <span class="note">tolerance ± 0,5 g</span>
-                </div>
-                <table class="michtab" style="margin-top:10px">
-                  <thead><tr><th>Komponenta</th><th class="num">%</th><th class="num">Cíl g</th><th class="num">Zbývá g</th></tr></thead>
-                  <tbody>
-                    <tr class="ted"><td>19 3601 White</td><td class="num">99,4</td><td class="num">72,0</td><td class="num">72,0</td></tr>
-                    <tr><td>14 3601 Black</td><td class="num">0,5</td><td class="num">0,38</td><td class="num">0,38</td></tr>
-                    <tr class="hotovo"><td>11 3601 Green</td><td class="num">0,1</td><td class="num">0,07</td><td class="num">pod tol.</td></tr>
-                  </tbody>
-                </table>
-                <div class="okbox">V pořádku — navážka je v toleranci.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
     <div class="card vystup">
       <h2>Blok k vložení do aplikace/10-styl/020-promenne.css</h2>
       <p class="hint">Celé bloky <b>:root</b> a <b>:root[data-theme="dark"]</b>
@@ -870,6 +965,232 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
     </div>
   </div>
 
+</div>
+
+<div class="nastroj" id="strana-michani" hidden>
+  <div class="card panel">
+    <h2>Písmo, tabulka a váha</h2>
+    <p class="hint">Míchací režim se ladí zvlášť od zbytku aplikace — nečte se
+      od klávesnice, ale od váhy, často v rukavicích. Tlačítka jsou v pravém
+      panelu, každé zvlášť; tady je všechno ostatní.</p>
+    <details class="skupina" open><summary>Hlavička</summary><div class="posuv" data-tvar="--mich-nazev"><div class="hlava"><span>Název receptury</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="14" max="56" step="1" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-davka"><div class="hlava"><span>Dávka — číslo vpravo</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="16" max="72" step="1" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-vzorek"><div class="hlava"><span>Vzorek barvy</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="24" max="110" step="2" data-role="posuv" data-jed="px" /></div></details>
+<details class="skupina"><summary>Tabulka navážky</summary><div class="posuv" data-tvar="--mich-hlavicka"><div class="hlava"><span>Hlavičky sloupců</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="8" max="24" step="0.5" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tabulka"><div class="hlava"><span>Text v tabulce</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="12" max="38" step="1" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-gramy"><div class="hlava"><span>Gramy v tabulce</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="14" max="52" step="1" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-radek"><div class="hlava"><span>Výška řádků</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="4" max="30" step="1" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-znak"><div class="hlava"><span>Sloupec se značkami ▶ a ✓</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="10" max="60" step="1" data-role="posuv" data-jed="px" /></div></details>
+<details class="skupina"><summary>Váha a asistent</summary><div class="posuv" data-tvar="--mich-vysledek"><div class="hlava"><span>Číslo na váze</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="24" max="110" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-wbar"><div class="hlava"><span>Tloušťka pruhu navážení</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="4" max="48" step="1" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-pole"><div class="hlava"><span>Pole pro zadávání</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="10" max="36" step="1" data-role="posuv" data-jed="px" /></div></details>
+<details class="skupina"><summary>Texty a hlášení</summary><div class="posuv" data-tvar="--mich-nadpis"><div class="hlava"><span>Nadpis karty asistenta</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="10" max="40" step="0.5" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-poznamka"><div class="hlava"><span>Poznámky a doprovodné věty</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="9" max="30" step="0.5" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-hlaseni"><div class="hlava"><span>Varování a potvrzení</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="9" max="28" step="0.5" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-stitek"><div class="hlava"><span>Štítky u složek</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="8" max="24" step="0.5" data-role="posuv" data-jed="px" /></div></details>
+<details class="skupina"><summary>Rozestupy a ostatní</summary><div class="posuv" data-tvar="--mich-mezera"><div class="hlava"><span>Odsazení a mezery (i uvnitř karty asistenta)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="6" max="56" step="1" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tlacitko"><div class="hlava"><span>Ostatní tlačítka (vzácné stavy bez posuvníku)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="10" max="30" step="0.5" data-role="posuv" data-jed="px" /></div></details>
+  </div>
+
+  <div class="ukazka">
+    <div class="card">
+      <h2>Míchací režim</h2>
+      <p class="hint">Skutečné prvky aplikace. Asistent ukazuje obě podoby
+        naráz — před připojením váhy i po něm; v aplikaci se střídají.
+        <b>Tlačítka se dají táhnout myší</b> — posun se propíše do posuvníků
+        vpravo i do výstupního bloku.</p>
+      <div class="michukazka">
+        <div class="michbg">
+          <div class="michhlav">
+            <span class="michvzorek" style="background:#F2602F"></span>
+            <span>
+              <span class="nazev" style="display:block">PANTONE Cool Gray 1 C</span>
+              <span class="kde">93804 · 106 · FIR Džbánek / Tělo lahve</span>
+            </span>
+            <span class="michdavka"><b>72,4 g</b><span>≈ 60,4 ml</span></span>
+            <button class="btn sec mich-tl-zpet">✕ Zpět do kalkulace</button>
+          </div>
+          <div class="michtelo">
+            <!-- Levý sloupec v aplikaci karta není, obsah leží přímo na ploše.
+                 Kartu má jen asistent navážení — ukázka to musí držet stejně,
+                 jinak by se podle ní ladilo něco, co v aplikaci není. -->
+            <div>
+              <div class="rowline">
+                <span class="tag">krycí plocha 100,0 % · z katalogu</span>
+                <button class="btn sec sm mich-tl-plocha">Spočítat krycí plochu z náhledu</button>
+              </div>
+              <table class="michtab">
+                <thead><tr><th>Komponenta</th><th class="num">Navážit</th><th class="num">Kumulativně</th></tr></thead>
+                <tbody>
+                  <tr class="ted"><td><span class="michstav">▶</span>19 3601 White</td>
+                    <td class="num g">72,0</td><td class="num">72,0</td></tr>
+                  <tr><td><span class="michstav"></span>14 3601 Black (Black C)</td>
+                    <td class="num g">0,4</td><td class="num">72,4</td></tr>
+                  <tr class="hotovo"><td><span class="michstav">✓</span>12 3601 Blue 1 (Process Blue C)</td>
+                    <td class="num g">0,0</td><td class="num">72,4</td></tr>
+                  <tr><td><b>Navážit celkem</b></td><td class="num g">72,4</td><td class="num g">72,4</td></tr>
+                </tbody>
+              </table>
+              <div class="specbar" style="margin-top:10px">
+                <span class="dot" style="background:var(--cyan)"></span>
+                <span>Dvousložková barva — po navážení přidejte <b>3,6 g tužidla</b>.</span>
+                <span style="margin-left:auto"></span>
+                <button class="btn sm">Tužidlo přidáno — spustit odpočet</button>
+              </div>
+              <div class="okbox">
+                <b>Na tuto zakázku můžete využít zbytek.</b>
+                <div class="rowline" style="margin-top:8px;margin-bottom:0">
+                  <span class="swatch" style="background:#8FBFA0;width:20px;height:20px"></span>
+                  <span><b>45,2 g</b> z kelímku <b>Z-017</b> — PANTONE 5635 C</span>
+                  <button class="btn sm">Použít 45,2 g — dávka se přepočítá</button>
+                </div>
+              </div>
+              <div class="rowline">
+                <button class="btn sec sm mich-tl-rucne">Zbytek není v evidenci — zadat ručně</button>
+                <button class="btn sec sm mich-tl-znam">Znám zbytek rovnou</button>
+              </div>
+              <div class="rowline">
+                <input value="18" style="width:90px" title="viskozita — výtokový čas">
+                <span class="note">s</span>
+                <button class="btn sec sm mich-tl-viskozita">Uložit k receptuře</button>
+              </div>
+            </div>
+            <div>
+              <div class="card">
+                <h2>Asistent navážení</h2>
+                <div class="rowline">
+                  <button class="btn mich-tl-pripojit">Připojit váhu (USB)</button>
+                  <select style="width:auto"><option>9600 Bd</option></select>
+                  <button class="btn sec mich-tl-simulace">Vyzkoušet v simulaci</button>
+                </div>
+                <div class="asistroh">
+                  <button class="btn danger sm mich-tl-odpojit">Odpojit</button>
+                  <button class="btn sec sm mich-tl-tara">Tára (0)</button>
+                </div>
+                <div class="rowline">
+                  <span class="tag tech">simulace váhy</span>
+                </div>
+                <div class="result-big">0,0 g</div>
+                <div class="result-sub">na váze · receptura PANTONE Cool Gray 1 C</div>
+                <div class="wbar" style="margin-top:10px"><span style="width:34%;background:var(--cyan)"></span></div>
+                <p class="note" style="margin-top:8px"><b>19 3601 White</b> — přidat 72,0 g
+                  · šarže neuvedena
+                  <button class="btn sec sm mich-tl-sarze" style="margin-left:4px">Zadat šarži</button>
+                </p>
+                <div class="rowline">
+                  <button class="btn mich-tl-dalsi">Další složka →</button>
+                  <span class="note">tolerance ± 0,5 g</span>
+                </div>
+                <div class="rowline">
+                  <button class="btn sec sm">Zrušit a navážit znovu</button>
+                </div>
+                <div class="okbox">V pořádku — navážka je v toleranci.</div>
+              </div>
+              <div class="rowline stitekpruh" style="margin-top:12px">
+                <div class="stitekobal">
+                  <button class="btn sec">Štítek na kelímek →</button>
+                  <label class="tgl"><input type="checkbox"><span class="tglt"></span>s tužidlem</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card vystup">
+      <h2>Blok k vložení do aplikace/10-styl/020-promenne.css</h2>
+      <p class="hint">Tentýž blok jako u barev — velikosti míchacího režimu
+        jsou taky jen proměnné. Vloží se jedním vložením obojí.</p>
+      <textarea data-vystup spellcheck="false" readonly></textarea>
+      <div class="rowline" style="margin-top:10px;margin-bottom:0">
+        <button class="btn" data-kopirovat>Zkopírovat</button>
+        <span class="note" data-stav></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card panel">
+    <h2>Tlačítka — každé zvlášť</h2>
+    <p class="hint">U každého tlačítka písmo, šířka, výška a posun. Šířka
+      a výška 0 nechají tvar podle textu; stejná čísla udělají čtverec a text
+      se zalomí sám. Posun tlačítko vykreslí jinde, místo v řádku ale drží.
+      Co nemá vlastní skupinu, drží společné Ostatní tlačítka vlevo dole.</p>
+    <details class="skupina"><summary>✕ Zpět do kalkulace</summary><div class="posuv" data-tvar="--mich-tl-zpet"><div class="hlava"><span>Písmo — velikost tlačítka</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="8" max="60" step="0.5" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-zpet-sirka"><div class="hlava"><span>Šířka (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-zpet-vyska"><div class="hlava"><span>Výška (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-zpet-posun-x"><div class="hlava"><span>Posun vodorovně</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-zpet-posun-y"><div class="hlava"><span>Posun svisle</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div></details>
+<details class="skupina"><summary>Krycí plocha (Spočítat / Upravit / Zpět)</summary><div class="posuv" data-tvar="--mich-tl-plocha"><div class="hlava"><span>Písmo — velikost tlačítka</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="8" max="60" step="0.5" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-plocha-sirka"><div class="hlava"><span>Šířka (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-plocha-vyska"><div class="hlava"><span>Výška (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-plocha-posun-x"><div class="hlava"><span>Posun vodorovně</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-plocha-posun-y"><div class="hlava"><span>Posun svisle</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div></details>
+<details class="skupina"><summary>Zbytek není v evidenci — zadat ručně</summary><div class="posuv" data-tvar="--mich-tl-rucne"><div class="hlava"><span>Písmo — velikost tlačítka</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="8" max="60" step="0.5" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-rucne-sirka"><div class="hlava"><span>Šířka (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-rucne-vyska"><div class="hlava"><span>Výška (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-rucne-posun-x"><div class="hlava"><span>Posun vodorovně</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-rucne-posun-y"><div class="hlava"><span>Posun svisle</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div></details>
+<details class="skupina"><summary>Znám zbytek rovnou</summary><div class="posuv" data-tvar="--mich-tl-znam"><div class="hlava"><span>Písmo — velikost tlačítka</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="8" max="60" step="0.5" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-znam-sirka"><div class="hlava"><span>Šířka (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-znam-vyska"><div class="hlava"><span>Výška (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-znam-posun-x"><div class="hlava"><span>Posun vodorovně</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-znam-posun-y"><div class="hlava"><span>Posun svisle</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div></details>
+<details class="skupina"><summary>Uložit k receptuře</summary><div class="posuv" data-tvar="--mich-tl-viskozita"><div class="hlava"><span>Písmo — velikost tlačítka</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="8" max="60" step="0.5" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-viskozita-sirka"><div class="hlava"><span>Šířka (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-viskozita-vyska"><div class="hlava"><span>Výška (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-viskozita-posun-x"><div class="hlava"><span>Posun vodorovně</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-viskozita-posun-y"><div class="hlava"><span>Posun svisle</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div></details>
+<details class="skupina"><summary>Připojit váhu (USB)</summary><div class="posuv" data-tvar="--mich-tl-pripojit"><div class="hlava"><span>Písmo — velikost tlačítka</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="8" max="60" step="0.5" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-pripojit-sirka"><div class="hlava"><span>Šířka (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-pripojit-vyska"><div class="hlava"><span>Výška (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-pripojit-posun-x"><div class="hlava"><span>Posun vodorovně</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-pripojit-posun-y"><div class="hlava"><span>Posun svisle</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div></details>
+<details class="skupina"><summary>Vyzkoušet v simulaci</summary><div class="posuv" data-tvar="--mich-tl-simulace"><div class="hlava"><span>Písmo — velikost tlačítka</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="8" max="60" step="0.5" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-simulace-sirka"><div class="hlava"><span>Šířka (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-simulace-vyska"><div class="hlava"><span>Výška (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-simulace-posun-x"><div class="hlava"><span>Posun vodorovně</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-simulace-posun-y"><div class="hlava"><span>Posun svisle</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div></details>
+<details class="skupina"><summary>Tára</summary><div class="posuv" data-tvar="--mich-tl-tara"><div class="hlava"><span>Písmo — velikost tlačítka</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="8" max="60" step="0.5" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-tara-sirka"><div class="hlava"><span>Šířka (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-tara-vyska"><div class="hlava"><span>Výška (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-tara-posun-x"><div class="hlava"><span>Posun vodorovně</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-tara-posun-y"><div class="hlava"><span>Posun svisle</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div></details>
+<details class="skupina"><summary>Odpojit</summary><div class="posuv" data-tvar="--mich-tl-odpojit"><div class="hlava"><span>Písmo — velikost tlačítka</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="8" max="60" step="0.5" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-odpojit-sirka"><div class="hlava"><span>Šířka (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-odpojit-vyska"><div class="hlava"><span>Výška (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-odpojit-posun-x"><div class="hlava"><span>Posun vodorovně</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-odpojit-posun-y"><div class="hlava"><span>Posun svisle</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div></details>
+<details class="skupina"><summary>Zadat šarži / Nová konev</summary><div class="posuv" data-tvar="--mich-tl-sarze"><div class="hlava"><span>Písmo — velikost tlačítka</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="8" max="60" step="0.5" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-sarze-sirka"><div class="hlava"><span>Šířka (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-sarze-vyska"><div class="hlava"><span>Výška (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-sarze-posun-x"><div class="hlava"><span>Posun vodorovně</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-sarze-posun-y"><div class="hlava"><span>Posun svisle</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div></details>
+<details class="skupina"><summary>Další složka / Dokončit</summary><div class="posuv" data-tvar="--mich-tl-dalsi"><div class="hlava"><span>Písmo — velikost tlačítka</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="8" max="60" step="0.5" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-dalsi-sirka"><div class="hlava"><span>Šířka (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-dalsi-vyska"><div class="hlava"><span>Výška (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-dalsi-posun-x"><div class="hlava"><span>Posun vodorovně</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-dalsi-posun-y"><div class="hlava"><span>Posun svisle</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div></details>
+<details class="skupina"><summary>Rodina: tlačítka v hlášeních (zbytky, pot life)</summary><div class="posuv" data-tvar="--mich-tl-hlaseni"><div class="hlava"><span>Písmo — velikost tlačítka</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="8" max="60" step="0.5" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-hlaseni-sirka"><div class="hlava"><span>Šířka (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-hlaseni-vyska"><div class="hlava"><span>Výška (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-hlaseni-posun-x"><div class="hlava"><span>Posun vodorovně</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-hlaseni-posun-y"><div class="hlava"><span>Posun svisle</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div></details>
+<details class="skupina"><summary>Rodina: pomocná tlačítka v kartě (Zapsat, Zpět…)</summary><div class="posuv" data-tvar="--mich-tl-pomocna"><div class="hlava"><span>Písmo — velikost tlačítka</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="8" max="60" step="0.5" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-pomocna-sirka"><div class="hlava"><span>Šířka (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-pomocna-vyska"><div class="hlava"><span>Výška (0 = podle textu)</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-pomocna-posun-x"><div class="hlava"><span>Posun vodorovně</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-pomocna-posun-y"><div class="hlava"><span>Posun svisle</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div></details>
+<details class="skupina"><summary>Štítek na kelímek</summary><div class="posuv" data-tvar="--mich-tl-stitek"><div class="hlava"><span>Písmo — výška pruhu je 3×</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="12" max="60" step="1" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-stitek-posun-x"><div class="hlava"><span>Posun vodorovně</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-tl-stitek-posun-y"><div class="hlava"><span>Posun svisle</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div></details>
+<details class="skupina"><summary>Přepínač s tužidlem</summary><div class="posuv" data-tvar="--mich-prepinac"><div class="hlava"><span>Velikost přepínače</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="10" max="60" step="1" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-prepinac-posun-x"><div class="hlava"><span>Posun vodorovně</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--mich-prepinac-posun-y"><div class="hlava"><span>Posun svisle</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-400" max="400" step="2" data-role="posuv" data-jed="px" /></div></details>
+    <div class="rowline" style="margin-top:12px">
+      <button class="btn sec sm" id="zpet-michani">Vrátit míchací režim</button>
+    </div>
+  </div>
 </div>
 
 <div class="nastroj" id="strana-rozvrzeni" hidden>
@@ -1207,11 +1528,11 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
 </template>
 
 <script>
-var VYCH_BARVY = {"light": {"--bg": "#949494", "--paper": "#dbdbdb", "--zvyraz": "#949494", "--ink": "#141414", "--ink-2": "#767676", "--line": "#D8D8D8", "--line-2": "#C7C7C7", "--key": "#141414", "--btn-ink": "#FFFFFF", "--cyan": "#141414", "--ok": "#3dc760", "--warn": "#e8c545", "--danger": "#b31919", "--logo": "#949494"}, "dark": {"--bg": "#545454", "--paper": "#333333", "--zvyraz": "#545454", "--ink": "#EDEDED", "--ink-2": "#8C8C8C", "--line": "#595959", "--line-2": "#7a7a7a", "--key": "#EDEDED", "--btn-ink": "#000000", "--cyan": "#EDEDED", "--ok": "#3dc760", "--warn": "#e8c545", "--danger": "#b31919", "--logo": "#545454"}}, VYCH_STINY = {"light": {"uhel": 135, "dVelky": 7, "blurVelky": 20, "dMaly": 6, "blurMaly": 14, "dVsazeny": 3, "blurVsazeny": 4, "silaSvetla": 11, "silaStinu": 43, "logoUhel": 135, "logoD": 3, "logoBlur": 2, "logoSvetlo": 14, "logoStin": 10}, "dark": {"uhel": 135, "dVelky": 13, "blurVelky": 24, "dMaly": 6, "blurMaly": 10, "dVsazeny": 4, "blurVsazeny": 4, "silaSvetla": 8, "silaStinu": 51, "logoUhel": 135, "logoD": 3, "logoBlur": 2, "logoSvetlo": 14, "logoStin": 10}}, VYCH_TVARY = {"--radius": "23px", "--radius-btn": "35px", "--radius-pole": "15px", "--radius-dlazdice": "15px", "--radius-stitek": "15px", "--ikona": "27px", "--ikona-tah": "1.5", "--ikona-pruhlednost": "1", "--ikona-radek": "1.2em", "--pruhlednost-karty": "1", "--ikona-konec": "round", "--pismo": "15.5px", "--pismo-nadpis": "19.5px", "--pismo-popisek": "12.5px", "--pismo-poznamka": "14px", "--pismo-tabulka": "19px", "--pismo-vysledek": "50px", "--logo-velikost": "116px", "--prostrkani": "0.07em", "--tloustka-nadpisu": "900", "--radek": "1.4", "--mezera-karta-y": "20px", "--mezera-karta-x": "22px", "--mezera-karet": "16px", "--mezera-poli": "12px", "--pole-y": "9px", "--pole-x": "12px", "--tlacitko-y": "10px", "--tlacitko-x": "18px", "--okraj-stranky": "20px", "--sans": "system-ui,sans-serif", "--mono": "'Segoe UI',system-ui,sans-serif", "--mich-nazev": "26px", "--mich-davka": "34px", "--mich-vzorek": "52px", "--mich-hlavicka": "12px", "--mich-tabulka": "20px", "--mich-gramy": "26px", "--mich-radek": "11px", "--mich-vysledek": "52px", "--mich-wbar": "20px", "--mich-tlacitko": "15px", "--mich-mezera": "22px", "--mich-pole": "20px", "--mich-hlaseni": "15px", "--mich-stitek": "14px", "--sirka-stranky": "none", "--sloupec-1": "1fr", "--sloupec-2": "1fr", "--mezera-sloupcu": "40px", "--produkt-sloupec": "1", "--produkt-radek": "1", "--produkt-sirka": "auto", "--produkt-zarovnani": "stretch", "--produkt-vyska": "auto", "--vysledek-sloupec": "2", "--vysledek-radek": "1", "--vysledek-sirka": "auto", "--vysledek-zarovnani": "stretch", "--vysledek-vyska": "auto", "--recept-sloupec": "1", "--recept-radek": "2", "--recept-sirka": "67%", "--recept-zarovnani": "start", "--recept-vyska": "auto", "--zakazka-sloupec": "1 / -1", "--zakazka-radek": "2", "--zakazka-sirka": "32.7%", "--zakazka-zarovnani": "end", "--zakazka-vyska": "auto", "--tisk-sloupec": "1 / -1", "--tisk-radek": "2", "--tisk-sirka": "33%", "--tisk-zarovnani": "center", "--tisk-vyska": "auto"};
+var VYCH_BARVY = {"light": {"--bg": "#949494", "--paper": "#dbdbdb", "--zvyraz": "#949494", "--ink": "#141414", "--ink-2": "#767676", "--line": "#D8D8D8", "--line-2": "#C7C7C7", "--key": "#141414", "--btn-ink": "#FFFFFF", "--cyan": "#141414", "--ok": "#3dc760", "--warn": "#e8c545", "--danger": "#b31919", "--logo": "#949494"}, "dark": {"--bg": "#545454", "--paper": "#333333", "--zvyraz": "#545454", "--ink": "#EDEDED", "--ink-2": "#8C8C8C", "--line": "#595959", "--line-2": "#7a7a7a", "--key": "#EDEDED", "--btn-ink": "#000000", "--cyan": "#EDEDED", "--ok": "#3dc760", "--warn": "#e8c545", "--danger": "#b31919", "--logo": "#545454"}}, VYCH_STINY = {"light": {"uhel": 135, "dVelky": 7, "blurVelky": 20, "dMaly": 6, "blurMaly": 14, "dVsazeny": 3, "blurVsazeny": 4, "silaSvetla": 11, "silaStinu": 43, "logoUhel": 135, "logoD": 3, "logoBlur": 2, "logoSvetlo": 14, "logoStin": 10}, "dark": {"uhel": 135, "dVelky": 13, "blurVelky": 24, "dMaly": 6, "blurMaly": 10, "dVsazeny": 4, "blurVsazeny": 4, "silaSvetla": 8, "silaStinu": 51, "logoUhel": 135, "logoD": 3, "logoBlur": 2, "logoSvetlo": 14, "logoStin": 10}}, VYCH_TVARY = {"--radius": "23px", "--radius-btn": "35px", "--radius-pole": "15px", "--radius-dlazdice": "15px", "--radius-stitek": "15px", "--ikona": "27px", "--ikona-tah": "1.5", "--ikona-pruhlednost": "1", "--ikona-radek": "1.2em", "--pruhlednost-karty": "1", "--ikona-konec": "round", "--pismo": "15.5px", "--pismo-nadpis": "19.5px", "--pismo-popisek": "12.5px", "--pismo-poznamka": "14px", "--pismo-tabulka": "19px", "--pismo-vysledek": "50px", "--logo-velikost": "116px", "--prostrkani": "0.07em", "--tloustka-nadpisu": "900", "--radek": "1.4", "--mezera-karta-y": "20px", "--mezera-karta-x": "22px", "--mezera-karet": "16px", "--mezera-poli": "12px", "--pole-y": "9px", "--pole-x": "12px", "--tlacitko-y": "10px", "--tlacitko-x": "18px", "--okraj-stranky": "20px", "--sans": "system-ui,sans-serif", "--mono": "'Segoe UI',system-ui,sans-serif", "--mich-nazev": "26px", "--mich-davka": "37px", "--mich-vzorek": "52px", "--mich-hlavicka": "12px", "--mich-tabulka": "20px", "--mich-gramy": "26px", "--mich-radek": "11px", "--mich-vysledek": "64px", "--mich-wbar": "19px", "--mich-tlacitko": "14px", "--mich-mezera": "15px", "--mich-pole": "17px", "--mich-hlaseni": "14px", "--mich-stitek": "14px", "--mich-prepinac": "16px", "--mich-tl-zpet": "17px", "--mich-tl-plocha": "16px", "--mich-tl-rucne": "18px", "--mich-tl-znam": "18px", "--mich-tl-viskozita": "16px", "--mich-tl-pripojit": "16px", "--mich-tl-simulace": "16px", "--mich-tl-tara": "24.5px", "--mich-tl-odpojit": "15px", "--mich-tl-sarze": "15px", "--mich-tl-dalsi": "16px", "--mich-tl-stitek": "23px", "--mich-tl-hlaseni": "14px", "--mich-tl-pomocna": "15px", "--mich-nadpis": "21px", "--mich-poznamka": "14px", "--mich-znak": "25px", "--sirka-stranky": "none", "--sloupec-1": "1fr", "--sloupec-2": "1fr", "--mezera-sloupcu": "40px", "--mich-tl-zpet-sirka": "auto", "--mich-tl-zpet-vyska": "50px", "--mich-tl-zpet-posun-x": "0px", "--mich-tl-zpet-posun-y": "0px", "--mich-tl-plocha-sirka": "288px", "--mich-tl-plocha-vyska": "50px", "--mich-tl-plocha-posun-x": "0px", "--mich-tl-plocha-posun-y": "0px", "--mich-tl-rucne-sirka": "auto", "--mich-tl-rucne-vyska": "auto", "--mich-tl-rucne-posun-x": "0px", "--mich-tl-rucne-posun-y": "0px", "--mich-tl-znam-sirka": "auto", "--mich-tl-znam-vyska": "auto", "--mich-tl-znam-posun-x": "0px", "--mich-tl-znam-posun-y": "0px", "--mich-tl-viskozita-sirka": "180px", "--mich-tl-viskozita-vyska": "50px", "--mich-tl-viskozita-posun-x": "306px", "--mich-tl-viskozita-posun-y": "24px", "--mich-tl-pripojit-sirka": "auto", "--mich-tl-pripojit-vyska": "auto", "--mich-tl-pripojit-posun-x": "0px", "--mich-tl-pripojit-posun-y": "0px", "--mich-tl-simulace-sirka": "auto", "--mich-tl-simulace-vyska": "auto", "--mich-tl-simulace-posun-x": "0px", "--mich-tl-simulace-posun-y": "0px", "--mich-tl-tara-sirka": "116px", "--mich-tl-tara-vyska": "100px", "--mich-tl-tara-posun-x": "0px", "--mich-tl-tara-posun-y": "0px", "--mich-tl-odpojit-sirka": "116px", "--mich-tl-odpojit-vyska": "100px", "--mich-tl-odpojit-posun-x": "0px", "--mich-tl-odpojit-posun-y": "0px", "--mich-tl-sarze-sirka": "auto", "--mich-tl-sarze-vyska": "auto", "--mich-tl-sarze-posun-x": "65px", "--mich-tl-sarze-posun-y": "0px", "--mich-tl-dalsi-sirka": "auto", "--mich-tl-dalsi-vyska": "auto", "--mich-tl-dalsi-posun-x": "0px", "--mich-tl-dalsi-posun-y": "0px", "--mich-tl-hlaseni-sirka": "auto", "--mich-tl-hlaseni-vyska": "auto", "--mich-tl-hlaseni-posun-x": "0px", "--mich-tl-hlaseni-posun-y": "0px", "--mich-tl-pomocna-sirka": "auto", "--mich-tl-pomocna-vyska": "auto", "--mich-tl-pomocna-posun-x": "0px", "--mich-tl-pomocna-posun-y": "0px", "--mich-tl-stitek-posun-x": "0px", "--mich-tl-stitek-posun-y": "0px", "--mich-prepinac-posun-x": "0px", "--mich-prepinac-posun-y": "0px", "--produkt-sloupec": "1", "--produkt-radek": "1", "--produkt-sirka": "auto", "--produkt-zarovnani": "stretch", "--produkt-vyska": "auto", "--vysledek-sloupec": "2", "--vysledek-radek": "1", "--vysledek-sirka": "auto", "--vysledek-zarovnani": "stretch", "--vysledek-vyska": "auto", "--recept-sloupec": "1", "--recept-radek": "2", "--recept-sirka": "67%", "--recept-zarovnani": "start", "--recept-vyska": "auto", "--zakazka-sloupec": "1 / -1", "--zakazka-radek": "2", "--zakazka-sirka": "32.7%", "--zakazka-zarovnani": "end", "--zakazka-vyska": "auto", "--tisk-sloupec": "1 / -1", "--tisk-radek": "2", "--tisk-sirka": "33%", "--tisk-zarovnani": "center", "--tisk-vyska": "auto"};
 var STRANKY = [{"sel": "", "nazev": "Základ (celá aplikace)"}, {"sel": ".michbg", "nazev": "Míchací režim"}], VYCH_PRESAHY = {".michbg": {"light": {"--paper": "#cccccc", "--zvyraz": "#919191", "--ink": "#000000", "--ink-2": "#8b8b8b", "--line": "#9e9e9e", "--line-2": "#949494", "--key": "#000000", "--btn-ink": "#ffffff", "--cyan": "#000000", "--bg": "#ffffff"}, "dark": {"--paper": "#2e2e2e", "--zvyraz": "#545454"}}}, KARTY = [{"klic": "produkt", "nazev": "Vybraný produkt", "sel": ".karta-produkt"}, {"klic": "vysledek", "nazev": "Kolik namíchat", "sel": ".bigpanel"}, {"klic": "recept", "nazev": "Receptura a barva", "sel": ".karta-recept"}, {"klic": "zakazka", "nazev": "Zakázka", "sel": ".karta-cisla"}, {"klic": "tisk", "nazev": "Parametry tisku", "sel": ".karta-tisk"}];
 var ZAC_STRANEK = "/* ZACATEK BAREV STRANEK */", KON_STRANEK = "/* KONEC BAREV STRANEK */";
 var PRED_SVETLY = ":root:not([data-theme=\"dark\"]) ", PRED_TMAVY = ":root[data-theme=\"dark\"] ";
-var BLOK = { light: "\n  /* Vzhled z\u016fst\u00e1v\u00e1 m\u011bkk\u00fd \u2014 karty vystupuj\u00ed z plochy st\u00ednem, ne r\u00e1me\u010dkem.\n     M\u011bn\u00ed se jen barvy: plocha je neutr\u00e1ln\u011b \u0161ed\u00e1 m\u00edsto tepl\u00e9 b\u00e9\u017eov\u00e9 a inkoust\n     je tmav\u0161\u00ed, aby se na to dalo d\u00edvat cel\u00fd den. Barevn\u00fd akcent zmizel;\n     zv\u00fdrazn\u011bn\u00ed d\u011bl\u00e1 inkoust, barva z\u016fstala tam, kde nese v\u00fdznam (odst\u00edn\n     barvy, varov\u00e1n\u00ed, stav v\u00e1\u017een\u00ed). */\n  /* --bg maluje JEN plochu str\u00e1nky; v\u0161echno, co na n\u00ed le\u017e\u00ed (karty, li\u0161ty,\n     tla\u010d\u00edtka, pole, \u0161t\u00edtky), bere barvu z --paper. Ty dv\u011b prom\u011bnn\u00e9 jdou\n     nastavit nez\u00e1visle \u2014 plocha je samostatn\u00e1 jednotka. */\n  --bg:#949494; --paper:#dbdbdb; --zvyraz:#949494; --logo:#949494;\n  --ink:#141414; --ink-2:#767676; --line:#D8D8D8; --line-2:#C7C7C7;\n  --cyan:#141414; --magenta:#C97B63; --yellow:#D9B44A; --key:#141414;\n  --btn-ink:#FFFFFF; --focus:rgba(20,20,20,.20); --danger:#b31919;\n  --ok:#3dc760; --warn:#e8c545;\n  /* Tvary: ka\u017ed\u00fd druh prvku m\u00e1 vlastn\u00ed zaoblen\u00ed, aby \u0161lo ladit zvl\u00e1\u0161\u0165\n     karty, tla\u010d\u00edtka, pole a dla\u017edice. Ikony jsou kreslen\u00e9, ne obr\u00e1zkov\u00e9 \u2014\n     velikost, tlou\u0161\u0165ka tahu i zakon\u010den\u00ed se \u0159\u00edd\u00ed odsud. Ikona stoj\u00edc\u00ed uvnit\u0159\n     \u0159\u00e1dku textu se ne\u0159\u00edd\u00ed velikost\u00ed samostatn\u00fdch ikon, ale p\u00edsmem kolem sebe\n     \u2014 proto je v em a zmen\u0161\u00ed se s n\u00edm. */\n  --radius:23px; --radius-btn:35px; --radius-pole:15px; --radius-dlazdice:15px;\n  --radius-stitek:15px;\n  --ikona:27px; --ikona-tah:1.5; --ikona-konec:round; --ikona-pruhlednost:1;\n  --ikona-radek:1.2em;\n  --pruhlednost-karty:1;\n  /* P\u00edsmo se \u0159\u00edd\u00ed podle role, ne podle prvku: co je nadpis, co popisek, co\n     v\u00fdsledek. Zv\u011bt\u0161en\u00e9 varianty na domovsk\u00e9 str\u00e1nce se z t\u011bchto hodnot\n     dopo\u010d\u00edtaj\u00ed, tak\u017ee cel\u00e1 \u0161k\u00e1la dr\u017e\u00ed pohromad\u011b. */\n  --pismo:15.5px; --pismo-nadpis:19.5px; --pismo-popisek:12.5px;\n  --pismo-poznamka:14px; --pismo-tabulka:19px; --pismo-vysledek:50px;\n  --logo-velikost:116px; --prostrkani:0.07em; --tloustka-nadpisu:900; --radek:1.4;\n  /* Rozestupy: odsazen\u00ed uvnit\u0159 karty, mezera mezi kartami, mezera mezi poli\n     v \u0159\u00e1dku a odsazen\u00ed uvnit\u0159 pol\u00ed a tla\u010d\u00edtek (to ur\u010duje jejich v\u00fd\u0161ku). */\n  /* M\u00edchac\u00ed re\u017eim m\u00e1 vlastn\u00ed sadu rozm\u011br\u016f. Ne\u010dte se od kl\u00e1vesnice, ale od\n     v\u00e1hy \u2014 \u010dasto ve stoje a v rukavic\u00edch \u2014 tak\u017ee se lad\u00ed zvl\u00e1\u0161\u0165 od zbytku\n     aplikace a nesm\u00ed se h\u00fdbat, kdy\u017e se s\u00e1hne na obecnou \u0161k\u00e1lu. */\n  --mich-nazev:26px; --mich-davka:34px; --mich-vzorek:52px;\n  --mich-hlavicka:12px; --mich-tabulka:20px; --mich-gramy:26px;\n  --mich-radek:11px; --mich-vysledek:52px; --mich-wbar:20px;\n  --mich-tlacitko:15px; --mich-mezera:22px;\n  --mich-pole:20px; --mich-hlaseni:15px; --mich-stitek:14px;\n  --mezera-karta-y:20px; --mezera-karta-x:22px; --mezera-karet:16px;\n  --mezera-poli:12px; --pole-y:9px; --pole-x:12px;\n  --tlacitko-y:10px; --tlacitko-x:18px; --okraj-stranky:20px;\n  /* Rozvr\u017een\u00ed hlavn\u00ed str\u00e1nky: kde kter\u00e1 karta stoj\u00ed, jak je \u0161irok\u00e1 a jak\n     vysok\u00e1. Ka\u017ed\u00e1 karta m\u00e1 sloupec, \u0159\u00e1dek, \u0161\u00ed\u0159ku, zarovn\u00e1n\u00ed a nejmen\u0161\u00ed v\u00fd\u0161ku\n     \u2014 dohromady tedy polohu i velikost. Lad\u00ed se v barvy.html na str\u00e1nce\n     Rozvr\u017een\u00ed; plat\u00ed od \u0161\u00ed\u0159ky okna 960 px, pod n\u00ed se karty skl\u00e1daj\u00ed pod sebe.\n     Dv\u011b karty ve stejn\u00e9m sloupci a \u0159\u00e1dku by se p\u0159ekryly \u2014 n\u00e1stroj to hl\u00edd\u00e1. */\n  --sirka-stranky:none; --sloupec-1:1fr; --sloupec-2:1fr; --mezera-sloupcu:40px;\n  --produkt-sloupec:1; --produkt-radek:1; --produkt-sirka:auto;\n  --produkt-zarovnani:stretch; --produkt-vyska:auto;\n  --vysledek-sloupec:2; --vysledek-radek:1; --vysledek-sirka:auto;\n  --vysledek-zarovnani:stretch; --vysledek-vyska:auto;\n  --recept-sloupec:1; --recept-radek:2; --recept-sirka:67%;\n  --recept-zarovnani:start; --recept-vyska:auto;\n  --zakazka-sloupec:1 / -1; --zakazka-radek:2; --zakazka-sirka:32.7%;\n  --zakazka-zarovnani:end; --zakazka-vyska:auto;\n  --tisk-sloupec:1 / -1; --tisk-radek:2;\n  --tisk-sirka:33%;\n  --tisk-zarovnani:center; --tisk-vyska:auto;\n  --neu:-5px -5px 20px rgba(255,255,255,0.11), 5px 5px 20px rgba(0,0,0,0.43);\n  --neu-sm:-4px -4px 14px rgba(255,255,255,0.105), 4px 4px 14px rgba(0,0,0,0.473);\n  --neu-in:inset 2px 2px 4px rgba(0,0,0,0.387), inset -2px -2px 4px rgba(255,255,255,0.105);\n  --neu-in-lg:inset 3px 3px 6px rgba(0,0,0,0.43), inset -3px -3px 6px rgba(255,255,255,0.11);\n  --modal-shadow:0 7px 40px rgba(0,0,0,0.86);\n  --logo-shadow:-2px -2px 2px rgba(255,255,255,0.14), 2px 2px 2px rgba(0,0,0,0.1);\n  --mono:'Segoe UI',system-ui,sans-serif;\n  --sans:system-ui,sans-serif;\n", dark: "\n  /* Tmav\u00fd re\u017eim je hlub\u0161\u00ed ne\u017e d\u0159\u00edv, ale ne \u010dern\u00fd \u2014 na \u010dern\u00e9 plochu nejde\n     osv\u011btlit a st\u00edny by zmizely. Hlavn\u00ed tla\u010d\u00edtko je sv\u011btl\u00e9 s tmav\u00fdm p\u00edsmem.\n     Linky se posouvaj\u00ed spolu s pozad\u00edm, aby z\u016fstaly stejn\u011b z\u0159eteln\u00e9. */\n  --bg:#545454; --paper:#333333; --zvyraz:#545454; --logo:#545454;\n  --ink:#EDEDED; --ink-2:#8C8C8C; --line:#595959; --line-2:#7a7a7a;\n  --cyan:#EDEDED; --magenta:#C97B63; --yellow:#D9B44A; --key:#EDEDED;\n  --btn-ink:#000000; --focus:rgba(237,237,237,.22); --danger:#b31919;\n  --ok:#3dc760; --warn:#e8c545;\n  --neu:-9px -9px 24px rgba(255,255,255,0.08), 9px 9px 24px rgba(0,0,0,0.51);\n  --neu-sm:-4px -4px 10px rgba(255,255,255,0.076), 4px 4px 10px rgba(0,0,0,0.561);\n  --neu-in:inset 3px 3px 4px rgba(0,0,0,0.459), inset -3px -3px 4px rgba(255,255,255,0.076);\n  --neu-in-lg:inset 4px 4px 6px rgba(0,0,0,0.51), inset -4px -4px 6px rgba(255,255,255,0.08);\n  --modal-shadow:0 13px 48px rgba(0,0,0,1);\n  --logo-shadow:-2px -2px 2px rgba(255,255,255,0.14), 2px 2px 2px rgba(0,0,0,0.1);\n" };
+var BLOK = { light: "\n  /* Vzhled z\u016fst\u00e1v\u00e1 m\u011bkk\u00fd \u2014 karty vystupuj\u00ed z plochy st\u00ednem, ne r\u00e1me\u010dkem.\n     M\u011bn\u00ed se jen barvy: plocha je neutr\u00e1ln\u011b \u0161ed\u00e1 m\u00edsto tepl\u00e9 b\u00e9\u017eov\u00e9 a inkoust\n     je tmav\u0161\u00ed, aby se na to dalo d\u00edvat cel\u00fd den. Barevn\u00fd akcent zmizel;\n     zv\u00fdrazn\u011bn\u00ed d\u011bl\u00e1 inkoust, barva z\u016fstala tam, kde nese v\u00fdznam (odst\u00edn\n     barvy, varov\u00e1n\u00ed, stav v\u00e1\u017een\u00ed). */\n  /* --bg maluje JEN plochu str\u00e1nky; v\u0161echno, co na n\u00ed le\u017e\u00ed (karty, li\u0161ty,\n     tla\u010d\u00edtka, pole, \u0161t\u00edtky), bere barvu z --paper. Ty dv\u011b prom\u011bnn\u00e9 jdou\n     nastavit nez\u00e1visle \u2014 plocha je samostatn\u00e1 jednotka. */\n  --bg:#949494; --paper:#dbdbdb; --zvyraz:#949494; --logo:#949494;\n  --ink:#141414; --ink-2:#767676; --line:#D8D8D8; --line-2:#C7C7C7;\n  --cyan:#141414; --magenta:#C97B63; --yellow:#D9B44A; --key:#141414;\n  --btn-ink:#FFFFFF; --focus:rgba(20,20,20,.20); --danger:#b31919;\n  --ok:#3dc760; --warn:#e8c545;\n  /* Tvary: ka\u017ed\u00fd druh prvku m\u00e1 vlastn\u00ed zaoblen\u00ed, aby \u0161lo ladit zvl\u00e1\u0161\u0165\n     karty, tla\u010d\u00edtka, pole a dla\u017edice. Ikony jsou kreslen\u00e9, ne obr\u00e1zkov\u00e9 \u2014\n     velikost, tlou\u0161\u0165ka tahu i zakon\u010den\u00ed se \u0159\u00edd\u00ed odsud. Ikona stoj\u00edc\u00ed uvnit\u0159\n     \u0159\u00e1dku textu se ne\u0159\u00edd\u00ed velikost\u00ed samostatn\u00fdch ikon, ale p\u00edsmem kolem sebe\n     \u2014 proto je v em a zmen\u0161\u00ed se s n\u00edm. */\n  --radius:23px; --radius-btn:35px; --radius-pole:15px; --radius-dlazdice:15px;\n  --radius-stitek:15px;\n  --ikona:27px; --ikona-tah:1.5; --ikona-konec:round; --ikona-pruhlednost:1;\n  --ikona-radek:1.2em;\n  --pruhlednost-karty:1;\n  /* P\u00edsmo se \u0159\u00edd\u00ed podle role, ne podle prvku: co je nadpis, co popisek, co\n     v\u00fdsledek. Zv\u011bt\u0161en\u00e9 varianty na domovsk\u00e9 str\u00e1nce se z t\u011bchto hodnot\n     dopo\u010d\u00edtaj\u00ed, tak\u017ee cel\u00e1 \u0161k\u00e1la dr\u017e\u00ed pohromad\u011b. */\n  --pismo:15.5px; --pismo-nadpis:19.5px; --pismo-popisek:12.5px;\n  --pismo-poznamka:14px; --pismo-tabulka:19px; --pismo-vysledek:50px;\n  --logo-velikost:116px; --prostrkani:0.07em; --tloustka-nadpisu:900; --radek:1.4;\n  /* Rozestupy: odsazen\u00ed uvnit\u0159 karty, mezera mezi kartami, mezera mezi poli\n     v \u0159\u00e1dku a odsazen\u00ed uvnit\u0159 pol\u00ed a tla\u010d\u00edtek (to ur\u010duje jejich v\u00fd\u0161ku). */\n  /* M\u00edchac\u00ed re\u017eim m\u00e1 vlastn\u00ed sadu rozm\u011br\u016f. Ne\u010dte se od kl\u00e1vesnice, ale od\n     v\u00e1hy \u2014 \u010dasto ve stoje a v rukavic\u00edch \u2014 tak\u017ee se lad\u00ed zvl\u00e1\u0161\u0165 od zbytku\n     aplikace a nesm\u00ed se h\u00fdbat, kdy\u017e se s\u00e1hne na obecnou \u0161k\u00e1lu. */\n  --mich-nazev:26px; --mich-davka:37px; --mich-vzorek:52px;\n  --mich-hlavicka:12px; --mich-tabulka:20px; --mich-gramy:26px;\n  --mich-radek:11px; --mich-vysledek:64px; --mich-wbar:19px;\n  --mich-tlacitko:14px; --mich-mezera:15px;\n  --mich-pole:17px; --mich-hlaseni:14px; --mich-stitek:14px;\n  --mich-prepinac:16px;\n  /* Ka\u017ed\u00e9 st\u00e1l\u00e9 tla\u010d\u00edtko m\u00edchac\u00edho re\u017eimu zvl\u00e1\u0161\u0165: hodnota je velikost p\u00edsma,\n     odsazen\u00ed se z n\u00ed dopo\u010d\u00edt\u00e1v\u00e1, tak\u017ee tvar tla\u010d\u00edtka dr\u017e\u00ed a m\u011bn\u00ed se jen\n     velikost. Lad\u00ed se na str\u00e1nce M\u00edchac\u00ed re\u017eim v barvy.html. Tla\u010d\u00edtka, kter\u00e1\n     tu vyjmenovan\u00e1 nejsou (vz\u00e1cn\u00e9 stavy), dr\u017e\u00ed spole\u010dn\u00e9 --mich-tlacitko. */\n  --mich-tl-zpet:17px; --mich-tl-plocha:16px; --mich-tl-rucne:18px;\n  --mich-tl-znam:18px; --mich-tl-viskozita:16px;\n  --mich-tl-pripojit:16px; --mich-tl-simulace:16px; --mich-tl-tara:24.5px;\n  --mich-tl-odpojit:15px; --mich-tl-sarze:15px; --mich-tl-dalsi:16px;\n  --mich-tl-stitek:23px; --mich-tl-hlaseni:14px; --mich-tl-pomocna:15px;\n  --mich-nadpis:21px; --mich-poznamka:14px; --mich-znak:25px;\n  /* Tvar a poloha tla\u010d\u00edtek: \u0161\u00ed\u0159ka a v\u00fd\u0161ka \u201eauto\" nechaj\u00ed tla\u010d\u00edtku tvar\n     podle textu, \u010d\u00edslo z n\u011bj ud\u011bl\u00e1 blok (stejn\u00e1 \u0161\u00ed\u0159ka a v\u00fd\u0161ka = \u010dtverec;\n     text se zalom\u00ed a vycentruje s\u00e1m, je to <button>). Posun je vizu\u00e1ln\u00ed\n     odchylka od p\u0159irozen\u00e9ho m\u00edsta v toku \u2014 tla\u010d\u00edtko se vykresl\u00ed jinde,\n     ale m\u00edsto v \u0159\u00e1dku si d\u00e1l dr\u017e\u00ed, tak\u017ee se rozvr\u017een\u00ed nerozsype. */\n  --mich-tl-zpet-sirka:auto; --mich-tl-zpet-vyska:50px; --mich-tl-zpet-posun-x:0px; --mich-tl-zpet-posun-y:0px;\n  --mich-tl-plocha-sirka:288px; --mich-tl-plocha-vyska:50px; --mich-tl-plocha-posun-x:0px; --mich-tl-plocha-posun-y:0px;\n  --mich-tl-rucne-sirka:auto; --mich-tl-rucne-vyska:auto; --mich-tl-rucne-posun-x:0px; --mich-tl-rucne-posun-y:0px;\n  --mich-tl-znam-sirka:auto; --mich-tl-znam-vyska:auto; --mich-tl-znam-posun-x:0px; --mich-tl-znam-posun-y:0px;\n  --mich-tl-viskozita-sirka:180px; --mich-tl-viskozita-vyska:50px; --mich-tl-viskozita-posun-x:306px; --mich-tl-viskozita-posun-y:24px;\n  --mich-tl-pripojit-sirka:auto; --mich-tl-pripojit-vyska:auto; --mich-tl-pripojit-posun-x:0px; --mich-tl-pripojit-posun-y:0px;\n  --mich-tl-simulace-sirka:auto; --mich-tl-simulace-vyska:auto; --mich-tl-simulace-posun-x:0px; --mich-tl-simulace-posun-y:0px;\n  --mich-tl-tara-sirka:116px; --mich-tl-tara-vyska:100px; --mich-tl-tara-posun-x:0px; --mich-tl-tara-posun-y:0px;\n  --mich-tl-odpojit-sirka:116px; --mich-tl-odpojit-vyska:100px; --mich-tl-odpojit-posun-x:0px; --mich-tl-odpojit-posun-y:0px;\n  --mich-tl-sarze-sirka:auto; --mich-tl-sarze-vyska:auto; --mich-tl-sarze-posun-x:65px; --mich-tl-sarze-posun-y:0px;\n  --mich-tl-dalsi-sirka:auto; --mich-tl-dalsi-vyska:auto; --mich-tl-dalsi-posun-x:0px; --mich-tl-dalsi-posun-y:0px;\n  --mich-tl-hlaseni-sirka:auto; --mich-tl-hlaseni-vyska:auto; --mich-tl-hlaseni-posun-x:0px; --mich-tl-hlaseni-posun-y:0px;\n  --mich-tl-pomocna-sirka:auto; --mich-tl-pomocna-vyska:auto; --mich-tl-pomocna-posun-x:0px; --mich-tl-pomocna-posun-y:0px;\n  --mich-tl-stitek-posun-x:0px; --mich-tl-stitek-posun-y:0px;\n  --mich-prepinac-posun-x:0px; --mich-prepinac-posun-y:0px;\n  --mezera-karta-y:20px; --mezera-karta-x:22px; --mezera-karet:16px;\n  --mezera-poli:12px; --pole-y:9px; --pole-x:12px;\n  --tlacitko-y:10px; --tlacitko-x:18px; --okraj-stranky:20px;\n  /* Rozvr\u017een\u00ed hlavn\u00ed str\u00e1nky: kde kter\u00e1 karta stoj\u00ed, jak je \u0161irok\u00e1 a jak\n     vysok\u00e1. Ka\u017ed\u00e1 karta m\u00e1 sloupec, \u0159\u00e1dek, \u0161\u00ed\u0159ku, zarovn\u00e1n\u00ed a nejmen\u0161\u00ed v\u00fd\u0161ku\n     \u2014 dohromady tedy polohu i velikost. Lad\u00ed se v barvy.html na str\u00e1nce\n     Rozvr\u017een\u00ed; plat\u00ed od \u0161\u00ed\u0159ky okna 960 px, pod n\u00ed se karty skl\u00e1daj\u00ed pod sebe.\n     Dv\u011b karty ve stejn\u00e9m sloupci a \u0159\u00e1dku by se p\u0159ekryly \u2014 n\u00e1stroj to hl\u00edd\u00e1. */\n  --sirka-stranky:none; --sloupec-1:1fr; --sloupec-2:1fr; --mezera-sloupcu:40px;\n  --produkt-sloupec:1; --produkt-radek:1; --produkt-sirka:auto;\n  --produkt-zarovnani:stretch; --produkt-vyska:auto;\n  --vysledek-sloupec:2; --vysledek-radek:1; --vysledek-sirka:auto;\n  --vysledek-zarovnani:stretch; --vysledek-vyska:auto;\n  --recept-sloupec:1; --recept-radek:2; --recept-sirka:67%;\n  --recept-zarovnani:start; --recept-vyska:auto;\n  --zakazka-sloupec:1 / -1; --zakazka-radek:2; --zakazka-sirka:32.7%;\n  --zakazka-zarovnani:end; --zakazka-vyska:auto;\n  --tisk-sloupec:1 / -1; --tisk-radek:2;\n  --tisk-sirka:33%;\n  --tisk-zarovnani:center; --tisk-vyska:auto;\n  --neu:-5px -5px 20px rgba(255,255,255,0.11), 5px 5px 20px rgba(0,0,0,0.43);\n  --neu-sm:-4px -4px 14px rgba(255,255,255,0.105), 4px 4px 14px rgba(0,0,0,0.473);\n  --neu-in:inset 2px 2px 4px rgba(0,0,0,0.387), inset -2px -2px 4px rgba(255,255,255,0.105);\n  --neu-in-lg:inset 3px 3px 6px rgba(0,0,0,0.43), inset -3px -3px 6px rgba(255,255,255,0.11);\n  --modal-shadow:0 7px 40px rgba(0,0,0,0.86);\n  --logo-shadow:-2px -2px 2px rgba(255,255,255,0.14), 2px 2px 2px rgba(0,0,0,0.1);\n  --mono:'Segoe UI',system-ui,sans-serif;\n  --sans:system-ui,sans-serif;\n", dark: "\n  /* Tmav\u00fd re\u017eim je hlub\u0161\u00ed ne\u017e d\u0159\u00edv, ale ne \u010dern\u00fd \u2014 na \u010dern\u00e9 plochu nejde\n     osv\u011btlit a st\u00edny by zmizely. Hlavn\u00ed tla\u010d\u00edtko je sv\u011btl\u00e9 s tmav\u00fdm p\u00edsmem.\n     Linky se posouvaj\u00ed spolu s pozad\u00edm, aby z\u016fstaly stejn\u011b z\u0159eteln\u00e9. */\n  --bg:#545454; --paper:#333333; --zvyraz:#545454; --logo:#545454;\n  --ink:#EDEDED; --ink-2:#8C8C8C; --line:#595959; --line-2:#7a7a7a;\n  --cyan:#EDEDED; --magenta:#C97B63; --yellow:#D9B44A; --key:#EDEDED;\n  --btn-ink:#000000; --focus:rgba(237,237,237,.22); --danger:#b31919;\n  --ok:#3dc760; --warn:#e8c545;\n  --neu:-9px -9px 24px rgba(255,255,255,0.08), 9px 9px 24px rgba(0,0,0,0.51);\n  --neu-sm:-4px -4px 10px rgba(255,255,255,0.076), 4px 4px 10px rgba(0,0,0,0.561);\n  --neu-in:inset 3px 3px 4px rgba(0,0,0,0.459), inset -3px -3px 4px rgba(255,255,255,0.076);\n  --neu-in-lg:inset 4px 4px 6px rgba(0,0,0,0.51), inset -4px -4px 6px rgba(255,255,255,0.08);\n  --modal-shadow:0 13px 48px rgba(0,0,0,1);\n  --logo-shadow:-2px -2px 2px rgba(255,255,255,0.14), 2px 2px 2px rgba(0,0,0,0.1);\n" };
 var barvy = JSON.parse(JSON.stringify(VYCH_BARVY));
 var stiny = JSON.parse(JSON.stringify(VYCH_STINY));
 var tvary = JSON.parse(JSON.stringify(VYCH_TVARY));
@@ -1503,7 +1824,7 @@ tvarPosuvy.forEach(function(p){
     var jed = inp.getAttribute("data-jed");
     /* Nejmenší výška na nule není nula, ale „auto" — karta si výšku vezme
        podle obsahu. Nula by ji naopak pustila pod obsah a text by vylezl ven. */
-    tvary[klic] = (/-vyska$/.test(klic) && +inp.value === 0) ? "auto" : inp.value + jed;
+    tvary[klic] = (/-(vyska|sirka)$/.test(klic) && +inp.value === 0) ? "auto" : inp.value + jed;
     p.querySelector('[data-role=cislo]').value = tvary[klic];
     korenu.style.setProperty(klic, tvary[klic]);
     /* Týž rozestup má posuvník na obou stránkách — musí ukazovat totéž. */
@@ -1593,6 +1914,7 @@ vybery.forEach(function(s){
   b.addEventListener("click", function(){
     var kam = b.getAttribute("data-strana");
     document.getElementById("strana-barvy").hidden = kam !== "barvy";
+    document.getElementById("strana-michani").hidden = kam !== "michani";
     document.getElementById("strana-rozvrzeni").hidden = kam !== "rozvrzeni";
     [].slice.call(document.querySelectorAll("[data-strana]")).forEach(function(x){
       x.classList.toggle("on", x === b); });
@@ -1607,6 +1929,14 @@ document.getElementById("zpet-rozvrzeni").addEventListener("click", function(){
     if (/^--(sirka-stranky|sloupec-\d|mezera-sloupcu|mezera-karet|okraj-stranky)$/.test(k)
         || /^--(produkt|vysledek|recept|zakazka|tisk)-/.test(k))
       tvary[k] = VYCH_TVARY[k];
+  });
+  nasad();
+});
+
+document.getElementById("zpet-michani").addEventListener("click", function(){
+  /* Vrací se jen míchací režim — barvy, písmo ani rozvržení se nesmí hnout. */
+  Object.keys(VYCH_TVARY).forEach(function(k){
+    if (/^--mich-/.test(k)) tvary[k] = VYCH_TVARY[k];
   });
   nasad();
 });
@@ -1686,6 +2016,54 @@ document.getElementById("zpet-barvy").addEventListener("click", function(){
       : "nepodařilo se — označte text a zkopírujte ručně";
   });
 });
+
+/* Tažení tlačítek v ukázce míchacího režimu. Chytne se tlačítko (nebo
+   přepínač s tužidlem) a posun se zapisuje do proměnných --…-posun-x/-y —
+   týchž, které mají posuvníky v pravém panelu; myš je jen rychlejší cesta
+   k nim. Členové rodin (hlášení, pomocná v kartě) nesou posun celé rodiny,
+   takže se rodina táhne jako celek. */
+var ukazkaMich = document.querySelector("#strana-michani .michukazka");
+function klicTlacitka(el){
+  var b = el.closest ? el.closest(".michukazka button, .michukazka .tgl") : null;
+  if (!b) return null;
+  var m = (b.className || "").match(/mich-tl-[a-z]+/);
+  if (m) return "--" + m[0];
+  if (b.classList.contains("tgl")) return "--mich-prepinac";
+  if (b.closest(".stitekpruh")) return "--mich-tl-stitek";
+  if (b.closest(".okbox") || b.closest(".warnbox") || b.closest(".specbar")) return "--mich-tl-hlaseni";
+  if (b.closest(".card") && b.classList.contains("sm")) return "--mich-tl-pomocna";
+  return null;
+}
+if (ukazkaMich){
+  var tazeni = null, potlacKlik = false;
+  ukazkaMich.addEventListener("mousedown", function(e){
+    var klic = klicTlacitka(e.target);
+    if (!klic) return;
+    e.preventDefault();
+    tazeni = { klic: klic, x0: e.clientX, y0: e.clientY,
+      px: parseFloat(tvary[klic + "-posun-x"]) || 0,
+      py: parseFloat(tvary[klic + "-posun-y"]) || 0, hnul: false };
+  });
+  window.addEventListener("mousemove", function(e){
+    if (!tazeni) return;
+    var dx = e.clientX - tazeni.x0, dy = e.clientY - tazeni.y0;
+    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) tazeni.hnul = true;
+    tvary[tazeni.klic + "-posun-x"] = Math.round(tazeni.px + dx) + "px";
+    tvary[tazeni.klic + "-posun-y"] = Math.round(tazeni.py + dy) + "px";
+    korenu.style.setProperty(tazeni.klic + "-posun-x", tvary[tazeni.klic + "-posun-x"]);
+    korenu.style.setProperty(tazeni.klic + "-posun-y", tvary[tazeni.klic + "-posun-y"]);
+  });
+  window.addEventListener("mouseup", function(){
+    if (!tazeni) return;
+    potlacKlik = tazeni.hnul;
+    tazeni = null;
+    if (potlacKlik) nasad();   // srovná posuvníky a přepíše výstup
+  });
+  /* Kliknutí, které bylo ve skutečnosti tažením, nesmí přepnout přepínač. */
+  ukazkaMich.addEventListener("click", function(e){
+    if (potlacKlik){ e.preventDefault(); e.stopPropagation(); potlacKlik = false; }
+  }, true);
+}
 
 pripravRam();
 nasad();

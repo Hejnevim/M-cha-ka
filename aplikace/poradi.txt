@@ -15,6 +15,7 @@
 20-zaklad/110-technologie.js
 20-zaklad/120-barva-potisku.js
 20-zaklad/125-ulozeni.js
+20-zaklad/127-jazyk.js
 20-zaklad/130-ikony.js
 20-zaklad/140-spec-z-kodu.js
 20-zaklad/150-sgps.js

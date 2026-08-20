@@ -16,23 +16,143 @@
   text-align:left;padding:calc(var(--mich-radek) * .55) 10px;border-bottom:2px solid var(--line-2)}
 .michtab td{padding:var(--mich-radek) 10px;border-bottom:1px solid var(--line)}
 .michtab td.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+/* Hlavička číselného sloupce musí stát nad čísly, tedy vpravo. Obecné `th.num`
+   z 050-prvky.css tu prohrává: má stejnou specificitu (0,1,1) jako
+   `.michtab th{text-align:left}`, které se načítá později, takže bez tohohle
+   pravidla by „navážit" a „kumulativně" zůstaly vlevo. */
+.michtab th.num{text-align:right}
 .michtab .g{font-size:var(--mich-gramy);font-weight:700}
 .michtab tr.ted{background:var(--zvyraz)}
 .michtab tr.ted td{font-weight:700}
 .michtab tr.hotovo td{color:var(--ink-2)}
 .michtab tr.hotovo .g{font-weight:400}
-.michstav{display:inline-block;width:26px;text-align:center}
+.michstav{display:inline-block;width:var(--mich-znak);text-align:center}
 /* Ovládání uvnitř režimu je větší — míchá se ve stoje, často v rukavicích. */
 /* Karty tu stojí z plochy stejně jako v kalkulaci — asistent navážení je něco,
    co se obsluhuje, takže má být ohraničený, ne rozpitý do pozadí. Odsazení si
    bere z míchací sady, ne z obecné: uvnitř režimu je všechno o kus větší. */
 .michbg .card{padding:var(--mich-mezera);margin-bottom:var(--mich-mezera)}
-.michbg .card>h2{font-size:calc(var(--pismo-nadpis) * 1.03)}
+.michbg .card>h2{font-size:var(--mich-nadpis)}
 .michbg .btn{padding:calc(var(--mich-tlacitko) * .87) calc(var(--mich-tlacitko) * 1.47);font-size:var(--mich-tlacitko)}
 .michbg .btn.sm{padding:calc(var(--mich-tlacitko) * .6) calc(var(--mich-tlacitko) * 1);font-size:calc(var(--mich-tlacitko) * .9)}
+/* Štítek na kelímek se mačká s kelímkem v druhé ruce a s odstupem od stolu
+   — proto pruh přes celou šířku sloupce, zarovnaný s kartou asistenta nad
+   ním: trefí se i bez míření, protože ruka od vážení jen sjede dolů. Výška
+   je trojnásobek písma, aby se do pruhu vešel i přepínač. */
+.michbg .stitekpruh{flex-direction:column;align-items:flex-end;justify-content:flex-start}
+.michbg .stitekpruh .stitekobal{position:relative;width:100%}
+/* Přepínač „s tužidlem" vypadá jako součást tlačítka — sedí absolutně u jeho
+   pravého okraje, svisle na středu. Je to ale sourozenec, ne potomek (proč,
+   říká komentář v JSX). Posun z barvy.html se přičítá k usazení na střed,
+   takže se přepínač dá po tlačítku posouvat jako každý jiný prvek. Velikost
+   řídí --mich-prepinac týmiž poměry jako v základní škále (13px → 38 × 20,
+   posun 18, mezera 8) — tvar se nemění, jen roste nebo zmenšuje celý. */
+.michbg .stitekpruh .tgl{font-size:var(--mich-prepinac);
+  position:absolute;top:50%;right:calc(var(--mich-tl-stitek) * .8);
+  transform:translate(var(--mich-prepinac-posun-x),var(--mich-prepinac-posun-y)) translateY(-50%);
+  gap:calc(var(--mich-prepinac) * .615)}
+.michbg .stitekpruh .tglt{width:calc(var(--mich-prepinac) * 2.923);
+  height:calc(var(--mich-prepinac) * 1.538);
+  border-radius:calc(var(--mich-prepinac) * .846)}
+.michbg .stitekpruh .tglt::after{width:calc(var(--mich-prepinac) * 1.231);
+  height:calc(var(--mich-prepinac) * 1.231);
+  top:calc(var(--mich-prepinac) * .154);left:calc(var(--mich-prepinac) * .154)}
+.michbg .stitekpruh .tgl input:checked + .tglt::after{
+  transform:translateX(calc(var(--mich-prepinac) * 1.385))}
+.michbg .stitekpruh .btn{font-size:var(--mich-tl-stitek);
+  transform:translate(var(--mich-tl-stitek-posun-x),var(--mich-tl-stitek-posun-y));
+  width:100%;height:calc(var(--mich-tl-stitek) * 3);flex:none;
+  padding:calc(var(--mich-tl-stitek) * .4) calc(var(--mich-tl-stitek) * 4.2);
+  white-space:normal;line-height:normal;
+  display:inline-flex;align-items:center;justify-content:center;text-align:center}
+/* Tára a Odpojit v pravém horním rohu karty asistenta, pod sebou: Odpojit
+   nahoře a dál od ruky (mačká se jednou za směnu), Tára pod ním (mačká se
+   po každé nádobě). Kontejner stojí absolutně, aby nebral řádek ovládání;
+   rozestup 1,5 × míchací mezery odpovídá rozpoložení z dílny. Posuny obou
+   tlačítek z barvy.html platí dál — měří se od rohu. */
+.michbg .card{position:relative}
+.michbg .asistroh{position:absolute;top:var(--mich-mezera);right:var(--mich-mezera);
+  display:flex;flex-direction:column;align-items:flex-end;
+  gap:calc(var(--mich-mezera) * 1.5);z-index:1}
+/* Posuvník simulace se táhne přes celou šířku karty a jeho pravý konec —
+   plná dávka — by zajel pod Táru v rohu. Řádek se proto o rohový sloupec
+   zkracuje. Je-li šířka Táry „auto", calc() neplatí a řádek zůstává celý —
+   auto znamená malé tlačítko textového tvaru, pod které konec nezajede. */
+.michbg .card .simposuv{margin:10px calc(var(--mich-tl-tara-sirka) + var(--mich-mezera)) 10px 0}
+.michbg .card .simposuv input[type=range]{width:100%}
+/* KAŽDÉ TLAČÍTKO ZVLÁŠŤ. Hodnota proměnné je velikost písma tlačítka;
+   odsazení se dopočítává týmiž poměry jako u společných pravidel výš
+   (velké: .87 a 1.47 z písma, malé: .667 a 1.111 — poměry 9/13,5 a 15/13,5
+   původního .btn.sm). K tomu tvar a poloha: -sirka/-vyska auto = tvar podle
+   textu, číslo = blok (border-box, odsazení se vejde dovnitř; stejná čísla
+   = čtverec a text se v <button> zalomí a vycentruje sám); -posun-x/-y je
+   odchylka přes transform, místo v řádku zůstává obsazené. Dvě rodiny bez
+   vlastní třídy: tlačítka v hlášeních levého sloupce (nabídky zbytků, pot
+   life) a drobná pomocná tlačítka v kartě asistenta (Zapsat, Zpět…).
+   Jmenovaná tlačítka v kartě mají selektor s .card, aby rodinu přebila
+   vahou, ne pořadím. */
+.michbg .okbox .btn,.michbg .warnbox .btn,.michbg .specbar .btn{font-size:var(--mich-tl-hlaseni);
+  padding:calc(var(--mich-tl-hlaseni) * .667) calc(var(--mich-tl-hlaseni) * 1.111);
+  width:var(--mich-tl-hlaseni-sirka);height:var(--mich-tl-hlaseni-vyska);
+  transform:translate(var(--mich-tl-hlaseni-posun-x),var(--mich-tl-hlaseni-posun-y))}
+.michbg .card .btn.sm{font-size:var(--mich-tl-pomocna);
+  padding:calc(var(--mich-tl-pomocna) * .667) calc(var(--mich-tl-pomocna) * 1.111);
+  width:var(--mich-tl-pomocna-sirka);height:var(--mich-tl-pomocna-vyska);
+  transform:translate(var(--mich-tl-pomocna-posun-x),var(--mich-tl-pomocna-posun-y))}
+.michbg .btn.mich-tl-zpet{font-size:var(--mich-tl-zpet);
+  padding:calc(var(--mich-tl-zpet) * .87) calc(var(--mich-tl-zpet) * 1.47);
+  width:var(--mich-tl-zpet-sirka);height:var(--mich-tl-zpet-vyska);
+  transform:translate(var(--mich-tl-zpet-posun-x),var(--mich-tl-zpet-posun-y))}
+.michbg .btn.mich-tl-plocha{font-size:var(--mich-tl-plocha);
+  padding:calc(var(--mich-tl-plocha) * .667) calc(var(--mich-tl-plocha) * 1.111);
+  width:var(--mich-tl-plocha-sirka);height:var(--mich-tl-plocha-vyska);
+  transform:translate(var(--mich-tl-plocha-posun-x),var(--mich-tl-plocha-posun-y))}
+/* Tlačítko krycí plochy stojí u pravé hrany sloupce, zarovnané s tabulkou
+   navážení pod ním — u váhy je vpravo ruka i pohled. Auto okraj místo
+   pevného posunu: štítek vlevo („krycí plocha 100,0 % · z katalogu") mění
+   délku podle hodnot a pevné číslo by s každou změnou textu přestalo sedět.
+   `first-of-type` proto, aby si dvojice tlačítek (Upravit / Zpět na katalog)
+   nerozdělila volné místo mezi sebe — okraj dostane jen první z nich. */
+.michbg .rowline .btn.mich-tl-plocha:first-of-type{margin-left:auto}
+.michbg .btn.mich-tl-rucne{font-size:var(--mich-tl-rucne);
+  padding:calc(var(--mich-tl-rucne) * .667) calc(var(--mich-tl-rucne) * 1.111);
+  width:var(--mich-tl-rucne-sirka);height:var(--mich-tl-rucne-vyska);
+  transform:translate(var(--mich-tl-rucne-posun-x),var(--mich-tl-rucne-posun-y))}
+.michbg .btn.mich-tl-znam{font-size:var(--mich-tl-znam);
+  padding:calc(var(--mich-tl-znam) * .667) calc(var(--mich-tl-znam) * 1.111);
+  width:var(--mich-tl-znam-sirka);height:var(--mich-tl-znam-vyska);
+  transform:translate(var(--mich-tl-znam-posun-x),var(--mich-tl-znam-posun-y))}
+.michbg .btn.mich-tl-viskozita{font-size:var(--mich-tl-viskozita);
+  padding:calc(var(--mich-tl-viskozita) * .667) calc(var(--mich-tl-viskozita) * 1.111);
+  width:var(--mich-tl-viskozita-sirka);height:var(--mich-tl-viskozita-vyska);
+  transform:translate(var(--mich-tl-viskozita-posun-x),var(--mich-tl-viskozita-posun-y))}
+.michbg .card .btn.mich-tl-pripojit{font-size:var(--mich-tl-pripojit);
+  padding:calc(var(--mich-tl-pripojit) * .87) calc(var(--mich-tl-pripojit) * 1.47);
+  width:var(--mich-tl-pripojit-sirka);height:var(--mich-tl-pripojit-vyska);
+  transform:translate(var(--mich-tl-pripojit-posun-x),var(--mich-tl-pripojit-posun-y))}
+.michbg .card .btn.mich-tl-simulace{font-size:var(--mich-tl-simulace);
+  padding:calc(var(--mich-tl-simulace) * .87) calc(var(--mich-tl-simulace) * 1.47);
+  width:var(--mich-tl-simulace-sirka);height:var(--mich-tl-simulace-vyska);
+  transform:translate(var(--mich-tl-simulace-posun-x),var(--mich-tl-simulace-posun-y))}
+.michbg .card .btn.mich-tl-tara{font-size:var(--mich-tl-tara);
+  padding:calc(var(--mich-tl-tara) * .667) calc(var(--mich-tl-tara) * 1.111);
+  width:var(--mich-tl-tara-sirka);height:var(--mich-tl-tara-vyska);
+  transform:translate(var(--mich-tl-tara-posun-x),var(--mich-tl-tara-posun-y))}
+.michbg .card .btn.mich-tl-odpojit{font-size:var(--mich-tl-odpojit);
+  padding:calc(var(--mich-tl-odpojit) * .667) calc(var(--mich-tl-odpojit) * 1.111);
+  width:var(--mich-tl-odpojit-sirka);height:var(--mich-tl-odpojit-vyska);
+  transform:translate(var(--mich-tl-odpojit-posun-x),var(--mich-tl-odpojit-posun-y))}
+.michbg .card .btn.mich-tl-sarze{font-size:var(--mich-tl-sarze);
+  padding:calc(var(--mich-tl-sarze) * .667) calc(var(--mich-tl-sarze) * 1.111);
+  width:var(--mich-tl-sarze-sirka);height:var(--mich-tl-sarze-vyska);
+  transform:translate(var(--mich-tl-sarze-posun-x),var(--mich-tl-sarze-posun-y))}
+.michbg .card .btn.mich-tl-dalsi{font-size:var(--mich-tl-dalsi);
+  padding:calc(var(--mich-tl-dalsi) * .87) calc(var(--mich-tl-dalsi) * 1.47);
+  width:var(--mich-tl-dalsi-sirka);height:var(--mich-tl-dalsi-vyska);
+  transform:translate(var(--mich-tl-dalsi-posun-x),var(--mich-tl-dalsi-posun-y))}
 .michbg .result-big{font-size:var(--mich-vysledek)}
 .michbg .wbar{height:var(--mich-wbar)}
-.michbg .note,.michbg .result-sub{font-size:calc(var(--pismo-poznamka) * .96)}
+.michbg .note,.michbg .result-sub{font-size:var(--mich-poznamka)}
 /* Pole, hlášení a štítky uvnitř režimu. Doteď to sem nikdo nepotřeboval —
    míchalo se podle tabulky a mačkala tlačítka. S aditivy se u váhy poprvé
    ZADÁVÁ: kolik ředidla se nalilo, se píše do pole v rukavicích, a strop

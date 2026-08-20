@@ -5,17 +5,17 @@ function PotlifePruh({ cfg, bazeG, zacatek, onSpustit, onZnovu, onUzavrit, davka
   useTikot(st.plati && st.stav !== "prosle", 30000);
   if (!cfg || !cfg.tuzidlo) return null;
   const tuz = davkaTuzidla(cfg, bazeG);
-  const velikost = velky ? { fontSize: 15 } : {};
+  const velikost = velky ? { fontSize: "var(--mich-hlaseni)" } : {};
 
   if (!st.plati) return html`
     <div className="specbar" style=${Object.assign({ marginTop: 10 }, velikost)}>
       <span className="dot" style=${{ background: "var(--cyan)" }}></span>
-      <span>Dvousložková barva — po navážení přidejte
-        <b> ${fmtG(tuz.tuzidlo)} g tužidla</b> (${fmt(tuz.pomer * 100, 1)} % z ${fmt(tuz.baze)} g báze),
-        směsi bude ${fmt(tuz.celkem)} g. Zpracovat ji jde ${dobaText(n(cfg.minut) * MINUTA)}
-        ${" "}od přidání tužidla.</span>
+      <span>${(() => { const [pred, po] = preloz("Dvousložková barva — po navážení přidejte {t} ({p} % z {b} g báze), směsi bude {c} g. Zpracovat ji jde {d} od přidání tužidla.",
+          { p: fmt(tuz.pomer * 100, 1), b: fmt(tuz.baze), c: fmt(tuz.celkem),
+            d: dobaText(n(cfg.minut) * MINUTA) }).split("{t}");
+        return html`${pred}<b> ${preloz("{t} g tužidla", { t: fmtG(tuz.tuzidlo) })}</b>${po}`; })()}</span>
       <span style=${{ marginLeft: "auto" }}></span>
-      ${onSpustit && html`<button className="btn sm" onClick=${onSpustit}>Tužidlo přidáno — spustit odpočet</button>`}
+      ${onSpustit && html`<button className="btn sm" onClick=${onSpustit}>${preloz("Tužidlo přidáno — spustit odpočet")}</button>`}
     </div>`;
 
   const barva = st.stav === "prosle" ? "var(--danger)"
@@ -26,23 +26,24 @@ function PotlifePruh({ cfg, bazeG, zacatek, onSpustit, onZnovu, onUzavrit, davka
       <div className="rowline" style=${{ marginTop: 0, marginBottom: 0, gap: 8 }}>
         <b style=${{ color: barva }}>
           ${st.stav === "prosle"
-            ? "Pot life vypršel — směs už tuhne (" + dobaText(st.zbyva) + " po lhůtě)"
+            ? preloz("Pot life vypršel — směs už tuhne ({d} po lhůtě)", { d: dobaText(st.zbyva) })
             : (st.stav === "kriticky"
-              ? "Pot life končí — zbývá " + dobaText(st.zbyva)
-              : "Pot life běží — zbývá " + dobaText(st.zbyva))}
+              ? preloz("Pot life končí — zbývá {d}", { d: dobaText(st.zbyva) })
+              : preloz("Pot life běží — zbývá {d}", { d: dobaText(st.zbyva) }))}
         </b>
-        <span className="note">z ${dobaText(st.lhuta)} · uplynulo ${fmt(st.podil * 100, 0)} %</span>
+        <span className="note">${preloz("z {l} · uplynulo {p} %", { l: dobaText(st.lhuta), p: fmt(st.podil * 100, 0) })}</span>
         <span style=${{ marginLeft: "auto" }}></span>
-        ${onZnovu && html`<button className="btn sec sm" onClick=${onZnovu}>Nová směs</button>`}
+        ${onZnovu && html`<button className="btn sec sm" onClick=${onZnovu}>${preloz("Nová směs")}</button>`}
       </div>
       <div className="wbar" style=${{ marginTop: 8 }}>
         <span style=${{ width: Math.min(100, st.podil * 100) + "%", background: barva }} />
       </div>
       <div className="note" style=${{ marginTop: 6 }}>
         ${st.stav === "prosle"
-          ? "Vytvrzenou barvu nejde naředit zpátky — namíchejte novou dávku."
-          : "Houstne " + cfg.hustnutiPopis + " — " + cfg.hustnutiRada + "."}
-        ${" "}V kelímku je ${fmt(tuz.celkem)} g (${fmt(tuz.baze)} g báze + ${fmtG(tuz.tuzidlo)} g tužidla).
+          ? preloz("Vytvrzenou barvu nejde naředit zpátky — namíchejte novou dávku.")
+          : preloz("Houstne {jak} — {rada}.", { jak: cfg.hustnutiPopis, rada: cfg.hustnutiRada })}
+        ${preloz(" V kelímku je {c} g ({b} g báze + {t} g tužidla).",
+          { c: fmt(tuz.celkem), b: fmt(tuz.baze), t: fmtG(tuz.tuzidlo) })}
       </div>
       ${/* Dávka se uzavírá rukou a právě tady, protože právě tady se na ni
             člověk dívá. Aplikace to sama poznat nemůže: prošlá lhůta neříká,
@@ -51,8 +52,8 @@ function PotlifePruh({ cfg, bazeG, zacatek, onSpustit, onZnovu, onUzavrit, davka
         <div className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
           <span className="note" style=${{ fontFamily: "var(--mono)" }}>${davka.kod}</span>
           <span style=${{ marginLeft: "auto" }}></span>
-          <button className="btn sec sm" onClick=${() => onUzavrit("spotrebovana")}>Spotřebováno</button>
-          <button className="btn danger sm" onClick=${() => onUzavrit("vyhozena")}>Vyhozeno</button>
+          <button className="btn sec sm" onClick=${() => onUzavrit("spotrebovana")}>${preloz("Spotřebováno")}</button>
+          <button className="btn danger sm" onClick=${() => onUzavrit("vyhozena")}>${preloz("Vyhozeno")}</button>
         </div>`}
     </div>`;
 }

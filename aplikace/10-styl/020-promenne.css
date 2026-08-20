@@ -33,11 +33,42 @@
   /* Míchací režim má vlastní sadu rozměrů. Nečte se od klávesnice, ale od
      váhy — často ve stoje a v rukavicích — takže se ladí zvlášť od zbytku
      aplikace a nesmí se hýbat, když se sáhne na obecnou škálu. */
-  --mich-nazev:26px; --mich-davka:34px; --mich-vzorek:52px;
+  --mich-nazev:26px; --mich-davka:37px; --mich-vzorek:52px;
   --mich-hlavicka:12px; --mich-tabulka:20px; --mich-gramy:26px;
-  --mich-radek:11px; --mich-vysledek:52px; --mich-wbar:20px;
-  --mich-tlacitko:15px; --mich-mezera:22px;
-  --mich-pole:20px; --mich-hlaseni:15px; --mich-stitek:14px;
+  --mich-radek:11px; --mich-vysledek:64px; --mich-wbar:19px;
+  --mich-tlacitko:14px; --mich-mezera:15px;
+  --mich-pole:17px; --mich-hlaseni:14px; --mich-stitek:14px;
+  --mich-prepinac:16px;
+  /* Každé stálé tlačítko míchacího režimu zvlášť: hodnota je velikost písma,
+     odsazení se z ní dopočítává, takže tvar tlačítka drží a mění se jen
+     velikost. Ladí se na stránce Míchací režim v barvy.html. Tlačítka, která
+     tu vyjmenovaná nejsou (vzácné stavy), drží společné --mich-tlacitko. */
+  --mich-tl-zpet:17px; --mich-tl-plocha:16px; --mich-tl-rucne:18px;
+  --mich-tl-znam:18px; --mich-tl-viskozita:16px;
+  --mich-tl-pripojit:16px; --mich-tl-simulace:16px; --mich-tl-tara:24.5px;
+  --mich-tl-odpojit:15px; --mich-tl-sarze:15px; --mich-tl-dalsi:16px;
+  --mich-tl-stitek:23px; --mich-tl-hlaseni:14px; --mich-tl-pomocna:15px;
+  --mich-nadpis:21px; --mich-poznamka:14px; --mich-znak:25px;
+  /* Tvar a poloha tlačítek: šířka a výška „auto" nechají tlačítku tvar
+     podle textu, číslo z něj udělá blok (stejná šířka a výška = čtverec;
+     text se zalomí a vycentruje sám, je to <button>). Posun je vizuální
+     odchylka od přirozeného místa v toku — tlačítko se vykreslí jinde,
+     ale místo v řádku si dál drží, takže se rozvržení nerozsype. */
+  --mich-tl-zpet-sirka:auto; --mich-tl-zpet-vyska:50px; --mich-tl-zpet-posun-x:0px; --mich-tl-zpet-posun-y:0px;
+  --mich-tl-plocha-sirka:288px; --mich-tl-plocha-vyska:50px; --mich-tl-plocha-posun-x:0px; --mich-tl-plocha-posun-y:0px;
+  --mich-tl-rucne-sirka:auto; --mich-tl-rucne-vyska:auto; --mich-tl-rucne-posun-x:0px; --mich-tl-rucne-posun-y:0px;
+  --mich-tl-znam-sirka:auto; --mich-tl-znam-vyska:auto; --mich-tl-znam-posun-x:0px; --mich-tl-znam-posun-y:0px;
+  --mich-tl-viskozita-sirka:180px; --mich-tl-viskozita-vyska:50px; --mich-tl-viskozita-posun-x:306px; --mich-tl-viskozita-posun-y:24px;
+  --mich-tl-pripojit-sirka:auto; --mich-tl-pripojit-vyska:auto; --mich-tl-pripojit-posun-x:0px; --mich-tl-pripojit-posun-y:0px;
+  --mich-tl-simulace-sirka:auto; --mich-tl-simulace-vyska:auto; --mich-tl-simulace-posun-x:0px; --mich-tl-simulace-posun-y:0px;
+  --mich-tl-tara-sirka:116px; --mich-tl-tara-vyska:100px; --mich-tl-tara-posun-x:0px; --mich-tl-tara-posun-y:0px;
+  --mich-tl-odpojit-sirka:116px; --mich-tl-odpojit-vyska:100px; --mich-tl-odpojit-posun-x:0px; --mich-tl-odpojit-posun-y:0px;
+  --mich-tl-sarze-sirka:auto; --mich-tl-sarze-vyska:auto; --mich-tl-sarze-posun-x:65px; --mich-tl-sarze-posun-y:0px;
+  --mich-tl-dalsi-sirka:auto; --mich-tl-dalsi-vyska:auto; --mich-tl-dalsi-posun-x:0px; --mich-tl-dalsi-posun-y:0px;
+  --mich-tl-hlaseni-sirka:auto; --mich-tl-hlaseni-vyska:auto; --mich-tl-hlaseni-posun-x:0px; --mich-tl-hlaseni-posun-y:0px;
+  --mich-tl-pomocna-sirka:auto; --mich-tl-pomocna-vyska:auto; --mich-tl-pomocna-posun-x:0px; --mich-tl-pomocna-posun-y:0px;
+  --mich-tl-stitek-posun-x:0px; --mich-tl-stitek-posun-y:0px;
+  --mich-prepinac-posun-x:0px; --mich-prepinac-posun-y:0px;
   --mezera-karta-y:20px; --mezera-karta-x:22px; --mezera-karet:16px;
   --mezera-poli:12px; --pole-y:9px; --pole-x:12px;
   --tlacitko-y:10px; --tlacitko-x:18px; --okraj-stranky:20px;

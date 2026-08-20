@@ -1,23 +1,23 @@
 # Ink Recipe Manager — strukturovaný rozbor aplikace
 
 <!-- AUTO:stav -->
-> **Stav k 19. srpna 2026.** Čísla v úsecích označených `AUTO` generuje
+> **Stav k 20. srpna 2026.** Čísla v úsecích označených `AUTO` generuje
 > `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — nepřepisují
 > se ručně a nemohou se rozejít se skutečností. Text mimo ně píše člověk.
 
-> Poslední zapsaná změna ve vývojovém deníku: **19. srpna 15:54 — Nová databáze se nenabízela, protože most zrovna neběžel — nastartován znovu**
+> Poslední zapsaná změna ve vývojovém deníku: **20. srpna 16:30 — Přeložena výchozí obrazovka Kalkulace (178 obalených míst, slovník 338 položek) — přepnutí jazyka je vidět na první pohled, ne až v nabídce**
 
 | soubor | řádků | velikost |
 |---|---:|---:|
-| `aplikace/ (80 souborů)` | 15 775 | 846 kB |
-| `index.html` | 108 | 6 kB |
+| `aplikace/ (81 souborů)` | 16 604 | 917 kB |
+| `index.html` | 109 | 6 kB |
 | `most.py` | 727 | 31 kB |
 | `pdf_spec.py` | 1 071 | 42 kB |
 | `odemkni.py` | 213 | 8 kB |
 | `prevod_printcolor.py` | 188 | 7 kB |
 | `kontrola_aplikace.py` | 169 | 7 kB |
 | `rozbor_aktualizuj.py` | 359 | 13 kB |
-| **celkem** | **18 610** | |
+| **celkem** | **19 440** | |
 <!-- /AUTO:stav -->
 
 ---
@@ -296,6 +296,7 @@ Klíče v `localStorage`:
 - `irm-davky`
 - `irm-delete-pw`
 - `irm-fronta`
+- `irm-jazyk`
 - `irm-katalog-verze`
 - `irm-links`
 - `irm-most-adresa`

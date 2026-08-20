@@ -1,0 +1,1129 @@
+<title>From the job sheet to the ink cup</title>
+<style>
+  /* ---------------------------------------------------------------
+     Anglická obdoba ukazka.html. Kód, třídy i komentáře zůstávají
+     česky jako všude v projektu — anglicky je jen to, co je vidět
+     a slyšet. Obě verze musí říkat totéž, takže se mění spolu.
+
+     Paleta je z aplikace samotné, ne vymyšlená k prezentaci: šedá
+     plocha, karty z ní vystupují stínem, inkoust je černý a barva
+     zůstala jen tam, kde nese význam — odstín, varování, stav vážení.
+     Světlá sada je úplná, tmavá jen přepisuje tokeny.
+     --------------------------------------------------------------- */
+  :root{
+    --bg:#949494; --paper:#dbdbdb; --paper-2:#e6e6e6;
+    --ink:#141414; --ink-2:#767676; --line:#c7c7c7;
+    --inkoust:#DA291C;          /* PANTONE 485 C — jediná sytá barva na stránce */
+    --ok:#2f9e4f; --warn:#b8860b; --stin-tmavy:rgba(0,0,0,.43);
+    --stin-svetly:rgba(255,255,255,.55);
+    --neu:-5px -5px 20px var(--stin-svetly), 5px 5px 20px var(--stin-tmavy);
+    --neu-sm:-3px -3px 10px var(--stin-svetly), 3px 3px 10px var(--stin-tmavy);
+    --neu-in:inset 2px 2px 5px var(--stin-tmavy), inset -2px -2px 5px var(--stin-svetly);
+    --radius:23px; --radius-btn:35px; --radius-pole:15px;
+    --sans:system-ui,"Segoe UI",sans-serif;
+    --prostrkani:.07em;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#545454; --paper:#333333; --paper-2:#3d3d3d;
+      --ink:#EDEDED; --ink-2:#9a9a9a; --line:#5e5e5e;
+      --inkoust:#F0523F;
+      --ok:#3dc760; --warn:#e8c545;
+      --stin-tmavy:rgba(0,0,0,.55); --stin-svetly:rgba(255,255,255,.07);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#545454; --paper:#333333; --paper-2:#3d3d3d;
+    --ink:#EDEDED; --ink-2:#9a9a9a; --line:#5e5e5e;
+    --inkoust:#F0523F;
+    --ok:#3dc760; --warn:#e8c545;
+    --stin-tmavy:rgba(0,0,0,.55); --stin-svetly:rgba(255,255,255,.07);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--sans); font-size:16px; line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+    display:flex; flex-direction:column; align-items:center;
+    gap:18px; padding:24px 16px 40px; min-height:100vh;
+  }
+  h1,h2,h3{margin:0; text-wrap:balance}
+
+  .hlavicka{width:min(980px,100%); display:flex; align-items:baseline;
+    justify-content:space-between; gap:16px; flex-wrap:wrap}
+  .znacka{font-weight:900; letter-spacing:var(--prostrkani); text-transform:uppercase;
+    font-size:clamp(19px,3.4vw,26px)}
+  .podznacka{color:var(--ink-2); font-size:13.5px}
+
+  /* ---- jeviště: jedna karta, jako karty v aplikaci ---- */
+  .jeviste{width:min(980px,100%); background:var(--paper); border-radius:var(--radius);
+    box-shadow:var(--neu); padding:clamp(16px,3vw,26px); display:flex;
+    flex-direction:column; gap:16px}
+
+  .cislo{font-size:11.5px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--ink-2); font-variant-numeric:tabular-nums}
+  .nadpis{font-size:clamp(20px,3vw,27px); font-weight:900;
+    letter-spacing:.02em; line-height:1.15}
+
+  .platno{position:relative; background:var(--paper-2); border-radius:var(--radius-pole);
+    box-shadow:var(--neu-in); overflow:hidden;
+    aspect-ratio:16/7; min-height:210px}
+  .scena{position:absolute; inset:0; display:none; padding:18px}
+  .scena.aktivni{display:block}
+  .scena svg{width:100%; height:100%; display:block; overflow:visible}
+
+  /* ---- titulky ---- */
+  .titulek{min-height:4.4em; display:flex; align-items:flex-start}
+  .titulek p{margin:0; max-width:62ch; font-size:clamp(15px,1.8vw,17.5px)}
+  .titulek b{color:var(--inkoust)}
+
+  /* ---- ovládání ---- */
+  .ovladani{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+  button{font:inherit; color:var(--ink); background:var(--paper); border:none;
+    border-radius:var(--radius-btn); box-shadow:var(--neu-sm); cursor:pointer;
+    padding:10px 18px; transition:box-shadow .15s, transform .15s}
+  button:hover{box-shadow:var(--neu)}
+  button:active{box-shadow:var(--neu-in); transform:translateY(1px)}
+  button:focus-visible{outline:2px solid var(--ink); outline-offset:3px}
+  button[disabled]{opacity:.45; cursor:default}
+  .hlavni{font-weight:700; padding:12px 26px}
+  .drobne{padding:8px 14px; font-size:14px}
+
+  .pruh{flex:1; min-width:120px; height:8px; border-radius:99px;
+    box-shadow:var(--neu-in); overflow:hidden}
+  .pruh span{display:block; height:100%; width:0%; background:var(--ink);
+    border-radius:99px; transition:width .25s linear}
+
+  .rail{display:flex; gap:6px; flex-wrap:wrap; padding-top:2px}
+  .rail button{padding:6px 11px; font-size:12.5px; border-radius:99px;
+    color:var(--ink-2); font-variant-numeric:tabular-nums}
+  .rail button.on{color:var(--paper); background:var(--ink); box-shadow:none}
+
+  .pozn{color:var(--ink-2); font-size:13px; max-width:62ch}
+  .pozn code{font-family:ui-monospace,Consolas,monospace; font-size:12.5px}
+
+  /* ---- prvky uvnitř scén ---- */
+  .lbl{font-size:11px; letter-spacing:.1em; text-transform:uppercase; fill:var(--ink-2)}
+  .val{font-weight:900; fill:var(--ink); font-variant-numeric:tabular-nums}
+  .txt{fill:var(--ink); font-size:13px}
+  .txt2{fill:var(--ink-2); font-size:12px}
+  .karta{fill:var(--paper); stroke:var(--line); stroke-width:1}
+  .cara{stroke:var(--line); stroke-width:1.5; fill:none}
+
+  /* animace se spouští třídou .bezi, aby se daly přehrát znovu */
+  .scena .anim{opacity:0}
+  .scena.bezi .anim{animation:najed .5s ease forwards}
+  @keyframes najed{to{opacity:1}}
+  .scena.bezi .a1{animation-delay:.15s}
+  .scena.bezi .a2{animation-delay:.55s}
+  .scena.bezi .a3{animation-delay:.95s}
+  .scena.bezi .a4{animation-delay:1.4s}
+  .scena.bezi .a5{animation-delay:1.9s}
+  .scena.bezi .a6{animation-delay:2.5s}
+
+  /* Poměr smrštění není náhodný: 3,25 / 25,71 cm² je 12,6 % plochy,
+     tedy 0,36 na stranu. Animace tím ukazuje skutečný rozdíl, ne dojem. */
+  .scena.bezi .smrst{animation:smrst 1.6s .9s ease-in-out forwards}
+  @keyframes smrst{to{transform:scale(.36); opacity:.9}}
+  .scena.bezi .plni{animation:plni 2.2s .4s ease-out forwards}
+  @keyframes plni{from{transform:scaleY(0)} to{transform:scaleY(1)}}
+  .scena.bezi .jede{animation:jede 2.4s .3s ease-out forwards}
+  @keyframes jede{from{width:0} to{width:var(--w,60%)}}
+  .scena.bezi .tik{animation:tik 3s .3s linear forwards}
+  @keyframes tik{to{stroke-dashoffset:0}}
+  .scena.bezi .puls{animation:puls 1.1s .6s ease-in-out infinite}
+  @keyframes puls{0%,100%{opacity:.35} 50%{opacity:1}}
+  .scena.bezi .leti{animation:leti .7s ease-out forwards}
+  @keyframes leti{from{transform:translateX(-46px); opacity:0} to{transform:translateX(0); opacity:1}}
+
+  /* ---- třetí dějství: co v aplikaci ještě chybí ----
+     Musí to jít poznat na první pohled a bez zvuku — ukázka nesmí slíbit, co
+     aplikace neumí. Karty jsou proto jen obtažené čárkovaně a bez výplně,
+     čísla ztlumená a nad scénou visí štítek. */
+  .stitek-brzy{display:none; margin-left:10px; padding:3px 10px; border-radius:99px;
+    font-size:10.5px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--ink-2); box-shadow:var(--neu-in); vertical-align:1px}
+  .jeviste.brzy .stitek-brzy{display:inline-block}
+  .jeviste.brzy .platno{outline:2px dashed var(--line); outline-offset:-9px}
+  .jeviste.brzy .nadpis{color:var(--ink-2)}
+  .scena[data-budouci] .karta{fill:none; stroke-dasharray:7 5}
+  .scena[data-budouci] .val{fill:var(--ink-2)}
+  .rail button.brzy{box-shadow:none; outline:1.5px dashed var(--line); outline-offset:-2px}
+  .rail button.brzy.on{outline:none}
+  .chybi{fill:var(--warn); font-weight:700}
+  .mame{fill:var(--ok); font-weight:700}
+
+  /* ---- dodatek: co to ušetří ----
+     Čte se, neposlouchá — proto to není scéna, ale oddíl pod jevištěm.
+     Měřené hodnoty a odhady se musí rozeznat na pohled, jinak by dodatek
+     tvrdil jako fakt něco, co je jen dosazené. */
+  .dodatek{width:min(980px,100%); background:var(--paper); border-radius:var(--radius);
+    box-shadow:var(--neu); padding:clamp(16px,3vw,26px); display:flex;
+    flex-direction:column; gap:18px}
+  .dodatek h2{font-size:clamp(18px,2.6vw,23px); font-weight:900; letter-spacing:.02em}
+  .dodatek h3{font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-2)}
+  .dodatek p{margin:0; max-width:70ch; font-size:15px}
+
+  .znacky{display:flex; gap:14px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-2)}
+  .znacky span{display:inline-flex; align-items:center; gap:6px}
+  .tecka{width:10px; height:10px; border-radius:50%; display:inline-block}
+  .tecka.m{background:var(--ok)}
+  .tecka.o{background:none; border:1.5px dashed var(--ink-2)}
+
+  .pole{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px}
+  .pole label{display:flex; flex-direction:column; gap:5px; font-size:12.5px; color:var(--ink-2)}
+  .pole .jm{display:flex; align-items:center; gap:6px}
+  .pole input{font:inherit; font-size:16px; font-variant-numeric:tabular-nums;
+    color:var(--ink); background:var(--paper); border:none; border-radius:var(--radius-pole);
+    box-shadow:var(--neu-in); padding:9px 12px; width:100%}
+  .pole input:focus{outline:none; box-shadow:var(--neu-in),0 0 0 3px rgba(128,128,128,.35)}
+
+  .vysledky{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px}
+  .vysledek{background:var(--paper); border-radius:var(--radius-pole); box-shadow:var(--neu-sm);
+    padding:14px 16px; display:flex; flex-direction:column; gap:2px}
+  .vysledek .k{font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-2)}
+  .vysledek .v{font-size:clamp(21px,3vw,28px); font-weight:900; font-variant-numeric:tabular-nums}
+  .vysledek.soucet{box-shadow:var(--neu)}
+  .vysledek.soucet .v{color:var(--ok)}
+
+  .zaklad{width:100%; overflow-x:auto}
+  .zaklad table{border-collapse:collapse; width:100%; font-size:13.5px; min-width:520px}
+  .zaklad th{text-align:left; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--ink-2); font-weight:400; padding:0 10px 7px 0; border-bottom:1px solid var(--line)}
+  .zaklad td{padding:8px 10px 8px 0; border-bottom:1px solid var(--line);
+    font-variant-numeric:tabular-nums; vertical-align:top}
+  .zaklad td.c{white-space:nowrap; font-weight:700}
+
+  @media (prefers-reduced-motion: reduce){
+    .scena .anim{opacity:1}
+    .scena.bezi .anim,.scena.bezi .smrst,.scena.bezi .plni,
+    .scena.bezi .jede,.scena.bezi .tik,.scena.bezi .puls,
+    .scena.bezi .leti{animation:none}
+    .scena.bezi .smrst{transform:scale(.36)}
+    .pruh span{transition:none}
+  }
+</style>
+
+<div class="hlavicka">
+  <div>
+    <div class="znacka">Ink Recipe Manager</div>
+    <div class="podznacka">Eighteen scenes on what the app does — and three on what is still missing</div>
+  </div>
+  <button class="drobne" id="zvuk" aria-pressed="true">🔊 Voice-over</button>
+</div>
+
+<div class="jeviste">
+  <div>
+    <div class="cislo"><span id="cislo">Scene 1 / 21</span><span class="stitek-brzy">not in the app yet</span></div>
+    <h2 class="nadpis" id="nadpis">One file, no installation</h2>
+  </div>
+
+  <div class="platno" id="platno">
+
+    <!-- 1. úvod -->
+    <section class="scena" data-s="0">
+      <svg viewBox="0 0 620 240" role="img" aria-label="Three cards with the size of the data set">
+        <g class="anim a1"><rect class="karta" x="20" y="40" width="170" height="150" rx="16"/>
+          <text class="val" x="105" y="105" font-size="34" text-anchor="middle">1,320</text>
+          <text class="lbl" x="105" y="130" text-anchor="middle">products</text></g>
+        <g class="anim a2"><rect class="karta" x="225" y="40" width="170" height="150" rx="16"/>
+          <text class="val" x="310" y="105" font-size="34" text-anchor="middle">3,468</text>
+          <text class="lbl" x="310" y="130" text-anchor="middle">recipes</text></g>
+        <g class="anim a3"><rect class="karta" x="430" y="40" width="170" height="150" rx="16"/>
+          <text class="val" x="515" y="105" font-size="34" text-anchor="middle">5,583</text>
+          <text class="lbl" x="515" y="130" text-anchor="middle">images</text></g>
+        <g class="anim a4"><text class="txt2" x="310" y="220" text-anchor="middle">seventeen tabs, one file in a browser — offline as well</text></g>
+      </svg>
+    </section>
+
+    <!-- 2. zadání -->
+    <section class="scena" data-s="1">
+      <svg viewBox="0 0 620 240" role="img" aria-label="Fields jumping from the PDF into the form">
+        <g class="anim a1"><rect class="karta" x="18" y="26" width="150" height="188" rx="10"/>
+          <text class="lbl" x="93" y="52" text-anchor="middle">job sheet</text>
+          <g stroke="var(--line)" stroke-width="7" stroke-linecap="round">
+            <path d="M40 76h106M40 96h106M40 116h72M40 136h106M40 156h56"/></g></g>
+        <g class="anim a2"><path class="cara" d="M180 120h56" marker-end=""/>
+          <path class="cara" d="M226 112l12 8-12 8"/></g>
+        <g class="anim a3 leti"><rect class="karta" x="252" y="34" width="160" height="34" rx="9"/>
+          <text class="txt" x="266" y="56">product · ref 11154</text></g>
+        <g class="anim a4 leti"><rect class="karta" x="252" y="78" width="160" height="34" rx="9"/>
+          <text class="txt" x="266" y="100">2,500 pieces</text></g>
+        <g class="anim a5 leti"><rect class="karta" x="252" y="122" width="160" height="34" rx="9"/>
+          <text class="txt" x="266" y="144">position · left chest</text></g>
+        <g class="anim a6"><rect class="karta" x="252" y="166" width="160" height="34" rx="9"/>
+          <circle cx="270" cy="183" r="7" fill="var(--inkoust)"/>
+          <text class="txt" x="286" y="188">PANTONE 485 C</text></g>
+        <g class="anim a6"><text class="val" x="520" y="106" font-size="44" text-anchor="middle">14</text>
+          <text class="lbl" x="520" y="130" text-anchor="middle">fields by itself</text>
+          <g class="puls" transform="translate(478,152)" fill="var(--ink)">
+            <rect width="3" height="26"/><rect x="6" width="2" height="26"/><rect x="12" width="5" height="26"/>
+            <rect x="21" width="2" height="26"/><rect x="26" width="4" height="26"/><rect x="34" width="2" height="26"/>
+            <rect x="39" width="5" height="26"/><rect x="48" width="3" height="26"/><rect x="55" width="2" height="26"/>
+            <rect x="60" width="4" height="26"/></g></g>
+      </svg>
+    </section>
+
+    <!-- 3. krycí plocha -->
+    <section class="scena" data-s="2">
+      <svg viewBox="0 0 620 240" role="img" aria-label="The bounding box around the artwork shrinks to the real coverage">
+        <g class="anim a1"><rect x="42" y="42" width="180" height="150" rx="6" fill="none"
+            stroke="var(--ink-2)" stroke-width="2" stroke-dasharray="6 5"/>
+          <text class="lbl" x="132" y="214" text-anchor="middle">bounding box</text></g>
+        <g class="anim a2" style="transform-origin:132px 117px">
+          <g class="smrst" style="transform-origin:132px 117px">
+            <path d="M72 150 L132 62 L192 150 Z" fill="var(--inkoust)" opacity=".9"/>
+            <circle cx="132" cy="132" r="17" fill="var(--paper-2)"/></g></g>
+        <g class="anim a4">
+          <text class="lbl" x="300" y="56">today — bounding box</text>
+          <text class="val" x="300" y="82" font-size="21">25.71 cm²  ·  3.1 g/pc</text>
+          <text class="lbl" x="300" y="112">interim step — artwork outline</text>
+          <text class="val" x="300" y="138" font-size="21" fill="var(--ink-2)">10.94 cm²  ·  1.3 g/pc</text>
+          <line class="cara" x1="300" y1="152" x2="596" y2="152"/>
+          <text class="lbl" x="300" y="176" fill="var(--ok)">the app — real coverage</text>
+          <text class="val" x="300" y="202" font-size="21" fill="var(--ok)">3.25 cm²  ·  0.4 g/pc</text></g>
+      </svg>
+    </section>
+
+    <!-- 4. dávka -->
+    <section class="scena" data-s="3">
+      <svg viewBox="0 0 620 240" role="img" aria-label="The batch calculation chain">
+        <g class="anim a1"><rect class="karta" x="14" y="86" width="104" height="62" rx="12"/>
+          <text class="lbl" x="66" y="110" text-anchor="middle">area</text>
+          <text class="val" x="66" y="134" font-size="18" text-anchor="middle">3.25 cm²</text></g>
+        <text class="val anim a2" x="130" y="124" font-size="20">×</text>
+        <g class="anim a2"><rect class="karta" x="148" y="86" width="104" height="62" rx="12"/>
+          <text class="lbl" x="200" y="110" text-anchor="middle">pieces</text>
+          <text class="val" x="200" y="134" font-size="18" text-anchor="middle">2,500</text></g>
+        <text class="val anim a3" x="264" y="124" font-size="20">×</text>
+        <g class="anim a3"><rect class="karta" x="282" y="86" width="104" height="62" rx="12"/>
+          <text class="lbl" x="334" y="110" text-anchor="middle">mesh 120-34</text>
+          <text class="val" x="334" y="134" font-size="18" text-anchor="middle">6 g/m²</text></g>
+        <text class="val anim a4" x="398" y="124" font-size="20">+</text>
+        <g class="anim a4"><rect class="karta" x="416" y="86" width="86" height="62" rx="12"/>
+          <text class="lbl" x="459" y="110" text-anchor="middle">waste</text>
+          <text class="val" x="459" y="134" font-size="18" text-anchor="middle">12 %</text></g>
+        <g class="anim a5"><path class="cara" d="M512 117h24M528 109l10 8-10 8"/>
+          <text class="val" x="556" y="112" font-size="30" text-anchor="middle">546</text>
+          <text class="lbl" x="556" y="134" text-anchor="middle">grams</text></g>
+        <text class="txt2 anim a6" x="310" y="206" text-anchor="middle">the minimum batch is the floor — less than that cannot be mixed honestly</text>
+      </svg>
+    </section>
+
+    <!-- 5. zbytky -->
+    <section class="scena" data-s="4">
+      <svg viewBox="0 0 620 240" role="img" aria-label="Exact match and a cascading top-up">
+        <g class="anim a1"><rect class="karta" x="20" y="30" width="270" height="180" rx="16"/>
+          <rect x="40" y="52" width="60" height="76" rx="8" fill="var(--inkoust)"/>
+          <text class="lbl" x="118" y="66" fill="var(--ok)">exact match</text>
+          <text class="txt" x="118" y="90">cup ZK4M7PQ</text>
+          <text class="txt2" x="118" y="110">identical formula</text>
+          <text class="val" x="40" y="160" font-size="22" fill="var(--ok)">nothing is mixed</text>
+          <text class="txt2" x="40" y="184">just pour it over — 320 g from the cup</text></g>
+        <g class="anim a3"><rect class="karta" x="322" y="30" width="278" height="180" rx="16"/>
+          <rect x="342" y="52" width="60" height="76" rx="8" fill="#C56A2E"/>
+          <text class="lbl" x="420" y="66">top-up</text>
+          <text class="txt" x="420" y="90">different shade, 200 g</text>
+          <text class="txt2" x="420" y="110">formula matches to 87 %</text></g>
+        <g class="anim a5"><text class="txt" x="342" y="160">add</text>
+          <text class="val" x="342" y="184" font-size="17">+38 g Warm Red · +12 g Yellow</text></g>
+      </svg>
+    </section>
+
+    <!-- 6. aditiva -->
+    <section class="scena" data-s="5">
+      <svg viewBox="0 0 620 240" role="img" aria-label="Thinner, the thinning ceiling and the pigment drop">
+        <g class="anim a1"><rect x="34" y="34" width="96" height="176" rx="12" class="karta"/>
+          <g style="transform-origin:82px 206px"><rect class="plni" x="40" y="86" width="84" height="118"
+            rx="8" fill="var(--inkoust)" style="transform-origin:82px 204px"/></g>
+          <text class="lbl" x="82" y="228" text-anchor="middle">cup</text></g>
+        <g class="anim a2">
+          <text class="lbl" x="164" y="56">ink</text><text class="val" x="164" y="80" font-size="21">200 g</text>
+          <text class="lbl" x="164" y="112">thinner</text><text class="val" x="164" y="136" font-size="21">18 g</text>
+          <text class="txt2" x="164" y="160">10 g recommended</text></g>
+        <g class="anim a3">
+          <rect x="300" y="60" width="280" height="16" rx="8" fill="none" stroke="var(--line)" stroke-width="1.5"/>
+          <rect class="jede" x="300" y="60" height="16" rx="8" fill="var(--warn)" style="--w:210px"/>
+          <line x1="510" y1="50" x2="510" y2="88" stroke="var(--ink)" stroke-width="2"/>
+          <text class="lbl" x="510" y="44" text-anchor="middle">ceiling 24 g</text></g>
+        <g class="anim a5">
+          <text class="lbl" x="300" y="130">pigment in every gram</text>
+          <text class="val" x="300" y="166" font-size="30" fill="var(--warn)">−3.7 %</text>
+          <text class="txt2" x="300" y="196">compensation raises the batch to 226.3 g —</text>
+          <text class="txt2" x="300" y="214">thinning ratio and viscosity both hold</text></g>
+      </svg>
+    </section>
+
+    <!-- 7. pot life -->
+    <section class="scena" data-s="6">
+      <svg viewBox="0 0 620 240" role="img" aria-label="Pot life countdown">
+        <g class="anim a1" transform="translate(120,120)">
+          <circle r="76" fill="none" stroke="var(--line)" stroke-width="14"/>
+          <circle class="tik" r="76" fill="none" stroke="var(--ok)" stroke-width="14"
+            stroke-linecap="round" stroke-dasharray="478" stroke-dashoffset="478"
+            transform="rotate(-90)"/>
+          <text class="val" y="2" font-size="30" text-anchor="middle">6:40</text>
+          <text class="lbl" y="26" text-anchor="middle">left</text></g>
+        <g class="anim a3">
+          <text class="lbl" x="250" y="66">two-component ink</text>
+          <text class="txt" x="250" y="94">the clock starts with the hardener,</text>
+          <text class="txt" x="250" y="116">not with weighing the base</text></g>
+        <g class="anim a4">
+          <text class="lbl" x="250" y="152">724.5 g of base</text>
+          <text class="val" x="250" y="182" font-size="24">→ 72.45 g of hardener</text>
+          <text class="txt2" x="250" y="208">a batch is a record of its own — the clock survives closing the app</text></g>
+      </svg>
+    </section>
+
+    <!-- 8. vážení -->
+    <section class="scena" data-s="7">
+      <svg viewBox="0 0 620 240" role="img" aria-label="Weighing assistant and the scale display">
+        <g class="anim a1"><rect class="karta" x="24" y="40" width="250" height="120" rx="14"/>
+          <text class="lbl" x="44" y="68">scale · USB</text>
+          <text class="val" x="44" y="122" font-size="46">327.4</text>
+          <text class="lbl" x="196" y="122">grams</text></g>
+        <g class="anim a3"><rect x="24" y="176" width="250" height="18" rx="9" fill="none"
+            stroke="var(--line)" stroke-width="1.5"/>
+          <rect class="jede" x="24" y="176" height="18" rx="9" fill="var(--ok)" style="--w:238px"/>
+          <text class="lbl" x="24" y="216" fill="var(--ok)">✓ within ±0.5 g</text></g>
+        <g class="anim a4">
+          <text class="lbl" x="316" y="60">weighed cumulatively</text>
+          <g class="txt">
+            <text x="316" y="92">1 · Warm Red</text><text class="val" x="580" y="92" text-anchor="end">203.3 g</text>
+            <text x="316" y="120">2 · Yellow 012</text><text class="val" x="580" y="120" text-anchor="end">124.1 g</text>
+            <text x="316" y="148" fill="var(--ink-2)">3 · thinner</text><text class="val" x="580" y="148" text-anchor="end" fill="var(--ink-2)">18.0 g</text></g>
+          <text class="txt2" x="316" y="188">overshoot and the batch is recalculated</text>
+          <text class="txt2" x="316" y="208">so the shade stays exact</text></g>
+      </svg>
+    </section>
+
+    <!-- 9. cena -->
+    <section class="scena" data-s="8">
+      <svg viewBox="0 0 620 240" role="img" aria-label="Batch cost and cost per piece">
+        <g class="anim a1"><rect class="karta" x="40" y="46" width="240" height="148" rx="16"/>
+          <text class="lbl" x="64" y="82">cost of the mixed batch</text>
+          <text class="val" x="64" y="132" font-size="38">418.60</text>
+          <text class="lbl" x="222" y="132">CZK</text>
+          <text class="txt2" x="64" y="164">hardener and thinner included</text></g>
+        <g class="anim a3"><rect class="karta" x="316" y="46" width="240" height="148" rx="16"/>
+          <text class="lbl" x="340" y="82">ink per single piece</text>
+          <text class="val" x="340" y="132" font-size="38">0.167</text>
+          <text class="lbl" x="470" y="132">CZK</text>
+          <text class="txt2" x="340" y="164">2,500 pieces</text></g>
+        <text class="txt2 anim a5" x="310" y="224" text-anchor="middle">the supervisor sees prices — at the scale they can be hidden, and they stay off the ticket</text>
+      </svg>
+    </section>
+
+    <!-- 10. štítek a návrat -->
+    <section class="scena" data-s="9">
+      <svg viewBox="0 0 620 240" role="img" aria-label="Cup label and the leftover returning to the register">
+        <g class="anim a1"><rect class="karta" x="40" y="44" width="180" height="150" rx="12"/>
+          <text class="txt" x="60" y="74">PANTONE 485 C</text>
+          <text class="txt2" x="60" y="94">546 g · 16 Aug 2026</text>
+          <g transform="translate(60,112)" fill="var(--ink)">
+            <rect width="4" height="44"/><rect x="8" width="2" height="44"/><rect x="14" width="6" height="44"/>
+            <rect x="24" width="2" height="44"/><rect x="30" width="4" height="44"/><rect x="38" width="3" height="44"/>
+            <rect x="45" width="6" height="44"/><rect x="55" width="2" height="44"/><rect x="61" width="4" height="44"/>
+            <rect x="69" width="2" height="44"/><rect x="75" width="5" height="44"/><rect x="84" width="3" height="44"/>
+            <rect x="91" width="2" height="44"/><rect x="97" width="6" height="44"/><rect x="107" width="3" height="44"/></g>
+          <text class="lbl" x="60" y="180">ZK4M7PQ</text></g>
+        <g class="anim a3"><path class="cara" d="M244 118h58M292 110l12 8-12 8"/>
+          <text class="txt2" x="248" y="104">after the job</text></g>
+        <g class="anim a4"><rect class="karta" x="326" y="44" width="234" height="150" rx="16"/>
+          <text class="lbl" x="350" y="76">leftover register</text>
+          <rect x="350" y="92" width="42" height="56" rx="7" fill="var(--inkoust)"/>
+          <text class="txt" x="408" y="112">226 g left</text>
+          <text class="txt2" x="408" y="132">waiting for the next job</text>
+          <text class="txt2" x="350" y="172">the loop closes — and reopens at scene five</text></g>
+      </svg>
+    </section>
+
+    <!-- 11. fronta míchání -->
+    <section class="scena" data-s="10">
+      <svg viewBox="0 0 620 240" role="img" aria-label="Mixing queue ordered so that leftovers feed the next batch">
+        <g class="anim a1"><text class="lbl" x="24" y="30">queue — what gets mixed today</text>
+          <rect class="karta" x="24" y="42" width="280" height="42" rx="10"/>
+          <text class="val" x="42" y="68" font-size="15">1</text>
+          <circle cx="70" cy="63" r="8" fill="var(--inkoust)"/>
+          <text class="txt" x="88" y="68">PANTONE 485 C · 546 g</text></g>
+        <g class="anim a2"><rect class="karta" x="24" y="94" width="280" height="42" rx="10"/>
+          <text class="val" x="42" y="120" font-size="15">2</text>
+          <circle cx="70" cy="115" r="8" fill="#2E5EA8"/>
+          <text class="txt" x="88" y="120">PANTONE 300 C · 380 g</text></g>
+        <g class="anim a3"><rect class="karta" x="24" y="146" width="280" height="42" rx="10"/>
+          <text class="val" x="42" y="172" font-size="15">3</text>
+          <circle cx="70" cy="167" r="8" fill="#B23A48"/>
+          <text class="txt" x="88" y="172">darker shade of the same range</text></g>
+        <g class="anim a4"><path class="cara" d="M312 63c46 0 46 104 0 104" transform="translate(310) scale(-1,1)" style="display:none"/>
+          <path class="cara" d="M310 63h28c14 0 14 0 14 20v64c0 20 0 20-14 20h-28"/>
+          <path class="cara" d="M322 159l-12 8 12 8" transform="translate(0,-59)"/>
+          <text class="txt2" x="368" y="90">the leftover from item 1</text>
+          <text class="txt2" x="368" y="108">is the base of item 3</text></g>
+        <g class="anim a5">
+          <text class="lbl" x="368" y="150">up to seven items</text>
+          <text class="val" x="368" y="178" font-size="24">all 5,040 orders</text>
+          <text class="txt2" x="368" y="202">not the best one found,</text>
+          <text class="txt2" x="368" y="220">but the best one there is</text></g>
+      </svg>
+    </section>
+
+    <!-- 12. šarže -->
+    <section class="scena" data-s="11">
+      <svg viewBox="0 0 620 240" role="img" aria-label="The open can stamps its lot into every batch">
+        <g class="anim a1"><rect class="karta" x="24" y="52" width="170" height="136" rx="14"/>
+          <rect x="46" y="74" width="52" height="66" rx="6" fill="var(--ink-2)" opacity=".5"/>
+          <text class="lbl" x="112" y="86">open can</text>
+          <text class="txt" x="112" y="108">Transp. base</text>
+          <text class="val" x="46" y="168" font-size="16">lot L240732</text></g>
+        <g class="anim a2"><path class="cara" d="M206 120h44M238 112l12 8-12 8"/>
+          <text class="txt2" x="204" y="106">stamped in by itself</text></g>
+        <g class="anim a3"><rect class="karta" x="262" y="52" width="150" height="60" rx="10"/>
+          <text class="txt" x="280" y="76">batch 546 g</text>
+          <text class="txt2" x="280" y="96">lot L240732</text>
+          <rect class="karta" x="262" y="126" width="150" height="60" rx="10"/>
+          <text class="txt" x="280" y="150">batch 380 g</text>
+          <text class="txt2" x="280" y="170">lot L240732</text></g>
+        <g class="anim a5"><rect class="karta" x="436" y="52" width="164" height="136" rx="14"/>
+          <text class="lbl" x="456" y="82">complaint</text>
+          <text class="txt" x="456" y="106">“which can was it?”</text>
+          <text class="txt" x="456" y="130">the register answers —</text>
+          <text class="txt" x="456" y="150">and names every job</text>
+          <text class="txt" x="456" y="170">that drew from it</text></g>
+      </svg>
+    </section>
+
+    <!-- 13. co propadne + likvidace -->
+    <section class="scena" data-s="12">
+      <svg viewBox="0 0 620 240" role="img" aria-label="Expiry overview by day and the cost of waste collection">
+        <g class="anim a1"><text class="lbl" x="24" y="30">what expires — seven days ahead</text>
+          <text class="txt" x="24" y="62" fill="var(--warn)">today</text>
+          <text class="txt" x="110" y="62">cup 120 g</text>
+          <text class="txt2" x="250" y="62">fits queue item 2</text></g>
+        <g class="anim a2">
+          <text class="txt" x="24" y="94" fill="var(--warn)">tomorrow</text>
+          <text class="txt" x="110" y="94">2K batch · 5:40 left</text>
+          <text class="txt2" x="250" y="94">print it out, or close it</text></g>
+        <g class="anim a3">
+          <text class="txt" x="24" y="126">Friday 21 Aug</text>
+          <text class="txt" x="110" y="126" transform="translate(30,0)">cup 480 g</text>
+          <text class="txt2" x="250" y="126" transform="translate(30,0)">nothing fits it</text>
+          <line class="cara" x1="24" y1="146" x2="596" y2="146"/></g>
+        <g class="anim a4"><rect class="karta" x="24" y="162" width="330" height="56" rx="12"/>
+          <text class="lbl" x="44" y="186">binned ink is paid for twice</text>
+          <text class="txt" x="44" y="206">the supplier for the ink · the hauler for the waste</text></g>
+        <g class="anim a5">
+          <text class="lbl" x="372" y="186">waste collection</text>
+          <text class="txt" x="372" y="206">per-kilo rate from the price list</text>
+          <text class="txt" x="372" y="224">the saving on it is reported</text></g>
+      </svg>
+    </section>
+
+    <!-- 14. shluky + zástupnost -->
+    <section class="scena" data-s="13">
+      <svg viewBox="0 0 620 240" role="img" aria-label="Three cups poured into one container and the substitution rule">
+        <g class="anim a1">
+          <rect class="karta" x="24" y="70" width="54" height="70" rx="8"/>
+          <rect x="30" y="106" width="42" height="28" rx="4" fill="var(--inkoust)"/>
+          <text class="lbl" x="51" y="160" text-anchor="middle">60 g</text>
+          <rect class="karta" x="90" y="70" width="54" height="70" rx="8"/>
+          <rect x="96" y="112" width="42" height="22" rx="4" fill="var(--inkoust)"/>
+          <text class="lbl" x="117" y="160" text-anchor="middle">48 g</text>
+          <rect class="karta" x="156" y="70" width="54" height="70" rx="8"/>
+          <rect x="162" y="116" width="42" height="18" rx="4" fill="var(--inkoust)"/>
+          <text class="lbl" x="183" y="160" text-anchor="middle">41 g</text></g>
+        <g class="anim a2"><path class="cara" d="M222 105h34M244 97l12 8-12 8"/></g>
+        <g class="anim a3"><rect class="karta" x="270" y="52" width="110" height="110" rx="12"/>
+          <rect x="280" y="90" width="90" height="62" rx="6" fill="var(--inkoust)"/>
+          <text class="lbl" x="325" y="80" text-anchor="middle">container</text>
+          <text class="val" x="325" y="186" font-size="17" text-anchor="middle">149 g</text>
+          <text class="txt2" x="325" y="208" text-anchor="middle">one label</text></g>
+        <g class="anim a4">
+          <text class="lbl" x="412" y="66">only safe pours are merged</text>
+          <text class="txt2" x="412" y="88">same components · ratios to a tenth</text>
+          <text class="txt2" x="412" y="106">nothing with hardener · nothing expired</text></g>
+        <g class="anim a5">
+          <text class="lbl" x="412" y="146">substitution</text>
+          <text class="txt" x="412" y="168">a premium base may stand in</text>
+          <text class="txt" x="412" y="188">for a standard one</text>
+          <text class="txt2" x="412" y="208">one way only — dearer for cheaper</text></g>
+      </svg>
+    </section>
+
+    <!-- 15. opravy po nátisku -->
+    <section class="scena" data-s="14">
+      <svg viewBox="0 0 620 240" role="img" aria-label="A fix record and the overview of repeat fixes">
+        <g class="anim a1"><rect class="karta" x="24" y="40" width="260" height="150" rx="14"/>
+          <text class="lbl" x="44" y="68">FIX-20260818-001</text>
+          <text class="txt" x="44" y="96">reason · “it is too light”</text>
+          <text class="txt" x="44" y="120">step · +2.7 g black, gentle</text>
+          <text class="txt2" x="44" y="144">recipe · job · batch code</text>
+          <text class="txt2" x="44" y="172">logged with one button at the scale</text></g>
+        <g class="anim a3">
+          <text class="val" x="392" y="76" font-size="34" text-anchor="middle">1,209</text>
+          <text class="lbl" x="392" y="98" text-anchor="middle">fixes a year · 47.8 min each</text></g>
+        <g class="anim a4">
+          <text class="lbl" x="330" y="136">which recipe keeps needing them</text>
+          <text class="txt" x="330" y="160">PANTONE 302 C</text>
+          <rect x="452" y="150" width="84" height="10" rx="5" fill="var(--warn)"/>
+          <text class="txt" x="330" y="182">PANTONE 485 C</text>
+          <rect x="452" y="172" width="36" height="10" rx="5" fill="var(--warn)"/></g>
+        <text class="txt2 anim a5" x="310" y="222" text-anchor="middle">the record does not write itself — only the person at the scale knows it was a fix</text>
+      </svg>
+    </section>
+
+    <!-- 16. sestavy a trendy -->
+    <section class="scena" data-s="15">
+      <svg viewBox="0 0 620 240" role="img" aria-label="Consumption by month and the most used shades">
+        <g class="anim a1"><text class="lbl" x="24" y="30">consumption by month</text>
+          <rect x="24" y="140" width="44" height="40" rx="5" fill="var(--ink-2)"/>
+          <rect x="80" y="110" width="44" height="70" rx="5" fill="var(--ink-2)"/>
+          <rect x="136" y="124" width="44" height="56" rx="5" fill="var(--ink-2)"/>
+          <rect x="192" y="82" width="44" height="98" rx="5" fill="var(--ink)"/>
+          <text class="lbl" x="46" y="200" text-anchor="middle">May</text>
+          <text class="lbl" x="102" y="200" text-anchor="middle">Jun</text>
+          <text class="lbl" x="158" y="200" text-anchor="middle">Jul</text>
+          <text class="lbl" x="214" y="200" text-anchor="middle">Aug</text></g>
+        <g class="anim a3">
+          <text class="lbl" x="300" y="30">most used shades</text>
+          <circle cx="310" cy="56" r="8" fill="var(--inkoust)"/>
+          <text class="txt" x="328" y="61">485 C · 14× · 6.2 kg</text>
+          <circle cx="310" cy="86" r="8" fill="#2E5EA8"/>
+          <text class="txt" x="328" y="91">300 C · 9× · 3.8 kg</text></g>
+        <g class="anim a4">
+          <text class="lbl" x="300" y="130">leftovers</text>
+          <text class="txt" x="300" y="154">what sits in stock · what went back to press</text>
+          <text class="txt" x="300" y="176">what expired — in grams and in CZK</text></g>
+        <text class="txt2 anim a5" x="310" y="222" text-anchor="middle">no new data is collected — a batch and its cup are the same mix, counted once</text>
+      </svg>
+    </section>
+
+    <!-- 17. sklad surovin -->
+    <section class="scena" data-s="16">
+      <svg viewBox="0 0 620 240" role="img" aria-label="Stock on hand from the count and the logged batches">
+        <g class="anim a1"><rect class="karta" x="20" y="60" width="150" height="66" rx="12"/>
+          <text class="lbl" x="95" y="86" text-anchor="middle">stock count</text>
+          <text class="val" x="95" y="112" font-size="19" text-anchor="middle">5.00 kg</text></g>
+        <text class="val anim a2" x="182" y="100" font-size="20">−</text>
+        <g class="anim a2"><rect class="karta" x="200" y="60" width="170" height="66" rx="12"/>
+          <text class="lbl" x="285" y="86" text-anchor="middle">used by batches</text>
+          <text class="val" x="285" y="112" font-size="19" text-anchor="middle">260 g</text></g>
+        <g class="anim a3"><path class="cara" d="M382 93h24M398 85l10 8-10 8"/>
+          <rect class="karta" x="418" y="60" width="182" height="66" rx="12"/>
+          <text class="lbl" x="509" y="86" text-anchor="middle">on hand</text>
+          <text class="val" x="509" y="112" font-size="19" text-anchor="middle" fill="var(--ok)">4.74 kg</text></g>
+        <g class="anim a4">
+          <text class="lbl" x="20" y="164">daily rate → days of cover</text>
+          <text class="txt" x="20" y="188">ink from a leftover is not deducted twice — it left the can the first time</text></g>
+        <g class="anim a5">
+          <text class="lbl" x="20" y="216" fill="var(--ok)">what to order: up to the minimum, in whole packs</text>
+          <text class="txt2" x="360" y="216">no count means “not counted” — not zero</text></g>
+      </svg>
+    </section>
+
+    <!-- 18. role a schvalování -->
+    <section class="scena" data-s="17">
+      <svg viewBox="0 0 620 240" role="img" aria-label="Technologist and printer roles, a pending recipe">
+        <g class="anim a1"><rect class="karta" x="24" y="40" width="180" height="150" rx="14"/>
+          <text class="lbl" x="44" y="68">printer · at the scale</text>
+          <text class="txt" x="44" y="94">calculation, weighing,</text>
+          <text class="txt" x="44" y="114">label, leftovers, queue,</text>
+          <text class="txt" x="44" y="134">logging a fix</text>
+          <text class="txt2" x="44" y="168">all it takes to ship a job</text></g>
+        <g class="anim a2"><rect class="karta" x="222" y="40" width="180" height="150" rx="14"/>
+          <text class="lbl" x="242" y="68">technologist</text>
+          <text class="txt" x="242" y="94">recipes, price list,</text>
+          <text class="txt" x="242" y="114">unlocking technologies,</text>
+          <text class="txt" x="242" y="134">deleting</text>
+          <text class="txt2" x="242" y="168">reference data for the shop</text></g>
+        <g class="anim a4"><rect class="karta" x="420" y="40" width="180" height="150" rx="14" stroke="var(--warn)"/>
+          <text class="lbl" x="440" y="68" fill="var(--warn)">pending recipe</text>
+          <text class="txt" x="440" y="94">valid only for the job</text>
+          <text class="txt" x="440" y="114">it was created for</text>
+          <text class="txt2" x="440" y="144">elsewhere once approved —</text>
+          <text class="txt2" x="440" y="164">with a per-component diff</text></g>
+        <text class="txt2 anim a5" x="310" y="222" text-anchor="middle">a rejection needs a reason — whoever mixed by that recipe has to learn why</text>
+      </svg>
+    </section>
+
+    <!-- 19. databáze a data sít — co dobíhá -->
+    <section class="scena" data-s="18" data-budouci>
+      <svg viewBox="0 0 620 240" role="img" aria-label="State of the colour databases and of the per-technology data">
+        <g class="anim a1">
+          <text class="lbl" x="20" y="26">technology</text>
+          <text class="lbl" x="130" y="26">database</text>
+          <text class="lbl" x="400" y="26" text-anchor="end">recipes</text>
+          <text class="lbl" x="440" y="26">status</text>
+          <line class="cara" x1="20" y1="36" x2="600" y2="36"/></g>
+        <g class="anim a2">
+          <text class="txt" x="20" y="62">FIR</text><text class="txt" x="130" y="62">Ferro Xpression</text>
+          <text class="val" x="400" y="62" text-anchor="end">1,097</text><text class="mame" x="440" y="62" font-size="13">live</text>
+          <text class="txt" x="20" y="88">PDP</text><text class="txt" x="130" y="88">Printcolor 786 + 660 · RUCOLOR</text>
+          <text class="val" x="400" y="88" text-anchor="end">2,368</text><text class="mame" x="440" y="88" font-size="13">live</text></g>
+        <g class="anim a4">
+          <text class="txt" x="20" y="114">TXP</text><text class="txt" x="130" y="114">Printcolor MS 660</text>
+          <text class="val" x="400" y="114" text-anchor="end">778</text><text class="txt2" x="440" y="114">to verify — the textile range?</text>
+          <text class="txt" x="20" y="140">SCR</text><text class="txt" x="130" y="140">Printcolor 660 · RUCOLOR</text>
+          <text class="val" x="400" y="140" text-anchor="end">1,554</text>
+          <text class="mame" x="440" y="140" font-size="13">RUCOLOR</text>
+          <text class="txt2" x="502" y="140">· 660 to verify</text></g>
+        <g class="anim a5">
+          <text class="txt" x="20" y="166">TRS</text><text class="txt2" x="130" y="166">own recipes only</text>
+          <text class="val" x="400" y="166" text-anchor="end">3</text><text class="chybi" x="440" y="166" font-size="13">no purchased database</text>
+          <line class="cara" x1="20" y1="182" x2="600" y2="182"/></g>
+        <g class="anim a6">
+          <text class="txt2" x="20" y="206">12 more colour ranges to come — assigned to the technologies one at a time</text>
+          <text class="txt2" x="20" y="226">mesh with manufacturer data: 2 of 28 · coefficients 1.00 · PDF converters done</text></g>
+      </svg>
+    </section>
+
+    <!-- 20. hustota, odstíny a barvy bází -->
+    <section class="scena" data-s="19" data-budouci>
+      <svg viewBox="0 0 620 240" role="img" aria-label="Missing density, recipe shades and base colours">
+        <g class="anim a1"><rect class="karta" x="20" y="34" width="270" height="110" rx="14"/>
+          <text class="lbl" x="44" y="64">density in the source data</text>
+          <text class="val" x="44" y="98" font-size="26">missing</text>
+          <text class="txt2" x="44" y="118">none of the four databases states it</text>
+          <text class="txt2" x="44" y="136">a flat 1.20 g/ml is used</text></g>
+        <g class="anim a2"><rect class="karta" x="316" y="34" width="284" height="110" rx="14"/>
+          <text class="lbl" x="340" y="64">recipes with no shade</text>
+          <text class="val" x="340" y="98" font-size="26">460</text>
+          <text class="txt2" x="396" y="90">223 MS 660 · 190 MS 786</text>
+          <text class="txt2" x="396" y="108">47 RUCOLOR 10KK</text>
+          <text class="txt2" x="340" y="132">elsewhere the Pantone name gave it away, here not</text></g>
+        <g class="anim a4">
+          <rect class="karta" x="20" y="160" width="96" height="52" rx="9"/>
+          <text class="val" x="68" y="182" font-size="17" text-anchor="middle" fill="var(--ink-2)">?</text>
+          <text class="txt2" x="68" y="202" text-anchor="middle">Weiss</text>
+          <rect class="karta" x="126" y="160" width="96" height="52" rx="9"/>
+          <text class="val" x="174" y="182" font-size="17" text-anchor="middle" fill="var(--ink-2)">?</text>
+          <text class="txt2" x="174" y="202" text-anchor="middle">Schwarz</text>
+          <rect class="karta" x="232" y="160" width="96" height="52" rx="9"/>
+          <text class="val" x="280" y="182" font-size="17" text-anchor="middle" fill="var(--ink-2)">?</text>
+          <text class="txt2" x="280" y="202" text-anchor="middle">Binder</text>
+          <text class="mame" x="348" y="182" font-size="12">pigments it knows</text>
+          <text class="txt2" x="348" y="200">from the shop's table</text></g>
+        <g class="anim a5"><text class="txt" x="20" y="234">With no shade it can advise on neither show-through nor correction — and says so plainly.</text></g>
+      </svg>
+    </section>
+
+    <!-- 21. napojení na SGPS -->
+    <section class="scena" data-s="20" data-budouci>
+      <svg viewBox="0 0 620 240" role="img" aria-label="Connection to the SGPS company system">
+        <g class="anim a1"><rect class="karta" x="20" y="72" width="150" height="96" rx="14"/>
+          <text class="val" x="95" y="112" font-size="24" text-anchor="middle">SGPS</text>
+          <text class="txt2" x="95" y="136" text-anchor="middle">company system</text></g>
+        <g class="anim a3">
+          <path class="cara" d="M182 100h96" stroke-dasharray="6 5"/>
+          <text class="txt2" x="196" y="92">export file</text>
+          <path class="cara" d="M182 146h96" stroke-dasharray="6 5"/>
+          <text class="txt2" x="212" y="138">HTTP</text></g>
+        <g class="anim a4"><rect class="karta" x="290" y="72" width="130" height="96" rx="14" stroke="var(--ok)"/>
+          <text class="mame" x="355" y="112" font-size="17" text-anchor="middle">bridge</text>
+          <text class="txt2" x="355" y="134" text-anchor="middle">ready for either</text></g>
+        <g class="anim a5"><path class="cara" d="M432 120h34M456 112l10 8-10 8"/>
+          <rect class="karta" x="478" y="72" width="122" height="96" rx="14"/>
+          <text class="txt" x="539" y="112" text-anchor="middle">the app</text>
+          <text class="txt2" x="539" y="134" text-anchor="middle">demo mode</text></g>
+        <g class="anim a6"><text class="txt2" x="20" y="206">Waiting on IT to say what interface SGPS offers. Field mapping is</text>
+          <text class="txt2" x="20" y="226">configuration — each field lists the names it may carry in the company system.</text></g>
+      </svg>
+    </section>
+  </div>
+
+  <div class="titulek"><p id="titulek"></p></div>
+
+  <div class="ovladani">
+    <button class="hlavni" id="prehrat">▶ Play the demo</button>
+    <button class="drobne" id="zpet">‹ Previous</button>
+    <button class="drobne" id="dal">Next ›</button>
+    <div class="pruh" aria-hidden="true"><span id="pruh"></span></div>
+  </div>
+  <div class="rail" id="rail"></div>
+  <p class="pozn" id="pozn"></p>
+</div>
+
+<section class="dodatek">
+  <div>
+    <h2>Appendix — what it costs today and what it saves</h2>
+    <p style="margin-top:6px">The figures come from the A3 <b>P26-31-01 INK and DAC improvements</b>,
+      data source <code>INK repairs.xlsx</code> (problemove_barvy.xlsm), measured
+      2 Apr — 10 Aug 2026. Nothing here is an estimate except a single value, which
+      the A3 itself marks as <b>to be confirmed</b> — and that one sits on the slider below.</p>
+  </div>
+
+  <div>
+    <h3>What one fix costs</h3>
+    <div class="zaklad" style="margin-top:8px">
+      <table>
+        <thead><tr><th>item</th><th>per fix</th><th>per year (1,209 fixes)</th></tr></thead>
+        <tbody>
+          <tr><td>Ink room — remixing the ink</td><td class="c">15.9 min</td>
+            <td class="c">320 h · 97,575 CZK</td></tr>
+          <tr><td>Production — waiting for the right shade</td><td class="c">31.9 min</td>
+            <td class="c">642 h · 195,907 CZK</td></tr>
+          <tr><td><b>Total</b></td><td class="c">47.8 min</td>
+            <td class="c">962 h · <b>293,482 CZK</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="pozn" style="margin-top:10px">Machine-hour rate 305 CZK, exchange rate 24.2 → <b>12,127 EUR</b>.
+      One fix = 3 min walking + 13 min set-up. <b>Two thirds of the lost time is not in the
+      ink room</b> — it is production standing still, waiting for the right shade.</p>
+  </div>
+
+  <div>
+    <h3>How much of it goes away</h3>
+    <p style="margin-top:8px">This is the one number nobody knows yet. The A3 gives a
+      <b>target % to be confirmed</b> and works with −30 %; the real drop will be measured after
+      roll-out, against the baseline of 1,209 fixes a year.</p>
+    <div class="pole" style="margin-top:12px; grid-template-columns:minmax(220px,320px)">
+      <label><span class="jm"><i class="tecka o"></i> Drop in the number of fixes (%)</span>
+        <input type="number" id="i_pokles" value="30" min="0" max="100" step="5"></label>
+    </div>
+    <div class="vysledky" style="margin-top:12px">
+      <div class="vysledek"><span class="k">fixes avoided</span>
+        <span class="v" id="v_oprav">—</span><span class="k" id="v_oprav_z">per year</span></div>
+      <div class="vysledek"><span class="k">ink room</span>
+        <span class="v" id="v_mich_kc">—</span><span class="k" id="v_mich_h"></span></div>
+      <div class="vysledek"><span class="k">production — printing, not waiting</span>
+        <span class="v" id="v_vyr_kc">—</span><span class="k" id="v_vyr_h"></span></div>
+      <div class="vysledek soucet"><span class="k">together</span>
+        <span class="v" id="v_kc">—</span><span class="k" id="v_eur"></span></div>
+    </div>
+    <p class="pozn" style="margin-top:10px" id="podil_vyroby"></p>
+  </div>
+
+  <div>
+    <h3>Payback</h3>
+    <div class="vysledky" style="margin-top:10px">
+      <div class="vysledek"><span class="k">investment</span>
+        <span class="v">0 CZK</span><span class="k">no licences, existing computers</span></div>
+      <div class="vysledek"><span class="k">cost</span>
+        <span class="v" style="font-size:19px">development time</span><span class="k">in-house</span></div>
+      <div class="vysledek"><span class="k">payback</span>
+        <span class="v" style="font-size:19px">immediate</span><span class="k">at zero investment</span></div>
+    </div>
+    <p class="pozn" style="margin-top:10px">The app uses the scale and the barcode reader the shop
+      already owns and runs from a single file — nothing has to be bought for it.</p>
+  </div>
+
+  <div>
+    <h3>What the saving does not include yet</h3>
+    <p style="margin-top:8px"><b>Material saving is carried in the A3 as “not quantified yet”.</b>
+      One single job has been measured: 138823, where consumption fell from 3.1 to 0.4 g per piece
+      (area 25.71 → 3.25 cm², eight times less). It cannot be scaled to the whole shop —
+      there are no shop-wide saving percentages and one job is not enough to derive them.</p>
+    <p class="pozn" style="margin-top:8px">On top of that comes the material binned today as an
+      unlabelled leftover. The leftover register puts it back into circulation and the reports have
+      been adding it up since 18 Aug 2026 — how much of it there is per year will be known once
+      the register has run for a few months.</p>
+  </div>
+</section>
+
+<script>
+(function(){
+  "use strict";
+
+  /* Mluvené slovo má tři stupně a ukázka si sáhne po nejlepším dostupném:
+     1. nahraný hlas ze složky audio_en/ vedle ukázky (scene-01.mp3 … scene-21.mp3)
+        — jediná cesta k hlasu, který nezní strojově, a funguje bez internetu;
+     2. hlas prohlížeče (Web Speech API) — žádný soubor, ale anglický hlas nemusí
+        být v systému nainstalovaný;
+     3. titulky, které běží vždycky — ukázka musí dávat smysl i potichu
+        a nesmí spadnout na chybějícím souboru.
+
+     Pole rec je scénář pro namluvení: bez značek, se zkratkami rozepsanými tak,
+     jak se čtou. Nahrávky se z něj generují, takže scénář nežije na dvou místech. */
+  var SCENY = [
+    { nadpis:"One file, no installation",
+      text:"Ink Recipe Manager is a whole application in a single file. It opens in a browser, runs with no server and no internet — and carries a catalogue of 1,320 products, 3,468 recipes and 5,583 images.",
+      rec:"Ink Recipe Manager is a whole application in a single file. It opens in a browser, it runs with no server and no internet, and it carries a catalogue of one thousand three hundred and twenty products, three thousand four hundred and sixty-eight recipes, and five thousand five hundred and eighty-three images.",
+      cas:19 },
+    { nadpis:"The job sheet reads itself",
+      text:"The job sheet arrives as a PDF. The app pulls <b>14 fields</b> out of it — product, shade, quantity and print position. With a barcode reader, the job is scanned in instead.",
+      rec:"The job sheet arrives as a P D F. The app pulls fourteen fields out of it: product, shade, quantity, and print position. With a barcode reader, the job is scanned in instead.",
+      cas:14 },
+    { nadpis:"Consumption from what the ink actually covers",
+      text:"It does not measure the box around the artwork but the points where ink really lands — dot gain included, helper graphics excluded. On job 138823 that is <b>eight times less area</b>: 3.1 → 0.4 grams per piece.",
+      rec:"It does not measure the box around the artwork, but the points where ink really lands, dot gain included and helper graphics excluded. On job one three eight eight two three that is eight times less area: from three point one grams down to zero point four grams per piece.",
+      cas:17 },
+    { nadpis:"How much to mix",
+      text:"Area, quantity, mesh density and waste give the batch size. The minimum batch is the floor — any less cannot be mixed honestly.",
+      rec:"Area, quantity, mesh density and waste give the batch size. The minimum batch is the floor: any less than that cannot be mixed honestly.",
+      cas:10 },
+    { nadpis:"Stock first, fresh ink second",
+      text:"Cups from earlier jobs are sitting in stock. If one has an <b>identical formula</b>, nothing gets mixed — it is simply poured over. For a different shade the app works out what to add — and it can take <b>two cups at once</b>, when together they give the batch more than either alone.",
+      rec:"Cups from earlier jobs are sitting in stock. If one of them has an identical formula, nothing gets mixed, it is simply poured over. For a different shade the app works out what to add. And it can take two cups at once, when together they give the batch more than either one alone.",
+      cas:18 },
+    { nadpis:"Thinner stopped living outside the system",
+      text:"Thinner and retarder are weighed like any other component. The thinning ceiling is watched, and the app works out how much pigment each gram lost to thinning — and how much bigger the batch has to be because of it.",
+      rec:"Thinner and retarder are weighed like any other component. The thinning ceiling is watched, and the app works out how much pigment every gram lost to thinning, and how much bigger the batch has to be because of it.",
+      cas:12 },
+    { nadpis:"Two-component ink sets from the hardener",
+      text:"The clock starts when the hardener goes in, not when the base is weighed — and the hardener is measured from the weight of the base, not from what the tin holds. A batch is a record of its own, so the countdown survives closing the app.",
+      rec:"The clock starts when the hardener goes in, not when the base is weighed. And the hardener is measured from the weight of the base, not from what the tin holds. A batch is a record of its own, so the countdown survives closing the app.",
+      cas:15 },
+    { nadpis:"The mixing mode reads off the scale",
+      text:"Its own set of sizes, for reading standing up and in gloves. The scale connects over USB and the assistant walks the operator through component by component. Safety data sheets and the grams of volatiles in the batch are one tap away.",
+      rec:"The mixing mode has its own set of sizes, for reading standing up and in gloves. The scale connects over U S B and the assistant walks the operator through, component by component. Safety data sheets and the grams of volatile compounds in the batch are one tap away.",
+      cas:18 },
+    { nadpis:"What that batch costs",
+      text:"Every batch shows its cost and how much of it falls on a single piece. The supervisor sees prices — at the scale they can be hidden, and then they stay off the mixing ticket too.",
+      rec:"Every batch shows its cost, and how much of it falls on a single piece. The supervisor sees prices: at the scale they can be hidden, and then they stay off the mixing ticket as well.",
+      cas:12 },
+    { nadpis:"A label on the cup, and back to stock",
+      text:"A label with a barcode is printed for the cup. After the job it is scanned, the app asks how much is left — and the leftover goes back into the register. That closes the loop.",
+      rec:"A label with a barcode is printed for the cup. After the job it is scanned, the app asks how much is left, and the leftover goes back into the register. That closes the loop.",
+      cas:12 },
+
+    /* --- co kolem míchání vyrostlo --- */
+    { nadpis:"The mixing queue — the order that saves the most",
+      text:"Today's mixing is lined up in a queue. The plan knows that <b>a leftover exists only after the batch it came from</b> — and it finds the order that uses up the most from the cups. Up to seven items it walks every possible order, so no better plan exists.",
+      rec:"Today's mixing is lined up in a queue. The plan knows that a leftover only exists after the batch it came from, and it finds the order that uses up the most from the cups. Up to seven items it walks every possible order, all five thousand and forty of them, so a better plan does not exist.",
+      cas:19 },
+    { nadpis:"Which can did it come from",
+      text:"For each material there is one open can standing at the scale. Its lot number is typed in <b>once</b> — and stamps itself into every batch. On a complaint, the can is traced, and so is every other job that drew from it.",
+      rec:"For each material there is one open can standing at the scale. Its lot number is typed in once, and it stamps itself into every batch. On a complaint, the can is traced, and so is every other job that drew from it.",
+      cas:15 },
+    { nadpis:"What expires this week",
+      text:"The overview looks seven days ahead, day by day. For a cup in stock it says <b>which queue item it still fits</b>. And because binned ink is paid for twice — the supplier and the waste hauler — it counts both sides.",
+      rec:"The overview looks seven days ahead, day by day. For a cup in stock it says which queue item it still fits. And because binned ink is paid for twice, once to the supplier and once to the waste hauler, the app counts both sides.",
+      cas:16 },
+    { nadpis:"Ten cups of one colour are one container",
+      text:"Cups with the same set of components and ratios matching to a tenth are poured into one container with a label of its own. And the shop can record which component may stand in for which — <b>dearer for cheaper, never the other way</b>.",
+      rec:"Cups with the same set of components, and ratios matching to a tenth, are poured into one container with a label of its own. And the shop can record which component may stand in for which. Dearer for cheaper, never the other way round.",
+      cas:16 },
+    { nadpis:"A fix is a record, not a memory",
+      text:"The shop does <b>1,209 fixes a year</b> at 47.8 minutes each. Every correction after a proof can now be logged with one button — reason and steps included. A tab then shows how many there were and which recipe keeps needing them.",
+      rec:"The shop does one thousand two hundred and nine fixes a year, at nearly forty-eight minutes each. Every correction after a proof can now be logged with a single button, with the reason and the steps. A tab then shows how many there were, and which recipe keeps needing them over and over.",
+      cas:18 },
+    { nadpis:"The register can add itself up",
+      text:"Consumption by month, the most used shades, and what came back from leftovers into print — in grams and in CZK. No new data is collected; it adds up the register that already exists. A batch and its cup are the same mix — <b>counted once</b>.",
+      rec:"The reports show consumption by month, the most used shades, and what came back from leftovers into print, in grams and in crowns. No new data is collected for it; it adds up the register that already exists. And a batch and its cup are the same mix, counted once.",
+      cas:19 },
+    { nadpis:"Raw material stock — no more empty cans at the scale",
+      text:"A stock count is entered and the balance keeps itself from every batch. The daily rate gives days of cover, and the <b>What to order</b> card tops up to the minimum in whole packs. Anything without a count is “not counted” — not zero.",
+      rec:"A stock count is entered, and from there the balance keeps itself from every logged batch. The daily rate gives days of cover, and the What to order card tops up to the minimum in whole packs. Anything without a stock count is not counted, which is not the same as zero.",
+      cas:17 },
+    { nadpis:"Who answers for the shade",
+      text:"The printer at the scale has everything a job needs to go out. The shop's reference data — recipes, price list, unlocking — is the technologist's. A printer may derive a shade too, but it holds only for their own job <b>until the technologist approves it</b>.",
+      rec:"The printer at the scale has everything a job needs to go out. The shop's reference data, that is recipes, the price list, and unlocking technologies, belongs to the technologist. A printer may derive a shade of their own too, but it holds only for the job it was created for, until the technologist approves it.",
+      cas:20 },
+
+    /* --- co ještě chybí --- */
+    { nadpis:"All five technologies are live — the data is catching up", budouci:true,
+      text:"Now for what is missing. Pad and screen printing got a fourth database — <b>RUCOLOR 10KK, 776 recipes</b>. <b>Another 12 colour ranges are still being collected</b> and will be assigned to the technologies one at a time. The MS 660 range still has to be verified for what it is actually for, and <b>transfer has no database at all</b>. Manufacturer data covers 2 meshes out of 28, coefficients are all still 1.00.",
+      rec:"Now for what is still missing. All five technologies are unlocked, and pad printing and screen printing got a fourth database, RUCOLOR ten K K, seven hundred and seventy-six recipes. Another twelve colour ranges are still being collected, and they will be assigned to the technologies one at a time. The M S six sixty range still has to be verified for what it is actually meant for, and transfer has no purchased database at all. Manufacturer data covers two meshes out of twenty-eight, and the consumption coefficients are all still at one point zero zero.",
+      cas:36 },
+    { nadpis:"Density, shades and the colours of the bases", budouci:true,
+      text:"None of the four purchased databases states a density — a flat 1.20 g/ml is used. For <b>460 recipes</b> no shade could be traced, and components such as Weiss or Binder have no shade either. Without one, the app can advise on neither show-through nor correction — and it says so plainly.",
+      rec:"None of the four purchased databases states a density, so the app works with a flat one point two grams per millilitre. For four hundred and sixty recipes no shade could be traced, and a shade is missing for components of the purchased databases as well, such as Weiss or Binder. Without it, the app can advise on neither show-through nor correction after a proof, and it says plainly that it does not know.",
+      cas:25 },
+    { nadpis:"Connecting to the company system", budouci:true,
+      text:"SGPS is running in demo mode — waiting on IT to say what interface it offers. The bridge is ready for both options, an export file and HTTP, and field mapping is configuration — no code change needed.",
+      rec:"The connection to the company system, S G P S, is running in demo mode. We are waiting on I T to say what interface it offers. The bridge is ready for both options, an export file and H T T P, and the field mapping is configuration, with no change to the code.",
+      cas:19 }
+  ];
+
+  var scenyEl = [].slice.call(document.querySelectorAll(".scena"));
+  var elNadpis = document.getElementById("nadpis");
+  var elTitulek = document.getElementById("titulek");
+  var elCislo = document.getElementById("cislo");
+  var elPruh = document.getElementById("pruh");
+  var elRail = document.getElementById("rail");
+  var elPozn = document.getElementById("pozn");
+  var bPrehrat = document.getElementById("prehrat");
+  var bZpet = document.getElementById("zpet");
+  var bDal = document.getElementById("dal");
+  var bZvuk = document.getElementById("zvuk");
+  var elJeviste = document.querySelector(".jeviste");
+
+  var i = 0, bezi = false, zvuk = true, casovac = null, tikac = null, hlas = null;
+  var prehravac = null;               // právě hrající zvukový soubor
+  var syn = window.speechSynthesis || null;
+
+  SCENY.forEach(function(s, k){
+    var b = document.createElement("button");
+    b.textContent = k + 1;
+    b.setAttribute("aria-label", "Scene " + (k + 1) + ": " + s.nadpis
+      + (s.budouci ? " (not in the app yet)" : ""));
+    if (s.budouci) b.classList.add("brzy");
+    b.addEventListener("click", function(){ skoc(k); });
+    elRail.appendChild(b);
+  });
+  var railBtn = [].slice.call(elRail.children);
+
+  function najdiHlas(){
+    if (!syn) return null;
+    var v = syn.getVoices() || [];
+    return v.filter(function(h){ return /^en/i.test(h.lang); })[0] || null;
+  }
+  function stavHlasu(){
+    if (!syn){ elPozn.textContent = "This browser has no speech synthesis — the demo runs with subtitles."; return; }
+    hlas = najdiHlas();
+    elPozn.textContent = (hlas
+      ? "Speaking with the system voice " + hlas.name + "."
+      : "No English voice is installed, so the demo runs with subtitles. Windows can add one: Settings → Time & language → Speech.")
+      + " If an audio_en/ folder with scene-01.mp3 to scene-21.mp3 sits next to this page, it plays from there.";
+  }
+  if (syn){ syn.addEventListener("voiceschanged", stavHlasu); }
+  stavHlasu();
+
+  function vykresli(){
+    var s = SCENY[i];
+    elCislo.textContent = "Scene " + (i + 1) + " / " + SCENY.length;
+    elNadpis.textContent = s.nadpis;
+    elTitulek.innerHTML = s.text;
+    /* Třetí dějství se musí poznat i bez zvuku a i když někdo skočí rovnou
+       na scénu devatenáct — proto štítek, čárkované karty a ztlumená čísla. */
+    elJeviste.classList.toggle("brzy", !!s.budouci);
+    scenyEl.forEach(function(el, k){
+      el.classList.toggle("aktivni", k === i);
+      el.classList.remove("bezi");
+    });
+    var akt = scenyEl[i];
+    void akt.offsetWidth;                 // vynutí restart animací
+    akt.classList.add("bezi");
+    railBtn.forEach(function(b, k){ b.classList.toggle("on", k === i); });
+    bZpet.disabled = i === 0;
+    bDal.disabled = i === SCENY.length - 1;
+    elPruh.style.width = "0%";
+  }
+
+  function stopni(){
+    if (casovac){ clearTimeout(casovac); casovac = null; }
+    if (tikac){ clearInterval(tikac); tikac = null; }
+    if (prehravac){
+      prehravac.onended = null; prehravac.onerror = null;
+      prehravac.pause(); prehravac = null;
+    }
+    if (syn){ syn.cancel(); }
+  }
+
+  function odpocet(ms, hotovo){
+    var zacatek = Date.now();
+    tikac = setInterval(function(){
+      var p = Math.min(100, (Date.now() - zacatek) / ms * 100);
+      elPruh.style.width = p + "%";
+      if (p >= 100){ clearInterval(tikac); tikac = null; }
+    }, 100);
+    casovac = setTimeout(hotovo, ms);
+  }
+
+  /* Nejdřív se zkusí nahrávka; teprve když není (soubor chybí nebo ho
+     prohlížeč nepustí), mluví syntéza. Oba neúspěchy — onerror i zamítnutý
+     play() — vedou na týž ústup, hlídá se proto, aby se nespustil dvakrát. */
+  function mluv(){
+    var s = SCENY[i];
+    var ms = s.cas * 1000;
+    if (!zvuk){ odpocet(ms, dalsi); return; }
+    var cislo = (i + 1 < 10 ? "0" : "") + (i + 1);
+    var a = new Audio("audio_en/scene-" + cislo + ".mp3");
+    prehravac = a;
+    var ustup = function(){
+      if (prehravac !== a) return;
+      prehravac = null;
+      mluvSyntezou(s, ms);
+    };
+    a.onended = function(){ if (prehravac === a && bezi) dalsi(); };
+    a.onerror = ustup;
+    a.play().then(function(){
+      if (prehravac === a){ odpocet(ms, function(){ /* přechod řídí nahrávka */ }); }
+    }).catch(ustup);
+  }
+
+  function mluvSyntezou(s, ms){
+    if (!syn || !hlas){ odpocet(ms, dalsi); return; }
+    var u = new SpeechSynthesisUtterance(s.rec);
+    u.voice = hlas; u.lang = hlas.lang; u.rate = 0.98; u.pitch = 1;
+    /* Chrome utne delší promluvu zhruba po patnácti vteřinách, když se
+       syntéza nepošťouchne — proto ten oživovací interval. */
+    var oziv = setInterval(function(){ if (syn.speaking) syn.resume(); else clearInterval(oziv); }, 8000);
+    u.onend = function(){ clearInterval(oziv); if (bezi) dalsi(); };
+    u.onerror = function(){ clearInterval(oziv); };
+    odpocet(ms, function(){ /* pruh doběhne, mluvení řídí přechod */ });
+    syn.speak(u);
+  }
+
+  function dalsi(){
+    if (i < SCENY.length - 1){ i++; vykresli(); mluv(); }
+    else { pauza(); bPrehrat.textContent = "▶ Play again"; }
+  }
+
+  function spust(){
+    bezi = true;
+    bPrehrat.textContent = "⏸ Pause";
+    if (i === SCENY.length - 1) { i = 0; }
+    vykresli(); mluv();
+  }
+  function pauza(){
+    bezi = false; stopni();
+    bPrehrat.textContent = "▶ Resume";
+    elPruh.style.width = "0%";
+  }
+  function skoc(k){
+    var jelo = bezi;
+    stopni();
+    i = Math.max(0, Math.min(SCENY.length - 1, k));
+    vykresli();
+    if (jelo) mluv();
+  }
+
+  bPrehrat.addEventListener("click", function(){ bezi ? pauza() : spust(); });
+  bZpet.addEventListener("click", function(){ skoc(i - 1); });
+  bDal.addEventListener("click", function(){ skoc(i + 1); });
+  bZvuk.addEventListener("click", function(){
+    zvuk = !zvuk;
+    bZvuk.setAttribute("aria-pressed", String(zvuk));
+    bZvuk.textContent = zvuk ? "🔊 Voice-over" : "🔇 Subtitles only";
+    if (bezi){ stopni(); mluv(); }
+  });
+  document.addEventListener("keydown", function(e){
+    if (e.key === "ArrowRight"){ skoc(i + 1); }
+    else if (e.key === "ArrowLeft"){ skoc(i - 1); }
+    else if (e.key === " "){ e.preventDefault(); bezi ? pauza() : spust(); }
+  });
+  window.addEventListener("beforeunload", stopni);
+
+  vykresli();
+
+  /* ---- dodatek: úspora z A3 ----
+     Všechno kromě jediného procenta je naměřené a napsané rovnou v HTML.
+     Dopočítává se jen to, co A3 sama označuje za „k potvrzení": o kolik oprav
+     ubude. Zbytek by se dopočítávat neměl — nemáme z čeho. */
+  var OPRAV_ROCNE = 1209;          // 403 oprav za 2. 4. — 10. 8. 2026
+  /* Míchárna a výroba se vedou zvlášť, ne přes poměr ze součtu: A3 má pro
+     každou vlastní naměřenou částku a hodiny. Výroba je dvě třetiny ztráty
+     a v úspoře to musí být vidět — jinak vypadá projekt jako věc míchárny. */
+  var MICHARNA_H = 320,  MICHARNA_CZK = 97575;
+  var VYROBA_H   = 642,  VYROBA_CZK   = 195907;
+  var KURZ = 24.2;
+  var iPokles = document.getElementById("i_pokles");
+
+  function dopocet(){
+    var pokles = Math.min(100, Math.max(0, parseFloat(iPokles.value) || 0)) / 100;
+    var oprav = OPRAV_ROCNE * pokles;
+    var michH = MICHARNA_H * pokles, michCZK = MICHARNA_CZK * pokles;
+    var vyrH  = VYROBA_H   * pokles, vyrCZK  = VYROBA_CZK   * pokles;
+    var czk = michCZK + vyrCZK, hodin = michH + vyrH;
+    var cis = function(v, d){ return v.toLocaleString("en-GB",
+      { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 }); };
+
+    document.getElementById("v_oprav").textContent = cis(oprav);
+    document.getElementById("v_oprav_z").textContent = "of " + cis(OPRAV_ROCNE) + " a year";
+    document.getElementById("v_mich_kc").textContent = cis(michCZK) + " CZK";
+    document.getElementById("v_mich_h").textContent = cis(michH) + " h of remixing";
+    document.getElementById("v_vyr_kc").textContent = cis(vyrCZK) + " CZK";
+    document.getElementById("v_vyr_h").textContent = cis(vyrH) + " h the press is not waiting";
+    document.getElementById("v_kc").textContent = cis(czk) + " CZK";
+    document.getElementById("v_eur").textContent = cis(czk / KURZ) + " EUR · " + cis(hodin) + " h";
+    document.getElementById("podil_vyroby").innerHTML = czk > 0
+      ? "Of that, <b>" + cis(vyrCZK / czk * 100) + " %</b> is production — machine time given back, "
+        + "not ink-room labour saved. That part is only " + cis(michCZK / czk * 100) + " %."
+      : "";
+  }
+  iPokles.addEventListener("input", dopocet);
+  dopocet();
+})();
+</script>

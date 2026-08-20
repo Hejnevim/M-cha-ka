@@ -18,28 +18,51 @@ Prezentace je proto čerstvá podle **posledního pushe** do tohoto repozitáře
 # Ukázka funkcí
 
 `ukazka.html` je něco jiného než `index.html`: ne chronologie vývoje, ale
-**mluvená animovaná ukázka aplikace** ve dvou dějstvích. Deset scén o tom,
-co aplikace umí (od zakázkového listu po štítek na kelímku), a čtyři o tom,
-co v ní teprve bude — databáze pro zbývající technologie, hustota a chybějící
-odstíny, barvy bází, napojení na SGPS. Dohromady zhruba tři a půl minuty.
+**mluvená animovaná ukázka aplikace** ve třech dějstvích, 21 scén, zhruba
+pět a půl minuty:
 
-Druhé dějství je **schválně vidět na první pohled**: štítek „v aplikaci ještě
+| dějství | scény | co v něm je |
+|---|---|---|
+| cesta zakázky | 1–10 | od zakázkového listu po štítek na kelímku a zbytek zpátky do evidence |
+| co kolem míchání vyrostlo | 11–18 | fronta, šarže, propady a likvidace, shluky a zástupnost, opravy, sestavy, sklad surovin, role |
+| co ještě chybí | 19–21 | databáze pro zbývající technologie, hustota a chybějící odstíny, napojení na SGPS |
+
+Třetí dějství je **schválně vidět na první pohled**: štítek „v aplikaci ještě
 není", čárkované karty, ztlumená čísla a čárkované body na liště. Ukázka nesmí
 slíbit, co aplikace neumí — ani když si ji někdo pustí bez zvuku nebo skočí
-rovnou na scénu jedenáct. Obsah druhého dějství je z oddílu **Co zbývá**
+rovnou na scénu devatenáct. Obsah třetího dějství je z oddílu **Co zbývá**
 ve `VYVOJ.md`; když se tam něco doplní nebo odškrtne, patří to i sem.
 
 Publikováno jako Artifact na
 https://claude.ai/code/artifact/e4b61056-2646-483f-9224-89c326b79b80
 
-Mluvené slovo dělá prohlížeč sám (Web Speech API), žádný zvukový soubor —
-stránka běží i bez internetu. Titulky jdou vždycky, takže ukázka dává smysl
-i tam, kde český hlas v systému není. Cloudová rutina v 17:00 se téhle
-prezentace **netýká**, ta staví jen `index.html` z `VYVOJ.md`.
+Mluvené slovo má tři stupně a ukázka sáhne po nejlepším dostupném: nahrávka
+ze složky `audio/` vedle stránky (`scena-01.mp3` … `scena-21.mp3`) → hlas
+prohlížeče (Web Speech API) → titulky. Titulky jdou vždycky, takže ukázka dává
+smysl i tam, kde v systému žádný hlas není, a stránka běží bez internetu.
+Cloudová rutina v 17:00 se téhle prezentace **netýká**, ta staví jen
+`index.html` z `VYVOJ.md`.
 
-Čísla v ukázce jsou buď z `VYVOJ.md` (rozsah dat, krycí plocha, pot life),
-nebo vymyšlená pro názornost (ceny, kód kelímku). **Nic z licencovaných
-databází v ní není** — viz `irm-data`.
+Čísla v ukázce jsou buď z `VYVOJ.md` a z rozboru dat (rozsah katalogu, počty
+receptur, krycí plocha, pot life), nebo vymyšlená pro názornost (ceny, kód
+kelímku). **Nic z licencovaných databází v ní není** — viz `irm-data`.
+
+## Anglická verze
+
+`ukazka_en.html` je táž ukázka v angličtině, se stejnými scénami, čísly
+i dodatkem; nahrávky má ve složce `audio_en/` jako `scene-01.mp3` …
+`scene-21.mp3`. Česky zůstává jen kód a komentáře, jako všude v projektu.
+
+**Obě verze se mění spolu.** Když se v jedné opraví číslo nebo přeformuluje
+scéna, musí se totéž stát i ve druhé — jinak si dvě publikované ukázky začnou
+odporovat a nikdo nepozná, která platí. Změní-li se pole `rec`, patří k tomu
+i nová nahrávka té scény; scénář pro namluvení žije jen v HTML, aby se text
+titulku a text v hlase nemohly rozejít.
+
+Hlasy: česky `cs-CZ-AntoninNeural`, anglicky `en-GB-RyanNeural`, obojí
+tempem −5 % přes `edge-tts` (jednorázový skript ve scratchpadu, čte `rec`
+přímo z ukázky). Pole `cas` u scény se pak srovná na skutečnou délku
+nahrávky, aby pruh pod jevištěm doběhl s hlasem, ne dřív.
 
 ## Dodatek — co to stojí dnes a co se ušetří
 

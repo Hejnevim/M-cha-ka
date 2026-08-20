@@ -131,7 +131,7 @@ function Products({ products, setProducts, guardDelete,
         ${filtered.length > 300 && html`<p className="note" style=${{ marginTop: 10 }}>Zobrazeno prvních 300 — upřesněte hledání.</p>`}
       ` : html`
         <table className="t">
-          <thead><tr><th /><th>Ref.</th><th>Produkt</th><th>Materiál</th><th>Tiskové polohy</th><th /></tr></thead>
+          <thead><tr><th /><th className="num">Ref.</th><th>Produkt</th><th>Materiál</th><th>Tiskové polohy</th><th /></tr></thead>
           <tbody>
             ${filtered.slice(0, 300).map((p) => html`
               <tr key=${p.id}>

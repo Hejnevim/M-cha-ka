@@ -226,6 +226,32 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 15:36 | Databáze RUCOLOR 10KK (776 receptur) přiřazená k tampontisku a sítotisku |
 | 15:54 | Nová databáze se nenabízela, protože most zrovna neběžel — nastartován znovu |
 
+### 20. srpna — velké tlačítko u váhy a ukázka anglicky
+| čas | co |
+|---|---|
+| 08:52 | Štítek na kelímek pod asistenta navážení a dvojnásobně velký — je to poslední krok u váhy, mačká se s kelímkem v druhé ruce |
+| 09:14 | **Obrat:** ze štítku čtverec 180 × 180 px u pravého okraje, poznámka i „Znám zbytek rovnou“ zpátky do levého sloupce |
+| 09:01 | Ukázka anglicky (`ukazka_en.html`, 21 nahrávek) a data v obou verzích srovnaná na dnešek — 3 468 receptur, čtvrtá databáze v tabulce technologií |
+| 09:15 | Scéna 19 přiznává, že se teprve sbírá dalších 12 barevných řad — tabulka technologií není hotový stav |
+| 09:22 | Přepínač „s tužidlem“ pod štítek na kelímek a na vlastní proměnnou `--mich-prepinac` — rozhoduje o hlídání pot life a musí jít zvětšit zvlášť |
+| 09:25 | **Obrat:** zvětšený přepínač se vedle čtverce 180 × 180 px neosvědčil, velikost zpátky na 13 px — zůstal přesun pod tlačítko a posuvník v barvy.html |
+| 09:52 | Míchací režim má v barvy.html vlastní stránku — 32 posuvníků, každé stálé tlačítko zvlášť, texty i značky; při výchozích hodnotách se nepohnul ani pixel |
+| 10:15 | Míchací režim poprvé doladěn vlastními posuvníky — 17 z 32 hodnot přenastaveno: číslo na váze 52 → 64 px, dávka 34 → 37 px, rozestupy 22 → 15 px, přepínač zpátky na 20 px |
+| 10:24 | Tvar tlačítek do čtverce (šířka × výška) a poloha tažením myší přímo v ukázce — 88 ovladačů míchacího režimu, posun přes transform drží rozvržení |
+| 10:57 | Druhé doladění míchacího režimu, poprvé i tažením myší — 21 hodnot: Tára 15 → 24,5 px a blok 116 × 100 px, krycí plocha 288 × 50 px, viskozita 180 × 50 px, štítek zpátky na 138 × 138 px; v ukázce to odhalilo dva překryvy, na které `prekryv.py` nedosáhne |
+| 11:36 | Vysvětlivky od zbytků do NAVOD_PODKLADY.md a „Znám zbytek rovnou“ na řádek vedle ručního zadání — blok štítkové poznámky odešel celý, posuny obou tlačítek na 0 |
+| 11:47 | Štítek na kelímek jako pruh přes celou šířku sloupce podél asistenta (716 px, výška 3× písma) a přepínač „s tužidlem“ vizuálně uvnitř tlačítka — v kódu sourozenec, aby přežil zákaz tlačítka |
+| 11:51 | Vysvětlivka z karty asistenta do NAVOD_PODKLADY.md — u váhy ji nikdo nečte, jen odsouvala ovládání níž |
+| 12:03 | Tára a Odpojit do pravého horního rohu asistenta pod sebe (116 × 100, mezera 23 px) — Odpojit dál od ruky, Tára blíž; posuvník simulace se o rohový sloupec zkracuje |
+| 12:05 | Dvě vysvětlivky od posouzení barvy na podkladu do NAVOD_PODKLADY.md — posouzení i stavová hláska zůstávají |
+| 12:18 | Nadpisy číselných sloupců zarovnané doprava nad čísla — specificita CSS přebíjela `th.num`, oprava platí pro všech 26 tabulek i míchací režim |
+| 12:27 | Tlačítko krycí plochy k pravé hraně nad „kumulativně“, zarovnané s tabulkou navážení — auto okraj místo pevného posunu, hrany na 838,17 px |
+| 12:41 | Věta „proč se nátisk nenabízí“ z obrazovky do NAVOD_PODKLADY.md — tiché rozhraní; výpočet zdůvodnění dál vrací, jen se nezobrazuje |
+| 13:24 | Výběr technologie v menu sbalený pod šipku ▸ — menu 17 položek místo 22, sbaleně vidět platná technologie, rozbalením všech 5 s počty |
+| 13:56 | Záložky menu ve čtyřech skupinách (Katalog, Míchání, Sklad, Data) rozbalovaných šipkou — menu 9 položek místo 22, výstrahy vystupují součtem na řádek skupiny |
+| 16:02 | Aplikace mluví třemi jazyky — v menu kolonka JAZYK (Čeština / English / Português), přeložen celý rám aplikace; volbu si drží prohlížeč |
+| 16:30 | Přeložena výchozí obrazovka Kalkulace (178 obalených míst, slovník 338 položek) — přepnutí jazyka je vidět na první pohled, ne až v nabídce |
+
 ---
 
 ## Co aplikace je
@@ -752,24 +778,32 @@ se známým výsledkem (viz čísla u bodů 3 a 8).
 
 ## Co zbývá
 
-- **Barevné databáze pro zbývající technologie** — tohle je teď hlavní úkol
-  a bez něj se technologie nedají odemknout. Stav k 11. 8. 2026:
+- **Barevné databáze pro zbývající technologie.** Odemčené jsou všechny
+  (`parametry/technologie.csv`), ale transfer stojí jen na vlastních
+  recepturách dílny. Stav k 20. 8. 2026:
 
   | technologie | databáze | receptur | stav |
   |---|---|---|---|
   | FIR | Ferro Xpression | 1 097 | máme |
-  | PDP | Printcolor MS 786 + MS 660 | 1 592 | máme |
+  | PDP | Printcolor MS 786 + MS 660 · RUCOLOR 10KK | 2 368 | máme |
   | TXP | Printcolor MS 660 | 778 | ověřit, zda je to řada na textil |
-  | SCR | Printcolor MS 660 | 778 | ověřit totéž pro plast a papír |
-  | TRS | žádná | 0 | **chybí celá** |
+  | SCR | Printcolor MS 660 · RUCOLOR 10KK | 1 554 | RUCOLOR sedí, MS 660 ověřit |
+  | TRS | žádná | 3 vlastní | **chybí celá** |
 
-  U nových databází stačí PDF z Printcolor easyMEMO — převod je hotový
-  (`prevod_printcolor.py`) a zvládne i jiné míchací systémy, protože se řídí
-  stavbou dokumentu, ne konkrétními čísly.
-- **Hustota barvy a chybějící odstíny** u Printcolor receptur. Hustota v PDF
-  není vůbec, aplikace počítá s 1,20 g/ml. Odstín se dohledal podle názvu
-  pantonu z jiných databází, ale u MS 786 chybí u 193 a u MS 660 u 223 receptur;
-  bez něj aplikace neporadí s prosvítáním ani s korekcí.
+  **Čeká dalších 12 barevných řad.** Podklady se teprve sbírají a přiřazovat
+  se budou po jedné, jak budou přicházet — tabulka výš proto ještě poroste
+  a přiřazení k technologiím se bude měnit. Do ukázky (scéna 19) to patří,
+  aby nevypadala jako hotový stav.
+
+  U nových databází stačí PDF: převody jsou hotové pro obojí, co dílna
+  dostává — Printcolor easyMEMO (`prevod_printcolor.py`, řídí se stavbou
+  dokumentu, ne konkrétními čísly) i tabulka RUCOINX (`prevod_rucolor.py`,
+  bázi pozná podle polohy čísla na stránce).
+- **Hustota barvy a chybějící odstíny.** Hustotu neuvádí ani jedna ze čtyř
+  nakoupených databází, aplikace počítá s 1,20 g/ml. Odstín se dohledal podle
+  názvu pantonu z jiných databází, ale chybí u 460 receptur: 223 MS 660,
+  190 MS 786, 47 RUCOLOR 10KK. Bez něj aplikace neporadí s prosvítáním ani
+  s korekcí. (Dřív tu stálo u MS 786 193 — přepočtem ze souboru vychází 190.)
 - **SGPS** (podnikový systém) je zatím v ukázkovém režimu — čeká se na informaci
   od IT, jaké rozhraní nabízí. Most je připravený na obě varianty: soubor
   s exportem i HTTP rozhraní, přepíná se v konfiguraci.
@@ -5385,3 +5419,738 @@ nabídka po deseti sekundách načítání ukazuje `RUCOLOR 10KK (776)` vedle
 `PMS 660 (778)` a `PMS 786 (814)` — dřív, po třech sekundách, tam byly jen
 dvě ukázkové receptury z kódu, protože se ještě nestihlo načíst nic ze
 souborů.
+
+
+## 107. Štítek na kelímek patří pod asistenta a je dvakrát větší
+
+**Problém.** Tlačítko „Štítek na kelímek →“ stálo v míchacím režimu na konci
+levého sloupce — pod tabulkou složení, pod hlášeními, pod aditivy a zbytky.
+Jenže štítek se lepí až po dovážení poslední složky, a tu vede asistent
+navážení v pravém sloupci. Tiskař tedy dokončil vážení vpravo a pak musel
+očima přeletět zpátky doleva a dolů přes celý sloupec hlášení, aby našel
+poslední krok. Tlačítko k tomu bylo stejně velké jako všechna ostatní
+v režimu (15 px), přestože se mačká s kelímkem v druhé ruce a s odstupem
+od stolu.
+
+**Co se změnilo.** Blok štítku se přesunul do pravého sloupce hned pod kartu
+asistenta a tlačítko vyrostlo na dvojnásobek. Velikost se nezapisuje číslem,
+ale dopočítává z míchací sady, aby se škála nerozešla, když se sáhne na
+`--mich-tlacitko`:
+
+```css
+.michbg .stitekpruh .btn{font-size:calc(var(--mich-tlacitko) * 2);
+  padding:calc(var(--mich-tlacitko) * 1.74) calc(var(--mich-tlacitko) * 2.94)}
+```
+
+Poměry odsazení (.87 a 1.47) jsou tytéž jako u `.michbg .btn`, jen zdvojené —
+tvar tlačítka se tedy nemění, jen roste.
+
+**Změřeno** (`snimek.py` po skutečném proklikání do míchacího režimu, okno
+1 600 × 1 100): tlačítko 364,1 × 92,2 px, písmo 30 px — proti ostatním
+tlačítkům režimu (`✕ Zpět do kalkulace`) 185,4 × 46,1 px při 15 px, tedy
+přesně dvojnásobek výšky i písma. Stojí na x = 856 px, tj. v pravém sloupci
+(sloupce začínají na 22 a 856 px), na y = 314 px — karta asistenta končí na
+302,5 px, takže je hned pod ní. V užších oknech nepřetéká ze sloupce
+(1 084 px i 884 px: šířka pořád 364,1 px, `pretekaVen: false`), pod 1 000 px
+se režim skládá do jednoho sloupce a tlačítko zůstává pod asistentem.
+`kontrola_aplikace.py` 0, `prekryv.py` 0 (čtyři šířky × oba režimy).
+
+**Co se nechalo být.** Přepínač „s tužidlem“ vedle tlačítka a tlačítko „Znám
+zbytek rovnou“ v poznámce pod ním zůstaly v původní velikosti. Přepínač se
+překlápí jednou před mícháním, ne u váhy, a poznámka je doprovodný text —
+zvětšit celý pruh by z posledního kroku udělalo největší prvek obrazovky,
+větší než tabulka složení, podle které se váží.
+
+## 108. Ukázka anglicky — a data srovnaná na dnešek
+
+**Problém.** Ukázka stála na rozboru z 18. srpna: katalog 2 692 receptur,
+tabulka technologií bez čtvrté databáze, 413 receptur bez odstínu. Mezitím
+přibyl RUCOLOR 10KK (kap. 105) a čísla ve scénách 1, 19 a 20 přestala platit
+— ukázka slibovala míň, než aplikace umí, a u receptur bez odstínu naopak
+uváděla méně, než jich doopravdy je. Druhá věc: pustit ukázku někomu, kdo
+neumí česky, nešlo vůbec.
+
+**Co se změnilo.** Data ve scénách srovnaná na dnešní stav:
+
+| co | bylo | je |
+|---|---|---|
+| receptur v katalogu | 2 692 | 3 468 |
+| PDP | Printcolor 786 + 660, 1 592 | + RUCOLOR, 2 368 |
+| SCR | Printcolor 660, 778, „ověřit" | + RUCOLOR, 1 554, ověřit jen 660 |
+| receptur bez odstínu | 413 (223 + 190) | 460 (223 + 190 + 47) |
+| hustota | „Printcolor neuvádí" | „žádná ze čtyř databází neuvádí" |
+
+Do scény 19 přibyla věta, která v žádném souboru dosud nestála: **čeká
+dalších 12 barevných řad**, podklady se teprve sbírají a přiřazovat se budou
+po jedné, jak budou přicházet. Bez ní vypadala tabulka technologií jako hotový
+stav, ke kterému už jen chybí transfer — a to není pravda. Doplněno i do
+oddílu *Co zbývá* a do `parametry/CO_SEHNAT.txt`, aby ukázka nebyla jediné
+místo, kde se to dočtete.
+
+Vedle vzniklo `ukazka_en.html` — táž ukázka anglicky, stejné scény, čísla
+i dodatek, s nahrávkami v `audio_en/`. Anglicky je jen to, co je vidět
+a slyšet; kód, třídy i komentáře zůstaly česky jako všude v projektu. Obě
+verze se od teď mění spolu, což stojí i v `prezentace/README.md` — dvě
+publikované ukázky, které si odporují, jsou horší než jedna zastaralá.
+
+**Chyba, kterou to mělo cestou.** Přetékající text jsem nejdřív měřil přes
+`getBBox()` a porovnával s `viewBox`. Jenže `getBBox()` vrací souřadnice
+v soustavě prvku, ne stránky: skupina posunutá `transform="translate(120,120)"`
+hlásila přetečení o 32 jednotek, i když text sedí uprostřed scény. A opačně —
+skutečné oříznutí podhodnocoval. **Měřil jsem proti nesprávné hranici.**
+Ořezává `.platno` (`overflow:hidden`), takže se musí porovnávat
+`getBoundingClientRect()` textu proti obdélníku `.platno`. Po přeměření se
+ukázalo, že **česká ukázka ořezávala text už před touhle změnou**: řádek
+o svozu do odpadu ve scéně 13 přišel o 115 px. Rozdělen na dva řádky.
+
+**Změřeno.** Čísla ve scénách proti souborům ve složce (`data.js`, `obrazky/`,
+`databaze barev/`, `parametry/`): 1 320 produktů, 5 583 obrázků, receptur
+1 097 + 778 + 814 + 776 + 3 = 3 468; bez odstínu 223 + 190 + 47 = 460; síta
+s údaji výrobce 2 z 28; koeficientů 14 zapsaných, 0 mimo 1,00. Přetečení textu
+proti `.platno`: česká ukázka 115 → 0 px, anglická 218 / 52 / 23 / 4 → 0 px
+(čtyři řádky ve scénách 13, 17 a 14). Dodatek při −30 % dál vychází na
+88 045 Kč. Obě stránky se vykreslí, skript projde: 21 sekcí, 21 bodů na liště.
+
+**Namluveno.** Anglicky `en-GB-RyanNeural`, tempo −5 %, jinak stejným
+postupem jako český Antonín: 21 souborů `audio_en/scene-01.mp3` …
+`scene-21.mp3`, 48 kb/s, 24 kHz mono, 59–172 kB, dohromady 2,1 MB. Česky se
+znovu namluvily tři scény, kterým se změnil text (1, 19, 20).
+
+Pole `cas` u každé scény se pak srovnalo na skutečnou délku nahrávky. Dosud
+bylo odhadnuté a šlo to poznat: scéna 1 měla `cas:13`, nahrávka trvá 17 s —
+pruh pod jevištěm doběhl o čtyři vteřiny dřív, než hlas domluvil, a zbytek
+scény vypadal, že se něco zaseklo. Přechod na další scénu řídí `onended`
+nahrávky, takže se nikdy nepřepínalo špatně, jen ten pruh lhal.
+
+`kontrola_aplikace.py`, `mapa.py` ani `rozbor_aktualizuj.py` se nespouštěly —
+`aplikace/` se změna nedotkla.
+
+
+## 109. Ze štítku čtverec u pravého okraje, poznámka zpátky doleva
+
+**Problém.** Kapitola 107 posunula celý blok štítku pod asistenta navážení —
+tedy i poznámku „Štítek nalepte na kelímek hned po namíchání…“ s tlačítkem
+„Znám zbytek rovnou“. Vedle dvojnásobně velkého tlačítka se z ní stal text,
+který obtéká další tlačítko, a pravý sloupec tím dostal dvě věci naráz:
+krok u váhy a doprovodné čtení. Tlačítko samo zůstalo obdélníkem přilepeným
+k levému okraji sloupce, ačkoli vážení nad ním končí vpravo.
+
+**Co se změnilo.** Blok se rozdělil na dva, protože každý míří jinam:
+
+| kus | kam patří | proč |
+|---|---|---|
+| `blokStitkuTlacitko` — tlačítko + přepínač „s tužidlem“ | pravý sloupec, pod asistenta | poslední krok u váhy |
+| `blokStitku` — poznámka + „Znám zbytek rovnou“ | levý sloupec, na původní místo | čte se jednou, ne u váhy |
+
+Z tlačítka je čtverec o hraně 12 × `--mich-tlacitko` a pruh je zarovnaný
+doprava. Text se v něm musí zalomit, jinak by se čtverec roztáhl na šířku
+řádku:
+
+```css
+.michbg .stitekpruh{justify-content:flex-end}
+.michbg .stitekpruh .btn{font-size:calc(var(--mich-tlacitko) * 2);
+  width:calc(var(--mich-tlacitko) * 12);height:calc(var(--mich-tlacitko) * 12);flex:none;
+  padding:calc(var(--mich-tlacitko) * .8);white-space:normal;line-height:normal;
+  display:inline-flex;align-items:center;justify-content:center;text-align:center}
+```
+
+**Změřeno** (`snimek.py` po proklikání do míchacího režimu): tlačítko
+180,0 × 180,0 px, tedy čtverec na půl pixelu přesně, písmo 30 px, text
+zalomený na dva řádky. Stojí na x = 1 269 px, pravým okrajem na 1 449 px —
+zbylých 113 px do konce sloupce (1 562 px) drží přepínač „s tužidlem“.
+Karta asistenta končí na 302,5 px, tlačítko začíná na 314 px. „Znám zbytek
+rovnou“ je zpátky v levém sloupci (x = 128 px) v původní velikosti — písmo
+13,5 px, 161,1 × 36,0 px. Čtverec drží 180 × 180 px i v oknech 1 084 a 884 px
+a ze sloupce nepřetéká. `kontrola_aplikace.py` 0, `prekryv.py` 0 (čtyři
+šířky × oba režimy).
+
+
+## 110. Přepínač „s tužidlem“ pod štítek a na vlastní proměnnou
+
+**Problém.** Ze štítku se stal čtverec o hraně 180 px, ale přepínač
+„s tužidlem“ zůstal vedle něj — dráha 38 × 20 px na okraji pruhu, kde se
+vedle čtverce ztrácel. Přitom to není doplněk: podle něj se pot life hlídá
+od přidání tužidla, takže špatně přepnutý kelímek ztuhne dřív, než aplikace
+řekne.
+
+**Co se změnilo.** Pruh štítku se překlopil na sloupec — přepínač tedy stojí
+pod tlačítkem, ne vedle něj, a je zarovnaný na jeho pravou hranu. Velikost
+se nezapisuje číslem, ale dopočítává z nové proměnné `--mich-prepinac` týmiž
+poměry jako v základní škále (13px → dráha 38 × 20, posun 18, mezera 8),
+takže se tvar přepínače nemění, jen roste nebo se zmenšuje celý:
+
+```css
+.michbg .stitekpruh{flex-direction:column;align-items:flex-end;justify-content:flex-start}
+.michbg .stitekpruh .tgl{font-size:var(--mich-prepinac);
+  gap:calc(var(--mich-prepinac) * .615)}
+.michbg .stitekpruh .tglt{width:calc(var(--mich-prepinac) * 2.923);
+  height:calc(var(--mich-prepinac) * 1.538);
+  border-radius:calc(var(--mich-prepinac) * .846)}
+```
+
+Proměnná je v míchací sadě a má posuvník v `barvy.html` (10–60 px) —
+míchacího režimu se tam ladí patnáct hodnot místo čtrnácti. Velikost se
+tím dá vyzkoušet u váhy bez sahání do kódu, což je celý smysl toho, že to
+není napevno zapsané číslo.
+
+**Cesta tam a zpátky.** Přepínač se nejdřív zvětšil na dvojnásobek
+(`--mich-prepinac:26px`) — písmo 26,0 px, dráha 75,98 × 39,98 px, kolečko
+32 × 32 px s posunem 36,01 px, tedy na setinu přesně dvojnásobek základní
+škály. Vedle čtverce 180 × 180 px to bylo příliš: dva velké prvky nad sebou
+si braly pozornost navzájem a z pruhu se stal blok vysoký 228 px. Po
+vyzkoušení se hodnota vrátila na 13 px. **Zůstalo z toho to podstatné** —
+přesun pod tlačítko a proměnná, kterou se velikost dá kdykoli posunout;
+zahodilo se jen konkrétní číslo.
+
+**Změřeno** (`snimek.py` po skutečném proklikání do míchacího režimu, okno
+1 600 × 1 100): přepínač má písmo 13,0 px, dráhu 37,98 × 19,98 px, kolečko
+16 × 16 px s odsazením 2,00 px a mezeru k popisce 8,00 px — tedy shodně se
+základní škálou aplikace, přepočet přes `calc()` nic neposunul. Celý přepínač
+měří 104,6 × 19,98 px. Tlačítko končí na y = 494,06 px, přepínač začíná na
+502,06 px, mezi nimi 8,00 px; pravé hrany obou sedí na 1 562 px, tedy přesně
+pod sebou. Při 26 px držela táž sestava 209,3 × 39,98 px a v okně 884 px
+z pruhu nepřetékala, takže zvětšení je průchozí i na užší obrazovce.
+`kontrola_aplikace.py` 0, `prekryv.py` 0 (čtyři šířky × oba režimy),
+oba režimy vyfoceny.
+
+**Co se nechalo být.** Druhý přepínač „s tužidlem“ — ten v dialogu ukládání
+zbytku v kalkulaci — zůstal beze změny. Ten se nemačká u váhy, ale
+u klávesnice, a pravidlo je schválně vymezené na `.michbg .stitekpruh`, aby
+se do dialogu nepropsalo.
+
+## 111. Míchací režim má v barvy.html vlastní stránku — každé tlačítko zvlášť
+
+**Problém.** Velikosti míchacího režimu se ladily jedním oddílem mezi tvary
+a písmem na stránce Barvy — a všechna tlačítka režimu držela jedno společné
+`--mich-tlacitko`. Jenže u váhy nejsou všechna tlačítka stejně důležitá:
+„Další složka" se mačká po každé komponentě, „Odpojit" jednou za směnu.
+Kdo chtěl zvětšit jedno, zvětšil všechna — a na obrazovce, která se čte
+s odstupem a v rukavicích, je to rozdíl mezi použitelným a přeplácaným.
+
+**Co se změnilo.** Nástroj `barvy.html` má třetí stránku **Míchací režim**
+(vedle Barev a Rozvržení): uprostřed ukázka celého režimu ze skutečných
+prvků aplikace, po stranách 32 posuvníků v sedmi skupinách podle místa na
+obrazovce (hlavička, tabulka navážky, váha a asistent, štítek na kelímek,
+levý sloupec, texty a hlášení, rozestupy). Každé stálé tlačítko režimu má
+vlastní proměnnou a vlastní posuvník:
+
+| proměnná | tlačítko |
+|---|---|
+| `--mich-tl-zpet` | ✕ Zpět do kalkulace |
+| `--mich-tl-pripojit`, `--mich-tl-simulace` | Připojit váhu, Vyzkoušet v simulaci |
+| `--mich-tl-tara`, `--mich-tl-odpojit`, `--mich-tl-sarze` | Tára, Odpojit, Zadat šarži |
+| `--mich-tl-dalsi` | Další složka / Dokončit |
+| `--mich-tl-stitek` | Štítek na kelímek — písmo, čtverec je 6× |
+| `--mich-tl-plocha`, `--mich-tl-rucne`, `--mich-tl-znam`, `--mich-tl-viskozita` | levý sloupec |
+| `--mich-tl-hlaseni`, `--mich-tl-pomocna` | rodiny: tlačítka v hlášeních a drobná pomocná v kartě |
+
+Hodnota proměnné je velikost písma tlačítka; odsazení se dopočítává týmiž
+poměry jako u společných pravidel (velké .87/1.47, malé .667/1.111 z písma),
+takže se tvar tlačítka nemění, jen velikost. K tomu tři nové proměnné textu:
+`--mich-nadpis` (nadpis karty asistenta, dřív odvozený z obecné škály),
+`--mich-poznamka` (poznámky, dtto) a `--mich-znak` (sloupec se značkami
+▶ a ✓ v tabulce). Míchací režim je tím **úplně odpojený od obecné škály** —
+nic v něm už se nedopočítává z `--pismo-*`. Pot life ve velkém režimu si
+navíc vnucoval písmo 15 px napevno v JSX; teď bere `var(--mich-hlaseni)`,
+takže ho posuvník hlášení konečně řídí (výchozích 15 px je týchž).
+
+Tlačítka beze jména (vzácné stavy — přepočet receptury, potvrzení konve)
+drží společné `--mich-tlacitko`, v nástroji poslední skupina „Rozestupy
+a ostatní". Stránka má tlačítko **Vrátit míchací režim**, které vrací jen
+proměnné `--mich-*` — barev, písma ani rozvržení se nedotkne.
+
+**Změřeno.** Při výchozích hodnotách se nepohnulo nic: písma tlačítek
+15 / 13,5 / 30 px beze změny, odsazení 13,05/22,05 px (velká) a
+9,0045/14,9985 px (malá) proti původním 13,05/22,05 a 9/15 — rozdíl
+0,0045 px je zaokrouhlení z calc(). Nadpis karty 20,085 → 20,1 px
+(posun 0,015 px), poznámky 13,44 px přesně, značky 26 px, čtverec štítku
+180 × 180 px. Drát od posuvníku k aplikaci dokázán na stránce nástroje:
+posuvník Tára na 20 → tlačítko v ukázce 20 px a `--mich-tl-tara:20px`
+ve výstupním bloku; posuvník štítku na 44 → čtverec 264 px (44 × 6),
+po Vrátit míchací režim zpět 180 px. Přepínání stránek: Barvy viditelné,
+Míchací režim schovaný, ukázka režimu na stránce jen jedna (přestěhovaná,
+ne zdvojená), posuvníků s `data-tvar` celkem 71. `node --check` všech čtyř
+měněných částí prošel, `kontrola_aplikace.py` 0, `prekryv.py` 0 (čtyři
+šířky × oba režimy).
+
+**Co se nechalo být.** Barvy míchacího režimu se dál ladí na stránce Barvy
+přepínačem stránek — barva není velikost a mechanismus odchylek od základu
+(`:root:not([data-theme="dark"]) .michbg{…}`) je jiný než u tvarů. Na nové
+stránce se ladí jen rozměry.
+
+## 112. Míchací režim doladěn u váhy — čísla nahoru, rozestupy dolů
+
+**Problém.** Kapitola 111 dala míchacímu režimu vlastní stránku v `barvy.html`
+s 32 posuvníky, ale nechala je na hodnotách, které do té doby vznikly
+odvozením z obecné škály. Otevřít nástroj a projít to okem u váhy je něco
+jiného než dopočítat poměry: obrazovka se čte s odstupem, přes rameno a
+v rukavicích, a rozestupy, které na monitoru vypadají vzdušně, tam jen
+odsouvají číslo na váze pod okraj.
+
+**Co se změnilo.** Doladění celé sady naráz, přeneseno z výstupu nástroje do
+`:root`. Přenastavilo se 17 z 32 hodnot, zbylých 15 zůstalo:
+
+| co | z | na | proč |
+|---|---|---|---|
+| `--mich-vysledek` — číslo na váze | 52 px | 64 px | hlavní údaj celé obrazovky, čte se od váhy na krok dva |
+| `--mich-davka` — dávka v hlavičce | 34 px | 37 px | druhé číslo v pořadí důležitosti, drží odstup od výsledku |
+| `--mich-mezera` — rozestupy | 22 px | 15 px | ušetřená výška jde na čísla; režim se vejde bez rolování |
+| `--mich-pole` — vstupní pole | 20 px | 17 px | pole se u váhy nevyplňují z klávesnice, čtou se |
+| `--mich-prepinac` — přepínač s tužidlem | 13 px | 20 px | **obrat proti dnešním 09:25**, viz níž |
+| `--mich-tl-zpet` | 15 px | 17 px | jediná cesta ven, mačká se s kelímkem v ruce |
+| `--mich-tl-tara`, `-odpojit`, `-sarze` | 13,5 px | 15 px | obsluha váhy — táruje se před každou složkou |
+| `--mich-tl-pomocna` | 13,5 px | 15 px | dtto, drobná tlačítka v kartě asistenta |
+| `--mich-tl-stitek` | 30 px | 28 px | čtverec byl na 180 px moc dominantní vedle většího čísla na váze |
+| `--mich-nadpis` | 20,1 px | 21 px | zbaveno zlomku po odvození z obecné škály |
+| `--mich-poznamka` | 13,44 px | 14 px | dtto |
+| `--mich-znak` — sloupec ▶ ✓ | 26 px | 25 px | značka nemá přerůst gramáž vedle sebe |
+| `--mich-tlacitko` — vzácné stavy | 15 px | 14 px | ustupuje pojmenovaným tlačítkům |
+| `--mich-hlaseni` | 15 px | 14 px | hlášení jsou text, ne údaj |
+| `--mich-wbar` | 20 px | 19 px | pruh vážení k užšímu rozestupu |
+
+Beze změny zůstal název receptury (26 px), vzorek barvy (52 px), hlavička
+i tělo tabulky navážky (12 a 20 px), gramáž (26 px), výška řádku (11 px),
+štítek (14 px) a celý levý sloupec (`-plocha`, `-rucne`, `-znam`,
+`-viskozita` po 13,5 px), „Připojit“, „Simulace“ a „Další složka“ (15 px)
+a tlačítka v hlášeních (13,5 px).
+
+**Obrat proti dnešnímu 09:25.** Zvětšený přepínač „s tužidlem“ se ráno
+neosvědčil a vrátil se na 13 px — ale to bylo vedle čtverce štítku 180 px.
+Teď je čtverec 168 px a přepínač 20 px; dvojice si přestala konkurovat a
+přepínač, který rozhoduje o hlídání pot life, je konečně vidět jako ovládací
+prvek, ne jako popisek. Ranní závěr platil pro tehdejší poměr, ne obecně.
+
+**Změřeno.** Vykresleno v ukázce nástroje ze skutečných částí `10-styl/*.css`:
+číslo na váze 64 px, dávka 37 px, nadpis karty 21 px, poznámka 14 px,
+odsazení karty 15 px. Tlačítko „✕ Zpět do kalkulace“ 17 px s odsazením
+14,79 / 24,99 px (= 17 × .87 a 17 × 1.47), „Tára“ 15 px s 10,005 / 16,665 px
+(= 15 × .667 a 15 × 1.111), pole 17 px s 9,86 / 13,09 px (= 17 × .58 a
+17 × .77) — tvary tlačítek i polí tedy drží, mění se jen velikost. Čtverec
+štítku 168 × 168 px (28 × 6), dřív 180 × 180. Přepínač 58,46 × 30,76 px
+(= 20 × 2.923 a 20 × 1.538). `kontrola_aplikace.py` 0, `prekryv.py` 0 (čtyři
+šířky × oba režimy), `sestav.py --kontrola` 0 (80 částí).
+
+**Falešný poplach.** `VYCHOZI_TVARY` v `barvy_nastroj.py` vypadá jako druhá
+kopie hodnot, kterou je nutné držet v souladu s `:root` — není. Je to rejstřík
+klíčů se záložními hodnotami, které se při každém generování přepíšou tím, co
+se přečte ze skutečného CSS (`tvary[klic] = hodnota(bl_svetly, klic)`). Že se
+tam sahat nemá, je vidět na `--radius`: v záloze 18 px, v aplikaci i ve
+vygenerovaném nástroji 23 px. Ověřeno na výstupu — mapa „Vrátit míchací režim“
+ve `barvy.html` nese nové hodnoty (`"--mich-vysledek": "64px"`), ne záložní.
+
+
+## 113. Tlačítka míchacího režimu: tvar do čtverce a poloha tažením myší
+
+**Problém.** Každé tlačítko režimu už mělo vlastní velikost písma, ale tvar
+a místo mu pořád určovala aplikace. Jenže co je u váhy potřeba trefit
+v rukavicích, má být velký cíl — čtverec jako štítek na kelímek — a co má
+být po ruce, má stát tam, kam ruka od váhy jde, ne kam to vyšlo v toku
+stránky.
+
+**Co se změnilo.** Ke každému jmenovanému tlačítku (11 stálých + 2 rodiny
++ štítek + přepínač) přibyly čtyři proměnné:
+
+| proměnná | co dělá |
+|---|---|
+| `-sirka`, `-vyska` | `auto` = tvar podle textu; číslo = blok. Stejná čísla = čtverec — text se v `<button>` zalomí a vycentruje sám, odsazení se díky `border-box` vejde dovnitř |
+| `-posun-x`, `-posun-y` | poloha přes `transform:translate` — tlačítko se vykreslí jinde, ale místo v řádku si drží, takže se rozvržení nerozsype a nic se nepřekryje jen proto, že se tlačítko odsunulo |
+
+V nástroji `barvy.html` má teď každé tlačítko vlastní skupinu s pěti
+ovladači (písmo, šířka, výška, posun ×2) — pravý panel stránky Míchací
+režim, 88 ovladačů celkem. A protože posun posuvníkem je zdlouhavý,
+**tlačítka v ukázce se dají rovnou táhnout myší**: mousedown na tlačítku,
+posun se za tažení zapisuje do týchž proměnných, po puštění se srovnají
+posuvníky a přepíše výstupní blok. Kliknutí, které bylo ve skutečnosti
+tažením, se potlačí, aby nepřepnulo přepínač s tužidlem. Členové rodin
+(hlášení, pomocná v kartě) nesou posun své rodiny, takže se rodina táhne
+jako celek.
+
+**Změřeno.** Při výchozích hodnotách (`auto`, `0px`) se nepohnulo nic —
+písma přesně podle mezitím naladěných hodnot v :root (Zpět 17 px, Tára
+15 px, štítek 28 px → čtverec 168 × 168 px), `transform` jednotková matice.
+V nástroji: šířka a výška 120 px → tlačítko „zadat ručně" 120 × 120 px
+a `white-space:normal`; syntetické tažení o 40/25 px → tlačítko „Znám
+zbytek rovnou" se posunulo přesně o 40/25 px, posuvník ukázal 40
+a výstupní blok nesl `--mich-tl-znam-posun-x:40px` i
+`--mich-tl-rucne-sirka:120px`; Vrátit míchací režim vrátil posun na 0/0.
+`kontrola_aplikace.py` 0, `prekryv.py` 0 (čtyři šířky × oba režimy).
+
+**Co je posun zač — a co není.** Je to vizuální odchylka od přirozeného
+místa, ne přestavba toku: tlačítko odsunuté o 300 px doleva pořád „bydlí"
+ve svém řádku a při užším okně se láme s ním. Na přestavbu levého a pravého
+sloupce režimu je to schválně krátké — ta by se dělala v JSX, ne proměnnou.
+
+**Mezitím ve složce.** Mezi kapitolami 111 a 113 se do `:root` vrátil první
+výstup z nové stránky nástroje (Zpět 17 px, pole 17 px, hlášení 14 px,
+štítek 28 px, přepínač 20 px…) — přesně tok, pro který stránka vznikla.
+Skript proto kotví vkládání na řádek s `--mich-znak`, ne na konkrétní čísla.
+
+## 114. Druhé doladění míchacího režimu — velké cíle u váhy a posun tažením
+
+**Problém.** Stránka Míchací režim v `barvy.html` byla po kapitole 113 hotová,
+ale výchozí hodnoty v ní zůstaly z doby, kdy tlačítka ještě neuměla mít vlastní
+tvar. Tára se u váhy mačká v rukavicích nejčastěji ze všeho a byla stejně velká
+jako „Uložit k receptuře", které se zmáčkne jednou za měsíc. A obojí stálo tam,
+kam to vyšlo v toku stránky, ne kam od váhy jde ruka.
+
+**Co se změnilo.** Druhý průchod nástrojem, tentokrát i tažením myší —
+21 hodnot ve 14 řádcích `:root`. Rozdělují se na tři druhy:
+
+| druh | co se stalo |
+|---|---|
+| písmo | Tára 15 → 24,5 px, „zadat ručně" a „Znám zbytek rovnou" 13,5 → 18 px, krycí plocha / viskozita / Připojit / Simulace / Další složka na 16 px, hlášení 13,5 → 14 px |
+| tvar | Tára a Odpojit z `auto` na blok 116 × 100 px, krycí plocha 288 × 50 px, viskozita 180 × 50 px, Zpět do kalkulace výška 50 px |
+| poloha | posun sedmi tlačítek přes `transform`, od −2 px u „zadat ručně" po +378 px vodorovně u „Znám zbytek rovnou" |
+
+Dva pohyby proti dosavadnímu směru: **štítek na kelímek se zmenšil** z 28 na
+23 px, tedy čtverec ze 168 na 138 px — vedle nově velké Táry byl dominantní
+dvakrát a v panelu se pak nedalo najít nic jiného. A **přepínač s tužidlem**
+šel z 20 na 16 px, což vrací kapitolu 112 o kus zpátky: velký přepínač vedle
+velkých tlačítek přestal být zvýrazněním a začal být šum.
+
+**Změřeno.** V ukázce nástroje (1 600 px, světlý režim): Zpět do kalkulace
+210,13 × 50, krycí plocha 288 × 50, viskozita 180 × 50, Tára 116 × 100,
+Odpojit 116 × 100 — přesně zadané hodnoty. Písma podle `getComputedStyle`:
+Tára 24,5 px, „Znám zbytek rovnou" a „zadat ručně" 18 px, krycí plocha
+a viskozita 16 px, Zpět 17 px. Posuny jako `matrix(1, 0, 0, 1, 378, −120)`,
+`(82, 0)`, `(−2, 13)`, `(306, 24)`, `(65, 0)`. `kontrola_aplikace.py` 0,
+`prekryv.py --zalozky` 0 (čtyři šířky × oba režimy + záložky),
+`sestav.py --kontrola` 0, `mapa.py --kontrola` 0.
+
+**Co `prekryv.py` nenajde.** Nula z překryvu je tady slabší tvrzení, než se
+zdá: míchací režim **není záložka**. Vstupuje se do něj tlačítkem, které je
+`disabled` bez vybrané receptury a spočítané dávky, takže ho procházení
+záložek vůbec neotevře a měří stránku, kde `.michbg` v DOM není (`pocet('.michbg')`
+vrátí 0). Prošlá kontrola překryvu o míchacím režimu neříká nic.
+
+Změřeno napřímo v ukázce nástroje — ta má tytéž prvky a totéž rozdělení na dva
+sloupce — se dvakrát překrývá to, co se posunulo nejdál:
+
+| co | přes co | kolik |
+|---|---|---|
+| „Znám zbytek rovnou" (+378 / −120 px) | „Zrušit a navážit znovu" | 128 × 40 px |
+| „Uložit k receptuře" (+306 / +24 px) | hlášení „V pořádku — navážka je v toleranci." | 141 × 33 px |
+
+Obojí je mezi levým a pravým sloupcem: posun je tak velký, že tlačítko opustí
+svůj sloupec a přistane v cizím. Že se to v aplikaci projeví pokaždé, jisté
+není — „Zrušit a navážit znovu" se ukazuje jen při navýšené dávce a zelené
+hlášení jen v toleranci —, ale obě ta místa v režimu existují a v ukázce se
+opravdu překrývají. Hodnoty zůstaly, jak byly zadané; je to k rozhodnutí, ne
+k tichému doladění.
+
+## 115. Vysvětlivky od zbytků pryč, „Znám zbytek rovnou" na řádek k ručnímu zadání
+
+**Problém.** V levém sloupci míchacího režimu stály u dvou tlačítek doprovodné
+věty: u ručního zadání zbytku „z kelímku bez štítku se dá vyjít taky…"
+a pod tím celý odstavec o oběhu štítku, ve kterém bylo zanořené tlačítko
+„Znám zbytek rovnou". U váhy je nikdo nečte — a obě tlačítka dělají totéž
+(„vím něco, co evidence neví"), takže patřila vedle sebe, ne přes dva odstavce.
+
+**Co se změnilo.** Obě vysvětlivky odešly z rozhraní do `NAVOD_PODKLADY.md`
+(oddíl Zbytky ze skladu) a „Znám zbytek rovnou" se přestěhovalo do řádku
+vedle „Zbytek není v evidenci — zadat ručně". Blok `blokStitku` tím ztratil
+obsah a odešel celý: definice, prop `stitek` i vykreslení v míchacím režimu
+(`irm-uprava-skriptem`, bod 4 — odebrání se dělá celé). Ruční zadání zůstává
+schované, když se právě používá kelímek z evidence; „Znám zbytek rovnou" je
+mimo tu podmínku, protože zapsat známý zbytek má smysl vždycky — to je táž
+viditelnost, jakou měla tlačítka doteď.
+
+K tomu úklid po tažení z kapitoly 113: „Znám zbytek rovnou" mělo naladěný
+posun 378/−120 px — odchylku od starého místa v odstavci, kterou si tiskař
+tlačítko přitáhl k ručnímu zadání rukou. Strukturální řádek teď dělá totéž
+doopravdy, takže se posuny obou tlačítek vrátily na 0/0; stará odchylka by
+tlačítko od nového místa zase odnesla.
+
+**Změřeno** (`snimek.py` po proklikání do míchacího režimu, 1 600 × 1 100):
+obě tlačítka na jednom řádku — ruční zadání na x = 15, „Znám zbytek rovnou"
+na x = 379, obě y = 992, mezera 8 px. Vysvětlivky v režimu 0 (hledán text
+obou vět). Ukázka v `barvy.html` zrcadlí týž řádek. `node --check` obou
+částí, `kontrola_aplikace.py` 0, `prekryv.py` 0.
+
+## 116. Štítek na kelímek jako pruh podél asistenta, tužidlo přímo v něm
+
+**Problém.** Čtverec štítku stál u pravého okraje a přepínač „s tužidlem"
+pod ním — dva cíle na dvou místech, přičemž k sobě patří: štítek se tiskne
+pro tentýž kelímek, u kterého se rozhoduje o tužidle. A čtverec, byť velký,
+nechával většinu šířky sloupce nevyužitou.
+
+**Co se změnilo.** Tlačítko je pruh přes celou šířku sloupce, zarovnaný
+s kartou asistenta nad ním — ruka od vážení jen sjede dolů. Výška je
+trojnásobek písma (`--mich-tl-stitek`), aby se do pruhu vešel i přepínač.
+Přepínač „s tužidlem" sedí **vizuálně uvnitř tlačítka** u pravého okraje,
+svisle na středu.
+
+Uvnitř jen vizuálně: v kódu je to sourozenec tlačítka v obalu
+`position:relative`, položený přes něj absolutně. Ovládací prvek uvnitř
+`<button>` je neplatné HTML — a hlavně by zákaz tlačítka (bez receptury)
+vypnul i přepínač; takhle jde tužidlo přepnout vždycky. Posun přepínače
+z `barvy.html` se přičítá k usazení na střed, takže se po tlačítku dá dál
+posouvat jako každý jiný prvek; popisek posuvníku štítku teď říká „výška
+pruhu je 3×" místo „hrana čtverce je 6×".
+
+**Změřeno** (`snimek.py`, okno 1 600 × 1 100): karta asistenta 716 px, pruh
+716 px, levé i pravé hrany zarovnané pod 1 px, výška 69 px (3 × 23 px
+písma). Přepínač celý uvnitř obrysu tlačítka, 18 px od pravé hrany, svisle
+na středu pod 1 px. Klik na přepínač tužidlo zapnul (nahoře naskočil pruh
+pot life) a tlačítko štítku přitom nespustil. V okně 884 px pruh 838 px,
+přepínač uvnitř, text se s ním nepřekrývá (`getBoundingClientRect` textu
+proti přepínači). `kontrola_aplikace.py` 0, `prekryv.py` 0 (čtyři šířky ×
+oba režimy), `node --check` prošel.
+
+## 117. Karta asistenta bez vysvětlivky
+
+**Problém.** Pod nadpisem Asistent navážení stála dvouřádková vysvětlivka
+o kumulativním vážení, USB připojení a simulaci. Kdo u váhy stojí podruhé,
+už ji nečte — jen mu odsouvá tlačítka a displej váhy níž.
+
+**Co se změnilo.** Vysvětlivka odešla z karty do `NAVOD_PODKLADY.md`
+(nový oddíl Asistent navážení) — rozhraní je tiché. V kartě zůstává jen to,
+co je stavové: hlášení, že bez zadaného složení asistent vážení nevede.
+
+**Změřeno** (`snimek.py`, míchací režim): text „Komponenty se váží…"
+v kartě 0×, obsah karty se posunul k nadpisu — první řádek ovládání začíná
+33 px pod nadpisem. `kontrola_aplikace.py` 0, `prekryv.py` 0 (čtyři šířky
+× oba režimy), `node --check` prošel.
+
+## 118. Tára a Odpojit v pravém horním rohu asistenta, pod sebou
+
+**Problém.** Tára a Odpojit stály v řádku ovládání vedle štítku stavu.
+Dílna si je mezitím naladila na bloky 116 × 100 px a posunem přetáhla
+doprava — rozpoložení, které chtěla, bylo jasné z obrázku: rohový sloupec,
+Odpojit nahoře, Tára pod ním. Posun ale není poloha — s jinou šířkou okna
+by se sloupec rozjel.
+
+**Co se změnilo.** Obě tlačítka bydlí v kontejneru `.asistroh` v pravém
+horním rohu karty (`position:absolute`, roh = míchací mezera), pod sebou
+s rozestupem 1,5 × mezery. Odpojit nahoře a dál od ruky — mačká se jednou
+za směnu; Tára pod ním, blíž ke středu, mačká se po každé nádobě. Stavový
+štítek (simulace váhy / váha připojena) zůstal v řádku ovládání. Staré
+odchylky tažení (136 a 140 px doprava) se vynulovaly — poloha je teď
+strukturální a posuny se měří od rohu.
+
+Dvě věci po cestě: **inline `margin: "10px 0"`** u řádku simulace přebil
+`margin-right` z CSS (zkrácený zápis nastavuje i pravý okraj), takže se
+posuvník simulace zkrátil až po přesunu okrajů celých do CSS. A pravý konec
+posuvníku — plná dávka — by jinak zajel 118 px pod Táru; řádek `.simposuv`
+se o rohový sloupec zkracuje (`calc(var(--mich-tl-tara-sirka) +
+var(--mich-mezera))`; při šířce „auto" calc neplatí a řádek zůstává celý).
+
+**Změřeno** (`snimek.py`, simulace, 1 600 × 1 100): Odpojit i Tára
+116 × 100 px, pravé hrany zarovnané pod 1 px, 15 px od pravé i horní hrany
+karty, svislá mezera 23 px (1,5 × 15). Odpojit nad Tárou. Pruh navážení
+`.wbar` se s rohem nekříží; posuvník simulace končí 13 px před Tárou
+(předtím 118 px pod ní). `kontrola_aplikace.py` 0, `prekryv.py` 0,
+`node --check` prošel.
+
+## 119. Blok Barva na podkladu bez dvou vysvětlivek
+
+**Problém.** Pod posouzením barvy na podkladu stály dvě vysvětlivky: co
+znamená nutný podtisk (průchod navíc, druhá dávka, sušení) a jak moc
+posouzení věřit (z odstínů, ne z měření; meze v parametrech). Obojí se čte
+jednou za život, ale na obrazovce to stálo pokaždé.
+
+**Co se změnilo.** Obě věty odešly do `NAVOD_PODKLADY.md` (nový oddíl
+Barva na podkladu). Samotné posouzení — štítky barva/podklad/rozdíl jasu
+a stavová hláska — v aplikaci zůstává beze změny; zmizel jen výklad.
+
+**Změřeno** (`snimek.py`, míchací režim): oba texty v režimu 0×, blok
+posouzení dál stojí (štítek „rozdíl jasu" nalezen). `kontrola_aplikace.py`
+0, `prekryv.py` 0, `node --check` prošel.
+
+## 120. Hlavičky číselných sloupců stojí nad čísly
+
+**Problém.** Čísla v tabulkách jsou zarovnaná doprava, ale nadpisy sloupců
+nad nimi stály vlevo — v tabulce navážení tak „ZBÝVÁ G" stálo daleko od svých
+hodnot a sloupec nevypadal jako sloupec. Třídu `num` přitom hlavičky v kódu
+měly; pravidlo jen nikdy nevyhrálo.
+
+**Co se změnilo.** Byla to dvojí prohra ve specificitě CSS, ne chybějící
+třída: `table.t th{text-align:left}` (0,1,2) přebíjelo `th.num` (0,1,1),
+a `.michtab th{text-align:left}` má stejnou specificitu jako `th.num`, ale
+načítá se později. V `050-prvky.css` přibyl do seznamu selektor
+`table.t th.num` (0,2,2), v `070-michani.css` pravidlo `.michtab th.num`.
+K tomu audit všech 26 tabulek v aplikaci: číselné hlavičky třídu `num` měly
+všude až na dva sloupce „Ref." (katalog produktů, importér) — kódy vpravo,
+nadpis vlevo; oběma třída doplněna. Zarovnání tlačítek doprava přes `td.num`
+pod prázdnou hlavičkou (šarže, opravy) je záměr a zůstává.
+
+**Změřeno** (`sonda.py`, `snimek.py`, 1 600 px): spočítané `text-align`
+v živé stránce — `table.t th.num` i `.michtab th.num` right, buňky right,
+popisné hlavičky left. Na skutečné obrazovce katalogu po dvou klicích
+(menu → Produkty): hlavička „REF." i buňka „11003" mají shodnou pravou hranu
+obsahu 183,22 px. `kontrola_aplikace.py` 0, `prekryv.py` 0 (8 měření,
+4 šířky × 2 režimy).
+
+## 121. Tlačítko krycí plochy u pravé hrany, zarovnané s tabulkou navážení
+
+**Problém.** „Spočítat krycí plochu z náhledu“ stálo v míchacím režimu
+uprostřed řádku — 82px posun z dřívějšího ladění ho nechával viset 224 px
+od pravé hrany sloupce, nad ničím. U váhy je přitom vpravo ruka i pohled
+a hned pod tlačítkem začíná tabulka navážení.
+
+**Co se změnilo.** Tlačítko drží u pravé hrany sloupce auto okrajem
+(`margin-left:auto` v `070-michani.css`), ne pevným posunem — štítek vlevo
+(„krycí plocha 100,0 % · z katalogu“) mění délku podle hodnot a pevné číslo
+by s každou změnou textu přestalo sedět. Výchozí
+`--mich-tl-plocha-posun-x` se vrátil z 82 px na 0; posuvník v barvy.html
+dál funguje jako doladění od nového místa. `first-of-type` v pravidle
+zaručuje, že si dvojice Upravit / Zpět na katalog nerozdělí volné místo
+mezi sebe.
+
+**Změřeno** (`snimek.py`, míchací režim, 1 600 px): pravá hrana tlačítka,
+tabulky navážení i zvýrazněného řádku shodně 838,17 px; tlačítko 550–838 px
+stojí nad hlavičkou „kumulativně“ (649–838 px). Před změnou končilo na
+614 px. `kontrola_aplikace.py` 0, `prekryv.py` 0 (8 měření), barvy.html
+přegenerováno (88 ovladačů míchacího režimu).
+
+## 122. Zdůvodnění, proč se nátisk nenabízí, odešlo do návodu
+
+**Problém.** Když nátisk z malé dávky nemá smysl — zkušební dávka by kvůli
+nejmenší složce přesáhla 60 % celé —, aplikace na místě tlačítka *Nejdřív
+nátisk* vysvětlovala proč, i s výpočtem. Kdo míchá, tomu ta věta nic nedává:
+tlačítko prostě není a míchá se celá dávka. Odstavec jen zabíral místo nad
+tabulkou navážení.
+
+**Co se změnilo.** Blok poznámky (`!natisk && rozborNatisku.nemaSmysl`)
+z `240-calc.js` zmizel — platí pro obě místa, kde rozpis stojí, kalkulaci
+i míchací režim, protože jde o jeden kus JSX. Text odešel doslova do
+`NAVOD_PODKLADY.md` (oddíl *Nátisk z malé dávky — kdy se nenabídne*) včetně
+omezení, které tím zmizelo z očí: tlačítko nátisku se nenabídne vždy a bez
+té věty to teď není odkud poznat. Výpočet v `590-natisk-mala-davka.js` se
+nezměnil a zdůvodnění dál vrací (pole `duvod`) — nezobrazuje se, ale rozbor
+je úplný.
+
+**Změřeno** (`snimek.py`, míchací režim po skutečném kliknutí): text
+„Nátisk z malé dávky sem nesedí“ 0×, tlačítko *Nejdřív nátisk* u téhle dávky
+0× (nemá smysl — správně), po poznámce nezůstala mezera (Viskozita navazuje
+hned za blok Než začnete míchat). `kontrola_aplikace.py` 0, `prekryv.py` 0
+(8 měření).
+
+## 123. Výběr technologie se v menu rozbaluje šipkou
+
+**Problém.** Menu neslo pět technologií s počty produktů (a zamčeným
+i tlačítko *Co chybí k odemčení…*) natrvalo rozbalených mezi rolemi
+a záložkami. Technologie se přitom přepíná jednou za směnu, zatímco záložky
+pod ní se otvírají pořád — kdo šel do Receptur, projížděl očima pět řádků,
+které ho nezajímaly.
+
+**Co se změnilo.** Hlavička TECHNOLOGIE je teď tlačítko se šipkou (▸/▾):
+sbaleně drží menu krátké a vpravo ukazuje, která technologie platí („vše",
+„SCR"…); rozbalením se objeví jednotlivé technologie i s počty a případné
+*Co chybí k odemčení…* — beze změny chování. Menu se po otevření vždycky
+začíná sbalené (`setTechRozbaleno(false)` při kliku na menu), aby bylo
+krátké pokaždé, ne jen napoprvé. Údaj „která platí" zůstává vidět dvakrát:
+štítek pod logem a hlavička v menu. Plovoucí popisek stojí ve značce před
+textem hlavičky — za textem by se vedle TECHNOLOGIE nevešel a spadl na
+druhý řádek.
+
+**Změřeno** (`snimek.py`, skutečné kliky): menu sbaleně 17 položek
+(předtím 22), technologií vidět 0; po kliku na šipku 23 položek, všech
+5 technologií s počty (SCR 411, TXP 298, PDP 511, TRS 695, FIR 35);
+výběr SCR projde a znovuotevřené menu je sbalené s hlavičkou
+„▸ TECHNOLOGIE · SCR". Hlavička 39 px proti řádku role 38 px — jeden
+řádek (s popiskem za textem 55+ px, dva řádky). `kontrola_aplikace.py` 0,
+`prekryv.py` 0 (8 měření), `node --check` prošel.
+
+## 124. Záložky v menu seskupené po druhu práce
+
+**Problém.** Menu neslo čtrnáct záložek v jedné řadě bez ladu — Připojení
+k mostu mezi Zakázkami a Produkty, Šarže mezi Co propadne a Zbytky. Kdo šel
+do Receptur, projížděl očima celý sloupec.
+
+**Co se změnilo.** Záložky drží čtyři skupiny, které se rozbalují šipkou
+stejně jako výběr technologie: **Katalog** (Produkty, Receptury, Přepočet
+na síto — přepočet pracuje s recepturami, tak stojí u nich), **Míchání**
+(Ke schválení, Fronta míchání, Opravy po nátisku — rozdělaná práce),
+**Sklad** (Sklad surovin, Zbytky barev, Co propadne, Šarže — šarže jsou
+evidence konví, patří ke skladu, ne k sestavám) a **Data** (Připojení
+k mostu, Import / data). Zakázky (SGPS) a Sestavy a trendy zůstaly
+samostatně. Sbalená skupina neschová nic důležitého: součty štítků
+(po lhůtě, pod minimem, došlo, fronta, schválení) vystupují na její řádek
+s vysvětlením v popisku, a skupina s otevřenou záložkou se zvýrazní jako
+aktivní. Menu se otevírá vždy sbalené; stav drží jedna mapa
+`otevreneSkupiny` místo čtyř stavů.
+
+**Změřeno** (`snimek.py`, skutečné kliky): menu sbaleně **9 položek**
+(před technologiemi 22, po nich 17); rozbalený Katalog přidá Produkty,
+Receptury a Přepočet na síto; po přepnutí na Produkty nese sbalený řádek
+Katalogu třídu `on`. Fronta nasazená do izolovaného profilu snímkovače
+vystoupila součtem na řádek Míchání (štítek 1, popisek „ve frontě čeká 1").
+Most při zkoušce běžel — skutečná `evidence/fronta.csv` zkontrolována,
+zůstala jen s hlavičkou, aplikace beze změny obsahu nezapisuje.
+`kontrola_aplikace.py` 0, `prekryv.py` 0 (8 měření), `node --check` prošel.
+
+Slepá ulička po cestě: položky zkušební fronty bez `kod` se při slučování
+s frontou ze souboru slily do jedné (mapa klíčovaná kódem) — první měření
+štítku proto ukázalo 1 místo 2. Není to chyba aplikace, ale zkoušky;
+příště se položkám dává `kod`.
+## 125. Aplikace mluví česky, anglicky a portugalsky
+
+**Problém.** Rozhraní bylo jen české. Jakmile má u váhy stát někdo, kdo česky
+nečte, je mu celá aplikace k ničemu — a anglická ukázka (`ukazka_en.html`)
+už předváděla něco, co aplikace sama neuměla.
+
+**Co se změnilo.** Nová část `20-zaklad/127-jazyk.js`: slovník `SLOVNIK`
+(84 položek, český text → angličtina + portugalština), funkce
+`preloz(text, dosazeni)` a volba jazyka v prohlížeči (`irm-jazyk`) vedle
+role a vzhledu. V nabídce je dole kolonka JAZYK s trojicí
+Čeština / English / Português — názvy jazyků se nepřekládají nikdy, každý
+si musí najít ten svůj i v cizím rozhraní. Klíčem slovníku je český text:
+co ve slovníku není, zůstane česky, takže rozpracovaný překlad nikdy
+nerozbije obrazovku. Jmenovky `{jmeno}` se doplňují až po překladu, aby si
+každý jazyk srovnal slovosled po svém. Přepnutí přenastaví i `lang` na
+kořeni stránky kvůli čtečkám a kontrole pravopisu.
+
+Přeložený je celý aplikační rám: nabídka (role, technologie, skupiny,
+záložky, odznaky s počty), hlavička s tlačítkem zpět, přepínač vzhledu,
+výstraha nenačteného katalogu, dialog hesla, dialog „Kolik barvy zbylo?“
+a stálá hlášení rámu (66 obalených míst: 60 v `210-app.js`, 6 v
+`220-heslo.js`). Obsah záložek se překládá dalšími etapami.
+
+Schválně se nepřekládají: data dílny (receptury, produkty, CSV, štítky,
+míchací lístky — provozní dokumenty dílny), podpisy rolí zapisované do
+souborů a tvar čísel (desetinná čárka, mezera v tisících platí v celé
+dílně bez ohledu na jazyk obrazovky).
+
+**Změřeno** (`snimek.py`, skutečné kliky): po kliku na English má kořen
+`lang="en"`, v úložišti `irm-jazyk="en"` a nabídka čte Technologist · Printer
+· TECHNOLOGY all · Orders (SGPS) · CATALOG · MIXING · STOCK · Reports and
+trends · DATA · LANGUAGE; po Português TECNOLOGIA · Encomendas (SGPS) ·
+CATÁLOGO · MISTURA. Obsah záložky (Kolik namíchat) zůstal česky — přesně
+rozsah 1. etapy. `kontrola_aplikace.py` 0, `sestav.py --kontrola` 0
+(81 částí), `node --check` prošel u všech tří dotčených částí.
+
+Past po cestě: čtyři skupinové řádky nabídky měly ve vzoru náhrady mezeru
+tam, kde v kódu stojí `>` — skript s ověřenými počty výskytů proto odmítl
+sáhnout na soubor a nic nepřepsal napůl. Přesně kvůli tomu se hromadné
+zásahy dělají skriptem, ne rukou.
+## 126. Přepnutí jazyka je vidět hned — Kalkulace mluví všemi třemi jazyky
+
+**Problém.** Po kapitole 125 se jazyk skutečně přepínal (kořen dostal
+`lang="en"`, nabídka se přeložila), ale kliknutím se nabídka zavřela a na
+obrazovce zůstala česká Kalkulace — takže to vypadalo, že se nestalo nic.
+Přesně tak to nahlásil uživatel.
+
+**Co se změnilo.** Přeložena výchozí obrazovka Kalkulace: vyhledávání,
+lišta načtené zakázky, karty Vybraný produkt, Receptura a barva, Zakázka,
+Parametry tisku a Kolik namíchat se všemi výstrahami (sklad, předpověď
+zbytku, VOC), nátisk z malé dávky, pruh pot life, finanční box a dialogy
+„Barva a poloha potisku" a „Uložit zbytek do evidence". Slovník v části
+`20-zaklad/127-jazyk.js` narostl na 338 položek; skripty obalily 178 míst
+(146 v `240-calc.js`, 24 ve `260-financni-box.js`, 8 v `270-potlife-pruh.js`).
+U textů s tučnou vsuvkou se šablona rozstřihává kolem jmenovky
+(`preloz(...).split("{kod}")`), aby překlad nezrušil zvýraznění a každý
+jazyk si srovnal slovosled po svém.
+
+Schválně zůstává česky: míchací lístek a štítek (tištěné dokumenty dílny),
+názvy produktů a receptur (data) a bloky vykreslované až v míchacím režimu
+(nabídky zbytků, ruční zadání zbytku, aditiva, viskozita, rady k podkladu)
+— ty jsou další etapa a do té doby spadnou do češtiny.
+
+**Změřeno** (`snimek.py`, skutečné kliky): po kliku na English čtou nadpisy
+karet Selected product · Recipe and color · Order · Print parameters ·
+How much to mix a výsledek „≈ 41,7 ml at density 1,20 g/ml"; po Português
+Produto selecionado · Receita e cor · Encomenda · Parâmetros de impressão ·
+Quanto misturar. `kontrola_aplikace.py` 0, `node --check` prošel u všech
+čtyř dotčených částí. Skripty s ověřenými počty výskytů: 74 + 72 + 24 + 8
+náhrad, žádná neproběhla s jiným počtem, než se čekalo.

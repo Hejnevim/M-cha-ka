@@ -128,7 +128,7 @@ function Importer({ setProducts, setRecipes, guardDelete, deletePw, setDeletePw,
             ${preview.skipped.length > 0 && html`<div className="warnbox">${preview.skipped.length} řádků přeskočeno — nerozpoznaná technologie (např. „${preview.skipped[0].techRaw}").</div>`}
             ${preview.badDim.length > 0 && html`<div className="warnbox">${preview.badDim.length} řádků přeskočeno — chybí rozměr tiskové plochy.</div>`}
             <table className="t" style=${{ marginTop: 12 }}>
-              <thead><tr><th>Ref.</th><th>Produkt</th><th>Poloha</th><th>Technologie</th><th className="num">Š×V mm</th></tr></thead>
+              <thead><tr><th className="num">Ref.</th><th>Produkt</th><th>Poloha</th><th>Technologie</th><th className="num">Š×V mm</th></tr></thead>
               <tbody>
                 ${preview.ok.slice(0, 30).map((i, k) => html`
                   <tr key=${k}>

@@ -154,21 +154,56 @@ ROZESTUPY = [
 # Míchací režim se ladí zvlášť. Nečte se od klávesnice, ale od váhy — často
 # ve stoje a v rukavicích — takže má vlastní velikosti, které se nesmí hnout,
 # když se sáhne na obecnou škálu aplikace.
-MICHANI = [
-    ("--mich-nazev", "Název receptury v hlavičce", 14, 56, 1, "px"),
-    ("--mich-davka", "Dávka v hlavičce", 16, 72, 1, "px"),
-    ("--mich-vzorek", "Vzorek barvy v hlavičce", 24, 110, 2, "px"),
-    ("--mich-hlavicka", "Hlavičky sloupců tabulky", 8, 24, 0.5, "px"),
-    ("--mich-tabulka", "Text v tabulce navážky", 12, 38, 1, "px"),
-    ("--mich-gramy", "Gramy v tabulce", 14, 52, 1, "px"),
-    ("--mich-radek", "Výška řádků tabulky", 4, 30, 1, "px"),
-    ("--mich-vysledek", "Číslo na váze", 24, 110, 2, "px"),
-    ("--mich-wbar", "Tloušťka pruhu navážení", 4, 48, 1, "px"),
-    ("--mich-tlacitko", "Velikost tlačítek", 10, 30, 0.5, "px"),
-    ("--mich-mezera", "Odsazení a mezery (i uvnitř karty asistenta)", 6, 56, 1, "px"),
-    ("--mich-pole", "Pole pro zadávání (aditiva, tolerance)", 10, 36, 1, "px"),
-    ("--mich-hlaseni", "Varování a potvrzení", 9, 28, 0.5, "px"),
-    ("--mich-stitek", "Štítky u složek", 8, 24, 0.5, "px"),
+MICHANI_SKUPINY = [
+    ("Hlavička", [
+        ("--mich-nazev", "Název receptury", 14, 56, 1, "px"),
+        ("--mich-davka", "Dávka — číslo vpravo", 16, 72, 1, "px"),
+        ("--mich-vzorek", "Vzorek barvy", 24, 110, 2, "px"),
+    ]),
+    ("Tabulka navážky", [
+        ("--mich-hlavicka", "Hlavičky sloupců", 8, 24, 0.5, "px"),
+        ("--mich-tabulka", "Text v tabulce", 12, 38, 1, "px"),
+        ("--mich-gramy", "Gramy v tabulce", 14, 52, 1, "px"),
+        ("--mich-radek", "Výška řádků", 4, 30, 1, "px"),
+        ("--mich-znak", "Sloupec se značkami ▶ a ✓", 10, 60, 1, "px"),
+    ]),
+    ("Váha a asistent", [
+        ("--mich-vysledek", "Číslo na váze", 24, 110, 2, "px"),
+        ("--mich-wbar", "Tloušťka pruhu navážení", 4, 48, 1, "px"),
+        ("--mich-pole", "Pole pro zadávání", 10, 36, 1, "px"),
+    ]),
+    ("Texty a hlášení", [
+        ("--mich-nadpis", "Nadpis karty asistenta", 10, 40, 0.5, "px"),
+        ("--mich-poznamka", "Poznámky a doprovodné věty", 9, 30, 0.5, "px"),
+        ("--mich-hlaseni", "Varování a potvrzení", 9, 28, 0.5, "px"),
+        ("--mich-stitek", "Štítky u složek", 8, 24, 0.5, "px"),
+    ]),
+    ("Rozestupy a ostatní", [
+        ("--mich-mezera", "Odsazení a mezery (i uvnitř karty asistenta)", 6, 56, 1, "px"),
+        ("--mich-tlacitko", "Ostatní tlačítka (vzácné stavy bez posuvníku)", 10, 30, 0.5, "px"),
+    ]),
+]
+MICHANI = [pol for _n, _pols in MICHANI_SKUPINY for pol in _pols]
+
+# Tlačítka míchacího režimu — každé má vlastní skupinu s pěti ovladači:
+# písmo (velikost), šířka a výška (0 = tvar podle textu, stejná čísla =
+# čtverec) a posun (vizuální odchylka od přirozeného místa; tlačítko si
+# místo v řádku drží, takže se rozvržení nerozsype). Poslední dvě položky
+# jsou rodiny — stavová tlačítka bez vlastního jména.
+MICH_TLACITKA = [
+    ("--mich-tl-zpet", "✕ Zpět do kalkulace"),
+    ("--mich-tl-plocha", "Krycí plocha (Spočítat / Upravit / Zpět)"),
+    ("--mich-tl-rucne", "Zbytek není v evidenci — zadat ručně"),
+    ("--mich-tl-znam", "Znám zbytek rovnou"),
+    ("--mich-tl-viskozita", "Uložit k receptuře"),
+    ("--mich-tl-pripojit", "Připojit váhu (USB)"),
+    ("--mich-tl-simulace", "Vyzkoušet v simulaci"),
+    ("--mich-tl-tara", "Tára"),
+    ("--mich-tl-odpojit", "Odpojit"),
+    ("--mich-tl-sarze", "Zadat šarži / Nová konev"),
+    ("--mich-tl-dalsi", "Další složka / Dokončit"),
+    ("--mich-tl-hlaseni", "Rodina: tlačítka v hlášeních (zbytky, pot life)"),
+    ("--mich-tl-pomocna", "Rodina: pomocná tlačítka v kartě (Zapsat, Zpět…)"),
 ]
 
 # ---------------------------------------------------------------------------
@@ -257,8 +292,26 @@ VYCHOZI_TVARY = {"--radius": "18px", "--radius-btn": "999px", "--radius-pole": "
                  "--mich-radek": "11px", "--mich-vysledek": "52px", "--mich-wbar": "20px",
                  "--mich-tlacitko": "15px", "--mich-mezera": "22px",
                  "--mich-pole": "20px", "--mich-hlaseni": "15px", "--mich-stitek": "14px",
+                 "--mich-prepinac": "13px",
+                 "--mich-tl-zpet": "15px", "--mich-tl-plocha": "13.5px",
+                 "--mich-tl-rucne": "13.5px", "--mich-tl-znam": "13.5px",
+                 "--mich-tl-viskozita": "13.5px", "--mich-tl-pripojit": "15px",
+                 "--mich-tl-simulace": "15px", "--mich-tl-tara": "13.5px",
+                 "--mich-tl-odpojit": "13.5px", "--mich-tl-sarze": "13.5px",
+                 "--mich-tl-dalsi": "15px", "--mich-tl-stitek": "30px",
+                 "--mich-tl-hlaseni": "13.5px", "--mich-tl-pomocna": "13.5px",
+                 "--mich-nadpis": "20.1px", "--mich-poznamka": "13.44px",
+                 "--mich-znak": "26px",
                  "--sirka-stranky": "none", "--sloupec-1": "1fr", "--sloupec-2": "1fr",
                  "--mezera-sloupcu": "40px"}
+
+# Tvar a poloha tlačítek míchacího režimu: „auto" a nulový posun znamenají
+# tlačítko přesně tak, jak si ho postaví aplikace.
+for _k, _n in MICH_TLACITKA:
+    VYCHOZI_TVARY.update({_k + "-sirka": "auto", _k + "-vyska": "auto",
+                          _k + "-posun-x": "0px", _k + "-posun-y": "0px"})
+VYCHOZI_TVARY.update({"--mich-tl-stitek-posun-x": "0px", "--mich-tl-stitek-posun-y": "0px",
+                      "--mich-prepinac-posun-x": "0px", "--mich-prepinac-posun-y": "0px"})
 
 # Poloha a velikost každé karty. Drží se v téže mapě jako tvary a písmo, takže
 # se čtou z aplikace a vracejí do ní stejnou cestou — žádný druhý mechanismus.
@@ -468,8 +521,29 @@ def main():
     tvary_html.append(skupina("Písmo", telo, False))
     tvary_html.append(skupina("Rozestupy",
                               [posuvnik(*r, atr="data-tvar") for r in ROZESTUPY], False))
-    tvary_html.append(skupina("Míchací režim",
-                              [posuvnik(*m, atr="data-tvar") for m in MICHANI], False))
+    # ---- stránka Míchací režim: vlevo písmo a prvky, vpravo tlačítka —
+    # jedna skupina na tlačítko, ať se ovladače jednoho nepletou s druhým.
+    mich_levy = [skupina(_n, [posuvnik(*m, atr="data-tvar") for m in _pols], _i == 0)
+                 for _i, (_n, _pols) in enumerate(MICHANI_SKUPINY)]
+    mich_pravy = []
+    for _k, _n in MICH_TLACITKA:
+        mich_pravy.append(skupina(_n, [
+            posuvnik(_k, "Písmo — velikost tlačítka", 8, 60, 0.5, "px", atr="data-tvar"),
+            posuvnik(_k + "-sirka", "Šířka (0 = podle textu)", 0, 400, 2, "px", atr="data-tvar"),
+            posuvnik(_k + "-vyska", "Výška (0 = podle textu)", 0, 400, 2, "px", atr="data-tvar"),
+            posuvnik(_k + "-posun-x", "Posun vodorovně", -400, 400, 2, "px", atr="data-tvar"),
+            posuvnik(_k + "-posun-y", "Posun svisle", -400, 400, 2, "px", atr="data-tvar"),
+        ], False))
+    mich_pravy.append(skupina("Štítek na kelímek", [
+        posuvnik("--mich-tl-stitek", "Písmo — výška pruhu je 3×", 12, 60, 1, "px", atr="data-tvar"),
+        posuvnik("--mich-tl-stitek-posun-x", "Posun vodorovně", -400, 400, 2, "px", atr="data-tvar"),
+        posuvnik("--mich-tl-stitek-posun-y", "Posun svisle", -400, 400, 2, "px", atr="data-tvar"),
+    ], False))
+    mich_pravy.append(skupina("Přepínač s tužidlem", [
+        posuvnik("--mich-prepinac", "Velikost přepínače", 10, 60, 1, "px", atr="data-tvar"),
+        posuvnik("--mich-prepinac-posun-x", "Posun vodorovně", -400, 400, 2, "px", atr="data-tvar"),
+        posuvnik("--mich-prepinac-posun-y", "Posun svisle", -400, 400, 2, "px", atr="data-tvar"),
+    ], False))
 
     # ---- stránka Rozvržení: vlevo stránka a sloupce, vpravo jednotlivé karty
     stranka_html = [vyber("--sirka-stranky", "Největší šířka stránky", SIRKY_STRANKY)]
@@ -510,6 +584,8 @@ def main():
             .replace("<!--STRANKA-->", "\n".join(stranka_html))
             .replace("<!--KARTY-->", "\n".join(karty_html))
             .replace("<!--OKNA-->", "\n".join(okna_html))
+            .replace("<!--MICH-LEVY-->", "\n".join(mich_levy))
+            .replace("<!--MICH-PRAVY-->", "\n".join(mich_pravy))
             .replace("/*KARTY*/", json.dumps(
                 [{"klic": k, "nazev": n, "sel": s} for k, n, s in KARTY],
                 ensure_ascii=False))
@@ -522,7 +598,8 @@ def main():
     print("barev: %d · stínů: %d (+%d logo) · tvarů a ikon: %d · písma: %d (+%d řezy)"
           " · rozestupů: %d · míchacího režimu: %d · rozvržení: %d karet"
           % (len(BARVY), len(STINY), len(STINY_LOGO), len(TVARY) + 1,
-             len(PISMO), len(RODINY), len(ROZESTUPY), len(MICHANI), len(KARTY)))
+             len(PISMO), len(RODINY), len(ROZESTUPY),
+             len(MICHANI) + 5 * len(MICH_TLACITKA) + 6, len(KARTY)))
     if "--open" in sys.argv:
         webbrowser.open("file:///" + CIL.replace("\\", "/"))
     return 0
@@ -619,11 +696,13 @@ SABLONA = r"""<!doctype html>
 .platno iframe{position:absolute;top:0;left:0;border:0;display:block;
   transform-origin:top left;background:var(--bg)}
 .kolize{color:var(--danger);font-weight:700}
+#strana-michani .michukazka button,#strana-michani .michukazka .tgl{cursor:grab}
 </style></head>
 <body>
 <div class="hdr"><div class="navleft"></div><h1>VZHLED</h1>
   <div class="lista" style="margin:0">
     <button class="chip on" data-strana="barvy">Barvy a vzhled</button>
+    <button class="chip" data-strana="michani">Míchací režim</button>
     <button class="chip" data-strana="rozvrzeni">Rozvržení hlavní stránky</button>
   </div>
 </div>
@@ -705,83 +784,6 @@ SABLONA = r"""<!doctype html>
       </table>
     </div>
 
-    <div class="card">
-        <h2>Míchací režim</h2>
-        <p class="hint">Celá obrazovka u váhy — skutečné prvky aplikace.
-          Ladí se posuvníky v oddílu <b>Míchací režim</b> vlevo.</p>
-        <div class="michukazka">
-          <div class="michbg">
-            <div class="michhlav">
-              <span class="michvzorek" style="background:#F2602F"></span>
-              <span>
-                <span class="nazev" style="display:block">PANTONE Cool Gray 1 C</span>
-                <span class="kde">93804 · 106 · FIR Džbánek / Tělo lahve</span>
-              </span>
-              <span class="michdavka"><b>72,4 g</b><span>≈ 60,4 ml</span></span>
-              <button class="btn sec">✕ Zpět do kalkulace</button>
-            </div>
-            <div class="michtelo">
-              <!-- Levý sloupec v aplikaci karta není, obsah leží přímo na ploše.
-                   Kartu má jen asistent navážení — ukázka to musí držet stejně,
-                   jinak by se podle ní ladilo něco, co v aplikaci není. -->
-              <div>
-                <div class="rowline">
-                  <span class="tag">krycí plocha 100,0 % · z katalogu</span>
-                  <button class="btn sec sm">Spočítat krycí plochu z náhledu</button>
-                </div>
-                <table class="michtab">
-                  <thead><tr><th>Komponenta</th><th class="num">Navážit</th><th class="num">Kumulativně</th></tr></thead>
-                  <tbody>
-                    <tr class="ted"><td><span class="michstav">▶</span>19 3601 White</td>
-                      <td class="num g">72,0</td><td class="num">72,0</td></tr>
-                    <tr><td><span class="michstav"></span>14 3601 Black (Black C)</td>
-                      <td class="num g">0,4</td><td class="num">72,4</td></tr>
-                    <tr><td><span class="michstav"></span>11 3601 Green (Green C)</td>
-                      <td class="num g">0,1</td><td class="num">72,4</td></tr>
-                    <tr class="hotovo"><td><span class="michstav">✓</span>12 3601 Blue 1 (Process Blue C)</td>
-                      <td class="num g">0,0</td><td class="num">72,4</td></tr>
-                    <tr><td><b>Navážit celkem</b></td><td class="num g">72,4</td><td class="num g">72,4</td></tr>
-                  </tbody>
-                </table>
-                <div class="rowline" style="margin-top:12px">
-                  <button class="btn sec">Zbytek není v evidenci — zadat ručně</button>
-                </div>
-                <div class="rowline">
-                  <button class="btn sec">Štítek na kelímek →</button>
-                  <button class="btn sec sm">Znám zbytek rovnou</button>
-                </div>
-              </div>
-              <div class="card">
-                <h2>Asistent navážení</h2>
-                <div class="rowline">
-                  <span class="tag tech">simulace váhy</span>
-                  <button class="btn sec sm">Tára (0)</button>
-                  <button class="btn sec sm">Odpojit</button>
-                </div>
-                <div class="result-big">0,0 g</div>
-                <div class="result-sub">na váze · receptura PANTONE Cool Gray 1 C</div>
-                <div class="wbar" style="margin-top:10px"><span style="width:34%;background:var(--cyan)"></span></div>
-                <p class="note" style="margin-top:8px"><b>19 3601 White</b> — přidat 72,0 g,
-                  navážit celkem do 72,0 g · zbývá 72,0 g</p>
-                <div class="rowline">
-                  <button class="btn">Další komponenta →</button>
-                  <span class="note">tolerance ± 0,5 g</span>
-                </div>
-                <table class="michtab" style="margin-top:10px">
-                  <thead><tr><th>Komponenta</th><th class="num">%</th><th class="num">Cíl g</th><th class="num">Zbývá g</th></tr></thead>
-                  <tbody>
-                    <tr class="ted"><td>19 3601 White</td><td class="num">99,4</td><td class="num">72,0</td><td class="num">72,0</td></tr>
-                    <tr><td>14 3601 Black</td><td class="num">0,5</td><td class="num">0,38</td><td class="num">0,38</td></tr>
-                    <tr class="hotovo"><td>11 3601 Green</td><td class="num">0,1</td><td class="num">0,07</td><td class="num">pod tol.</td></tr>
-                  </tbody>
-                </table>
-                <div class="okbox">V pořádku — navážka je v toleranci.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
     <div class="card vystup">
       <h2>Blok k vložení do aplikace/10-styl/020-promenne.css</h2>
       <p class="hint">Celé bloky <b>:root</b> a <b>:root[data-theme="dark"]</b>
@@ -812,6 +814,146 @@ SABLONA = r"""<!doctype html>
     </div>
   </div>
 
+</div>
+
+<div class="nastroj" id="strana-michani" hidden>
+  <div class="card panel">
+    <h2>Písmo, tabulka a váha</h2>
+    <p class="hint">Míchací režim se ladí zvlášť od zbytku aplikace — nečte se
+      od klávesnice, ale od váhy, často v rukavicích. Tlačítka jsou v pravém
+      panelu, každé zvlášť; tady je všechno ostatní.</p>
+    <!--MICH-LEVY-->
+  </div>
+
+  <div class="ukazka">
+    <div class="card">
+      <h2>Míchací režim</h2>
+      <p class="hint">Skutečné prvky aplikace. Asistent ukazuje obě podoby
+        naráz — před připojením váhy i po něm; v aplikaci se střídají.
+        <b>Tlačítka se dají táhnout myší</b> — posun se propíše do posuvníků
+        vpravo i do výstupního bloku.</p>
+      <div class="michukazka">
+        <div class="michbg">
+          <div class="michhlav">
+            <span class="michvzorek" style="background:#F2602F"></span>
+            <span>
+              <span class="nazev" style="display:block">PANTONE Cool Gray 1 C</span>
+              <span class="kde">93804 · 106 · FIR Džbánek / Tělo lahve</span>
+            </span>
+            <span class="michdavka"><b>72,4 g</b><span>≈ 60,4 ml</span></span>
+            <button class="btn sec mich-tl-zpet">✕ Zpět do kalkulace</button>
+          </div>
+          <div class="michtelo">
+            <!-- Levý sloupec v aplikaci karta není, obsah leží přímo na ploše.
+                 Kartu má jen asistent navážení — ukázka to musí držet stejně,
+                 jinak by se podle ní ladilo něco, co v aplikaci není. -->
+            <div>
+              <div class="rowline">
+                <span class="tag">krycí plocha 100,0 % · z katalogu</span>
+                <button class="btn sec sm mich-tl-plocha">Spočítat krycí plochu z náhledu</button>
+              </div>
+              <table class="michtab">
+                <thead><tr><th>Komponenta</th><th class="num">Navážit</th><th class="num">Kumulativně</th></tr></thead>
+                <tbody>
+                  <tr class="ted"><td><span class="michstav">▶</span>19 3601 White</td>
+                    <td class="num g">72,0</td><td class="num">72,0</td></tr>
+                  <tr><td><span class="michstav"></span>14 3601 Black (Black C)</td>
+                    <td class="num g">0,4</td><td class="num">72,4</td></tr>
+                  <tr class="hotovo"><td><span class="michstav">✓</span>12 3601 Blue 1 (Process Blue C)</td>
+                    <td class="num g">0,0</td><td class="num">72,4</td></tr>
+                  <tr><td><b>Navážit celkem</b></td><td class="num g">72,4</td><td class="num g">72,4</td></tr>
+                </tbody>
+              </table>
+              <div class="specbar" style="margin-top:10px">
+                <span class="dot" style="background:var(--cyan)"></span>
+                <span>Dvousložková barva — po navážení přidejte <b>3,6 g tužidla</b>.</span>
+                <span style="margin-left:auto"></span>
+                <button class="btn sm">Tužidlo přidáno — spustit odpočet</button>
+              </div>
+              <div class="okbox">
+                <b>Na tuto zakázku můžete využít zbytek.</b>
+                <div class="rowline" style="margin-top:8px;margin-bottom:0">
+                  <span class="swatch" style="background:#8FBFA0;width:20px;height:20px"></span>
+                  <span><b>45,2 g</b> z kelímku <b>Z-017</b> — PANTONE 5635 C</span>
+                  <button class="btn sm">Použít 45,2 g — dávka se přepočítá</button>
+                </div>
+              </div>
+              <div class="rowline">
+                <button class="btn sec sm mich-tl-rucne">Zbytek není v evidenci — zadat ručně</button>
+                <button class="btn sec sm mich-tl-znam">Znám zbytek rovnou</button>
+              </div>
+              <div class="rowline">
+                <input value="18" style="width:90px" title="viskozita — výtokový čas">
+                <span class="note">s</span>
+                <button class="btn sec sm mich-tl-viskozita">Uložit k receptuře</button>
+              </div>
+            </div>
+            <div>
+              <div class="card">
+                <h2>Asistent navážení</h2>
+                <div class="rowline">
+                  <button class="btn mich-tl-pripojit">Připojit váhu (USB)</button>
+                  <select style="width:auto"><option>9600 Bd</option></select>
+                  <button class="btn sec mich-tl-simulace">Vyzkoušet v simulaci</button>
+                </div>
+                <div class="asistroh">
+                  <button class="btn danger sm mich-tl-odpojit">Odpojit</button>
+                  <button class="btn sec sm mich-tl-tara">Tára (0)</button>
+                </div>
+                <div class="rowline">
+                  <span class="tag tech">simulace váhy</span>
+                </div>
+                <div class="result-big">0,0 g</div>
+                <div class="result-sub">na váze · receptura PANTONE Cool Gray 1 C</div>
+                <div class="wbar" style="margin-top:10px"><span style="width:34%;background:var(--cyan)"></span></div>
+                <p class="note" style="margin-top:8px"><b>19 3601 White</b> — přidat 72,0 g
+                  · šarže neuvedena
+                  <button class="btn sec sm mich-tl-sarze" style="margin-left:4px">Zadat šarži</button>
+                </p>
+                <div class="rowline">
+                  <button class="btn mich-tl-dalsi">Další složka →</button>
+                  <span class="note">tolerance ± 0,5 g</span>
+                </div>
+                <div class="rowline">
+                  <button class="btn sec sm">Zrušit a navážit znovu</button>
+                </div>
+                <div class="okbox">V pořádku — navážka je v toleranci.</div>
+              </div>
+              <div class="rowline stitekpruh" style="margin-top:12px">
+                <div class="stitekobal">
+                  <button class="btn sec">Štítek na kelímek →</button>
+                  <label class="tgl"><input type="checkbox"><span class="tglt"></span>s tužidlem</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card vystup">
+      <h2>Blok k vložení do aplikace/10-styl/020-promenne.css</h2>
+      <p class="hint">Tentýž blok jako u barev — velikosti míchacího režimu
+        jsou taky jen proměnné. Vloží se jedním vložením obojí.</p>
+      <textarea data-vystup spellcheck="false" readonly></textarea>
+      <div class="rowline" style="margin-top:10px;margin-bottom:0">
+        <button class="btn" data-kopirovat>Zkopírovat</button>
+        <span class="note" data-stav></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card panel">
+    <h2>Tlačítka — každé zvlášť</h2>
+    <p class="hint">U každého tlačítka písmo, šířka, výška a posun. Šířka
+      a výška 0 nechají tvar podle textu; stejná čísla udělají čtverec a text
+      se zalomí sám. Posun tlačítko vykreslí jinde, místo v řádku ale drží.
+      Co nemá vlastní skupinu, drží společné Ostatní tlačítka vlevo dole.</p>
+    <!--MICH-PRAVY-->
+    <div class="rowline" style="margin-top:12px">
+      <button class="btn sec sm" id="zpet-michani">Vrátit míchací režim</button>
+    </div>
+  </div>
 </div>
 
 <div class="nastroj" id="strana-rozvrzeni" hidden>
@@ -1265,7 +1407,7 @@ tvarPosuvy.forEach(function(p){
     var jed = inp.getAttribute("data-jed");
     /* Nejmenší výška na nule není nula, ale „auto" — karta si výšku vezme
        podle obsahu. Nula by ji naopak pustila pod obsah a text by vylezl ven. */
-    tvary[klic] = (/-vyska$/.test(klic) && +inp.value === 0) ? "auto" : inp.value + jed;
+    tvary[klic] = (/-(vyska|sirka)$/.test(klic) && +inp.value === 0) ? "auto" : inp.value + jed;
     p.querySelector('[data-role=cislo]').value = tvary[klic];
     korenu.style.setProperty(klic, tvary[klic]);
     /* Týž rozestup má posuvník na obou stránkách — musí ukazovat totéž. */
@@ -1355,6 +1497,7 @@ vybery.forEach(function(s){
   b.addEventListener("click", function(){
     var kam = b.getAttribute("data-strana");
     document.getElementById("strana-barvy").hidden = kam !== "barvy";
+    document.getElementById("strana-michani").hidden = kam !== "michani";
     document.getElementById("strana-rozvrzeni").hidden = kam !== "rozvrzeni";
     [].slice.call(document.querySelectorAll("[data-strana]")).forEach(function(x){
       x.classList.toggle("on", x === b); });
@@ -1369,6 +1512,14 @@ document.getElementById("zpet-rozvrzeni").addEventListener("click", function(){
     if (/^--(sirka-stranky|sloupec-\d|mezera-sloupcu|mezera-karet|okraj-stranky)$/.test(k)
         || /^--(produkt|vysledek|recept|zakazka|tisk)-/.test(k))
       tvary[k] = VYCH_TVARY[k];
+  });
+  nasad();
+});
+
+document.getElementById("zpet-michani").addEventListener("click", function(){
+  /* Vrací se jen míchací režim — barvy, písmo ani rozvržení se nesmí hnout. */
+  Object.keys(VYCH_TVARY).forEach(function(k){
+    if (/^--mich-/.test(k)) tvary[k] = VYCH_TVARY[k];
   });
   nasad();
 });
@@ -1448,6 +1599,54 @@ document.getElementById("zpet-barvy").addEventListener("click", function(){
       : "nepodařilo se — označte text a zkopírujte ručně";
   });
 });
+
+/* Tažení tlačítek v ukázce míchacího režimu. Chytne se tlačítko (nebo
+   přepínač s tužidlem) a posun se zapisuje do proměnných --…-posun-x/-y —
+   týchž, které mají posuvníky v pravém panelu; myš je jen rychlejší cesta
+   k nim. Členové rodin (hlášení, pomocná v kartě) nesou posun celé rodiny,
+   takže se rodina táhne jako celek. */
+var ukazkaMich = document.querySelector("#strana-michani .michukazka");
+function klicTlacitka(el){
+  var b = el.closest ? el.closest(".michukazka button, .michukazka .tgl") : null;
+  if (!b) return null;
+  var m = (b.className || "").match(/mich-tl-[a-z]+/);
+  if (m) return "--" + m[0];
+  if (b.classList.contains("tgl")) return "--mich-prepinac";
+  if (b.closest(".stitekpruh")) return "--mich-tl-stitek";
+  if (b.closest(".okbox") || b.closest(".warnbox") || b.closest(".specbar")) return "--mich-tl-hlaseni";
+  if (b.closest(".card") && b.classList.contains("sm")) return "--mich-tl-pomocna";
+  return null;
+}
+if (ukazkaMich){
+  var tazeni = null, potlacKlik = false;
+  ukazkaMich.addEventListener("mousedown", function(e){
+    var klic = klicTlacitka(e.target);
+    if (!klic) return;
+    e.preventDefault();
+    tazeni = { klic: klic, x0: e.clientX, y0: e.clientY,
+      px: parseFloat(tvary[klic + "-posun-x"]) || 0,
+      py: parseFloat(tvary[klic + "-posun-y"]) || 0, hnul: false };
+  });
+  window.addEventListener("mousemove", function(e){
+    if (!tazeni) return;
+    var dx = e.clientX - tazeni.x0, dy = e.clientY - tazeni.y0;
+    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) tazeni.hnul = true;
+    tvary[tazeni.klic + "-posun-x"] = Math.round(tazeni.px + dx) + "px";
+    tvary[tazeni.klic + "-posun-y"] = Math.round(tazeni.py + dy) + "px";
+    korenu.style.setProperty(tazeni.klic + "-posun-x", tvary[tazeni.klic + "-posun-x"]);
+    korenu.style.setProperty(tazeni.klic + "-posun-y", tvary[tazeni.klic + "-posun-y"]);
+  });
+  window.addEventListener("mouseup", function(){
+    if (!tazeni) return;
+    potlacKlik = tazeni.hnul;
+    tazeni = null;
+    if (potlacKlik) nasad();   // srovná posuvníky a přepíše výstup
+  });
+  /* Kliknutí, které bylo ve skutečnosti tažením, nesmí přepnout přepínač. */
+  ukazkaMich.addEventListener("click", function(e){
+    if (potlacKlik){ e.preventDefault(); e.stopPropagation(); potlacKlik = false; }
+  }, true);
+}
 
 pripravRam();
 nasad();

@@ -1,7 +1,7 @@
 "use strict";
 function MichaciRezim({ aktivni, onZavrit, recipe, calcAkt, rozpis, vyuziti, stav,
                         product, colorSel, position, tech, zak, kodDavky,
-                        pokryti, zbytky, stitek, rady, potlife, aditiva, riziko, natisk, viskozita,
+                        pokryti, zbytky, stitekTlacitko, rady, potlife, aditiva, riziko, natisk, viskozita,
                         children }) {
   useEffect(() => {
     if (!aktivni) return;
@@ -42,7 +42,7 @@ function MichaciRezim({ aktivni, onZavrit, recipe, calcAkt, rozpis, vyuziti, sta
             ? "zakázka potřebuje " + fmt(calcAkt.davkaZakazky || calcAkt.totalG) + " g"
             : "≈ " + fmt(calcAkt.totalMl) + " ml"}</span>
         </div>
-        <button className="btn sec" onClick=${onZavrit} title="Zavřít můžete i klávesou Esc">
+        <button className="btn sec mich-tl-zpet" onClick=${onZavrit} title="Zavřít můžete i klávesou Esc">
           ✕ Zpět do kalkulace
         </button>
       </div>
@@ -109,9 +109,15 @@ function MichaciRezim({ aktivni, onZavrit, recipe, calcAkt, rozpis, vyuziti, sta
           ${viskozita}
           ${aditiva}
           ${zbytky}
-          ${stitek}
         </div>
-        <div>${children}</div>
+        <!-- Tlačítko štítku stojí pod asistentem, ne pod tabulkou: nalepuje se
+             až po dovážení poslední složky, takže patří na konec té ruky,
+             kterou tiskař u váhy sleduje. Poznámka k němu zůstala vlevo mezi
+             ostatním textem — ta se čte jednou, ne u váhy. -->
+        <div>
+          ${children}
+          ${stitekTlacitko}
+        </div>
       </div>
     </div>`, document.body);
 }

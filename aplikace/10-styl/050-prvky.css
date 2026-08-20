@@ -29,8 +29,11 @@ table.t th{text-align:left;font-size:var(--pismo-popisek);letter-spacing:var(--p
 table.t td{border-bottom:1px solid var(--line);padding:9px 8px;vertical-align:top}
 /* Číslice musí mít stejnou šířku, jinak se sloupce gramáží rozházejí. Když je
    --mono skutečně strojopis, platí to samo; u běžného písma to musí zapnout
-   tohle pravidlo. */
-td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+   tohle pravidlo. `table.t th.num` je v seznamu navíc kvůli specificitě:
+   samotné `th.num` (0,1,1) prohrává s `table.t th{text-align:left}` (0,1,2)
+   a hlavičky číselných sloupců by zůstaly vlevo, zatímco čísla pod nimi
+   stojí vpravo. */
+td.num,th.num,table.t th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
 .swatch{width:26px;height:26px;border-radius:var(--radius-pole);border:1px solid rgba(0,0,0,.12);display:inline-block;vertical-align:middle}
 /* text-align kvůli úzkému sloupci: jakmile se štítek zalomí na víc řádků,
    zarovnaný doleva vypadá roztřepeně — uvnitř oblého tvaru patří na střed */

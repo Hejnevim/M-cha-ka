@@ -13,6 +13,22 @@ function App() {
     saveLS("irm-theme", theme);
   }, [theme]);
   const [menuOpen, setMenuOpen] = useState(false);
+  /* Jazyk obrazovky. Pravdu drží modul v části 127-jazyk.js, aby na překlad
+     dosáhly i funkce mimo komponenty; stav je tu jen proto, aby přepnutí
+     jazyka překreslilo celou aplikaci. */
+  const [jazyk, setJazyk] = useState(jazykAplikace);
+  const prepniJazyk = (kod) => { nastavJazyk(kod); setJazyk(kod); setMenuOpen(false); };
+  /* Technologie se přepíná jednou za směnu; záložky pod ní se otvírají pořád.
+     Výběr technologie je proto v menu sbalený a rozbaluje se šipkou — pět
+     položek s počty jen natahovalo menu nad záložky. Při otevření menu se
+     výběr sbalí, takže se menu otevírá vždycky krátké. */
+  const [techRozbaleno, setTechRozbaleno] = useState(false);
+  /* Záložky v menu jsou seskupené po druhu práce — katalog, rozdělaná práce
+     u míchání, sklad, data — a skupina se rozbaluje šipkou stejně jako výběr
+     technologie. Jedna mapa (klíč skupiny → rozbaleno) místo čtyř stavů.
+     Sbalená skupina nesmí schovat výstrahy: součty štítků (po lhůtě, pod
+     minimem, fronta, schválení) proto vystupují na její řádek. */
+  const [otevreneSkupiny, setOtevreneSkupiny] = useState({});
   const menuRef = useRef(null);
   useEffect(() => {
     if (!menuOpen) return;
@@ -51,19 +67,20 @@ function App() {
     if (nova === role || !ROLE[nova]) return;
     const provest = () => { setRole(nova); setMenuOpen(false); };
     if (!smiRole(nova, "receptury") || !deletePw) { provest(); return; }
-    setPwGate({ onConfirm: provest, label: "přepnutí na roli " + nazevRole(nova),
-      potvrd: "Přepnout roli" });
+    setPwGate({ onConfirm: provest,
+      label: preloz("přepnutí na roli {role}", { role: preloz(nazevRole(nova)) }),
+      potvrd: preloz("Přepnout roli") });
   };
 
   const guardDelete = (actionFn, label) => {
     // Jedno hrdlo pro všechno mazání v aplikaci — receptury, produkty, kelímky
     // i odebrání databáze. Tiskař u váhy maže omylem, ne se zlým úmyslem.
     if (!smiRole(role, "mazani")) {
-      setToast({ ok: false, text: "Mazat smí technolog — přepněte roli v nabídce vlevo nahoře." });
+      setToast({ ok: false, text: preloz("Mazat smí technolog — přepněte roli v nabídce vlevo nahoře.") });
       return;
     }
     if (!deletePw) { actionFn(); return; }
-    setPwGate({ onConfirm: actionFn, label: label || "smazání" });
+    setPwGate({ onConfirm: actionFn, label: preloz(label || "smazání") });
   };
 
   /* Přepnutí zámku technologie. Zapisuje se do parametry/technologie.csv, ne
@@ -763,7 +780,7 @@ function App() {
               + " převzatých z přejmenovaného souboru" : "")
             + " z " + souboru + (souboru === 1 ? " souboru" : " souborů") + "." });
         } else if (Object.keys(chyby).length) {
-          setToast({ ok: false, text: "Databázi se nepodařilo načíst — podrobnosti v Připojení k mostu." });
+          setToast({ ok: false, text: preloz("Databázi se nepodařilo načíst — podrobnosti v Připojení k mostu.") });
         }
       } catch (e) {
         if (!zrusen) setDatabaze({ stav: "chyba", soubory: [], chyby: {},
@@ -829,7 +846,7 @@ function App() {
     const techSpecu = res.position && res.position.tech;
     if (technologie && techSpecu && techSpecu !== technologie) {
       setTechnologie(techSpecu);
-      setToast({ ok: true, text: "Přepnuto na technologii " + techSpecu + " podle zakázky." });
+      setToast({ ok: true, text: preloz("Přepnuto na technologii {tech} podle zakázky.", { tech: techSpecu }) });
     }
     setSpec(Object.assign({}, res, { ts: Date.now() }));
     setTab("calc");
@@ -849,7 +866,7 @@ function App() {
       const z = (c.zbytky || []).find((x) => x.kod === kod);
       if (!z) {
         setZbytekKod(kod); setTab("zbytky");
-        setToast({ ok: false, text: "Kelímek " + kod + " v evidenci není." });
+        setToast({ ok: false, text: preloz("Kelímek {kod} v evidenci není.", { kod: kod }) });
         return;
       }
       // Dávka označená při míchání — teď je po tisku a je čas zapsat, co zbylo.
@@ -901,7 +918,7 @@ function App() {
         + (res.warn.length ? " (" + res.warn.length + " upozornění)" : "") });
     } else {
       if (c.tab !== "scan") setTab("scan");
-      setToast({ ok: false, text: res.warn[0] || "Kód se nepodařilo přiřadit." });
+      setToast({ ok: false, text: res.warn[0] || preloz("Kód se nepodařilo přiřadit.") });
     }
   };
   const onCode = (raw) => handleCode.current(raw);
@@ -910,7 +927,7 @@ function App() {
   const otevriZakazku = (z) => {
     const res = resolveSpec(zakazkaNaSpec(z), products, recipes);
     if (!res.product) {
-      setToast({ ok: false, text: res.warn[0] || "Produkt zakázky není v katalogu." });
+      setToast({ ok: false, text: res.warn[0] || preloz("Produkt zakázky není v katalogu.") });
       return;
     }
     res.ok.unshift("Zakázka " + (z.cislo || "") + " načtena ze SGPS");
@@ -966,119 +983,174 @@ function App() {
       <header className="hdr">
         <div className="navleft">
         <div className="menuwrap" ref=${menuRef}>
-          <button className="navbtn" type="button" onClick=${() => setMenuOpen((o) => !o)}
-            title="Menu" aria-label="Otevřít menu" aria-expanded=${menuOpen}>
+          <button className="navbtn" type="button" onClick=${() => { setMenuOpen((o) => !o); setTechRozbaleno(false); setOtevreneSkupiny({}); }}
+            title="Menu" aria-label=${preloz("Otevřít menu")} aria-expanded=${menuOpen}>
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true">
               <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             </svg>
           </button>
           ${menuOpen && html`
             <div className="navdrop">
-              <div className="note" style=${{ padding: "6px 14px 2px", letterSpacing: ".06em" }}>ROLE</div>
+              <div className="note" style=${{ padding: "6px 14px 2px", letterSpacing: ".06em" }}>${preloz("ROLE")}</div>
               ${ROLE_PORADI.map((rl) => html`
                 <button key=${rl} className=${role === rl ? "on" : ""}
-                  onClick=${() => prepniRoli(rl)} title=${ROLE[rl].popis}>
-                  ${ROLE[rl].nazev}
+                  onClick=${() => prepniRoli(rl)} title=${preloz(ROLE[rl].popis)}>
+                  ${preloz(ROLE[rl].nazev)}
                   <span className="note" style=${{ float: "right" }}>
-                    ${role === rl ? "teď" : (smiRole(rl, "receptury") && deletePw ? "na heslo" : "")}
+                    ${role === rl ? preloz("teď") : (smiRole(rl, "receptury") && deletePw ? preloz("na heslo") : "")}
                   </span>
                 </button>`)}
               <div style=${{ borderTop: "1px solid var(--line)", margin: "6px 8px" }}></div>
-              <div className="note" style=${{ padding: "6px 14px 2px", letterSpacing: ".06em" }}>TECHNOLOGIE</div>
-              ${!Object.keys(techStav).length && html`
-                <button className=${technologie ? "" : "on"}
-                  onClick=${() => { setTechnologie(""); setMenuOpen(false); }}>
-                  Všechny technologie
-                  <span className="note" style=${{ float: "right" }}>${fmt(products.length, 0)}</span>
-                </button>`}
-              ${TECH_PORADI.filter((t) => TECHS[t]).map((t) => {
-                const kolik = products.filter((p) => produktUmi(p, t)).length;
-                if (!kolik) return null;
-                const ostra = techOstra(t, techStav);
-                const pr = pripravenostTech(t, { sita, koef, pigmenty, recipes, dbTech, techStav });
-                return html`
-                  <button key=${t} className=${technologie === t ? "on" : ""}
-                    disabled=${!ostra}
-                    style=${ostra ? {} : { opacity: .55, cursor: "not-allowed" }}
-                    onClick=${() => { if (ostra) { setTechnologie(t); setMenuOpen(false); } }}
-                    title=${ostra ? TECHS[t].name
-                      : "Zamčeno: " + (pr.pozn || "chybí data") + " — hotovo " + pr.hotovo + " ze " + pr.celkem}>
-                    ${!ostra && html`<${IkonaZamek} />`}${t} — ${TECHS[t].name.replace(/\s*\(.*/, "")}
-                    <span className="note" style=${{ float: "right" }}>
-                      ${ostra ? fmt(kolik, 0) : pr.hotovo + "/" + pr.celkem}
-                    </span>
-                  </button>`;
-              })}
-              ${Object.keys(techStav).length > 0 && html`
-                <button onClick=${() => { setTab("odemykani"); setMenuOpen(false); }}>
-                  Co chybí k odemčení…
-                </button>`}
+              <button onClick=${() => setTechRozbaleno((o) => !o)} aria-expanded=${techRozbaleno}
+                title=${techRozbaleno ? preloz("Sbalit výběr technologie") : preloz("Rozbalit výběr technologie")}>
+                <span className="note" style=${{ float: "right" }}>${technologie || preloz("vše")}</span>
+                <span className="note" style=${{ letterSpacing: ".06em" }}>${techRozbaleno ? "▾" : "▸"} ${preloz("TECHNOLOGIE")}</span>
+              </button>
+              ${techRozbaleno && html`<${React.Fragment}>
+                ${!Object.keys(techStav).length && html`
+                  <button className=${technologie ? "" : "on"}
+                    onClick=${() => { setTechnologie(""); setMenuOpen(false); }}>
+                    ${preloz("Všechny technologie")}
+                    <span className="note" style=${{ float: "right" }}>${fmt(products.length, 0)}</span>
+                  </button>`}
+                ${TECH_PORADI.filter((t) => TECHS[t]).map((t) => {
+                  const kolik = products.filter((p) => produktUmi(p, t)).length;
+                  if (!kolik) return null;
+                  const ostra = techOstra(t, techStav);
+                  const pr = pripravenostTech(t, { sita, koef, pigmenty, recipes, dbTech, techStav });
+                  return html`
+                    <button key=${t} className=${technologie === t ? "on" : ""}
+                      disabled=${!ostra}
+                      style=${ostra ? {} : { opacity: .55, cursor: "not-allowed" }}
+                      onClick=${() => { if (ostra) { setTechnologie(t); setMenuOpen(false); } }}
+                      title=${ostra ? preloz(TECHS[t].name)
+                        : preloz("Zamčeno: {duvod} — hotovo {hotovo} ze {celkem}",
+                            { duvod: pr.pozn || preloz("chybí data"), hotovo: pr.hotovo, celkem: pr.celkem })}>
+                      ${!ostra && html`<${IkonaZamek} />`}${t} — ${preloz(TECHS[t].name).replace(/\s*\(.*/, "")}
+                      <span className="note" style=${{ float: "right" }}>
+                        ${ostra ? fmt(kolik, 0) : pr.hotovo + "/" + pr.celkem}
+                      </span>
+                    </button>`;
+                  })}
+                ${Object.keys(techStav).length > 0 && html`
+                  <button onClick=${() => { setTab("odemykani"); setMenuOpen(false); }}>
+                    ${preloz("Co chybí k odemčení…")}
+                  </button>`}
+              <//>`}
               <div style=${{ borderTop: "1px solid var(--line)", margin: "6px 8px" }}></div>
               <!-- Načtení zakázky (PDF i čárový kód) je v kartě Vybraný produkt —
                    zakázka se načítá tam, kde se s ní hned počítá. Obě záložky
                    dál existují: PDF pro opravu rozpoznaných polí, Čárový kód
                    pro nastavení čtečky a pro kód, který se nepodařilo přiřadit. -->
-              <button className=${tab === "zak" ? "on" : ""} onClick=${() => { setTab("zak"); setMenuOpen(false); }}>Zakázky (SGPS)</button>
-              <button className=${tab === "most" ? "on" : ""} onClick=${() => { setTab("most"); setMenuOpen(false); }}>Připojení k mostu</button>
-              <button className=${tab === "prod" ? "on" : ""} onClick=${() => { setTab("prod"); setMenuOpen(false); }}>Produkty</button>
-              <button className=${tab === "rec" ? "on" : ""} onClick=${() => { setTab("rec"); setMenuOpen(false); }}>Receptury</button>
-              <button className=${tab === "schval" ? "on" : ""} onClick=${() => { setTab("schval"); setMenuOpen(false); }}>
-                Ke schválení
-                ${cekaSchvaleni > 0 && html`<span className="tag" style=${{ marginLeft: 8 }}
-                  title=${"čeká na schválení " + cekaSchvaleni}>${cekaSchvaleni}</span>`}
+              <button className=${tab === "zak" ? "on" : ""} onClick=${() => { setTab("zak"); setMenuOpen(false); }}>${preloz("Zakázky (SGPS)")}</button>
+              <button onClick=${() => setOtevreneSkupiny((p) => ({ ...p, katalog: !p.katalog }))}
+                aria-expanded=${!!otevreneSkupiny.katalog}
+                className=${["prod", "rec", "sito"].includes(tab) ? "on" : ""}>
+                <span className="note" style=${{ letterSpacing: ".06em" }}>${otevreneSkupiny.katalog ? "▾" : "▸"} ${preloz("KATALOG")}</span>
               </button>
-              <button className=${tab === "sito" ? "on" : ""} onClick=${() => { setTab("sito"); setMenuOpen(false); }}>Přepočet na síto</button>
-              <button className=${tab === "propad" ? "on" : ""} onClick=${() => { setTab("propad"); setMenuOpen(false); }}>Co propadne</button>
-              <button className=${tab === "sarze" ? "on" : ""} onClick=${() => { setTab("sarze"); setMenuOpen(false); }}>Šarže</button>
-              <button className=${tab === "zbytky" ? "on" : ""} onClick=${() => { setTab("zbytky"); setMenuOpen(false); }}>
-                Zbytky barev
-${lhutyPocet.prosle + lhutyPocet.brzy > 0 && html`<span className="tag"
-                  style=${{ marginLeft: 8, background: lhutyPocet.prosle ? "#B23B2A" : "var(--warn)",
+              ${otevreneSkupiny.katalog && html`<${React.Fragment}>
+                <button className=${tab === "prod" ? "on" : ""} onClick=${() => { setTab("prod"); setMenuOpen(false); }}>${preloz("Produkty")}</button>
+                <button className=${tab === "rec" ? "on" : ""} onClick=${() => { setTab("rec"); setMenuOpen(false); }}>${preloz("Receptury")}</button>
+                <button className=${tab === "sito" ? "on" : ""} onClick=${() => { setTab("sito"); setMenuOpen(false); }}>${preloz("Přepočet na síto")}</button>
+              <//>`}
+              <button onClick=${() => setOtevreneSkupiny((p) => ({ ...p, michani: !p.michani }))}
+                aria-expanded=${!!otevreneSkupiny.michani}
+                className=${["schval", "fronta", "opravy"].includes(tab) ? "on" : ""}>
+                ${!otevreneSkupiny.michani && cekaSchvaleni + frontaPocet > 0 && html`<span className="tag"
+                  style=${{ float: "right" }}
+                  title=${[cekaSchvaleni ? preloz("čeká na schválení {n}", { n: cekaSchvaleni }) : "",
+                    frontaPocet ? preloz("ve frontě čeká {n}", { n: frontaPocet }) : ""].filter(Boolean).join(", ")}>
+                  ${cekaSchvaleni + frontaPocet}</span>`}
+                <span className="note" style=${{ letterSpacing: ".06em" }}>${otevreneSkupiny.michani ? "▾" : "▸"} ${preloz("MÍCHÁNÍ")}</span>
+              </button>
+              ${otevreneSkupiny.michani && html`<${React.Fragment}>
+                <button className=${tab === "schval" ? "on" : ""} onClick=${() => { setTab("schval"); setMenuOpen(false); }}>
+                  ${preloz("Ke schválení")}
+                  ${cekaSchvaleni > 0 && html`<span className="tag" style=${{ marginLeft: 8 }}
+                    title=${preloz("čeká na schválení {n}", { n: cekaSchvaleni })}>${cekaSchvaleni}</span>`}
+                </button>
+                <button className=${tab === "fronta" ? "on" : ""} onClick=${() => { setTab("fronta"); setMenuOpen(false); }}>
+                  ${preloz("Fronta míchání")}
+                  ${frontaPocet > 0 && html`<span className="tag" style=${{ marginLeft: 8 }}
+                    title=${preloz("ve frontě čeká {n}", { n: frontaPocet })}>${frontaPocet}</span>`}
+                </button>
+                <button className=${tab === "opravy" ? "on" : ""} onClick=${() => { setTab("opravy"); setMenuOpen(false); }}>${preloz("Opravy po nátisku")}</button>
+              <//>`}
+              <button onClick=${() => setOtevreneSkupiny((p) => ({ ...p, sklad: !p.sklad }))}
+                aria-expanded=${!!otevreneSkupiny.sklad}
+                className=${["sklad", "zbytky", "propad", "sarze"].includes(tab) ? "on" : ""}>
+                ${!otevreneSkupiny.sklad && lhutyPocet.prosle + lhutyPocet.brzy + skladPocet > 0 && html`<span className="tag"
+                  style=${{ float: "right", background: (lhutyPocet.prosle || sklad.pocet.chybi) ? "#B23B2A" : "var(--warn)",
                     color: "#fff", boxShadow: "none" }}
-                  title=${[lhutyPocet.prosle ? lhutyPocet.prosle + " po lhůtě" : "",
-                    lhutyPocet.brzy ? lhutyPocet.brzy + " brzy končí" : ""].filter(Boolean).join(", ")}>
-                  ${lhutyPocet.prosle + lhutyPocet.brzy}</span>`}
+                  title=${[lhutyPocet.prosle ? preloz("{n} po lhůtě", { n: lhutyPocet.prosle }) : "",
+                    lhutyPocet.brzy ? preloz("{n} brzy končí", { n: lhutyPocet.brzy }) : "",
+                    sklad.pocet.chybi ? preloz("{n} došlo", { n: sklad.pocet.chybi }) : "",
+                    sklad.pocet.dochazi ? preloz("{n} pod minimem", { n: sklad.pocet.dochazi }) : ""].filter(Boolean).join(", ")}>
+                  ${lhutyPocet.prosle + lhutyPocet.brzy + skladPocet}</span>`}
+                <span className="note" style=${{ letterSpacing: ".06em" }}>${otevreneSkupiny.sklad ? "▾" : "▸"} ${preloz("SKLAD")}</span>
               </button>
-              <button className=${tab === "fronta" ? "on" : ""} onClick=${() => { setTab("fronta"); setMenuOpen(false); }}>
-                Fronta míchání
-                ${frontaPocet > 0 && html`<span className="tag" style=${{ marginLeft: 8 }}
-                  title=${"ve frontě čeká " + frontaPocet}>${frontaPocet}</span>`}
+              ${otevreneSkupiny.sklad && html`<${React.Fragment}>
+                <button className=${tab === "sklad" ? "on" : ""} onClick=${() => { setTab("sklad"); setMenuOpen(false); }}>
+                  ${preloz("Sklad surovin")}
+                  ${skladPocet > 0 && html`<span className="tag"
+                    style=${{ marginLeft: 8, background: sklad.pocet.chybi ? "#B23B2A" : "var(--warn)",
+                      color: "#fff", boxShadow: "none" }}
+                    title=${[sklad.pocet.chybi ? preloz("{n} došlo", { n: sklad.pocet.chybi }) : "",
+                      sklad.pocet.dochazi ? preloz("{n} pod minimem", { n: sklad.pocet.dochazi }) : ""].filter(Boolean).join(", ")}>
+                    ${skladPocet}</span>`}
+                </button>
+                <button className=${tab === "zbytky" ? "on" : ""} onClick=${() => { setTab("zbytky"); setMenuOpen(false); }}>
+                  ${preloz("Zbytky barev")}
+                  ${lhutyPocet.prosle + lhutyPocet.brzy > 0 && html`<span className="tag"
+                    style=${{ marginLeft: 8, background: lhutyPocet.prosle ? "#B23B2A" : "var(--warn)",
+                      color: "#fff", boxShadow: "none" }}
+                    title=${[lhutyPocet.prosle ? preloz("{n} po lhůtě", { n: lhutyPocet.prosle }) : "",
+                      lhutyPocet.brzy ? preloz("{n} brzy končí", { n: lhutyPocet.brzy }) : ""].filter(Boolean).join(", ")}>
+                    ${lhutyPocet.prosle + lhutyPocet.brzy}</span>`}
+                </button>
+                <button className=${tab === "propad" ? "on" : ""} onClick=${() => { setTab("propad"); setMenuOpen(false); }}>${preloz("Co propadne")}</button>
+                <button className=${tab === "sarze" ? "on" : ""} onClick=${() => { setTab("sarze"); setMenuOpen(false); }}>${preloz("Šarže")}</button>
+              <//>`}
+              <button className=${tab === "sestavy" ? "on" : ""} onClick=${() => { setTab("sestavy"); setMenuOpen(false); }}>${preloz("Sestavy a trendy")}</button>
+              <button onClick=${() => setOtevreneSkupiny((p) => ({ ...p, data: !p.data }))}
+                aria-expanded=${!!otevreneSkupiny.data}
+                className=${["most", "imp"].includes(tab) ? "on" : ""}>
+                <span className="note" style=${{ letterSpacing: ".06em" }}>${otevreneSkupiny.data ? "▾" : "▸"} ${preloz("DATA")}</span>
               </button>
-              <button className=${tab === "opravy" ? "on" : ""} onClick=${() => { setTab("opravy"); setMenuOpen(false); }}>Opravy po nátisku</button>
-              <button className=${tab === "sestavy" ? "on" : ""} onClick=${() => { setTab("sestavy"); setMenuOpen(false); }}>Sestavy a trendy</button>
-              <button className=${tab === "sklad" ? "on" : ""} onClick=${() => { setTab("sklad"); setMenuOpen(false); }}>
-                Sklad surovin
-                ${skladPocet > 0 && html`<span className="tag"
-                  style=${{ marginLeft: 8, background: sklad.pocet.chybi ? "#B23B2A" : "var(--warn)",
-                    color: "#fff", boxShadow: "none" }}
-                  title=${[sklad.pocet.chybi ? sklad.pocet.chybi + " došlo" : "",
-                    sklad.pocet.dochazi ? sklad.pocet.dochazi + " pod minimem" : ""].filter(Boolean).join(", ")}>
-                  ${skladPocet}</span>`}
-              </button>
-              <button className=${tab === "imp" ? "on" : ""} onClick=${() => { setTab("imp"); setMenuOpen(false); }}>Import / data</button>
+              ${otevreneSkupiny.data && html`<${React.Fragment}>
+                <button className=${tab === "most" ? "on" : ""} onClick=${() => { setTab("most"); setMenuOpen(false); }}>${preloz("Připojení k mostu")}</button>
+                <button className=${tab === "imp" ? "on" : ""} onClick=${() => { setTab("imp"); setMenuOpen(false); }}>${preloz("Import / data")}</button>
+              <//>`}
+              <div style=${{ borderTop: "1px solid var(--line)", margin: "6px 8px" }}></div>
+              <div className="note" style=${{ padding: "6px 14px 2px", letterSpacing: ".06em" }}>${preloz("JAZYK")}</div>
+              ${JAZYKY_PORADI.map((j) => html`
+                <button key=${j} className=${jazyk === j ? "on" : ""} onClick=${() => prepniJazyk(j)}>
+                  ${JAZYKY[j]}
+                  <span className="note" style=${{ float: "right" }}>${jazyk === j ? preloz("teď") : ""}</span>
+                </button>`)}
             </div>`}
         </div>
         ${kamZpet && html`
           <button className="backbtn" type="button" onClick=${zpet}
-            title=${"Zpět na „" + (ZALOZKY_NAZVY[kamZpet] || kamZpet) + "“ (Alt + ←)"}>
+            title=${preloz("Zpět na „{kam}“ (Alt + ←)", { kam: preloz(ZALOZKY_NAZVY[kamZpet] || kamZpet) })}>
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true">
               <path d="M15 5l-7 7 7 7" stroke="currentColor" strokeWidth="2.2"
                 strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            <span>${ZALOZKY_NAZVY[kamZpet] || kamZpet}</span>
+            <span>${preloz(ZALOZKY_NAZVY[kamZpet] || kamZpet)}</span>
           </button>`}
         </div>
         <div style=${{ gridColumn: 2, justifySelf: "center", textAlign: "center" }}>
-          <h1 title="Zpět na Kalkulaci" onClick=${() => setTab("calc")}>IRM</h1>
+          <h1 title=${preloz("Zpět na Kalkulaci")} onClick=${() => setTab("calc")}>IRM</h1>
           ${technologie && html`<div className="tag tech" style=${{ marginTop: -8 }}
-            title=${(TECHS[technologie] || {}).name || ""}>
-            ${technologie} — ${((TECHS[technologie] || {}).name || "").replace(/\s*\(.*/, "")}
+            title=${preloz((TECHS[technologie] || {}).name || "")}>
+            ${technologie} — ${preloz((TECHS[technologie] || {}).name || "").replace(/\s*\(.*/, "")}
           </div>`}
         </div>
         <button className="themebtn" type="button"
           onClick=${() => setTheme((t) => t === "dark" ? "light" : "dark")}
-          title=${theme === "dark" ? "Přepnout na světlý režim" : "Přepnout na tmavý režim"}
-          aria-label="Přepnout světlý/tmavý režim">
+          title=${theme === "dark" ? preloz("Přepnout na světlý režim") : preloz("Přepnout na tmavý režim")}
+          aria-label=${preloz("Přepnout světlý/tmavý režim")}>
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true">
             <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
             <path d="M12 3 A9 9 0 0 1 12 21 Z" fill="currentColor" />
@@ -1088,11 +1160,10 @@ ${lhutyPocet.prosle + lhutyPocet.brzy > 0 && html`<span className="tag"
       <main className="wrap">
         ${!dataJsOk && html`
           <div className="warnbox" style=${{ marginTop: 0, marginBottom: 18 }}>
-            <b>Katalog (soubor data.js) se nenačetl.</b><br />
-            Aplikace musí běžet ze složky, kde leží pohromadě všechny soubory balíčku
-            (index.html, data.js, stahni_obrazky.py, složky lib a obrazky).<br />
-            Nejčastější příčina: index.html byl otevřen přímo ze ZIPu nebo zkopírován jinam samostatně.
-            <b> Rozbalte celý ZIP do jedné složky a otevřete index.html z ní.</b>
+            <b>${preloz("Katalog (soubor data.js) se nenačetl.")}</b><br />
+            ${preloz("Aplikace musí běžet ze složky, kde leží pohromadě všechny soubory balíčku (index.html, data.js, stahni_obrazky.py, složky lib a obrazky).")}<br />
+            ${preloz("Nejčastější příčina: index.html byl otevřen přímo ze ZIPu nebo zkopírován jinam samostatně.")}
+            <b> ${preloz("Rozbalte celý ZIP do jedné složky a otevřete index.html z ní.")}</b>
           </div>`}
         <div style=${{ display: tab === "calc" ? "" : "none" }}>
           <${Calc} products=${products} recipes=${recipes} setRecipes=${setRecipes} links=${links} setLinks=${setLinks}
@@ -1176,35 +1247,38 @@ ${lhutyPocet.prosle + lhutyPocet.brzy > 0 && html`<span className="tag"
           }) : x));
           setDoplnitZbytek(null);
           setToast(naSklad
-            ? { ok: true, text: "Do evidence uloženo " + fmt(zbylo) + " g — kelímek " + z.kod + "." }
-            : { ok: true, text: "Kelímek " + z.kod + " uzavřen, nezbylo nic." });
+            ? { ok: true, text: preloz("Do evidence uloženo {g} g — kelímek {kod}.", { g: fmt(zbylo), kod: z.kod }) }
+            : { ok: true, text: preloz("Kelímek {kod} uzavřen, nezbylo nic.", { kod: z.kod }) });
         };
         return html`
           <div className="modalbg" onClick=${(e) => { if (e.target === e.currentTarget) setDoplnitZbytek(null); }}>
             <div className="modalbox" style=${{ width: "min(460px,100%)" }}>
               <div className="card" style=${{ margin: 0 }}>
-                <h2 style=${{ margin: 0 }}>Kolik barvy zbylo?</h2>
-                <p className="hint">Kelímek <b>${z.kod}</b> byl označený při míchání. Teď stačí zvážit,
-                  co v něm zůstalo, a dostane se do evidence zbytků.</p>
+                <h2 style=${{ margin: 0 }}>${preloz("Kolik barvy zbylo?")}</h2>
+                <p className="hint">${(() => {
+                  /* kód kelímku má zůstat tučně, šablona se proto rozstřihne kolem {kod} */
+                  const [pred, po] = preloz("Kelímek {kod} byl označený při míchání. Teď stačí zvážit, co v něm zůstalo, a dostane se do evidence zbytků.").split("{kod}");
+                  return html`${pred}<b>${z.kod}</b>${po}`;
+                })()}</p>
                 <div className="rowline" style=${{ marginTop: 6 }}>
                   <span className="swatch" style=${{ background: z.hex }} />
-                  <span className="note">${z.nazev}${z.zakazka ? " · zakázka " + z.zakazka : ""}
-                    · namícháno ${fmt(n(z.davkaG))} g</span>
+                  <span className="note">${z.nazev}${z.zakazka ? " " + preloz("· zakázka {c}", { c: z.zakazka }) : ""}
+                    ${preloz("· namícháno {g} g", { g: fmt(n(z.davkaG)) })}</span>
                 </div>
-                <label className="f" style=${{ marginTop: 12 }}>Zbylo (g)</label>
+                <label className="f" style=${{ marginTop: 12 }}>${preloz("Zbylo (g)")}</label>
                 <input type="number" step="1" min="0" autoFocus value=${doplnitZbytek.gramu}
                   onChange=${(e) => setDoplnitZbytek(Object.assign({}, doplnitZbytek, { gramu: e.target.value }))}
                   onKeyDown=${(e) => { if (e.key === "Enter" && zbylo > 0) zapis(true); }} />
                 ${zbylo > 0 && html`<p className="note" style=${{ marginTop: 6 }}>
-                  Z ${fmt(n(z.davkaG))} g se spotřebovalo ${fmt(Math.max(0, spotreba))} g
-                  ${spotreba < 0 ? html`<b> — zadané množství je větší než namíchaná dávka, zkontrolujte to.</b>` : ""}
+                  ${preloz("Z {celkem} g se spotřebovalo {kolik} g", { celkem: fmt(n(z.davkaG)), kolik: fmt(Math.max(0, spotreba)) })}
+                  ${spotreba < 0 ? html`<b> ${preloz("— zadané množství je větší než namíchaná dávka, zkontrolujte to.")}</b>` : ""}
                 </p>`}
                 <div className="rowline" style=${{ marginTop: 14, marginBottom: 0 }}>
                   <button className="btn" disabled=${!(zbylo > 0)} onClick=${() => zapis(true)}>
-                    Uložit do evidence
+                    ${preloz("Uložit do evidence")}
                   </button>
-                  <button className="btn sec" onClick=${() => zapis(false)}>Nezbylo nic</button>
-                  <button className="btn sec" onClick=${() => setDoplnitZbytek(null)}>Později</button>
+                  <button className="btn sec" onClick=${() => zapis(false)}>${preloz("Nezbylo nic")}</button>
+                  <button className="btn sec" onClick=${() => setDoplnitZbytek(null)}>${preloz("Později")}</button>
                 </div>
               </div>
             </div>

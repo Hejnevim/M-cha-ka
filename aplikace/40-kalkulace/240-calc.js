@@ -264,7 +264,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
       setOdvod(null);
       setSmazPotvrd("");
     };
-    if (guardDelete) guardDelete(provest, "smazání custom receptury " + r.name);
+    if (guardDelete) guardDelete(provest, preloz("smazání custom receptury {r}", { r: r.name }));
     else provest();
   };
   /* Vlastní barvy se třídí podle databáze, ze které byly odvozené — stejně
@@ -948,7 +948,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
          <th style="text-align:right">navážit g</th><th style="text-align:right">kumulativně g</th>
          <th style="text-align:right">ml</th><th style="text-align:center">✓</th>`;
     const w = window.open("", "_blank");
-    if (!w) { alert("Prohlížeč zablokoval nové okno — povolte vyskakovací okna pro tuto stránku."); return; }
+    if (!w) { alert(preloz("Prohlížeč zablokoval nové okno — povolte vyskakovací okna pro tuto stránku.")); return; }
     w.document.write(`<!doctype html><html lang="cs"><head><meta charset="utf-8"><title>Míchací lístek — ${esc(recipe.name)}</title>
 <style>
   body{font-family:Arial,Helvetica,sans-serif;color:#18170F;margin:24px;font-size:13px}
@@ -1103,17 +1103,8 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 ${podklad.hlaska
                   ? html`<div style=${{ marginTop: 6 }}>${podklad.hlaska}</div>`
                   : html`<div style=${{ marginTop: 6 }}>Barva je vůči podkladu dost tmavá — prosvítání nehrozí.</div>`}
-                ${podklad.podtiskNutny && html`
-                  <div className="note" style=${{ marginTop: 6 }}>
-                    Podtisk znamená průchod navíc: bílá se počítá jako samostatná dávka
-                    a k času tisku přibude sušení mezi průchody.
-                  </div>`}
                 ${podklad.posun && html`<div style=${{ marginTop: 6 }}>${podklad.posun}</div>`}
               </div>
-              <p className="note" style=${{ marginTop: 4 }}>
-                Posouzení vychází z odstínu barvy a materiálu, ne z měření — je to
-                upozornění, ne verdikt. Meze si dílna může upravit v parametrech.
-              </p>
               ${podklad.stav !== "ok" && slozeni.baze.length > 0 && bazeVolby.length > 1 && html`
                 <div className="note" style=${{ marginTop: 6 }}>
                   Odstín dělá poměr pigmentů, kryvost dělá báze — tentýž odstín jde
@@ -1161,15 +1152,15 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
      na obrazovce nezůstane nic, co v tu chvíli nikdo nepotřebuje. */
   const blokPokryti = calcAkt ? html`
             <div className="rowline" style=${{ marginTop: 0, marginBottom: 10 }}>
-              <span className="tag" title="Podíl plochy, který barva doopravdy pokryje">
-                krycí plocha ${fmt(pokryti, 1)} %${pokrytiJob != null
-                  ? " · z náhledu" + (odsazeniJob ? " + " + fmt(odsazeniJob, 1) + " mm" : "")
-                  : " · z katalogu"}
+              <span className="tag" title=${preloz("Podíl plochy, který barva doopravdy pokryje")}>
+                ${preloz("krycí plocha")} ${fmt(pokryti, 1)} %${pokrytiJob != null
+                  ? preloz(" · z náhledu") + (odsazeniJob ? " + " + fmt(odsazeniJob, 1) + " mm" : "")
+                  : preloz(" · z katalogu")}
               </span>
-              <button className="btn sec sm" onClick=${() => setPokrytiOkno(true)}>
-                ${pokrytiJob != null ? "Upravit krycí plochu" : "Spočítat krycí plochu z náhledu"}
+              <button className="btn sec sm mich-tl-plocha" onClick=${() => setPokrytiOkno(true)}>
+                ${pokrytiJob != null ? preloz("Upravit krycí plochu") : preloz("Spočítat krycí plochu z náhledu")}
               </button>
-              ${pokrytiJob != null && html`<button className="btn sec sm" onClick=${() => { setPokrytiJob(null); setOdsazeniJob(null); }}>Zpět na katalog</button>`}
+              ${pokrytiJob != null && html`<button className="btn sec sm mich-tl-plocha" onClick=${() => { setPokrytiJob(null); setOdsazeniJob(null); }}>${preloz("Zpět na katalog")}</button>`}
             </div>` : null;
   const blokZbytku = calcAkt ? html`<${React.Fragment}>
             ${!pouzityZbytek && nabidky.length > 0 && html`
@@ -1297,14 +1288,22 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                     v hotové dávce pak bude obojí.
                   </div>`}
               </div>`}
-            ${!pouzityZbytek && html`
-              <div className="rowline" style=${{ marginTop: 10, marginBottom: 0 }}>
-                <button className="btn sec sm" onClick=${() => setRucni(rucni || {
+            <div className="rowline" style=${{ marginTop: 10, marginBottom: 0 }}>
+              ${/* Obě tlačítka jsou „vím něco, co evidence neví", proto jeden
+                    řádek. Ruční zadání při použitém kelímku smysl nemá — kelímek
+                    už je vybraný —, kdežto zápis známého zbytku má smysl vždycky,
+                    proto je mimo podmínku. Vysvětlivky k oběma odešly do
+                    NAVOD_PODKLADY.md — rozhraní je tiché. */
+                !pouzityZbytek && html`<button className="btn sec sm mich-tl-rucne" onClick=${() => setRucni(rucni || {
                   nazev: "", gramu: "", slozeni: [{ id: uid(), name: "", pct: "" }] })}>
                   ${rucni ? "Zbytek zadaný ručně" : "Zbytek není v evidenci — zadat ručně"}
-                </button>
-                <span className="note">z kelímku bez štítku se dá vyjít taky, když víte, co v něm je</span>
-              </div>`}
+                </button>`}
+              <button className="btn sec sm mich-tl-znam"
+                onClick=${() => setUlozitZbytek({ gramu: "", pozn: "", expirace: "",
+                  potlifeH: dvouslozkova ? String(potlifeHodin(potlifeAkt) || POTLIFE_VYCHOZI) : "",
+                  tuzidlo: !!dvouslozkova })}
+                disabled=${!recipe}>Znám zbytek rovnou</button>
+            </div>
             ${!pouzityZbytek && rucni && html`
               <div className="pickbox" style=${{ marginTop: 8 }}>
                 <div className="rowline" style=${{ marginTop: 0 }}>
@@ -1407,73 +1406,62 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
               <div className="rowline" style=${{ marginTop: 10, marginBottom: 0 }}>
                 <button className="btn sec sm" onClick=${() => setNatisk({
                   davka: rozborNatisku.doporucena, stav: "michat" })}>
-                  Nejdřív nátisk — ${fmt(rozborNatisku.doporucena, 0)} g
+                  ${preloz("Nejdřív nátisk — {g} g", { g: fmt(rozborNatisku.doporucena, 0) })}
                 </button>
                 <span className="note">
-                  vyjde-li odstín špatně, vyhodí se ${fmt(rozborNatisku.doporucena, 0)} g
-                  místo ${fmt(calcPlna.totalG)} g
+                  ${preloz("vyjde-li odstín špatně, vyhodí se {g} g místo {c} g",
+                    { g: fmt(rozborNatisku.doporucena, 0), c: fmt(calcPlna.totalG) })}
                 </span>
-              </div>`}
-            ${!natisk && rozborNatisku.nemaSmysl && html`
-              <div className="note" style=${{ marginTop: 10 }}>
-                Nátisk z malé dávky sem nesedí: ${rozborNatisku.duvod}, takže by zkušební
-                dávka musela mít ${fmt(rozborNatisku.doporucena, 0)} g —
-                ${rozborNatisku.doporucena >= calcPlna.totalG
-                  ? "tedy víc než celá dávka " + fmt(calcPlna.totalG) + " g"
-                  : "z " + fmt(calcPlna.totalG) + " g, což už neušetří dost"}. Míchejte rovnou celou.
               </div>`}
             ${natisk && natisk.stav === "michat" && html`
               <div className="pickbox" style=${{ marginTop: 10 }}>
                 <div className="rowline" style=${{ marginTop: 0, marginBottom: 0 }}>
-                  <b>Nátisk</b>
+                  <b>${preloz("Nátisk")}</b>
                   <input type="number" step="5" min="5" style=${{ width: 92 }}
                     value=${natisk.davka}
                     onChange=${(e) => setNatisk({ davka: n(e.target.value), stav: "michat" })} />
-                  <span className="note">g z ${fmt(calcPlna.totalG)} g —
-                    doporučeno ${fmt(rozborNatisku.doporucena, 0)} g</span>
+                  <span className="note">${preloz("g z {c} g — doporučeno {d} g",
+                    { c: fmt(calcPlna.totalG), d: fmt(rozborNatisku.doporucena, 0) })}</span>
                   <span style=${{ marginLeft: "auto" }}></span>
-                  <button className="btn sec sm" onClick=${() => setNatisk(null)}>Zrušit</button>
+                  <button className="btn sec sm" onClick=${() => setNatisk(null)}>${preloz("Zrušit")}</button>
                 </div>
                 ${!rozborNatisku.spolehlivy && html`
                   <div className="warnbox" style=${{ marginTop: 8 }}>
-                    <b>Takhle malý nátisk neukáže odstín receptury.</b>
-                    ${" "}Nejmenší složka ${rozborNatisku.nejmensi.name} je
-                    ${" " + fmt(rozborNatisku.nejmensi.podil * 100, 1)} % dávky, takže jí
-                    vyjde ${fmt(rozborNatisku.naNejmensi, 2)} g — a nepřesnost váhy
-                    ${" ±" + fmt(rozborNatisku.rozliseni, 2)} g je z toho
-                    ${" " + fmt(rozborNatisku.chyba * 100, 0)} %. Schválili byste odstín,
-                    který se v plné dávce nezopakuje.
+                    <b>${preloz("Takhle malý nátisk neukáže odstín receptury.")}</b>
+                    ${preloz(" Nejmenší složka {s} je {p} % dávky, takže jí vyjde {g} g — a nepřesnost váhy ±{r} g je z toho {ch} %. Schválili byste odstín, který se v plné dávce nezopakuje.",
+                      { s: rozborNatisku.nejmensi.name, p: fmt(rozborNatisku.nejmensi.podil * 100, 1),
+                        g: fmt(rozborNatisku.naNejmensi, 2), r: fmt(rozborNatisku.rozliseni, 2),
+                        ch: fmt(rozborNatisku.chyba * 100, 0) })}
                     <div className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
                       <button className="btn sm" onClick=${() => setNatisk({
                         davka: rozborNatisku.doporucena, stav: "michat" })}>
-                        Zvětšit na ${fmt(rozborNatisku.doporucena, 0)} g
+                        ${preloz("Zvětšit na {g} g", { g: fmt(rozborNatisku.doporucena, 0) })}
                       </button>
                     </div>
                   </div>`}
                 ${rozborNatisku.spolehlivy && html`
                   <div className="note" style=${{ marginTop: 8 }}>
-                    Nejmenší složka ${rozborNatisku.nejmensi.name} vyjde
-                    ${" " + fmt(rozborNatisku.naNejmensi, 2)} g; nepřesnost váhy
-                    ${" ±" + fmt(rozborNatisku.rozliseni, 2)} g je z toho
-                    ${" " + fmt(rozborNatisku.chyba * 100, 0)} %, což odstín ještě neposune.
+                    ${preloz("Nejmenší složka {s} vyjde {g} g; nepřesnost váhy ±{r} g je z toho {ch} %, což odstín ještě neposune.",
+                      { s: rozborNatisku.nejmensi.name, g: fmt(rozborNatisku.naNejmensi, 2),
+                        r: fmt(rozborNatisku.rozliseni, 2), ch: fmt(rozborNatisku.chyba * 100, 0) })}
                   </div>`}
                 <div className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
                   <button className="btn sm" onClick=${() => setNatisk({
                     davka: rozborNatisku.davka, stav: "schvaleno" })}>
-                    Nátisk sedí — domíchat do ${fmt(calcPlna.totalG)} g
+                    ${preloz("Nátisk sedí — domíchat do {c} g", { c: fmt(calcPlna.totalG) })}
                   </button>
                   <span className="note">
-                    zbývá dovážit ${fmt(rozborNatisku.zbyvaPoSchvaleni)} g
+                    ${preloz("zbývá dovážit {g} g", { g: fmt(rozborNatisku.zbyvaPoSchvaleni) })}
                   </span>
                 </div>
               </div>`}
             ${natisk && natisk.stav === "schvaleno" && html`
               <div className="specbar" style=${{ marginTop: 10 }}>
                 <span className="dot" style=${{ background: "var(--ok)", flex: "none" }}></span>
-                <span>Nátisk schválen — v nádobě je ${fmt(rozborNatisku.davka)} g
-                  a asistent vede jen dovážení do ${fmt(calcPlna.totalG)} g.</span>
+                <span>${preloz("Nátisk schválen — v nádobě je {g} g a asistent vede jen dovážení do {c} g.",
+                  { g: fmt(rozborNatisku.davka), c: fmt(calcPlna.totalG) })}</span>
                 <span style=${{ marginLeft: "auto" }}></span>
-                <button className="btn sec sm" onClick=${() => setNatisk(null)}>Zrušit nátisk</button>
+                <button className="btn sec sm" onClick=${() => setNatisk(null)}>${preloz("Zrušit nátisk")}</button>
               </div>`}` : null;
 
   /* Co může skončit opravou. Stojí to nad tlačítkem do míchacího režimu,
@@ -1493,7 +1481,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                   className="note"> ${b.coStim}</span></span>
               </div>`);
   const rizikoNadpis = riziko && riziko.stupen === "vysoke"
-    ? "Než začnete míchat — tohle končívá opravou." : "Než začnete míchat";
+    ? preloz("Než začnete míchat — tohle končívá opravou.") : preloz("Než začnete míchat");
   const blokRizika = (riziko && riziko.body.length) ? html`
             <div className=${riziko.stupen === "vysoke" ? "warnbox" : "pickbox"}
               style=${{ marginTop: 10 }}>
@@ -1588,7 +1576,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                   onChange=${(e) => setViskoz(e.target.value)} />
                 <span className="note">s</span>
                 ${recipe && n(viskoz) > 0 && n(viskoz) !== n(recipe.viskozita) && html`
-                  <button className="btn sec sm" title="uložit jako referenční hodnotu receptury"
+                  <button className="btn sec sm mich-tl-viskozita" title="uložit jako referenční hodnotu receptury"
                     onClick=${() => upravRecepturu({ viskozita: n(viskoz) })}>Uložit k receptuře</button>`}
               </div>
               ${zeSita && zeSita.dopVisk && html`
@@ -1615,28 +1603,28 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
             onUzavrit=${uzavritDavku}
             onZnovu=${odpojDavku} />` : null;
 
-  const blokStitku = calcAkt ? html`<${React.Fragment}>
-            <div className="rowline" style=${{ marginTop: 12, marginBottom: 0 }}>
-              <button className="btn sec" onClick=${oznacDavku} disabled=${!recipe || !calc}>
-                Štítek na kelímek →
-              </button>
-              <label className="tgl" title="pot life se pak hlídá od přidání tužidla">
-                <input type="checkbox" checked=${dvouslozkova} onChange=${(e) => setDvouslozkova(e.target.checked)} />
-                <span className="tglt"></span>s tužidlem
-              </label>
-            </div>
-            <p className="note" style=${{ marginTop: 6 }}>
-              Štítek nalepte na kelímek hned po namíchání. Po zakázce ho načtěte čtečkou
-              a aplikace se zeptá, kolik barvy zbylo — tím se dostane do evidence zbytků.
-              ${" "}<button className="btn sec sm" style=${{ marginLeft: 4 }}
-                onClick=${() => setUlozitZbytek({ gramu: "", pozn: "", expirace: "",
-                  potlifeH: dvouslozkova ? String(potlifeHodin(potlifeAkt) || POTLIFE_VYCHOZI) : "",
-                  tuzidlo: !!dvouslozkova })}
-                disabled=${!recipe}>Znám zbytek rovnou</button>
-            </p>
-          <//>` : null;
+  /* Tlačítko a jeho poznámka jdou v míchacím režimu každé jinam: tlačítko je
+     poslední krok u váhy a stojí pod asistentem navážení, kdežto poznámka je
+     doprovodný text, který se čte jednou a patří k ostatnímu textu vlevo.
+     Proto to nejsou dva kusy jednoho bloku, ale dva bloky. */
+  const blokStitkuTlacitko = calcAkt ? html`
+            <div className="rowline stitekpruh" style=${{ marginTop: 12, marginBottom: 0 }}>
+              ${/* Přepínač vypadá jako součást tlačítka, ale je to sourozenec
+                    položený přes něj: ovládací prvek uvnitř <button> je
+                    neplatné HTML a zákaz tlačítka (bez receptury) by vypnul
+                    i jeho. Takhle jde tužidlo přepnout vždycky. */ ""}
+              <div className="stitekobal">
+                <button className="btn sec" onClick=${oznacDavku} disabled=${!recipe || !calc}>
+                  ${preloz("Štítek na kelímek →")}
+                </button>
+                <label className="tgl" title=${preloz("pot life se pak hlídá od přidání tužidla")}>
+                  <input type="checkbox" checked=${dvouslozkova} onChange=${(e) => setDvouslozkova(e.target.checked)} />
+                  <span className="tglt"></span>${preloz("s tužidlem")}
+                </label>
+              </div>
+            </div>` : null;
 
-  if (!products.length) return html`<div className="empty">Katalog je prázdný — v záložce Import / data obnovte katalog nebo nahrajte soubor.</div>`;
+  if (!products.length) return html`<div className="empty">${preloz("Katalog je prázdný — v záložce Import / data obnovte katalog nebo nahrajte soubor.")}</div>`;
 
   return html`
     <div>
@@ -1648,12 +1636,12 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
             onFocus=${() => setDropOpen(true)}
             onBlur=${() => setTimeout(() => setDropOpen(false), 150)}
             onKeyDown=${(e) => { if (e.key === "Escape") { e.currentTarget.blur(); setDropOpen(false); } if (e.key === "Enter" && filtered[0]) pickProduct(filtered[0].id); }}
-            placeholder="Hledat produkt podle názvu nebo ref. čísla…" />
-          <span className="count">${filtered.length} z ${products.length}</span>
+            placeholder=${preloz("Hledat produkt podle názvu nebo ref. čísla…")} />
+          <span className="count">${preloz("{n} z {celkem}", { n: filtered.length, celkem: products.length })}</span>
         </div>
         ${dropOpen && html`
           <div className="searchdrop">
-            ${filtered.length === 0 && html`<div className="searchitem note">Nic nenalezeno.</div>`}
+            ${filtered.length === 0 && html`<div className="searchitem note">${preloz("Nic nenalezeno.")}</div>`}
             ${filtered.slice(0, 12).map((p) => html`
               <div key=${p.id} className="searchitem" onMouseDown=${() => pickProduct(p.id)}>
                 <${Img} className="searchitem-img" src=${p.img} alt=${p.name}
@@ -1664,63 +1652,63 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                   <div className="searchitem-dm">${p.material || ""}</div>
                 </div>
               </div>`)}
-            ${filtered.length > 12 && html`<div className="searchitem note">… a dalších ${filtered.length - 12} — upřesněte hledání.</div>`}
+            ${filtered.length > 12 && html`<div className="searchitem note">${preloz("… a dalších {n} — upřesněte hledání.", { n: filtered.length - 12 })}</div>`}
           </div>`}
       </div>
 
       ${zak && html`
         <div className="specbar">
-          <span className="tag tech">spec načten</span>
-          ${zak.order && html`<span>Zakázka <b>${zak.order}</b></span>`}
-          ${zak.customer && html`<span>Objednavatel <b>${zak.customer}</b></span>`}
+          <span className="tag tech">${preloz("spec načten")}</span>
+          ${zak.order && html`<span>${preloz("Zakázka")} <b>${zak.order}</b></span>`}
+          ${zak.customer && html`<span>${preloz("Objednavatel")} <b>${zak.customer}</b></span>`}
           ${zak.w > 0 && zak.h > 0 && html`
             <${React.Fragment}>
-              <label className="tgl" title="Katalog uvádí jen největší možnou plochu — rozměr z listu je ten skutečný">
+              <label className="tgl" title=${preloz("Katalog uvádí jen největší možnou plochu — rozměr z listu je ten skutečný")}>
                 <input type="checkbox" checked=${pouzitRozmer} onChange=${(e) => setPouzitRozmer(e.target.checked)} />
                 <span className="tglt"></span>
-                Rozměr z listu <b>${fmt(zak.w, 1)}×${fmt(zak.h, 1)} mm</b>
+                ${preloz("Rozměr z listu")} <b>${fmt(zak.w, 1)}×${fmt(zak.h, 1)} mm</b>
               </label>
-              ${position && html`<span className="note">katalog max. ${fmt(n(position.w), 0)}×${fmt(n(position.h), 0)} mm</span>`}
+              ${position && html`<span className="note">${preloz("katalog max.")} ${fmt(n(position.w), 0)}×${fmt(n(position.h), 0)} mm</span>`}
             <//>`}
           ${zak.note && html`<span className="note">${zak.note}</span>`}
           ${(zak.mesh || zak.opacity || zak.surface) && html`
             <${React.Fragment}>
-              <span className="note">požadováno: ${[zak.mesh, zak.opacity, zak.surface].filter(Boolean).join(" · ")}</span>
-              <button className="btn sec sm" onClick=${zapsatParametry}>Zapsat do receptury</button>
+              <span className="note">${preloz("požadováno:")} ${[zak.mesh, zak.opacity, zak.surface].filter(Boolean).join(" · ")}</span>
+              <button className="btn sec sm" onClick=${zapsatParametry}>${preloz("Zapsat do receptury")}</button>
             <//>`}
-          ${zak.warn && zak.warn.length > 0 && html`<span className="note" style=${{ color: "var(--warn)" }}>${zak.warn.length} upozornění</span>`}
+          ${zak.warn && zak.warn.length > 0 && html`<span className="note" style=${{ color: "var(--warn)" }}>${preloz("{n} upozornění", { n: zak.warn.length })}</span>`}
           <span style=${{ marginLeft: "auto" }}></span>
-          ${onUpravitSpec && html`<button className="btn sec sm" onClick=${onUpravitSpec}>Upravit spec</button>`}
+          ${onUpravitSpec && html`<button className="btn sec sm" onClick=${onUpravitSpec}>${preloz("Upravit spec")}</button>`}
           <button className="btn sec sm" onClick=${() => setZak(null)}>✕</button>
         </div>`}
 
       <div className="grid calc">
           <div className="card karta-produkt" style=${{ margin: 0 }}>
-            <h2>Vybraný produkt</h2>
+            <h2>${preloz("Vybraný produkt")}</h2>
             <div className="produkt-dlazdice">
               <div className="dlazdice">
                 <${Img} className="prodphoto" srcs=${prodPhotos} alt=${product ? product.name : ""}
-                  errFallback=${html`<div className="prodphoto noimg">fotka nenalezena</div>`} />
-                <div className="popiska">Produkt</div>
+                  errFallback=${html`<div className="prodphoto noimg">${preloz("fotka nenalezena")}</div>`} />
+                <div className="popiska">${preloz("Produkt")}</div>
               </div>
               <div className="dlazdice">
                 ${position ? html`
                   <${Img} className="prodphoto" src=${position.img} alt=${position.name}
-                    fallback=${html`<div className="prodphoto noimg">bez náhledu</div>`}
-                    errFallback=${html`<div className="prodphoto noimg">obrázek nenalezen</div>`} />
+                    fallback=${html`<div className="prodphoto noimg">${preloz("bez náhledu")}</div>`}
+                    errFallback=${html`<div className="prodphoto noimg">${preloz("obrázek nenalezen")}</div>`} />
                   <div className="popiska"><b>${position.name}</b><br />
                     ${position.tech} · ${fmt(position.w, 1)} × ${fmt(position.h, 1)} mm</div>
                 ` : html`
                   <button className="prodphoto noimg" onClick=${() => setPickerOpen(true)} disabled=${!product}
-                    style=${{ cursor: product ? "pointer" : "default" }}>vyberte polohu potisku</button>
-                  <div className="popiska">Poloha potisku</div>
+                    style=${{ cursor: product ? "pointer" : "default" }}>${preloz("vyberte polohu potisku")}</button>
+                  <div className="popiska">${preloz("Poloha potisku")}</div>
                 `}
               </div>
               ${onPouzitSpec && html`
                 <div className="dlazdice">
                   <${PdfVKalkulaci} sgps=${sgps} products=${products} recipes=${recipes}
                     onApply=${onPouzitSpec} onNacteno=${onPdfNacteno} />
-                  <div className="popiska">Zakázkový list</div>
+                  <div className="popiska">${preloz("Zakázkový list")}</div>
                   ${onCode && html`
                     <div style=${{ marginTop: 8 }}>
                       <${KodVKalkulaci} hidOn=${hidOn} setHidOn=${setHidOn}
@@ -1733,76 +1721,75 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
               ${product && product.material && html`<div className="note">${product.material}</div>`}
             </div>
             <div className="rowline" style=${{ marginTop: 10, marginBottom: 0 }}>
-              <span className="tag tech">${tech} — ${TECHS[tech] ? TECHS[tech].name : ""}</span>
-              <span className="tag" title=${rozmerListu ? "rozměr ze zakázkového listu" : "největší tisková plocha dle katalogu"}>
+              <span className="tag tech">${tech} — ${preloz(TECHS[tech] ? TECHS[tech].name : "")}</span>
+              <span className="tag" title=${rozmerListu ? preloz("rozměr ze zakázkového listu") : preloz("největší tisková plocha dle katalogu")}>
                 ${position ? fmt(sirka, 1) + "×" + fmt(vyska, 1) : "?"} mm${rozmerListu ? " ⌂" : ""}
               </span>
               ${colorSel && html`<span className="tag"><span className="cdot" style=${{ background: colorSel.hex || "#CCCCCC" }}></span>${colorSel.code || colorSel.name || ""}</span>`}
-              <button className="btn sec sm" onClick=${() => setPickerOpen(true)} disabled=${!product}>Barva a poloha potisku →</button>
+              <button className="btn sec sm" onClick=${() => setPickerOpen(true)} disabled=${!product}>${preloz("Barva a poloha potisku →")}</button>
             </div>
           </div>
 
             <div className="card bigform karta-recept" style=${{ margin: 0 }}>
-            <h2>Receptura a barva</h2>
+            <h2>${preloz("Receptura a barva")}</h2>
             <!-- Dvě půlky, obě se stejným rytmem: filtr → hledání → výběr.
                  Vlevo standardy z nakoupených databází, vpravo vlastní odstíny
                  odvozené z nich. Vysvětlivky jsou až pod oběma sloupci, aby
                  hledání i výběry začínaly v obou půlkách ve stejné výšce. -->
             <div className="frow c2 recept-pulky">
               <div>
-                <label className="f">Pantone standard — ${pantoneList.length} z ${pantoneAll.length}</label>
+                <label className="f">${preloz("Pantone standard — {n} z {celkem}", { n: pantoneList.length, celkem: pantoneAll.length })}</label>
                 <${FiltrDatabaze} recipes=${zakladAll} hodnota=${dbFiltr} setHodnota=${setDbFiltr}
                   nadpis=${false} vzdy=${true} vyber=${true} aktivni=${!skryta}
                   dbMat=${dbMat} matProduktu=${matProduktu}
-                  popis=${typyPolohyAkt.length ? "Poloha má přiřazené typy: "
-                      + typyPolohyAkt.map(nazevDb).join(", ")
-                      + " — jiné typy barev se na ní nenabízejí (mění se v záložce Produkty)."
+                  popis=${typyPolohyAkt.length ? preloz("Poloha má přiřazené typy: {typy} — jiné typy barev se na ní nenabízejí (mění se v záložce Produkty).",
+                      { typy: typyPolohyAkt.map(nazevDb).join(", ") })
                     : null} />
-                <input value=${recQ} onChange=${(e) => setRecQ(e.target.value)} placeholder="Hledat: např. 485 nebo Reflex…" style=${{ marginBottom: 6 }} />
+                <input value=${recQ} onChange=${(e) => setRecQ(e.target.value)} placeholder=${preloz("Hledat: např. 485 nebo Reflex…")} style=${{ marginBottom: 6 }} />
                 <!-- Výběr i to, co pod ním visí, musí být jedna buňka: obě půlky
                      sdílejí čtyři řádky mřížky a pátý prvek by se do nich vecpal
                      přes výběr. -->
                 <div>
                   <select value=${pantoneList.some((r) => r.id === recId) ? recId : ""}
                     onChange=${(e) => { if (e.target.value) setRecId(e.target.value); }}>
-                    <option value="">— vyberte Pantone recepturu —</option>
+                    <option value="">${preloz("— vyberte Pantone recepturu —")}</option>
                     ${pantoneList.slice(0, 400).map((r) => html`<option key=${r.id} value=${r.id}>${r.name} · ${r.series}</option>`)}
                   </select>
                 </div>
               </div>
               <div>
-                <label className="f">Custom${product ? " — " + (product.ref || product.name) : ""} — ${customVidet.length} z ${customList.length}</label>
+                <label className="f">Custom${product ? " — " + (product.ref || product.name) : ""} — ${preloz("{n} z {celkem}", { n: customVidet.length, celkem: customList.length })}</label>
                 <div style=${{ marginBottom: 10 }}>
                   <select value=${custFiltr} onChange=${(e) => setCustFiltr(e.target.value)}>
-                    <option value="">Všechny typy barev (${fmt(customList.length, 0)})</option>
+                    <option value="">${preloz("Všechny typy barev ({n})", { n: fmt(customList.length, 0) })}</option>
                     ${customZdroje.map((z) => html`<option key=${z.nazev} value=${z.nazev}>
                       ${z.nazev} (${fmt(z.pocet, 0)})</option>`)}
                   </select>
                 </div>
-                <input value=${custQ} onChange=${(e) => setCustQ(e.target.value)} placeholder="Hledat mezi vlastními barvami…" style=${{ marginBottom: 6 }} />
+                <input value=${custQ} onChange=${(e) => setCustQ(e.target.value)} placeholder=${preloz("Hledat mezi vlastními barvami…")} style=${{ marginBottom: 6 }} />
                 <div>
                   <select value=${customVidet.some((x) => x.r.id === recId) ? recId : ""}
                     onChange=${(e) => { if (e.target.value) setRecId(e.target.value); }}>
-                    <option value="">${customVidet.length ? "— vyberte custom recepturu —"
-                      : (customList.length ? "— nic neodpovídá filtru —" : "— žádná pro tento produkt —")}</option>
+                    <option value="">${customVidet.length ? preloz("— vyberte custom recepturu —")
+                      : (customList.length ? preloz("— nic neodpovídá filtru —") : preloz("— žádná pro tento produkt —"))}</option>
                     ${customVidet.map(({ r, presna, volna }) => html`<option key=${r.id} value=${r.id}>${
-                      r.name}${presna ? " ✓ tato kombinace" : (volna ? " · bez vazby" : "")}${
-                      cekaNaSchvaleni(r) ? " — čeká na schválení" : ""}</option>`)}
+                      r.name}${presna ? preloz(" ✓ tato kombinace") : (volna ? preloz(" · bez vazby") : "")}${
+                      cekaNaSchvaleni(r) ? preloz(" — čeká na schválení") : ""}</option>`)}
                   </select>
                   ${customVybrany && cekaNaSchvaleni(customVybrany) && html`
                     <div className="note" style=${{ marginTop: 6, color: "var(--warn)" }}>
-                      Čeká na schválení technologem — míchat podle ní jde, ale jen na téhle
-                      kombinaci. Jinde se nenabídne, dokud ji technolog neschválí.
+                      ${preloz("Čeká na schválení technologem — míchat podle ní jde, ale jen na téhle kombinaci. Jinde se nenabídne, dokud ji technolog neschválí.")}
                     </div>`}
                   ${customVybrany && smiRecept && html`
                   <div className="rowline" style=${{ marginTop: 6, marginBottom: 0 }}>
                     ${smazPotvrd === customVybrany.id ? html`
-                      <span className="note">Smazat <b style=${{ color: "var(--ink)" }}>${customVybrany.name}</b> i s vazbami na produkt? Vrátit to nejde.</span>
-                      <button className="btn danger sm" onClick=${() => smazCustom(customVybrany)}>Ano, smazat</button>
-                      <button className="btn sec sm" onClick=${() => setSmazPotvrd("")}>Zpět</button>
+                      <span className="note">${(() => { const [pred, po] = preloz("Smazat {r} i s vazbami na produkt? Vrátit to nejde.").split("{r}");
+                        return html`${pred}<b style=${{ color: "var(--ink)" }}>${customVybrany.name}</b>${po}`; })()}</span>
+                      <button className="btn danger sm" onClick=${() => smazCustom(customVybrany)}>${preloz("Ano, smazat")}</button>
+                      <button className="btn sec sm" onClick=${() => setSmazPotvrd("")}>${preloz("Zpět")}</button>
                     ` : html`
-                      <button className="btn sec sm" onClick=${() => setSmazPotvrd(customVybrany.id)}>Smazat tuto custom recepturu</button>
-                      <span className="note">smaže se i ze souboru vlastních receptur</span>
+                      <button className="btn sec sm" onClick=${() => setSmazPotvrd(customVybrany.id)}>${preloz("Smazat tuto custom recepturu")}</button>
+                      <span className="note">${preloz("smaže se i ze souboru vlastních receptur")}</span>
                     `}
                   </div>`}
                 </div>
@@ -1810,11 +1797,10 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
             </div>
             ${!recipe && html`
               <div className="warnbox" style=${{ marginTop: 0 }}>
-                <b>Žádná receptura není vybraná.</b> Databáze receptur se teprve doplňuje —
-                můžete pokračovat i bez ní: aplikace spočítá celkovou dávku barvy a míchací
-                lístek vytiskne s prázdnými řádky na dopsání složení.
+                <b>${preloz("Žádná receptura není vybraná.")}</b>
+                ${" "}${preloz("Databáze receptur se teprve doplňuje — můžete pokračovat i bez ní: aplikace spočítá celkovou dávku barvy a míchací lístek vytiskne s prázdnými řádky na dopsání složení.")}
                 <div style=${{ marginTop: 8 }}>
-                  <button className="btn sm" onClick=${() => { setRecId(""); setAdHoc(novaAdHoc("", "")); }}>Zadat barvu ručně</button>
+                  <button className="btn sm" onClick=${() => { setRecId(""); setAdHoc(novaAdHoc("", "")); }}>${preloz("Zadat barvu ručně")}</button>
                 </div>
               </div>`}
             <!-- Typ barvy proti materiálu produktu. Upozornění, ne zákaz:
@@ -1829,54 +1815,52 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
             ${recipe && typyPolohyAkt.length > 0 && recipe.zdroj
               && typyPolohyAkt.indexOf(recipe.zdroj) < 0 && html`
               <div className="warnbox" style=${{ marginTop: 0 }}>
-                <b>Vybraná receptura je typu ${nazevDb(recipe.zdroj)}, který na tuhle polohu
-                přiřazený není.</b>${" "}
-                Poloha ${position ? position.name : ""} má přiřazené typy${" "}
-                ${typyPolohyAkt.map(nazevDb).join(", ")} — vyberte recepturu z nich,
-                nebo přiřazení upravte v záložce Produkty.
+                <b>${preloz("Vybraná receptura je typu {typ}, který na tuhle polohu přiřazený není.", { typ: nazevDb(recipe.zdroj) })}</b>${" "}
+                ${preloz("Poloha {p} má přiřazené typy {typy} — vyberte recepturu z nich, nebo přiřazení upravte v záložce Produkty.",
+                  { p: position ? position.name : "", typy: typyPolohyAkt.map(nazevDb).join(", ") })}
               </div>`}
             ${recipe && recVhodnost === "ne" && html`
               <div className="warnbox" style=${{ marginTop: 0 }}>
-                <b>Typ barvy ${nazevDb(recipe.zdroj)} není určen na ${matProduktu.join(" ani ")}.</b>${" "}
-                Produkt je dle katalogu z materiálu ${matProduktu.join(" / ")} a u typu${" "}
-                ${nazevDb(recipe.zdroj)} tenhle materiál v <b>parametry/databaze.csv</b> uveden není.
-                Vyberte typ barvy se značkou ✓, nebo doplňte materiály typu v tom souboru.
+                <b>${preloz("Typ barvy {typ} není určen na {mat}.", { typ: nazevDb(recipe.zdroj), mat: matProduktu.join(preloz(" ani ")) })}</b>${" "}
+                ${(() => { const [pred, po] = preloz("Produkt je dle katalogu z materiálu {mat} a u typu {typ} tenhle materiál v {soubor} uveden není. Vyberte typ barvy se značkou ✓, nebo doplňte materiály typu v tom souboru.",
+                    { mat: matProduktu.join(" / "), typ: nazevDb(recipe.zdroj) }).split("{soubor}");
+                  return html`${pred}<b>parametry/databaze.csv</b>${po}`; })()}
               </div>`}
             ${recipe && recVhodnost === "ano" && matProduktu.length > 1 && html`
               <div className="specbar" style=${{ marginTop: 0 }}>
-                Produkt je z materiálů ${matProduktu.join(" / ")} — katalog neříká, z čeho je
-                potiskovaný díl. Typ ${nazevDb(recipe.zdroj)} sedí aspoň na jeden z nich;
-                jestli i na ten potiskovaný, posuďte podle dílu.
+                ${preloz("Produkt je z materiálů {mat} — katalog neříká, z čeho je potiskovaný díl. Typ {typ} sedí aspoň na jeden z nich; jestli i na ten potiskovaný, posuďte podle dílu.",
+                  { mat: matProduktu.join(" / "), typ: nazevDb(recipe.zdroj) })}
               </div>`}
             ${jeAdHoc && html`
               <div className="okbox" style=${{ marginTop: 0, marginBottom: 10 }}>
-                Barva <b>${recipe.name}</b>${recipe.series ? " (" + recipe.series + ")" : ""} není v databázi receptur —
-                pracuje se s ní jako s rozpracovanou. ${recipe.components.length
-                  ? "Složení je zadané, můžete ho uložit natrvalo."
-                  : "Bez zadaného složení se vytiskne lístek s prázdnými řádky."}
+                ${(() => { const [pred, po] = preloz("Barva {b} není v databázi receptur — pracuje se s ní jako s rozpracovanou.").split("{b}");
+                  return html`${pred}<b>${recipe.name}</b>${recipe.series ? " (" + recipe.series + ")" : ""}${po}`; })()}
+                ${" "}${recipe.components.length
+                  ? preloz("Složení je zadané, můžete ho uložit natrvalo.")
+                  : preloz("Bez zadaného složení se vytiskne lístek s prázdnými řádky.")}
                 <div className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
                   <button className="btn sm" onClick=${() => setOdvod({ mode: "edit",
                     initial: Object.assign(JSON.parse(JSON.stringify(recipe)), { id: uid() },
                       // bez složení otevřeme editor s jedním prázdným řádkem, ať je co vyplnit
                       recipe.components.length ? {} : { components: [{ id: uid(), name: "", pct: 100 }] }) })}>
-                    ${recipe.components.length ? "Upravit a uložit recepturu" : "Zadat složení a uložit"}
+                    ${recipe.components.length ? preloz("Upravit a uložit recepturu") : preloz("Zadat složení a uložit")}
                   </button>
-                  <span className="note">uloží se jako Custom a naváže na ${(colorSel ? (colorSel.code || colorSel.name || "") : "barvu")}${position ? " · " + position.tech + " · " + position.name : ""}</span>
+                  <span className="note">${preloz("uloží se jako Custom a naváže na")} ${(colorSel ? (colorSel.code || colorSel.name || "") : preloz("barvu"))}${position ? " · " + position.tech + " · " + position.name : ""}</span>
                 </div>
               </div>`}
             <!-- Vybraná barva stejně velká jako v „Kolik namíchat". Je to hlavní
                  kontrola, že se míchá ta správná — a kontrola, kterou tiskař dělá
                  okem, musí být na obou místech stejná, jinak se nedají porovnat. -->
             <div style=${{ marginTop: 12 }}>
-              <b style=${{ fontSize: 17 }}>${recipe ? recipe.name : "— bez receptury —"}</b>
+              <b style=${{ fontSize: 17 }}>${recipe ? recipe.name : preloz("— bez receptury —")}</b>
               ${recipe && recipe.series ? html`<span className="note"> · ${recipe.series}</span>` : ""}
               <br /><span className="note">
-                ${recipe && recipe.type === "Custom" ? "Custom" : "Pantone standard"}
-                ${" · hustota " + fmt(n(recipe ? recipe.density : 1, 1), 2) + " g/ml"}
-                ${" · " + (recipe ? recipe.components.length : 0) + " komponent"}
+                ${recipe && recipe.type === "Custom" ? "Custom" : preloz("Pantone standard")}
+                ${" " + preloz("· hustota {h} g/ml", { h: fmt(n(recipe ? recipe.density : 1, 1), 2) })}
+                ${" " + preloz("· {n} komponent", { n: recipe ? recipe.components.length : 0 })}
                 ${vazRec && recipe && vazRec.id === recipe.id
-                  ? " · vázaná na " + (colorSel ? (colorSel.code || colorSel.name || "") : "")
-                    + (vazbaSiroka ? " (všechny polohy)" : (position ? " · " + position.tech + " " + position.name : ""))
+                  ? " " + preloz("· vázaná na {c}", { c: colorSel ? (colorSel.code || colorSel.name || "") : "" })
+                    + (vazbaSiroka ? preloz(" (všechny polohy)") : (position ? " · " + position.tech + " " + position.name : ""))
                   : ""}
               </span>
               <${PruhSlozeni} recipe=${recipe} />
@@ -1884,39 +1868,39 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
             ${barvaPotisku && html`
               <div className="rowline" style=${{ marginTop: 2, marginBottom: 0 }}>
                 <span className="tag" title=${barvaPotisku.presny
-                  ? "pantone je daný názvem barvy"
-                  : "dopočítáno z odstínu vzorníku — orientační, ne změřené"}>
+                  ? preloz("pantone je daný názvem barvy")
+                  : preloz("dopočítáno z odstínu vzorníku — orientační, ne změřené")}>
                   ${barvaPotisku.pantone || "CMYK " + cmykText(barvaPotisku.cmyk)}
                 </span>
                 <span className="note">
                   ${barvaPotisku.pantone && barvaPotisku.cmyk
                     ? "≈ CMYK " + cmykText(barvaPotisku.cmyk) + " · " : ""}
                   ${barvaPotisku.hex}
-                  ${barvaPotisku.zListu ? " — vzorník ze zakázkového listu" : ""}
+                  ${barvaPotisku.zListu ? preloz(" — vzorník ze zakázkového listu") : ""}
                   ${barvaPotisku.blizky
-                    ? " · nejblíž " + barvaPotisku.blizky.recipe.name
-                      + " (odchylka ΔE " + fmt(barvaPotisku.blizky.dE, 1) + ")" : ""}
+                    ? " " + preloz("· nejblíž {r} (odchylka ΔE {d})",
+                        { r: barvaPotisku.blizky.recipe.name, d: fmt(barvaPotisku.blizky.dE, 1) }) : ""}
                 </span>
               </div>`}
             </div>
 
             <div className="card bigform karta-cisla" style=${{ margin: 0 }}>
-            <h2>Zakázka</h2>
+            <h2>${preloz("Zakázka")}</h2>
             <div className="zakazka-cisla">
               <div>
-                <label className="f">Počet kusů</label>
+                <label className="f">${preloz("Počet kusů")}</label>
                 <input type="number" min="1" value=${qty} onChange=${(e) => setQty(e.target.value)} />
               </div>
               <div>
-                <label className="f">Spotřeba (g/m²)</label>
+                <label className="f">${preloz("Spotřeba (g/m²)")}</label>
                 <input type="number" step="0.1" value=${gm2} onChange=${(e) => setGm2(e.target.value)} />
               </div>
               <div>
-                <label className="f">Ztráty (%)</label>
+                <label className="f">${preloz("Ztráty (%)")}</label>
                 <input type="number" step="1" value=${loss} onChange=${(e) => setLoss(e.target.value)} />
               </div>
               <div>
-                <label className="f">Min. dávka (g)</label>
+                <label className="f">${preloz("Min. dávka (g)")}</label>
                 <input type="number" step="10" value=${minBatch} onChange=${(e) => setMinBatch(e.target.value)} />
               </div>
             </div>
@@ -1924,74 +1908,75 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 <div className=${Math.abs(zeSita.gm2 - n(gm2)) > 0.05 ? "okbox" : "specbar"} style=${{ marginTop: 4 }}>
                   ${Math.abs(zeSita.gm2 - n(gm2)) > 0.05
                     ? html`<${React.Fragment}>
-                        <b>${zeSita.sito.klise ? "Z klišé" : "Ze síta"} ${recipe.mesh} vychází ${fmt(zeSita.gm2, 1)} g/m²</b>
-                        ${" — teď je nastaveno " + fmt(n(gm2), 1) + " g/m²."}
+                        <b>${preloz(zeSita.sito.klise ? "Z klišé {mesh} vychází {g} g/m²" : "Ze síta {mesh} vychází {g} g/m²",
+                          { mesh: recipe.mesh, g: fmt(zeSita.gm2, 1) })}</b>
+                        ${preloz(" — teď je nastaveno {g} g/m².", { g: fmt(n(gm2), 1) })}
                         <div className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
                           <button className="btn sm" onClick=${() => setGm2(fmt(zeSita.gm2, 1).replace(",", "."))}>
-                            Použít ${fmt(zeSita.gm2, 1)} g/m²
+                            ${preloz("Použít {g} g/m²", { g: fmt(zeSita.gm2, 1) })}
                           </button>
                         </div>
                       <//>`
                     : html`<${React.Fragment}>
                         <span className="dot" style=${{ background: "var(--ok)" }}></span>
-                        <span>Spotřeba odpovídá ${zeSita.sito.klise ? "klišé" : "sítu"} ${recipe.mesh}.</span>
+                        <span>${preloz("Spotřeba odpovídá {co} {mesh}.", { co: preloz(zeSita.sito.klise ? "klišé" : "sítu"), mesh: recipe.mesh })}</span>
                       <//>`}
                   <div className="note" style=${{ marginTop: 6 }}>
-                    ${fmt(zeSita.sito.vth, 1)} cm³/m² teoreticky${zeSita.sito.klise ? " (hloubka leptu)" : ""}
-                    ${zeSita.sito.dopocteno ? " (dopočteno z geometrie tkaniny — orientační)" : ""}
-                    ${" × " + fmt(zeSita.prenos, 2) + " přenos × " + fmt(n(recipe.density, 1), 2) + " g/ml hustota"}
-                    ${zeSita.kKryvost !== 1 ? " × " + fmt(zeSita.kKryvost, 2) + " " + (recipe.opacity || "kryvost") : ""}
+                    ${fmt(zeSita.sito.vth, 1)} cm³/m² ${preloz("teoreticky")}${zeSita.sito.klise ? preloz(" (hloubka leptu)") : ""}
+                    ${zeSita.sito.dopocteno ? preloz(" (dopočteno z geometrie tkaniny — orientační)") : ""}
+                    ${" " + preloz("× {p} přenos × {h} g/ml hustota", { p: fmt(zeSita.prenos, 2), h: fmt(n(recipe.density, 1), 2) })}
+                    ${zeSita.kKryvost !== 1 ? " × " + fmt(zeSita.kKryvost, 2) + " " + (recipe.opacity || preloz("kryvost")) : ""}
                     ${zeSita.kMaterial !== 1 ? " × " + fmt(zeSita.kMaterial, 2) + " " + zeSita.materialKlic : ""}
-                    ${zeSita.kPodklad !== 1 ? " × " + fmt(zeSita.kPodklad, 2) + " podklad " + zeSita.tridaPodkladu : ""}
-                    ${zeSita.kViskozita !== 1 ? " × " + fmt(zeSita.kViskozita, 2) + " viskozita " + fmt(zeSita.viskozita, 1) + " s" : ""}
+                    ${zeSita.kPodklad !== 1 ? " × " + fmt(zeSita.kPodklad, 2) + " " + preloz("podklad") + " " + zeSita.tridaPodkladu : ""}
+                    ${zeSita.kViskozita !== 1 ? " × " + fmt(zeSita.kViskozita, 2) + " " + preloz("viskozita") + " " + fmt(zeSita.viskozita, 1) + " s" : ""}
                   </div>
                 </div>`}
             </div>
 
             ${recipe && html`
             <div className="card bigform karta-tisk" style=${{ margin: 0 }}>
-              <h2>Parametry tisku</h2>
+              <h2>${preloz("Parametry tisku")}</h2>
               <!-- sloupce podle toho, kolik polí se doopravdy vykreslí: u tampontisku
                    je místo síta klišé, a není-li žádné zapsané, zbudou jen dvě pole -->
               <div className=${"frow " + (maSito || klisePro.length > 0 ? "c3" : "c2")} style=${{ marginTop: 8 }}>
                 ${maSito && html`
                   <div>
-                    <label className="f">Síto</label>
+                    <label className="f">${preloz("Síto")}</label>
                     <select value=${recipe.mesh || ""} onChange=${(e) => upravRecepturu({ mesh: e.target.value })}>
-                      <option value="">— nevybráno —</option>
+                      <option value="">${preloz("— nevybráno —")}</option>
                       ${sitaProTech.map((m) => html`<option key=${m.sito} value=${m.sito}>${m.sito}${
                         m.vth > 0 ? " · " + fmt(m.vth, 0) + " cm³/m²" : ""}</option>`)}
                       ${recipe.mesh && !sitaProTech.some((m) => m.sito === recipe.mesh)
-                        && html`<option value=${recipe.mesh}>${recipe.mesh} (není v parametrech ${tech})</option>`}
+                        && html`<option value=${recipe.mesh}>${recipe.mesh} ${preloz("(není v parametrech {tech})", { tech: tech })}</option>`}
                     </select>
                   </div>`}
                 ${!maSito && klisePro.length > 0 && html`
                   <div>
-                    <label className="f">Klišé (hloubka leptu)</label>
+                    <label className="f">${preloz("Klišé (hloubka leptu)")}</label>
                     <select value=${recipe.mesh || ""} onChange=${(e) => upravRecepturu({ mesh: e.target.value })}>
-                      <option value="">— nevybráno —</option>
+                      <option value="">${preloz("— nevybráno —")}</option>
                       ${klisePro.map((m) => html`<option key=${m.sito} value=${m.sito}>${m.sito}${
                         m.hloubka > 0 ? " · " + fmt(m.hloubka, 0) + " µm" : ""}</option>`)}
                     </select>
                   </div>`}
                 <div>
-                  <label className="f">Kryvost</label>
+                  <label className="f">${preloz("Kryvost")}</label>
                   <select value=${recipe.opacity || ""} onChange=${(e) => upravRecepturu({ opacity: e.target.value })}>
-                    <option value="">— nevybráno —</option>
+                    <option value="">${preloz("— nevybráno —")}</option>
                     ${KRYVOSTI.map((m) => html`<option key=${m} value=${m}>${m}</option>`)}
                   </select>
                 </div>
                 <div>
-                  <label className="f">Povrch</label>
+                  <label className="f">${preloz("Povrch")}</label>
                   <select value=${recipe.surface || ""} onChange=${(e) => upravRecepturu({ surface: e.target.value })}>
-                    <option value="">— nevybráno —</option>
+                    <option value="">${preloz("— nevybráno —")}</option>
                     ${POVRCHY.map((m) => html`<option key=${m} value=${m}>${m}</option>`)}
                   </select>
                 </div>
               </div>
               <div className="flags">
-                <label className="tgl"><input type="checkbox" checked=${!!recipe.tested} onChange=${(e) => upravRecepturu({ tested: e.target.checked })} /><span className="tglt"></span>Otestovaný</label>
-                <label className="tgl"><input type="checkbox" checked=${!!recipe.fade} onChange=${(e) => upravRecepturu({ fade: e.target.checked })} /><span className="tglt"></span>Vysoce odolný vůči vyblednutí</label>
+                <label className="tgl"><input type="checkbox" checked=${!!recipe.tested} onChange=${(e) => upravRecepturu({ tested: e.target.checked })} /><span className="tglt"></span>${preloz("Otestovaný")}</label>
+                <label className="tgl"><input type="checkbox" checked=${!!recipe.fade} onChange=${(e) => upravRecepturu({ fade: e.target.checked })} /><span className="tglt"></span>${preloz("Vysoce odolný vůči vyblednutí")}</label>
               </div>
             </div>`}
 
@@ -1999,14 +1984,14 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
           <div className="bigpanel" style=${{ display: "grid", gap: 20 }}>
           <div className="card" style=${{ margin: 0 }}>
             <div className="rowline" style=${{ marginTop: 0, marginBottom: 0 }}>
-              <h2 style=${{ margin: 0 }}>Kolik namíchat</h2>
+              <h2 style=${{ margin: 0 }}>${preloz("Kolik namíchat")}</h2>
               ${riziko && riziko.body.length > 0 && html`
                 <${React.Fragment}>
                   <span style=${{ marginLeft: "auto" }}></span>
                   <button className=${"btn sm" + (riziko.stupen === "vysoke" ? " danger" : " sec")}
                     onClick=${() => setRizikoOtevreno(true)}
-                    title="Co může skončit opravou, dřív než se sáhne po váze">
-                    ⚠ Než začnete míchat (${riziko.body.length})
+                    title=${preloz("Co může skončit opravou, dřív než se sáhne po váze")}>
+                    ${preloz("⚠ Než začnete míchat ({n})", { n: riziko.body.length })}
                   </button>
                 <//>`}
             </div>
@@ -2019,75 +2004,75 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 <br /><span className="note">
                   ${colorSel ? (colorSel.code || "") + (colorSel.name ? " " + colorSel.name : "") + " · " : ""}
                   ${position ? position.tech + " " + position.name : tech}
-                  ${" · " + fmt(n(qty), 0) + " ks"}
+                  ${" · " + fmt(n(qty), 0) + " " + preloz("ks")}
                 </span>
               </span>
             </div>
 
             <div className="result-big">${fmt(calcAkt.totalG)} g</div>
-            <div className="result-sub">≈ ${fmt(calcAkt.totalMl)} ml při hustotě ${fmt(n(recipe.density, 1), 2)} g/ml${
-              calcAkt.zvetseno ? " · zakázka potřebuje " + fmt(calcAkt.davkaZakazky) + " g" : ""}</div>
+            <div className="result-sub">≈ ${fmt(calcAkt.totalMl)} ml ${preloz("při hustotě")} ${fmt(n(recipe.density, 1), 2)} g/ml${
+              calcAkt.zvetseno ? preloz(" · zakázka potřebuje {g} g", { g: fmt(calcAkt.davkaZakazky) }) : ""}</div>
 
             ${calcAkt.comps.length > 0 && html`<${PruhSlozeni} recipe=${recipe} comps=${calcAkt.comps} />`}
 
-            ${calcAkt.minApplied && html`<div className="warnbox">Uplatněna minimální dávka ${fmt(n(minBatch), 0)} g (výpočtová potřeba je nižší).</div>`}
+            ${calcAkt.minApplied && html`<div className="warnbox">${preloz("Uplatněna minimální dávka {g} g (výpočtová potřeba je nižší).", { g: fmt(n(minBatch), 0) })}</div>`}
             ${calcAkt.comps.length === 0
-              ? html`<div className="warnbox">Složení receptury zatím není zadané — celková dávka je spočítaná,
-                  míchací lístek se vytiskne s prázdnými řádky na navážky.</div>`
-              : (Math.abs(calcAkt.pctSum - 100) > 0.01 && html`<div className="warnbox">Součet receptury je ${fmt(calcAkt.pctSum)} % — poměry byly normalizovány na 100 %.</div>`)}
+              ? html`<div className="warnbox">${preloz("Složení receptury zatím není zadané — celková dávka je spočítaná, míchací lístek se vytiskne s prázdnými řádky na navážky.")}</div>`
+              : (Math.abs(calcAkt.pctSum - 100) > 0.01 && html`<div className="warnbox">${preloz("Součet receptury je {s} % — poměry byly normalizovány na 100 %.", { s: fmt(calcAkt.pctSum) })}</div>`)}
             ${skladAkt && skladAkt.zastavi > 0 && html`
               <div className="warnbox">
-                <b>Na tuhle dávku podle skladu nestačí zásoba.</b>
+                <b>${preloz("Na tuhle dávku podle skladu nestačí zásoba.")}</b>
                 ${skladAkt.chybi.map((x) => html`<div key=${x.nazev} style=${{ marginTop: 4 }}>
-                  ${x.nazev} — podle poslední inventury <b>došla</b>.</div>`)}
+                  ${(() => { const [pred, po] = preloz("— podle poslední inventury {v}.").split("{v}");
+                    return html`${x.nazev} ${pred}<b>${preloz("došla")}</b>${po}`; })()}</div>`)}
                 ${skladAkt.nestaci.map((x) => html`<div key=${x.nazev} style=${{ marginTop: 4 }}>
-                  ${x.nazev} — zbývá <b>${fmt(x.zbyvaG, 0)} g</b>, dávka potřebuje
-                  ${" "}<b>${fmt(x.potreba, 0)} g</b>.</div>`)}
+                  ${(() => { const cely = preloz("— zbývá {z}, dávka potřebuje {p}.");
+                    const [pred, zbytekTextu] = cely.split("{z}"); const [stred, po] = zbytekTextu.split("{p}");
+                    return html`${x.nazev} ${pred}<b>${fmt(x.zbyvaG, 0)} g</b>${stred}<b>${fmt(x.potreba, 0)} g</b>${po}`; })()}</div>`)}
                 <div className="note" style=${{ marginTop: 6 }}>
-                  Zůstatek je dopočet z inventury a zapsaných dávek — konev v regálu má
-                  poslední slovo. Nesedí-li to, přepočítejte zásobu v záložce Sklad surovin.
+                  ${preloz("Zůstatek je dopočet z inventury a zapsaných dávek — konev v regálu má poslední slovo. Nesedí-li to, přepočítejte zásobu v záložce Sklad surovin.")}
                 </div>
               </div>`}
             ${skladAkt && !skladAkt.zastavi && skladAkt.podMinimum.length > 0 && html`
               <div className="specbar" style=${{ marginTop: 10 }}>
                 <span className="dot" style=${{ background: "var(--warn)" }}></span>
-                <span>Po téhle dávce spadne pod minimum:
-                  ${" "}${skladAkt.podMinimum.map((x) => x.nazev).join(", ")} — je čas objednat.</span>
+                <span>${preloz("Po téhle dávce spadne pod minimum:")}
+                  ${" "}${skladAkt.podMinimum.map((x) => x.nazev).join(", ")} ${preloz("— je čas objednat.")}</span>
               </div>`}
             ${vyuzitiZbytku && html`
               <div className="specbar" style=${{ marginTop: 10 }}>
                 <span className="dot" style=${{ background: "var(--ok)" }}></span>
-                <span>Míchá se ${vyuzitiZbytku.dvojice ? "ze dvou zbytků" : "ze zbytku"}
+                <span>${preloz("Míchá se")} ${preloz(vyuzitiZbytku.dvojice ? "ze dvou zbytků" : "ze zbytku")}
                   <b> ${popisKelimku(vyuzitiZbytku.zbytek)}</b>${" "}
-                  (${fmt(vyuzitiZbytku.pouzit)} g) — domíchat ${fmt(vyuzitiZbytku.domichat)} g.${
+                  (${fmt(vyuzitiZbytku.pouzit)} g) ${preloz("— domíchat {d} g.", { d: fmt(vyuzitiZbytku.domichat) })}${
                   (vyuzitiZbytku.zastoupeno || []).length
-                    ? " Zástupnost: " + textZastoupeni(vyuzitiZbytku.zastoupeno) + "." : ""}</span>
+                    ? " " + preloz("Zástupnost:") + " " + textZastoupeni(vyuzitiZbytku.zastoupeno) + "." : ""}</span>
               </div>`}
             ${!vyuzitiZbytku && nabidky.length > 0 && html`
               <div className="specbar" style=${{ marginTop: 10 }}>
                 <span className="dot" style=${{ background: "var(--ok)" }}></span>
-                <span>Ve skladu ${nabidky.length === 1 ? "je zbytek, který" : "jsou " + nabidky.length + " zbytky, které"}
-                  ${" "}na tuhle dávku ${nabidky.length === 1 ? "sedne" : "sednou"} — nabídnou se v míchacím režimu.</span>
+                <span>${nabidky.length === 1
+                  ? preloz("Ve skladu je zbytek, který na tuhle dávku sedne — nabídne se v míchacím režimu.")
+                  : preloz("Ve skladu jsou {n} zbytky, které na tuhle dávku sednou — nabídnou se v míchacím režimu.", { n: nabidky.length })}</span>
               </div>`}
 
             ${predpoved && html`
               <div className="specbar" style=${{ marginTop: 10 }}>
                 <span className="dot" style=${{ background: "var(--warn)", flex: "none" }}></span>
-                <span>Podle ${predpoved.pocet} minulých dávek téhle barvy
-                  ${predpoved.podlePolohy ? " na téhle poloze" : ""} zbude asi
-                  <b> ${fmt(predpoved.zbudeG)} g</b> — ${fmt(predpoved.podil * 100, 0)} % dávky.
+                <span>${(() => { const [pred, po] = preloz("Podle {n} minulých dávek téhle barvy{pol} zbude asi {g} — {p} % dávky.",
+                    { n: predpoved.pocet, pol: predpoved.podlePolohy ? preloz(" na téhle poloze") : "",
+                      p: fmt(predpoved.podil * 100, 0) }).split("{g}");
+                  return html`${pred}<b>${fmt(predpoved.zbudeG)} g</b>${po}`; })()}
                   ${ztratyNavrh != null
-                    ? html`<span className="note"> Se ztrátami ${fmt(ztratyNavrh, 1)} % místo
-                        ${" " + fmt(n(loss), 1)} % by dávka vyšla na
-                        ${" " + fmt(Math.max(calc.netto * (1 + ztratyNavrh / 100), n(minBatch)))} g
-                        a nezbylo by nic.</span>`
-                    : html`<span className="note"> Ztráty už níž nemají kam — zbytek je
-                        z minimální dávky nebo z netta.</span>`}
+                    ? html`<span className="note">${preloz(" Se ztrátami {a} % místo {b} % by dávka vyšla na {c} g a nezbylo by nic.",
+                        { a: fmt(ztratyNavrh, 1), b: fmt(n(loss), 1),
+                          c: fmt(Math.max(calc.netto * (1 + ztratyNavrh / 100), n(minBatch))) })}</span>`
+                    : html`<span className="note">${preloz(" Ztráty už níž nemají kam — zbytek je z minimální dávky nebo z netta.")}</span>`}
                 </span>
                 ${ztratyNavrh != null && html`
                   <span style=${{ marginLeft: "auto" }}></span>
                   <button className="btn sec sm" onClick=${() => setLoss(ztratyNavrh)}>
-                    Ztráty na ${fmt(ztratyNavrh, 1)} %
+                    ${preloz("Ztráty na {p} %", { p: fmt(ztratyNavrh, 1) })}
                   </button>`}
               </div>`}
             ${!michRezim && blokNatisku}
@@ -2107,15 +2092,16 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 ${/* flex-basis 0: řádky flexu se lámou podle nezmenšené šířky
                       obsahu, takže delší text by spadl POD tečku, ne vedle ní */""}
                 <span style=${{ flex: "1 1 0" }}>
-                  ${vocAkt.znama && html`<span>Těkavé látky (VOC): <b>${fmt(vocAkt.vocG, 1)} g</b> v dávce${
-                    vocAkt.kryto < 1 ? html`<span className="note"> · spočítáno z ${
-                      fmt(Math.floor(vocAkt.kryto * 100), 0)} % navážky — bez údaje ${
-                      vocAkt.bezUdaje.slice(0, 4).join(", ")}${vocAkt.bezUdaje.length > 4 ? " …" : ""}</span>` : ""}
+                  ${vocAkt.znama && html`<span>${(() => { const [pred, po] = preloz("Těkavé látky (VOC): {g} v dávce").split("{g}");
+                    return html`${pred}<b>${fmt(vocAkt.vocG, 1)} g</b>${po}`; })()}${
+                    vocAkt.kryto < 1 ? html`<span className="note"> ${preloz("· spočítáno z {p} % navážky — bez údaje {c}",
+                      { p: fmt(Math.floor(vocAkt.kryto * 100), 0),
+                        c: vocAkt.bezUdaje.slice(0, 4).join(", ") + (vocAkt.bezUdaje.length > 4 ? " …" : "") })}</span>` : ""}
                   </span>`}
                   ${!vocAkt.znama && vocAkt.listy.length > 0 && html`<span className="note">
-                    Podíl VOC není v ceníku u žádné složky — výkaz se nepočítá.</span>`}
+                    ${preloz("Podíl VOC není v ceníku u žádné složky — výkaz se nepočítá.")}</span>`}
                   ${vocAkt.listy.length > 0 && html`<span className="note">${vocAkt.znama ? " · " : " "}
-                    bezpečnostní listy: ${vocAkt.listy.map((l, i) => html`<${React.Fragment} key=${l.nazev}>${
+                    ${preloz("bezpečnostní listy:")} ${vocAkt.listy.map((l, i) => html`<${React.Fragment} key=${l.nazev}>${
                       i > 0 ? " · " : ""}<a href=${l.odkaz} target="_blank" rel="noopener">${l.nazev}</a><//>`)}</span>`}
                 </span>
               </div>`}
@@ -2123,23 +2109,24 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
             <div className="rowline michtl" style=${{ marginTop: 16, marginBottom: 0 }}>
               <button className="btn" style=${{ padding: "15px 26px", fontSize: 16 }}
                 onClick=${() => setMichRezim(true)} disabled=${!recipe || !calcAkt}
-                title="Celá obrazovka jen pro míchání (zavřít klávesou Esc)">⛶ Míchací režim</button>
-              <button className="btn sec" onClick=${tiskLisku}>🖨 Míchací lístek</button>
+                title=${preloz("Celá obrazovka jen pro míchání (zavřít klávesou Esc)")}>${preloz("⛶ Míchací režim")}</button>
+              <button className="btn sec" onClick=${tiskLisku}>${preloz("🖨 Míchací lístek")}</button>
               <button className="btn sec" disabled=${!recipe || !calcAkt || !calcAkt.comps.length}
                 onClick=${() => onDoFronty && onDoFronty({ recipe: recipe,
                   davkaG: calc ? calc.totalG : 0, ks: n(qty),
                   zakazka: (zak && zak.order) || "", produkt: (product && product.ref) || "",
                   barva: colorSel ? (colorSel.code || colorSel.name || "") : "",
                   tech: tech || "", poloha: position ? position.name : "" })}
-                title="Přidat do fronty míchání — pořadí se pak dá zvolit tak, aby zbytek z jedné zakázky sedl na další">
-                ＋ Do fronty</button>
+                title=${preloz("Přidat do fronty míchání — pořadí se pak dá zvolit tak, aby zbytek z jedné zakázky sedl na další")}>
+                ${preloz("＋ Do fronty")}</button>
             </div>
           </div>
           <${MichaciRezim} aktivni=${michRezim} onZavrit=${zavriMichani}
             recipe=${recipe} calcAkt=${calcAkt} rozpis=${rozpisZbytku} vyuziti=${vyuzitiZbytku}
             stav=${michStav} product=${product} colorSel=${colorSel} position=${position}
             tech=${tech} zak=${zak} kodDavky=${kodDavky} potlife=${michRezim ? blokPotlife : null}
-            pokryti=${blokPokryti} zbytky=${blokZbytku} stitek=${blokStitku} rady=${blokRady}
+            pokryti=${blokPokryti} zbytky=${blokZbytku}
+            stitekTlacitko=${blokStitkuTlacitko} rady=${blokRady}
             aditiva=${blokAditiv} riziko=${michRezim ? blokRizika : null}
             natisk=${michRezim ? blokNatisku : null} viskozita=${michRezim ? blokViskozita : null}>
             <${Vazeni} comps=${calcAkt.comps} totalG=${calcAkt.totalG} recipeName=${recipe ? recipe.name : ""}
@@ -2179,7 +2166,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
             <div className="card" style=${{ margin: 0 }}>
               <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
                 <div>
-                  <h2 style=${{ margin: 0 }}>Barva a poloha potisku</h2>
+                  <h2 style=${{ margin: 0 }}>${preloz("Barva a poloha potisku")}</h2>
                   <p className="hint" style=${{ margin: "4px 0 0" }}>${product.ref ? product.ref + " · " : ""}${product.name}</p>
                 </div>
                 <button className="btn sec sm" onClick=${() => setPickerOpen(false)}>✕</button>
@@ -2187,7 +2174,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
 
               ${colors.length > 0 && html`
                 <div style=${{ margin: "14px 0 4px" }}>
-                  <label className="f">Barva produktu (${colors.length})</label>
+                  <label className="f">${preloz("Barva produktu ({n})", { n: colors.length })}</label>
                   <div className="chips">
                     ${colors.map((c, i) => html`
                       <button key=${i} className=${"chip" + ((colorSel === c) ? " on" : "")}
@@ -2195,65 +2182,64 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                         <span className="cdot" style=${{ background: c.hex || "#CCCCCC" }}></span>${c.code ? c.code + (c.name ? " · " + c.name : "") : (c.name || "?")}
                       </button>`)}
                   </div>
-                  ${colorSel && html`<div className="note" style=${{ marginTop: 6 }}>skladem ${colorSel.stock && colorSel.stock !== "--" ? colorSel.stock + " ks" : "— (údaj nedostupný)"}${colorSel.img ? "" : " · tato varianta nemá vlastní fotku, zobrazena společná"}</div>`}
+                  ${colorSel && html`<div className="note" style=${{ marginTop: 6 }}>${preloz("skladem")} ${colorSel.stock && colorSel.stock !== "--" ? colorSel.stock + " " + preloz("ks") : preloz("— (údaj nedostupný)")}${colorSel.img ? "" : preloz(" · tato varianta nemá vlastní fotku, zobrazena společná")}</div>`}
 
                   ${colorSel && html`
                     <div className="linkbox">
                       ${vazRec ? html`
-                        <span className="note">Vázaná receptura${vazbaSiroka ? " (pro všechny polohy)" : ""}: <b style=${{ color: "var(--ink)" }}>${vazRec.name}</b></span>
+                        <span className="note">${preloz("Vázaná receptura")}${vazbaSiroka ? preloz(" (pro všechny polohy)") : ""}: <b style=${{ color: "var(--ink)" }}>${vazRec.name}</b></span>
                         ${smazPotvrd === vazRec.id ? html`
-                          <span className="note">Opravdu smazat celou recepturu? Vrátit to nejde.</span>
+                          <span className="note">${preloz("Opravdu smazat celou recepturu? Vrátit to nejde.")}</span>
                           <button className="btn danger sm" onClick=${() => smazCustom(vazRec)}>Ano, smazat</button>
-                          <button className="btn sec sm" onClick=${() => setSmazPotvrd("")}>Zpět</button>
+                          <button className="btn sec sm" onClick=${() => setSmazPotvrd("")}>${preloz("Zpět")}</button>
                         ` : html`
                           ${smiRecept && html`
-                            <button className="btn sec sm" onClick=${() => setOdvod({ mode: "edit", initial: JSON.parse(JSON.stringify(vazRec)) })}>Upravit</button>`}
-                          <button className="btn danger sm" onClick=${zrusVazbu}>Zrušit vazbu</button>
+                            <button className="btn sec sm" onClick=${() => setOdvod({ mode: "edit", initial: JSON.parse(JSON.stringify(vazRec)) })}>${preloz("Upravit")}</button>`}
+                          <button className="btn danger sm" onClick=${zrusVazbu}>${preloz("Zrušit vazbu")}</button>
                           ${smiRecept && vazRec.type === "Custom" && html`
-                            <button className="btn danger sm" onClick=${() => setSmazPotvrd(vazRec.id)}>Smazat recepturu</button>`}
+                            <button className="btn danger sm" onClick=${() => setSmazPotvrd(vazRec.id)}>${preloz("Smazat recepturu")}</button>`}
                         `}
                       ` : html`
                         <button className="btn sec sm" onClick=${() => {
                           // předvyplní se jen receptura, ze které jde odvozovat — tedy z databáze
                           setBaseId(recipe && zakladAll.some((r) => r.id === recipe.id) ? recipe.id : "");
                           setBaseQ(""); setOdvod({ mode: "pick" });
-                        }}>＋ Custom receptura pro tuto kombinaci</button>
-                        <span className="note">uloží se jen k：${colorSel.code || colorSel.name || ""}${(product ? " · " + (product.ref || "") : "")}${position ? " · " + position.tech + " · " + position.name : " · (vyberte polohu níže)"}</span>
+                        }}>${preloz("＋ Custom receptura pro tuto kombinaci")}</button>
+                        <span className="note">${preloz("uloží se jen k：")}${colorSel.code || colorSel.name || ""}${(product ? " · " + (product.ref || "") : "")}${position ? " · " + position.tech + " · " + position.name : preloz(" · (vyberte polohu níže)")}</span>
                       `}
                     </div>
                     ${odvod && odvod.mode === "pick" && html`
                       <div className="pickbox">
-                        <label className="f">Výchozí receptura z databáze (${baseList.length} z ${zakladAll.length})</label>
+                        <label className="f">${preloz("Výchozí receptura z databáze ({n} z {m})", { n: baseList.length, m: zakladAll.length })}</label>
                         ${zakladAll.length === 0 ? html`
                           <div className="warnbox" style=${{ marginTop: 0 }}>
-                            Pro technologii <b>${tech}</b> není nahraná žádná databáze receptur,
-                            není tedy z čeho odvozovat. Přiřaďte databázi v
-                            <b> parametry/databaze.csv</b>.
+                            ${(() => { const [pred, zbytekTextu] = preloz("Pro technologii {t} není nahraná žádná databáze receptur, není tedy z čeho odvozovat. Přiřaďte databázi v {soubor}.").split("{t}");
+                              const [stred, po] = zbytekTextu.split("{soubor}");
+                              return html`${pred}<b>${tech}</b>${stred}<b> parametry/databaze.csv</b>${po}`; })()}
                           </div>` : html`
                           <div>
-                            <input value=${baseQ} onChange=${(e) => setBaseQ(e.target.value)} placeholder="Filtr: např. 485, Reflex…" style=${{ marginBottom: 6 }} />
+                            <input value=${baseQ} onChange=${(e) => setBaseQ(e.target.value)} placeholder=${preloz("Filtr: např. 485, Reflex…")} style=${{ marginBottom: 6 }} />
                             <select value=${baseList.some((r) => r.id === baseId) ? baseId : ""} onChange=${(e) => setBaseId(e.target.value)}>
-                              <option value="">— vyberte výchozí recepturu —</option>
+                              <option value="">${preloz("— vyberte výchozí recepturu —")}</option>
                               ${baseList.slice(0, 400).map((r) => html`<option key=${r.id} value=${r.id}>${
                                 r.name}${r.zdroj ? " · " + nazevDb(r.zdroj) : (r.series ? " · " + r.series : "")}</option>`)}
                             </select>
                             <div className="note" style=${{ marginTop: 4 }}>
-                              Vybírá se jen z databází nahraných pro technologii ${tech} — vlastní barva
-                              tak vždycky vychází z dohledatelné formule.
+                              ${preloz("Vybírá se jen z databází nahraných pro technologii {t} — vlastní barva tak vždycky vychází z dohledatelné formule.", { t: tech })}
                             </div>
                           </div>`}
                         <div className="rowline" style=${{ marginTop: 10, marginBottom: 0 }}>
-                          <button className="btn sm" disabled=${!baseSel} onClick=${() => baseSel && odvodit(baseSel)}>Odvodit a upravit →</button>
-                          <button className="btn sec sm" onClick=${() => setOdvod(null)}>Zavřít</button>
+                          <button className="btn sm" disabled=${!baseSel} onClick=${() => baseSel && odvodit(baseSel)}>${preloz("Odvodit a upravit →")}</button>
+                          <button className="btn sec sm" onClick=${() => setOdvod(null)}>${preloz("Zavřít")}</button>
                         </div>
                         ${baseSel && html`<div className="note" style=${{ marginTop: 8 }}>
-                          Uloží se jako: <b style=${{ color: "var(--ink)" }}>${nazevCustom(baseSel, product, colorSel, position)}</b>
+                          ${preloz("Uloží se jako:")} <b style=${{ color: "var(--ink)" }}>${nazevCustom(baseSel, product, colorSel, position)}</b>
                         </div>`}
                       </div>`}
                   `}
                 </div>`}
 
-              <label className="f" style=${{ marginTop: 4 }}>Možnosti potisku — vyberte polohu</label>
+              <label className="f" style=${{ marginTop: 4 }}>${preloz("Možnosti potisku — vyberte polohu")}</label>
               <div className="poscards">
                 ${polohy.map((p) => html`
                   <div key=${p.id} className=${"poscard" + (p.id === posId ? " on" : "")}
@@ -2261,15 +2247,15 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                     onClick=${() => setPosId(p.id)}
                     onKeyDown=${(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setPosId(p.id); } }}>
                     <${Img} src=${p.img} alt=${p.name}
-                      fallback=${html`<div className="noimg">bez náhledu</div>`}
-                      errFallback=${html`<div className="noimg imgwarn">obrázek nenalezen — spusťte stahni_obrazky.py</div>`} />
+                      fallback=${html`<div className="noimg">${preloz("bez náhledu")}</div>`}
+                      errFallback=${html`<div className="noimg imgwarn">${preloz("obrázek nenalezen — spusťte stahni_obrazky.py")}</div>`} />
                     <div className="nm">${p.name}</div>
                     <div className="dm">${p.w}×${p.h} mm · ${p.tech}</div>
                   </div>`)}
               </div>
 
               <div style=${{ marginTop: 16 }}>
-                <button className="btn" onClick=${() => setPickerOpen(false)}>Potvrdit výběr</button>
+                <button className="btn" onClick=${() => setPickerOpen(false)}>${preloz("Potvrdit výběr")}</button>
               </div>
             </div>
           </div>
@@ -2283,61 +2269,60 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
         <div className="modalbg" onClick=${(e) => { if (e.target === e.currentTarget) setUlozitZbytek(null); }}>
           <div className="modalbox" style=${{ width: "min(480px,100%)" }}>
             <div className="card" style=${{ margin: 0 }}>
-              <h2 style=${{ margin: 0 }}>Uložit zbytek do evidence</h2>
+              <h2 style=${{ margin: 0 }}>${preloz("Uložit zbytek do evidence")}</h2>
               <p className="hint">
-                Zbylá barva dostane kód na štítek. Při další zakázce se stejnou recepturou
-                aplikace sama nabídne, kolik z ní jde použít.
+                ${preloz("Zbylá barva dostane kód na štítek. Při další zakázce se stejnou recepturou aplikace sama nabídne, kolik z ní jde použít.")}
               </p>
               <div className="rowline" style=${{ marginTop: 6 }}>
                 <span className="swatch" style=${{ background: recipe.hex }} />
                 <span className="note">${recipe.name}${recipe.series ? " · " + recipe.series : ""}
-                  · ${recipe.components.length} komponent</span>
+                  ${preloz("· {n} komponent", { n: recipe.components.length })}</span>
               </div>
               <div className="frow c2" style=${{ marginTop: 10 }}>
                 <div>
-                  <label className="f">Kolik zbylo (g)</label>
+                  <label className="f">${preloz("Kolik zbylo (g)")}</label>
                   <input type="number" step="1" min="0" autoFocus value=${ulozitZbytek.gramu}
                     onChange=${(e) => setUlozitZbytek(Object.assign({}, ulozitZbytek, { gramu: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="f">Poznámka</label>
+                  <label className="f">${preloz("Poznámka")}</label>
                   <input value=${ulozitZbytek.pozn}
                     onChange=${(e) => setUlozitZbytek(Object.assign({}, ulozitZbytek, { pozn: e.target.value }))}
-                    placeholder="např. kelímek u míchačky" />
+                    placeholder=${preloz("např. kelímek u míchačky")} />
                 </div>
               </div>
               <div className="frow c3" style=${{ marginTop: 4 }}>
                 <div>
-                  <label className="f">Spotřebovat do</label>
+                  <label className="f">${preloz("Spotřebovat do")}</label>
                   <input type="date" value=${ulozitZbytek.expirace || ""}
                     onChange=${(e) => setUlozitZbytek(Object.assign({}, ulozitZbytek, { expirace: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="f">Čas použitelnosti (h)</label>
+                  <label className="f">${preloz("Čas použitelnosti (h)")}</label>
                   <input type="number" step="0.5" min="0" value=${ulozitZbytek.potlifeH || ""}
-                    placeholder="jen dvousložkové"
+                    placeholder=${preloz("jen dvousložkové")}
                     onChange=${(e) => setUlozitZbytek(Object.assign({}, ulozitZbytek, { potlifeH: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="f">Dvousložková</label>
+                  <label className="f">${preloz("Dvousložková")}</label>
                   <label className="tgl" style=${{ marginTop: 6 }}>
                     <input type="checkbox" checked=${!!ulozitZbytek.tuzidlo}
                       onChange=${(e) => setUlozitZbytek(Object.assign({}, ulozitZbytek, { tuzidlo: e.target.checked,
                         potlifeH: e.target.checked && !ulozitZbytek.potlifeH
                           ? String(potlifeHodin(potlifeCfg) || POTLIFE_VYCHOZI) : ulozitZbytek.potlifeH }))} />
-                    <span className="tglt"></span>s tužidlem
+                    <span className="tglt"></span>${preloz("s tužidlem")}
                   </label>
                 </div>
               </div>
               <p className="note">
-                Pot life se počítá od teď — barva se právě namíchala. Zapíše se i zakázka${zak && zak.order ? " " + zak.order : ""},
-                produkt${product && product.ref ? " " + product.ref : ""} a poloha, ať je pak jasné, odkud zbytek je.
+                ${preloz("Pot life se počítá od teď — barva se právě namíchala. Zapíše se i zakázka{z}, produkt{p} a poloha, ať je pak jasné, odkud zbytek je.",
+                  { z: zak && zak.order ? " " + zak.order : "", p: product && product.ref ? " " + product.ref : "" })}
               </p>
               <div className="rowline" style=${{ marginTop: 12, marginBottom: 0 }}>
                 <button className="btn" disabled=${!(n(ulozitZbytek.gramu) > 0)} onClick=${ulozZbytekZKalkulace}>
-                  Uložit a otevřít štítek
+                  ${preloz("Uložit a otevřít štítek")}
                 </button>
-                <button className="btn sec" onClick=${() => setUlozitZbytek(null)}>Zrušit</button>
+                <button className="btn sec" onClick=${() => setUlozitZbytek(null)}>${preloz("Zrušit")}</button>
               </div>
             </div>
           </div>
