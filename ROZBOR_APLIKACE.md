@@ -1,7 +1,7 @@
 # Ink Recipe Manager — strukturovaný rozbor aplikace
 
 <!-- AUTO:stav -->
-> **Stav k 27. srpna 2026.** Čísla v úsecích označených `AUTO` generuje
+> **Stav k 28. srpna 2026.** Čísla v úsecích označených `AUTO` generuje
 > `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — nepřepisují
 > se ručně a nemohou se rozejít se skutečností. Text mimo ně píše člověk.
 
