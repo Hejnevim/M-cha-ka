@@ -5,11 +5,11 @@
 > `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — nepřepisují
 > se ručně a nemohou se rozejít se skutečností. Text mimo ně píše člověk.
 
-> Poslední zapsaná změna ve vývojovém deníku: **31. srpna 13:14 — Text v Odpojit vycentrován (přetékal jen doprava) a Tára přestala zasahovat do řádku posuvníku v simulaci**
+> Poslední zapsaná změna ve vývojovém deníku: **31. srpna 14:11 — Dlaždice Zakázky a Parametrů tisku na mobilu zmenšeny o polovinu — na výšku 178 px se čtyři pole pod sebe nevešla na jednu obrazovku**
 
 | soubor | řádků | velikost |
 |---|---:|---:|
-| `aplikace/ (81 souborů)` | 17 115 | 964 kB |
+| `aplikace/ (81 souborů)` | 17 131 | 965 kB |
 | `index.html` | 109 | 6 kB |
 | `most.py` | 727 | 31 kB |
 | `pdf_spec.py` | 1 071 | 42 kB |
@@ -17,7 +17,7 @@
 | `prevod_printcolor.py` | 188 | 7 kB |
 | `kontrola_aplikace.py` | 169 | 7 kB |
 | `rozbor_aktualizuj.py` | 359 | 13 kB |
-| **celkem** | **19 951** | |
+| **celkem** | **19 967** | |
 <!-- /AUTO:stav -->
 
 ---

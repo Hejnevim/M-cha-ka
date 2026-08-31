@@ -261,6 +261,7 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 12:33 | Dlaždice síta, kryvosti a povrchu v Parametrech tisku dostaly pevnou výšku — jako čtverec nafukovaly kartu při méně polích v řádku nebo úzkém okně |
 | 12:50 | Písmo tlačítka Odpojit u váhy zvětšeno na velikost Táry — stejně velké dlaždice vedle sebe měly nápadně rozdílně velký text |
 | 13:14 | Text v Odpojit vycentrován (přetékal jen doprava) a Tára přestala zasahovat do řádku posuvníku v simulaci |
+| 14:11 | Dlaždice Zakázky a Parametrů tisku na mobilu zmenšeny o polovinu — na výšku 178 px se čtyři pole pod sebe nevešla na jednu obrazovku |
 
 ---
 
@@ -6327,5 +6328,30 @@ skutečných uzlů — žádná ruční rekonstrukce CSS, žádný odhad.
 Mezera mezi Tárou a posuvníkem 14 px v úzkém (650 px) i širokém
 (1600 px) okně, u receptury bez varování (nejméně obsahu nad
 posuvníkem — nejhorší případ). `kontrola_aplikace.py` 0, `prekryv.py
---zalozky` čisté na všech čtyřech šířkách, v obou režimech i napříč
+--zalozky` čisté na všech čtyřech šířkách, v obou режimech i napříč
 záložkami, `barvy_nastroj.py` přegenerován.
+
+## 133. Dlaždice na mobilu poloviční — čtyři pole Zakázky se vejdou najednou
+
+**Problém.** Snímek skutečného telefonu ukázal, že dlaždice síta/kryvosti/
+povrchu a čísel zakázky (kapitoly 128 a 130 daly oběma pevnou výšku
+178 px, aby se nenafukovaly do čtverce) jsou na úzké obrazovce, kde se
+sloupce skládají pod sebe, zbytečně velké — čtyři pole Zakázky pod sebou
+(4 × 178 px + popisky) na jednu obrazovku telefonu nevešla, poslední
+(„Min. dávka") zůstávalo pod okrajem.
+
+**Co se změnilo.** Pod stejnými zlomy, na kterých se sloupce skládají
+pod sebe (`.zakazka-cisla` 560 px, `.karta-tisk` 640 px), dostaly
+dlaždice poloviční výšku (178 → 88 px) a úměrně menší písmo
+(`--pismo * 3,375` → `* 1,7` u Zakázky, `--pismo * 2` → `* 1` u
+Parametrů tisku, stejně tak šipka výběru). Nad zlomem (dva/tři sloupce
+vedle sebe) se nic nemění.
+
+**Změřeno** (`sonda.py`, syntetické dlaždice v obou kartách při šířce
+420 px): výška 88 px místo 178 (přesně polovina), písmo Zakázky
+26,35 px, Parametrů tisku 15,5 px. Čtyři pole Zakázky pod sebou teď
+534 px místo 894, tři pole Parametrů tisku 396 px místo 666. Nejdelší
+text v poli („Aluminium Foil mat") potřebuje 144 px, k dispozici má
+302 px — nepřeteče. `kontrola_aplikace.py` 0, `prekryv.py --sirky
+"420,500,560,640" --zalozky` čisté v obou režimech přesně na šířkách
+kolem nových zlomů, `barvy_nastroj.py` přegenerován.

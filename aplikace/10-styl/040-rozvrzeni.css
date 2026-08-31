@@ -97,6 +97,14 @@
 .karta-tisk select:open::picker-icon{rotate:180deg}
 .karta-tisk select::picker(select){font-size:calc(var(--pismo) * 1.5)}
 .karta-tisk option{padding:calc(var(--pole-y) * 1.4) calc(var(--pole-x) * 1.4)}
+/* Pod 640px se `.frow` skládá na jeden sloupec (viz pravidlo výš) a
+   dlaždice jedou přes celou šířku telefonu — stejná potíž jako u
+   `.zakazka-cisla` (viz tam), stejná oprava: na úzkém okně dlaždice
+   zmenšeny přibližně o polovinu (178 → 88 px). */
+@media(max-width:640px){
+  .karta-tisk select{font-size:min(var(--pismo), 5.5cqw);height:88px}
+  .karta-tisk select::picker-icon{width:4.5cqw;height:4.5cqw}
+}
 .bigform select:focus,.bigform input:focus{box-shadow:var(--neu-sm),0 0 0 3px var(--focus)}
 .bigform .frow{gap:calc(var(--mezera-poli) * 1.33);margin-bottom:calc(var(--mezera-poli) * 1.33)}
 .bigform .note{font-size:calc(var(--pismo-poznamka) * 1.16)}

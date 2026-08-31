@@ -1,7 +1,7 @@
 # Rejstřík kódu aplikace
 
 > Generuje `mapa.py` ze skutečných souborů — neupravovat ručně.
-> Kód není v `index.html`, leží v `aplikace/` v 81 částech (17115 řádků).
+> Kód není v `index.html`, leží v `aplikace/` v 81 částech (17131 řádků).
 > Čísla u položek jsou `část:řádek` — část podle tabulky níž.
 
 | # | část | řádků |
@@ -9,8 +9,8 @@
 | 1 | `00-hlava/010-hlava.html` | 6 |
 | 2 | `10-styl/020-promenne.css` | 127 |
 | 3 | `10-styl/030-zaklad.css` | 85 |
-| 4 | `10-styl/040-rozvrzeni.css` | 108 |
-| 5 | `10-styl/050-prvky.css` | 90 |
+| 4 | `10-styl/040-rozvrzeni.css` | 116 |
+| 5 | `10-styl/050-prvky.css` | 98 |
 | 6 | `10-styl/060-produkty.css` | 34 |
 | 7 | `10-styl/070-michani.css` | 192 |
 | 8 | `10-styl/080-ovladani.css` | 59 |
@@ -163,9 +163,9 @@
 `.bigform select` 4:57 · `.karta-tisk label.f` 4:63 · `.karta-tisk .frow>div` 4:80 · `.karta-tisk select` 4:81
 `.karta-tisk select::picker-icon` 4:94 · `.karta-tisk select::select-fallback-button-text` 4:96
 `.karta-tisk select:open::picker-icon` 4:97 · `.karta-tisk select::picker(select)` 4:98
-`.karta-tisk option` 4:99 · `.bigform select:focus,.bigform input:focus` 4:100 · `.bigform .frow` 4:101
-`.bigform .note` 4:102 · `.bigform .swatch` 4:103 · `.bigform .tgl` 4:104 · `.bigform .tglt` 4:105
-`.bigform .tglt::after` 4:106 · `.bigform .tgl input:checked + .tglt::after` 4:107 · `.bigform .flags` 4:108
+`.karta-tisk option` 4:99 · `.bigform select:focus,.bigform input:focus` 4:108 · `.bigform .frow` 4:109
+`.bigform .note` 4:110 · `.bigform .swatch` 4:111 · `.bigform .tgl` 4:112 · `.bigform .tglt` 4:113
+`.bigform .tglt::after` 4:114 · `.bigform .tgl input:checked + .tglt::after` 4:115 · `.bigform .flags` 4:116
 `.card` 5:1 · `.card h2` 5:2 · `.card .hint` 5:3 · `.frow` 5:4 · `label.f` 5:6 · `.chips` 5:14 · `.chip` 5:15
 `.chip.on` 5:16 · `.chip.mini` 5:19 · `.btn` 5:20 · `.btn:hover` 5:21 · `.btn.sec` 5:22
 `.btn.sec:hover` 5:23 · `.btn.sm` 5:24 · `.btn.danger` 5:25 · `.btn:disabled` 5:26 · `table.t` 5:27
@@ -213,7 +213,7 @@
 `.dot` 8:50 · `.cam` 8:51 · `.specbar` 8:52 · `.specbar b` 8:53 · `.specbar a` 8:56 · `.kv` 8:57
 `.kv .k` 8:58 · `.kv .v` 8:59
 
-### Uvnitř @media a @supports (37)
+### Uvnitř @media a @supports (40)
 
 `select,::picker(select)` 3:20 · `select::picker-icon` 3:23 · `select` 3:27 · `select:open` 3:28
 `.bigform select:open` 3:29 · `::picker(select)` 3:30 · `option` 3:39 · `option:hover,option:focus` 3:44
@@ -221,19 +221,21 @@
 `option:not(:checked)::checkmark` 3:50 · `.backbtn` 3:78 · `.backbtn span` 3:78 · `.grid.calc` 4:5
 `.grid.calc>.karta-produkt` 4:19 · `.grid.calc>.bigpanel` 4:21 · `.grid.calc>.karta-recept` 4:23
 `.grid.calc>.karta-cisla` 4:25 · `.grid.calc>.karta-tisk` 4:27 · `.grid.calc>.card` 4:29
-`.karta-produkt` 4:30 · `.frow.c2` 5:5 · `.frow.c3` 5:5 · `.frow.c4` 5:5
+`.karta-produkt` 4:30 · `.karta-tisk select` 4:105 · `.karta-tisk select::picker-icon` 4:106 · `.frow.c2` 5:5
+`.frow.c3` 5:5 · `.frow.c4` 5:5
 `.frow.c2>div>label.f:first-child,.frow.c3>div>label.f:first-child,.frow.c4>div>label.f:first-child` 5:10
-`.frow>.flags` 5:13 · `@media(min-width:640px)` 5:71 · `.zakazka-cisla` 5:90 · `.michtelo` 7:188
-`.michtab` 7:189 · `.michtab .g` 7:190 · `.michbg` 7:192 · `.pgrid` 8:27 · `.pgrid` 8:28 · `.pgrid` 8:29
-`.pgrid` 8:30
+`.frow>.flags` 5:13 · `@media(min-width:640px)` 5:71 · `.zakazka-cisla` 5:96 · `.zakazka-cisla input` 5:97
+`.michtelo` 7:188 · `.michtab` 7:189 · `.michtab .g` 7:190 · `.michbg` 7:192 · `.pgrid` 8:27 · `.pgrid` 8:28
+`.pgrid` 8:29 · `.pgrid` 8:30
 
-### Podmínky (14)
+### Podmínky (15)
 
 `@supports (appearance: base-select)` 3:19 · `@media(max-width:720px)` 3:78 · `@media(min-width:960px)` 4:5
-`@media(min-width:960px)` 4:18 · `@media(min-width:640px)` 5:5 · `@media(min-width:640px)` 5:10
-`@supports (grid-template-rows: subgrid)` 5:70 · `@media(max-width:560px)` 5:90
-`@media (max-width:1000px)` 7:187 · `@media print` 7:192 · `@media(max-width:1500px)` 8:27
-`@media(max-width:1150px)` 8:28 · `@media(max-width:800px)` 8:29 · `@media(max-width:480px)` 8:30
+`@media(min-width:960px)` 4:18 · `@media(max-width:640px)` 4:104 · `@media(min-width:640px)` 5:5
+`@media(min-width:640px)` 5:10 · `@supports (grid-template-rows: subgrid)` 5:70
+`@media(max-width:560px)` 5:95 · `@media (max-width:1000px)` 7:187 · `@media print` 7:192
+`@media(max-width:1500px)` 8:27 · `@media(max-width:1150px)` 8:28 · `@media(max-width:800px)` 8:29
+`@media(max-width:480px)` 8:30
 
 ## Komponenty (39)
 

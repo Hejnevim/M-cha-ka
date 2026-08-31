@@ -87,4 +87,12 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
    dlaždic vyšly na touž výšku karty jako oba sousedé. */
 .zakazka-cisla input{font-size:min(calc(var(--pismo) * 3.375), 18.5625cqw);font-weight:700;text-align:center;
   height:178px;padding:5cqw;box-sizing:border-box}
-@media(max-width:560px){.zakazka-cisla{grid-template-columns:1fr}}
+/* Pod 560px se sloupce skládají na jeden a dlaždice jedou přes celou šířku
+   telefonu — čtyři po 178 px (+ popisky) nezvládne bez rolování žádný
+   mobil, poslední zůstává mimo obrazovku. Na úzkém okně proto dlaždice
+   zmenšeny přibližně o polovinu (178 → 88 px, písmo 3,375 → 1,7 násobku
+   `--pismo`) — pořád čitelné z odstupu, ale čtyři se vejdou najednou. */
+@media(max-width:560px){
+  .zakazka-cisla{grid-template-columns:1fr}
+  .zakazka-cisla input{font-size:min(calc(var(--pismo) * 1.7), 9.375cqw);height:88px}
+}
