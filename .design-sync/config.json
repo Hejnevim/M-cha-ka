@@ -1,0 +1,93 @@
+{
+  "pkg": "irm",
+  "globalName": "IRM",
+  "shape": "package",
+  "buildCmd": "node .design-sync/sestav_vstup.mjs",
+  "cssEntry": "dist/styl.css",
+  "srcDir": "aplikace",
+  "componentSrcMap": {
+    "Img": "aplikace/20-zaklad/130-ikony.js",
+    "IkonaZamek": "aplikace/20-zaklad/130-ikony.js",
+    "ZoomLista": "aplikace/20-zaklad/175-pokryti-okno.js",
+    "SpecPole": "aplikace/20-zaklad/160-pdf.js",
+    "SpecVysledek": "aplikace/20-zaklad/160-pdf.js",
+    "PwGate": "aplikace/30-app/220-heslo.js",
+    "FinancniBox": "aplikace/40-kalkulace/260-financni-box.js",
+    "PotlifePruh": "aplikace/40-kalkulace/270-potlife-pruh.js",
+    "Vazeni": "aplikace/40-kalkulace/290-vazeni.js",
+    "StitekZbytku": "aplikace/50-zbytky/300-stitek.js",
+    "PruhSlozeni": "aplikace/99-zaver/660-pomocne.js",
+    "FiltrDatabaze": "aplikace/99-zaver/660-pomocne.js",
+    "TypyPolohyChipy": "aplikace/60-databaze/360-sito-tab.js",
+    "OpravyTab": "aplikace/50-zbytky/350-opravy-tab.js",
+    "FrontaTab": "aplikace/50-zbytky/320-fronta-tab.js",
+    "SestavyTab": "aplikace/85-sestavy/654-sestavy-tab.js"
+  },
+  "docsDir": ".design-sync/dokumentace",
+  "libOverrides": {
+    "source-kit.mjs": "číslované složky částí aplikace (20-zaklad…) nejsou kategorie — skupiny řídí frontmatter category v dokumentaci"
+  },
+  "dtsPropsFor": {
+    "Img": "src?: string; srcs?: string[]; alt?: string; className?: string; fallback?: React.ReactNode; errFallback?: React.ReactNode;",
+    "IkonaZamek": "otevreny?: boolean;",
+    "ZoomLista": "zoom: number; setZoom: (z: number | ((z: number) => number)) => void; popis?: string;",
+    "SpecPole": "pole: Record<string, string>; setPole: (pole: Record<string, string>) => void; zdroj: Record<string, string>; text?: string;",
+    "SpecVysledek": "res?: { ok: string[]; warn: string[] } | null;",
+    "PwGate": "label: string; correctPw: string; onConfirm: () => void; onCancel: () => void; potvrdText?: string;",
+    "FinancniBox": "naklady?: { znama?: boolean; uplna?: boolean; celkem: number; gramu: number; kryto?: number; mena?: string; gramCena?: number; polozky: { nazev: string; gramu: number; cenaJednotky?: number | null; jednotka?: string; cena?: number | null; role?: string }[]; bezCeny: string[]; jinaMena: string[] } | null; ks?: number | string; uspora?: number; likvidace?: number; usporaKod?: string; videt?: boolean; onPrepnout?: () => void; velky?: boolean;",
+    "PotlifePruh": "cfg?: { tuzidlo?: boolean; pomer?: number | string; minut?: number | string; hustnutiPopis?: string; hustnutiRada?: string } | null; bazeG?: number; zacatek?: number | null; onSpustit?: () => void; onZnovu?: () => void; onUzavrit?: (jak: 'spotrebovana' | 'vyhozena') => void; davka?: { kod: string } | null; velky?: boolean;",
+    "Vazeni": "comps: { id: string; name: string; g: number }[]; aditiva?: { druh: string; popis: string; g: number }[]; redeni?: number; totalG: number; recipeName?: string; predem?: number[]; predemPopis?: string; onHotovo?: (vysledek: unknown) => void; pigmenty?: unknown; barvaHex?: string; onStav?: (stav: unknown) => void; potlife?: unknown; zacatekPotlife?: number | null; onSpustitPotlife?: () => void; sarze?: Record<string, string>; onNovaKonev?: (pro: number, kod: string) => void; onOprava?: (zapis: unknown) => void;",
+    "StitekZbytku": "zbytek: { kod: string; nazev?: string; gramu?: number | string; hustota?: number | string; expirace?: string; potlifeH?: number | string; namichano?: number; zakazka?: string; ulozeno?: number; viskozita?: number | string; viskPohar?: string }; onClose: () => void;",
+    "PruhSlozeni": "recipe?: { hex?: string; components?: { id: string; name: string; pct: number | string }[] } | null; comps?: { id: string; name: string; norm: number }[];",
+    "FiltrDatabaze": "recipes: { zdroj?: string }[]; hodnota: string; setHodnota: (v: string) => void; popis?: string; tech?: string; skryto?: number; nadpis?: boolean; vzdy?: boolean; vyber?: boolean; dbMat?: Record<string, string[]>; matProduktu?: string[]; aktivni?: boolean;",
+    "TypyPolohyChipy": "produkt: { id?: string; ref?: string }; poloha: { tech: string; name: string }; recipes: { zdroj?: string }[]; dbTech?: Record<string, string>; typyPoloh?: Record<string, string[]>; ulozTypPolohy: (ref: string, tech: string, nazevPolohy: string, soubory: string[]) => void; mostOk?: boolean;",
+    "OpravyTab": "opravy: { kod: string; kdy: number; nazev?: string; zakazka?: string; duvodPopis?: string; pridanoG?: number; kroku?: number; davka?: string; kroky?: string; pozn?: string; davkaPred?: number; davkaPo?: number; produkt?: string }[]; davky: { kod: string; zalozeno: number }[];",
+    "FrontaTab": "fronta: { kod: string; stav: string; nazev?: string; davkaG?: number; poradi?: number; pridano?: number; zmeneno?: number; zakazka?: string; hex?: string; slozeni?: { name: string; pct: number }[] }[]; setFronta: (f: (prev: unknown[]) => unknown[]) => void; zbytky: { kod: string; nazev?: string; gramu?: number; ulozeno?: number; hex?: string; stav?: string; slozeni?: { name: string; pct: number }[] }[]; materialy: unknown[];",
+    "SestavyTab": "davky: { kod: string; zalozeno: number; nazev?: string; bazeG?: number; tuzidloG?: number; kodKelimku?: string }[]; zbytky: unknown[]; materialy: unknown[];"
+  },
+  "overrides": {
+    "PwGate": {
+      "cardMode": "single",
+      "viewport": "560x500"
+    },
+    "StitekZbytku": {
+      "cardMode": "single",
+      "viewport": "560x600"
+    },
+    "Vazeni": {
+      "cardMode": "column"
+    },
+    "OpravyTab": {
+      "cardMode": "column"
+    },
+    "FrontaTab": {
+      "cardMode": "column"
+    },
+    "SestavyTab": {
+      "cardMode": "column"
+    },
+    "SpecPole": {
+      "cardMode": "column"
+    },
+    "PruhSlozeni": {
+      "cardMode": "column"
+    },
+    "PotlifePruh": {
+      "cardMode": "column"
+    },
+    "FinancniBox": {
+      "cardMode": "column"
+    },
+    "ZoomLista": {
+      "cardMode": "column"
+    },
+    "SpecVysledek": {
+      "cardMode": "column"
+    },
+    "FiltrDatabaze": {
+      "cardMode": "column"
+    }
+  },
+  "readmeHeader": ".design-sync/conventions.md",
+  "projectId": "2050913b-5766-4bfb-a62a-6029bfd294b4"
+}

@@ -37,3 +37,11 @@ coverage/
 # Vědomě se NEIGNORUJE *.min.js: lib/react.production.min.js
 # a lib/react-dom.production.min.js jsou součást balíčku, ze kterého
 # aplikace v dílně běží bez internetu. Bez nich se nespustí.
+
+# design-sync (nahrání vzhledu do claude.ai/design) — stroje a mezivýstupy;
+# trvalá část (config, poznámky, náhledy) je v .design-sync/ a commituje se
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules

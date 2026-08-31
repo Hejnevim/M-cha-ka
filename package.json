@@ -1,0 +1,7 @@
+{
+  "name": "irm",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ink Recipe Manager — metadata pro nástroje; aplikace sama běží bez build kroku (viz sestav.py)",
+  "module": "dist/index.mjs"
+}
