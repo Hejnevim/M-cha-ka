@@ -1,7 +1,7 @@
 # Rejstřík kódu aplikace
 
 > Generuje `mapa.py` ze skutečných souborů — neupravovat ručně.
-> Kód není v `index.html`, leží v `aplikace/` v 81 částech (17173 řádků).
+> Kód není v `index.html`, leží v `aplikace/` v 81 částech (17190 řádků).
 > Čísla u položek jsou `část:řádek` — část podle tabulky níž.
 
 | # | část | řádků |
@@ -10,7 +10,7 @@
 | 2 | `10-styl/020-promenne.css` | 127 |
 | 3 | `10-styl/030-zaklad.css` | 85 |
 | 4 | `10-styl/040-rozvrzeni.css` | 116 |
-| 5 | `10-styl/050-prvky.css` | 104 |
+| 5 | `10-styl/050-prvky.css` | 121 |
 | 6 | `10-styl/060-produkty.css` | 34 |
 | 7 | `10-styl/070-michani.css` | 217 |
 | 8 | `10-styl/080-ovladani.css` | 70 |
@@ -169,11 +169,11 @@
 `.card` 5:1 · `.card h2` 5:2 · `.card .hint` 5:3 · `.frow` 5:4 · `label.f` 5:6 · `.chips` 5:14 · `.chip` 5:15
 `.chip.on` 5:16 · `.chip.mini` 5:19 · `.btn` 5:20 · `.btn:hover` 5:21 · `.btn.sec` 5:22
 `.btn.sec:hover` 5:23 · `.btn.sm` 5:24 · `.btn.danger` 5:25 · `.btn:disabled` 5:26 · `table.t` 5:27
-`table.t th` 5:34 · `table.t td` 5:35 · `td.num,th.num,table.t th.num` 5:42 · `.swatch` 5:43 · `.tag` 5:46
-`.tag.tech` 5:47 · `.result-big` 5:53 · `.result-sub` 5:54 · `.mixbar` 5:55 · `.warnbox` 5:56
-`.imgwarn` 5:57 · `.rowactive td` 5:58 · `.okbox` 5:59 · `.empty` 5:60 · `.rowline` 5:61 · `.note` 5:62
-`.search` 5:63 · `pre.tpl` 5:64 · `.zakazka-cisla` 5:86 · `.zakazka-cisla>div` 5:87
-`.zakazka-cisla label.f` 5:88 · `.zakazka-cisla input` 5:94 · `.produkt-dlazdice` 6:1
+`table.t th` 5:51 · `table.t td` 5:52 · `td.num,th.num,table.t th.num` 5:59 · `.swatch` 5:60 · `.tag` 5:63
+`.tag.tech` 5:64 · `.result-big` 5:70 · `.result-sub` 5:71 · `.mixbar` 5:72 · `.warnbox` 5:73
+`.imgwarn` 5:74 · `.rowactive td` 5:75 · `.okbox` 5:76 · `.empty` 5:77 · `.rowline` 5:78 · `.note` 5:79
+`.search` 5:80 · `pre.tpl` 5:81 · `.zakazka-cisla` 5:103 · `.zakazka-cisla>div` 5:104
+`.zakazka-cisla label.f` 5:105 · `.zakazka-cisla input` 5:111 · `.produkt-dlazdice` 6:1
 `.produkt-dlazdice .dlazdice` 6:2 · `.produkt-dlazdice .prodphoto,.produkt-dlazdice .pdfdrop` 6:3
 `.produkt-dlazdice .popiska` 6:5 · `.produkt-dlazdice .popiska b` 6:6
 `.produkt-dlazdice button.prodphoto` 6:7 · `.pdfdrop` 6:8 · `.prodphoto` 6:9 · `.poscards` 6:10
@@ -214,7 +214,7 @@
 `.dot` 8:61 · `.cam` 8:62 · `.specbar` 8:63 · `.specbar b` 8:64 · `.specbar a` 8:67 · `.kv` 8:68
 `.kv .k` 8:69 · `.kv .v` 8:70
 
-### Uvnitř @media a @supports (45)
+### Uvnitř @media a @supports (48)
 
 `select,::picker(select)` 3:20 · `select::picker-icon` 3:23 · `select` 3:27 · `select:open` 3:28
 `.bigform select:open` 3:29 · `::picker(select)` 3:30 · `option` 3:39 · `option:hover,option:focus` 3:44
@@ -225,17 +225,18 @@
 `.karta-produkt` 4:30 · `.karta-tisk select` 4:105 · `.karta-tisk select::picker-icon` 4:106 · `.frow.c2` 5:5
 `.frow.c3` 5:5 · `.frow.c4` 5:5
 `.frow.c2>div>label.f:first-child,.frow.c3>div>label.f:first-child,.frow.c4>div>label.f:first-child` 5:10
-`.frow>.flags` 5:13 · `table.t` 5:33 · `@media(min-width:640px)` 5:77 · `.zakazka-cisla` 5:102
-`.zakazka-cisla input` 5:103 · `.michtelo` 7:199 · `.michtab` 7:200 · `.michtab .g` 7:201
-`.michbg table.t` 7:215 · `.michbg` 7:217 · `.pgrid` 8:27 · `.pgrid` 8:28 · `.pgrid` 8:29 · `.pgrid` 8:30
-`.pgrid:has(.pgcard.receptura)` 8:38 · `.pgcard.receptura` 8:39 · `.pgcard.receptura .pgcard-actions` 8:40
+`.frow>.flags` 5:13 · `table.t` 5:34 · `table.t th,table.t td` 5:40 · `table.t td[colspan]` 5:43
+`table.t select` 5:49 · `@media(min-width:640px)` 5:94 · `.zakazka-cisla` 5:119 · `.zakazka-cisla input` 5:120
+`.michtelo` 7:199 · `.michtab` 7:200 · `.michtab .g` 7:201 · `.michbg table.t` 7:215 · `.michbg` 7:217
+`.pgrid` 8:27 · `.pgrid` 8:28 · `.pgrid` 8:29 · `.pgrid` 8:30 · `.pgrid:has(.pgcard.receptura)` 8:38
+`.pgcard.receptura` 8:39 · `.pgcard.receptura .pgcard-actions` 8:40
 
 ### Podmínky (17)
 
 `@supports (appearance: base-select)` 3:19 · `@media(max-width:720px)` 3:78 · `@media(min-width:960px)` 4:5
 `@media(min-width:960px)` 4:18 · `@media(max-width:640px)` 4:104 · `@media(min-width:640px)` 5:5
 `@media(min-width:640px)` 5:10 · `@media(max-width:800px)` 5:33
-`@supports (grid-template-rows: subgrid)` 5:76 · `@media(max-width:560px)` 5:101
+`@supports (grid-template-rows: subgrid)` 5:93 · `@media(max-width:560px)` 5:118
 `@media (max-width:1000px)` 7:193 · `@media print` 7:217 · `@media(max-width:1500px)` 8:27
 `@media(max-width:1150px)` 8:28 · `@media(max-width:800px)` 8:29 · `@media(max-width:480px)` 8:30
 `@media(max-width:800px)` 8:37

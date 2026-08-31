@@ -30,7 +30,24 @@ table.t{width:100%;border-collapse:collapse;font-size:var(--pismo-tabulka)}
    karty zůstanou na šířce okna a všechno pod tabulkou vypadá rozházené.
    Tabulka proto roluje sama v sobě — stejný tah jako u tabulky procent
    v míchacím režimu (070-michani.css). */
-@media(max-width:800px){table.t{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}}
+@media(max-width:800px){
+  table.t{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  /* Samotné rolování nestačí: dokud smí text v buňkách zalamovat, tabulka se
+     místo rolování smrskne na minimální šířku — „— neurčeno —" ve výběru se
+     rozpadne na tři řádky, hlavičky se zalomí a sloupce ujedou od svých
+     nadpisů. Bez zalamování si každý sloupec vezme šířku podle obsahu,
+     nadpis zůstane nad svým sloupcem a přebytek jde do rolování. */
+  table.t th,table.t td{white-space:nowrap}
+  /* Buňka přes celý řádek (mezisoučet dne, rozpis oprav) na šířky sloupců
+     nemá vliv a bez zalomení by táhla tabulku do dálky — ta smí dál zalamovat. */
+  table.t td[colspan]{white-space:normal}
+  /* Výběr má obecně `width:100%` (030-zaklad.css) — jenže procentní šířka se
+     nepropisuje do minimální šířky sloupce, takže sloupec zůstane úzký podle
+     nadpisu a text ve výběru se ořízne (změřeno: obsah 116 px v poli 48 px).
+     `auto` v buňce znamená šířku podle obsahu a sloupec si o ni řekne;
+     pole s pevnou šířkou v řádku (za, měna) si ji drží inline stylem dál. */
+  table.t select{width:auto}
+}
 table.t th{text-align:left;font-size:var(--pismo-popisek);letter-spacing:var(--prostrkani);text-transform:uppercase;color:var(--ink-2);border-bottom:1.5px solid var(--ink);padding:8px}
 table.t td{border-bottom:1px solid var(--line);padding:9px 8px;vertical-align:top}
 /* Číslice musí mít stejnou šířku, jinak se sloupce gramáží rozházejí. Když je

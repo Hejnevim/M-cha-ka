@@ -264,6 +264,7 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 14:11 | Dlaždice Zakázky a Parametrů tisku na mobilu zmenšeny o polovinu — na výšku 178 px se čtyři pole pod sebe nevešla na jednu obrazovku |
 | 14:37 | Míchací režim na telefonu přetékal do strany (chybějící `minmax(0,…)` u jednosloupcového rozvržení a tabulka bez omezené šířky) — nadpis a text vypadaly, že jim chybí první písmeno |
 | 15:05 | Vzorník receptur na telefonu po třech vedle sebe a ceník roluje v kartě místo lámání stránky — karty zarovnané na stejné hrany |
+| 15:08 | Sloupce ceníku na telefonu drží pod svými nadpisy — buňky nezalamují, výběr druhu se neořezává a tabulka roluje v sobě |
 
 ---
 
@@ -6435,4 +6436,33 @@ a `scrollWidth > clientWidth` — roluje v sobě, ne přes stránku. Katalog
 produktů při 380 px beze změny (jeden sloupec 304 px, dokument 380).
 Při 1600 px beze změny — pět sloupců, karty 282,39 a 282,41 px na stejném
 y 363,98. `kontrola_aplikace.py` 0, `prekryv.py --zalozky` čisté na všech
+čtyřech šířkách v obou režimech.
+
+## 136. Sloupce ceníku drží pod svými nadpisy — buňky se na telefonu nesmršťují
+
+**Problém.** Rolování ceníku v kartě (kapitola 135) nestačilo: dokud smí text
+v buňkách zalamovat, tabulka se místo rolování smrskne na minimální šířku.
+Na telefonu se „— neurčeno —" ve výběru druhu rozpadlo na tři řádky, nadpis
+V RECEPTURÁCH se zalomil a sloupce ujely od svých nadpisů — výběr nešel
+přečíst a nebylo poznat, které číslo patří ke kterému sloupci.
+
+**Co se změnilo.**
+
+- Pod 800 px buňky `table.t` nezalamují (`white-space:nowrap`) — každý
+  sloupec si vezme šířku podle obsahu, nadpis zůstane nad svým sloupcem
+  a přebytek jde do vodorovného rolování tabulky. Buňka přes celý řádek
+  (`td[colspan]` — mezisoučet dne v Co propadne, rozpis oprav) šířky
+  sloupců neurčuje a zalamovat smí dál.
+- Výběr v tabulce dostal `width:auto` místo obecného `width:100%`:
+  procentní šířka se nepropisuje do minimální šířky sloupce, takže sloupec
+  zůstal úzký podle nadpisu a text výběru se ořezával. Pole s pevnou šířkou
+  v řádku (za 74 px, měna 88 px) si ji drží inline stylem dál.
+
+**Změřeno** (`snimek.py` s měřením po skutečném prokliknutí
+menu → Receptury, šířka 400 px): všech osm sloupců hlavičky a řádku na
+chlup stejné hrany (např. Druh 343,03 → 510,69 px v hlavičce i v buňce);
+výběr druhu 152 px obsahu ve 152 px pole — před opravou 116 px obsahu
+v poli 48 px, oříznuto — a výška 39 px = jeden řádek (dřív tři); tabulka
+roluje v sobě (`scrollWidth` 1 183 px > 324 px viditelných), dokument drží
+400 px. `kontrola_aplikace.py` 0, `prekryv.py --zalozky` čisté na všech
 čtyřech šířkách v obou režimech.
