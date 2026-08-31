@@ -157,6 +157,10 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
 
   const [recQ, setRecQ] = useState("");
   const [custQ, setCustQ] = useState("");
+  // Výběr receptury je schovaný za dvěma tlačítky (Pantone standard/custom).
+  // Karta se otevírá kvůli počítání, ne kvůli listování — nabídka s tisíci
+  // položkami se ukáže, až si o ni tiskař řekne tlačítkem.
+  const [vyberZdroje, setVyberZdroje] = useState("");  // "" · "pantone" · "custom"
   const [custFiltr, setCustFiltr] = useState("");
   // Rozhoduje technologie vybrané polohy, ne pracovní režim. Na textilní síto
   // se nebude míchat receptura z databáze pro tampontisk ani pro vypalování —
@@ -1741,12 +1745,22 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
 
             <div className="card bigform karta-recept" style=${{ margin: 0 }}>
             <h2>${preloz("Receptura a barva")}</h2>
-            <!-- Dvě půlky, obě se stejným rytmem: filtr → hledání → výběr.
-                 Vlevo standardy z nakoupených databází, vpravo vlastní odstíny
-                 odvozené z nich. Vysvětlivky jsou až pod oběma sloupci, aby
-                 hledání i výběry začínaly v obou půlkách ve stejné výšce. -->
-            <div className="frow c2 recept-pulky">
-              <div>
+            <!-- Výběr receptury je schovaný za dvěma tlačítky: napřed volba
+                 Pantone standard (nakoupené databáze) nebo Pantone custom
+                 (vlastní odstíny), teprve po rozkliknutí se ukáže filtr →
+                 hledání → výběr zvoleného zdroje. Druhé kliknutí na totéž
+                 tlačítko nabídku zase schová. Nabídka s tisíci položkami se
+                 tak neukazuje, dokud si o ni tiskař neřekne. -->
+            <div className="frow c2">
+              <button className=${"btn volba-zdroje" + (vyberZdroje === "pantone" ? "" : " sec")}
+                onClick=${() => setVyberZdroje(vyberZdroje === "pantone" ? "" : "pantone")}>
+                ${preloz("Pantone standard")}</button>
+              <button className=${"btn volba-zdroje" + (vyberZdroje === "custom" ? "" : " sec")}
+                onClick=${() => setVyberZdroje(vyberZdroje === "custom" ? "" : "custom")}>
+                ${preloz("Pantone custom")}</button>
+            </div>
+            ${vyberZdroje === "pantone" && html`
+              <div style=${{ marginBottom: 12 }}>
                 <label className="f">${preloz("Pantone standard — {n} z {celkem}", { n: pantoneList.length, celkem: pantoneAll.length })}</label>
                 <${FiltrDatabaze} recipes=${zakladAll} hodnota=${dbFiltr} setHodnota=${setDbFiltr}
                   nadpis=${false} vzdy=${true} vyber=${true} aktivni=${!skryta}
@@ -1765,8 +1779,9 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                     ${pantoneList.slice(0, 400).map((r) => html`<option key=${r.id} value=${r.id}>${r.name} · ${r.series}</option>`)}
                   </select>
                 </div>
-              </div>
-              <div>
+              </div>`}
+            ${vyberZdroje === "custom" && html`
+              <div style=${{ marginBottom: 12 }}>
                 <label className="f">Custom${product ? " — " + (product.ref || product.name) : ""} — ${preloz("{n} z {celkem}", { n: customVidet.length, celkem: customList.length })}</label>
                 <div style=${{ marginBottom: 10 }}>
                   <select value=${custFiltr} onChange=${(e) => setCustFiltr(e.target.value)}>
@@ -1802,8 +1817,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                     `}
                   </div>`}
                 </div>
-              </div>
-            </div>
+              </div>`}
             ${!recipe && html`
               <div className="warnbox" style=${{ marginTop: 0 }}>
                 <b>${preloz("Žádná receptura není vybraná.")}</b>
@@ -1863,15 +1877,15 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
             <div style=${{ marginTop: 12 }}>
               <b style=${{ fontSize: 17 }}>${recipe ? recipe.name : preloz("— bez receptury —")}</b>
               ${recipe && recipe.series ? html`<span className="note"> · ${recipe.series}</span>` : ""}
-              <br /><span className="note">
-                ${recipe && recipe.type === "Custom" ? "Custom" : preloz("Pantone standard")}
-                ${" " + preloz("· hustota {h} g/ml", { h: fmt(n(recipe ? recipe.density : 1, 1), 2) })}
-                ${" " + preloz("· {n} komponent", { n: recipe ? recipe.components.length : 0 })}
-                ${vazRec && recipe && vazRec.id === recipe.id
-                  ? " " + preloz("· vázaná na {c}", { c: colorSel ? (colorSel.code || colorSel.name || "") : "" })
-                    + (vazbaSiroka ? preloz(" (všechny polohy)") : (position ? " · " + position.tech + " " + position.name : ""))
-                  : ""}
-              </span>
+              ${/* Typ, hustota a počet komponent tu bývaly taky, ale tiskaře
+                    při míchání nezajímají — hustotu a složení ukazuje karta
+                    „Kolik namíchat", typ poznal už při výběru zdroje. Zůstává
+                    jen vazba na barvu a polohu, protože ta jinde vidět není. */""}
+              ${vazRec && recipe && vazRec.id === recipe.id && html`
+                <br /><span className="note">
+                  ${preloz("vázaná na {c}", { c: colorSel ? (colorSel.code || colorSel.name || "") : "" })
+                    + (vazbaSiroka ? preloz(" (všechny polohy)") : (position ? " · " + position.tech + " " + position.name : ""))}
+                </span>`}
               <${PruhSlozeni} recipe=${recipe} />
             </div>
             ${barvaPotisku && html`

@@ -1,26 +1,36 @@
 :root{
   /* Vzhled zůstává měkký — karty vystupují z plochy stínem, ne rámečkem.
-     Mění se jen barvy: plocha je neutrálně šedá místo teplé béžové a inkoust
-     je tmavší, aby se na to dalo dívat celý den. Barevný akcent zmizel;
-     zvýraznění dělá inkoust, barva zůstala tam, kde nese význam (odstín
-     barvy, varování, stav vážení). */
+     Plocha se vrátila k teplému, růžovošedému tónu a inkoust zůstal tmavý,
+     aby se na to dalo dívat celý den. Barevný akcent nepřibyl; zvýraznění
+     dělá inkoust, barva zůstala tam, kde nese význam (odstín barvy,
+     varování, stav vážení). */
   /* --bg maluje JEN plochu stránky; všechno, co na ní leží (karty, lišty,
      tlačítka, pole, štítky), bere barvu z --paper. Ty dvě proměnné jdou
      nastavit nezávisle — plocha je samostatná jednotka. */
-  --bg:#949494; --paper:#dbdbdb; --zvyraz:#949494; --logo:#949494;
-  --ink:#141414; --ink-2:#767676; --line:#D8D8D8; --line-2:#C7C7C7;
-  --cyan:#141414; --magenta:#C97B63; --yellow:#D9B44A; --key:#141414;
-  --btn-ink:#FFFFFF; --focus:rgba(20,20,20,.20); --danger:#b31919;
+  /* Plocha a povrch se od přísného neumorfního základu (obojí #E0E0E0)
+     rozešly do dvou blízkých růžovošedých odstínů — povrch je o chlup
+     světlejší, aby karty vystupovaly i barvou, ne jen stínem. Hloubku dál
+     dělá dvojice stínů (světlo zleva shora, stín zprava zdola); rozdíl
+     podkladů je záměrně malý — čím víc se --bg a --paper rozejdou, tím míň
+     vypadají karty jako vytlačené z plochy a tím víc jako položené desky. */
+  --bg:#cbbebe; --paper:#d4bfbf; --zvyraz:#c8c8c8; --logo:#E0E0E0;
+  --ink:#2D2D2D; --ink-2:#757575; --line:#d4d4d4; --line-2:#c6c6c6;
+  --cyan:#2D2D2D; --magenta:#C97B63; --yellow:#D9B44A; --key:#2D2D2D;
+  --btn-ink:#FFFFFF; --focus:rgba(45,45,45,.20); --danger:#b31919;
   --ok:#3dc760; --warn:#e8c545;
   /* Tvary: každý druh prvku má vlastní zaoblení, aby šlo ladit zvlášť
      karty, tlačítka, pole a dlaždice. Ikony jsou kreslené, ne obrázkové —
      velikost, tloušťka tahu i zakončení se řídí odsud. Ikona stojící uvnitř
      řádku textu se neřídí velikostí samostatných ikon, ale písmem kolem sebe
      — proto je v em a zmenší se s ním. */
-  --radius:23px; --radius-btn:35px; --radius-pole:15px; --radius-dlazdice:15px;
-  --radius-stitek:15px;
+  /* Neumorfní geometrie: karty 32 px, pole a dlaždice 20 px, tlačítka a
+     štítky pilulka (999 px). Kontejnery nemají rámečky — hloubku dělají
+     jen stíny, proto se zaoblení nesmí srazit k nule, hrana by prozradila,
+     že tam žádná deska není. */
+  --radius:32px; --radius-btn:999px; --radius-pole:20px; --radius-dlazdice:20px;
+  --radius-stitek:999px;
   --ikona:27px; --ikona-tah:1.5; --ikona-konec:round; --ikona-pruhlednost:1;
-  --ikona-radek:1.2em;
+  --ikona-radek:1.2em; --ikona-barva:#4A4A4A;
   --pruhlednost-karty:1;
   /* Písmo se řídí podle role, ne podle prvku: co je nadpis, co popisek, co
      výsledek. Zvětšené varianty na domovské stránce se z těchto hodnot
@@ -89,29 +99,41 @@
   --tisk-sloupec:1 / -1; --tisk-radek:2;
   --tisk-sirka:33%;
   --tisk-zarovnani:center; --tisk-vyska:auto;
-  --neu:-5px -5px 20px rgba(255,255,255,0.11), 5px 5px 20px rgba(0,0,0,0.43);
-  --neu-sm:-4px -4px 14px rgba(255,255,255,0.105), 4px 4px 14px rgba(0,0,0,0.473);
-  --neu-in:inset 2px 2px 4px rgba(0,0,0,0.387), inset -2px -2px 4px rgba(255,255,255,0.105);
-  --neu-in-lg:inset 3px 3px 6px rgba(0,0,0,0.43), inset -3px -3px 6px rgba(255,255,255,0.11);
-  --modal-shadow:0 7px 40px rgba(0,0,0,0.86);
+  /* Stíny jsou ve tvaru rgba(bílá)+rgba(černá) — jediný tvar, který umí
+     barvy.html číst a ladit. Proti neumorfnímu základu jsou ztlumené: bílá
+     nejde na plnou (na tmavší růžovošedé ploše by pálila) a černá je
+     silnější, aby hloubka na ní držela. */
+  --neu:-11px -11px 24px rgba(255,255,255,0.52), 11px 11px 24px rgba(0,0,0,0.38);
+  --neu-sm:-5px -5px 15px rgba(255,255,255,0.494), 5px 5px 15px rgba(0,0,0,0.418);
+  --neu-in:inset 4px 4px 6px rgba(0,0,0,0.342), inset -4px -4px 6px rgba(255,255,255,0.494);
+  --neu-in-lg:inset 6px 6px 9px rgba(0,0,0,0.38), inset -6px -6px 9px rgba(255,255,255,0.52);
+  --modal-shadow:0 15px 48px rgba(0,0,0,0.76);
   --logo-shadow:-2px -2px 2px rgba(255,255,255,0.14), 2px 2px 2px rgba(0,0,0,0.1);
   --mono:'Segoe UI',system-ui,sans-serif;
   --sans:system-ui,sans-serif;
 }
 :root[data-theme="dark"]{
-  /* Tmavý režim je hlubší než dřív, ale ne černý — na černé plochu nejde
-     osvětlit a stíny by zmizely. Hlavní tlačítko je světlé s tmavým písmem.
-     Linky se posouvají spolu s pozadím, aby zůstaly stejně zřetelné. */
-  --bg:#545454; --paper:#333333; --zvyraz:#545454; --logo:#545454;
-  --ink:#EDEDED; --ink-2:#8C8C8C; --line:#595959; --line-2:#7a7a7a;
-  --cyan:#EDEDED; --magenta:#C97B63; --yellow:#D9B44A; --key:#EDEDED;
-  --btn-ink:#000000; --focus:rgba(237,237,237,.22); --danger:#b31919;
-  --ok:#3dc760; --warn:#e8c545;
-  --neu:-9px -9px 24px rgba(255,255,255,0.08), 9px 9px 24px rgba(0,0,0,0.51);
-  --neu-sm:-4px -4px 10px rgba(255,255,255,0.076), 4px 4px 10px rgba(0,0,0,0.561);
-  --neu-in:inset 3px 3px 4px rgba(0,0,0,0.459), inset -3px -3px 4px rgba(255,255,255,0.076);
-  --neu-in-lg:inset 4px 4px 6px rgba(0,0,0,0.51), inset -4px -4px 6px rgba(255,255,255,0.08);
-  --modal-shadow:0 13px 48px rgba(0,0,0,1);
+  /* Tmavý neumorfismus: plocha #373d43, povrch o chlup tmavší #31383f — ne
+     černá, na černé nejde plochu „osvítit" a horní světlý stín by zmizel.
+     Hloubku dělá tmavý stín vpravo dole a jemně světlejší šeď vlevo nahoře,
+     žádné rámečky; rozdíl podkladů je stejně jako ve světlém motivu záměrně
+     malý. Aktivní prvky nesou zelený akcent (#10B981), upozornění teplý
+     oranžový (#F59E0B). Hlavní tlačítko je světlé s tmavým písmem. */
+  --bg:#373d43; --paper:#31383f; --zvyraz:#2b3035; --logo:#212529;
+  --ink:#E2E8F0; --ink-2:#94A3B8; --line:#343a40; --line-2:#495057;
+  --cyan:#10B981; --magenta:#C97B63; --yellow:#D9B44A; --key:#E2E8F0;
+  --btn-ink:#212529; --focus:rgba(226,232,240,.22); --danger:#b31919;
+  --ok:#10B981; --warn:#F59E0B;
+  --ikona-barva:#CBD5E1;
+  /* Stíny v rgba kvůli barvy.html — viz poznámka u světlých stínů. Tmavé
+     odstíny jsou černá 27–33 %, světlé bílá 7,6–8 %; bílá je proti původnímu
+     návrhu silnější, protože plocha zesvětlala a slabší „osvícení" by na ní
+     zaniklo. */
+  --neu:-10px -10px 20px rgba(255,255,255,0.08), 10px 10px 20px rgba(0,0,0,0.3);
+  --neu-sm:-5px -5px 12px rgba(255,255,255,0.076), 5px 5px 12px rgba(0,0,0,0.33);
+  --neu-in:inset 4px 4px 6px rgba(0,0,0,0.27), inset -4px -4px 6px rgba(255,255,255,0.076);
+  --neu-in-lg:inset 6px 6px 9px rgba(0,0,0,0.3), inset -6px -6px 9px rgba(255,255,255,0.08);
+  --modal-shadow:0 14px 40px rgba(0,0,0,0.6);
   --logo-shadow:-2px -2px 2px rgba(255,255,255,0.14), 2px 2px 2px rgba(0,0,0,0.1);
 }
 /* ZACATEK BAREV STRANEK */

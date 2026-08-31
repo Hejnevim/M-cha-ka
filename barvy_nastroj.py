@@ -41,6 +41,7 @@ SKUPINY = [
     ("Text a linky", [
         ("--ink", "hlavní text"),
         ("--ink-2", "vedlejší text a popisky"),
+        ("--ikona-barva", "samostatné ikony (menu, šipka zpět, přepínač režimu)"),
         ("--line", "linky v tabulkách"),
         ("--line-2", "silnější linky"),
     ]),
@@ -272,8 +273,8 @@ RODINY = [
     ]),
 ]
 
-VYCHOZI_TVARY = {"--radius": "18px", "--radius-btn": "999px", "--radius-pole": "10px",
-                 "--radius-dlazdice": "12px", "--radius-stitek": "999px",
+VYCHOZI_TVARY = {"--radius": "32px", "--radius-btn": "999px", "--radius-pole": "20px",
+                 "--radius-dlazdice": "20px", "--radius-stitek": "999px",
                  "--ikona": "20px", "--ikona-tah": "2", "--ikona-pruhlednost": "1",
                  "--ikona-radek": "1.2em",
                  "--pruhlednost-karty": "1", "--ikona-konec": "round",
@@ -449,8 +450,8 @@ def stiny_z_css(blk, vychozi):
     return out
 
 
-VYCHOZI_STINY = {"uhel": 135, "dVelky": 25, "blurVelky": 34, "dMaly": 7, "blurMaly": 12,
-                 "dVsazeny": 7, "blurVsazeny": 11, "silaSvetla": 90, "silaStinu": 10,
+VYCHOZI_STINY = {"uhel": 135, "dVelky": 17, "blurVelky": 24, "dMaly": 8, "blurMaly": 14,
+                 "dVsazeny": 6, "blurVsazeny": 8, "silaSvetla": 100, "silaStinu": 15,
                  "logoUhel": 135, "logoD": 6, "logoBlur": 8, "logoSvetlo": 95, "logoStin": 18}
 
 

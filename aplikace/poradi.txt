@@ -17,6 +17,7 @@
 20-zaklad/125-ulozeni.js
 20-zaklad/127-jazyk.js
 20-zaklad/130-ikony.js
+20-zaklad/135-rolovani.js
 20-zaklad/140-spec-z-kodu.js
 20-zaklad/150-sgps.js
 20-zaklad/160-pdf.js

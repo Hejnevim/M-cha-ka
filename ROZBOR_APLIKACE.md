@@ -5,19 +5,19 @@
 > `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — nepřepisují
 > se ručně a nemohou se rozejít se skutečností. Text mimo ně píše člověk.
 
-> Poslední zapsaná změna ve vývojovém deníku: **31. srpna 15:08 — Sloupce ceníku na telefonu drží pod svými nadpisy — buňky nezalamují, výběr druhu se neořezává a tabulka roluje v sobě**
+> Poslední zapsaná změna ve vývojovém deníku: **31. srpna 16:45 — Plocha dostala teplý růžovošedý tón (#cbbebe) a karty se od ní o odstín oddělily (#d4bfbf) — bílé „osvícení" ztlumeno na polovinu, tmavý režim zesvětlal z #212529 na #373d43/#31383f**
 
 | soubor | řádků | velikost |
 |---|---:|---:|
-| `aplikace/ (81 souborů)` | 17 190 | 969 kB |
-| `index.html` | 109 | 6 kB |
+| `aplikace/ (82 souborů)` | 17 337 | 978 kB |
+| `index.html` | 110 | 6 kB |
 | `most.py` | 727 | 31 kB |
 | `pdf_spec.py` | 1 071 | 42 kB |
 | `odemkni.py` | 213 | 8 kB |
 | `prevod_printcolor.py` | 188 | 7 kB |
 | `kontrola_aplikace.py` | 169 | 7 kB |
 | `rozbor_aktualizuj.py` | 359 | 13 kB |
-| **celkem** | **20 026** | |
+| **celkem** | **20 174** | |
 <!-- /AUTO:stav -->
 
 ---

@@ -265,6 +265,12 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 14:37 | Míchací režim na telefonu přetékal do strany (chybějící `minmax(0,…)` u jednosloupcového rozvržení a tabulka bez omezené šířky) — nadpis a text vypadaly, že jim chybí první písmeno |
 | 15:05 | Vzorník receptur na telefonu po třech vedle sebe a ceník roluje v kartě místo lámání stránky — karty zarovnané na stejné hrany |
 | 15:08 | Sloupce ceníku na telefonu drží pod svými nadpisy — buňky nezalamují, výběr druhu se neořezává a tabulka roluje v sobě |
+| 15:30 | Ceník má rolovací lištu i nad hlavičkou — nakreslený jezdec, který je na telefonu vidět pořád, tahatelný prstem i myší |
+| 15:42 | Výběr receptury schovaný za tlačítka Pantone standard / Pantone custom — nabídka se ukáže až po rozkliknutí |
+| 15:57 | Pod vybranou recepturou zmizela poznámka typ · hustota · komponenty — údaje říká výběr zdroje a karta Kolik namíchat, zůstala jen vazba na barvu a polohu |
+| 16:10 | Dlaždice Zakázky a Parametrů tisku dorovnávají výšku karty místo pevných 178 px — vedle rozbalené receptury nezbývá v žádné kartě prázdný pruh |
+| 16:20 | Celý vzhled přeladěn na neumorfismus podle nového návrhu — plocha a karty jedna barva (#E0E0E0 / #212529), hloubku dělají jen stíny, karty 32 px, tlačítka pilulka, tmavý režim se zeleným a oranžovým akcentem |
+| 16:45 | Plocha dostala teplý růžovošedý tón (#cbbebe) a karty se od ní o odstín oddělily (#d4bfbf) — bílé „osvícení" ztlumeno na polovinu, tmavý režim zesvětlal z #212529 na #373d43/#31383f |
 
 ---
 
@@ -6466,3 +6472,187 @@ v poli 48 px, oříznuto — a výška 39 px = jeden řádek (dřív tři); tabu
 roluje v sobě (`scrollWidth` 1 183 px > 324 px viditelných), dokument drží
 400 px. `kontrola_aplikace.py` 0, `prekryv.py --zalozky` čisté na všech
 čtyřech šířkách v obou režimech.
+
+## 137. Rolovací lišta i nad hlavičkou ceníku
+
+**Problém.** Ceník roluje do strany sám v sobě (kapitola 136), ale lišta
+prohlížeče je až pod posledním řádkem — u ceníku se 120 složkami na ni ten,
+kdo stojí u hlavičky, nedosáhne. Že tabulka pokračuje sloupci cena, za, měna,
+VOC a bezpečnostní list, nebylo nahoře vůbec poznat.
+
+**Co se změnilo.** Nová část `20-zaklad/135-rolovani.js` s komponentou
+`RolovaniSListou`: nad tabulkou je dráha s jezdcem, obě strany si se
+skutečným rolovátkem předávají polohu. Jezdec se táhne prstem i myší
+(klik do dráhy skočí rovnou na místo), na široké obrazovce, kde není co
+rolovat, se dráha schová. Dráha s jezdcem se kreslí vlastními divy schválně:
+na telefonu prohlížeč lištu nastálo zobrazit neumí — kreslí ji jen průsvitně
+během tažení a `::-webkit-scrollbar` tam neplatí. Ceník je první použití;
+obal jde nasadit na kteroukoli další širokou tabulku.
+
+**Změřeno** (`snimek.py` s měřením po skutečném prokliknutí
+menu → Receptury, šířka 400 px): dráha 324 × 14 px, jezdec 89 px — poměr
+viditelného k obsahu 324/1183 sedí na půl pixelu; rolování těla na 430 px
+posune jezdce na 118 px (výpočtem 117,6); klik na konec dráhy odroluje
+tabulku na maximum 859 px. Při 1600 px obsah 1476 = viditelných 1476,
+dráha schovaná. `kontrola_aplikace.py` 0, `sestav.py --kontrola` 0
+(82 částí), `prekryv.py --zalozky` čisté na všech čtyřech šířkách v obou
+režimech.
+
+## 138. Výběr receptury se schoval za dvě tlačítka
+
+**Problém.** Karta Receptura a barva ukazovala obě nabídky pořád — dva
+filtry, dvě hledání a dva výběry s tisíci položkami, i když se zrovna nic
+nevybíralo. Karta se přitom otevírá hlavně kvůli počítání: nabídky
+zabíraly půlku karty tomu, kdo už recepturu má.
+
+**Co se změnilo.** Místo dvou trvale rozložených půlek jsou v kartě dvě
+tlačítka — **Pantone standard** (nakoupené databáze) a **Pantone custom**
+(vlastní odstíny). Výběr zvoleného zdroje (filtr → hledání → výběr) se
+ukáže až po rozkliknutí, druhé kliknutí na totéž tlačítko ho zase schová;
+aktivní tlačítko je zvýrazněné plnou barvou. Obsah obou nabídek se nezměnil,
+jen se ukazuje na vyžádání. Zrušené pravidlo `.recept-pulky` (sdílené řádky
+mřížky přes subgrid) odešlo s rozložením, které zarovnávalo — půlky už vedle
+sebe nestojí.
+
+**Změřeno** (`snimek.py`, skutečné kliky, 1600 px): na startu v kartě
+0 výběrů a 0 polí, jen dvě tlačítka 217,92 × 49 px s verzálkami; po kliku
+na Pantone custom 2 výběry + 1 hledání a tlačítko aktivní; druhý klik
+vše schová (0/0); po kliku na Pantone standard 2 výběry + 1 hledání.
+`kontrola_aplikace.py` 0, `prekryv.py --zalozky` čisté na všech čtyřech
+šířkách v obou režimech.
+
+## 139. Pod vybranou recepturou už nevisí typ, hustota a počet komponent
+
+**Problém.** Pod jménem vybrané receptury v kartě Receptura a barva stál
+řádek „Pantone standard · hustota 1,20 g/ml · 3 komponent". Tiskaře při
+výběru nezajímá nic z toho: typ zvolil tlačítkem o dva řádky výš, hustotu
+a složení mu ukáže karta „Kolik namíchat", až bude vážit. Řádek jen přidával
+text pod hlavní okometrickou kontrolu — jméno odstínu.
+
+**Co se změnilo.** Poznámka je pryč. Z řádku zůstal jediný údaj, který jinde
+vidět není — „vázaná na …" (vazba custom receptury na barvu a polohu) — nově
+bez úvodní tečky a vykreslí se, jen když vazba existuje; dřív tam řádek stál
+u každé receptury. Ve slovníku klíč „· hustota {h} g/ml" skončil (nikdo
+jiný ho nepoužíval) a „· vázaná na {c}" se přejmenoval na „vázaná na {c}".
+
+**Změřeno:** `sonda.py text('.karta-recept')` s vybranou PANTONE 485 C —
+text karty neobsahuje „hustota", „komponent" ani „Pantone standard" pod
+jménem odstínu; `kontrola_aplikace.py` 0; slovník 589 položek (en i pt).
+
+## 140. Dlaždice dorovnají kartu, místo aby ji přerůstaly
+
+**Problém.** Dlaždice čísel Zakázky měly pevnou výšku 178 px — stejnou jako
+síto/kryvost/povrch. Jenže Zakázka má dlaždic dva řádky, takže karta vyšla na
+520 px, a protože karty v řádku drží společnou výšku, určovala výšku i oběma
+sousedům: v Receptuře a barvě zbývalo až 283 px prázdného místa, v Parametrech
+tisku 157 px. Tři karty vedle sebe vypadaly jako jedna plná a dvě poloprázdné.
+
+**Co se změnilo.** Dlaždice výšku karty přestaly určovat a začaly ji
+dorovnávat. Obě karty (`.karta-cisla` i `.karta-tisk`) jedou jako sloupec,
+mřížka dlaždic si vezme zbytek karty (`flex:1`) a dlaždice se roztáhnou do
+výšky, kterou řádku určí nejvyšší obsah — typicky rozbalený výběr receptury.
+Z pevné výšky zbyla jen dolní mez: Zakázka 100 px (dva řádky po 100 px dají
+kartě ~364 px, touž přirozenou výšku jako jeden řádek Parametrů po 178 px),
+Parametry tisku 178 px, na mobilu obě 88 px. Návrat čtverce
+(`aspect-ratio:1`) nehrozí — do přirozené výšky karty se počítá jen dolní
+mez, takže dlaždice rostou pouze do místa, které už v kartě je.
+
+**Změřeno:** před změnou řádek karet 519,98 px; obsah Receptury končil
+282,6 px a Parametrů tisku 157 px nad vnitřním okrajem. Po změně, sbalený
+stav: řádek 376,94 px a obsah Zakázky i Parametrů končí přesně na vnitřním
+okraji (1195,44 px), dlaždice Zakázky 106,5 px v obou řádcích shodně
+(rozdíl 0,01 px). Rozbalený výběr receptury (`snimek.py --klik
+'.volba-zdroje'`): všechny tři karty 445,92 px a obsah všech tří končí na
+993,42 px — nula prázdného místa. `kontrola_aplikace.py` 0, `prekryv.py`
+čistý ve čtyřech šířkách a obou režimech.
+## 141. Vzhled přeladěn na plný neumorfismus — plocha a karty jedna barva
+
+**Problém.** Karty se od plochy dosud odlišovaly i barvou podkladu (plocha
+#949494, karty #dbdbdb) a stíny byly jen doplněk. Nový návrh vzhledu
+předepisuje čistý neumorfismus: plocha i všechno na ní má **touž barvu**
+a hloubku dělá výhradně dvojice stínů — světlo zleva shora, stín zprava
+zdola. K tomu přesné poloměry (karty 32 px, pole 20 px, tlačítka pilulka)
+a pro tmavý režim vlastní paletu s barevnými akcenty.
+
+**Co se změnilo.** Kompletní přeladění proměnných v `020-promenne.css`:
+
+| | světlý | tmavý |
+|---|---|---|
+| plocha i karty (`--bg` = `--paper`) | #E0E0E0 | #212529 |
+| hlavní / vedlejší text | #2D2D2D / #757575 | #E2E8F0 / #94A3B8 |
+| ikony (`--ikona-barva`, nová) | #4A4A4A | #CBD5E1 |
+| akcenty (`--ok` / `--warn`) | beze změny | #10B981 / #F59E0B |
+| stín karet | −12 −12 24 bílá · 12 12 24 černá 15 % | −10 −10 20 bílá 5 % · 10 10 20 černá 30 % |
+| stín tlačítek | ±6 px, rozostření 14 | ±5 px, rozostření 12 |
+| vsazený stín polí | ±4 px, rozostření 8 | ±4 px, rozostření 8 |
+
+Zaoblení: `--radius` 32 px, `--radius-pole` a `--radius-dlazdice` 20 px,
+`--radius-btn` a `--radius-stitek` pilulka (999 px). Tmavé aktivní prvky
+(`--cyan`: zaškrtnutý přepínač, ukazatel navážení, aktivní položka menu)
+nesou zelený akcent #10B981.
+
+Návrh zadává stíny hexovými barvami (#bebebe/#ffffff na #E0E0E0). Do CSS
+šly přepsané do tvaru rgba nad touž plochou — vizuálně totéž (#bebebe =
+černá 15 % na #E0E0E0), ale `barvy.html` umí stíny číst a ladit jen jako
+rgba(bílá)+rgba(černá), a hex by ladění utrhl od aplikace.
+
+Nová proměnná `--ikona-barva` prošla všemi kroky laditelné vlastnosti:
+`:root` (oba režimy), pravidlo na `svg[viewBox="0 0 24 24"]`
+v `030-zaklad.css` a řádek ve skupině „Text a linky" v `barvy_nastroj.py`.
+Ikona v řádku textu (`.ikona-radek`, zámek technologie) barvu dál dědí
+z věty, ve které stojí. Výchozí tvary a stíny v nástroji (`VYCHOZI_TVARY`,
+`VYCHOZI_STINY`) srovnány s novým `:root`.
+
+**Co se nechalo být.** Míchací režim má vlastní paletu z úseku barev stránek
+(světlý: bílá plocha, karty #cccccc) — je vyladěná pro čtení od váhy
+z dálky a návrh se jí netýkal. Ladí se v `barvy.html`, ne ručně.
+
+**Falešný poplach.** `sonda.py --tema light` vracela u těla stránky tmavou
+barvu — `body` má `transition: background .2s` a měřilo se uprostřed
+přechodu (známá past z dřívějška). Průkazné je čtení proměnné:
+`prom('--bg')` → #E0E0E0.
+
+**Změřeno:** světlý režim — `.card` podklad rgb(224, 224, 224), zaoblení
+32 px, stín `rgb(255,255,255) −12 −12 24 · rgba(0,0,0,0.15) 12 12 24`;
+tmavý — podklad rgb(33, 37, 41), stín `rgba(255,255,255,0.05) −10 −10 20 ·
+rgba(0,0,0,0.3) 10 10 20`; `.btn` zaoblení 999 px; `--bg` = `--paper`
+v obou režimech; `kontrola_aplikace.py` 0; `barvy.html` přegenerována
+(15 barev, 9+5 stínů). Snímky obou režimů prohlédnuty — karty vystupují
+z jednolité plochy, vyhledávací pole je vsazené, logo ražené.
+
+## 142. Plocha dostala teplý tón a karty se od ní barevně oddělily
+
+**Problém.** Plný neumorfismus z předchozí kapitoly stál na jediné neutrální
+šedé (#E0E0E0) — plocha i karty táž barva, hloubka jen ze stínů. Na velké
+ploše působila jednolitá šedá stroze a bílé „osvícení" na plný jas bylo
+ostré. Nový návrh vzhledu vrací teplý tón a kartám dává vlastní odstín.
+
+**Co se změnilo.** Světlá plocha je růžovošedá #cbbebe a karty o odstín
+světlejší #d4bfbf — vystupují barvou i stínem, ne už jen stínem. Tmavý režim
+zesvětlal z #212529 na plochu #373d43 a karty #31383f. Stíny se přeladily
+k tlumenějšímu podání: ve světlém režimu bílá klesla z plné na 52 % (na
+tmavší ploše by pálila) a černá stoupla z 15 % na 38 %, vsazené stíny se
+zkrátily (rozostření 8→6 px, velké 12→9 px); v tmavém režimu bílé „osvícení"
+naopak posílilo z 5 % na 8 %, protože na světlejší ploše by zaniklo. Stín
+modálních oken zjemněl (světlý 0,86→0,76, tmavý z plné černé na 0,6).
+
+Zásada „plocha a povrch musí být tatáž barva" tím přestala platit doslova —
+komentáře v `020-promenne.css`, které ji zadávaly, jsou přepsané: rozdíl
+podkladů je záměrně malý, aby karty dál vypadaly jako vytlačené z plochy,
+a ne jako položené desky. `barvy.html` přegenerována z nového CSS.
+
+**Co se nechalo být.** Míchací režim drží vlastní paletu z úseku barev
+stránek (bílá plocha, karty #cccccc) — návrh se ho netýkal. Zaoblení, písma
+a rozestupy se nemění; `--zvyraz`, `--logo` a inkousty zůstávají.
+
+**Falešný poplach.** `sonda.py --tema light` ukázala u těla stránky tmavou
+plochu rgb(55,61,67) — táž známá past jako u kapitoly 141: `body` má
+`transition: background .2s` a měření trefilo začátek přechodu. Průkazné
+bylo čtení proměnných: `prom('--bg')` → #cbbebe, `prom('--paper')` → #d4bfbf.
+
+**Změřeno:** světlý režim — `.card` podklad rgb(212, 191, 191), stín
+`rgba(255,255,255,0.52) −11 −11 24 · rgba(0,0,0,0.38) 11 11 24`; tmavý —
+podklad rgb(49, 56, 63), stín `rgba(255,255,255,0.08) −10 −10 20 ·
+rgba(0,0,0,0.3) 10 10 20`; proměnné světlé #cbbebe/#d4bfbf, tmavé
+#373d43/#31383f; `kontrola_aplikace.py` 0; `barvy.html` přegenerována
+(15 barev, 9+5 stínů); `mapa.py` a `rozbor_aktualizuj.py` proběhly.

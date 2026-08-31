@@ -66,20 +66,25 @@
    najde dřív dlaždici než dlouhý pruh. */
 /* Písmo, odsazení i šipka se měří od šířky dlaždice, ne pevným počtem pixelů,
    aby se na úzké obrazovce zmenšila celá kresba naráz a text se nezalomil na
-   tři řádky. Výška je ale pevná (stejná hodnota jako `.zakazka-cisla`, viz
-   tam) — se čtvercem (`aspect-ratio:1`) rostla dlaždice do výšky spolu se
-   šířkou sloupce, a stačilo méně polí v řádku (tampontisk bez klišé, `c2`)
-   nebo úzké okno se skládáním do jednoho sloupce, aby ze čtverce vyšel
-   několiksetpixelový blok přes půl obrazovky. */
+   tři řádky. Výška má jen dolní mez 178 px a jinak dorovná zbytek karty —
+   stejný princip jako u `.zakazka-cisla` (viz tam): když výšku řádku karet
+   určí vyšší soused (rozbalená Receptura), dlaždice povyrostou a pod nimi
+   nezbude pruh prázdného místa. Čtverec (`aspect-ratio:1`) se sem vracet
+   nesmí — rostl se šířkou sloupce, a stačilo méně polí v řádku (tampontisk
+   bez klišé, `c2`) nebo úzké okno, aby z něj vyšel několiksetpixelový blok
+   přes půl obrazovky. Dorovnání podle výšky řádku tímhle netrpí: do
+   přirozené výšky karty se počítá jen dolní mez. */
+.karta-tisk{display:flex;flex-direction:column}
+.karta-tisk>.frow{flex:1}
 /* Kontejner je každé pole zvlášť, a nesmí se to vázat na počet sloupců:
    u tampontisku bez zapsaného klišé zbudou v řádku jen dvě pole (`c2`).
    Bez kontejneru se `cqw` nepočítá z dlaždice, ale z šířky okna — odsazení
    vyšlo 95 px místo 14 a dlaždice se nafoukla na 271 x 561 px místo
    271 x 271. Roztáhla tím celý druhý řádek karet, takže vedle ní stály
    receptura i zakázka z poloviny prázdné. */
-.karta-tisk .frow>div{container-type:inline-size}
+.karta-tisk .frow>div{container-type:inline-size;display:flex;flex-direction:column}
 .karta-tisk select{font-size:min(calc(var(--pismo) * 2), 11cqw);font-weight:700;text-align:center;
-  width:100%;height:178px;box-sizing:border-box;
+  width:100%;flex:1;min-height:178px;box-sizing:border-box;
   display:flex;align-items:center;justify-content:center;
   /* Hodnota a šipka stojí pod sebou jako jedna dvojice na středu dlaždice.
      Proto se tady nekreslí šipka pozadím jako u ostatních polí — pozadí je
@@ -99,10 +104,10 @@
 .karta-tisk option{padding:calc(var(--pole-y) * 1.4) calc(var(--pole-x) * 1.4)}
 /* Pod 640px se `.frow` skládá na jeden sloupec (viz pravidlo výš) a
    dlaždice jedou přes celou šířku telefonu — stejná potíž jako u
-   `.zakazka-cisla` (viz tam), stejná oprava: na úzkém okně dlaždice
-   zmenšeny přibližně o polovinu (178 → 88 px). */
+   `.zakazka-cisla` (viz tam), stejná oprava: na úzkém okně dolní mez
+   dlaždice snížena přibližně o polovinu (178 → 88 px). */
 @media(max-width:640px){
-  .karta-tisk select{font-size:min(var(--pismo), 5.5cqw);height:88px}
+  .karta-tisk select{font-size:min(var(--pismo), 5.5cqw);min-height:88px}
   .karta-tisk select::picker-icon{width:4.5cqw;height:4.5cqw}
 }
 .bigform select:focus,.bigform input:focus{box-shadow:var(--neu-sm),0 0 0 3px var(--focus)}

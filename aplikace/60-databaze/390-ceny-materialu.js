@@ -86,7 +86,8 @@ function CenyMaterialu({ recipes, materialy, onUlozit, stav, mostOk, smiMenit })
           onChange=${(e) => setJenBez(e.target.checked)} /><span className="tglt"></span>jen bez ceny</label>
       </div>
       ${!seznam.length ? html`<div className="empty">Zatím nejsou nahrané žádné receptury ani materiály.</div>` : html`
-        <table className="t" style=${{ marginTop: 10 }}>
+        <${RolovaniSListou} styl=${{ marginTop: 10 }}>
+        <table className="t">
           <thead><tr><th>Složka</th><th>Druh</th><th className="num">v recepturách</th>
             <th className="num">cena</th><th>za</th><th>měna</th>
             <th className="num">VOC %</th><th>bezpečnostní list</th></tr></thead>
@@ -136,6 +137,7 @@ function CenyMaterialu({ recipes, materialy, onUlozit, stav, mostOk, smiMenit })
               </tr>`)}
           </tbody>
         </table>
+        <//>
         ${videt.length > 120 && html`<p className="note">Zobrazeno prvních 120 z ${fmt(videt.length, 0)} — upřesněte hledání.</p>`}`}
       <p className="note" style=${{ marginTop: 8 }}>
         Cena za litr se na gramy přepočítá hustotou receptury (g/ml je totéž číslo

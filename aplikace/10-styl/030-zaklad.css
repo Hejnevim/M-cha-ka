@@ -57,14 +57,16 @@ textarea{font-family:var(--mono);font-size:12.5px;min-height:160px;resize:vertic
 /* Ikony se kreslí vektorem — velikost, tloušťka tahu a zakončení jdou
    z proměnných, takže se dají ladit stejně jako barvy. CSS má přednost před
    atributy v SVG, proto stačí tohle jediné pravidlo. */
-svg[viewBox="0 0 24 24"]{width:var(--ikona);height:var(--ikona);opacity:var(--ikona-pruhlednost)}
+svg[viewBox="0 0 24 24"]{width:var(--ikona);height:var(--ikona);opacity:var(--ikona-pruhlednost);color:var(--ikona-barva)}
 svg[viewBox="0 0 24 24"] path,svg[viewBox="0 0 24 24"] circle,svg[viewBox="0 0 24 24"] line{
   stroke-width:var(--ikona-tah);stroke-linecap:var(--ikona-konec);stroke-linejoin:var(--ikona-konec)}
 /* Ikona uvnitř řádku textu (zámek u zamčené technologie) sedí v písmu, ne
    vedle něj — velikost bere z textu kolem sebe, aby v menu i v nadpisu držela
    stejný poměr. Kresba i tah zůstávají z pravidla výše. */
+/* Ikona v řádku textu barvu nepřebírá z --ikona-barva, ale z věty, ve které
+   stojí — jinak by zámek v šedém popisku svítil jinak než písmo kolem. */
 svg[viewBox="0 0 24 24"].ikona-radek{width:var(--ikona-radek);height:var(--ikona-radek);
-  vertical-align:-.24em;margin-right:.3em}
+  vertical-align:-.24em;margin-right:.3em;color:inherit}
 .hdr{background:transparent;color:var(--ink);padding:9px clamp(16px,3vw,40px);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
 .themebtn{grid-column:3;justify-self:end;flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:none;background:var(--paper);box-shadow:var(--neu-sm);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;line-height:1;transition:opacity .15s;color:var(--ink)}
 .themebtn:hover{opacity:.8}

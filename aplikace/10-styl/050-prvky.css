@@ -47,7 +47,27 @@ table.t{width:100%;border-collapse:collapse;font-size:var(--pismo-tabulka)}
      `auto` v buňce znamená šířku podle obsahu a sloupec si o ni řekne;
      pole s pevnou šířkou v řádku (za, měna) si ji drží inline stylem dál. */
   table.t select{width:auto}
+  /* V obalu s horní lištou roluje obal, ne tabulka — dvě rolovátka v sobě
+     by si polohu nepředala a horní lišta by hýbala prázdnem. */
+  .rolovani-telo>table.t{display:table}
 }
+/* Rolování s lištou i nad hlavičkou (RolovaniSListou, 135-rolovani.js):
+   u dlouhé tabulky je lišta prohlížeče až pod posledním řádkem, kam od
+   hlavičky není vidět. Dráha s jezdcem se kreslí vlastními divy — na
+   telefonu prohlížeč lištu nastálo zobrazit neumí (kreslí ji jen průsvitně
+   během tažení a ::-webkit-scrollbar tam neplatí). Polohu a šířku jezdce
+   řídí komponenta; `touch-action:none`, jinak by tažení jezdce prstem
+   místo rolování tabulky posouvalo celou stránku. */
+.rolovani-lista{position:relative;height:14px;border-radius:7px;background:var(--paper);
+  box-shadow:var(--neu-in);margin-bottom:6px;touch-action:none;cursor:pointer}
+.rolovani-jezdec{position:absolute;top:3px;bottom:3px;left:0;border-radius:4px;
+  background:var(--ink-2);opacity:.7}
+.rolovani-telo{overflow-x:auto;-webkit-overflow-scrolling:touch}
+/* Spodní lišta samotného rolovátka ať ladí s dráhou nahoře — tohle platí
+   na počítači; telefon si dál kreslí svou průsvitnou přes obsah. */
+.rolovani-telo::-webkit-scrollbar{height:9px}
+.rolovani-telo::-webkit-scrollbar-track{background:var(--line);border-radius:5px}
+.rolovani-telo::-webkit-scrollbar-thumb{background:var(--ink-2);border-radius:5px}
 table.t th{text-align:left;font-size:var(--pismo-popisek);letter-spacing:var(--prostrkani);text-transform:uppercase;color:var(--ink-2);border-bottom:1.5px solid var(--ink);padding:8px}
 table.t td{border-bottom:1px solid var(--line);padding:9px 8px;vertical-align:top}
 /* Číslice musí mít stejnou šířku, jinak se sloupce gramáží rozházejí. Když je
@@ -86,36 +106,40 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
    tiskne, kam se to tiskne a kam pustit zakázkový list. Text a volby jdou pod
    ně na celou šířku; ve sloupcích vedle textu se název při užším okně rozsypal
    na jedno slovo na řádek. */
-/* Obě půlky výběru receptur mají stejný rytmus: popisek, filtr, hledání,
-   výběr. Když se v jedné zalomí lišta filtru na dva řádky, musela by se
-   druhá posunout taky — proto sdílejí řádky mřížky, ne jen sloupce.
-   Co je pod výběrem (poznámka, mazání) už na řádcích nezávisí. */
-@supports (grid-template-rows: subgrid){
-  @media(min-width:640px){
-    .recept-pulky{grid-template-rows:auto auto auto auto}
-    .recept-pulky>div{display:grid;grid-template-rows:subgrid;grid-row:span 4;align-content:start}
-  }
-}
+/* Výběr receptury je schovaný za dvěma tlačítky (Pantone standard/custom,
+   karta-recept v 240-calc.js) — nabídka s tisíci položkami se ukáže, až si
+   o ni tiskař řekne. Vzhled popisku pole (verzálky s prostrkáním), ale
+   hmota dlaždice, ať se z odstupu čte jako blok, ne jako pruh. */
+.volba-zdroje{text-transform:uppercase;letter-spacing:var(--prostrkani);padding:14px 10px}
 /* Čísla zakázky jako čtyři velké dlaždice vyplňující celou kartu — stejný
    vzor jako síto/kryvost/povrch v Parametrech tisku (`.karta-tisk`), aby se
    tentýž typ pole choval na obou kartách stejně. Bez viskozity pod nimi
    zůstávala karta z půlky prázdná; dlaždice ten prostor zaberou. */
-.zakazka-cisla{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.zakazka-cisla>div{container-type:inline-size}
+/* Dlaždice výšku karty nesmí URČOVAT, jen DOROVNAT. Pevných 178 px hnalo
+   dva řádky dlaždic na 520 px a Zakázka tak sama určovala výšku celého
+   řádku karet — Receptuře zbývalo ~280 px a Parametrům tisku ~160 px
+   prázdného místa. Proto karta jede jako sloupec, mřížka dlaždic si vezme
+   zbytek karty (`flex:1`) a dlaždice se roztáhnou do výšky, kterou řádku
+   určí nejvyšší sousední karta. Naopak růst do prázdna nehrozí: do
+   přirozené výšky karty se počítá jen dolní mez dlaždice, ne čtverec —
+   to byla chyba dřívějšího `aspect-ratio:1`, který kartu hnal na 595 px. */
+.karta-cisla{display:flex;flex-direction:column}
+.zakazka-cisla{display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1}
+.zakazka-cisla>div{container-type:inline-size;display:flex;flex-direction:column}
 .zakazka-cisla label.f{font-size:calc(var(--pismo-popisek) * 1.5);margin-bottom:10px;text-align:center}
-/* Dlaždice je obdélník: šířku bere celou ze sloupce mřížky (žádné mezery
-   navíc mezi poli), ale výšku má pevnou — čtverec přes celý sloupec hnal
-   kartu na 595 px a roztahoval sousední Recepturu a Parametry tisku
-   (přirozeně 526 px). Výška 178 px je změřená sondou tak, aby dva řádky
-   dlaždic vyšly na touž výšku karty jako oba sousedé. */
+/* Dolní mez 100 px je změřená sondou: dva řádky dlaždic po 100 px dají
+   kartě přirozenou výšku ~364 px, tedy touž, jakou má vedle stojící karta
+   Parametry tisku s jedním řádkem dlaždic po 178 px (~363 px). Když tedy
+   Zakázka stojí v řádku sama nebo je nejvyšší, drží stejnou výšku jako
+   soused, a prázdné místo nevzniká ani v ní, ani kvůli ní. */
 .zakazka-cisla input{font-size:min(calc(var(--pismo) * 3.375), 18.5625cqw);font-weight:700;text-align:center;
-  height:178px;padding:5cqw;box-sizing:border-box}
+  flex:1;min-height:100px;padding:5cqw;box-sizing:border-box}
 /* Pod 560px se sloupce skládají na jeden a dlaždice jedou přes celou šířku
    telefonu — čtyři po 178 px (+ popisky) nezvládne bez rolování žádný
-   mobil, poslední zůstává mimo obrazovku. Na úzkém okně proto dlaždice
-   zmenšeny přibližně o polovinu (178 → 88 px, písmo 3,375 → 1,7 násobku
-   `--pismo`) — pořád čitelné z odstupu, ale čtyři se vejdou najednou. */
+   mobil, poslední zůstává mimo obrazovku. Na úzkém okně proto dolní mez
+   dlaždice snížena na 88 px (písmo 3,375 → 1,7 násobku `--pismo`) — pořád
+   čitelné z odstupu, ale čtyři se vejdou najednou. */
 @media(max-width:560px){
   .zakazka-cisla{grid-template-columns:1fr}
-  .zakazka-cisla input{font-size:min(calc(var(--pismo) * 1.7), 9.375cqw);height:88px}
+  .zakazka-cisla input{font-size:min(calc(var(--pismo) * 1.7), 9.375cqw);min-height:88px}
 }

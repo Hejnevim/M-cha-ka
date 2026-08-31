@@ -303,9 +303,8 @@ const SLOVNIK = {
     { en: "will be saved as Custom and linked to", pt: "guarda-se como Custom e liga-se a" },
   "— bez receptury —": { en: "— no recipe —", pt: "— sem receita —" },
   "Pantone standard": { en: "Pantone standard", pt: "Padrão Pantone" },
-  "· hustota {h} g/ml": { en: "· density {h} g/ml", pt: "· densidade {h} g/ml" },
   "· {n} komponent": { en: "· {n} components", pt: "· {n} componentes" },
-  "· vázaná na {c}": { en: "· linked to {c}", pt: "· ligada a {c}" },
+  "vázaná na {c}": { en: "linked to {c}", pt: "ligada a {c}" },
   " (všechny polohy)": { en: " (all positions)", pt: " (todas as posições)" },
   "pantone je daný názvem barvy": { en: "the Pantone comes from the color name", pt: "o Pantone vem do nome da cor" },
   "dopočítáno z odstínu vzorníku — orientační, ne změřené":
