@@ -262,6 +262,8 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 12:50 | Písmo tlačítka Odpojit u váhy zvětšeno na velikost Táry — stejně velké dlaždice vedle sebe měly nápadně rozdílně velký text |
 | 13:14 | Text v Odpojit vycentrován (přetékal jen doprava) a Tára přestala zasahovat do řádku posuvníku v simulaci |
 | 14:11 | Dlaždice Zakázky a Parametrů tisku na mobilu zmenšeny o polovinu — na výšku 178 px se čtyři pole pod sebe nevešla na jednu obrazovku |
+| 14:37 | Míchací režim na telefonu přetékal do strany (chybějící `minmax(0,…)` u jednosloupcového rozvržení a tabulka bez omezené šířky) — nadpis a text vypadaly, že jim chybí první písmeno |
+| 15:05 | Vzorník receptur na telefonu po třech vedle sebe a ceník roluje v kartě místo lámání stránky — karty zarovnané na stejné hrany |
 
 ---
 
@@ -6355,3 +6357,82 @@ text v poli („Aluminium Foil mat") potřebuje 144 px, k dispozici má
 302 px — nepřeteče. `kontrola_aplikace.py` 0, `prekryv.py --sirky
 "420,500,560,640" --zalozky` čisté v obou režimech přesně na šířkách
 kolem nových zlomů, `barvy_nastroj.py` přegenerován.
+
+## 134. Míchací režim na telefonu přestal přetékat do strany
+
+**Problém.** Na skutečném telefonu vypadal míchací režim rozbitý — textu
+všude jako by chybělo první písmeno („rintcolor" místo „Printcolor",
+„bývá" místo „zbývá"), tlačítko Odpojit obkrojovalo nadpis „Asistent
+navážení". `sonda.py`/`snimek.py` ale okno pod 500 px nikdy nezmenšily
+(zjištěno až teď — `--sirka 360` i `300` vracely `window.innerWidth`
+500, tvrdé minimum bezhlavého okna), takže se to touhle sadou nikdy
+neověřilo. Skutečná příčina se ukázala, až `snimek.py` dostal
+`Emulation.setDeviceMetricsOverride` (viz níž) a šlo vynutit opravdovou
+šířku telefonu.
+
+**Co se změnilo.**
+- `snimek.py`: šířka/výška se teď vynucují přes ladicí protokol, ne jen
+  přes `--window-size` chromu (to pod ~500 px nejde). Beze změny chování
+  při běžném použití nad touhle hranicí.
+- `10-styl/070-michani.css`, `@media(max-width:1000px)`: `.michtelo`
+  mělo pod zlomem holé `grid-template-columns:1fr` — bez `minmax(0,…)`
+  má sloupec skrytou minimální šířku podle obsahu, ne 0, takže se
+  nesmrskl pod svou nejširší kartu (změřeno: 420 px sloupec v 391px
+  okně) a roztáhl celý `.michbg` do strany. Doplněno na
+  `minmax(0, 1fr)` — přesně ten vzor, který už používá dvousloupcové
+  pravidlo pro širší okna.
+- Tabulka procent asistenta (`table.t`, obecná třída) je bez
+  deklarované šířky sloupců — `table-layout:auto` si drží minimální
+  šířku podle nejdelšího obsahu (390 px v 361px sloupci) a přetékala
+  stejně. V míchacím režimu dostala `display:block;overflow-x:auto` —
+  zůstal přirozený poměr sloupců (`table-layout:fixed` by je smáčkl
+  na stejno a jméno komponenty by přeteklo přes sloupec procent), jen
+  se navíc umí sama rolovat stranou.
+- Nadpis „Asistent navážení" leží v běžném toku a o absolutně
+  umístěném rohu s Odpojit/Tárou neví — na úzké kartě (361 px) se pod
+  ně natáhl a roh ho translucentně překryl. `.card:has(> .asistroh)>h2`
+  dostal stejnou vodorovnou rezervu jako posuvník o kus níž.
+
+**Změřeno** (`snimek.py`, skutečná komponenta `MichaciRezim` + `Vazeni`,
+vynucená šířka 391 px): `.michbg` scrollWidth = clientWidth = 391 (dřív
+435, přesah 44 px) po opravě gridu, po opravě tabulky přesah karty na 0
+úplně. Při 1600 px (dva sloupce) beze změny — `teloGridCols` dál
+831,7 px + 723,25 px, žádný přesah. `kontrola_aplikace.py` 0,
+`prekryv.py --sirky "391,420,500,700,1000,1100,1400,1920" --zalozky`
+čisté v obou režimech na všech osmi šířkách, `barvy_nastroj.py`
+přegenerován.
+
+## 135. Vzorník receptur na telefonu po třech, ceník přestal lámat stránku
+
+**Problém.** Snímek skutečného telefonu ze záložky Receptury ukázal dvojí
+rozbití. Mřížka odstínů se na úzké obrazovce skládala po jednom — z dlaždice
+odstínu byl plakát přes celý řádek a z listování vzorníkem nekonečné rolování,
+přitom hodnota vzorníku je v počtu vzorků vedle sebe. A karta Ceny materiálů
+pod ní má tabulku s osmi sloupci polí (druh, cena, za, měna, VOC %,
+bezpečnostní list), která se do šířky telefonu nevejde — roztáhla celý
+dokument, stránka šla rolovat do strany, karty zůstaly na šířce okna
+a všechno pod tabulkou vypadalo rozházené a nezarovnané.
+
+**Co se změnilo.**
+
+- Mřížka odstínů (`.pgrid` s kartami `.pgcard.receptura`) jede pod 800 px
+  po třech sloupcích s mezerou 10 px místo 16. Karta receptury se zmenší
+  celá: okraje 14 → 9 px, mezery 8 → 6 px a tlačítka Upravit/Smazat se
+  smí zalomit pod sebe — do třetiny řádku se vedle sebe nevejdou. Katalog
+  produktů (karty s fotkou a texty) zůstává po dvou a pod 480 px po jednom:
+  scoping přes `.pgrid:has(.pgcard.receptura)`, produktová fotka po třech
+  nedává smysl, odstín ano.
+- Široká tabulka (`table.t`) pod 800 px roluje sama v sobě
+  (`display:block;overflow-x:auto`) — stejný tah, jakým to řeší tabulka
+  procent v míchacím režimu (kapitola 134). Dokument tak drží šířku okna
+  a karty se zarovnají.
+
+**Změřeno** (`snimek.py` + měření po skutečném prokliknutí menu → Receptury
+při šířce 380 px): mřížka tři sloupce po 94,66 px; `document.scrollWidth`
+380 = šířka okna (dřív tabulka roztahovala dokument); obě karty na chlup
+stejné hrany 16 → 364 px; tabulka ceníku uvnitř karty 38 → 342 px
+a `scrollWidth > clientWidth` — roluje v sobě, ne přes stránku. Katalog
+produktů při 380 px beze změny (jeden sloupec 304 px, dokument 380).
+Při 1600 px beze změny — pět sloupců, karty 282,39 a 282,41 px na stejném
+y 363,98. `kontrola_aplikace.py` 0, `prekryv.py --zalozky` čisté na všech
+čtyřech šířkách v obou režimech.

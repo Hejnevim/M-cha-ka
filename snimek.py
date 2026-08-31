@@ -201,6 +201,12 @@ def main():
         w = Ladici(adresa)
         w.posli("Page.enable")
         w.posli("Runtime.enable")
+        # `--window-size` na spuštění chrome nejde pod cca 500 px (bezhlavé
+        # okno má i tak nějaké minimum) — skutečnou šířku vynutí až tohle,
+        # nezávisle na oknu prohlížeče. Bez mobile:True, ať se nemění chování
+        # dotyku ani media query pro ukazatel — jen velikost plátna.
+        w.posli("Emulation.setDeviceMetricsOverride",
+                width=a.sirka, height=a.vyska, deviceScaleFactor=0, mobile=False)
         w.posli("Page.navigate", url="file:///" + os.path.abspath(zdroj).replace("\\", "/"))
         if a.pred:
             # stav se ukládá do úložiště prohlížeče a aplikace ho čte při prvním

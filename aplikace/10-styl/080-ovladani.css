@@ -28,6 +28,17 @@
 @media(max-width:1150px){.pgrid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:800px){.pgrid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:480px){.pgrid{grid-template-columns:1fr}}
+/* Vzorník odstínů na úzké obrazovce. Jeden odstín přes celý řádek udělá
+   z dlaždice plakát a z mřížky nekonečné rolování — hodnota vzorníku je
+   v počtu vzorků vedle sebe, proto tři sloupce i tam, kde produkty (karty
+   s fotkou a texty) už jedou po jednom. Karta se zmenší celá: menší okraje,
+   menší mezery a tlačítka pod sebou, jinak se Upravit/Smazat do třetiny
+   řádku nevejdou a řádek se rozláme. */
+@media(max-width:800px){
+  .pgrid:has(.pgcard.receptura){grid-template-columns:repeat(3,1fr);gap:10px}
+  .pgcard.receptura{padding:9px;gap:6px}
+  .pgcard.receptura .pgcard-actions{flex-wrap:wrap}
+}
 .pgcard{background:var(--paper);border-radius:var(--radius);box-shadow:var(--neu);padding:14px;display:flex;flex-direction:column;gap:8px}
 .pgcard-img{aspect-ratio:1/1;border-radius:var(--radius-dlazdice);background:var(--paper);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:var(--neu-in)}
 .pgcard-img img{width:100%;height:100%;object-fit:contain;padding:14px}

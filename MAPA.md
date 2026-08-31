@@ -1,7 +1,7 @@
 # Rejstřík kódu aplikace
 
 > Generuje `mapa.py` ze skutečných souborů — neupravovat ručně.
-> Kód není v `index.html`, leží v `aplikace/` v 81 částech (17131 řádků).
+> Kód není v `index.html`, leží v `aplikace/` v 81 částech (17173 řádků).
 > Čísla u položek jsou `část:řádek` — část podle tabulky níž.
 
 | # | část | řádků |
@@ -10,10 +10,10 @@
 | 2 | `10-styl/020-promenne.css` | 127 |
 | 3 | `10-styl/030-zaklad.css` | 85 |
 | 4 | `10-styl/040-rozvrzeni.css` | 116 |
-| 5 | `10-styl/050-prvky.css` | 98 |
+| 5 | `10-styl/050-prvky.css` | 104 |
 | 6 | `10-styl/060-produkty.css` | 34 |
-| 7 | `10-styl/070-michani.css` | 192 |
-| 8 | `10-styl/080-ovladani.css` | 59 |
+| 7 | `10-styl/070-michani.css` | 217 |
+| 8 | `10-styl/080-ovladani.css` | 70 |
 | 9 | `00-hlava/090-kostra.html` | 18 |
 | 10 | `20-zaklad/100-uvod.js` | 31 |
 | 11 | `20-zaklad/110-technologie.js` | 66 |
@@ -136,7 +136,7 @@
 `--neu-sm` 2:93 · `--neu-in` 2:94 · `--neu-in-lg` 2:95 · `--modal-shadow` 2:96 · `--logo-shadow` 2:97
 `--mono` 2:98 · `--sans` 2:99
 
-## Pravidla CSS (253)
+## Pravidla CSS (254)
 
 `:root` 2:1 · `:root[data-theme="dark"]` 2:101 · `:root:not([data-theme="dark"]) .michbg` 2:122
 `:root[data-theme="dark"] .michbg` 2:123
@@ -169,11 +169,11 @@
 `.card` 5:1 · `.card h2` 5:2 · `.card .hint` 5:3 · `.frow` 5:4 · `label.f` 5:6 · `.chips` 5:14 · `.chip` 5:15
 `.chip.on` 5:16 · `.chip.mini` 5:19 · `.btn` 5:20 · `.btn:hover` 5:21 · `.btn.sec` 5:22
 `.btn.sec:hover` 5:23 · `.btn.sm` 5:24 · `.btn.danger` 5:25 · `.btn:disabled` 5:26 · `table.t` 5:27
-`table.t th` 5:28 · `table.t td` 5:29 · `td.num,th.num,table.t th.num` 5:36 · `.swatch` 5:37 · `.tag` 5:40
-`.tag.tech` 5:41 · `.result-big` 5:47 · `.result-sub` 5:48 · `.mixbar` 5:49 · `.warnbox` 5:50
-`.imgwarn` 5:51 · `.rowactive td` 5:52 · `.okbox` 5:53 · `.empty` 5:54 · `.rowline` 5:55 · `.note` 5:56
-`.search` 5:57 · `pre.tpl` 5:58 · `.zakazka-cisla` 5:80 · `.zakazka-cisla>div` 5:81
-`.zakazka-cisla label.f` 5:82 · `.zakazka-cisla input` 5:88 · `.produkt-dlazdice` 6:1
+`table.t th` 5:34 · `table.t td` 5:35 · `td.num,th.num,table.t th.num` 5:42 · `.swatch` 5:43 · `.tag` 5:46
+`.tag.tech` 5:47 · `.result-big` 5:53 · `.result-sub` 5:54 · `.mixbar` 5:55 · `.warnbox` 5:56
+`.imgwarn` 5:57 · `.rowactive td` 5:58 · `.okbox` 5:59 · `.empty` 5:60 · `.rowline` 5:61 · `.note` 5:62
+`.search` 5:63 · `pre.tpl` 5:64 · `.zakazka-cisla` 5:86 · `.zakazka-cisla>div` 5:87
+`.zakazka-cisla label.f` 5:88 · `.zakazka-cisla input` 5:94 · `.produkt-dlazdice` 6:1
 `.produkt-dlazdice .dlazdice` 6:2 · `.produkt-dlazdice .prodphoto,.produkt-dlazdice .pdfdrop` 6:3
 `.produkt-dlazdice .popiska` 6:5 · `.produkt-dlazdice .popiska b` 6:6
 `.produkt-dlazdice button.prodphoto` 6:7 · `.pdfdrop` 6:8 · `.prodphoto` 6:9 · `.poscards` 6:10
@@ -190,30 +190,31 @@
 `.michbg .stitekpruh .stitekobal` 7:43 · `.michbg .stitekpruh .tgl` 7:50 · `.michbg .stitekpruh .tglt` 7:54
 `.michbg .stitekpruh .tglt::after` 7:57 · `.michbg .stitekpruh .tgl input:checked + .tglt::after` 7:60
 `.michbg .stitekpruh .btn` 7:62 · `.michbg .card` 7:73 · `.michbg .asistroh` 7:74
-`.michbg .card .simposuv` 7:89 · `.michbg .card .simposuv input[type=range]` 7:92
-`.michbg .okbox .btn,.michbg .warnbox .btn,.michbg .specbar .btn` 7:104 · `.michbg .card .btn.sm` 7:108
-`.michbg .btn.mich-tl-zpet` 7:112 · `.michbg .btn.mich-tl-plocha` 7:116
-`.michbg .rowline .btn.mich-tl-plocha:first-of-type` 7:126 · `.michbg .btn.mich-tl-rucne` 7:127
-`.michbg .btn.mich-tl-znam` 7:131 · `.michbg .btn.mich-tl-viskozita` 7:135
-`.michbg .card .btn.mich-tl-pripojit` 7:139 · `.michbg .card .btn.mich-tl-simulace` 7:143
-`.michbg .card .btn.mich-tl-tara` 7:152 · `.michbg .card .btn.mich-tl-odpojit` 7:157
-`.michbg .card .btn.mich-tl-sarze` 7:162 · `.michbg .card .btn.mich-tl-dalsi` 7:166
-`.michbg .result-big` 7:170 · `.michbg .wbar` 7:171 · `.michbg .note,.michbg .result-sub` 7:172
-`.michbg input,.michbg select` 7:180 · `.michbg .warnbox,.michbg .okbox` 7:182 · `.michbg .tag` 7:184
-`.michbg .pickbox` 7:186 · `.linkbox` 8:1 · `.pickbox` 8:2 · `.flags` 8:3 · `.tgl` 8:4 · `.tgl input` 8:5
+`.michbg .card:has(> .asistroh)>h2` 7:82 · `.michbg .card .simposuv` 7:95
+`.michbg .card .simposuv input[type=range]` 7:98
+`.michbg .okbox .btn,.michbg .warnbox .btn,.michbg .specbar .btn` 7:110 · `.michbg .card .btn.sm` 7:114
+`.michbg .btn.mich-tl-zpet` 7:118 · `.michbg .btn.mich-tl-plocha` 7:122
+`.michbg .rowline .btn.mich-tl-plocha:first-of-type` 7:132 · `.michbg .btn.mich-tl-rucne` 7:133
+`.michbg .btn.mich-tl-znam` 7:137 · `.michbg .btn.mich-tl-viskozita` 7:141
+`.michbg .card .btn.mich-tl-pripojit` 7:145 · `.michbg .card .btn.mich-tl-simulace` 7:149
+`.michbg .card .btn.mich-tl-tara` 7:158 · `.michbg .card .btn.mich-tl-odpojit` 7:163
+`.michbg .card .btn.mich-tl-sarze` 7:168 · `.michbg .card .btn.mich-tl-dalsi` 7:172
+`.michbg .result-big` 7:176 · `.michbg .wbar` 7:177 · `.michbg .note,.michbg .result-sub` 7:178
+`.michbg input,.michbg select` 7:186 · `.michbg .warnbox,.michbg .okbox` 7:188 · `.michbg .tag` 7:190
+`.michbg .pickbox` 7:192 · `.linkbox` 8:1 · `.pickbox` 8:2 · `.flags` 8:3 · `.tgl` 8:4 · `.tgl input` 8:5
 `.tglt` 8:6 · `.tglt::after` 8:7 · `.tgl input:checked + .tglt` 8:8 · `.tgl input:checked + .tglt::after` 8:9
 `#chyba` 8:10 · `.searchwrap` 8:11 · `.searchbar` 8:12 · `.searchbar .ic` 8:13 · `.searchbar input` 8:14
 `.searchbar input:focus` 8:15 · `.searchbar .count` 8:16 · `.searchdrop` 8:17 · `.searchitem` 8:18
 `.searchitem:hover,.searchitem.hi` 8:19 · `.searchitem-img` 8:20 · `.searchitem-nm` 8:21
 `.searchitem-dm` 8:22 · `.viewtoggle` 8:23 · `.viewtoggle button` 8:24 · `.viewtoggle button.on` 8:25
-`.pgrid` 8:26 · `.pgcard` 8:31 · `.pgcard-img` 8:32 · `.pgcard-img img` 8:33 · `.pgcard-nm` 8:34
-`.pgcard-ref` 8:35 · `.pgcard-mat` 8:36 · `.pgcard-dots` 8:37 · `.pgcard-actions` 8:38
-`.pgcard.receptura .pgcard-img` 8:43 · `.toast` 8:44 · `.toast.bad` 8:45
-`:root[data-theme="dark"] .toast.bad` 8:46 · `.scanrow` 8:47 · `.scanrow:last-child` 8:48 · `.scanraw` 8:49
-`.dot` 8:50 · `.cam` 8:51 · `.specbar` 8:52 · `.specbar b` 8:53 · `.specbar a` 8:56 · `.kv` 8:57
-`.kv .k` 8:58 · `.kv .v` 8:59
+`.pgrid` 8:26 · `.pgcard` 8:42 · `.pgcard-img` 8:43 · `.pgcard-img img` 8:44 · `.pgcard-nm` 8:45
+`.pgcard-ref` 8:46 · `.pgcard-mat` 8:47 · `.pgcard-dots` 8:48 · `.pgcard-actions` 8:49
+`.pgcard.receptura .pgcard-img` 8:54 · `.toast` 8:55 · `.toast.bad` 8:56
+`:root[data-theme="dark"] .toast.bad` 8:57 · `.scanrow` 8:58 · `.scanrow:last-child` 8:59 · `.scanraw` 8:60
+`.dot` 8:61 · `.cam` 8:62 · `.specbar` 8:63 · `.specbar b` 8:64 · `.specbar a` 8:67 · `.kv` 8:68
+`.kv .k` 8:69 · `.kv .v` 8:70
 
-### Uvnitř @media a @supports (40)
+### Uvnitř @media a @supports (45)
 
 `select,::picker(select)` 3:20 · `select::picker-icon` 3:23 · `select` 3:27 · `select:open` 3:28
 `.bigform select:open` 3:29 · `::picker(select)` 3:30 · `option` 3:39 · `option:hover,option:focus` 3:44
@@ -224,18 +225,20 @@
 `.karta-produkt` 4:30 · `.karta-tisk select` 4:105 · `.karta-tisk select::picker-icon` 4:106 · `.frow.c2` 5:5
 `.frow.c3` 5:5 · `.frow.c4` 5:5
 `.frow.c2>div>label.f:first-child,.frow.c3>div>label.f:first-child,.frow.c4>div>label.f:first-child` 5:10
-`.frow>.flags` 5:13 · `@media(min-width:640px)` 5:71 · `.zakazka-cisla` 5:96 · `.zakazka-cisla input` 5:97
-`.michtelo` 7:188 · `.michtab` 7:189 · `.michtab .g` 7:190 · `.michbg` 7:192 · `.pgrid` 8:27 · `.pgrid` 8:28
-`.pgrid` 8:29 · `.pgrid` 8:30
+`.frow>.flags` 5:13 · `table.t` 5:33 · `@media(min-width:640px)` 5:77 · `.zakazka-cisla` 5:102
+`.zakazka-cisla input` 5:103 · `.michtelo` 7:199 · `.michtab` 7:200 · `.michtab .g` 7:201
+`.michbg table.t` 7:215 · `.michbg` 7:217 · `.pgrid` 8:27 · `.pgrid` 8:28 · `.pgrid` 8:29 · `.pgrid` 8:30
+`.pgrid:has(.pgcard.receptura)` 8:38 · `.pgcard.receptura` 8:39 · `.pgcard.receptura .pgcard-actions` 8:40
 
-### Podmínky (15)
+### Podmínky (17)
 
 `@supports (appearance: base-select)` 3:19 · `@media(max-width:720px)` 3:78 · `@media(min-width:960px)` 4:5
 `@media(min-width:960px)` 4:18 · `@media(max-width:640px)` 4:104 · `@media(min-width:640px)` 5:5
-`@media(min-width:640px)` 5:10 · `@supports (grid-template-rows: subgrid)` 5:70
-`@media(max-width:560px)` 5:95 · `@media (max-width:1000px)` 7:187 · `@media print` 7:192
-`@media(max-width:1500px)` 8:27 · `@media(max-width:1150px)` 8:28 · `@media(max-width:800px)` 8:29
-`@media(max-width:480px)` 8:30
+`@media(min-width:640px)` 5:10 · `@media(max-width:800px)` 5:33
+`@supports (grid-template-rows: subgrid)` 5:76 · `@media(max-width:560px)` 5:101
+`@media (max-width:1000px)` 7:193 · `@media print` 7:217 · `@media(max-width:1500px)` 8:27
+`@media(max-width:1150px)` 8:28 · `@media(max-width:800px)` 8:29 · `@media(max-width:480px)` 8:30
+`@media(max-width:800px)` 8:37
 
 ## Komponenty (39)
 

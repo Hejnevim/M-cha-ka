@@ -541,6 +541,12 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
 .michbg .asistroh{position:absolute;top:var(--mich-mezera);right:var(--mich-mezera);
   display:flex;flex-direction:column;align-items:flex-end;
   gap:calc(var(--mich-mezera) * 1.5);z-index:1}
+/* Nadpis karty leží v běžném toku a o rohovém sloupci neví — na širokém
+   okně mu zbytek řádku stačí, ale na úzkém telefonu (změřeno: karta
+   361 px, sloupec 131 px) se „Asistent navážení" natáhne pod Odpojit a
+   schová se pod ním (ten je nad textem, `z-index:1`). Stejná vodorovná
+   rezerva jako u posuvníku níž — a jen na kartě, která roh vůbec má. */
+.michbg .card:has(> .asistroh)>h2{margin-right:calc(var(--mich-tl-tara-sirka) + var(--mich-mezera))}
 /* Posuvník simulace se táhne přes celou šířku karty a jeho pravý konec —
    plná dávka — by zajel pod Táru v rohu. Řádek se proto o rohový sloupec
    zkracuje. Je-li šířka Táry „auto", calc() neplatí a řádek zůstává celý —
@@ -652,9 +658,28 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
   padding:calc(var(--mich-stitek) * .24) calc(var(--mich-stitek) * .72)}
 .michbg .pickbox{padding:calc(var(--mich-mezera) * .55)}
 @media (max-width:1000px){
-  .michtelo{grid-template-columns:1fr}
+  /* Holé `1fr` má skrytě minimální šířku `auto` (obsah), ne 0 — sloupec by
+     se pak nesmrskl pod to, co je uvnitř nejširší, a na úzkém telefonu
+     (změřeno: 420 px sloupec v 391px okně) by karta i s ní celý `.michbg`
+     přetekly stranou. Stejnou past řeší `minmax(0, …)` už ve výchozím
+     dvousloupcovém pravidle výš — tady na ni jen zapomnělo. */
+  .michtelo{grid-template-columns:minmax(0, 1fr)}
   .michtab{font-size:calc(var(--mich-tabulka) * .85)}
   .michtab .g{font-size:calc(var(--mich-gramy) * .85)}
+  /* Tabulka procent asistenta (`table.t` z 050-prvky.css, obecná třída pro
+     data) je jinak `table-layout:auto` — vlastní minimální šířku podle
+     obsahu sloupců (KOMPONENTA/%/CÍL G/NALITO G/ZBÝVÁ G), `width:100%` ji
+     pod ni nesmrskne. Na telefonu (změřeno: 390 px tabulka v 361px sloupci)
+     tak sama protáhla kartu i celý `.michbg` do strany.
+     `table-layout:fixed` by přesah spravilo, ale rozdělí sloupce rovným
+     dílem — jméno komponenty (nejdelší obsah) by se zalomilo na tři řádky
+     a přeteklo přes sousední sloupec procent. Místo toho se tabulka nechá
+     v přirozeném poměru sloupců a jen dostane vlastní vodorovné rolování,
+     ať zůstane čitelná — `display:block` na `<table>` k tomu stačí, vnitřek
+     (`thead`/`tbody`/řádky) se dál chová jako tabulka. Platí jen tady
+     v míchacím režimu, obecná `.t` se používá i jinde na širších
+     obrazovkách, kde tenhle přesah nehrozí. */
+  .michbg table.t{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
 }
 @media print{.michbg{display:none}}
 .linkbox{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
