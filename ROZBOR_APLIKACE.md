@@ -1,15 +1,15 @@
 # Ink Recipe Manager — strukturovaný rozbor aplikace
 
 <!-- AUTO:stav -->
-> **Stav k 28. srpna 2026.** Čísla v úsecích označených `AUTO` generuje
+> **Stav k 31. srpna 2026.** Čísla v úsecích označených `AUTO` generuje
 > `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — nepřepisují
 > se ručně a nemohou se rozejít se skutečností. Text mimo ně píše člověk.
 
-> Poslední zapsaná změna ve vývojovém deníku: **20. srpna 16:30 — Přeložena výchozí obrazovka Kalkulace (178 obalených míst, slovník 338 položek) — přepnutí jazyka je vidět na první pohled, ne až v nabídce**
+> Poslední zapsaná změna ve vývojovém deníku: **31. srpna 13:14 — Text v Odpojit vycentrován (přetékal jen doprava) a Tára přestala zasahovat do řádku posuvníku v simulaci**
 
 | soubor | řádků | velikost |
 |---|---:|---:|
-| `aplikace/ (81 souborů)` | 16 604 | 917 kB |
+| `aplikace/ (81 souborů)` | 17 115 | 964 kB |
 | `index.html` | 109 | 6 kB |
 | `most.py` | 727 | 31 kB |
 | `pdf_spec.py` | 1 071 | 42 kB |
@@ -17,7 +17,7 @@
 | `prevod_printcolor.py` | 188 | 7 kB |
 | `kontrola_aplikace.py` | 169 | 7 kB |
 | `rozbor_aktualizuj.py` | 359 | 13 kB |
-| **celkem** | **19 440** | |
+| **celkem** | **19 951** | |
 <!-- /AUTO:stav -->
 
 ---

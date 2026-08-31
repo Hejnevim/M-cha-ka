@@ -164,9 +164,14 @@ function dobaText(ms) {
   return Math.max(1, min) + " min";
 }
 
-/* Zbývající čas lidsky: "za 3 h 20 min", "před 2 dny" */
+/* Zbývající čas lidsky: "za 3 h 20 min", "před 2 dny".
+
+   Předložka se překládá (v angličtině stojí „ago" až ZA časem, proto jmenovka
+   a ne pouhé lepení), kdežto dobaText sám zůstává česky — tiskne se i na
+   míchací lístek a provozní dokumenty dílny se nepřekládají. zbyvaText na
+   žádný tiskový dokument nejde, jen na obrazovku. */
 function zbyvaText(ms) {
   if (ms == null) return "";
-  return (ms < 0 ? "před " : "za ") + dobaText(ms);
+  return preloz(ms < 0 ? "před {d}" : "za {d}", { d: dobaText(ms) });
 }
 

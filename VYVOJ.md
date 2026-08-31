@@ -252,6 +252,16 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 16:02 | Aplikace mluví třemi jazyky — v menu kolonka JAZYK (Čeština / English / Português), přeložen celý rám aplikace; volbu si drží prohlížeč |
 | 16:30 | Přeložena výchozí obrazovka Kalkulace (178 obalených míst, slovník 338 položek) — přepnutí jazyka je vidět na první pohled, ne až v nabídce |
 
+### 31. srpna — jazyk dojel až k váze
+| čas | co |
+|---|---|
+| 09:05 | Míchací režim mluví všemi třemi jazyky — asistent navážení, korekce, zbytky, aditiva, viskozita i riziko opravy (228 obalených míst, slovník 589 položek) |
+| 09:57 | Dlaždice Zakázky zmenšeny o čtvrtinu — čísla přerůstala kartu na velkém monitoru |
+| 12:18 | Nezvolené přepínače (chips) dostaly v tmavém režimu barvu textu — byly černé na tmavém pozadí |
+| 12:33 | Dlaždice síta, kryvosti a povrchu v Parametrech tisku dostaly pevnou výšku — jako čtverec nafukovaly kartu při méně polích v řádku nebo úzkém okně |
+| 12:50 | Písmo tlačítka Odpojit u váhy zvětšeno na velikost Táry — stejně velké dlaždice vedle sebe měly nápadně rozdílně velký text |
+| 13:14 | Text v Odpojit vycentrován (přetékal jen doprava) a Tára přestala zasahovat do řádku posuvníku v simulaci |
+
 ---
 
 ## Co aplikace je
@@ -6154,3 +6164,168 @@ Produto selecionado · Receita e cor · Encomenda · Parâmetros de impressão �
 Quanto misturar. `kontrola_aplikace.py` 0, `node --check` prošel u všech
 čtyř dotčených částí. Skripty s ověřenými počty výskytů: 74 + 72 + 24 + 8
 náhrad, žádná neproběhla s jiným počtem, než se čekalo.
+
+## 127. Jazyk dojel až k váze — míchací režim mluví všemi třemi jazyky
+
+**Problém.** Po kapitole 126 se přepnutí jazyka projevilo v nabídce i na
+Kalkulaci, ale klik na „⛶ Míchací režim" vrátil obsluhu do češtiny: celá
+obrazovka u váhy — asistent navážení, tabulka navážek, nabídky zbytků,
+aditiva, viskozita, rady k podkladu i riziko opravy — zůstávala česky.
+Přesně pro tuhle obrazovku přitom cizí jazyk existuje: u váhy stojí ten,
+kdo česky nečte.
+
+**Co se změnilo.** Přeložen celý míchací režim a všechno, co se v něm
+vykresluje: rám a tabulka navážek (`280-michaci-rezim.js`, 16 míst),
+asistent navážení včetně šarží, přelivu, tužidla a korekcí po nátisku
+(`290-vazeni.js`, 78 míst), chyby váhy (`250-vaha.js`, 3), bloky rad,
+zbytků, ručního zadání, aditiv a viskozity (`240-calc.js`, +106 míst)
+a riziko opravy (`600-riziko-opravy.js`, 23). Slovník narostl na 589
+položek (+251).
+
+Tři místa si vyžádala víc než obalení textu:
+
+- **Riziko opravy skládá věty s dosazenými čísly** („Součet složení je
+  101,5 %, ne 100 %."), takže je slovník při vykreslení už nenajde —
+  překládá se uvnitř `rizikoOpravy()` a memo v Calc dostalo do závislostí
+  `jazykAplikace`, jinak by po přepnutí drželo starou řeč.
+- **Tištěné dokumenty zůstávají česky.** `dobaText` a `textZastoupeni` jdou
+  i na míchací lístek, proto se nepřekládají; pro obrazovku vznikly
+  `zbyvaText` s překládanou předložkou (v angličtině stojí „ago" až za
+  časem, proto jmenovka, ne lepení) a `textZastoupeniObr`.
+- **Jména aditiv** se překládají při vstupu do asistenta — algoritmus se
+  o název neopírá a komponenty receptury (data dílny) zůstávají, jak jsou.
+
+**Změřeno.** Slovník strojově (zkouška ve scratchpadu, části načtené jako
+v prohlížeči): 589 klíčů, žádná duplicita, každá položka má en i pt,
+jmenovky `{x}` sedí ve všech překladech. `snimek.py` skutečnými kliky:
+s `irm-jazyk="en"` čte míchací režim WEIGHING ASSISTANT · Connect the
+scale (USB) · Total to weigh · Before you start mixing · Viscosity —
+flow-out time · thinner / drying retarder; po kliku na simulaci
+SIMULATION — ADD INK WITH THE SLIDER · batch not stated · 31,0 g to go ·
+Next component → · TARGET G / POURED G / LEFT G. S `pt` ASSISTENTE DE
+PESAGEM · Total a pesar · Antes de começar a misturar. Komponenty
+receptury (Printcolor Warm Red, Transparentní báze) a tvar čísel (50,0)
+zůstaly beze změny — přesně podle pravidel. `kontrola_aplikace.py` 0,
+`node --check` prošel u všech osmi dotčených částí.
+
+**Falešný poplach po cestě.** První anglický snímek vyšel celý česky a
+vypadalo to na chybu aplikace. Nebyla: `loadLS` čte úložiště jako JSON
+(aplikace ukládá `"en"` s uvozovkami) a zkouška podstrčila holé `en` —
+`JSON.parse` spadl a volba tiše sjela na češtinu. Oprava patřila zkoušce,
+ne aplikaci; aplikace sama si jazyk ukládá správně.
+
+## 128. Dlaždice Zakázky zmenšeny o čtvrtinu
+
+**Problém.** Čtyři velké dlaždice v kartě Zakázka (Počet kusů, Spotřeba,
+Ztráty, Min. dávka) měly číslo tak velké, že na širokém monitoru působilo
+nepoměrně k okolním kartám Receptura a Parametry tisku.
+
+**Co se změnilo.** Násobek písma v `.zakazka-cisla input`
+(`10-styl/050-prvky.css`) snížen na 75 % původní hodnoty — z
+`min(calc(var(--pismo) * 4.5), 24.75cqw)` na
+`min(calc(var(--pismo) * 3.375), 18.5625cqw)`. Výška dlaždice (178 px) a
+rozvržení mřížky zůstaly beze změny, mění se jen velikost číslice.
+
+**Změřeno** (`sonda.py`): písmo v dlaždici kleslo z 53,43 px na 40,07 px
+(přesně 75 %), výška dlaždice beze změny 178 px. `kontrola_aplikace.py` 0,
+`prekryv.py` čisté na všech čtyřech šířkách a v obou režimech.
+
+## 129. Nezvolené přepínače čitelné i v tmavém režimu
+
+**Problém.** Přepínače jako filtr databáze receptur („vše (41)", „MS 660
+(11)") byly v tmavém režimu skoro nečitelné — tmavé písmo na tmavém pozadí.
+Zvolený přepínač (`.chip.on`) barvu textu měl, nezvolený ne — bral ji z
+výchozího stylu tlačítka v prohlížeči, který na tmavý motiv nereaguje.
+
+**Co se změnilo.** Pravidlo `.chip` v `10-styl/050-prvky.css` dostalo
+`color:var(--ink)` — stejnou proměnnou, kterou už používá zbytek rozhraní.
+Stejná chyba a stejná oprava i ve vlastní kopii pravidla v `barvy.html`
+(nástroj pro ladění tokenů má CSS zkopírované, ne natažené z aplikace).
+
+**Změřeno** (`sonda.py`, syntetický `.chip` v obou motivech): tmavý režim
+text `rgb(237,237,237)` na pozadí `rgb(51,51,51)` (dřív dědilo černou);
+světlý režim beze změny `rgb(20,20,20)` na `rgb(219,219,219)`; zvolený stav
+`.chip.on` beze změny `rgb(0,0,0)` na `rgb(237,237,237)`.
+`kontrola_aplikace.py` 0, `prekryv.py` čisté na všech čtyřech šířkách a
+v obou režimech.
+
+## 130. Dlaždice v Parametrech tisku už se nenafukují
+
+**Problém.** Pole síto, kryvost a povrch v kartě Parametry tisku byla
+kreslená jako čtverec (`aspect-ratio:1`), který roste s šířkou svého
+sloupce. Stačilo méně polí v řádku (tampontisk bez zapsaného klišé má jen
+dvě pole místo tří, `frow.c2`) nebo úzké okno, kde se pole skládají do
+jednoho sloupce — a ze čtverce vyšla dlaždice přes 700 px, prázdná skoro
+přes celou kartu, zatímco text a šipka uvnitř zůstaly nepoměrně malé.
+
+**Co se změnilo.** `.karta-tisk select` v `10-styl/040-rozvrzeni.css`
+dostal pevnou výšku 178 px místo `aspect-ratio:1` — stejnou hodnotu, jakou
+už z téhož důvodu používá sesterská karta Zakázka (`.zakazka-cisla`, viz
+kapitola 128 a komentář u ní). Šířka dál sedí na sloupec a písmo, odsazení
+i šipka se dál škálují od šířky dlaždice (`cqw`, s horní mezí u písma),
+takže se na úzké obrazovce pořád zmenší naráz — jen výška je teď to jediné,
+co se drží pevně.
+
+**Změřeno** (`sonda.py`, syntetická dlaždice `.karta-tisk select` při
+šířkách sloupce 180–760 px): výška teď 178 px při všech šířkách (dřív
+136–716 px, rostla se čtvercem). `kontrola_aplikace.py` 0, `prekryv.py
+--zalozky` čisté na všech čtyřech šířkách, v obou režimech i napříč
+záložkami.
+
+## 131. Odpojit a Tára u váhy stejně velké i písmem
+
+**Problém.** Tlačítka Odpojit a Tára v pravém rohu karty Asistent navážení
+jsou stejně velká dlaždice (116 × 100 px), ale Odpojit neslo písmo jen
+15 px proti 24,5 px u Táry — v prázdné dlaždici tak působilo nepoměrně
+malé a dvojice vedle sebe (resp. pod sebou) nepůsobila jako pár.
+
+**Co se změnilo.** `--mich-tl-odpojit` v `10-styl/020-promenne.css`
+zvýšeno z 15px na 24,5px, na hodnotu `--mich-tl-tara`. Rozměr dlaždice
+(116 × 100 px, poloha v rohu) se nemění — jen se dorovnalo písmo, aby
+dvojici u váhy nesla stejná váha pohledu.
+
+**Změřeno** (`sonda.py`, syntetická dvojice tlačítek ve skutečném
+kontextu `.michbg .card`): oba boxy beze změny 116 × 100 px, „Odpojit" se
+při 24,5 px pořád vejde na jeden řádek (zkoušeno do 25 px, láme se od
+26 px). `barvy_nastroj.py` přegenerován (127 ovladatelných hodnot),
+`kontrola_aplikace.py` 0, `prekryv.py --zalozky` čisté na všech čtyřech
+šířkách, v obou režimech i napříč záložkami.
+
+## 132. Odpojit vycentrováno, Tára nezasahuje do posuvníku
+
+**Problém.** Po zvětšení písma v kapitole 131 bylo vidět, že „Odpojit"
+není na střed: 27 px místa vlevo, jen 1 px vpravo. Přehled na skutečné
+komponentě (viz níž) ukázal proč — „Odpojit" je jedno nezalomitelné slovo
+širší než dlaždice s odsazením (87 px textu proti 61,6 px místa), a
+prohlížeč takové přetékající zarovnání na střed neumí — text se nalepí
+k jednomu okraji místo aby přetekl na obě strany stejně. „Tára (0)" má
+mezeru a zalomí se na dvě kratší slova, tou vadou netrpí. Druhý nález:
+Tára svým pevným rozměrem sahá od rohu karty o 238 px dolů, ale nadpis,
+štítek režimu a velký výsledek nad posuvníkem (bez varování o chybějícím
+složení) zabraly jen 190 px — Tára tak zasahovala do řádku posuvníku,
+i když se s ním díky vodorovné rezervě nekryla.
+
+**Co se změnilo.** V `10-styl/070-michani.css`: `.btn.mich-tl-tara` a
+`.btn.mich-tl-odpojit` dostaly `display:flex;align-items:center;
+justify-content:center` místo spoléhání na textové zarovnání tlačítka —
+flex centruje i přetékající obsah stejně na obě strany. `.simposuv`
+dostal místo pevných 10 px horní okraj počítaný z výšky dvojice tlačítek
+(`--mich-tl-odpojit-vyska` + `--mich-tl-tara-vyska` + mezery) minus
+175 px (změřená výška nadpisu, štítku a výsledku s malou rezervou) —
+posuvník teď začíná až pod dvojicí tlačítek, ne vedle ní.
+
+**Jak se to změřilo bez skutečného průchodu aplikací.** Otevřít asistenta
+navážení vyžaduje frontu míchání a rozpracovanou zakázku — pro měření
+layoutu zbytečná zátěž. Místo toho `sonda.py`/`snimek.py` vykreslily
+skutečnou komponentu `Vazeni` (aplikace ji má jako globální funkci,
+`ReactDOM.createRoot` + `ReactDOM.flushSync` pro synchronní vykreslení
+bez čekání na React) do stejné kostry (`.michbg .michtelo > div.card`),
+klikly na „Vyzkoušet v simulaci" a měřily `getBoundingClientRect()`
+skutečných uzlů — žádná ruční rekonstrukce CSS, žádný odhad.
+
+**Změřeno**: „Odpojit" nyní 14 px místa na obě strany (dřív 27/1).
+Mezera mezi Tárou a posuvníkem 14 px v úzkém (650 px) i širokém
+(1600 px) okně, u receptury bez varování (nejméně obsahu nad
+posuvníkem — nejhorší případ). `kontrola_aplikace.py` 0, `prekryv.py
+--zalozky` čisté na všech čtyřech šířkách, v obou režimech i napříč
+záložkami, `barvy_nastroj.py` přegenerován.

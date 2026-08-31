@@ -11,8 +11,11 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
      složky odstínu to nejsou: korekce po nátisku se jich netýká a tužidlo se
      počítá z báze, ne z naředěné směsi. Že jsou v seznamu, má jediný důvod —
      přelití pak řeší tentýž algoritmus jako u barvy, bez druhé jeho kopie. */
+  /* Jméno aditiva se překládá hned tady: níž se s ním jen kreslí (řádek
+     v tabulce, nadpis kroku) a algoritmus se o název neopírá. Komponenty
+     receptury naproti tomu zůstávají, jak jsou — jsou to data dílny. */
   const aditivaRadky = (aditiva || []).filter((a) => n(a.g) > 0.005)
-    .map((a) => ({ id: "aditivum-" + a.druh, name: a.popis, g: n(a.g), aditivum: a.druh }));
+    .map((a) => ({ id: "aditivum-" + a.druh, name: preloz(a.popis), g: n(a.g), aditivum: a.druh }));
   const slozky = comps.concat(aditivaRadky);
   const aditivaG = aditivaRadky.reduce((s, a) => s + a.g, 0);
   const davkaCela = totalG + aditivaG;          // co má nakonec být v nádobě
@@ -129,33 +132,33 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
 
   return html`
     <div className="card" style=${{ margin: 0 }}>
-      <h2>Asistent navážení</h2>
+      <h2>${preloz("Asistent navážení")}</h2>
       ${/* Tára a Odpojit bydlí v pravém horním rohu karty, pod sebou —
             rozpoložení podle dílny: Odpojit nahoře a dál od ruky (mačká se
             jednou za směnu), Tára pod ním (mačká se po každé nádobě).
             Kontejner je absolutní, aby tlačítka nebrala řádek ovládání. */ ""}
       ${sc.mode !== "off" && html`
         <div className="asistroh">
-          <button className="btn danger sm mich-tl-odpojit" onClick=${sc.disconnect}>Odpojit</button>
-          <button className="btn sec sm mich-tl-tara" onClick=${sc.tare}>Tára (0)</button>
+          <button className="btn danger sm mich-tl-odpojit" onClick=${sc.disconnect}>${preloz("Odpojit")}</button>
+          <button className="btn sec sm mich-tl-tara" onClick=${sc.tare}>${preloz("Tára (0)")}</button>
         </div>`}
       ${!comps.length && html`<div className="warnbox" style=${{ marginTop: 0 }}>
-        Asistent vede vážení po komponentách — zadejte nejdřív složení receptury.
-        Celkovou dávku ${fmt(totalG)} g můžete zatím navážit podle míchacího lístku.
+        ${preloz("Asistent vede vážení po komponentách — zadejte nejdřív složení receptury. Celkovou dávku {g} g můžete zatím navážit podle míchacího lístku.",
+          { g: fmt(totalG) })}
       </div>`}
 
       <div className="rowline" style=${comps.length ? {} : { display: "none" }}>
         ${sc.mode === "off" && html`
           <${React.Fragment}>
-            <button className="btn mich-tl-pripojit" onClick=${() => sc.connect(baud)}>Připojit váhu (USB)</button>
-            <select style=${{ width: "auto" }} value=${baud} onChange=${(e) => setBaud(e.target.value)} title="Rychlost komunikace (baud)">
+            <button className="btn mich-tl-pripojit" onClick=${() => sc.connect(baud)}>${preloz("Připojit váhu (USB)")}</button>
+            <select style=${{ width: "auto" }} value=${baud} onChange=${(e) => setBaud(e.target.value)} title=${preloz("Rychlost komunikace (baud)")}>
               ${["4800", "9600", "19200", "38400", "115200"].map((b) => html`<option key=${b} value=${b}>${b} Bd</option>`)}
             </select>
-            <button className="btn sec mich-tl-simulace" onClick=${sc.startSim}>Vyzkoušet v simulaci</button>
+            <button className="btn sec mich-tl-simulace" onClick=${sc.startSim}>${preloz("Vyzkoušet v simulaci")}</button>
           <//>`}
         ${sc.mode !== "off" && html`
           <span className="tag" style=${{ background: "var(--paper)", color: "var(--ok)" }}>
-            ${sc.mode === "serial" ? "váha připojena" : "simulace váhy"}
+            ${preloz(sc.mode === "serial" ? "váha připojena" : "simulace váhy")}
           </span>`}
       </div>
       ${sc.err && html`<div className="warnbox">${sc.err}</div>`}
@@ -163,11 +166,11 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
       ${sc.mode !== "off" && html`
         <${React.Fragment}>
           <div className="result-big" style=${{ marginTop: 10 }}>${fmt(w, 1)} g</div>
-          <div className="result-sub">na váze · receptura ${recipeName}</div>
+          <div className="result-sub">${preloz("na váze · receptura {r}", { r: recipeName })}</div>
 
           ${sc.mode === "sim" && html`
             <div className="simposuv">
-              <label className="f">Simulace — přidávejte barvu posuvníkem</label>
+              <label className="f">${preloz("Simulace — přidávejte barvu posuvníkem")}</label>
               <input type="range" min="0" max=${Math.ceil(davka * 1.4)} step="0.1" value=${sc.raw}
                 onChange=${(e) => sc.setRaw(n(e.target.value))} />
             </div>`}
@@ -175,114 +178,117 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
           ${predemPopis && (predem || []).some((x) => x > 0) && html`
             <div className="specbar" style=${{ marginTop: 10 }}>
               <span className="dot" style=${{ background: "var(--ok)" }}></span>
-              <span>V nádobě už je <b>${fmtG((predem || []).reduce((a, b) => a + b, 0))} g</b>${" "}
-                ze zbytku (${predemPopis}) — asistent vede jen dolití zbylých složek.</span>
+              <span>${preloz("V nádobě už je")} <b>${fmtG((predem || []).reduce((a, b) => a + b, 0))} g</b>${" "}
+                ${preloz("ze zbytku")} (${predemPopis}) ${preloz("— asistent vede jen dolití zbylých složek.")}</span>
             </div>`}
           ${naviceni > 0.05 && html`
             <div className="specbar" style=${{ marginTop: 10 }}>
               <span className="dot" style=${{ background: "var(--warn)" }}></span>
-              <span>Dávka přepočtena na <b>${fmt(davka)} g</b> (z ${fmt(davkaCela)} g,
-                +${fmt(naviceni)} g / +${fmt(naviceni / davkaCela * 100, 0)} %) — poměr složek zůstal stejný.</span>
+              <span>${(() => { const [pred, po] = preloz("Dávka přepočtena na {d} (z {p} g, +{n} g / +{pct} %) — poměr složek zůstal stejný.",
+                  { p: fmt(davkaCela), n: fmt(naviceni), pct: fmt(naviceni / davkaCela * 100, 0) }).split("{d}");
+                return html`${pred}<b>${fmt(davka)} g</b>${po}`; })()}</span>
               <span style=${{ marginLeft: "auto" }}></span>
-              <button className="btn sec sm" onClick=${zacniZnovu}>Zrušit a navážit znovu</button>
+              <button className="btn sec sm" onClick=${zacniZnovu}>${preloz("Zrušit a navážit znovu")}</button>
             </div>`}
 
           ${!done ? html`
             <div style=${{ marginTop: 12 }}>
               <div style=${{ fontWeight: 800 }}>
-                ${cur.name}${(nalito[krok] || 0) > 0.05 ? " — dorovnání" : ""}
+                ${cur.name}${(nalito[krok] || 0) > 0.05 ? preloz(" — dorovnání") : ""}
               </div>
               <div className="note">
-                přidat ${fmtG(zbyvaVse[krok])} g${(nalito[krok] || 0) > 0.05
-                  ? " (už nalito " + fmtG(nalito[krok]) + " g z " + fmtG(cil[krok]) + " g)" : ""}
-                → navážit celkem do ${fmt(target)} g
+                ${preloz("přidat {g} g{uz} → navážit celkem do {t} g", {
+                  g: fmtG(zbyvaVse[krok]), t: fmt(target),
+                  uz: (nalito[krok] || 0) > 0.05
+                    ? preloz(" (už nalito {a} g z {c} g)", { a: fmtG(nalito[krok]), c: fmtG(cil[krok]) }) : "" })}
               </div>
               ${onNovaKonev && !cur.aditivum && html`
                 <div className="rowline" style=${{ marginTop: 6, marginBottom: 0 }}>
                   ${konevPro === krok ? html`
-                    <input value=${konevKod} autoFocus placeholder="šarže z konve"
+                    <input value=${konevKod} autoFocus placeholder=${preloz("šarže z konve")}
                       onChange=${(e) => setKonevKod(e.target.value)}
                       onKeyDown=${(e) => { if (e.key === "Enter") potvrdKonev();
                         if (e.key === "Escape") setKonevPro(-1); }}
                       style=${{ width: 190 }} />
                     <button className="btn sm" disabled=${!konevKod.trim()}
-                      onClick=${potvrdKonev}>Zapsat</button>
-                    <button className="btn sec sm" onClick=${() => setKonevPro(-1)}>Zpět</button>`
+                      onClick=${potvrdKonev}>${preloz("Zapsat")}</button>
+                    <button className="btn sec sm" onClick=${() => setKonevPro(-1)}>${preloz("Zpět")}</button>`
                   : html`
                     <span className="note">${sarzeTed
-                      ? "šarže " + sarzeTed.kod
-                      : "šarže neuvedena"}</span>
+                      ? preloz("šarže {kod}", { kod: sarzeTed.kod })
+                      : preloz("šarže neuvedena")}</span>
                     <button className="btn sec sm mich-tl-sarze" onClick=${() => {
                       setKonevKod(""); setKonevPro(krok); }}>
-                      ${sarzeTed ? "Nová konev" : "Zadat šarži"}
+                      ${preloz(sarzeTed ? "Nová konev" : "Zadat šarži")}
                     </button>`}
                 </div>`}
               <div className="wbar" style=${{ marginTop: 8 }}>
                 <span style=${{ width: progress + "%", background: over ? "#B91C1C" : (inTol ? "var(--ok)" : "var(--cyan)") }} />
               </div>
               <div style=${{ fontFamily: "var(--mono)", fontSize: 20, marginTop: 6, color: over ? "#B91C1C" : (inTol ? "var(--ok)" : "inherit") }}>
-                ${over ? "přelito o " + fmt(-rem, 1) + " g" : (inTol ? "✓ v toleranci" : "zbývá " + fmt(rem, 1) + " g")}
+                ${over ? preloz("přelito o {g} g", { g: fmt(-rem, 1) })
+                  : (inTol ? preloz("✓ v toleranci") : preloz("zbývá {g} g", { g: fmt(rem, 1) }))}
               </div>
               ${cur.aditivum && html`
                 <div className="note" style=${{ marginTop: 6 }}>
-                  ${ADITIVA[cur.aditivum].rada}${rozborVahy
-                    ? ". V nádobě je barvy " + fmt(bazeVPotu) + " g, doporučené ředění "
-                      + fmt(rozborVahy.doporuceno) + " g, strop " + fmt(rozborVahy.strop) + " g."
+                  ${preloz(ADITIVA[cur.aditivum].rada)}${rozborVahy
+                    ? preloz(". V nádobě je barvy {b} g, doporučené ředění {d} g, strop {s} g.",
+                        { b: fmt(bazeVPotu), d: fmt(rozborVahy.doporuceno), s: fmt(rozborVahy.strop) })
                     : "."}
                 </div>`}
               ${cur.aditivum && rozborVahy && rozborVahy.prilisRidke && html`
                 <div className="warnbox" style=${{ marginTop: 8 }}>
-                  Aditiv je v nádobě ${fmt(rozborVahy.aditiva)} g, strop receptury je
-                  ${" " + fmt(rozborVahy.strop)} g — o ${fmt(rozborVahy.nadStropem)} g víc.
+                  ${preloz("Aditiv je v nádobě {a} g, strop receptury je {s} g — o {n} g víc.",
+                    { a: fmt(rozborVahy.aditiva), s: fmt(rozborVahy.strop), n: fmt(rozborVahy.nadStropem) })}
                 </div>`}
               <div className="rowline" style=${{ marginTop: 10 }}>
                 <button className="btn mich-tl-dalsi" style=${inTol ? { background: "var(--ok)" } : {}}
                   disabled=${over} onClick=${dalsiKrok}>
-                  ${zbyvaVse.filter((z, i) => i !== krok && z > tolerance / 2).length ? "Další složka →" : "Dokončit"}
+                  ${preloz(zbyvaVse.filter((z, i) => i !== krok && z > tolerance / 2).length ? "Další složka →" : "Dokončit")}
                 </button>
-                <span className="note">tolerance ±</span>
+                <span className="note">${preloz("tolerance ±")}</span>
                 <input type="number" step="0.1" min="0.05" value=${tol} onChange=${(e) => setTol(e.target.value)} style=${{ width: 70 }} />
                 <span className="note">g</span>
               </div>
 
               ${over && navrh && html`
                 <div className="warnbox">
-                  <b>Přelito o ${fmt(-rem, 1)} g.</b> Odebrat z nádoby přesně jde těžko — odstín se
-                  zachová tím, že se dorovnají ostatní komponenty, tedy že se zvětší celá dávka.
+                  <b>${preloz("Přelito o {g} g.", { g: fmt(-rem, 1) })}</b>${preloz(" Odebrat z nádoby přesně jde těžko — odstín se zachová tím, že se dorovnají ostatní komponenty, tedy že se zvětší celá dávka.")}
                   <div className="kv" style=${{ marginTop: 8 }}>
-                    <div className="k">Nová dávka</div>
+                    <div className="k">${preloz("Nová dávka")}</div>
                     <div className="v"><b>${fmt(navrh.davka)} g</b>
-                      <span className="note"> místo ${fmt(davkaCela)} g · o ${fmt(navrh.davka - davkaCela)} g víc
-                        (+${fmt((navrh.davka - davkaCela) / Math.max(davkaCela, 0.01) * 100, 0)} %)</span></div>
-                    <div className="k">Ještě přidat</div>
+                      <span className="note">${preloz(" místo {p} g · o {n} g víc (+{pct} %)",
+                        { p: fmt(davkaCela), n: fmt(navrh.davka - davkaCela),
+                          pct: fmt((navrh.davka - davkaCela) / Math.max(davkaCela, 0.01) * 100, 0) })}</span></div>
+                    <div className="k">${preloz("Ještě přidat")}</div>
                     <div className="v">
                       ${slozky.map((c, i) => navrh.zbyva[i] > tolerance / 2
                         ? html`<div key=${c.id}>${c.name} — <b>${fmtG(navrh.zbyva[i])} g</b>${
-                            i < krok || (i > krok && (nalito[i] || 0) > 0.05) ? " (dorovnat)" : ""}</div>`
+                            i < krok || (i > krok && (nalito[i] || 0) > 0.05) ? preloz(" (dorovnat)") : ""}</div>`
                         : null)}
                     </div>
                   </div>
                   <div className="rowline" style=${{ marginTop: 10, marginBottom: 0 }}>
                     <button className="btn" onClick=${prijmoutPrepocet}>
-                      Přepočítat dávku na ${fmt(navrh.davka)} g →
+                      ${preloz("Přepočítat dávku na {g} g →", { g: fmt(navrh.davka) })}
                     </button>
                     <span className="note">
-                      nebo přebytek odeberte a vraťte váhu na ${fmt(target)} g
+                      ${preloz("nebo přebytek odeberte a vraťte váhu na {g} g", { g: fmt(target) })}
                     </span>
                   </div>
                   ${navrh.davka > davkaCela * 2 && html`
                     <div style=${{ marginTop: 8 }}>
-                      Přeliv je velký — dávka by narostla na víc než dvojnásobek. Zvažte, jestli
-                      není levnější začít znovu.
+                      ${preloz("Přeliv je velký — dávka by narostla na víc než dvojnásobek. Zvažte, jestli není levnější začít znovu.")}
                     </div>`}
                 </div>`}
             </div>` : html`
             <div className="okbox" style=${{ marginTop: 12 }}>
-              ✓ Všechny komponenty navaženy (${fmt(vPotu)} g celkem${naviceni > 0.05
-                ? ", dávka přepočtena z " + fmt(davkaCela) + " g" : ""}). Barvu důkladně promíchejte.
+              ${preloz("✓ Všechny komponenty navaženy ({g} g celkem{prep}). Barvu důkladně promíchejte.", {
+                g: fmt(vPotu),
+                prep: naviceni > 0.05 ? preloz(", dávka přepočtena z {p} g", { p: fmt(davkaCela) }) : "" })}
               <div className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
-                <button className="btn sec sm" onClick=${zacniZnovu}>Navážit znovu</button>
-                ${onHotovo && html`<button className="btn sm" onClick=${onHotovo}>Odepsat zbytek ze skladu</button>`}
+                <button className="btn sec sm" onClick=${zacniZnovu}>${preloz("Navážit znovu")}</button>
+                ${onHotovo && html`<button className="btn sm" onClick=${onHotovo}>${preloz("Odepsat zbytek ze skladu")}</button>`}
               </div>
             </div>`}
 
@@ -291,28 +297,26 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
                 Váží se na tutéž váhu, proto se rovnou říká i cílová hodnota. */
             done && potlife && potlife.tuzidlo && !zacatekPotlife && html`
             <div className="warnbox" style=${{ marginTop: 10 }}>
-              <b>Zbývá tužidlo — ${fmtG(davkaTuzidla(potlife, bazeVPotu).tuzidlo)} g</b>
-              ${" "}(${fmt(potlife.pomer * 100, 1)} % z ${fmt(bazeVPotu)} g báze${
-                aditivaVPotu > 0.05 ? ", aditiva se do základu nepočítají" : ""}).
-              Na váze ${fmt(vPotu + davkaTuzidla(potlife, bazeVPotu).tuzidlo)} g.
+              <b>${preloz("Zbývá tužidlo — {t} g", { t: fmtG(davkaTuzidla(potlife, bazeVPotu).tuzidlo) })}</b>
+              ${preloz(" ({p} % z {b} g báze{ad}).", {
+                p: fmt(potlife.pomer * 100, 1), b: fmt(bazeVPotu),
+                ad: aditivaVPotu > 0.05 ? preloz(", aditiva se do základu nepočítají") : "" })}
+              ${" "}${preloz("Na váze {v} g.", { v: fmt(vPotu + davkaTuzidla(potlife, bazeVPotu).tuzidlo) })}
               <div className="note" style=${{ marginTop: 4 }}>
-                Přidávejte až do promíchané báze. Od té chvíle běží doba
-                zpracovatelnosti ${dobaText(n(potlife.minut) * MINUTA)} — pak už se směs
-                nedá zachránit ředěním.
+                ${preloz("Přidávejte až do promíchané báze. Od té chvíle běží doba zpracovatelnosti {d} — pak už se směs nedá zachránit ředěním.",
+                  { d: dobaText(n(potlife.minut) * MINUTA) })}
               </div>
               ${onSpustitPotlife && html`
                 <div className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
-                  <button className="btn sm" onClick=${() => onSpustitPotlife(bazeVPotu)}>Tužidlo přidáno — spustit odpočet</button>
+                  <button className="btn sm" onClick=${() => onSpustitPotlife(bazeVPotu)}>${preloz("Tužidlo přidáno — spustit odpočet")}</button>
                 </div>`}
             </div>`}
 
           ${done && comps.length > 0 && html`
             <div style=${{ marginTop: 14 }}>
-              <div className="lbl">Korekce po nátisku</div>
+              <div className="lbl">${preloz("Korekce po nátisku")}</div>
               <p className="note" style=${{ marginTop: 4 }}>
-                Nátisk nesedí s etalonem? Z nádoby se ubrat nedá, takže korekce je
-                vždycky přídavek a dávka poroste. Přidávejte po malých krocích a mezi
-                nimi tiskněte — barvicí síla bází je velmi různá.
+                ${preloz("Nátisk nesedí s etalonem? Z nádoby se ubrat nedá, takže korekce je vždycky přídavek a dávka poroste. Přidávejte po malých krocích a mezi nimi tiskněte — barvicí síla bází je velmi různá.")}
               </p>
 
               ${(() => {
@@ -325,45 +329,44 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
                 return html`
                   <div style=${{ marginTop: 8 }}>
                     <div className="rowline" style=${{ marginTop: 0 }}>
-                      <span className="note">Nátisk proti etalonu:</span>
+                      <span className="note">${preloz("Nátisk proti etalonu:")}</span>
                       <select value=${korSmer} onChange=${(e) => setKorSmer(e.target.value)}
                               style=${{ width: "auto" }}>
                         ${Object.entries(SMERY_KOREKCE).map(([k, v]) => html`
-                          <option key=${k} value=${k}>${v.popis}</option>`)}
+                          <option key=${k} value=${k}>${preloz(v.popis)}</option>`)}
                       </select>
                     </div>
                     ${dop && dop.navrhy.length > 0
                       ? html`<div className="okbox" style=${{ marginTop: 6 }}>
-                          Nejlíp tím směrem táhne
+                          ${preloz("Nejlíp tím směrem táhne")}
                           <b> <span style=${{ display: "inline-block", width: 9, height: 9, borderRadius: 2,
                                     background: dop.navrhy[0].hex, marginRight: 4, verticalAlign: -1 }}></span>${dop.navrhy[0].name}</b>.
-                          Začněte s <b>${fmt(dop.navrhy[0].startPct, 2)} %</b> dávky, tedy
-                          ${fmtG(davka * dop.navrhy[0].startPct / 100)} g.
+                          ${(() => { const [pred, po] = preloz("Začněte s {pct} dávky, tedy {g} g.",
+                              { g: fmtG(davka * dop.navrhy[0].startPct / 100) }).split("{pct}");
+                            return html`${pred}<b>${fmt(dop.navrhy[0].startPct, 2)} %</b>${po}`; })()}
                           ${dop.navrhy.length > 1 && html`<div className="note" style=${{ marginTop: 4 }}>
-                            Dál v pořadí: ${dop.navrhy.slice(1).map((x) => x.name).join(", ")}.</div>`}
+                            ${preloz("Dál v pořadí: {list}.", { list: dop.navrhy.slice(1).map((x) => x.name).join(", ") })}</div>`}
                           <div className="note" style=${{ marginTop: 4 }}>
-                            Výpočet předpokládá, že se odstíny průměrují. Míchání barev je ale
-                            odečítací a silný pigment posune odstín víc — proto se nabízí
-                            jen třetina spočítaného množství. Rozhoduje oko.
+                            ${preloz("Výpočet předpokládá, že se odstíny průměrují. Míchání barev je ale odečítací a silný pigment posune odstín víc — proto se nabízí jen třetina spočítaného množství. Rozhoduje oko.")}
                           </div>
                           <button className="btn sec sm" style=${{ marginTop: 6 }} onClick=${() => {
                             const i = comps.findIndex((c) => c.name === dop.navrhy[0].name);
                             if (i >= 0) setKorSlozka(i);
-                          }}>Vybrat ${dop.navrhy[0].name} níže</button>
+                          }}>${preloz("Vybrat {p} níže", { p: dop.navrhy[0].name })}</button>
                         </div>`
                       : html`<div className="note" style=${{ marginTop: 6 }}>
-                          ${dop ? dop.duvod : ""}</div>`}
+                          ${dop ? preloz(dop.duvod) : ""}</div>`}
                   </div>`;
               })()}
               <div className="rowline" style=${{ marginTop: 8 }}>
                 <select value=${korSlozka} onChange=${(e) => setKorSlozka(+e.target.value)}
-                        style=${{ width: "auto" }} title="Kterou složkou se koriguje">
-                  ${comps.map((c, i) => html`<option key=${c.id || i} value=${i}>${c.name || "složka " + (i + 1)}</option>`)}
+                        style=${{ width: "auto" }} title=${preloz("Kterou složkou se koriguje")}>
+                  ${comps.map((c, i) => html`<option key=${c.id || i} value=${i}>${c.name || preloz("složka {n}", { n: i + 1 })}</option>`)}
                 </select>
                 <select value=${korSila} onChange=${(e) => setKorSila(e.target.value)}
-                        style=${{ width: "auto" }} title="Jak velký krok">
+                        style=${{ width: "auto" }} title=${preloz("Jak velký krok")}>
                   ${Object.entries(KROKY_KOREKCE).map(([k, v]) => html`
-                    <option key=${k} value=${k}>${v.popis} (${fmt(v.dil * 100, 1)} % dávky)</option>`)}
+                    <option key=${k} value=${k}>${preloz(v.popis)} (${fmt(v.dil * 100, 1)} ${preloz("% dávky")})</option>`)}
                 </select>
                 <button className="btn sec sm" onClick=${() => {
                   const zaklad = comps.map((c, i) => ({ name: c.name, g: cil[i] }));
@@ -378,26 +381,27 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
                   setDavka(novaDavka);
                   setKrok(korSlozka);
                   setKorHistorie(korHistorie.concat([{ nazev: k.slozka, g: k.pridat, sila: k.sila }]));
-                }}>Přidat do dávky</button>
+                }}>${preloz("Přidat do dávky")}</button>
               </div>
               ${(() => {
                 const zaklad = comps.map((c, i) => ({ name: c.name, g: cil[i] }));
                 const n_ = korekceOdstinu({ comps: zaklad, totalG: bazeCil, index: korSlozka, sila: korSila });
                 if (!n_) return "";
                 return html`<div className="note" style=${{ marginTop: 4 }}>
-                  Přidá se <b>${fmtG(n_.pridat)} g</b> složky ${n_.slozka};
-                  dávka naroste z ${fmt(davka)} g na <b>${fmt(n_.davka + davka - bazeCil)} g</b>.
+                  ${(() => { const [pred, stred] = preloz("Přidá se {g} složky {s}; dávka naroste z {d} g na {n}.",
+                      { s: n_.slozka, d: fmt(davka) }).split("{g}");
+                    const [mezi, po] = stred.split("{n}");
+                    return html`${pred}<b>${fmtG(n_.pridat)} g</b>${mezi}<b>${fmt(n_.davka + davka - bazeCil)} g</b>${po}`; })()}
                 </div>`;
               })()}
               ${korHistorie.length > 0 && html`
                 <div className="okbox" style=${{ marginTop: 8 }}>
-                  <b>Provedené korekce:</b>
+                  <b>${preloz("Provedené korekce:")}</b>
                   ${korHistorie.map((h, i) => html`<div key=${i} className="note" style=${{ marginTop: 2 }}>
-                    ${i + 1}. ${h.sila} — ${h.nazev} +${fmtG(h.g)} g</div>`)}
+                    ${i + 1}. ${preloz(h.sila)} — ${h.nazev} +${fmtG(h.g)} g</div>`)}
                   <div className="note" style=${{ marginTop: 6 }}>
-                    Dávka je teď ${fmt(davka)} g místo původních ${fmt(davkaCela)} g.
-                    Tohle složení už není receptura z databáze — než ho použijete znovu,
-                    uložte si ho jako vlastní recepturu k tomuhle produktu a barvě.
+                    ${preloz("Dávka je teď {d} g místo původních {p} g. Tohle složení už není receptura z databáze — než ho použijete znovu, uložte si ho jako vlastní recepturu k tomuhle produktu a barvě.",
+                      { d: fmt(davka), p: fmt(davkaCela) })}
                   </div>
                   ${/* Zpětná vazba z kontroly: že oprava nastala, ví jen člověk u váhy.
                         Nabídne se mu to tady, kde korekci právě dodělal — o obrazovku
@@ -405,43 +409,43 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
                     onOprava && html`
                     <div>
                       <div className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
-                      <span className="note">Nátisk proti etalonu:</span>
+                      <span className="note">${preloz("Nátisk proti etalonu:")}</span>
                       <select value=${korSmer} onChange=${(e) => setKorSmer(e.target.value)}
                               style=${{ width: "auto" }}>
                         ${Object.entries(SMERY_KOREKCE).map(([k, v]) => html`
-                          <option key=${k} value=${k}>${v.popis}</option>`)}
+                          <option key=${k} value=${k}>${preloz(v.popis)}</option>`)}
                       </select>
                       <input value=${korPozn} onChange=${(e) => setKorPozn(e.target.value)}
-                        placeholder="poznámka" style=${{ width: 180 }} />
+                        placeholder=${preloz("poznámka")} style=${{ width: 180 }} />
                       <button className="btn sec sm" onClick=${() => {
                         const kod = onOprava({ duvod: korSmer, kroky: korHistorie,
                           davkaPred: davkaCela, davkaPo: davka, pozn: korPozn.trim() });
                         if (kod) { setKorZapsano(kod); setKorPozn(""); }
-                      }}>Zapsat opravu do evidence</button>
+                      }}>${preloz("Zapsat opravu do evidence")}</button>
                       </div>
                       ${korZapsano && html`<div className="note" style=${{ marginTop: 4 }}>
-                        Zapsáno jako ${korZapsano}. Další korekce se zapisuje zvlášť.</div>`}
+                        ${preloz("Zapsáno jako {kod}. Další korekce se zapisuje zvlášť.", { kod: korZapsano })}</div>`}
                     </div>`}
                 </div>`}
             </div>`}
 
           <table className="t" style=${{ marginTop: 14 }}>
-            <thead><tr><th></th><th>Komponenta</th><th className="num">%</th><th className="num">cíl g</th>
-              <th className="num">nalito g</th><th className="num">zbývá g</th></tr></thead>
+            <thead><tr><th></th><th>${preloz("Komponenta")}</th><th className="num">%</th><th className="num">${preloz("cíl g")}</th>
+              <th className="num">${preloz("nalito g")}</th><th className="num">${preloz("zbývá g")}</th></tr></thead>
             <tbody>
               ${slozky.map((c, i) => html`
                 <tr key=${c.id} className=${i === krok ? "rowactive" : ""}
                   style=${zbyvaVse[i] <= tolerance / 2 ? { opacity: .55 } : {}}>
                   <td>${zbyvaVse[i] <= tolerance / 2 ? "✓" : (i === krok ? "▶" : "")}</td>
                   <td>${c.name}${c.aditivum
-                    ? html`<span className="tag" style=${{ marginLeft: 6 }}>aditivum</span>` : ""}</td>
+                    ? html`<span className="tag" style=${{ marginLeft: 6 }}>${preloz("aditivum")}</span>` : ""}</td>
                   <td className="num">${fmt(podil[i] * 100)}</td>
                   <td className="num">${fmtG(cil[i])}</td>
                   <td className="num">${fmtG(nalito[i] || 0)}</td>
                   <td className="num">${zbyvaVse[i] > tolerance / 2
                     ? fmtG(zbyvaVse[i])
-                    : html`<span className="note" title="méně, než váha rozliší — bere se za navážené">${
-                        zbyvaVse[i] > 0.004 ? fmtG(zbyvaVse[i]) + " ›pod tol.‹" : "—"}</span>`}</td>
+                    : html`<span className="note" title=${preloz("méně, než váha rozliší — bere se za navážené")}>${
+                        zbyvaVse[i] > 0.004 ? fmtG(zbyvaVse[i]) + preloz(" ›pod tol.‹") : "—"}</span>`}</td>
                 </tr>`)}
             </tbody>
           </table>

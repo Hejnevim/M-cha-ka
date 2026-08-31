@@ -12,7 +12,7 @@ label.f{display:block;font-size:var(--pismo-popisek);line-height:1.25;font-weigh
    vedle ní — srovnáme ji na spodní hranu řádku, na střed sousedního pole. */
 .frow>.flags{align-self:end;margin-top:0;padding-bottom:8px}}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
-.chip{border:none;background:var(--paper);border-radius:var(--radius-btn);padding:calc(var(--tlacitko-y) * .7) calc(var(--tlacitko-x) * .78);cursor:pointer;font-weight:600;font-size:calc(var(--pismo) - 1px);display:inline-flex;align-items:center;justify-content:center;text-align:center;transition:box-shadow .15s,background .15s,color .15s;box-shadow:var(--neu-sm)}
+.chip{border:none;background:var(--paper);color:var(--ink);border-radius:var(--radius-btn);padding:calc(var(--tlacitko-y) * .7) calc(var(--tlacitko-x) * .78);cursor:pointer;font-weight:600;font-size:calc(var(--pismo) - 1px);display:inline-flex;align-items:center;justify-content:center;text-align:center;transition:box-shadow .15s,background .15s,color .15s;box-shadow:var(--neu-sm)}
 .chip.on{background:var(--key);color:var(--btn-ink)}
 /* drobný štítek do řádku poznámky — typy barev u polohy v katalogu produktů;
    plná velikost chipu by řádek s polohou roztáhla přes dva */
@@ -85,6 +85,6 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
    kartu na 595 px a roztahoval sousední Recepturu a Parametry tisku
    (přirozeně 526 px). Výška 178 px je změřená sondou tak, aby dva řádky
    dlaždic vyšly na touž výšku karty jako oba sousedé. */
-.zakazka-cisla input{font-size:min(calc(var(--pismo) * 4.5), 24.75cqw);font-weight:700;text-align:center;
+.zakazka-cisla input{font-size:min(calc(var(--pismo) * 3.375), 18.5625cqw);font-weight:700;text-align:center;
   height:178px;padding:5cqw;box-sizing:border-box}
 @media(max-width:560px){.zakazka-cisla{grid-template-columns:1fr}}

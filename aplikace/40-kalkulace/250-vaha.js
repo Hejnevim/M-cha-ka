@@ -14,7 +14,7 @@ function useScale() {
   const connect = async (baud) => {
     setErr("");
     if (!("serial" in navigator)) {
-      setErr("Tento prohlížeč nepodporuje připojení váhy (Web Serial). Použijte Chrome nebo Edge.");
+      setErr(preloz("Tento prohlížeč nepodporuje připojení váhy (Web Serial). Použijte Chrome nebo Edge."));
       return;
     }
     try {
@@ -44,10 +44,10 @@ function useScale() {
               }
             }
           }
-        } catch (e) { setErr("Čtení z váhy selhalo: " + e); }
+        } catch (e) { setErr(preloz("Čtení z váhy selhalo: {e}", { e: e })); }
       })();
     } catch (e) {
-      setErr("Připojení se nezdařilo: " + (e && e.message ? e.message : e));
+      setErr(preloz("Připojení se nezdařilo: {e}", { e: e && e.message ? e.message : e }));
     }
   };
 

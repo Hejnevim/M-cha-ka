@@ -79,6 +79,11 @@ function popisZastoupeni(slozeni, comps, prevod) {
   return out;
 }
 const textZastoupeni = (z) => (z || []).map((x) => x.zastupce + " místo " + x.misto).join(" · ");
+/* Táž věta pro obrazovku: „místo" se překládá. textZastoupeni zůstává vedle,
+   protože se otiskuje na míchací lístek — a provozní dokumenty dílny se
+   nepřekládají. Jména složek jsou data, ta nechává obojí být. */
+const textZastoupeniObr = (z) => (z || [])
+  .map((x) => preloz("{z} místo {m}", { z: x.zastupce, m: x.misto })).join(" · ");
 
 /* Kontrola pro ceník: co je zapsané a jestli to nemíří proti ceně. Ceny se
    porovnávají, jen když je u obou známá, ve stejné měně a za stejnou jednotku

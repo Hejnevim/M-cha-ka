@@ -21,8 +21,8 @@ function MichaciRezim({ aktivni, onZavrit, recipe, calcAkt, rozpis, vyuziti, sta
     product ? (product.ref || product.name) : "",
     colorSel ? (colorSel.code || colorSel.name || "") : "",
     position ? (position.tech || tech) + " " + position.name : (tech || ""),
-    zak && zak.order ? "zakázka " + zak.order : "",
-    kodDavky ? "kelímek " + kodDavky : "",
+    zak && zak.order ? preloz("zakázka {c}", { c: zak.order }) : "",
+    kodDavky ? preloz("kelímek {kod}", { kod: kodDavky }) : "",
   ].filter(Boolean).join(" · ");
   // kumulativní součet se počítá z toho, co se doopravdy navažuje — je-li
   // v nádobě zbytek, přibývá jen zbývající část
@@ -39,11 +39,11 @@ function MichaciRezim({ aktivni, onZavrit, recipe, calcAkt, rozpis, vyuziti, sta
         <div className="michdavka">
           <b>${fmt(davka)} g</b>
           <span>${calcAkt.zvetseno || Math.abs(davka - calcAkt.totalG) > 0.05
-            ? "zakázka potřebuje " + fmt(calcAkt.davkaZakazky || calcAkt.totalG) + " g"
+            ? preloz("zakázka potřebuje {g} g", { g: fmt(calcAkt.davkaZakazky || calcAkt.totalG) })
             : "≈ " + fmt(calcAkt.totalMl) + " ml"}</span>
         </div>
-        <button className="btn sec mich-tl-zpet" onClick=${onZavrit} title="Zavřít můžete i klávesou Esc">
-          ✕ Zpět do kalkulace
+        <button className="btn sec mich-tl-zpet" onClick=${onZavrit} title=${preloz("Zavřít můžete i klávesou Esc")}>
+          ${preloz("✕ Zpět do kalkulace")}
         </button>
       </div>
 
@@ -54,19 +54,19 @@ function MichaciRezim({ aktivni, onZavrit, recipe, calcAkt, rozpis, vyuziti, sta
           ${pokryti}
           ${vyuziti && html`
             <div className="okbox" style=${{ marginTop: 0, marginBottom: 12, fontSize: 15 }}>
-              V nádobě už je <b>${fmt(vyuziti.pouzit)} g</b> ${vyuziti.dvojice ? "ze dvou zbytků" : "ze zbytku"}
-              <b> ${popisKelimku(vyuziti.zbytek)}</b>
-              ${" "}— navažuje se jen sloupec „navážit".
+              ${preloz("V nádobě už je")} <b>${fmt(vyuziti.pouzit)} g</b> ${preloz(vyuziti.dvojice ? "ze dvou zbytků" : "ze zbytku")}
+              <b> ${preloz(popisKelimku(vyuziti.zbytek))}</b>
+              ${" "}${preloz("— navažuje se jen sloupec „navážit\".")}
             </div>`}
           ${calcAkt.comps.length ? html`
             <table className="michtab">
               <thead>
                 <tr>
                   <th style=${{ width: 34 }}></th>
-                  <th>Komponenta</th>
-                  ${rozpis && html`<th className="num">ze zbytku</th>`}
-                  <th className="num">navážit</th>
-                  <th className="num">kumulativně</th>
+                  <th>${preloz("Komponenta")}</th>
+                  ${rozpis && html`<th className="num">${preloz("ze zbytku")}</th>`}
+                  <th className="num">${preloz("navážit")}</th>
+                  <th className="num">${preloz("kumulativně")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -87,7 +87,7 @@ function MichaciRezim({ aktivni, onZavrit, recipe, calcAkt, rozpis, vyuziti, sta
                 })}
                 <tr>
                   <td></td>
-                  <td style=${{ fontWeight: 700 }}>Navážit celkem</td>
+                  <td style=${{ fontWeight: 700 }}>${preloz("Navážit celkem")}</td>
                   ${rozpis && html`<td className="num" style=${{ fontWeight: 700 }}>${fmt(vyuziti ? vyuziti.pouzit : 0)}</td>`}
                   <td className="num g">${fmt(kum)}</td>
                   <td className="num" style=${{ fontWeight: 700 }}>${fmt(kum)}</td>
@@ -95,14 +95,14 @@ function MichaciRezim({ aktivni, onZavrit, recipe, calcAkt, rozpis, vyuziti, sta
               </tbody>
             </table>` : html`
             <div className="warnbox" style=${{ marginTop: 0 }}>
-              Složení téhle receptury není v aplikaci zadané. Namíchejte
-              ${" " + fmt(calcAkt.totalG)} g podle firemní receptury.
+              ${preloz("Složení téhle receptury není v aplikaci zadané. Namíchejte {g} g podle firemní receptury.",
+                { g: fmt(calcAkt.totalG) })}
             </div>`}
           <p className="note" style=${{ marginTop: 12 }}>
-            Váží se kumulativně do jedné nádoby — displej váhy má po každé složce
-            ukazovat hodnotu ve sloupci „kumulativně"${vyuziti
-              ? " (váhu vytárujte i s kelímkem; v nádobě pak bude " + fmt(calcAkt.totalG) + " g)"
-              : ""}. Zavřít můžete klávesou Esc.
+            ${preloz("Váží se kumulativně do jedné nádoby — displej váhy má po každé složce ukazovat hodnotu ve sloupci „kumulativně\"{tara}. Zavřít můžete klávesou Esc.",
+              { tara: vyuziti
+                ? preloz(" (váhu vytárujte i s kelímkem; v nádobě pak bude {g} g)", { g: fmt(calcAkt.totalG) })
+                : "" })}
           </p>
           ${riziko}
           ${natisk}

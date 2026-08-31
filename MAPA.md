@@ -1,7 +1,7 @@
 # Rejstřík kódu aplikace
 
 > Generuje `mapa.py` ze skutečných souborů — neupravovat ručně.
-> Kód není v `index.html`, leží v `aplikace/` v 81 částech (16601 řádků).
+> Kód není v `index.html`, leží v `aplikace/` v 81 částech (17115 řádků).
 > Čísla u položek jsou `část:řádek` — část podle tabulky níž.
 
 | # | část | řádků |
@@ -9,17 +9,17 @@
 | 1 | `00-hlava/010-hlava.html` | 6 |
 | 2 | `10-styl/020-promenne.css` | 127 |
 | 3 | `10-styl/030-zaklad.css` | 85 |
-| 4 | `10-styl/040-rozvrzeni.css` | 105 |
+| 4 | `10-styl/040-rozvrzeni.css` | 108 |
 | 5 | `10-styl/050-prvky.css` | 90 |
 | 6 | `10-styl/060-produkty.css` | 34 |
-| 7 | `10-styl/070-michani.css` | 175 |
+| 7 | `10-styl/070-michani.css` | 192 |
 | 8 | `10-styl/080-ovladani.css` | 59 |
 | 9 | `00-hlava/090-kostra.html` | 18 |
 | 10 | `20-zaklad/100-uvod.js` | 31 |
 | 11 | `20-zaklad/110-technologie.js` | 66 |
 | 12 | `20-zaklad/120-barva-potisku.js` | 93 |
 | 13 | `20-zaklad/125-ulozeni.js` | 10 |
-| 14 | `20-zaklad/127-jazyk.js` | 605 |
+| 14 | `20-zaklad/127-jazyk.js` | 1067 |
 | 15 | `20-zaklad/130-ikony.js` | 29 |
 | 16 | `20-zaklad/140-spec-z-kodu.js` | 251 |
 | 17 | `20-zaklad/150-sgps.js` | 93 |
@@ -35,12 +35,12 @@
 | 27 | `30-app/220-heslo.js` | 28 |
 | 28 | `30-app/225-role.js` | 144 |
 | 29 | `40-kalkulace/230-odemykani.js` | 76 |
-| 30 | `40-kalkulace/240-calc.js` | 2343 |
+| 30 | `40-kalkulace/240-calc.js` | 2352 |
 | 31 | `40-kalkulace/250-vaha.js` | 104 |
 | 32 | `40-kalkulace/260-financni-box.js` | 128 |
 | 33 | `40-kalkulace/270-potlife-pruh.js` | 69 |
 | 34 | `40-kalkulace/280-michaci-rezim.js` | 124 |
-| 35 | `40-kalkulace/290-vazeni.js` | 451 |
+| 35 | `40-kalkulace/290-vazeni.js` | 455 |
 | 36 | `50-zbytky/300-stitek.js` | 60 |
 | 37 | `50-zbytky/310-zbytky-tab.js` | 459 |
 | 38 | `50-zbytky/320-fronta-tab.js` | 197 |
@@ -61,11 +61,11 @@
 | 53 | `70-pravidla/455-material.js` | 85 |
 | 54 | `70-pravidla/456-typ-polohy.js` | 114 |
 | 55 | `70-pravidla/460-pigment-baze.js` | 135 |
-| 56 | `70-pravidla/470-zastupnost.js` | 198 |
+| 56 | `70-pravidla/470-zastupnost.js` | 203 |
 | 57 | `70-pravidla/480-korekce.js` | 137 |
 | 58 | `70-pravidla/490-prepocet-sortimentu.js` | 124 |
 | 59 | `50-zbytky/500-evidence.js` | 112 |
-| 60 | `70-pravidla/510-aditiva.js` | 172 |
+| 60 | `70-pravidla/510-aditiva.js` | 177 |
 | 61 | `80-cena/520-cena-davky.js` | 120 |
 | 62 | `80-cena/530-uspora-likvidace.js` | 278 |
 | 63 | `80-cena/540-carovy-kod.js` | 57 |
@@ -74,7 +74,7 @@
 | 66 | `50-zbytky/570-shluky.js` | 194 |
 | 67 | `50-zbytky/580-predpoved.js` | 65 |
 | 68 | `50-zbytky/590-natisk-mala-davka.js` | 69 |
-| 69 | `50-zbytky/600-riziko-opravy.js` | 94 |
+| 69 | `50-zbytky/600-riziko-opravy.js` | 103 |
 | 70 | `50-zbytky/610-davky.js` | 216 |
 | 71 | `50-zbytky/620-sarze.js` | 216 |
 | 72 | `50-zbytky/630-zaznam-opravy.js` | 222 |
@@ -160,12 +160,12 @@
 `.bigpanel table.t th` 4:46 · `.bigpanel table.t td` 4:47 · `.bigpanel .note` 4:48 · `.bigpanel .btn` 4:49
 `.bigpanel .swatch` 4:50 · `.bigpanel .tag` 4:51 · `.bigpanel .wbar` 4:52 · `.bigform.card>h2` 4:53
 `.bigform.card>.hint` 4:54 · `.bigform label.f` 4:55 · `.bigform select,.bigform input` 4:56
-`.bigform select` 4:57 · `.karta-tisk label.f` 4:63 · `.karta-tisk .frow>div` 4:77 · `.karta-tisk select` 4:78
-`.karta-tisk select::picker-icon` 4:91 · `.karta-tisk select::select-fallback-button-text` 4:93
-`.karta-tisk select:open::picker-icon` 4:94 · `.karta-tisk select::picker(select)` 4:95
-`.karta-tisk option` 4:96 · `.bigform select:focus,.bigform input:focus` 4:97 · `.bigform .frow` 4:98
-`.bigform .note` 4:99 · `.bigform .swatch` 4:100 · `.bigform .tgl` 4:101 · `.bigform .tglt` 4:102
-`.bigform .tglt::after` 4:103 · `.bigform .tgl input:checked + .tglt::after` 4:104 · `.bigform .flags` 4:105
+`.bigform select` 4:57 · `.karta-tisk label.f` 4:63 · `.karta-tisk .frow>div` 4:80 · `.karta-tisk select` 4:81
+`.karta-tisk select::picker-icon` 4:94 · `.karta-tisk select::select-fallback-button-text` 4:96
+`.karta-tisk select:open::picker-icon` 4:97 · `.karta-tisk select::picker(select)` 4:98
+`.karta-tisk option` 4:99 · `.bigform select:focus,.bigform input:focus` 4:100 · `.bigform .frow` 4:101
+`.bigform .note` 4:102 · `.bigform .swatch` 4:103 · `.bigform .tgl` 4:104 · `.bigform .tglt` 4:105
+`.bigform .tglt::after` 4:106 · `.bigform .tgl input:checked + .tglt::after` 4:107 · `.bigform .flags` 4:108
 `.card` 5:1 · `.card h2` 5:2 · `.card .hint` 5:3 · `.frow` 5:4 · `label.f` 5:6 · `.chips` 5:14 · `.chip` 5:15
 `.chip.on` 5:16 · `.chip.mini` 5:19 · `.btn` 5:20 · `.btn:hover` 5:21 · `.btn.sec` 5:22
 `.btn.sec:hover` 5:23 · `.btn.sm` 5:24 · `.btn.danger` 5:25 · `.btn:disabled` 5:26 · `table.t` 5:27
@@ -190,17 +190,17 @@
 `.michbg .stitekpruh .stitekobal` 7:43 · `.michbg .stitekpruh .tgl` 7:50 · `.michbg .stitekpruh .tglt` 7:54
 `.michbg .stitekpruh .tglt::after` 7:57 · `.michbg .stitekpruh .tgl input:checked + .tglt::after` 7:60
 `.michbg .stitekpruh .btn` 7:62 · `.michbg .card` 7:73 · `.michbg .asistroh` 7:74
-`.michbg .card .simposuv` 7:81 · `.michbg .card .simposuv input[type=range]` 7:82
-`.michbg .okbox .btn,.michbg .warnbox .btn,.michbg .specbar .btn` 7:94 · `.michbg .card .btn.sm` 7:98
-`.michbg .btn.mich-tl-zpet` 7:102 · `.michbg .btn.mich-tl-plocha` 7:106
-`.michbg .rowline .btn.mich-tl-plocha:first-of-type` 7:116 · `.michbg .btn.mich-tl-rucne` 7:117
-`.michbg .btn.mich-tl-znam` 7:121 · `.michbg .btn.mich-tl-viskozita` 7:125
-`.michbg .card .btn.mich-tl-pripojit` 7:129 · `.michbg .card .btn.mich-tl-simulace` 7:133
-`.michbg .card .btn.mich-tl-tara` 7:137 · `.michbg .card .btn.mich-tl-odpojit` 7:141
-`.michbg .card .btn.mich-tl-sarze` 7:145 · `.michbg .card .btn.mich-tl-dalsi` 7:149
-`.michbg .result-big` 7:153 · `.michbg .wbar` 7:154 · `.michbg .note,.michbg .result-sub` 7:155
-`.michbg input,.michbg select` 7:163 · `.michbg .warnbox,.michbg .okbox` 7:165 · `.michbg .tag` 7:167
-`.michbg .pickbox` 7:169 · `.linkbox` 8:1 · `.pickbox` 8:2 · `.flags` 8:3 · `.tgl` 8:4 · `.tgl input` 8:5
+`.michbg .card .simposuv` 7:89 · `.michbg .card .simposuv input[type=range]` 7:92
+`.michbg .okbox .btn,.michbg .warnbox .btn,.michbg .specbar .btn` 7:104 · `.michbg .card .btn.sm` 7:108
+`.michbg .btn.mich-tl-zpet` 7:112 · `.michbg .btn.mich-tl-plocha` 7:116
+`.michbg .rowline .btn.mich-tl-plocha:first-of-type` 7:126 · `.michbg .btn.mich-tl-rucne` 7:127
+`.michbg .btn.mich-tl-znam` 7:131 · `.michbg .btn.mich-tl-viskozita` 7:135
+`.michbg .card .btn.mich-tl-pripojit` 7:139 · `.michbg .card .btn.mich-tl-simulace` 7:143
+`.michbg .card .btn.mich-tl-tara` 7:152 · `.michbg .card .btn.mich-tl-odpojit` 7:157
+`.michbg .card .btn.mich-tl-sarze` 7:162 · `.michbg .card .btn.mich-tl-dalsi` 7:166
+`.michbg .result-big` 7:170 · `.michbg .wbar` 7:171 · `.michbg .note,.michbg .result-sub` 7:172
+`.michbg input,.michbg select` 7:180 · `.michbg .warnbox,.michbg .okbox` 7:182 · `.michbg .tag` 7:184
+`.michbg .pickbox` 7:186 · `.linkbox` 8:1 · `.pickbox` 8:2 · `.flags` 8:3 · `.tgl` 8:4 · `.tgl input` 8:5
 `.tglt` 8:6 · `.tglt::after` 8:7 · `.tgl input:checked + .tglt` 8:8 · `.tgl input:checked + .tglt::after` 8:9
 `#chyba` 8:10 · `.searchwrap` 8:11 · `.searchbar` 8:12 · `.searchbar .ic` 8:13 · `.searchbar input` 8:14
 `.searchbar input:focus` 8:15 · `.searchbar .count` 8:16 · `.searchdrop` 8:17 · `.searchitem` 8:18
@@ -223,8 +223,8 @@
 `.grid.calc>.karta-cisla` 4:25 · `.grid.calc>.karta-tisk` 4:27 · `.grid.calc>.card` 4:29
 `.karta-produkt` 4:30 · `.frow.c2` 5:5 · `.frow.c3` 5:5 · `.frow.c4` 5:5
 `.frow.c2>div>label.f:first-child,.frow.c3>div>label.f:first-child,.frow.c4>div>label.f:first-child` 5:10
-`.frow>.flags` 5:13 · `@media(min-width:640px)` 5:71 · `.zakazka-cisla` 5:90 · `.michtelo` 7:171
-`.michtab` 7:172 · `.michtab .g` 7:173 · `.michbg` 7:175 · `.pgrid` 8:27 · `.pgrid` 8:28 · `.pgrid` 8:29
+`.frow>.flags` 5:13 · `@media(min-width:640px)` 5:71 · `.zakazka-cisla` 5:90 · `.michtelo` 7:188
+`.michtab` 7:189 · `.michtab .g` 7:190 · `.michbg` 7:192 · `.pgrid` 8:27 · `.pgrid` 8:28 · `.pgrid` 8:29
 `.pgrid` 8:30
 
 ### Podmínky (14)
@@ -232,7 +232,7 @@
 `@supports (appearance: base-select)` 3:19 · `@media(max-width:720px)` 3:78 · `@media(min-width:960px)` 4:5
 `@media(min-width:960px)` 4:18 · `@media(min-width:640px)` 5:5 · `@media(min-width:640px)` 5:10
 `@supports (grid-template-rows: subgrid)` 5:70 · `@media(max-width:560px)` 5:90
-`@media (max-width:1000px)` 7:170 · `@media print` 7:175 · `@media(max-width:1500px)` 8:27
+`@media (max-width:1000px)` 7:187 · `@media print` 7:192 · `@media(max-width:1500px)` 8:27
 `@media(max-width:1150px)` 8:28 · `@media(max-width:800px)` 8:29 · `@media(max-width:480px)` 8:30
 
 ## Komponenty (39)
@@ -246,13 +246,13 @@
 `RecipeForm` 46:2 · `SchvaleniTab` 47:11 · `SestavyTab` 76:11 · `SkladTab` 78:23 · `PruhSlozeni` 79:28
 `FiltrDatabaze` 79:58 · `Importer` 80:2
 
-## Funkce (428)
+## Funkce (429)
 
 `techMaSito` 10:15 · `produktUmi` 11:13 · `polohyTech` 11:15 · `mapTech` 11:28 · `toLocalImg` 11:36
 `uid` 11:63 · `n` 11:64 · `fmt` 11:65 · `hexNaRgb` 12:8 · `rgbNaCmyk` 12:14 · `cmykText` 12:21
 `rgbNaLab` 12:25 · `t` 12:31 · `deltaE` 12:35 · `pantoneZNazvu` 12:38 · `nejblizsiPantone` 12:48
-`vzornikProHodnotu` 12:63 · `popisBarvyPotisku` 12:76 · `loadLS` 13:2 · `saveLS` 13:6 · `nastavJazyk` 14:41
-`preloz` 14:596 · `fixTech` 15:26 · `bezDiakritiky` 16:51 · `rozborKoduPolohy` 16:57 · `polohaDleKodu` 16:63
+`vzornikProHodnotu` 12:63 · `popisBarvyPotisku` 12:76 · `loadLS` 13:2 · `saveLS` 13:6 · `nastavJazyk` 14:53
+`preloz` 14:1058 · `fixTech` 15:26 · `bezDiakritiky` 16:51 · `rozborKoduPolohy` 16:57 · `polohaDleKodu` 16:63
 `posTokeny` 16:69 · `parseSpec` 16:73 · `put` 16:77 · `resolveSpec` 16:102 · `num` 16:106 · `vyber` 16:143
 `dleSlov` 16:153 · `presne` 16:186 · `najdi` 16:212 · `sgpsKandidati` 17:17 · `sgpsAdresa` 17:28
 `sgpsBase` 17:29 · `zakazkaNaSpec` 17:52 · `put` 17:54 · `useSgps` 17:63 · `poleNaSpec` 18:28 · `put` 18:30
@@ -272,11 +272,11 @@
 `pickProduct` 30:61 · `klicBarva` 30:66 · `klicUplny` 30:67 · `novaAdHoc` 30:98 · `podleTypuPolohy` 30:174
 `odvodit` 30:205 · `ulozOdvozenou` 30:217 · `zrusVazbu` 30:229 · `smazCustom` 30:254 · `provest` 30:256
 `customVybrany` 30:293 · `upravRecepturu` 30:399 · `zapsatParametry` 30:406 · `zbytekPodleKodu` 30:476
-`zalozDavku` 30:673 · `novaKonev` 30:696 · `zapisOpravu` 30:717 · `spustitPotlife` 30:732
-`uzavritDavku` 30:747 · `odpojDavku` 30:766 · `odepisZbytku` 30:787 · `oznacDavku` 30:803
-`ulozZbytekZKalkulace` 30:848 · `esc` 30:893 · `tiskLisku` 30:894 · `rizikoBody` 30:1471 · `useScale` 31:6
-`prepocetDavky` 31:76 · `fmtG` 31:94 · `useTikot` 32:112 · `naKlavesu` 34:8 · `zacatek` 35:24
-`zacniZnovu` 35:45 · `potvrdKonev` 35:84 · `prijmoutPrepocet` 35:104 · `dalsiKrok` 35:112 · `vytiskni` 36:4
+`zalozDavku` 30:676 · `novaKonev` 30:699 · `zapisOpravu` 30:720 · `spustitPotlife` 30:735
+`uzavritDavku` 30:750 · `odpojDavku` 30:769 · `odepisZbytku` 30:790 · `oznacDavku` 30:806
+`ulozZbytekZKalkulace` 30:851 · `esc` 30:896 · `tiskLisku` 30:897 · `rizikoBody` 30:1480 · `useScale` 31:6
+`prepocetDavky` 31:76 · `fmtG` 31:94 · `useTikot` 32:112 · `naKlavesu` 34:8 · `zacatek` 35:27
+`zacniZnovu` 35:48 · `potvrdKonev` 35:87 · `prijmoutPrepocet` 35:107 · `dalsiKrok` 35:115 · `vytiskni` 36:4
 `e` 36:7 · `uprav` 37:36 · `smaz` 37:38 · `zapisViskozitu` 37:65 · `provedSliti` 37:95 · `ulozNovy` 37:113
 `prerovnej` 38:28 · `presun` 38:32 · `uzavri` 38:39 · `zdrojText` 38:44 · `zpusobText` 38:50 · `den` 39:25
 `otevri` 39:27 · `uzavri` 40:17 · `kusy` 40:21 · `hodnotaText` 40:32 · `kdyText` 41:22 · `velke` 42:47
@@ -298,14 +298,14 @@
 `typyProPolohu` 54:55 · `vychoziTypyPolohCsv` 54:62 · `zapisTypPolohyDoCsv` 54:74 · `najdi` 54:78
 `bez` 54:87 · `roleMaterialu` 55:34 · `znakMeny` 55:45 · `cenaZaGram` 55:51 · `vocDavky` 55:72
 `pridej` 55:78 · `podilySlozeni` 55:130 · `seznamZastupnosti` 56:23 · `tabulkaZastupnosti` 56:29
-`prevodZastupnosti` 56:47 · `popisZastoupeni` 56:66 · `textZastoupeni` 56:81 · `kontrolaZastupnosti` 56:87
-`csvNaPigmenty` 56:110 · `i` 56:114 · `naVoc` 56:131 · `rozborSlozeni` 56:179 · `korekceOdstinu` 57:16
-`doporucKorekci` 57:59 · `spotrebaZeSita` 57:97 · `prepocetSortimentu` 58:18 · `spotreba` 58:40
-`median` 58:103 · `novyKodZbytku` 59:12 · `jeKodZbytku` 59:21 · `maBazi` 59:26 · `normKomp` 59:27
-`popisKelimku` 59:36 · `kodHustnuti` 59:68 · `naPodil` 59:76 · `potlifeReceptury` 59:87
+`prevodZastupnosti` 56:47 · `popisZastoupeni` 56:66 · `textZastoupeni` 56:81 · `textZastoupeniObr` 56:85
+`kontrolaZastupnosti` 56:92 · `csvNaPigmenty` 56:115 · `i` 56:119 · `naVoc` 56:136 · `rozborSlozeni` 56:184
+`korekceOdstinu` 57:16 · `doporucKorekci` 57:59 · `spotrebaZeSita` 57:97 · `prepocetSortimentu` 58:18
+`spotreba` 58:40 · `median` 58:103 · `novyKodZbytku` 59:12 · `jeKodZbytku` 59:21 · `maBazi` 59:26
+`normKomp` 59:27 · `popisKelimku` 59:36 · `kodHustnuti` 59:68 · `naPodil` 59:76 · `potlifeReceptury` 59:87
 `potlifeHodin` 59:100 · `davkaTuzidla` 59:106 · `redeniReceptury` 60:34 · `rozborNaredeni` 60:57
 `kompenzaceNaredeni` 60:93 · `stavPotlife` 60:109 · `stavZbytku` 60:124 · `dobaText` 60:157
-`zbyvaText` 60:168 · `menaDilny` 61:17 · `materialPodleJmena` 61:32 · `materialRole` 61:37 · `cenaDavky` 61:56
+`zbyvaText` 60:173 · `menaDilny` 61:17 · `materialPodleJmena` 61:32 · `materialRole` 61:37 · `cenaDavky` 61:56
 `pridej` 61:62 · `cenaNaKus` 61:114 · `usporaZeZbytku` 62:2 · `sazbaLikvidace` 62:16 · `cenaLikvidace` 62:29
 `cenaText` 62:34 · `viskHistDoTextu` 62:43 · `viskHistZTextu` 62:46 · `podilyZbytku` 62:59
 `podilyCile` 62:73 · `vyuzitelnyZbytek` 62:89 · `zbytekCelyPlan` 62:141 · `domichaniZeZbytku` 62:184
@@ -316,7 +316,7 @@
 `nabidkyDvojic` 65:156 · `podobnostPodilu` 66:36 · `podobnostZbytku` 66:42 · `sadaSlozek` 66:47
 `slozeniShluku` 66:57 · `hexShluku` 66:80 · `dva` 66:88 · `nazevShluku` 66:94 · `shlukZKelimku` 66:104
 `navrhyShluku` 66:142 · `predpovedZbytku` 67:15 · `navrhZtrat` 67:58 · `davkaNaNatisk` 68:28
-`rizikoOpravy` 69:17 · `pridej` 69:20 · `novyKodDavky` 70:39 · `jeKodDavky` 70:54 · `novaDavka` 70:60
+`rizikoOpravy` 69:22 · `pridej` 69:25 · `novyKodDavky` 70:39 · `jeKodDavky` 70:54 · `novaDavka` 70:60
 `davkaSTuzidlem` 70:97 · `davkaUzavrena` 70:113 · `stavDavky` 70:122 · `davkyKHlidani` 70:144
 `davkyDoCsv` 70:157 · `csvNaDavky` 70:171 · `sloucDavky` 70:207 · `klicMaterialuSarze` 71:20
 `klicSarze` 71:25 · `novaSarze` 71:28 · `otevrenaSarze` 71:40 · `otevritKonev` 71:54 · `dojetaKonev` 71:65
@@ -341,8 +341,8 @@
 ## Konstanty (125)
 
 `TECHS` 10:8 · `SITA` 10:20 · `KRYVOSTI` 10:26 · `POVRCHY` 10:27 · `TECH_PORADI` 11:10 · `TECH_MAP` 11:18
-`REMOTE_BASE` 11:35 · `SEED_RECIPES` 11:48 · `JAZYKY` 14:24 · `JAZYKY_PORADI` 14:29 · `JAZYK_VYCHOZI` 14:30
-`SLOVNIK` 14:54 · `SPEC_ALIAS` 16:7 · `SPEC_LABEL` 16:28 · `POS_SLOVNIK` 16:39 · `MOST_VYCHOZI` 17:10
+`REMOTE_BASE` 11:35 · `SEED_RECIPES` 11:48 · `JAZYKY` 14:36 · `JAZYKY_PORADI` 14:41 · `JAZYK_VYCHOZI` 14:42
+`SLOVNIK` 14:66 · `SPEC_ALIAS` 16:7 · `SPEC_LABEL` 16:28 · `POS_SLOVNIK` 16:39 · `MOST_VYCHOZI` 17:10
 `PDF_NA_SPEC` 18:6 · `PDF_PORADI` 18:13 · `PDF_POPIS` 18:17 · `NEKONECNO` 19:10 · `MAX` 19:44 · `MAX` 19:167
 `ZOOM_MAX` 19:298 · `ZALOZKY_NAZVY` 25:3 · `ROLE_VYCHOZI` 28:24 · `ROLE` 28:26 · `ROLE_PORADI` 28:38
 `OPRAVNENI` 28:43 · `SCHV_OK` 28:70 · `SCHV_CEKA` 28:71 · `SCHV_ZAMITNUTO` 28:72 · `SCHV_POPIS` 28:87
@@ -362,7 +362,7 @@
 `NEJMENSI_PODIL_ZISKU_DVOJICE` 65:34 · `LA` 65:80 · `NEJVIC_KANDIDATU_DVOJIC` 65:154
 `MEZ_PODOBNOSTI_SHLUKU` 66:30 · `NEJMENSI_SHLUK` 66:31 · `NEJMENSI_MNOZSTVI_SHLUKU` 66:32
 `NEJMIN_VZORKU_ZBYTKU` 67:13 · `ROZLISENI_VAHY` 68:20 · `PRESNOST_NATISKU` 68:21 · `KROK_NATISKU` 68:22
-`MEZ_UZITKU_NATISKU` 68:26 · `RIZIKO_ZADNE` 69:15 · `SOUBOR_DAVKY` 70:18 · `DAVKA_STAVY` 70:22
+`MEZ_UZITKU_NATISKU` 68:26 · `RIZIKO_ZADNE` 69:20 · `SOUBOR_DAVKY` 70:18 · `DAVKA_STAVY` 70:22
 `DAVKA_UZAVRENI` 70:30 · `DAVKY_HLAVICKA` 70:152 · `SOUBOR_SARZE` 71:16 · `SARZE_HLAVICKA` 71:144
 `SOUBOR_OPRAVY` 72:24 · `MINUT_OPRAVY` 72:30 · `OPRAVY_HLAVICKA` 72:102 · `SOUBOR_FRONTA` 73:30
 `FRONTA_STAVY` 73:34 · `NEJMENSI_PREDPOKLADANY_ZBYTEK` 73:112 · `FRONTA_PRESNE_DO` 73:226
