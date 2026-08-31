@@ -1729,11 +1729,11 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                     </div>`}
                 </div>`}
             </div>
-            <div style=${{ marginTop: 14 }}>
+            <div className="produkt-nazev">
               <div style=${{ fontWeight: 800, fontSize: 16 }}>${product && product.ref ? product.ref + " · " : ""}${product ? product.name : ""}</div>
               ${product && product.material && html`<div className="note">${product.material}</div>`}
             </div>
-            <div className="rowline" style=${{ marginTop: 10, marginBottom: 0 }}>
+            <div className="rowline">
               <span className="tag tech">${tech} — ${preloz(TECHS[tech] ? TECHS[tech].name : "")}</span>
               <span className="tag" title=${rozmerListu ? preloz("rozměr ze zakázkového listu") : preloz("největší tisková plocha dle katalogu")}>
                 ${position ? fmt(sirka, 1) + "×" + fmt(vyska, 1) : "?"} mm${rozmerListu ? " ⌂" : ""}

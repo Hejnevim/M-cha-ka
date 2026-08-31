@@ -1,19 +1,18 @@
 :root{
   /* Vzhled zůstává měkký — karty vystupují z plochy stínem, ne rámečkem.
-     Plocha se vrátila k teplému, růžovošedému tónu a inkoust zůstal tmavý,
-     aby se na to dalo dívat celý den. Barevný akcent nepřibyl; zvýraznění
-     dělá inkoust, barva zůstala tam, kde nese význam (odstín barvy,
-     varování, stav vážení). */
+     Plocha je neutrálně šedá a inkoust tmavý, aby se na to dalo dívat celý
+     den. Barevný akcent nepřibyl; zvýraznění dělá inkoust, barva zůstala
+     tam, kde nese význam (odstín barvy, varování, stav vážení). */
   /* --bg maluje JEN plochu stránky; všechno, co na ní leží (karty, lišty,
      tlačítka, pole, štítky), bere barvu z --paper. Ty dvě proměnné jdou
      nastavit nezávisle — plocha je samostatná jednotka. */
   /* Plocha a povrch se od přísného neumorfního základu (obojí #E0E0E0)
-     rozešly do dvou blízkých růžovošedých odstínů — povrch je o chlup
-     světlejší, aby karty vystupovaly i barvou, ne jen stínem. Hloubku dál
-     dělá dvojice stínů (světlo zleva shora, stín zprava zdola); rozdíl
-     podkladů je záměrně malý — čím víc se --bg a --paper rozejdou, tím míň
-     vypadají karty jako vytlačené z plochy a tím víc jako položené desky. */
-  --bg:#cbbebe; --paper:#d4bfbf; --zvyraz:#c8c8c8; --logo:#E0E0E0;
+     rozešly: plocha ztmavla na #c9c9c9 a karty zesvětlaly na #ededed, takže
+     vystupují barvou i stínem — světlejší povrch čte oko jako „blíž ke
+     světlu", což hraje se směrem stínů (světlo zleva shora). Dvojice stínů
+     hloubku dál nese; s rozdílem podkladů karty vypadají míň jako vytlačené
+     z plochy a víc jako položené desky — to je tady záměr. */
+  --bg:#c9c9c9; --paper:#ededed; --zvyraz:#c8c8c8; --logo:#E0E0E0;
   --ink:#2D2D2D; --ink-2:#757575; --line:#d4d4d4; --line-2:#c6c6c6;
   --cyan:#2D2D2D; --magenta:#C97B63; --yellow:#D9B44A; --key:#2D2D2D;
   --btn-ink:#FFFFFF; --focus:rgba(45,45,45,.20); --danger:#b31919;
@@ -101,12 +100,12 @@
   --tisk-zarovnani:center; --tisk-vyska:auto;
   /* Stíny jsou ve tvaru rgba(bílá)+rgba(černá) — jediný tvar, který umí
      barvy.html číst a ladit. Proti neumorfnímu základu jsou ztlumené: bílá
-     nejde na plnou (na tmavší růžovošedé ploše by pálila) a černá je
-     silnější, aby hloubka na ní držela. */
-  --neu:-11px -11px 24px rgba(255,255,255,0.52), 11px 11px 24px rgba(0,0,0,0.38);
-  --neu-sm:-5px -5px 15px rgba(255,255,255,0.494), 5px 5px 15px rgba(0,0,0,0.418);
-  --neu-in:inset 4px 4px 6px rgba(0,0,0,0.342), inset -4px -4px 6px rgba(255,255,255,0.494);
-  --neu-in-lg:inset 6px 6px 9px rgba(0,0,0,0.38), inset -6px -6px 9px rgba(255,255,255,0.52);
+     kolem 37–39 % — karty jsou samy světlé, silnější „osvícení" by kolem
+     nich na šedé ploše svítilo — a černá je silnější, aby hloubka držela. */
+  --neu:-11px -11px 24px rgba(255,255,255,0.39), 11px 11px 24px rgba(0,0,0,0.38);
+  --neu-sm:-5px -5px 15px rgba(255,255,255,0.371), 5px 5px 15px rgba(0,0,0,0.418);
+  --neu-in:inset 4px 4px 6px rgba(0,0,0,0.342), inset -4px -4px 6px rgba(255,255,255,0.371);
+  --neu-in-lg:inset 6px 6px 9px rgba(0,0,0,0.38), inset -6px -6px 9px rgba(255,255,255,0.39);
   --modal-shadow:0 15px 48px rgba(0,0,0,0.76);
   --logo-shadow:-2px -2px 2px rgba(255,255,255,0.14), 2px 2px 2px rgba(0,0,0,0.1);
   --mono:'Segoe UI',system-ui,sans-serif;

@@ -5,11 +5,11 @@
 > `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — nepřepisují
 > se ručně a nemohou se rozejít se skutečností. Text mimo ně píše člověk.
 
-> Poslední zapsaná změna ve vývojovém deníku: **31. srpna 16:45 — Plocha dostala teplý růžovošedý tón (#cbbebe) a karty se od ní o odstín oddělily (#d4bfbf) — bílé „osvícení" ztlumeno na polovinu, tmavý režim zesvětlal z #212529 na #373d43/#31383f**
+> Poslední zapsaná změna ve vývojovém deníku: **31. srpna 17:03 — Čtyři nové zapsané postupy — jazyk obrazovky, telefon, nová databáze barev a ukázka; tři existující doplněny o neumorfismus, měření v obou režimech a šířky snímkovače**
 
 | soubor | řádků | velikost |
 |---|---:|---:|
-| `aplikace/ (82 souborů)` | 17 337 | 978 kB |
+| `aplikace/ (82 souborů)` | 17 346 | 978 kB |
 | `index.html` | 110 | 6 kB |
 | `most.py` | 727 | 31 kB |
 | `pdf_spec.py` | 1 071 | 42 kB |
@@ -17,7 +17,7 @@
 | `prevod_printcolor.py` | 188 | 7 kB |
 | `kontrola_aplikace.py` | 169 | 7 kB |
 | `rozbor_aktualizuj.py` | 359 | 13 kB |
-| **celkem** | **20 174** | |
+| **celkem** | **20 183** | |
 <!-- /AUTO:stav -->
 
 ---

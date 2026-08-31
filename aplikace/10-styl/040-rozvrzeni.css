@@ -15,6 +15,10 @@
    sloupcům vyjdou dlaždice parametrů na chlup stejně velké jako náhledy
    produktu — a to při každé šířce okna, ne jen při jedné. Přestavuje se to
    v barvy.html na stránce Rozvržení, ne tady. */
+/* Na úzké obrazovce karta není flex a auto-margin by vyšel na nulu — název
+   i řádek výběru si proto drží pevné odstupy jako dřív. */
+.karta-produkt .produkt-nazev{margin-top:14px}
+.karta-produkt .rowline{margin-top:10px;margin-bottom:0}
 @media(min-width:960px){
   .grid.calc>.karta-produkt{grid-column:var(--produkt-sloupec);grid-row:var(--produkt-radek);
     width:var(--produkt-sirka);justify-self:var(--produkt-zarovnani);min-height:var(--produkt-vyska)}
@@ -28,6 +32,12 @@
     width:var(--tisk-sirka);justify-self:var(--tisk-zarovnani);min-height:var(--tisk-vyska)}
   .grid.calc>.card{margin-bottom:0}
   .karta-produkt{display:flex;flex-direction:column}
+  /* Název produktu s materiálem a řádek výběru technologie, rozměru a barvy
+     stojí pohromadě v levém dolním rohu karty: karta je díky min-height vyšší
+     než obsah a bez auto-marginu by celá skupina visela uprostřed volného
+     místa hned pod náhledy. */
+  .karta-produkt .produkt-nazev{margin-top:auto;padding-top:14px}
+  .karta-produkt .rowline{margin-top:10px;margin-bottom:0}
 }
 .grid.calc>.bigpanel{align-content:stretch}
 .bigpanel>.card{height:100%;display:flex;flex-direction:column}

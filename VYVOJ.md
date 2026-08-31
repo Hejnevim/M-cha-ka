@@ -271,6 +271,10 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 16:10 | Dlaždice Zakázky a Parametrů tisku dorovnávají výšku karty místo pevných 178 px — vedle rozbalené receptury nezbývá v žádné kartě prázdný pruh |
 | 16:20 | Celý vzhled přeladěn na neumorfismus podle nového návrhu — plocha a karty jedna barva (#E0E0E0 / #212529), hloubku dělají jen stíny, karty 32 px, tlačítka pilulka, tmavý režim se zeleným a oranžovým akcentem |
 | 16:45 | Plocha dostala teplý růžovošedý tón (#cbbebe) a karty se od ní o odstín oddělily (#d4bfbf) — bílé „osvícení" ztlumeno na polovinu, tmavý režim zesvětlal z #212529 na #373d43/#31383f |
+| 16:52 | Světlý motiv zpět k neutrální šedé — plocha #c9c9c9 a karty výrazně světlejší #ededed vystupují barvou, bílé osvícení dál ztlumeno na 37–39 % |
+| 16:58 | Výběr technologie, rozměru a barvy přišpendlen k levému dolnímu rohu karty produktu — pod ním už nezbývá prázdný pruh |
+| 17:04 | K levému dolnímu rohu karty produktu sjel i název s materiálem — text a výběr drží pohromadě jako jedna skupina |
+| 17:03 | Čtyři nové zapsané postupy — jazyk obrazovky, telefon, nová databáze barev a ukázka; tři existující doplněny o neumorfismus, měření v obou režimech a šířky snímkovače |
 
 ---
 
@@ -6656,3 +6660,81 @@ podklad rgb(49, 56, 63), stín `rgba(255,255,255,0.08) −10 −10 20 ·
 rgba(0,0,0,0.3) 10 10 20`; proměnné světlé #cbbebe/#d4bfbf, tmavé
 #373d43/#31383f; `kontrola_aplikace.py` 0; `barvy.html` přegenerována
 (15 barev, 9+5 stínů); `mapa.py` a `rozbor_aktualizuj.py` proběhly.
+
+## 143. Světlý motiv zpět k neutrální šedé, karty světlejší než plocha
+
+**Problém.** Růžovošedý tón z předchozí úpravy se neosvědčil — teplý nádech
+plochy se pral s odstíny barev ve vzorníku, a to je přesně místo, kde barva
+podkladu nesmí mluvit do barvy, kterou se dílna řídí. Zároveň se karty od
+plochy oddělovaly jen o chlup a na první pohled splývaly.
+
+**Co se změnilo.** Světlá plocha je neutrální šedá #c9c9c9 a karty výrazně
+světlejší #ededed — světlejší povrch čte oko jako „blíž ke světlu", což
+hraje se směrem stínů (světlo zleva shora). Bílé „osvícení" kleslo z 52 na
+39 % (velké stíny) a z 49 na 37 % (malé a vsazené): karty jsou teď samy
+světlé a plné osvícení by kolem nich na šedé ploše svítilo. Černé složky,
+rozměry stínů i celý tmavý motiv (#373d43/#31383f z kapitoly 142) zůstávají.
+
+**Co se nechalo být.** Míchací režim dál drží vlastní paletu z úseku barev
+stránek; tmavý motiv se této iterace netýkal.
+
+**Změřeno:** `prom('--bg')` → #c9c9c9, `prom('--paper')` → #ededed; `.card`
+podklad rgb(237, 237, 237), stín `rgba(255,255,255,0.39) −11 −11 24 ·
+rgba(0,0,0,0.38) 11 11 24`; `kontrola_aplikace.py` 0; `barvy.html`
+přegenerována (15 barev, 9+5 stínů); `mapa.py` a `rozbor_aktualizuj.py`
+proběhly.
+
+## 144. Výběr technologie a barvy stojí v rohu karty, ne uprostřed volného místa
+
+**Problém.** Karta Vybraný produkt je kvůli společné výšce řádku mřížky
+vyšší než její obsah. Řádek s výběrem (technologie, rozměr potisku, počet
+barev, tlačítko Barva a poloha potisku) proto visel hned pod názvem
+produktu a pod ním zůstával prázdný pruh — vypadalo to jako nedodělaná
+karta a oko nemělo, čeho se u dolní hrany chytit.
+
+**Co se změnilo.** U dolního okraje se drží celá skupina: název produktu
+s materiálem (nově třída `.produkt-nazev`) a pod ním řádek `.rowline`.
+Karta už byla flex sloupec, stačilo bloku názvu dát `margin-top:auto`
+místo pevných odsazení, která do té doby stála inline v komponentě.
+Pravidla jsou v `040-rozvrzeni.css` — uvnitř zlomu 960 px auto-margin,
+mimo něj pevných 14 a 10 px, protože na úzké obrazovce karta flex není
+a auto-margin by vyšel na nulu.
+
+**Změřeno:** levá hrana názvu i řádku 62 px = levá hrana karty 40 px +
+vnitřní okraj 22 px; dolní hrana řádku 802,5 px = dolní hrana karty
+822,5 px − vnitřní okraj 20 px; název končí 761,5 px, tedy 10 px nad
+řádkem. `kontrola_aplikace.py` 0; `prekryv.py` čistý na všech čtyřech
+šířkách v obou režimech.
+
+## 145. Čtyři nové zapsané postupy — jazyk, telefon, databáze, ukázka
+
+**Problém.** Poslední týdny se opakovaly čtyři druhy práce a pravidla k nim
+ležela roztroušená po kapitolách deníku. Každý nový text rozhraní musí od
+kapitoly 125 projít slovníkem — a nic nehlídá, aby se na to nezapomnělo.
+Telefonní šířky se dlouho neuměly ani změřit (sonda pod 500 px tiše měří
+při 500 — kap. 134) a jeden den padlo pět kapitol na touž rodinu chyb.
+Přidání čtvrté barevné databáze narazilo dvakrát, i když už byl postup
+třikrát prošlapaný (most neběžel — kap. 106; přejmenování málem zdvojilo
+receptury — kap. 91). A ukázka dvakrát zamrzla za aplikací (kap. 96 a 108).
+Kdo postup nepamatoval, vymýšlel ho znovu — přesně stav před kapitolou 35.
+
+**Co se změnilo.** Čtyři nové zapsané postupy v `.claude/skills/`:
+
+| postup | co drží |
+|---|---|
+| `irm-jazyk` | slovník a `preloz()`, jmenovky po překladu, co se schválně nepřekládá, pasti (jazyk v závislostech memo, JSON v úložišti) |
+| `irm-mobil` | pod 500 px měří jen snímkovač; `minmax(0,…)`, tabulky rolující v kartě, poloviční dlaždice, tabulka zavedených zlomů |
+| `irm-databaze-nova` | převod z PDF podle tvaru dokumentu, ověření součtů složení, přiřazení k technologiím, kontrola přes most, přejmenování přes tři místa |
+| `irm-ukazka` | obě jazykové verze spolu, čísla proti souborům, `rec`/`cas` a nahrávky, třetí dějství nesmí slibovat |
+
+Tři existující postupy doplněny o to, co přinesly poslední kapitoly:
+`irm-token` o pravidla neumorfismu (stíny jako dvojice rgba — hex by utrhl
+ladění, karty světlejší než plocha, míchací režim se nepřelaďuje),
+`irm-overeni` o měření barev v obou režimech a obě pasti sondy (přechod
+pozadí těla, minimum šířky okna), `irm-nastroje` o `prevod_rucolor.py`
+a vynucené šířky snímkovače. Rozcestník `pravidla-projektu` vede na všechny
+čtyři nové.
+
+**Změřeno:** 18 složek v `.claude/skills/`, každá se `SKILL.md` (bylo 14);
+všechny čtyři nové se registrují v nabídce skillů. `aplikace/` se změna
+nedotkla, takže kontrola vykreslení, mapa ani rozbor se nespouštěly.
