@@ -55,11 +55,12 @@ PRES_ZALOZKY = """(async function(){
 })()"""
 
 
-def spust(vyraz, sirka, rezim, soubor):
-    r = subprocess.run(
-        [sys.executable, SONDA, "--soubor", soubor, "--sirka", str(sirka),
-         "--tema", rezim, "--syrove", vyraz],
-        capture_output=True, cwd=SLOZKA)
+def spust(vyraz, sirka, rezim, soubor, jazyk=""):
+    prikaz = [sys.executable, SONDA, "--soubor", soubor, "--sirka", str(sirka),
+              "--tema", rezim, "--syrove"]
+    if jazyk:
+        prikaz += ["--jazyk", jazyk]
+    r = subprocess.run(prikaz + [vyraz], capture_output=True, cwd=SLOZKA)
     vystup = r.stdout.decode("utf-8", "replace").strip()
     if r.returncode == 2 or not vystup:
         return None
@@ -86,6 +87,10 @@ def main():
     ap.add_argument("--soubor", default="index.html")
     ap.add_argument("--sirky", default=",".join(str(s) for s in SIRKY))
     ap.add_argument("--zalozky", action="store_true", help="projít i ostatní záložky")
+    # Anglický a portugalský text je delší než český — přeteče z prvku,
+    # který na češtinu stačil. Proto se překryvy měří i v cizích jazycích.
+    ap.add_argument("--jazyk", default="", choices=["", "cs", "en", "pt"],
+                    help="jazyk obrazovky (výchozí čeština)")
     a = ap.parse_args()
 
     if not os.path.exists(DETEKTOR):
@@ -98,7 +103,7 @@ def main():
     nezmereno = 0
     for sirka in sirky:
         for rezim in REZIMY:
-            n = spust(detektor, sirka, rezim, a.soubor)
+            n = spust(detektor, sirka, rezim, a.soubor, a.jazyk)
             if n is None:
                 print("%d px · %s — NELZE ZMĚŘIT" % (sirka, rezim))
                 nezmereno += 1
@@ -113,7 +118,7 @@ def main():
     if a.zalozky:
         print("\nzáložky (%d px · light):" % sirky[0])
         vysledek = spust(PRES_ZALOZKY.replace("__DETEKTOR__", detektor),
-                         sirky[0], "light", a.soubor)
+                         sirky[0], "light", a.soubor, a.jazyk)
         if vysledek is None:
             print("  NELZE ZMĚŘIT")
             nezmereno += 1

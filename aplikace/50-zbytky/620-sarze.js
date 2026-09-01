@@ -174,7 +174,7 @@ function csvNaSarze(text) {
     zmeneno: i(/^(zmeneno|zm.n.no|changed|updated)/),
   };
   if (ci.kod < 0 || ci.material < 0)
-    throw new Error("CSV šarží musí mít sloupce kod a material.");
+    throw new Error(preloz("CSV šarží musí mít sloupce kod a material."));
   const out = [];
   for (const r of rows.slice(1)) {
     const kod = String(r[ci.kod] || "").trim();

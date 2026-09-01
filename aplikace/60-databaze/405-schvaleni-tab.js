@@ -51,7 +51,7 @@ function SchvaleniTab({ recipes, setRecipes, links, role, jmenoRole, setJmenoRol
   const schval = (r) => {
     uprav(r, razitkoSchvaleni(r, role, jmenoRole));
     setZamitam("");
-    if (onToast) onToast({ ok: true, text: "Schváleno: " + r.name });
+    if (onToast) onToast({ ok: true, text: preloz("Schváleno: {r}", { r: r.name }) });
   };
 
   const zamitni = (r) => {
@@ -59,13 +59,13 @@ function SchvaleniTab({ recipes, setRecipes, links, role, jmenoRole, setJmenoRol
     uprav(r, razitkoZamitnuti(r, role, jmenoRole, duvod));
     setZamitam("");
     setDuvody(Object.assign({}, duvody, { [r.id]: "" }));
-    if (onToast) onToast({ ok: true, text: "Zamítnuto: " + r.name });
+    if (onToast) onToast({ ok: true, text: preloz("Zamítnuto: {r}", { r: r.name }) });
   };
 
   const vratZpet = (r) => {
     uprav(r, Object.assign({}, r, { schvaleni: SCHV_CEKA, schvalil: "", schvalenoKdy: 0,
       duvodZamitnuti: "" }));
-    if (onToast) onToast({ ok: true, text: "Vráceno ke schválení: " + r.name });
+    if (onToast) onToast({ ok: true, text: preloz("Vráceno ke schválení: {r}", { r: r.name }) });
   };
 
   const kdyText = (x) => n(x) > 0
@@ -84,56 +84,56 @@ function SchvaleniTab({ recipes, setRecipes, links, role, jmenoRole, setJmenoRol
           <div style=${{ flex: "1 1 260px", minWidth: 0 }}>
             <div style=${{ fontWeight: 700 }}>${r.name}</div>
             <div className="note">
-              ${zdrojOdvozeni(r) ? "odvozeno z databáze " + zdrojOdvozeni(r) : "bez uvedeného podkladu"}
-              ${r.zaklad ? " · základ " + r.zaklad : ""}
+              ${zdrojOdvozeni(r) ? preloz("odvozeno z databáze {db}", { db: zdrojOdvozeni(r) }) : preloz("bez uvedeného podkladu")}
+              ${r.zaklad ? preloz(" · základ {z}", { z: r.zaklad }) : ""}
             </div>
             <div className="note">
-              ${r.zadal ? "zadal " + r.zadal : "zadal neznámo kdo"}
+              ${r.zadal ? preloz("zadal {kdo}", { kdo: r.zadal }) : preloz("zadal neznámo kdo")}
               ${kdyText(r.zadanoKdy) ? " · " + kdyText(r.zadanoKdy) : ""}
             </div>
             <${PruhSlozeni} recipe=${r} />
             ${Math.abs(sum - 100) > 0.01 && html`<div className="note"
-              style=${{ color: "var(--warn)" }}>Součet složek ${fmt(sum)} % — ne 100 %.</div>`}
+              style=${{ color: "var(--warn)" }}>${preloz("Součet složek {s} % — ne 100 %.", { s: fmt(sum) })}</div>`}
           </div>
           <div style=${{ flex: "1 1 260px", minWidth: 0 }}>
             ${rozdil ? (rozdil.zmeny.length ? html`
-              <div className="note">Proti <b style=${{ color: "var(--ink)" }}>${rozdil.base.name}</b>:</div>
+              <div className="note">${preloz("Proti")} <b style=${{ color: "var(--ink)" }}>${rozdil.base.name}</b>:</div>
               ${rozdil.zmeny.map((z) => html`
                 <div key=${z.nazev} className="note">
-                  ${z.nazev} — ${z.z == null ? "nově " + fmt(z.na) + " %"
-                    : (z.na == null ? "odebráno (bylo " + fmt(z.z) + " %)"
+                  ${z.nazev} — ${z.z == null ? preloz("nově {p} %", { p: fmt(z.na) })
+                    : (z.na == null ? preloz("odebráno (bylo {p} %)", { p: fmt(z.z) })
                       : fmt(z.z) + " % → " + fmt(z.na) + " %")}
                 </div>`)}
-            ` : html`<div className="note">Složením se od
-              <b style=${{ color: "var(--ink)" }}>${rozdil.base.name}</b> neliší.</div>`)
-              : html`<div className="note">Podkladová receptura není nahraná — rozdíl se nedá spočítat.</div>`}
+            ` : html`<div className="note">${preloz("Složením se od")}
+              <b style=${{ color: "var(--ink)" }}> ${rozdil.base.name}</b> ${preloz("neliší.")}</div>`)
+              : html`<div className="note">${preloz("Podkladová receptura není nahraná — rozdíl se nedá spočítat.")}</div>`}
             ${vazby.length ? html`
-              <div className="note" style=${{ marginTop: 6 }}>Platí pro:</div>
+              <div className="note" style=${{ marginTop: 6 }}>${preloz("Platí pro:")}</div>
               ${vazby.map((v) => html`<div key=${v} className="note">${v}</div>`)}
-            ` : html`<div className="note" style=${{ marginTop: 6 }}>Bez vazby na produkt.</div>`}
+            ` : html`<div className="note" style=${{ marginTop: 6 }}>${preloz("Bez vazby na produkt.")}</div>`}
           </div>
         </div>
         ${zamitnuta ? html`
           <div className="warnbox" style=${{ marginBottom: 0 }}>
-            Zamítl ${r.schvalil || "neznámo kdo"}${kdySchvalenoText(r) ? " · " + kdySchvalenoText(r) : ""}${
+            ${preloz("Zamítl {kdo}", { kdo: r.schvalil || preloz("neznámo kdo") })}${kdySchvalenoText(r) ? " · " + kdySchvalenoText(r) : ""}${
               r.duvodZamitnuti ? " — " + r.duvodZamitnuti : "."}
             ${smi && html`<div className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
-              <button className="btn sec sm" onClick=${() => vratZpet(r)}>Vrátit ke schválení</button>
+              <button className="btn sec sm" onClick=${() => vratZpet(r)}>${preloz("Vrátit ke schválení")}</button>
             </div>`}
           </div>
         ` : (smi && html`
           <div className="rowline" style=${{ marginTop: 10, marginBottom: 0 }}>
             ${zamitam === r.id ? html`
               <input value=${duvody[r.id] || ""} style=${{ flex: "2 1 260px" }}
-                autoFocus placeholder="Proč se zamítá — tiskař to uvidí"
+                autoFocus placeholder=${preloz("Proč se zamítá — tiskař to uvidí")}
                 onChange=${(e) => setDuvody(Object.assign({}, duvody, { [r.id]: e.target.value }))}
                 onKeyDown=${(e) => { if (e.key === "Enter") zamitni(r); }} />
-              <button className="btn danger sm" onClick=${() => zamitni(r)}>Zamítnout</button>
-              <button className="btn sec sm" onClick=${() => setZamitam("")}>Zpět</button>
+              <button className="btn danger sm" onClick=${() => zamitni(r)}>${preloz("Zamítnout")}</button>
+              <button className="btn sec sm" onClick=${() => setZamitam("")}>${preloz("Zpět")}</button>
             ` : html`
-              <button className="btn sm" onClick=${() => schval(r)}>Schválit</button>
-              <button className="btn danger sm" onClick=${() => setZamitam(r.id)}>Zamítnout…</button>
-              <span className="note">schválená receptura se pak nabídne i u jiných zakázek</span>
+              <button className="btn sm" onClick=${() => schval(r)}>${preloz("Schválit")}</button>
+              <button className="btn danger sm" onClick=${() => setZamitam(r.id)}>${preloz("Zamítnout…")}</button>
+              <span className="note">${preloz("schválená receptura se pak nabídne i u jiných zakázek")}</span>
             `}
           </div>`)}
       </div>`;
@@ -142,20 +142,20 @@ function SchvaleniTab({ recipes, setRecipes, links, role, jmenoRole, setJmenoRol
   return html`
     <${React.Fragment}>
       <div className="card">
-        <h2 style=${{ margin: 0 }}>Ke schválení (${fmt(cekajici.length, 0)})</h2>
+        <h2 style=${{ margin: 0 }}>${preloz("Ke schválení")} (${fmt(cekajici.length, 0)})</h2>
         <div className="specbar" style=${{ marginTop: 12 }}>
           <span className="dot" style=${{ background: cekajici.length ? "var(--warn)" : "var(--ok)" }}></span>
-          <span>Čeká <b>${fmt(cekajici.length, 0)}</b></span>
-          <span>Zamítnuto <b>${fmt(zamitnute.length, 0)}</b></span>
-          <span>Přihlášen jako <b>${nazevRole(role)}</b>${
+          <span>${preloz("Čeká")} <b>${fmt(cekajici.length, 0)}</b></span>
+          <span>${preloz("Zamítnuto")} <b>${fmt(zamitnute.length, 0)}</b></span>
+          <span>${preloz("Přihlášen jako")} <b>${preloz(nazevRole(role))}</b>${
             String(jmenoRole || "").trim() ? " · " + String(jmenoRole).trim() : ""}</span>
         </div>
         ${!smi && html`<div className="warnbox">
-          Schvaluje technolog. Přepněte roli v nabídce vlevo nahoře.</div>`}
+          ${preloz("Schvaluje technolog. Přepněte roli v nabídce vlevo nahoře.")}</div>`}
         <div className="frow c2" style=${{ marginTop: 10 }}>
           <div>
-            <label className="f">Jméno pod podpis</label>
-            <input value=${jmenoRole || ""} placeholder="nepovinné — jinak se podepíše jen role"
+            <label className="f">${preloz("Jméno pod podpis")}</label>
+            <input value=${jmenoRole || ""} placeholder=${preloz("nepovinné — jinak se podepíše jen role")}
               onChange=${(e) => setJmenoRole && setJmenoRole(e.target.value)} />
           </div>
         </div>
@@ -163,14 +163,13 @@ function SchvaleniTab({ recipes, setRecipes, links, role, jmenoRole, setJmenoRol
 
       ${!cekajici.length ? html`
         <div className="card"><div className="empty">
-          Nic nečeká. Receptura se sem dostane, když ji odvodí tiskař — od technologa
-          je schválená rovnou tím, že ji založil.
+          ${preloz("Nic nečeká. Receptura se sem dostane, když ji odvodí tiskař — od technologa je schválená rovnou tím, že ji založil.")}
         </div></div>` : cekajici.map((r) => radek(r, false))}
 
       ${zamitnute.length > 0 && html`
         <div className="card">
-          <h2 style=${{ margin: 0 }}>Zamítnuté (${fmt(zamitnute.length, 0)})</h2>
-          <p className="hint">Nemažou se — kdo podle nich míchal, se musí dozvědět proč.</p>
+          <h2 style=${{ margin: 0 }}>${preloz("Zamítnuté")} (${fmt(zamitnute.length, 0)})</h2>
+          <p className="hint">${preloz("Nemažou se — kdo podle nich míchal, se musí dozvědět proč.")}</p>
         </div>`}
       ${zamitnute.map((r) => radek(r, true))}
     <//>`;

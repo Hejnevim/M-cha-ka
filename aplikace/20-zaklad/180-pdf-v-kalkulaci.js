@@ -48,10 +48,10 @@ function PdfVKalkulaci({ sgps, products, recipes, onApply, onNacteno }) {
           boxShadow: nadHranici ? "var(--neu-in),0 0 0 3px var(--focus)" : "var(--neu-in)" }}>
           <div style=${{ fontSize: 22, opacity: .55 }}>⇩</div>
           <div style=${{ fontWeight: 700, fontSize: 13 }}>
-            ${stav === "cte" ? "Čtu PDF…" : "Zakázkový list (PDF)"}
+            ${stav === "cte" ? preloz("Čtu PDF…") : preloz("Zakázkový list (PDF)")}
           </div>
           <div className="note" style=${{ fontSize: 11.5, lineHeight: 1.35 }}>
-            ${mostOk ? "přetáhněte sem, nebo klikněte a vyberte" : "vyžaduje spuštěný most (python most.py)"}
+            ${mostOk ? preloz("přetáhněte sem, nebo klikněte a vyberte") : preloz("vyžaduje spuštěný most (python most.py)")}
           </div>
           ${data.jmeno && stav !== "cte" && html`<div className="note" style=${{ fontSize: 11 }}>${data.jmeno}</div>`}
         </div>
@@ -63,10 +63,10 @@ function PdfVKalkulaci({ sgps, products, recipes, onApply, onNacteno }) {
         <div className="modalbg" onClick=${(e) => { if (e.target === e.currentTarget) setStav("cekam"); }}>
           <div className="modalbox" style=${{ width: "min(560px,100%)" }}>
             <div className="card" style=${{ margin: 0 }}>
-              <h2>PDF se nepodařilo načíst</h2>
+              <h2>${preloz("PDF se nepodařilo načíst")}</h2>
               <div className="warnbox">${chyba}</div>
               <div className="rowline" style=${{ marginTop: 14, marginBottom: 0 }}>
-                <button className="btn sec" onClick=${() => setStav("cekam")}>Zavřít</button>
+                <button className="btn sec" onClick=${() => setStav("cekam")}>${preloz("Zavřít")}</button>
               </div>
             </div>
           </div>
@@ -78,7 +78,7 @@ function PdfVKalkulaci({ sgps, products, recipes, onApply, onNacteno }) {
             <div className="card" style=${{ margin: 0 }}>
               <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
                 <div>
-                  <h2 style=${{ margin: 0 }}>Zakázkový list — rozpoznané údaje (${Object.keys(data.pole).length})</h2>
+                  <h2 style=${{ margin: 0 }}>${preloz("Zakázkový list — rozpoznané údaje")} (${Object.keys(data.pole).length})</h2>
                   <p className="hint" style=${{ margin: "4px 0 0" }}>${data.jmeno}</p>
                 </div>
                 <button className="btn sec sm" onClick=${() => setStav("cekam")}>✕</button>
@@ -86,13 +86,13 @@ function PdfVKalkulaci({ sgps, products, recipes, onApply, onNacteno }) {
               <div style=${{ marginTop: 12 }}>
                 <${SpecPole} pole=${data.pole} setPole=${setPole} zdroj=${data.zdroj} text=${data.text} />
               </div>
-              <h2 style=${{ marginTop: 18 }}>Co z toho aplikace poznala</h2>
+              <h2 style=${{ marginTop: 18 }}>${preloz("Co z toho aplikace poznala")}</h2>
               <${SpecVysledek} res=${res} />
               <div className="rowline" style=${{ marginTop: 16, marginBottom: 0 }}>
                 <button className="btn" disabled=${!res || !res.product}
-                  onClick=${() => { onApply(Object.assign({}, res, { vzorniky: data.vzorniky || [] })); setStav("cekam"); }}>Použít v kalkulaci →</button>
-                <button className="btn sec" onClick=${() => setStav("cekam")}>Zrušit</button>
-                ${(!res || !res.product) && html`<span className="note">bez rozpoznaného produktu nelze pokračovat — doplňte ref. číslo výše</span>`}
+                  onClick=${() => { onApply(Object.assign({}, res, { vzorniky: data.vzorniky || [] })); setStav("cekam"); }}>${preloz("Použít v kalkulaci →")}</button>
+                <button className="btn sec" onClick=${() => setStav("cekam")}>${preloz("Zrušit")}</button>
+                ${(!res || !res.product) && html`<span className="note">${preloz("bez rozpoznaného produktu nelze pokračovat — doplňte ref. číslo výše")}</span>`}
               </div>
             </div>
           </div>

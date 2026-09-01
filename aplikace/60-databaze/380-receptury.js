@@ -71,32 +71,30 @@ function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr, techno
     <div>
     <div className="card">
       <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 10, flexWrap: "wrap" }}>
-        <h2 style=${{ margin: 0 }}>Receptury barev (${dbFiltr ? fmt(filtered.length, 0) + " z " + fmt(recipes.length, 0) : fmt(recipes.length, 0)})</h2>
+        <h2 style=${{ margin: 0 }}>${preloz("Receptury barev")} (${dbFiltr ? fmt(filtered.length, 0) + preloz(" z {n}", { n: fmt(recipes.length, 0) }) : fmt(recipes.length, 0)})</h2>
         <div style=${{ display: "flex", gap: 8, alignItems: "center" }}>
           <div className="viewtoggle">
             <button className=${view === "table" ? "on" : ""} onClick=${() => setView("table")}
-              title="Zobrazit jako tabulku" aria-label="Tabulka">☰</button>
+              title=${preloz("Zobrazit jako tabulku")} aria-label=${preloz("Tabulka")}>☰</button>
             <button className=${view === "grid" ? "on" : ""} onClick=${() => setView("grid")}
-              title="Zobrazit jako mřížku odstínů" aria-label="Mřížka">▦</button>
+              title=${preloz("Zobrazit jako mřížku odstínů")} aria-label=${preloz("Mřížka")}>▦</button>
           </div>
           <button className="btn sec" onClick=${exportCsv}>Export CSV</button>
           ${smiRecept && html`
           <button className="btn" onClick=${() => setEdit({ id: uid(), name: "", type: "Pantone", series: "", density: 1.2, hex: "#888888",
             tuzidlo: false, pomerTuzidla: null, potlifeMin: null, mezPotlife: null, hustnuti: null,
             pomerRedidla: null, mezRedidla: null,
-            components: [{ id: uid(), name: "", pct: 100 }] })}>+ Nová receptura</button>`}
+            components: [{ id: uid(), name: "", pct: 100 }] })}>${preloz("+ Nová receptura")}</button>`}
         </div>
       </div>
-      <p className="hint">Pantone standard = formule dle vaší licencované knihovny Printcolor/Pantone. Custom = vlastní vyvzorkovaná směs. Hromadné nahrání: záložka Import / data.</p>
+      <p className="hint">${preloz("Pantone standard = formule dle vaší licencované knihovny Printcolor/Pantone. Custom = vlastní vyvzorkovaná směs. Hromadné nahrání: záložka Import / data.")}</p>
       ${!smiRecept && html`<div className="warnbox">
-        Role <b>${nazevRole(role)}</b> — receptury jsou tu na čtení. Zakládá a mění je
-        technolog; vlastní odstín odvodíte v kalkulaci u konkrétní zakázky.</div>`}
+        ${preloz("Role")} <b>${preloz(nazevRole(role))}</b>${preloz(" — receptury jsou tu na čtení. Zakládá a mění je technolog; vlastní odstín odvodíte v kalkulaci u konkrétní zakázky.")}</div>`}
       <${FiltrDatabaze} recipes=${recipes} hodnota=${dbFiltr} setHodnota=${setDbFiltr}
-        popis=${cizi ? "Databáze " + (nazevDb(dbFiltr) || dbFiltr.replace(/\.csv$/i, ""))
-          + " k technologii " + technologie + " nepatří. Ukazuje se celá, aby šel vzorník"
-          + " prohlédnout — v kalkulaci se v této technologii nenabídne." : ""} />
-      <input className="search" value=${q} onChange=${(e) => setQ(e.target.value)} placeholder="Hledat recepturu…" style=${{ marginBottom: 14 }} />
-      ${!filtered.length ? html`<div className="empty">Zatím žádné receptury.</div>` : (view === "grid" ? html`
+        popis=${cizi ? preloz("Databáze {db} k technologii {t} nepatří. Ukazuje se celá, aby šel vzorník prohlédnout — v kalkulaci se v této technologii nenabídne.",
+          { db: nazevDb(dbFiltr) || dbFiltr.replace(/\.csv$/i, ""), t: technologie }) : ""} />
+      <input className="search" value=${q} onChange=${(e) => setQ(e.target.value)} placeholder=${preloz("Hledat recepturu…")} style=${{ marginBottom: 14 }} />
+      ${!filtered.length ? html`<div className="empty">${preloz("Zatím žádné receptury.")}</div>` : (view === "grid" ? html`
         <div className="pgrid">
           ${filtered.slice(0, strop).map((r) => {
             const sum = r.components.reduce((s, c) => s + n(c.pct), 0);
@@ -108,39 +106,39 @@ function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr, techno
                 <div className="pgcard-img" style=${{ background: r.hex }}
                   title=${r.name + " · " + r.hex}></div>
                 <div>
-                  <div className="pgcard-ref">${r.zdroj ? r.zdroj.replace(/\.csv$/i, "") : "ručně v aplikaci"}</div>
+                  <div className="pgcard-ref">${r.zdroj ? r.zdroj.replace(/\.csv$/i, "") : preloz("ručně v aplikaci")}</div>
                   <div className="pgcard-nm">${r.name}</div>
                   <div className="pgcard-mat">
                     ${r.type === "Pantone" ? "Pantone standard" : "Custom"}${r.series ? " · " + r.series : ""}
                   </div>
                   <${PruhSlozeni} recipe=${r} />
                   <div className="note" style=${{ marginTop: 4 }}>
-                    ${r.components.length} ${r.components.length === 1 ? "komponenta"
-                      : (r.components.length < 5 ? "komponenty" : "komponent")}
+                    ${r.components.length} ${r.components.length === 1 ? preloz("komponenta")
+                      : (r.components.length < 5 ? preloz("komponenty") : preloz("komponent"))}
                     ${" · "}${fmt(n(r.density), 2)} g/ml
                   </div>
                   ${pl.tuzidlo && html`<div className="note"
-                    title=${"tužidlo " + fmt(pl.pomer * 100, 1) + " % váhy báze · houstne " + pl.hustnutiPopis}>
+                    title=${preloz("tužidlo {p} % váhy báze · houstne {h}", { p: fmt(pl.pomer * 100, 1), h: preloz(pl.hustnutiPopis) })}>
                     2K · pot life ${dobaText(pl.minut * MINUTA)}</div>`}
                   ${Math.abs(sum - 100) > 0.01 && html`<div className="note"
                     style=${{ color: "var(--warn)" }}>Σ ${fmt(sum)} %</div>`}
                   ${r.type === "Custom" && !jeSchvalena(r) && html`<div className="note"
-                    style=${{ color: "var(--warn)" }}>${SCHV_POPIS[stavSchvaleni(r)]}</div>`}
+                    style=${{ color: "var(--warn)" }}>${preloz(SCHV_POPIS[stavSchvaleni(r)])}</div>`}
                 </div>
                 ${smiRecept && html`
                 <div className="pgcard-actions">
                   <button className="btn sec sm" style=${{ flex: 1 }}
-                    onClick=${() => setEdit(JSON.parse(JSON.stringify(r)))}>Upravit</button>
+                    onClick=${() => setEdit(JSON.parse(JSON.stringify(r)))}>${preloz("Upravit")}</button>
                   <button className="btn danger sm" onClick=${() => guardDelete(() => setRecipes((prev) =>
-                    prev.filter((x) => x.id !== r.id)), "smazání receptury " + r.name)}>Smazat</button>
+                    prev.filter((x) => x.id !== r.id)), preloz("smazání receptury {r}", { r: r.name }))}>${preloz("Smazat")}</button>
                 </div>`}
               </div>`;
           })}
         </div>
-        ${filtered.length > strop && html`<p className="note" style=${{ marginTop: 10 }}>Zobrazeno prvních ${strop} z ${filtered.length} — upřesněte hledání.</p>`}
+        ${filtered.length > strop && html`<p className="note" style=${{ marginTop: 10 }}>${preloz("Zobrazeno prvních {a} z {b} — upřesněte hledání.", { a: strop, b: filtered.length })}</p>`}
       ` : html`
         <table className="t">
-          <thead><tr><th /><th>Receptura</th><th>Typ</th><th>Databáze</th><th>Řada</th><th className="num">Hustota g/ml</th><th>Složení</th><th /></tr></thead>
+          <thead><tr><th /><th>${preloz("Receptura")}</th><th>${preloz("Typ")}</th><th>${preloz("Databáze")}</th><th>${preloz("Řada")}</th><th className="num">${preloz("Hustota g/ml")}</th><th>${preloz("Složení")}</th><th /></tr></thead>
           <tbody>
             ${filtered.slice(0, strop).map((r) => {
               const sum = r.components.reduce((s, c) => s + n(c.pct), 0);
@@ -150,12 +148,12 @@ function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr, techno
                   <td><span className="swatch" style=${{ background: r.hex }} /></td>
                   <td style=${{ fontWeight: 700 }}>${r.name}
                     ${r.type === "Custom" && !jeSchvalena(r) && html`<div className="note"
-                      style=${{ fontWeight: 400, color: "var(--warn)" }}>${SCHV_POPIS[stavSchvaleni(r)]}</div>`}
+                      style=${{ fontWeight: 400, color: "var(--warn)" }}>${preloz(SCHV_POPIS[stavSchvaleni(r)])}</div>`}
                     ${pl.tuzidlo && html`<div className="note" style=${{ fontWeight: 400 }}
-                      title=${"tužidlo " + fmt(pl.pomer * 100, 1) + " % váhy báze · houstne " + pl.hustnutiPopis}>
+                      title=${preloz("tužidlo {p} % váhy báze · houstne {h}", { p: fmt(pl.pomer * 100, 1), h: preloz(pl.hustnutiPopis) })}>
                       2K · pot life ${dobaText(pl.minut * MINUTA)}</div>`}</td>
                   <td><span className="tag">${r.type === "Pantone" ? "Pantone standard" : "Custom"}</span></td>
-                  <td className="note">${r.zdroj ? r.zdroj.replace(/\.csv$/i, "") : "ručně v aplikaci"}</td>
+                  <td className="note">${r.zdroj ? r.zdroj.replace(/\.csv$/i, "") : preloz("ručně v aplikaci")}</td>
                   <td>${r.series}</td>
                   <td className="num">${fmt(n(r.density), 2)}</td>
                   <td>
@@ -164,14 +162,14 @@ function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr, techno
                   </td>
                   <td style=${{ whiteSpace: "nowrap" }}>
                     ${smiRecept && html`
-                      <button className="btn sec sm" onClick=${() => setEdit(JSON.parse(JSON.stringify(r)))}>Upravit</button>${" "}
-                      <button className="btn danger sm" onClick=${() => guardDelete(() => setRecipes((prev) => prev.filter((x) => x.id !== r.id)), "smazání receptury " + r.name)}>Smazat</button>`}
+                      <button className="btn sec sm" onClick=${() => setEdit(JSON.parse(JSON.stringify(r)))}>${preloz("Upravit")}</button>${" "}
+                      <button className="btn danger sm" onClick=${() => guardDelete(() => setRecipes((prev) => prev.filter((x) => x.id !== r.id)), preloz("smazání receptury {r}", { r: r.name }))}>${preloz("Smazat")}</button>`}
                   </td>
                 </tr>`;
             })}
           </tbody>
         </table>
-        ${filtered.length > strop && html`<p className="note">Zobrazeno prvních ${strop} z ${filtered.length} — upřesněte hledání.</p>`}`)}
+        ${filtered.length > strop && html`<p className="note">${preloz("Zobrazeno prvních {a} z {b} — upřesněte hledání.", { a: strop, b: filtered.length })}</p>`}`)}
     </div>
     <${CenyMaterialu} recipes=${recipes} materialy=${materialy} onUlozit=${onUlozitCeny}
       stav=${cenyStav || { stav: "", chyba: "" }} mostOk=${mostOk}

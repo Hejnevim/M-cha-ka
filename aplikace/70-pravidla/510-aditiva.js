@@ -132,7 +132,7 @@ function stavZbytku(z, ted) {
       // "brzy" = poslední pětina lhůty, nejvýš ale den dopředu, ať roční
       // spotřeba neřve dva měsíce dopředu
       const lhuta = d.getTime() - zacatek;
-      meze.push({ do: d.getTime(), duvod: "spotřeba do " + z.expirace,
+      meze.push({ do: d.getTime(), duvod: preloz("spotřeba do {d}", { d: z.expirace }),
         prah: Math.min(24 * HODINA, Math.max(HODINA, lhuta * 0.2)) });
     }
   }
@@ -142,7 +142,7 @@ function stavZbytku(z, ted) {
     const lhuta = n(z.potlifeH) * HODINA;
     const mez = Math.min(0.99, naPodil(z.mezPotlife, MEZ_POTLIFE_VYCHOZI));
     meze.push({ do: zacatek + lhuta, prah: lhuta * (1 - mez),
-      duvod: "pot life " + fmt(n(z.potlifeH), 0) + " h od namíchání" });
+      duvod: preloz("pot life {h} h od namíchání", { h: fmt(n(z.potlifeH), 0) }) });
   }
   if (!meze.length) return { stav: "ok", zbyva: null, doKdy: null, duvod: "" };
   const nej = meze.reduce((a, b) => (a.do <= b.do ? a : b));

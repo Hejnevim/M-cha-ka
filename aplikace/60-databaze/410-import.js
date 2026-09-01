@@ -89,7 +89,7 @@ function jsonToItems(data) {
    aby se dvě databáze nemíchaly dohromady */
 function csvToRecipes(text, zdroj) {
   const rows = parseCsv(text);
-  if (!rows.length) throw new Error("Soubor je prázdný — chybí i hlavička sloupců.");
+  if (!rows.length) throw new Error(preloz("Soubor je prázdný — chybí i hlavička sloupců."));
   const head = rows[0].map((h) => h.toLowerCase());
   const idx = (re) => head.findIndex((h) => re.test(h));
   const ci = {
@@ -120,7 +120,7 @@ function csvToRecipes(text, zdroj) {
     zadanoKdy: idx(/^(zadano.kdy|zad.no.kdy|requested_at)/),
   };
   if (ci.name < 0 || ci.comp < 0 || ci.pct < 0)
-    throw new Error("CSV musí obsahovat sloupce: nazev, komponenta, procento (volitelně typ, rada, hustota, hex).");
+    throw new Error(preloz("CSV musí obsahovat sloupce: nazev, komponenta, procento (volitelně typ, rada, hustota, hex)."));
   const map = new Map();
   for (const r of rows.slice(1)) {
     const name = r[ci.name]; if (!name) continue;

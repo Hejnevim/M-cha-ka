@@ -46,8 +46,8 @@ function davkaNaNatisk({ comps, totalG, rozliseni, minBatch, chci }) {
   if (doporucena >= totalG * MEZ_UZITKU_NATISKU) {
     return { nemaSmysl: true, nejmensi: nejm, doporucena: doporucena, davka: totalG,
       duvod: zPresnosti > zDilny
-        ? "nejmenší složka " + nejm.name + " je jen " + fmt(nejm.podil * 100, 1) + " % dávky"
-        : "nejmenší dávka dílny je " + fmt(zDilny, 0) + " g" };
+        ? preloz("nejmenší složka {s} je jen {p} % dávky", { s: nejm.name, p: fmt(nejm.podil * 100, 1) })
+        : preloz("nejmenší dávka dílny je {g} g", { g: fmt(zDilny, 0) }) };
   }
 
   const davka = Math.max(KROK_NATISKU, n(chci) > 0 ? n(chci) : doporucena);

@@ -275,6 +275,15 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 16:58 | Výběr technologie, rozměru a barvy přišpendlen k levému dolnímu rohu karty produktu — pod ním už nezbývá prázdný pruh |
 | 17:04 | K levému dolnímu rohu karty produktu sjel i název s materiálem — text a výběr drží pohromadě jako jedna skupina |
 | 17:03 | Čtyři nové zapsané postupy — jazyk obrazovky, telefon, nová databáze barev a ukázka; tři existující doplněny o neumorfismus, měření v obou režimech a šířky snímkovače |
+| 17:26 | Ukázka dohnala aplikaci — scéna 8 mluví o třech jazycích (nové nahrávky), popisek scény 1 o telefonu, paleta opsaná z neumorfního vzhledu; publikovaná česká verze byla o dvě generace pozadu a anglická vůbec, obě znovu publikovány |
+| 19:41 | Přeloženy všechny zbývající záložky — celá aplikace mluví česky, anglicky a portugalsky (slovník 1 495 položek, 1 591 obalených míst) |
+
+### 1. září — delší jazyky přestaly přetékat
+| čas | co |
+|---|---|
+| 08:50 | Dlaždice míchacího režimu v cizím jazyce rostou s textem (Disconnect trčel 5,4 px), popisky dlaždic tisku se zalamují doopravdy a prekryv.py umí --jazyk i přetok z prvku |
+| 08:58 | Ukázka má přestavěné první čtyři scény: úvod bez počtů, nová scéna o řadách přiřazených každému místu potisku, spec s SGPS čárkovaně jako budoucí cestou a dávka podle síta i podle velikosti loga — obě jazykové verze, nové nahrávky |
+| 09:02 | Prázdná dlaždice říká jen „nevybráno" — bez pomlček ve všech třech jazycích a bez šipky pod hodnotou |
 
 ---
 
@@ -6738,3 +6747,207 @@ a vynucené šířky snímkovače. Rozcestník `pravidla-projektu` vede na všec
 **Změřeno:** 18 složek v `.claude/skills/`, každá se `SKILL.md` (bylo 14);
 všechny čtyři nové se registrují v nabídce skillů. `aplikace/` se změna
 nedotkla, takže kontrola vykreslení, mapa ani rozbor se nespouštěly.
+
+## 146. Ukázka dohnala aplikaci — jazyky, telefon a nový kabát
+
+**Problém.** Ukázka stála na stavu z 20. srpna a aplikace jí mezitím utekla
+ve třech věcech: míchací režim mluví česky, anglicky a portugalsky
+(kap. 125–127), rozvržení drží i na telefonu (kap. 133–137) a celý vzhled
+se přeladil na neumorfismus s novou paletou (kap. 141–144) — ukázka přitom
+tvrdí, že „paleta je z aplikace samotné", a nesla starou. Horší nález přišel
+při publikování: **artifact české ukázky byl ještě o dvě generace pozadu** —
+verze ze 16. srpna se 14 scénami a katalogem „2 692 receptur", tedy bez
+třetího dějství, bez RUCOLORu a se špatnými počty. A anglická ukázka nebyla
+publikovaná vůbec, přestože `prezentace/README.md` tvrdí, že obě verze jako
+Artifacty žijí.
+
+**Co se změnilo.**
+
+- **Scéna 8 (míchací režim)** říká nově i to, že asistent vede navažování
+  česky, anglicky nebo portugalsky — přesně pro obrazovku, u které stojí
+  ten, kdo česky nečte. Změněné `rec` → nové nahrávky `scena-08.mp3`
+  a `scene-08.mp3` (`edge-tts`, Antonín/Ryan, −5 %), `cas` srovnán na
+  skutečnou délku. Do SVG přibyl řádek „česky · English · Português" —
+  názvy jazyků se nepřekládají (kap. 125), takže je v obou verzích stejný.
+- **Popisek scény 1** doplněn o telefon: „…i bez internetu, i na telefonu".
+- **Paleta opsána z `020-promenne.css`**: plocha #c9c9c9, karty #ededed,
+  tmavý režim #373d43/#31383f se zeleným (#10B981) a oranžovým (#F59E0B)
+  akcentem, karty 32 px, tlačítka pilulka, stíny převzaté i s hodnotami.
+  Jen `--ok`/`--warn` zůstávají ve světlém režimu tmavší než v aplikaci —
+  v ukázce jsou to barvy textu na světlém platně, appkové odstíny by nešly
+  přečíst.
+- Obě verze publikovány: česká na stejnou adresu, anglická poprvé
+  (adresa doplněna do `prezentace/README.md`).
+
+**Změřeno.** Čísla ve scénách proti souborům: 1 320 produktů (`data.js`),
+5 583 obrázků, receptur 1 097 + 778 + 814 + 776 + 3 = 3 468, bez odstínu
+223 + 190 + 47 = 460, síta s údaji výrobce 2 z 28, koeficientů 14, 0 mimo
+1,00, záložek 17 (`ZALOZKY_NAZVY`) — všechno beze změny, scény 19–21
+a dodatek zůstaly. Nahrávky: česká 19,9 s → `cas:20`, anglická 23,5 s →
+`cas:24` (kontrola metody: `scena-01.mp3` vychází 16,8 s ↔ `cas:17`).
+Headless ověření obou stránek: 21 sekcí, 21 bodů na liště, `data-s`
+souvislé, 0 chyb běhu, přetečení textu proti `.platno`
+(`getBoundingClientRect`) 0,0 px. Syntaxe skriptu přes `new Function`
+prošla u obou. `aplikace/` se změna nedotkla — kontrola vykreslení, mapa
+ani rozbor se nespouštěly.
+
+**Past po cestě.** `kontrola_aplikace.py --soubor` na ukázku nejde použít:
+vkládá sběr chyb před `</head>` a měří potomky `#root`, ale ukázka kostru
+ani `#root` nemá (je psaná pro publikování jako Artifact, který jí kostru
+dodá). Vykreslení se proto ověřilo jednorázovým skriptem ve scratchpadu
+stejnou cestou — headless Chrome s virtuálním časem.
+## 147. Celá aplikace mluví třemi jazyky — přeložily se všechny zbývající záložky
+
+**Problém.** Přepnutí na angličtinu nebo portugalštinu přeložilo jen rám,
+Kalkulaci a míchací režim. Sestavy a trendy, Import / data, Připojení
+k mostu, Zbytky barev, Fronta míchání, Šarže, Co propadne, Opravy po
+nátisku, Přepočet na síto, Produkty, Receptury, ceník, Ke schválení, Sklad
+surovin, čtení PDF, čtečka, Zakázky (SGPS) i Odemykání technologií zůstávaly
+česky — pro míchačku, která česky neumí, byla použitelná jen půlka aplikace.
+
+**Co se změnilo.** Všech 26 zbývajících částí s texty obrazovky prošlo
+obalením `preloz()` a slovník dostal položky en + pt pro každý nový klíč.
+Věty s dosazenými čísly se překládají v místě vzniku se jmenovkami
+(`"Ve frontě čeká {n} {p} k namíchání."`), množné tvary větví trojice
+klíčů (kelímek / kelímky / kelímků), tučné vsuvky se skládají z půlek věty
+kolem zvýrazněného kusu. Skloňované dvojice síto/klišé mají celé věty po
+dvou klíčích — jmenovka s vloženým podstatným jménem by v angličtině
+nesložila správný člen.
+
+Nově překládají i výpočty, jejichž texty jdou na obrazovku: důvody lhůt
+(`stavZbytku`), názvy dnů propadu, stavy sestav, kontrolní body odemykání,
+hlášky rozpoznávání specu (`resolveSpec`, 20 zpráv) a chyby čtení CSV.
+Názvy měsíců a dnů v týdnu píše nová funkce `jazykProstredi()`
+(cs-CZ / en-US / pt-PT); čtyři `useMemo`, které tyhle texty počítají,
+dostaly `jazykAplikace` do závislostí, aby po přepnutí nedržely starou řeč.
+
+Schválně česky zůstávají: tištěný štítek a míchací lístek (dokumenty
+dílny), obsah CSV, výchozí názvy ukládané do evidence („Shluk …",
+„vlastní a ruční" jako data) a šablona formátu receptur.
+
+**Dvě vlastní chyby po cestě.** Nové položky se přidávaly po skupinách
+a 23 klíčů se ocitlo ve slovníku dvakrát („Kryvost", „Zpět", „položek"…)
+— druhá definice tiše přebíjí první. Odhalila je až strojová zkouška
+duplicit, ruční grep před přidáním je nechytal, protože kontroloval jen
+část klíčů. A klíč „neliší." dostal nejdřív prázdný anglický překlad —
+`preloz` prázdný řetězec zahodí (`||`) a spadl by zpátky do češtiny;
+místo prázdna musí stát aspoň tečka.
+
+**Falešný poplach.** Tři klíče volané z komponent ve slovníku chyběly
+(„Pantone custom", „Šarže z konve", „Platí pro:") — nic nespadlo, texty
+jen tiše zůstaly česky. Přesně proto se to hlídá zkouškou, ne okem.
+
+**Změřeno.** Slovník 1 495 klíčů (ráno 589), každý má en i pt, jmenovky
+`{x}` sedí ve všech třech jazycích, 0 duplicit (23 odstraněno). Statických
+volání `preloz("…")` v částech 1 591 — všechna mají položku. Kontrola
+vykreslení prošla (kořen 1 potomek, 0 chyb). Skutečnými kliky v prohlížeči:
+volba en → `lang="en"`, záložka Sestavy a trendy ukázala „Reports and
+trends / Consumption by month / Most frequent shades / Leftovers — what
+came back and what expired", Import / data „Product import (catalog) /
+Recipe format (CSV) / Data management / Deletion protection"; volba pt →
+`lang="pt"`, Sklad surovin „Armazém de matérias-primas (17) / O que
+encomendar (0)" včetně čipů filtru a prázdných stavů (snímek přeměřen).
+## 148. Delší jazyk už nepřetéká z dlaždic — laděné rozměry jsou v cizí řeči minima
+
+**Problém.** Rozměry dlaždic míchacího režimu se ladí v barvy.html na
+češtinu. Anglické „Disconnect" je ale jedno nezalomitelné slovo o 11 px
+širší než celá dlaždice Odpojit — trčelo z ní 5,4 px na každou stranu.
+„Compute coverage from the preview" se v tlačítku krycí plochy zalomilo
+na dva řádky a přetékalo 2,7 px dolů přes hlavičku tabulky navážení.
+A portugalské OPACIDADE či PROFUNDIDADE jsou širší než 87px sloupec
+dlaždic Parametrů tisku na šířce 1100 px (změřeno až 33,5 px ven) —
+kde mimochodem o 6,2 px přetékal i český KRYVOST.
+
+**Co se změnilo.** Tři opravy a jedna nová schopnost nástrojů:
+
+- `prekryv.py` i `sonda.py` dostaly `--jazyk` (volba se podstrkává do
+  localStorage před načtením částí — pozdější zápis už vykreslení
+  nezmění) a detektor `prekryv.js` umí nový druh nálezu **přetok
+  z prvku**: sjednocení skutečných obdélníků obsahu proti rámečku.
+  Sousedské porovnání tohle nechytalo — text do ničeho nenarážel,
+  jen lezl přes okraj vlastního tlačítka.
+- Dlaždice míchacího režimu: česky platí laděná čísla přesně, v cizím
+  jazyce (`html:not([lang="cs"])`) se z nich stávají minima — dlaždice
+  s textem vyroste, místo aby ho pustila ven. Třináct pravidel.
+- Popisky dlaždic tisku dostaly `overflow-wrap:anywhere`. `break-word`
+  prohlížeč nezalomil: šířku slova měří bez prostrkání (KRYVOST — glyfy
+  83,8 px, s prostrkáním 93 px, sloupec 87 px), takže si myslel, že se
+  slovo vejde. Portugalský překlad „profundidade de gravação" se zkrátil
+  na „prof. de gravação" — celé slovo se nevejde v žádném zalomení.
+- Posuvník simulace měl výchozí okraj prohlížeče 2 px a se šířkou 100 %
+  přesahoval rámeček řádku — `margin:0`.
+
+**Slepá ulička.** První pokus změnil `width`→`min-width` plošně — jenže
+tím se pohnula čeština: Odpojit i Tára narostly ze 116 na 142 px
+(přirozená šířka textu s odsazením je víc než laděných 116) a Tára se
+přestala lámat na dva řádky. Proto jazykové přebití: český vzhled se
+nesmí hnout, měří se to.
+
+**Změřeno.** Po opravě míchací režim: cs beze změny do pixelu (dlaždice
+116×100, plocha 288×50, zpět 210×50, Tára dvouřádková 48×64); en Odpojit
+181×100 s textem 127 px uvnitř (rezerva 27,2 px po stranách), plocha
+311×50 na jeden řádek; pt 149×100 a 335×50. Kresba nadpisu na telefonu
+390 px končí 19,2 px před dlaždicí Disconnect. Detektor: 0 nálezů ve
+třech jazycích × čtyřech šířkách × obou režimech na domovské stránce,
+0 na všech záložkách (1920 px), 0 v míchacím režimu se simulací
+(1600 px i 390 px). Protichůdně: před opravou hlásil 5,4 / 2,7 / 33,5 px.
+
+## 149. Ukázka začíná výhodami, ne čísly — přestavěné první čtyři scény
+
+**Problém.** Mluvená ukázka otvírala třemi velkými počty (1 320 produktů,
+3 468 receptur, 5 583 obrázků). Čísla ale zastarávají s každou novou
+databází a divák z nich nepozná, v čem je aplikace jiná. Hlavní výhoda
+dílny — že každé potiskované místo na každém produktu má přiřazenou svou
+řadu barev, takže kdo míchá, vůbec nevidí barvy, které na ten díl nesmí —
+neměla vlastní scénu. A dvě úvodní scény (krycí plocha, výpočet dávky)
+říkaly jednu věc nadvakrát.
+
+**Co se změnilo.** Scény 1–4 obou jazykových verzí (`ukazka.html`,
+`ukazka_en.html`), počet scén zůstal 21:
+
+| scéna | dřív | teď |
+|---|---|---|
+| 1 | tři karty s počty | stáhnout, nebo jen v prohlížeči; uvnitř aktuální katalog se všemi potiskovanými místy a všechny barevné řady dílny — bez čísel |
+| 2 | zakázkový list → 14 údajů | **nová**: každé místo na produktu zná své barvy — tělo pera (tampontisk) nabídne MS 786 · MS 660 · 10KK, klip (sítotisk) MS 660 · 10KK, Xpression se nenabídne |
+| 3 | krycí plocha 25,71 → 3,25 cm² | spec: přetažením PDF hned, ze SGPS až bude propojení (karta i šipka čárkovaně, stejně jako scéna 21) — všechno si vytáhne sám, počet údajů se neříká |
+| 4 | řetěz výpočtu dávky | spojení obou: dávka podle síta (120-34 · 6 g/m²) i podle skutečné velikosti loga — 3,25 cm² místo obdélníku 25,71 cm², zakázka 138823: 3,1 → 0,4 g na kus |
+
+Přiřazení řad ve scéně 2 je opsané z `parametry/databaze.csv` (PDP: 786,
+660, RUCOLOR; SCR: 660, RUCOLOR; Xpression jen FIR), ne vymyšlené.
+Scéna 3 slibuje SGPS stejnou řečí jako třetí dějství: čárkovaná karta
+a „až bude propojení". K tomu nové nahrávky scén 1–4 v obou jazycích
+(edge-tts, Antonín/Ryan, −5 %) a `cas` srovnané na skutečné délky.
+Zelené zvýraznění ve scéně 4 muselo do `style=` — atribut `fill` na
+`<text class="val">` prohrává s CSS třídou (týž neúčinný vzor měla
+i stará scéna 3, jen to nebylo vidět).
+
+**Změřeno.** Syntaxe obou stránek projde v Node (`new Function`), 21 sekcí
+= 21 scén, `data-s` souvislé, čárkované body 3/3. Sondou přes obalenou
+kopii: žádný text scén 1–4 nepřetéká z plátna (mez 1 px), stránka se
+vykreslí a skript doběhne (titulek scény 1, 21 bodů na liště). Délky
+nahrávek: cs 16,4 / 14,3 / 16,2 / 25,8 s → cas 17/15/17/26; en 16,0 /
+14,2 / 17,0 / 25,6 s → cas 16/15/17/26. Obě verze publikované na své
+stávající adresy.
+
+## 150. Prázdná dlaždice říká jen „nevybráno" — bez pomlček a bez šipky
+
+**Problém.** Nevyplněné dlaždice parametrů tisku (síto/klišé, kryvost,
+povrch) ukazovaly „— nevybráno —" a pod hodnotou rozbalovací šipku.
+Dlaždice má z odstupu připomínat náhled hodnoty, ne formulářové pole —
+pomlčky a šipka ji zbytečně zaplňovaly kresbou, která nic neříká: že se
+dlaždicí dá vybírat, prozradí kliknutí.
+
+**Co se změnilo.** Klíč slovníku `„— nevybráno —"` se přejmenoval na
+`„nevybráno"` a překlady přišly o pomlčky ve všech třech jazycích
+(en „not selected", pt „não selecionado") — podle kázně slovníku se změnou
+českého textu měnil klíč, ne jen hodnoty. Obaleno na všech 7 místech
+(4 výběry v Kalkulaci, 3 ve formuláři receptury). Šipka `::picker-icon`
+u `.karta-tisk select` je schovaná (`display:none`) včetně pravidla
+otáčení při otevření a zmenšené varianty pod 640 px; zdůvodnění, proč se
+u dlaždic nekreslí šipka ani pozadím, zůstalo v komentáři u pravidla.
+
+**Změřeno.** Vykreslení projde (kořen 1 potomek, žádná hláška). Sondou
+text dlaždic: „nevybráno" bez pomlček; s podstrčeným jazykem
+(`JSON.stringify`, viz past z kap. 126) čtou všechny tři dlaždice
+en „not selected" a pt „não selecionado". Snímek potvrzuje dlaždici jen
+s hodnotou na středu, bez šipky.

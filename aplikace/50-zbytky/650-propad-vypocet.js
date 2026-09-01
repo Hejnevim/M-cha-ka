@@ -42,9 +42,9 @@ function denPropadu(doKdy, ted) {
    nadpisů se stejným jménem. */
 const PROPAD_DNY_NAZVY = ["dnes", "zítra", "pozítří"];
 function nazevDnePropadu(den, doKdy) {
-  if (den < 0) return "už po lhůtě";
-  if (den < PROPAD_DNY_NAZVY.length) return PROPAD_DNY_NAZVY[den];
-  return new Date(n(doKdy)).toLocaleDateString("cs-CZ",
+  if (den < 0) return preloz("už po lhůtě");
+  if (den < PROPAD_DNY_NAZVY.length) return preloz(PROPAD_DNY_NAZVY[den]);
+  return new Date(n(doKdy)).toLocaleDateString(jazykProstredi(),
     { weekday: "long", day: "numeric", month: "numeric" });
 }
 
@@ -140,7 +140,7 @@ function prehledPropadu({ zbytky, davky, fronta, materialy, ted, dni }) {
       hex: (kelimek && kelimek.hex) || "#888888", gramu: gramu,
       zakazka: x.davka.zakazka || (kelimek ? kelimek.zakazka : ""),
       doKdy: x.stav.doKdy, zbyva: x.stav.zbyva, stavPopis: x.stav.popis,
-      duvod: "pot life " + fmt(n(x.davka.minut) / 60, 1) + " h od tužidla",
+      duvod: preloz("pot life {h} h od tužidla", { h: fmt(n(x.davka.minut) / 60, 1) }),
       slozeni: (kelimek && kelimek.slozeni) || [],
       hodnota: kelimek ? hodnotaKelimku(kelimek, materialy) : null,
       likvidaceGram: sazbaLikvidace(materialy, n(kelimek && kelimek.hustota, 1.2)),
@@ -160,7 +160,7 @@ function prehledPropadu({ zbytky, davky, fronta, materialy, ted, dni }) {
       druh: "kelimek", kod: z.kod, kodDavky: "", nazev: z.nazev || "",
       hex: z.hex || "#888888", gramu: n(z.gramu), zakazka: z.zakazka || "",
       doKdy: st.doKdy, zbyva: st.zbyva, duvod: st.duvod,
-      stavPopis: naStroji ? "v tisku" : "ve skladu",
+      stavPopis: naStroji ? preloz("v tisku") : preloz("ve skladu"),
       slozeni: z.slozeni || [], hodnota: hodnotaKelimku(z, materialy),
       likvidaceGram: sazbaLikvidace(materialy, n(z.hustota, 1.2)),
       naStroji: naStroji, kam: [], navrh: null,

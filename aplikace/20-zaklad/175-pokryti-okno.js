@@ -29,13 +29,13 @@ function ZoomLista({ zoom, setZoom, popis }) {
   const krok = (nasobek) => setZoom((z) => Math.min(ZOOM_MAX, Math.max(1, z * nasobek)));
   return html`
     <div className="rowline" style=${{ gap: 6, marginBottom: 6, alignItems: "center" }}>
-      <button className="btn sec sm" title="oddálit" disabled=${zoom <= 1}
+      <button className="btn sec sm" title=${preloz("oddálit")} disabled=${zoom <= 1}
         onClick=${() => krok(1 / 1.5)}>−</button>
       <span className="note" style=${{ minWidth: 40, textAlign: "center" }}>${fmt(zoom, 1)}×</span>
-      <button className="btn sec sm" title="přiblížit" disabled=${zoom >= ZOOM_MAX}
+      <button className="btn sec sm" title=${preloz("přiblížit")} disabled=${zoom >= ZOOM_MAX}
         onClick=${() => krok(1.5)}>+</button>
-      ${zoom > 1 && html`<button className="btn sec sm" onClick=${() => setZoom(1)}>na šířku</button>`}
-      <span className="note" style=${{ marginLeft: "auto" }}>${popis || "Ctrl + kolečko myši přiblíží"}</span>
+      ${zoom > 1 && html`<button className="btn sec sm" onClick=${() => setZoom(1)}>${preloz("na šířku")}</button>`}
+      <span className="note" style=${{ marginLeft: "auto" }}>${popis || preloz("Ctrl + kolečko myši přiblíží")}</span>
     </div>`;
 }
 
@@ -121,7 +121,7 @@ function PokrytiModal({ obrazky, stranky, pdfId, sirka, vyska, gm2, qty, hustota
         setChyba("");
       } catch (e) { setChyba(String(e.message || e)); }
     };
-    img.onerror = () => { if (!zrusen) setChyba("Obrázek se nepodařilo načíst."); };
+    img.onerror = () => { if (!zrusen) setChyba(preloz("Obrázek se nepodařilo načíst.")); };
     img.src = predloha.url;
     return () => { zrusen = true; };
   }, [predloha && predloha.url, predloha && predloha.vyrez, prah, orezat, odsazeni, sirka, vyska, vybrane]);
@@ -212,13 +212,13 @@ function PokrytiModal({ obrazky, stranky, pdfId, sirka, vyska, gm2, qty, hustota
 
   const zeSouboru = (f) => {
     if (!f) return;
-    if (!/^image\//.test(f.type)) { setChyba("Vyberte obrázek (PNG, JPG…). Vektorové PDF takto rozebrat nelze."); return; }
+    if (!/^image\//.test(f.type)) { setChyba(preloz("Vyberte obrázek (PNG, JPG…). Vektorové PDF takto rozebrat nelze.")); return; }
     const rd = new FileReader();
     rd.onload = () => setZdroj({ url: String(rd.result), popis: f.name });
     rd.readAsDataURL(f);
   };
   const mmText = (vysl && sirka > 0 && vysl.bw)
-    ? " · motiv v poměru " + fmt(vysl.bw / vysl.bh, 2) + " : 1"
+    ? preloz(" · motiv v poměru {p} : 1", { p: fmt(vysl.bw / vysl.bh, 2) })
     : "";
 
   return html`
@@ -227,30 +227,29 @@ function PokrytiModal({ obrazky, stranky, pdfId, sirka, vyska, gm2, qty, hustota
         <div className="card" style=${{ margin: 0 }}>
           <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
             <div>
-              <h2 style=${{ margin: 0 }}>Skutečné pokrytí motivu</h2>
+              <h2 style=${{ margin: 0 }}>${preloz("Skutečné pokrytí motivu")}</h2>
               <p className="hint" style=${{ margin: "4px 0 0" }}>
-                Rozměr potisku je obdélník, do kterého se motiv vejde. Logo v něm ale nechává volné
-                místo — spotřeba barvy odpovídá jen skutečně potištěné ploše.
+                ${preloz("Rozměr potisku je obdélník, do kterého se motiv vejde. Logo v něm ale nechává volné místo — spotřeba barvy odpovídá jen skutečně potištěné ploše.")}
               </p>
             </div>
             <button className="btn sec sm" onClick=${onClose}>✕</button>
           </div>
 
-          <label className="f" style=${{ marginTop: 14 }}>Předloha</label>
+          <label className="f" style=${{ marginTop: 14 }}>${preloz("Předloha")}</label>
           ${((stranky && stranky.length) || (obrazky && obrazky.length)) > 0 && html`
             <div className="chips" style=${{ marginBottom: 10 }}>
               ${(stranky || []).map((s, i) => html`
                 <button key=${"s" + i} className=${"chip" + (zdroj && zdroj.url === s.url ? " on" : "")}
                   onClick=${() => { setVyrez(null); setZdroj({ url: s.url, vyrezat: true,
                     strana: s.strana, sirka: s.sirka, vyska: s.vyska,
-                    popis: "strana " + s.strana + " zakázkového listu · " + s.sirka + "×" + s.vyska + " px" }); }}>
-                  ⃞ Strana ${s.strana} listu
+                    popis: preloz("strana {s} zakázkového listu · {r} px", { s: s.strana, r: s.sirka + "×" + s.vyska }) }); }}>
+                  ⃞ ${preloz("Strana {s} listu", { s: s.strana })}
                 </button>`)}
               ${(obrazky || []).map((o, i) => html`
                 <button key=${"o" + i} className=${"chip" + (zdroj && zdroj.url === o.url ? " on" : "")}
                   onClick=${() => { setVyrez(null); setZdroj({ url: o.url,
-                    popis: "obrázek z PDF · " + o.sirka + "×" + o.vyska + " px" }); }}>
-                  Obrázek ${o.sirka}×${o.vyska}${o.maska ? " (maska)" : ""}
+                    popis: preloz("obrázek z PDF · {r} px", { r: o.sirka + "×" + o.vyska }) }); }}>
+                  ${preloz("Obrázek")} ${o.sirka}×${o.vyska}${o.maska ? preloz(" (maska)") : ""}
                 </button>`)}
             </div>`}
 
@@ -258,24 +257,24 @@ function PokrytiModal({ obrazky, stranky, pdfId, sirka, vyska, gm2, qty, hustota
             <div style=${{ marginBottom: 12 }}>
               <p className="note" style=${{ marginBottom: 6 }}>
                 ${bloky.length
-                  ? html`<${React.Fragment}>${vyrez ? "Motiv byl vybrán automaticky podle tvaru rozměru potisku" : "Vyberte motiv"}${sirka > 0 && vyska > 0 ? " (hledá se poměr " + fmt(sirka / Math.max(vyska, 0.01), 1) + ":1)" : ""}. Jiný zvolíte tlačítkem níže, nebo ho <b>označte tažením myši</b>.<//>`
-                  : html`<${React.Fragment}><b>Tažením myši označte náhled potisku</b> — pokrytí se spočítá jen uvnitř označené oblasti.<//>`}
+                  ? html`<${React.Fragment}>${vyrez ? preloz("Motiv byl vybrán automaticky podle tvaru rozměru potisku") : preloz("Vyberte motiv")}${sirka > 0 && vyska > 0 ? preloz(" (hledá se poměr {p}:1)", { p: fmt(sirka / Math.max(vyska, 0.01), 1) }) : ""}${preloz(". Jiný zvolíte tlačítkem níže, nebo ho")} <b>${preloz("označte tažením myši")}</b>.<//>`
+                  : html`<${React.Fragment}><b>${preloz("Tažením myši označte náhled potisku")}</b>${preloz(" — pokrytí se spočítá jen uvnitř označené oblasti.")}<//>`}
               </p>
               ${bloky.length > 1 && html`
                 <div className="chips" style=${{ marginBottom: 8 }}>
                   ${bloky.map((b, i) => html`
                     <button key=${i} className=${"chip" + (vyrez && Math.abs(vyrez.x - b.x) < 2 && Math.abs(vyrez.y - b.y) < 2 ? " on" : "")}
                       onClick=${() => setVyrez(b)}>
-                      Motiv ${i + 1} · ${Math.round(b.w)}×${Math.round(b.h)} px${b.pomer ? " · " + fmt(b.pomer, 1) + ":1" : ""}
+                      ${preloz("Motiv")} ${i + 1} · ${Math.round(b.w)}×${Math.round(b.h)} px${b.pomer ? " · " + fmt(b.pomer, 1) + ":1" : ""}
                     </button>`)}
                 </div>`}
               <${ZoomLista} zoom=${zoomS} setZoom=${setZoomS}
-                popis=${zoomS > 1 ? "Ctrl + kolečko přiblíží · označovat lze i přiblížené" : "Ctrl + kolečko myši přiblíží"} />
+                popis=${zoomS > 1 ? preloz("Ctrl + kolečko přiblíží · označovat lze i přiblížené") : preloz("Ctrl + kolečko myši přiblíží")} />
               <div ref=${stranaRef} style=${{ overflow: "auto", maxHeight: 520, borderRadius: 10,
                 background: "#fff", boxShadow: "var(--neu-in)" }}>
                 <div style=${{ position: "relative", width: (zoomS * 100) + "%", cursor: "crosshair" }}
                   onMouseDown=${tahStart} onMouseMove=${tahPohyb} onMouseUp=${tahKonec} onMouseLeave=${tahKonec}>
-                  <img ref=${platnoRef} src=${zdroj.url} alt="stránka listu" draggable="false"
+                  <img ref=${platnoRef} src=${zdroj.url} alt=${preloz("stránka listu")} draggable="false"
                     style=${{ width: zoomS > 1 ? "100%" : "auto", maxWidth: "100%", display: "block" }} />
                   ${ramecek() && html`<div style=${Object.assign({ position: "absolute", border: "2px solid var(--cyan)",
                     background: "rgba(127,127,127,.28)", pointerEvents: "none" }, ramecek())}></div>`}
@@ -288,9 +287,9 @@ function PokrytiModal({ obrazky, stranky, pdfId, sirka, vyska, gm2, qty, hustota
             onClick=${() => souborRef.current && souborRef.current.click()}
             style=${{ borderRadius: 12, padding: "18px 14px", textAlign: "center", cursor: "pointer",
               boxShadow: nadHranici ? "var(--neu-in),0 0 0 3px var(--focus)" : "var(--neu-in)" }}>
-            <div style=${{ fontWeight: 700, fontSize: 13 }}>Přetáhněte sem tiskové podklady (PNG, JPG)</div>
+            <div style=${{ fontWeight: 700, fontSize: 13 }}>${preloz("Přetáhněte sem tiskové podklady (PNG, JPG)")}</div>
             <div className="note" style=${{ marginTop: 3 }}>
-              nejpřesnější je soubor, ze kterého se dělá síto — na bílém nebo průhledném pozadí
+              ${preloz("nejpřesnější je soubor, ze kterého se dělá síto — na bílém nebo průhledném pozadí")}
             </div>
           </div>
           <input ref=${souborRef} type="file" accept="image/*" style=${{ display: "none" }}
@@ -301,14 +300,14 @@ function PokrytiModal({ obrazky, stranky, pdfId, sirka, vyska, gm2, qty, hustota
             <div style=${{ marginTop: 16 }}>
               <div className="frow c2" style=${{ alignItems: "start" }}>
                 <div>
-                  <label className="f">Náhled — modře to, co se počítá jako barva</label>
+                  <label className="f">${preloz("Náhled — modře to, co se počítá jako barva")}</label>
                   <${ZoomLista} zoom=${zoomN} setZoom=${setZoomN}
-                    popis=${zoomN > 1 ? "tažením myši posunete výřez" : "Ctrl + kolečko myši přiblíží"} />
+                    popis=${zoomN > 1 ? preloz("tažením myši posunete výřez") : preloz("Ctrl + kolečko myši přiblíží")} />
                   <div ref=${nahledRef} onMouseDown=${panStart} onMouseMove=${panPohyb}
                     onMouseUp=${panKonec} onMouseLeave=${panKonec}
                     style=${{ overflow: "auto", maxHeight: 420, borderRadius: 10, background: "#fff",
                       boxShadow: "var(--neu-in)", cursor: zoomN > 1 ? "grab" : "default" }}>
-                    <img src=${vysl.nahled} alt="rozbor pokrytí" draggable="false"
+                    <img src=${vysl.nahled} alt=${preloz("rozbor pokrytí")} draggable="false"
                       style=${{ width: (zoomN * 100) + "%", maxWidth: "none", display: "block",
                         // U hrubé předlohy chceme při přiblížení vidět jednotlivé body masky;
                         // u ostrého výřezu z PDF je jich tolik, že hladké zobrazení vypadá líp.
@@ -316,32 +315,32 @@ function PokrytiModal({ obrazky, stranky, pdfId, sirka, vyska, gm2, qty, hustota
                   </div>
                   <div className="note" style=${{ marginTop: 4 }}>
                     ${zdroj ? zdroj.popis : ""}
-                    ${ostryPlati && html`<${React.Fragment}> · <b>ostrý výřez z PDF</b> ${ostry.sirka}×${ostry.vyska} px
+                    ${ostryPlati && html`<${React.Fragment}> · <b>${preloz("ostrý výřez z PDF")}</b> ${ostry.sirka}×${ostry.vyska} px
                       (${fmt(ostry.px_na_mm * 25.4, 0)} DPI)<//>`}
-                    ${cekaOstry && html`<${React.Fragment}> · kreslí se ostrý výřez…<//>`}
+                    ${cekaOstry && html`<${React.Fragment}> · ${preloz("kreslí se ostrý výřez…")}<//>`}
                   </div>
                   ${ostryStav && ostryStav !== "kreslim" && html`
                     <div className="note" style=${{ marginTop: 4 }}>
-                      Ostrý výřez se nepodařilo vykreslit (${ostryStav}) — počítá se z hrubého náhledu stránky.
+                      ${preloz("Ostrý výřez se nepodařilo vykreslit ({e}) — počítá se z hrubého náhledu stránky.", { e: ostryStav })}
                     </div>`}
                 </div>
                 <div>
                   <div className="result-big">${fmt(vysl.pct, 1)} %</div>
-                  <div className="result-sub">krycí plocha z rozměru potisku${mmText}</div>
+                  <div className="result-sub">${preloz("krycí plocha z rozměru potisku")}${mmText}</div>
                   ${sirka > 0 && vyska > 0 && html`
                     <div className="kv" style=${{ marginTop: 10 }}>
-                      <div className="k">Krycí plocha</div>
+                      <div className="k">${preloz("Krycí plocha")}</div>
                       <div className="v">${fmt(sirka * vyska * vysl.pct / 100 / 100, 2)} cm²
-                        <span className="note"> z ${fmt(sirka * vyska / 100, 2)} cm² obdélníku</span></div>
+                        <span className="note">${preloz(" z {p} cm² obdélníku", { p: fmt(sirka * vyska / 100, 2) })}</span></div>
                       ${gm2 > 0 && qty > 0 && html`
                         <${React.Fragment}>
-                          <div className="k">Barvy na zakázku</div>
+                          <div className="k">${preloz("Barvy na zakázku")}</div>
                           <div className="v">${fmt(sirka * vyska * vysl.pct / 100 / 1000000 * qty * gm2, 1)} g
-                            <span className="note"> netto při ${fmt(gm2, 1)} g/m² a ${fmt(qty, 0)} ks</span></div>
+                            <span className="note">${preloz(" netto při {g} g/m² a {n} ks", { g: fmt(gm2, 1), n: fmt(qty, 0) })}</span></div>
                         <//>`}
                     </div>`}
 
-                  <label className="f" style=${{ marginTop: 14 }}>Vnější odsazení kolem objektů (mm)</label>
+                  <label className="f" style=${{ marginTop: 14 }}>${preloz("Vnější odsazení kolem objektů (mm)")}</label>
                   <div className="rowline" style=${{ marginBottom: 4 }}>
                     <input type="range" style=${{ flex: 1 }} min="0" max="5" step="0.1" value=${odsazeni}
                       onChange=${(e) => setOdsazeni(n(e.target.value, 0))} />
@@ -349,54 +348,54 @@ function PokrytiModal({ obrazky, stranky, pdfId, sirka, vyska, gm2, qty, hustota
                       onChange=${(e) => setOdsazeni(n(e.target.value, 0))} />
                   </div>
                   <p className="note">
-                    Barva se kolem každého objektu rozpíjí — odsazení tenhle přesah přidá.
-                    ${vysl.pxNaMm > 0 ? " Měřítko " + fmt(vysl.pxNaMm, 1) + " bodů na mm." : ""}
-                    ${odsazeni > 0 ? " Samotný motiv bez odsazení má "
-                      + fmt(vysl.barvy / Math.max(1, vysl.kryciPocet) * vysl.pct, 1) + " %." : ""}
+                    ${preloz("Barva se kolem každého objektu rozpíjí — odsazení tenhle přesah přidá.")}
+                    ${vysl.pxNaMm > 0 ? preloz(" Měřítko {m} bodů na mm.", { m: fmt(vysl.pxNaMm, 1) }) : ""}
+                    ${odsazeni > 0 ? preloz(" Samotný motiv bez odsazení má {p} %.",
+                      { p: fmt(vysl.barvy / Math.max(1, vysl.kryciPocet) * vysl.pct, 1) }) : ""}
                   </p>
 
                   <label className="f" style=${{ marginTop: 14 }}>
-                    Barvy potisku — počítají se jen vybrané${vybrane.length > 1 ? " (" + vybrane.length + ")" : ""}
+                    ${preloz("Barvy potisku — počítají se jen vybrané")}${vybrane.length > 1 ? " (" + vybrane.length + ")" : ""}
                   </label>
                   <div className="chips" style=${{ marginBottom: 6 }}>
                     ${barvy.map((b, i) => html`
                       <button key=${i} className=${"chip" + (vybrane.some((x) => klicBarvy(x) === klicBarvy(b)) ? " on" : "")}
-                        onClick=${() => prepniBarvu(b)} title=${"podíl ve výřezu " + fmt(b.podil, 1) + " % · klepnutím přidáte nebo odeberete"}>
+                        onClick=${() => prepniBarvu(b)} title=${preloz("podíl ve výřezu {p} % · klepnutím přidáte nebo odeberete", { p: fmt(b.podil, 1) })}>
                         <span className="cdot" style=${{ background: "rgb(" + b.r + "," + b.g + "," + b.b + ")" }}></span>
                         ${fmt(b.podil, 1)} %
                       </button>`)}
                     ${barvy.length > 1 && html`
                       <button className="chip" onClick=${() => setVybrane(barvy.slice())}
-                        title="započítat všechny nalezené barvy">všechny</button>`}
+                        title=${preloz("započítat všechny nalezené barvy")}>${preloz("všechny")}</button>`}
                     <button className=${"chip" + (vybrane.length ? "" : " on")} onClick=${() => setVybrane([])}>
-                      vše kromě pozadí
+                      ${preloz("vše kromě pozadí")}
                     </button>
                   </div>
                   <p className="note">
                     ${vybrane.length
-                      ? "Klepnutím se barvy přidávají a odebírají — u vícebarevného potisku vyberte všechny. Rámečky, vodicí čáry a popisky v jiné barvě se do výpočtu nezapočítají."
-                      : "Počítá se všechno, co není pozadí — včetně rámečků a popisků, pokud jsou ve výřezu."}
+                      ? preloz("Klepnutím se barvy přidávají a odebírají — u vícebarevného potisku vyberte všechny. Rámečky, vodicí čáry a popisky v jiné barvě se do výpočtu nezapočítají.")
+                      : preloz("Počítá se všechno, co není pozadí — včetně rámečků a popisků, pokud jsou ve výřezu.")}
                   </p>
 
                   <label className="f" style=${{ marginTop: 12 }}>
-                    ${vybrane.length ? "Tolerance odstínu" : "Citlivost — co ještě je barva"}
+                    ${vybrane.length ? preloz("Tolerance odstínu") : preloz("Citlivost — co ještě je barva")}
                   </label>
                   <input type="range" min="4" max="120" step="2" value=${prah}
                     onChange=${(e) => setPrah(n(e.target.value, 28))} />
-                  <div className="note">práh ${prah} — ${vybrane.length
-                    ? "zvyšte, pokud vypadávají okraje písma; snižte, pokud se chytá i jiná barva"
-                    : "zvyšte, pokud se do barvy počítá i pozadí"}</div>
+                  <div className="note">${preloz("práh")} ${prah} — ${vybrane.length
+                    ? preloz("zvyšte, pokud vypadávají okraje písma; snižte, pokud se chytá i jiná barva")
+                    : preloz("zvyšte, pokud se do barvy počítá i pozadí")}</div>
                   <label className="tgl" style=${{ marginTop: 12 }}>
                     <input type="checkbox" checked=${orezat} onChange=${(e) => setOrezat(e.target.checked)} />
-                    <span className="tglt"></span>Měřit jen uvnitř ohraničení motivu
+                    <span className="tglt"></span>${preloz("Měřit jen uvnitř ohraničení motivu")}
                   </label>
                 </div>
               </div>
               <div className="rowline" style=${{ marginTop: 16, marginBottom: 0 }}>
                 <button className="btn" onClick=${() => { onPouzit(vysl.pct, n(odsazeni, 0)); onClose(); }}>
-                  Použít krycí plochu ${fmt(vysl.pct, 1)} % →
+                  ${preloz("Použít krycí plochu {p} % →", { p: fmt(vysl.pct, 1) })}
                 </button>
-                <button className="btn sec" onClick=${onClose}>Zrušit</button>
+                <button className="btn sec" onClick=${onClose}>${preloz("Zrušit")}</button>
               </div>
             </div>`}
         </div>

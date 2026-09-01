@@ -14,11 +14,11 @@ function Importer({ setProducts, setRecipes, guardDelete, deletePw, setDeletePw,
   const [pwMsg, setPwMsg] = useState(null);
   const savePw = () => {
     setPwMsg(null);
-    if (deletePw && pwCur !== deletePw) { setPwMsg({ warn: "Současné heslo nesouhlasí." }); return; }
-    if (pw1 !== pw2) { setPwMsg({ warn: "Nová hesla se neshodují." }); return; }
+    if (deletePw && pwCur !== deletePw) { setPwMsg({ warn: preloz("Současné heslo nesouhlasí.") }); return; }
+    if (pw1 !== pw2) { setPwMsg({ warn: preloz("Nová hesla se neshodují.") }); return; }
     setDeletePw(pw1);
     setPwCur(""); setPw1(""); setPw2("");
-    setPwMsg({ ok: pw1 ? "Heslo pro mazání bylo nastaveno." : "Ochrana heslem byla odebrána — mazání teď funguje bez potvrzení." });
+    setPwMsg({ ok: pw1 ? preloz("Heslo pro mazání bylo nastaveno.") : preloz("Ochrana heslem byla odebrána — mazání teď funguje bez potvrzení.") });
   };
 
   const analyze = (raw) => {
@@ -26,7 +26,7 @@ function Importer({ setProducts, setRecipes, guardDelete, deletePw, setDeletePw,
     try {
       let items;
       const t = raw.trim();
-      if (!t) { setMsg({ warn: "Vložte data nebo nahrajte soubor." }); return; }
+      if (!t) { setMsg({ warn: preloz("Vložte data nebo nahrajte soubor.") }); return; }
       if (t[0] === "{" || t[0] === "[") items = jsonToItems(JSON.parse(t));
       else items = rowsToItems(parseCsv(t));
       const mapped = items.filter((i) => i.name || i.ref).map((i) => Object.assign({}, i, { tech: mapTech(i.techRaw) }));
@@ -34,7 +34,7 @@ function Importer({ setProducts, setRecipes, guardDelete, deletePw, setDeletePw,
       const ok = mapped.filter((i) => i.tech && i.w > 0 && i.h > 0);
       setPreview({ ok, skipped, badDim: mapped.filter((i) => i.tech && !(i.w > 0 && i.h > 0)), imgs: ok.filter((i) => i.img).length });
     } catch (e) {
-      setMsg({ warn: "Data se nepodařilo přečíst: " + e.message });
+      setMsg({ warn: preloz("Data se nepodařilo přečíst: {e}", { e: e.message }) });
       setPreview(null);
     }
   };
@@ -60,7 +60,7 @@ function Importer({ setProducts, setRecipes, guardDelete, deletePw, setDeletePw,
           added++;
         }
       }
-      setMsg({ ok: "Import hotov — nové produkty: " + added + ", aktualizované polohy: " + updated + "." });
+      setMsg({ ok: preloz("Import hotov — nové produkty: {a}, aktualizované polohy: {b}.", { a: added, b: updated }) });
       return Array.from(byKey.values());
     });
     setPreview(null); setText("");
@@ -70,10 +70,10 @@ function Importer({ setProducts, setRecipes, guardDelete, deletePw, setDeletePw,
     setMsg(null); setPreview(null);
     try {
       const recs = csvToRecipes(raw);
-      if (!recs.length) { setMsg({ warn: "V souboru nebyly nalezeny žádné receptury." }); return; }
+      if (!recs.length) { setMsg({ warn: preloz("V souboru nebyly nalezeny žádné receptury.") }); return; }
       setRecPreview(recs);
     } catch (e) {
-      setMsg({ warn: "Receptury se nepodařilo přečíst: " + e.message });
+      setMsg({ warn: preloz("Receptury se nepodařilo přečíst: {e}", { e: e.message }) });
       setRecPreview(null);
     }
   };
@@ -82,7 +82,7 @@ function Importer({ setProducts, setRecipes, guardDelete, deletePw, setDeletePw,
     if (!recPreview) return;
     setRecipes((prev) => {
       const v = sloucReceptury(prev, recPreview);
-      setMsg({ ok: "Receptury naimportovány — nové: " + v.pridano + ", nahrazené: " + v.obnoveno + "." });
+      setMsg({ ok: preloz("Receptury naimportovány — nové: {a}, nahrazené: {b}.", { a: v.pridano, b: v.obnoveno }) });
       return v.seznam;
     });
     setRecPreview(null); setText("");
@@ -102,20 +102,20 @@ function Importer({ setProducts, setRecipes, guardDelete, deletePw, setDeletePw,
         stav=${cenyStav || { stav: "", chyba: "" }} mostOk=${mostOk}
         smiMenit=${smiRole(role, "cenik")} />
       <div className="card">
-        <h2>Import produktů (katalog)</h2>
-        <p className="hint">CSV nebo JSON. Technologie se mapují automaticky: Tampontisk → PDP · Sítotisk (plast, papír) i rotační → SCR · Sítotisk (textil) → TXP · Transfer → TRS · Firing → FIR. Opakovaný import nic nezdvojí — existující produkty se aktualizují.</p>
+        <h2>${preloz("Import produktů (katalog)")}</h2>
+        <p className="hint">${preloz("CSV nebo JSON. Technologie se mapují automaticky: Tampontisk → PDP · Sítotisk (plast, papír) i rotační → SCR · Sítotisk (textil) → TXP · Transfer → TRS · Firing → FIR. Opakovaný import nic nezdvojí — existující produkty se aktualizují.")}</p>
         <div className="rowline">
-          <button className="btn sec" onClick=${() => fileRef.current && fileRef.current.click()}>Nahrát soubor produktů</button>
+          <button className="btn sec" onClick=${() => fileRef.current && fileRef.current.click()}>${preloz("Nahrát soubor produktů")}</button>
           <input ref=${fileRef} type="file" accept=".csv,.json,.txt" style=${{ display: "none" }} onChange=${(e) => readFile(e, analyze)} />
-          <button className="btn sec" onClick=${() => recFileRef.current && recFileRef.current.click()}>Nahrát soubor receptur (CSV)</button>
+          <button className="btn sec" onClick=${() => recFileRef.current && recFileRef.current.click()}>${preloz("Nahrát soubor receptur (CSV)")}</button>
           <input ref=${recFileRef} type="file" accept=".csv,.txt" style=${{ display: "none" }} onChange=${(e) => readFile(e, analyzeRecipes)} />
         </div>
-        <textarea value=${text} onChange=${(e) => setText(e.target.value)} placeholder="…nebo sem vložte obsah souboru a použijte tlačítka Analyzovat níže" />
+        <textarea value=${text} onChange=${(e) => setText(e.target.value)} placeholder=${preloz("…nebo sem vložte obsah souboru a použijte tlačítka Analyzovat níže")} />
         <div className="rowline" style=${{ marginTop: 10 }}>
-          <button className="btn" onClick=${() => analyze(text)}>Analyzovat jako produkty</button>
-          <button className="btn" onClick=${() => analyzeRecipes(text)}>Analyzovat jako receptury</button>
-          ${preview && html`<button className="btn" style=${{ background: "var(--ok)" }} onClick=${doImport} disabled=${!preview.ok.length}>Importovat ${preview.ok.length} poloh</button>`}
-          ${recPreview && html`<button className="btn" style=${{ background: "var(--ok)" }} onClick=${doImportRecipes}>Importovat ${recPreview.length} receptur</button>`}
+          <button className="btn" onClick=${() => analyze(text)}>${preloz("Analyzovat jako produkty")}</button>
+          <button className="btn" onClick=${() => analyzeRecipes(text)}>${preloz("Analyzovat jako receptury")}</button>
+          ${preview && html`<button className="btn" style=${{ background: "var(--ok)" }} onClick=${doImport} disabled=${!preview.ok.length}>${preloz("Importovat {n} poloh", { n: preview.ok.length })}</button>`}
+          ${recPreview && html`<button className="btn" style=${{ background: "var(--ok)" }} onClick=${doImportRecipes}>${preloz("Importovat {n} receptur", { n: recPreview.length })}</button>`}
         </div>
         ${msg && msg.warn && html`<div className="warnbox">${msg.warn}</div>`}
         ${msg && msg.ok && html`<div className="okbox">${msg.ok}</div>`}
@@ -123,12 +123,14 @@ function Importer({ setProducts, setRecipes, guardDelete, deletePw, setDeletePw,
         ${preview && html`
           <${React.Fragment}>
             ${preview.imgs === 0
-              ? html`<div className="warnbox"><b>Pozor:</b> soubor neobsahuje žádné obrázky náhledů — pravděpodobně stará verze exportu.</div>`
-              : html`<div className="okbox">✓ Soubor obsahuje obrázkové náhledy u ${preview.imgs.toLocaleString("cs-CZ")} z ${preview.ok.length.toLocaleString("cs-CZ")} poloh.</div>`}
-            ${preview.skipped.length > 0 && html`<div className="warnbox">${preview.skipped.length} řádků přeskočeno — nerozpoznaná technologie (např. „${preview.skipped[0].techRaw}").</div>`}
-            ${preview.badDim.length > 0 && html`<div className="warnbox">${preview.badDim.length} řádků přeskočeno — chybí rozměr tiskové plochy.</div>`}
+              ? html`<div className="warnbox"><b>${preloz("Pozor:")}</b> ${preloz("soubor neobsahuje žádné obrázky náhledů — pravděpodobně stará verze exportu.")}</div>`
+              : html`<div className="okbox">${preloz("✓ Soubor obsahuje obrázkové náhledy u {a} z {b} poloh.",
+                  { a: preview.imgs.toLocaleString("cs-CZ"), b: preview.ok.length.toLocaleString("cs-CZ") })}</div>`}
+            ${preview.skipped.length > 0 && html`<div className="warnbox">${preloz("{n} řádků přeskočeno — nerozpoznaná technologie (např. „{t}“).",
+              { n: preview.skipped.length, t: preview.skipped[0].techRaw })}</div>`}
+            ${preview.badDim.length > 0 && html`<div className="warnbox">${preloz("{n} řádků přeskočeno — chybí rozměr tiskové plochy.", { n: preview.badDim.length })}</div>`}
             <table className="t" style=${{ marginTop: 12 }}>
-              <thead><tr><th className="num">Ref.</th><th>Produkt</th><th>Poloha</th><th>Technologie</th><th className="num">Š×V mm</th></tr></thead>
+              <thead><tr><th className="num">${preloz("Ref.")}</th><th>${preloz("Produkt")}</th><th>${preloz("Poloha")}</th><th>${preloz("Technologie")}</th><th className="num">${preloz("Š×V mm")}</th></tr></thead>
               <tbody>
                 ${preview.ok.slice(0, 30).map((i, k) => html`
                   <tr key=${k}>
@@ -140,12 +142,12 @@ function Importer({ setProducts, setRecipes, guardDelete, deletePw, setDeletePw,
                   </tr>`)}
               </tbody>
             </table>
-            ${preview.ok.length > 30 && html`<p className="note">… a dalších ${preview.ok.length - 30} řádků.</p>`}
+            ${preview.ok.length > 30 && html`<p className="note">${preloz("… a dalších {n} řádků.", { n: preview.ok.length - 30 })}</p>`}
           <//>`}
 
         ${recPreview && html`
           <table className="t" style=${{ marginTop: 12 }}>
-            <thead><tr><th /><th>Receptura</th><th>Typ</th><th>Řada</th><th className="num">Hustota</th><th>Komponenty</th><th className="num">Σ %</th></tr></thead>
+            <thead><tr><th /><th>${preloz("Receptura")}</th><th>${preloz("Typ")}</th><th>${preloz("Řada")}</th><th className="num">${preloz("Hustota")}</th><th>${preloz("Komponenty")}</th><th className="num">Σ %</th></tr></thead>
             <tbody>
               ${recPreview.slice(0, 30).map((r) => {
                 const sum = r.components.reduce((s, c) => s + n(c.pct), 0);
@@ -162,12 +164,12 @@ function Importer({ setProducts, setRecipes, guardDelete, deletePw, setDeletePw,
               })}
             </tbody>
           </table>
-          ${recPreview.length > 30 && html`<p className="note">… a dalších ${recPreview.length - 30} receptur.</p>`}`}
+          ${recPreview.length > 30 && html`<p className="note">${preloz("… a dalších {n} receptur.", { n: recPreview.length - 30 })}</p>`}`}
       </div>
 
       <div className="card">
-        <h2>Formát receptur (CSV)</h2>
-        <p className="hint">Jeden řádek = jedna komponenta; řádky se stejným názvem receptury se sloučí. Tímto formátem nahrajete celou databázi Printcolor, jakmile ji od nich dostanete (jejich Pantone formule jsou licencovaná data, která poskytují zákazníkům).</p>
+        <h2>${preloz("Formát receptur (CSV)")}</h2>
+        <p className="hint">${preloz("Jeden řádek = jedna komponenta; řádky se stejným názvem receptury se sloučí. Tímto formátem nahrajete celou databázi Printcolor, jakmile ji od nich dostanete (jejich Pantone formule jsou licencovaná data, která poskytují zákazníkům).")}</p>
         <pre className="tpl">nazev;typ;rada;hustota;hex;komponenta;procento
 PANTONE 485 C;Pantone;Printcolor 390;1,25;DA291C;Printcolor Warm Red;62
 PANTONE 485 C;Pantone;Printcolor 390;1,25;DA291C;Printcolor Yellow 012;28
@@ -177,37 +179,37 @@ Firemní zelená CUST-014;Custom;Printcolor 390;1,22;0E8A5F;Transparentní báze
       </div>
 
       <div className="card">
-        <h2>Správa dat</h2>
+        <h2>${preloz("Správa dat")}</h2>
         <div className="rowline">
           <button className="btn sec" onClick=${() => {
-            if (window.confirm("Obnovit katalog produktů z data.js? Vaše ruční úpravy produktů budou zahozeny (receptury zůstanou).")) {
+            if (window.confirm(preloz("Obnovit katalog produktů z data.js? Vaše ruční úpravy produktů budou zahozeny (receptury zůstanou)."))) {
               setProducts(window.KATALOG || []);
-              setMsg({ ok: "Katalog obnoven z data.js (" + ((window.KATALOG || []).length) + " produktů)." });
+              setMsg({ ok: preloz("Katalog obnoven z data.js ({n} produktů).", { n: (window.KATALOG || []).length }) });
             }
-          }}>Obnovit katalog z data.js</button>
+          }}>${preloz("Obnovit katalog z data.js")}</button>
           <button className="btn danger" onClick=${() => guardDelete(() => {
-            if (window.confirm("Opravdu vymazat VŠECHNY produkty? (Receptury zůstanou.)")) {
+            if (window.confirm(preloz("Opravdu vymazat VŠECHNY produkty? (Receptury zůstanou.)"))) {
               setProducts([]);
-              setMsg({ ok: "Katalog produktů vymazán." });
+              setMsg({ ok: preloz("Katalog produktů vymazán.") });
             }
-          }, "vymazání celého katalogu produktů")}>Vymazat katalog produktů</button>
+          }, preloz("vymazání celého katalogu produktů"))}>${preloz("Vymazat katalog produktů")}</button>
         </div>
       </div>
 
       ${smiData && html`
       <div className="card">
-        <h2>Zabezpečení mazání</h2>
+        <h2>${preloz("Zabezpečení mazání")}</h2>
         <p className="hint">${deletePw
-          ? "Mazání produktů a receptur je chráněno heslem — nechte nová hesla prázdná a uložte, pokud chcete ochranu odebrat."
-          : "Nastavte heslo, aby šlo mazat produkty a receptury jen po jeho zadání."}</p>
+          ? preloz("Mazání produktů a receptur je chráněno heslem — nechte nová hesla prázdná a uložte, pokud chcete ochranu odebrat.")
+          : preloz("Nastavte heslo, aby šlo mazat produkty a receptury jen po jeho zadání.")}</p>
         <div className="frow c3">
-          ${deletePw && html`<div><label className="f">Současné heslo</label><input type="password" value=${pwCur} onChange=${(e) => setPwCur(e.target.value)} /></div>`}
-          <div><label className="f">Nové heslo</label><input type="password" value=${pw1} onChange=${(e) => setPw1(e.target.value)} placeholder=${deletePw ? "prázdné = zrušit ochranu" : "heslo"} /></div>
-          <div><label className="f">Zopakovat nové heslo</label><input type="password" value=${pw2} onChange=${(e) => setPw2(e.target.value)} /></div>
+          ${deletePw && html`<div><label className="f">${preloz("Současné heslo")}</label><input type="password" value=${pwCur} onChange=${(e) => setPwCur(e.target.value)} /></div>`}
+          <div><label className="f">${preloz("Nové heslo")}</label><input type="password" value=${pw1} onChange=${(e) => setPw1(e.target.value)} placeholder=${deletePw ? preloz("prázdné = zrušit ochranu") : preloz("heslo")} /></div>
+          <div><label className="f">${preloz("Zopakovat nové heslo")}</label><input type="password" value=${pw2} onChange=${(e) => setPw2(e.target.value)} /></div>
         </div>
         ${pwMsg && pwMsg.warn && html`<div className="warnbox">${pwMsg.warn}</div>`}
         ${pwMsg && pwMsg.ok && html`<div className="okbox">${pwMsg.ok}</div>`}
-        <button className="btn" style=${{ marginTop: 10 }} onClick=${savePw}>Uložit</button>
+        <button className="btn" style=${{ marginTop: 10 }} onClick=${savePw}>${preloz("Uložit")}</button>
       </div>`}
     <//>`;
 }

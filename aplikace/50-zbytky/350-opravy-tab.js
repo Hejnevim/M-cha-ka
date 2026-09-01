@@ -29,66 +29,66 @@ function OpravyTab({ opravy, davky }) {
       <div className="card">
         <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "center",
           marginBottom: 12, gap: 10, flexWrap: "wrap" }}>
-          <h2 style=${{ margin: 0 }}>Opravy po nátisku (${fmt(prehled.oprav, 0)})</h2>
+          <h2 style=${{ margin: 0 }}>${preloz("Opravy po nátisku")} (${fmt(prehled.oprav, 0)})</h2>
           <div className="chips">
             ${OBDOBI_OPRAV.map((o) => html`
               <button key=${o.kod} className=${"chip" + (o.kod === obdobi ? " on" : "")}
-                onClick=${() => setObdobi(o.kod)}>${o.popis}</button>`)}
+                onClick=${() => setObdobi(o.kod)}>${preloz(o.popis)}</button>`)}
           </div>
         </div>
 
         <div className="specbar" style=${{ marginTop: 0 }}>
           <span className="dot" style=${{ background: prehled.oprav ? "var(--warn)" : "var(--ok)" }}></span>
-          <span>Oprav <b>${fmt(prehled.oprav, 0)}</b></span>
-          <span>Dávek <b>${fmt(prehled.davek, 0)}</b>${prehled.podil != null
-            ? " · s opravou " + fmt(prehled.podil * 100, 1) + " %" : ""}</span>
-          <span>Přidáno <b>${fmt(prehled.gramu)} g</b></span>
-          <span>Čas oprav <b>${fmt(prehled.minut / 60, 1)} h</b></span>
+          <span>${preloz("Oprav")} <b>${fmt(prehled.oprav, 0)}</b></span>
+          <span>${preloz("Dávek")} <b>${fmt(prehled.davek, 0)}</b>${prehled.podil != null
+            ? preloz(" · s opravou {p} %", { p: fmt(prehled.podil * 100, 1) }) : ""}</span>
+          <span>${preloz("Přidáno")} <b>${fmt(prehled.gramu)} g</b></span>
+          <span>${preloz("Čas oprav")} <b>${fmt(prehled.minut / 60, 1)} h</b></span>
         </div>
         ${prehled.podil == null && prehled.oprav > 0 && html`
           <p className="note" style=${{ marginTop: 8 }}>
-            Za tohle období není zapsaná žádná dávka — podíl dávek s opravou se proto
-            nepočítá.</p>`}
+            ${preloz("Za tohle období není zapsaná žádná dávka — podíl dávek s opravou se proto nepočítá.")}</p>`}
         ${prehled.bezDavky > 0 && html`
           <p className="note" style=${{ marginTop: 8 }}>
-            ${fmt(prehled.bezDavky, 0)} z toho bez kódu dávky — do podílu se nepočítají.</p>`}
+            ${preloz("{n} z toho bez kódu dávky — do podílu se nepočítají.", { n: fmt(prehled.bezDavky, 0) })}</p>`}
 
         ${!prehled.oprav ? html`
           <div className="empty">
-            Za zvolené období není zapsaná žádná oprava. Zapisuje se u váhy: po korekci
-            po nátisku tlačítkem <b>Zapsat opravu do evidence</b>.
+            ${preloz("Za zvolené období není zapsaná žádná oprava. Zapisuje se u váhy: po korekci po nátisku tlačítkem")}
+            <b> ${preloz("Zapsat opravu do evidence")}</b>.
           </div>` : html`
           <${React.Fragment}>
-            <h2 style=${{ marginTop: 18 }}>Které receptury se opravují</h2>
+            <h2 style=${{ marginTop: 18 }}>${preloz("Které receptury se opravují")}</h2>
             <table className="t">
-              <thead><tr><th>Barva</th><th className="num">Oprav</th>
-                <th className="num">Přidáno g</th><th>Nejčastěji</th></tr></thead>
+              <thead><tr><th>${preloz("Barva")}</th><th className="num">${preloz("Oprav")}</th>
+                <th className="num">${preloz("Přidáno g")}</th><th>${preloz("Nejčastěji")}</th></tr></thead>
               <tbody>
                 ${prehled.receptury.map((r) => html`
                   <tr key=${r.nazev}>
                     <td style=${{ fontWeight: 700 }}>${r.nazev}</td>
                     <td className="num">${fmt(r.pocet, 0)}</td>
                     <td className="num">${fmt(r.gramu)}</td>
-                    <td>${r.duvod || "—"}</td>
+                    <td>${r.duvod ? preloz(r.duvod) : "—"}</td>
                   </tr>`)}
               </tbody>
             </table>
             ${prehled.receptury.length && prehled.receptury[0].pocet > 1 && html`
               <p className="note" style=${{ marginTop: 8 }}>
-                ${prehled.receptury[0].nazev} se opravovala ${fmt(prehled.receptury[0].pocet, 0)}×
-                ${prehled.receptury[0].duvod ? " a nejčastěji proto, že " + prehled.receptury[0].duvod : ""}.
-                Opravit složení v databázi stojí jednou to, co nátisk stojí pokaždé.</p>`}
+                ${preloz("{r} se opravovala {n}×{duvod}. Opravit složení v databázi stojí jednou to, co nátisk stojí pokaždé.",
+                  { r: prehled.receptury[0].nazev, n: fmt(prehled.receptury[0].pocet, 0),
+                    duvod: prehled.receptury[0].duvod
+                      ? preloz(" a nejčastěji proto, že {d}", { d: preloz(prehled.receptury[0].duvod) }) : "" })}</p>`}
 
-            <h2 style=${{ marginTop: 18 }}>Co bylo na nátiscích vidět</h2>
+            <h2 style=${{ marginTop: 18 }}>${preloz("Co bylo na nátiscích vidět")}</h2>
             <div className="specbar" style=${{ marginTop: 0 }}>
               ${prehled.duvody.map((d) => html`
-                <span key=${d.popis}>${d.popis} <b>${fmt(d.pocet, 0)}×</b></span>`)}
+                <span key=${d.popis}>${preloz(d.popis)} <b>${fmt(d.pocet, 0)}×</b></span>`)}
             </div>
 
-            <h2 style=${{ marginTop: 18 }}>Zapsané opravy</h2>
+            <h2 style=${{ marginTop: 18 }}>${preloz("Zapsané opravy")}</h2>
             <table className="t">
-              <thead><tr><th>Kód</th><th>Kdy</th><th>Barva</th><th>Zakázka</th>
-                <th>Důvod</th><th className="num">Kroků</th><th className="num">Přidáno g</th>
+              <thead><tr><th>${preloz("Kód")}</th><th>${preloz("Kdy")}</th><th>${preloz("Barva")}</th><th>${preloz("Zakázka")}</th>
+                <th>${preloz("Důvod")}</th><th className="num">${preloz("Kroků")}</th><th className="num">${preloz("Přidáno g")}</th>
                 <th /></tr></thead>
               <tbody>
                 ${prehled.zaznamy.map((o) => html`
@@ -98,13 +98,13 @@ function OpravyTab({ opravy, davky }) {
                       <td>${kdyText(o.kdy)}</td>
                       <td style=${{ fontWeight: 700 }}>${o.nazev || "—"}</td>
                       <td>${o.zakazka || "—"}</td>
-                      <td>${o.duvodPopis || "—"}</td>
+                      <td>${o.duvodPopis ? preloz(o.duvodPopis) : "—"}</td>
                       <td className="num">${fmt(o.kroku, 0)}</td>
                       <td className="num">${fmt(o.pridanoG)}</td>
                       <td className="num">
                         <button className="btn sec sm"
                           onClick=${() => setDetail(detail === o.kod ? "" : o.kod)}>
-                          ${detail === o.kod ? "Skrýt" : "Čím"}
+                          ${detail === o.kod ? preloz("Skrýt") : preloz("Čím")}
                         </button>
                       </td>
                     </tr>
@@ -114,10 +114,10 @@ function OpravyTab({ opravy, davky }) {
                           ${poleNaKroky(o.kroky).map((k, i) => html`
                             <span key=${i}>${i ? " · " : ""}${k.nazev} +${fmtG(k.g)} g${
                               k.sila ? " (" + k.sila + ")" : ""}</span>`)}
-                          ${o.davkaPred > 0 && html`<span> · dávka
+                          ${o.davkaPred > 0 && html`<span> · ${preloz("dávka")}
                             ${" " + fmt(o.davkaPred)} → ${fmt(o.davkaPo)} g</span>`}
-                          ${o.davka && html`<span> · dávka ${o.davka}</span>`}
-                          ${o.produkt && html`<span> · produkt ${o.produkt}</span>`}
+                          ${o.davka && html`<span> · ${preloz("dávka")} ${o.davka}</span>`}
+                          ${o.produkt && html`<span> · ${preloz("produkt")} ${o.produkt}</span>`}
                           ${o.pozn && html`<div>${o.pozn}</div>`}
                         </td>
                       </tr>`}

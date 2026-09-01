@@ -174,7 +174,7 @@ function csvNaDavky(text) {
   const head = rows[0].map((h) => h.toLowerCase().trim());
   const ci = {};
   for (const jm of DAVKY_HLAVICKA) ci[jm] = head.indexOf(jm);
-  if (ci.kod < 0) throw new Error("CSV dávek musí mít sloupec kod.");
+  if (ci.kod < 0) throw new Error(preloz("CSV dávek musí mít sloupec kod."));
   const out = [];
   for (const r of rows.slice(1)) {
     const kod = String(r[ci.kod] || "").trim();

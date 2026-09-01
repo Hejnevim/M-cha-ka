@@ -43,71 +43,72 @@ function FrontaTab({ fronta, setFronta, zbytky, materialy }) {
      předpověď ho mít nemůže — u té se říká, po které položce fronty vznikne. */
   const zdrojText = (k) => {
     if (!k || !k.zdroj) return "";
-    if (!k.zPredpovedi) return "kelímek " + popisKelimku(k.zdroj);
+    if (!k.zPredpovedi) return preloz("kelímek {kod}", { kod: popisKelimku(k.zdroj) });
     const c = cislaPolozek.get(k.zdroj.kod);
-    return "zbytek po " + (c ? c + ". " : "") + (k.zdroj.nazev || "položce");
+    return preloz("zbytek po {c}{n}", { c: c ? c + ". " : "", n: k.zdroj.nazev || preloz("položce") });
   };
-  const zpusobText = (k) => k.druh === "presna" ? "přímá shoda"
-    : "dopočet, složení sedí na " + fmt(k.shoda * 100, 0) + " %";
+  const zpusobText = (k) => k.druh === "presna" ? preloz("přímá shoda")
+    : preloz("dopočet, složení sedí na {p} %", { p: fmt(k.shoda * 100, 0) });
 
   return html`
     <${React.Fragment}>
       <div className="card">
         <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "center",
           marginBottom: 12, gap: 10, flexWrap: "wrap" }}>
-          <h2 style=${{ margin: 0 }}>Fronta míchání (${fmt(cekaji.length, 0)})</h2>
-          ${hotovoDnes > 0 && html`<span className="note">Dnes namícháno ${fmt(hotovoDnes, 0)}
-            ${hotovoDnes === 1 ? " položka" : (hotovoDnes < 5 ? " položky" : " položek")}.</span>`}
+          <h2 style=${{ margin: 0 }}>${preloz("Fronta míchání")} (${fmt(cekaji.length, 0)})</h2>
+          ${hotovoDnes > 0 && html`<span className="note">${preloz("Dnes namícháno")} ${fmt(hotovoDnes, 0)}
+            ${hotovoDnes === 1 ? preloz(" položka") : (hotovoDnes < 5 ? preloz(" položky") : preloz(" položek"))}.</span>`}
         </div>
 
         ${!cekaji.length ? html`
           <div className="empty">
-            Ve frontě nic nečeká. Položka se do ní přidá v kalkulaci tlačítkem
-            <b> ＋ Do fronty</b> — jakmile je u zakázky vybraná receptura a spočítaná dávka.
+            ${preloz("Ve frontě nic nečeká. Položka se do ní přidá v kalkulaci tlačítkem")}
+            <b> ${preloz("＋ Do fronty")}</b>${preloz(" — jakmile je u zakázky vybraná receptura a spočítaná dávka.")}
           </div>` : html`
         <${React.Fragment}>
           <p className="note" style=${{ marginTop: 0 }}>
-            Celkem se má namíchat <b>${fmt(celkemG)} g</b> barvy${dnes && dnes.gramu > 0
-              ? ", z toho " + fmt(dnes.gramu) + " g v tomhle pořadí vyjde ze zbytků" : ""}.
+            ${preloz("Celkem se má namíchat")} <b>${fmt(celkemG)} g</b> ${preloz("barvy")}${dnes && dnes.gramu > 0
+              ? preloz(", z toho {g} g v tomhle pořadí vyjde ze zbytků", { g: fmt(dnes.gramu) }) : ""}.
             ${dnes && dnes.usporaLikvidace > 0
-              ? "Za jejich svoz do nebezpečného odpadu se nezaplatí "
-                + cenaText(dnes.usporaLikvidace, vysledek.mena) + "." : ""}
+              ? preloz("Za jejich svoz do nebezpečného odpadu se nezaplatí {c}.",
+                  { c: cenaText(dnes.usporaLikvidace, vysledek.mena) }) : ""}
           </p>
 
           ${vysledek && vysledek.prerovnat && html`
             <div className="okbox" style=${{ marginTop: 0 }}>
               <div className="rowline" style=${{ marginBottom: 6 }}>
-                <span><b>Jiné pořadí ušetří o ${fmt(vysledek.zisk.gramu)} g čerstvé barvy víc</b>${
+                <span><b>${preloz("Jiné pořadí ušetří o {g} g čerstvé barvy víc", { g: fmt(vysledek.zisk.gramu) })}</b>${
                   vysledek.zisk.uspora > 0
                     ? " — " + cenaText(vysledek.zisk.uspora, vysledek.mena) : ""}.
-                  ${" "}Ze zbytků by vyšlo ${fmt(vysledek.plan.gramu)} g místo ${fmt(dnes.gramu)} g.</span>
+                  ${" "}${preloz("Ze zbytků by vyšlo {a} g místo {b} g.",
+                    { a: fmt(vysledek.plan.gramu), b: fmt(dnes.gramu) })}</span>
                 <span style=${{ marginLeft: "auto" }}></span>
                 <button className="btn sm" onClick=${() => prerovnej(
-                  vysledek.plan.poradi.map((i) => cekaji[i].kod))}>Přerovnat frontu</button>
+                  vysledek.plan.poradi.map((i) => cekaji[i].kod))}>${preloz("Přerovnat frontu")}</button>
               </div>
               ${vysledek.plan.kroky.map((k, i) => html`
                 <div key=${k.polozka.kod} className="note" style=${{ marginTop: 2 }}>
-                  ${(i + 1) + ". " + (k.polozka.nazev || "bez názvu") + " · " + fmt(k.davkaG) + " g"}
+                  ${(i + 1) + ". " + (k.polozka.nazev || preloz("bez názvu")) + " · " + fmt(k.davkaG) + " g"}
                   ${k.zdroj
-                    ? " ← " + zdrojText(k) + " (" + fmt(k.pouzit) + " g), domíchat "
-                      + fmt(k.domichat) + " g"
+                    ? preloz(" ← {z} ({g} g), domíchat {d} g",
+                        { z: zdrojText(k), g: fmt(k.pouzit), d: fmt(k.domichat) })
                       + ((k.zastoupeno || []).length
-                        ? " · zástupnost: " + textZastoupeni(k.zastoupeno) : "")
-                    : " ← čerstvě"}
+                        ? preloz(" · zástupnost: {z}", { z: textZastoupeniObr(k.zastoupeno) }) : "")
+                    : preloz(" ← čerstvě")}
                 </div>`)}
             </div>`}
           ${vysledek && !vysledek.prerovnat && html`
             <div className="specbar" style=${{ marginTop: 0 }}>
               <span className="dot" style=${{ background: "var(--ok)" }}></span>
-              <span>Zadané pořadí je z téhle fronty to nejlepší${vysledek.vsechna
-                ? " — vyzkoušeno všech " + fmt(vysledek.zkouseno, 0) + " pořadí"
-                : " z " + fmt(vysledek.zkouseno, 0) + " zkoušených"}.</span>
+              <span>${preloz("Zadané pořadí je z téhle fronty to nejlepší")}${vysledek.vsechna
+                ? preloz(" — vyzkoušeno všech {n} pořadí", { n: fmt(vysledek.zkouseno, 0) })
+                : preloz(" z {n} zkoušených", { n: fmt(vysledek.zkouseno, 0) })}.</span>
             </div>`}
 
           <table className="t">
-            <thead><tr><th className="num">#</th><th /><th>Barva</th><th className="num">Dávka</th>
-              <th>Zakázka</th><th>Začne se z</th><th className="num">Domíchat</th>
-              <th className="num">Ušetří</th><th /></tr></thead>
+            <thead><tr><th className="num">#</th><th /><th>${preloz("Barva")}</th><th className="num">${preloz("Dávka")}</th>
+              <th>${preloz("Zakázka")}</th><th>${preloz("Začne se z")}</th><th className="num">${preloz("Domíchat")}</th>
+              <th className="num">${preloz("Ušetří")}</th><th /></tr></thead>
             <tbody>
               ${cekaji.map((p, i) => {
                 const k = dnes && dnes.kroky[i];
@@ -116,8 +117,8 @@ function FrontaTab({ fronta, setFronta, zbytky, materialy }) {
                   <td className="num" style=${{ fontFamily: "var(--mono)", fontWeight: 700 }}>${i + 1}</td>
                   <td><span className="swatch" style=${{ background: p.hex || "#888888" }} /></td>
                   <td>
-                    <div style=${{ fontWeight: 700 }}>${p.nazev || "bez názvu"}
-                      ${p.tuzidlo && html`<span className="tag" style=${{ marginLeft: 6 }}>s tužidlem</span>`}</div>
+                    <div style=${{ fontWeight: 700 }}>${p.nazev || preloz("bez názvu")}
+                      ${p.tuzidlo && html`<span className="tag" style=${{ marginLeft: 6 }}>${preloz("s tužidlem")}</span>`}</div>
                     <div className="note">${p.kod}${p.poloha ? " · " + p.poloha : ""}${
                       p.tech ? " · " + p.tech : ""}</div>
                   </td>
@@ -128,7 +129,7 @@ function FrontaTab({ fronta, setFronta, zbytky, materialy }) {
                   <td>${k && k.zdroj
                     ? html`<div>${zdrojText(k)}</div>
                         <div className="note">${fmt(k.pouzit)} g · ${zpusobText(k)}</div>`
-                    : html`<span className="note">čerstvě</span>`}</td>
+                    : html`<span className="note">${preloz("čerstvě")}</span>`}</td>
                   <td className="num">${k ? fmt(k.domichat) + " g" : ""}</td>
                   <td className="num">${k && k.uspora != null && k.uspora > 0
                     ? cenaText(k.uspora, vysledek ? vysledek.mena : "")
@@ -136,12 +137,12 @@ function FrontaTab({ fronta, setFronta, zbytky, materialy }) {
                   <td>
                     <div className="rowline" style=${{ gap: 4, marginBottom: 0 }}>
                       <button className="btn sec sm" disabled=${i === 0}
-                        title="posunout ve frontě dopředu" onClick=${() => presun(p.kod, -1)}>↑</button>
+                        title=${preloz("posunout ve frontě dopředu")} onClick=${() => presun(p.kod, -1)}>↑</button>
                       <button className="btn sec sm" disabled=${i === cekaji.length - 1}
-                        title="posunout ve frontě dozadu" onClick=${() => presun(p.kod, 1)}>↓</button>
-                      <button className="btn sm" title="odškrtnout jako namíchané"
-                        onClick=${() => uzavri(p.kod, "namichano")}>Namícháno</button>
-                      <button className="btn sec sm" title="z fronty pryč, do souboru se zapíše jako zrušená"
+                        title=${preloz("posunout ve frontě dozadu")} onClick=${() => presun(p.kod, 1)}>↓</button>
+                      <button className="btn sm" title=${preloz("odškrtnout jako namíchané")}
+                        onClick=${() => uzavri(p.kod, "namichano")}>${preloz("Namícháno")}</button>
+                      <button className="btn sec sm" title=${preloz("z fronty pryč, do souboru se zapíše jako zrušená")}
                         onClick=${() => uzavri(p.kod, "zruseno")}>✕</button>
                     </div>
                   </td>
@@ -153,31 +154,27 @@ function FrontaTab({ fronta, setFronta, zbytky, materialy }) {
           ${vysledek && vysledek.bezPredpovedi.length > 0 && html`
             <p className="note">
               ${vysledek.bezPredpovedi.length === 1
-                ? "U položky " + vysledek.bezPredpovedi[0].nazev + " nemá evidence dost minulých"
-                  + " dávek téže barvy (potřebuje aspoň " + NEJMIN_VZORKU_ZBYTKU
-                  + "), takže s jejím zbytkem pořadí nepočítá."
-                : "U " + fmt(vysledek.bezPredpovedi.length, 0) + " položek nemá evidence dost"
-                  + " minulých dávek téže barvy (potřebuje aspoň " + NEJMIN_VZORKU_ZBYTKU
-                  + "), takže s jejich zbytkem pořadí nepočítá: "
-                  + vysledek.bezPredpovedi.slice(0, 4).map((p) => p.nazev).join(", ")
-                  + (vysledek.bezPredpovedi.length > 4 ? " a další." : ".")}
+                ? preloz("U položky {p} nemá evidence dost minulých dávek téže barvy (potřebuje aspoň {min}), takže s jejím zbytkem pořadí nepočítá.",
+                    { p: vysledek.bezPredpovedi[0].nazev, min: NEJMIN_VZORKU_ZBYTKU })
+                : preloz("U {n} položek nemá evidence dost minulých dávek téže barvy (potřebuje aspoň {min}), takže s jejich zbytkem pořadí nepočítá: {list}{konec}",
+                    { n: fmt(vysledek.bezPredpovedi.length, 0), min: NEJMIN_VZORKU_ZBYTKU,
+                      list: vysledek.bezPredpovedi.slice(0, 4).map((p) => p.nazev).join(", "),
+                      konec: vysledek.bezPredpovedi.length > 4 ? preloz(" a další.") : "." })}
             </p>`}
           ${vysledek && !vysledek.cenyUplne && html`
             <p className="note">
-              Ceník nemá cenu všech složek u ${vysledek.bezCeny.length === 1
-                ? "jedné položky" : fmt(vysledek.bezCeny.length, 0) + " položek"} — pořadí se
-              proto vybírá podle gramů čerstvé barvy a koruny se sčítají jen tam, kde je cena známá.
+              ${preloz("Ceník nemá cenu všech složek u {x} — pořadí se proto vybírá podle gramů čerstvé barvy a koruny se sčítají jen tam, kde je cena známá.",
+                { x: vysledek.bezCeny.length === 1
+                  ? preloz("jedné položky") : preloz("{n} položek", { n: fmt(vysledek.bezCeny.length, 0) }) })}
             </p>`}
           ${vysledek && vysledek.plan.kroky.some((k) => k.zdroj && k.zdroj.tuzidlo) && html`
             <p className="note">
-              Plán bere i kelímek s tužidlem — ten tuhne a na svou položku musí přijít
-              v rámci své lhůty, jinak z pořadí nezbude nic než přehozený den.
+              ${preloz("Plán bere i kelímek s tužidlem — ten tuhne a na svou položku musí přijít v rámci své lhůty, jinak z pořadí nezbude nic než přehozený den.")}
             </p>`}
           ${vysledek && !vysledek.vsechna && html`
             <p className="note">
-              Fronta má víc než ${FRONTA_PRESNE_DO} položek, takže se pořadí skládalo postupně
-              a pak zlepšovalo — vyzkoušeno ${fmt(vysledek.zkouseno, 0)} pořadí. Že lepší
-              neexistuje, se u téhle velikosti netvrdí.
+              ${preloz("Fronta má víc než {n} položek, takže se pořadí skládalo postupně a pak zlepšovalo — vyzkoušeno {z} pořadí. Že lepší neexistuje, se u téhle velikosti netvrdí.",
+                { n: FRONTA_PRESNE_DO, z: fmt(vysledek.zkouseno, 0) })}
             </p>`}
         <//>`}
       </div>

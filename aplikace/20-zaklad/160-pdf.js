@@ -47,7 +47,7 @@ async function precistPdf(f) {
     // neprojde. Most čte tělo požadavku po bajtech, na typu mu nezáleží.
     const r = await fetch(adresa, { method: "POST", body: new Blob([f], { type: "text/plain" }) });
     const d = await r.json();
-    if (!d.ok) throw new Error(d.chyba || "PDF se nepodařilo přečíst.");
+    if (!d.ok) throw new Error(d.chyba || preloz("PDF se nepodařilo přečíst."));
     return { pole: d.pole || {}, zdroj: d.zdroj || {}, text: d.text || "",
       obrazky: d.obrazky || [], stranky: d.stranky || [], vzorniky: d.vzorniky || [],
       pdfId: d.pdf_id || "" };
@@ -59,11 +59,10 @@ async function precistPdf(f) {
       let zije = false;
       try { await sgpsGet("/stav"); zije = true; } catch (e2) {}
       popis = zije
-        ? "Most odpovídá, ale soubor se k němu nedostal (" + popis + "). "
-          + "Bývá to blokace ochranou prohlížeče nebo antivirem — zkuste aplikaci "
-          + "otevřít přímo z adresy " + sgpsBase().replace("/api", "") + "."
-        : "Most přestal odpovídat na " + adresa + ". Zkontrolujte okno, ve kterém "
-          + "běží python most.py — nesmí být zavřené a nemá v něm být chybový výpis.";
+        ? preloz("Most odpovídá, ale soubor se k němu nedostal ({e}). Bývá to blokace ochranou prohlížeče nebo antivirem — zkuste aplikaci otevřít přímo z adresy {a}.",
+            { e: popis, a: sgpsBase().replace("/api", "") })
+        : preloz("Most přestal odpovídat na {a}. Zkontrolujte okno, ve kterém běží python most.py — nesmí být zavřené a nemá v něm být chybový výpis.",
+            { a: adresa });
     }
     const chyba = new Error(popis);
     chyba.mostZije = !/přestal odpovídat/.test(popis);
@@ -81,7 +80,7 @@ async function ostryVyrez(pdfId, strana, vyrez, sirka, vyska, cil) {
   const r = await fetch(sgpsBase() + "/vyrez", { method: "POST",
     body: new Blob([telo], { type: "text/plain" }) });
   const d = await r.json();
-  if (!d.ok) throw new Error(d.chyba || "Výřez se nepodařilo vykreslit.");
+  if (!d.ok) throw new Error(d.chyba || preloz("Výřez se nepodařilo vykreslit."));
   return d;
 }
 
@@ -92,19 +91,19 @@ function SpecPole({ pole, setPole, zdroj, text }) {
     <${React.Fragment}>
       <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
         <p className="hint" style=${{ margin: 0 }}>
-          Prázdné pole se nepoužije a v kalkulaci zůstane stávající hodnota.
+          ${preloz("Prázdné pole se nepoužije a v kalkulaci zůstane stávající hodnota.")}
         </p>
         <button className="btn sec sm" onClick=${() => setTextVidet(!textVidet)}>
-          ${textVidet ? "Skrýt text z PDF" : "Zobrazit text z PDF"}
+          ${textVidet ? preloz("Skrýt text z PDF") : preloz("Zobrazit text z PDF")}
         </button>
       </div>
       <div className="frow c3" style=${{ marginTop: 10 }}>
         ${PDF_PORADI.map((k) => html`
           <div key=${k}>
-            <label className="f">${PDF_POPIS[k] || k}</label>
+            <label className="f">${preloz(PDF_POPIS[k] || k)}</label>
             <input value=${pole[k] != null ? String(pole[k]) : ""}
               onChange=${(e) => setPole(Object.assign({}, pole, { [k]: e.target.value }))}
-              placeholder=${zdroj[k] ? "" : "nenalezeno v PDF"} />
+              placeholder=${zdroj[k] ? "" : preloz("nenalezeno v PDF")} />
             ${zdroj[k] && html`<div className="note" style=${{ marginTop: 3 }}>${zdroj[k]}</div>`}
           </div>`)}
       </div>
@@ -114,11 +113,11 @@ function SpecPole({ pole, setPole, zdroj, text }) {
 
 /* Vyhodnocení specu proti katalogu — co se povedlo napárovat a co ne. */
 function SpecVysledek({ res }) {
-  if (!res) return html`<div className="empty">Zatím není co vyhodnotit.</div>`;
+  if (!res) return html`<div className="empty">${preloz("Zatím není co vyhodnotit.")}</div>`;
   return html`
     <${React.Fragment}>
-      ${res.ok.map((t, i) => html`<div key=${i} className="okbox" style=${{ marginTop: 6 }}>✓ ${t}</div>`)}
-      ${res.warn.map((t, i) => html`<div key=${i} className="warnbox" style=${{ marginTop: 6 }}>${t}</div>`)}
+      ${res.ok.map((t, i) => html`<div key=${i} className="okbox" style=${{ marginTop: 6 }}>✓ ${preloz(t)}</div>`)}
+      ${res.warn.map((t, i) => html`<div key=${i} className="warnbox" style=${{ marginTop: 6 }}>${preloz(t)}</div>`)}
     <//>`;
 }
 
@@ -157,21 +156,21 @@ function PdfTab({ sgps, products, recipes, onApply, ulozeny, setUlozeny }) {
 
   if (sgps.stav.stav !== "ok") return html`
     <div className="card">
-      <h2>Načtení specifikace z PDF</h2>
+      <h2>${preloz("Načtení specifikace z PDF")}</h2>
       <div className="warnbox" style=${{ marginTop: 0 }}>
-        <b>Most neběží.</b> PDF čte pomocný program — prohlížeč to sám neumí.
+        <b>${preloz("Most neběží.")}</b> ${preloz("PDF čte pomocný program — prohlížeč to sám neumí.")}
       </div>
-      <p className="hint" style=${{ marginTop: 12 }}>Ve složce aplikace spusťte:</p>
+      <p className="hint" style=${{ marginTop: 12 }}>${preloz("Ve složce aplikace spusťte:")}</p>
       <pre className="tpl">python most.py</pre>
-      <p className="note">Most se sám otevře na http://localhost:8765 a nechá se běžet po celou dobu práce.</p>
-      <button className="btn" style=${{ marginTop: 10 }} onClick=${sgps.zjisti}>Zkusit znovu</button>
+      <p className="note">${preloz("Most se sám otevře na http://localhost:8765 a nechá se běžet po celou dobu práce.")}</p>
+      <button className="btn" style=${{ marginTop: 10 }} onClick=${sgps.zjisti}>${preloz("Zkusit znovu")}</button>
     </div>`;
 
   return html`
     <${React.Fragment}>
       <div className="card">
-        <h2>Načtení specifikace z PDF</h2>
-        <p className="hint">Přetáhněte sem zakázkový list v PDF. Rozpoznané údaje si před použitím zkontrolujte — každé pole jde přepsat.</p>
+        <h2>${preloz("Načtení specifikace z PDF")}</h2>
+        <p className="hint">${preloz("Přetáhněte sem zakázkový list v PDF. Rozpoznané údaje si před použitím zkontrolujte — každé pole jde přepsat.")}</p>
         <div onDragOver=${(e) => { e.preventDefault(); setNadHranici(true); }}
           onDragLeave=${() => setNadHranici(false)} onDrop=${naPusteni}
           onClick=${() => souborRef.current && souborRef.current.click()}
@@ -179,7 +178,7 @@ function PdfTab({ sgps, products, recipes, onApply, ulozeny, setUlozeny }) {
             boxShadow: nadHranici ? "var(--neu-in),0 0 0 3px var(--focus)" : "var(--neu-in)" }}>
           <div style=${{ fontSize: 30, opacity: .5 }}>⇩</div>
           <div style=${{ fontWeight: 700, marginTop: 6 }}>
-            ${stav === "cte" ? "Čtu PDF…" : "Přetáhněte PDF sem, nebo klikněte a vyberte soubor"}
+            ${stav === "cte" ? preloz("Čtu PDF…") : preloz("Přetáhněte PDF sem, nebo klikněte a vyberte soubor")}
           </div>
           ${jmeno && html`<div className="note" style=${{ marginTop: 4 }}>${jmeno}</div>`}
         </div>
@@ -192,32 +191,33 @@ function PdfTab({ sgps, products, recipes, onApply, ulozeny, setUlozeny }) {
                 const t0 = Date.now();
                 try {
                   const d = await sgpsGet("/stav");
-                  uprav({ chyba: "Most odpovídá za " + (Date.now() - t0) + " ms — režim „" + d.rezim
-                    + "“, čtení PDF " + (d.pdf ? "připravené" : "NEDOSTUPNÉ (chybí pdf_spec.py)")
-                    + ", adresa " + sgpsBase() + "." });
+                  uprav({ chyba: preloz("Most odpovídá za {ms} ms — režim „{r}“, čtení PDF {pdf}, adresa {a}.",
+                    { ms: Date.now() - t0, r: d.rezim,
+                      pdf: d.pdf ? preloz("připravené") : preloz("NEDOSTUPNÉ (chybí pdf_spec.py)"),
+                      a: sgpsBase() }) });
                 } catch (e2) {
-                  uprav({ chyba: "Most se neozval na " + sgpsBase() + " — " + String((e2 && e2.message) || e2) });
+                  uprav({ chyba: preloz("Most se neozval na {a} — {e}", { a: sgpsBase(), e: String((e2 && e2.message) || e2) }) });
                 }
-              }}>Ověřit spojení s mostem</button>
-              <span className="note">vypíše, na jaké adrese se aplikace mostu ptá a co odpověděl</span>
+              }}>${preloz("Ověřit spojení s mostem")}</button>
+              <span className="note">${preloz("vypíše, na jaké adrese se aplikace mostu ptá a co odpověděl")}</span>
             </div>
           <//>`}
       </div>
 
       ${stav === "hotovo" && html`
         <div className="card">
-          <h2>Rozpoznané údaje (${Object.keys(pole).length})</h2>
+          <h2>${preloz("Rozpoznané údaje")} (${Object.keys(pole).length})</h2>
           <${SpecPole} pole=${pole} setPole=${setPole} zdroj=${zdroj} text=${text} />
         </div>
 
         <div className="card">
-          <h2>Co z toho aplikace poznala</h2>
+          <h2>${preloz("Co z toho aplikace poznala")}</h2>
           <${SpecVysledek} res=${res} />
           ${res && html`
             <div className="rowline" style=${{ marginTop: 14, marginBottom: 0 }}>
               <button className="btn" disabled=${!res.product}
-                onClick=${() => onApply(Object.assign({}, res, { vzorniky: ulozeny.vzorniky || [] }))}>Použít v kalkulaci →</button>
-              ${!res.product && html`<span className="note">bez rozpoznaného produktu nelze pokračovat — doplňte ref. číslo výše</span>`}
+                onClick=${() => onApply(Object.assign({}, res, { vzorniky: ulozeny.vzorniky || [] }))}>${preloz("Použít v kalkulaci →")}</button>
+              ${!res.product && html`<span className="note">${preloz("bez rozpoznaného produktu nelze pokračovat — doplňte ref. číslo výše")}</span>`}
             </div>`}
         </div>`}
     <//>`;

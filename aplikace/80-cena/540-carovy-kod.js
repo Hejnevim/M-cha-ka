@@ -4,7 +4,7 @@ function code128Pruhy(text) {
   const hodnoty = [104];                       // START B
   for (let i = 0; i < s.length; i++) {
     const c = s.charCodeAt(i);
-    if (c < 32 || c > 126) throw new Error("Kód obsahuje znak, který Code 128 sada B neumí.");
+    if (c < 32 || c > 126) throw new Error(preloz("Kód obsahuje znak, který Code 128 sada B neumí."));
     hodnoty.push(c - 32);
   }
   let kontrola = 104;

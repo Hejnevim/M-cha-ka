@@ -63,8 +63,8 @@ function FiltrDatabaze({ recipes, hodnota, setHodnota, popis, tech, skryto, nadp
     if (!zdroj) return "";
     const v = vhodnostTypu(zdroj, dbMat, matProduktu);
     if (!v) return "";
-    return v === "ano" ? " · ✓ na " + (matProduktu || []).join(" / ")
-      : " · × není na " + (matProduktu || []).join(" / ");
+    return v === "ano" ? preloz(" · ✓ na {m}", { m: (matProduktu || []).join(" / ") })
+      : preloz(" · × není na {m}", { m: (matProduktu || []).join(" / ") });
   };
   // Zvolená databáze, která k téhle technologii nepatří, by tiše ukazovala
   // prázdný seznam — proto se výběr vrátí na "vše".
@@ -84,27 +84,27 @@ function FiltrDatabaze({ recipes, hodnota, setHodnota, popis, tech, skryto, nadp
   if (!vzdy && zdroje.filter((z) => z.zdroj).length < 2) return null;
   return html`
     <div style=${{ marginBottom: 10 }}>
-      ${nadpis !== false && html`<label className="f">Databáze receptur${tech ? " pro " + tech : ""}</label>`}
+      ${nadpis !== false && html`<label className="f">${preloz("Databáze receptur")}${tech ? preloz(" pro {t}", { t: tech }) : ""}</label>`}
       ${vyber ? html`
         <select value=${hodnota} onChange=${(e) => setHodnota(e.target.value)}>
-          <option value="">Všechny typy barev (${fmt(recipes.length, 0)})</option>
+          <option value="">${preloz("Všechny typy barev")} (${fmt(recipes.length, 0)})</option>
           ${zdroje.map((z) => html`<option key=${z.zdroj || "-"} value=${z.zdroj || "@vlastni"}>
-            ${nazevDb(z.zdroj) || z.nazev} (${fmt(z.pocet, 0)})${znackaMat(z.zdroj)}</option>`)}
+            ${nazevDb(z.zdroj) || preloz(z.nazev)} (${fmt(z.pocet, 0)})${znackaMat(z.zdroj)}</option>`)}
         </select>` : html`
       <div className="chips">
         <button className=${"chip" + (hodnota ? "" : " on")} onClick=${() => setHodnota("")}>
-          vše (${fmt(recipes.length, 0)})
+          ${preloz("vše")} (${fmt(recipes.length, 0)})
         </button>
         ${zdroje.map((z) => html`
           <button key=${z.zdroj || "-"} className=${"chip" + (hodnota === (z.zdroj || "@vlastni") ? " on" : "")}
-            title=${z.zdroj || "receptury zadané ručně v aplikaci"}
+            title=${z.zdroj || preloz("receptury zadané ručně v aplikaci")}
             onClick=${() => setHodnota(z.zdroj || "@vlastni")}>
-            ${z.nazev} (${fmt(z.pocet, 0)})${znackaMat(z.zdroj)}
+            ${preloz(z.nazev)} (${fmt(z.pocet, 0)})${znackaMat(z.zdroj)}
           </button>`)}
       </div>`}
       ${skryto > 0 && html`<p className="note" style=${{ marginTop: 6 }}>
-        Skryto ${fmt(skryto, 0)} receptur z databází, které k technologii
-        ${tech ? " " + tech : ""} nepatří.
+        ${preloz("Skryto {n} receptur z databází, které k technologii{t} nepatří.",
+          { n: fmt(skryto, 0), t: tech ? " " + tech : "" })}
       </p>`}
       ${popis && html`<p className="note" style=${{ marginTop: 6 }}>${popis}</p>`}
     </div>`;

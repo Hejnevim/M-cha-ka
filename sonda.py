@@ -107,6 +107,10 @@ def main():
     ap.add_argument("--sirka", type=int, default=1600, help="šířka okna v px")
     ap.add_argument("--vyska", type=int, default=1000, help="výška okna v px")
     ap.add_argument("--syrove", action="store_true", help="vypsat JSON bez úprav")
+    # Jazyk se musí podstrčit PŘED načtením částí — volbu čte 127-jazyk.js
+    # z localStorage při svém načtení, pozdější zápis už vykreslení nezmění.
+    ap.add_argument("--jazyk", default="", choices=["", "cs", "en", "pt"],
+                    help="jazyk obrazovky (zapíše se do localStorage před načtením)")
     a = ap.parse_args()
 
     zdroj = os.path.join(os.path.dirname(os.path.abspath(__file__)), a.soubor)
@@ -130,7 +134,15 @@ def main():
     # `</body>` je v souboru víckrát, i uvnitř javascriptových řetězců pro tisk
     # štítku. Vkládá se jen před ten poslední.
     j = s.rindex("</body>")
-    open(docasny, "w", encoding="utf-8").write(s[:j] + vlozka + s[j:])
+    s = s[:j] + vlozka + s[j:]
+    if a.jazyk:
+        # do localStorage jako JSON s uvozovkami — loadLS čte přes JSON.parse
+        # a holé `en` by tiše sjelo na češtinu (past popsaná v irm-jazyk)
+        pred = ("<script>try{localStorage.setItem('irm-jazyk',%s)}catch(e){}"
+                "</script>" % json.dumps(json.dumps(a.jazyk)))
+        k = s.index("<head>") + len("<head>")
+        s = s[:k] + pred + s[k:]
+    open(docasny, "w", encoding="utf-8").write(s)
     try:
         vystup = subprocess.run(
             [prohlizec, "--headless=new", "--disable-gpu", "--no-sandbox",

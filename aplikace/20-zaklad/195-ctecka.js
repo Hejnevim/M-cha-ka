@@ -14,7 +14,7 @@ function useSerialScanner(onCode) {
   };
   const connect = async () => {
     setErr("");
-    if (!("serial" in navigator)) { setErr("Tento prohlížeč nepodporuje sériové připojení (Web Serial). Použijte Chrome nebo Edge, nebo režim klávesnice."); return; }
+    if (!("serial" in navigator)) { setErr(preloz("Tento prohlížeč nepodporuje sériové připojení (Web Serial). Použijte Chrome nebo Edge, nebo režim klávesnice.")); return; }
     try {
       const port = await navigator.serial.requestPort();
       await port.open({ baudRate: n(baud, 9600) });
@@ -35,10 +35,10 @@ function useSerialScanner(onCode) {
             buf = lines.pop();
             for (const l of lines) if (l.trim()) cb.current(l.trim());
           }
-        } catch (e) { setErr("Čtení ze čtečky selhalo: " + e); }
+        } catch (e) { setErr(preloz("Čtení ze čtečky selhalo: {e}", { e: e })); }
       })();
     } catch (e) {
-      setErr("Připojení se nezdařilo: " + (e && e.message ? e.message : e));
+      setErr(preloz("Připojení se nezdařilo: {e}", { e: e && e.message ? e.message : e }));
     }
   };
   useEffect(() => () => { disconnect(); }, []);
@@ -84,7 +84,7 @@ function useCamScanner(onCode) {
           } catch (e) { /* jednotlivé snímky mohou selhat — pokračujeme */ }
         }, 250);
       } catch (e) {
-        setErr("Kameru se nepodařilo spustit: " + (e && e.message ? e.message : e));
+        setErr(preloz("Kameru se nepodařilo spustit: {e}", { e: e && e.message ? e.message : e }));
         setOn(false);
       }
     })();
@@ -106,102 +106,102 @@ function ScanTab({ hidOn, setHidOn, scanLog, onCode, onApply, clearLog, sgps }) 
   return html`
     <${React.Fragment}>
       <div className="card">
-        <h2>Načtení specifikace zakázky</h2>
-        <p className="hint">Čtečka načte kód ze zakázkového listu a aplikace z něj rovnou předvyplní kalkulaci — produkt, polohu, barvu, recepturu i počet kusů.</p>
+        <h2>${preloz("Načtení specifikace zakázky")}</h2>
+        <p className="hint">${preloz("Čtečka načte kód ze zakázkového listu a aplikace z něj rovnou předvyplní kalkulaci — produkt, polohu, barvu, recepturu i počet kusů.")}</p>
         <div className="specbar" style=${{ marginTop: 4 }}>
           <span className="dot" style=${{ background: sgpsOk ? "var(--ok)" : "var(--warn)" }}></span>
           ${sgpsOk
-            ? html`<span>Napojení na <b>SGPS</b> je aktivní (${sgps.stav.popis || sgps.stav.rezim}, ${sgps.stav.pocet} zakázek) — stačí načíst <b>číslo zakázky</b> a zbytek se doplní ze systému.</span>`
-            : html`<span>SGPS není napojeno — kód musí nést všechny údaje sám. Zakázkový list se dá načíst i jako PDF, dlaždicí <b>Zakázkový list</b> v kartě Vybraný produkt.</span>`}
+            ? html`<span>${preloz("Napojení na")} <b>SGPS</b> ${preloz("je aktivní ({r}, {n} zakázek) — stačí načíst", { r: preloz(sgps.stav.popis || sgps.stav.rezim), n: sgps.stav.pocet })} <b>${preloz("číslo zakázky")}</b> ${preloz("a zbytek se doplní ze systému.")}</span>`
+            : html`<span>${preloz("SGPS není napojeno — kód musí nést všechny údaje sám. Zakázkový list se dá načíst i jako PDF, dlaždicí")} <b>${preloz("Zakázkový list")}</b> ${preloz("v kartě Vybraný produkt.")}</span>`}
         </div>
 
-        <label className="f" style=${{ marginTop: 6 }}>1 · Čtečka v režimu klávesnice (běžné USB čtečky)</label>
+        <label className="f" style=${{ marginTop: 6 }}>${preloz("1 · Čtečka v režimu klávesnice (běžné USB čtečky)")}</label>
         <div className="rowline">
-          <label className="tgl"><input type="checkbox" checked=${hidOn} onChange=${(e) => setHidOn(e.target.checked)} /><span className="tglt"></span>Poslouchat čtečku kdekoli v aplikaci</label>
-          <span className="tag" style=${{ background: hidOn ? "var(--ok)" : "var(--paper)", color: hidOn ? "#fff" : "var(--ink-2)", boxShadow: hidOn ? "var(--neu-sm)" : "var(--neu-in)" }}>${hidOn ? "aktivní" : "vypnuto"}</span>
+          <label className="tgl"><input type="checkbox" checked=${hidOn} onChange=${(e) => setHidOn(e.target.checked)} /><span className="tglt"></span>${preloz("Poslouchat čtečku kdekoli v aplikaci")}</label>
+          <span className="tag" style=${{ background: hidOn ? "var(--ok)" : "var(--paper)", color: hidOn ? "#fff" : "var(--ink-2)", boxShadow: hidOn ? "var(--neu-sm)" : "var(--neu-in)" }}>${hidOn ? preloz("aktivní") : preloz("vypnuto")}</span>
         </div>
-        <p className="note">Většina USB čteček se chová jako klávesnice — nic se nepřipojuje, stačí zapnout tento přepínač a načíst kód. Aplikace rozpozná čtečku podle rychlosti zadání, běžné psaní tím není dotčeno.</p>
+        <p className="note">${preloz("Většina USB čteček se chová jako klávesnice — nic se nepřipojuje, stačí zapnout tento přepínač a načíst kód. Aplikace rozpozná čtečku podle rychlosti zadání, běžné psaní tím není dotčeno.")}</p>
 
-        <label className="f" style=${{ marginTop: 16 }}>2 · Čtečka na sériovém portu (USB / RS-232)</label>
+        <label className="f" style=${{ marginTop: 16 }}>${preloz("2 · Čtečka na sériovém portu (USB / RS-232)")}</label>
         <div className="rowline">
           ${!ser.on ? html`
             <${React.Fragment}>
-              <button className="btn" onClick=${ser.connect}>Připojit čtečku (COM)</button>
-              <select style=${{ width: "auto" }} value=${ser.baud} onChange=${(e) => ser.setBaud(e.target.value)} title="Rychlost komunikace (baud)">
+              <button className="btn" onClick=${ser.connect}>${preloz("Připojit čtečku (COM)")}</button>
+              <select style=${{ width: "auto" }} value=${ser.baud} onChange=${(e) => ser.setBaud(e.target.value)} title=${preloz("Rychlost komunikace (baud)")}>
                 ${["4800", "9600", "19200", "38400", "115200"].map((b) => html`<option key=${b} value=${b}>${b} Bd</option>`)}
               </select>
             <//>` : html`
             <${React.Fragment}>
-              <span className="tag tech">čtečka připojena</span>
-              <button className="btn danger sm" onClick=${ser.disconnect}>Odpojit</button>
+              <span className="tag tech">${preloz("čtečka připojena")}</span>
+              <button className="btn danger sm" onClick=${ser.disconnect}>${preloz("Odpojit")}</button>
             <//>`}
         </div>
         ${ser.err && html`<div className="warnbox">${ser.err}</div>`}
 
-        <label className="f" style=${{ marginTop: 16 }}>3 · Kamera (QR / DataMatrix na zakázkovém listu)</label>
+        <label className="f" style=${{ marginTop: 16 }}>${preloz("3 · Kamera (QR / DataMatrix na zakázkovém listu)")}</label>
         <div className="rowline">
           ${!cam.on
-            ? html`<button className="btn sec" onClick=${cam.start} disabled=${!cam.supported}>Zapnout kameru</button>`
-            : html`<button className="btn danger sm" onClick=${cam.stop}>Vypnout kameru</button>`}
-          ${!cam.supported && html`<span className="note">tento prohlížeč čtení kódů z kamery nepodporuje (vyžaduje Chrome/Edge)</span>`}
+            ? html`<button className="btn sec" onClick=${cam.start} disabled=${!cam.supported}>${preloz("Zapnout kameru")}</button>`
+            : html`<button className="btn danger sm" onClick=${cam.stop}>${preloz("Vypnout kameru")}</button>`}
+          ${!cam.supported && html`<span className="note">${preloz("tento prohlížeč čtení kódů z kamery nepodporuje (vyžaduje Chrome/Edge)")}</span>`}
         </div>
         ${cam.err && html`<div className="warnbox">${cam.err}</div>`}
         ${cam.on && html`<video className="cam" ref=${cam.videoRef} muted playsInline></video>`}
 
-        <label className="f" style=${{ marginTop: 16 }}>Ruční zadání / zkouška</label>
+        <label className="f" style=${{ marginTop: 16 }}>${preloz("Ruční zadání / zkouška")}</label>
         <div className="rowline">
           <input style=${{ flex: "1 1 320px" }} value=${manual} onChange=${(e) => setManual(e.target.value)}
             onKeyDown=${(e) => { if (e.key === "Enter") { e.preventDefault(); podat(); } }}
-            placeholder="Např. 11101 nebo IRM1|ref=11101|ks=500|barva=105" />
-          <button className="btn sec" onClick=${podat}>Načíst</button>
+            placeholder=${preloz("Např. 11101 nebo IRM1|ref=11101|ks=500|barva=105")} />
+          <button className="btn sec" onClick=${podat}>${preloz("Načíst")}</button>
         </div>
       </div>
 
       ${res && html`
         <div className="card">
-          <h2>Poslední načtený kód</h2>
+          <h2>${preloz("Poslední načtený kód")}</h2>
           <p className="hint scanraw">${last.raw}</p>
           <div className="kv">
             ${Object.keys(res.fields).map((k) => html`
               <${React.Fragment} key=${k}>
-                <div className="k">${SPEC_LABEL[k] || k}</div>
+                <div className="k">${preloz(SPEC_LABEL[k] || k)}</div>
                 <div className="v">${res.fields[k]}</div>
               <//>`)}
           </div>
           ${res.ok.map((t, i) => html`<div key=${i} className="okbox" style=${{ marginTop: 6 }}>✓ ${t}</div>`)}
           ${res.warn.map((t, i) => html`<div key=${i} className="warnbox" style=${{ marginTop: 6 }}>${t}</div>`)}
-          ${res.parsed.unknown.length > 0 && html`<div className="note" style=${{ marginTop: 8 }}>Nerozpoznané klíče (ignorovány): ${res.parsed.unknown.join(", ")}</div>`}
+          ${res.parsed.unknown.length > 0 && html`<div className="note" style=${{ marginTop: 8 }}>${preloz("Nerozpoznané klíče (ignorovány):")} ${res.parsed.unknown.join(", ")}</div>`}
           <div className="rowline" style=${{ marginTop: 14, marginBottom: 0 }}>
-            <button className="btn" disabled=${!res.product} onClick=${() => onApply(res)}>Použít v kalkulaci →</button>
-            ${!res.product && html`<span className="note">bez rozpoznaného produktu nelze zakázku otevřít</span>`}
+            <button className="btn" disabled=${!res.product} onClick=${() => onApply(res)}>${preloz("Použít v kalkulaci →")}</button>
+            ${!res.product && html`<span className="note">${preloz("bez rozpoznaného produktu nelze zakázku otevřít")}</span>`}
           </div>
         </div>`}
 
       ${scanLog.length > 1 && html`
         <div className="card">
           <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-            <h2 style=${{ margin: 0 }}>Historie načtení (${scanLog.length})</h2>
-            <button className="btn sec sm" onClick=${clearLog}>Vymazat</button>
+            <h2 style=${{ margin: 0 }}>${preloz("Historie načtení")} (${scanLog.length})</h2>
+            <button className="btn sec sm" onClick=${clearLog}>${preloz("Vymazat")}</button>
           </div>
           ${scanLog.map((s) => html`
             <div key=${s.ts} className="scanrow">
               <span className="dot" style=${{ background: s.res.product ? "var(--ok)" : "var(--warn)" }}></span>
               <span className="note" style=${{ flex: "0 0 60px" }}>${new Date(s.ts).toLocaleTimeString("cs-CZ")}</span>
               <span className="scanraw">${s.raw}</span>
-              <span className="note" style=${{ flex: "0 0 auto" }}>${s.res.product ? ((s.res.product.ref || "") + " " + s.res.product.name).slice(0, 40) : "nerozpoznáno"}</span>
+              <span className="note" style=${{ flex: "0 0 auto" }}>${s.res.product ? ((s.res.product.ref || "") + " " + s.res.product.name).slice(0, 40) : preloz("nerozpoznáno")}</span>
             </div>`)}
         </div>`}
 
       <div className="card">
-        <h2>Formát kódu specifikace</h2>
-        <p className="hint">Čtečka může načíst buď samotné referenční číslo produktu, nebo celou zakázku. Klíče se oddělují svislítkem, středníkem nebo tabulátorem; pořadí nerozhoduje a chybějící údaje zůstanou v kalkulaci beze změny.</p>
+        <h2>${preloz("Formát kódu specifikace")}</h2>
+        <p className="hint">${preloz("Čtečka může načíst buď samotné referenční číslo produktu, nebo celou zakázku. Klíče se oddělují svislítkem, středníkem nebo tabulátorem; pořadí nerozhoduje a chybějící údaje zůstanou v kalkulaci beze změny.")}</p>
         <pre className="tpl">11101
 
 IRM1|ref=11101|ks=500|poz=2|barva=105|rec=PANTONE 485 C|ztraty=15|obj=2026-114
 
 {"ref":"11101","ks":500,"barva":"105","rec":"PANTONE 485 C","zakaznik":"Firma s.r.o."}</pre>
         <p className="note" style=${{ marginTop: 10 }}>
-          <b>Klíče:</b> ref (kod, produkt, sku) · ks (mnozstvi, pocet, qty) · poz (poloha — pořadové číslo, název nebo technologie)
+          <b>${preloz("Klíče:")}</b> ref (kod, produkt, sku) · ks (mnozstvi, pocet, qty) · poz (poloha — pořadové číslo, název nebo technologie)
           · barva (kód, název nebo hex) · rec (receptura, pantone) · gm2 (spotreba) · ztraty · min (min. dávka)
           · obj (zakazka) · zakaznik (objednavatel) · sito · kryvost · povrch · pozn.
         </p>
@@ -234,33 +234,33 @@ function KodVKalkulaci({ hidOn, setHidOn, onCode, onNastaveni }) {
            do míchacího režimu, ne drobné tlačítko jako dřív v řádku štítků. -->
       <button className="btn sec" style=${{ padding: "15px 26px", fontSize: 16, width: "100%" }}
         onClick=${() => setOpen(true)}
-        title="Načíst zakázku čárovým kódem">Načíst kód</button>
+        title=${preloz("Načíst zakázku čárovým kódem")}>${preloz("Načíst kód")}</button>
       ${open && html`
         <div className="modalbg" onClick=${(e) => { if (e.target === e.currentTarget) zavri(); }}>
           <div className="modalbox" style=${{ width: "min(520px,100%)" }}>
             <div className="card" style=${{ margin: 0 }}>
               <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
-                <h2 style=${{ margin: 0 }}>Načíst zakázku čárovým kódem</h2>
+                <h2 style=${{ margin: 0 }}>${preloz("Načíst zakázku čárovým kódem")}</h2>
                 <button className="btn sec sm" onClick=${() => zavri()}>✕</button>
               </div>
               <div className="rowline" style=${{ marginTop: 14 }}>
                 <input autoFocus style=${{ flex: "1 1 280px" }} value=${manual}
                   onChange=${(e) => setManual(e.target.value)}
                   onKeyDown=${(e) => { if (e.key === "Enter") { e.preventDefault(); podat(); } }}
-                  placeholder="Načtěte kód čtečkou, nebo zapište ručně" />
-                <button className="btn" onClick=${podat} disabled=${!manual.trim()}>Načíst</button>
+                  placeholder=${preloz("Načtěte kód čtečkou, nebo zapište ručně")} />
+                <button className="btn" onClick=${podat} disabled=${!manual.trim()}>${preloz("Načíst")}</button>
               </div>
               <div className="rowline">
-                <label className="tgl"><input type="checkbox" checked=${hidOn} onChange=${(e) => setHidOn(e.target.checked)} /><span className="tglt"></span>Poslouchat čtečku kdekoli v aplikaci</label>
-                <span className="tag" style=${{ background: hidOn ? "var(--ok)" : "var(--paper)", color: hidOn ? "#fff" : "var(--ink-2)", boxShadow: hidOn ? "var(--neu-sm)" : "var(--neu-in)" }}>${hidOn ? "aktivní" : "vypnuto"}</span>
+                <label className="tgl"><input type="checkbox" checked=${hidOn} onChange=${(e) => setHidOn(e.target.checked)} /><span className="tglt"></span>${preloz("Poslouchat čtečku kdekoli v aplikaci")}</label>
+                <span className="tag" style=${{ background: hidOn ? "var(--ok)" : "var(--paper)", color: hidOn ? "#fff" : "var(--ink-2)", boxShadow: hidOn ? "var(--neu-sm)" : "var(--neu-in)" }}>${hidOn ? preloz("aktivní") : preloz("vypnuto")}</span>
               </div>
               <div className="rowline">
                 ${!cam.on
-                  ? html`<button className="btn sec sm" onClick=${cam.start} disabled=${!cam.supported}>Zapnout kameru</button>`
-                  : html`<button className="btn danger sm" onClick=${cam.stop}>Vypnout kameru</button>`}
-                ${!cam.supported && html`<span className="note">tento prohlížeč čtení kódů z kamery nepodporuje (vyžaduje Chrome/Edge)</span>`}
+                  ? html`<button className="btn sec sm" onClick=${cam.start} disabled=${!cam.supported}>${preloz("Zapnout kameru")}</button>`
+                  : html`<button className="btn danger sm" onClick=${cam.stop}>${preloz("Vypnout kameru")}</button>`}
+                ${!cam.supported && html`<span className="note">${preloz("tento prohlížeč čtení kódů z kamery nepodporuje (vyžaduje Chrome/Edge)")}</span>`}
                 <span style=${{ marginLeft: "auto" }}></span>
-                ${onNastaveni && html`<button className="btn sec sm" onClick=${() => { zavri(); onNastaveni(); }}>Nastavení čtečky →</button>`}
+                ${onNastaveni && html`<button className="btn sec sm" onClick=${() => { zavri(); onNastaveni(); }}>${preloz("Nastavení čtečky →")}</button>`}
               </div>
               ${cam.err && html`<div className="warnbox">${cam.err}</div>`}
               ${cam.on && html`<video className="cam" ref=${cam.videoRef} muted playsInline></video>`}

@@ -1966,7 +1966,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                   <div>
                     <label className="f">${preloz("Síto")}</label>
                     <select value=${recipe.mesh || ""} onChange=${(e) => upravRecepturu({ mesh: e.target.value })}>
-                      <option value="">${preloz("— nevybráno —")}</option>
+                      <option value="">${preloz("nevybráno")}</option>
                       ${sitaProTech.map((m) => html`<option key=${m.sito} value=${m.sito}>${m.sito}${
                         m.vth > 0 ? " · " + fmt(m.vth, 0) + " cm³/m²" : ""}</option>`)}
                       ${recipe.mesh && !sitaProTech.some((m) => m.sito === recipe.mesh)
@@ -1977,7 +1977,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                   <div>
                     <label className="f">${preloz("Klišé (hloubka leptu)")}</label>
                     <select value=${recipe.mesh || ""} onChange=${(e) => upravRecepturu({ mesh: e.target.value })}>
-                      <option value="">${preloz("— nevybráno —")}</option>
+                      <option value="">${preloz("nevybráno")}</option>
                       ${klisePro.map((m) => html`<option key=${m.sito} value=${m.sito}>${m.sito}${
                         m.hloubka > 0 ? " · " + fmt(m.hloubka, 0) + " µm" : ""}</option>`)}
                     </select>
@@ -1985,14 +1985,14 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 <div>
                   <label className="f">${preloz("Kryvost")}</label>
                   <select value=${recipe.opacity || ""} onChange=${(e) => upravRecepturu({ opacity: e.target.value })}>
-                    <option value="">${preloz("— nevybráno —")}</option>
+                    <option value="">${preloz("nevybráno")}</option>
                     ${KRYVOSTI.map((m) => html`<option key=${m} value=${m}>${m}</option>`)}
                   </select>
                 </div>
                 <div>
                   <label className="f">${preloz("Povrch")}</label>
                   <select value=${recipe.surface || ""} onChange=${(e) => upravRecepturu({ surface: e.target.value })}>
-                    <option value="">${preloz("— nevybráno —")}</option>
+                    <option value="">${preloz("nevybráno")}</option>
                     ${POVRCHY.map((m) => html`<option key=${m} value=${m}>${m}</option>`)}
                   </select>
                 </div>

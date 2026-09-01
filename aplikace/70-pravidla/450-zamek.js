@@ -303,19 +303,19 @@ function pripravenostTech(tech, { sita, koef, pigmenty, recipes, dbTech, techSta
     (s, k) => s + Object.keys(koef[k] || {}).length, 0) : 0;
 
   const body = [
-    { klic: "receptury", popis: "databáze receptur přiřazená technologii",
-      hotovo: receptur > 0, detail: receptur > 0 ? receptur + " receptur" : "žádná databáze" },
-    { klic: "sita", popis: maSito ? "parametry sít od výrobce" : "hloubky leptu klišé",
+    { klic: "receptury", popis: preloz("databáze receptur přiřazená technologii"),
+      hotovo: receptur > 0, detail: receptur > 0 ? receptur + " " + preloz("receptur") : preloz("žádná databáze") },
+    { klic: "sita", popis: maSito ? preloz("parametry sít od výrobce") : preloz("hloubky leptu klišé"),
       hotovo: vlastniSita.length > 0,
-      detail: vlastniSita.length > 0 ? vlastniSita.length + (maSito ? " sít" : " klišé")
-        : (jenNazvy > 0 ? jenNazvy + (maSito ? " sít jen podle názvu" : " klišé bez hloubky")
-          : "nejsou") },
-    { klic: "koeficienty", popis: "koeficienty spotřeby",
-      hotovo: koefu > 0, detail: koefu > 0 ? koefu + " hodnot" : "nejsou" },
-    { klic: "pigmenty", popis: "pigmenty a báze",
+      detail: vlastniSita.length > 0 ? vlastniSita.length + " " + (maSito ? preloz("sít") : preloz("klišé"))
+        : (jenNazvy > 0 ? jenNazvy + " " + (maSito ? preloz("sít jen podle názvu") : preloz("klišé bez hloubky"))
+          : preloz("nejsou")) },
+    { klic: "koeficienty", popis: preloz("koeficienty spotřeby"),
+      hotovo: koefu > 0, detail: koefu > 0 ? koefu + " " + preloz("hodnot") : preloz("nejsou") },
+    { klic: "pigmenty", popis: preloz("pigmenty a báze"),
       hotovo: pigmenty && Object.keys(pigmenty).length > 0,
       detail: pigmenty && Object.keys(pigmenty).length
-        ? Object.keys(pigmenty).length + " položek" : "nejsou" },
+        ? Object.keys(pigmenty).length + " " + preloz("položek") : preloz("nejsou") },
   ];
   const hotovo = body.filter((b) => b.hotovo).length;
   return {

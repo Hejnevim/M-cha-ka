@@ -36,7 +36,7 @@ function ZbytkyTab({ zbytky, setZbytky, recipes, materialy, guardDelete, otevren
   const uprav = (kod, zmena) => setZbytky((prev) => prev.map((z) =>
     z.kod === kod ? Object.assign({}, z, zmena, { zmeneno: Date.now() }) : z));
   const smaz = (z) => guardDelete(() => setZbytky((prev) => prev.filter((x) => x.kod !== z.kod)),
-    "smazání zbytku " + z.kod + " (" + z.nazev + ")");
+    preloz("smazání zbytku {kod} ({nazev})", { kod: z.kod, nazev: z.nazev }));
 
   const celkem = filtr.filter((z) => z.stav !== "vtisku").reduce((s, z) => s + n(z.gramu), 0);
 
@@ -46,11 +46,13 @@ function ZbytkyTab({ zbytky, setZbytky, recipes, materialy, guardDelete, otevren
     const t = setInterval(() => setTed(Date.now()), 60000);
     return () => clearInterval(t);
   }, []);
+  /* jazykAplikace v závislostech: duvod se překládá uvnitř stavZbytku,
+     bez něj by po přepnutí jazyka držel starou řeč až minutu */
   const stavy = useMemo(() => {
     const m = {};
     for (const z of (zbytky || [])) m[z.kod] = stavZbytku(z, ted);
     return m;
-  }, [zbytky, ted]);
+  }, [zbytky, ted, jazykAplikace]);
   const vTisku = (zbytky || []).filter((z) => z.stav === "vtisku");
   const hlidane = (zbytky || []).filter((z) => n(z.gramu) > 0 && z.stav !== "vtisku");
   const prosleKs = hlidane.filter((z) => stavy[z.kod] && stavy[z.kod].stav === "prosle");
@@ -133,72 +135,71 @@ function ZbytkyTab({ zbytky, setZbytky, recipes, materialy, guardDelete, otevren
     <${React.Fragment}>
       <div className="card">
         <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 10, flexWrap: "wrap" }}>
-          <h2 style=${{ margin: 0 }}>Zbytky barev (${fmt(filtr.length, 0)}${filtr.length !== (zbytky || []).length ? " z " + fmt((zbytky || []).length, 0) : ""})</h2>
+          <h2 style=${{ margin: 0 }}>${preloz("Zbytky barev")} (${fmt(filtr.length, 0)}${filtr.length !== (zbytky || []).length ? preloz(" z {n}", { n: fmt((zbytky || []).length, 0) }) : ""})</h2>
           <button className="btn" onClick=${() => setNovy({ nazev: "", gramu: "", receptId: "", zakazka: "",
             expirace: "", potlifeH: "", tuzidlo: false, pozn: "" })}>
-            + Uložit zbytek
+            ${preloz("+ Uložit zbytek")}
           </button>
         </div>
         <p className="hint">
-          Nespotřebovaná barva z minulé zakázky. Kelímek dostane kód na štítek; při další
-          zakázce aplikace sama napíše, kolik z něj jde použít a kolik už stačí domíchat.
+          ${preloz("Nespotřebovaná barva z minulé zakázky. Kelímek dostane kód na štítek; při další zakázce aplikace sama napíše, kolik z něj jde použít a kolik už stačí domíchat.")}
         </p>
 
         ${vTisku.length > 0 && html`
           <div className="specbar" style=${{ marginTop: 0 }}>
             <span className="dot" style=${{ background: "var(--key)" }}></span>
-            <span><b>${fmt(vTisku.length, 0)} ${vTisku.length === 1 ? "dávka je označená" : "dávek je označených"} v tisku</b>
-              ${" — " + vTisku.slice(0, 3).map((z) => z.kod).join(", ")}${vTisku.length > 3 ? " a další" : ""}.
-              Po zakázce načtěte štítek čtečkou, nebo zapište zbytek tlačítkem u řádku.</span>
+            <span><b>${fmt(vTisku.length, 0)} ${vTisku.length === 1 ? preloz("dávka je označená") : preloz("dávek je označených")} ${preloz("v tisku")}</b>
+              ${" — " + vTisku.slice(0, 3).map((z) => z.kod).join(", ")}${vTisku.length > 3 ? preloz(" a další") : ""}.
+              ${preloz("Po zakázce načtěte štítek čtečkou, nebo zapište zbytek tlačítkem u řádku.")}</span>
           </div>`}
         ${(prosleKs.length > 0 || brzyKs.length > 0) && html`
           <div className=${prosleKs.length ? "warnbox" : "okbox"} style=${{ marginTop: 0 }}>
             ${prosleKs.length > 0 && html`<${React.Fragment}>
-              <b>${fmt(prosleKs.length, 0)} ${prosleKs.length === 1 ? "kelímek má" : "kelímků má"} po lhůtě</b>
-              ${" (" + fmt(prosleKs.reduce((s, z) => s + n(z.gramu), 0)) + " g) — barva už není použitelná, aplikace ji nenabízí."}
+              <b>${fmt(prosleKs.length, 0)} ${prosleKs.length === 1 ? preloz("kelímek má") : preloz("kelímků má")} ${preloz("po lhůtě")}</b>
+              ${" (" + fmt(prosleKs.reduce((s, z) => s + n(z.gramu), 0)) + " g)"}${preloz(" — barva už není použitelná, aplikace ji nenabízí.")}
               ${likvidaceProslych > 0
-                ? " Svoz do nebezpečného odpadu vyjde na "
-                  + cenaText(likvidaceProslych, menaDilny(materialy)) + "."
+                ? preloz(" Svoz do nebezpečného odpadu vyjde na {c}.",
+                    { c: cenaText(likvidaceProslych, menaDilny(materialy)) })
                 : ""}
               <br /><//>`}
             ${brzyKs.length > 0 && html`<${React.Fragment}>
-              <b>${fmt(brzyKs.length, 0)} ${brzyKs.length === 1 ? "kelímku" : "kelímkům"} končí lhůta:</b>
+              <b>${fmt(brzyKs.length, 0)} ${brzyKs.length === 1 ? preloz("kelímku") : preloz("kelímkům")} ${preloz("končí lhůta:")}</b>
               ${" "}${brzyKs.slice(0, 4).map((z) => z.kod + " (" + zbyvaText(stavy[z.kod].zbyva) + ")").join(", ")}
-              ${brzyKs.length > 4 ? " a další" : ""} — spotřebovat přednostně.<//>`}
+              ${brzyKs.length > 4 ? preloz(" a další") : ""}${preloz(" — spotřebovat přednostně.")}<//>`}
           </div>`}
 
-        <label className="f">Filtr</label>
+        <label className="f">${preloz("Filtr")}</label>
         <div className="chips" style=${{ marginBottom: 8 }}>
-          <button className=${"chip" + (baze ? "" : " on")} onClick=${() => setBaze("")}>všechny</button>
+          <button className=${"chip" + (baze ? "" : " on")} onClick=${() => setBaze("")}>${preloz("všechny")}</button>
           <button className=${"chip" + (baze === "bez" ? " on" : "")} onClick=${() => setBaze("bez")}
-            title="čisté barvy bez transparentní báze">bez báze</button>
+            title=${preloz("čisté barvy bez transparentní báze")}>${preloz("bez báze")}</button>
           <button className=${"chip" + (baze === "s" ? " on" : "")} onClick=${() => setBaze("s")}
-            title="barvy ředěné transparentní bází nebo mediem">s bází</button>
+            title=${preloz("barvy ředěné transparentní bází nebo mediem")}>${preloz("s bází")}</button>
           <span style=${{ width: 12 }}></span>
           <button className=${"chip" + (lhuta === "brzy" ? " on" : "")} onClick=${() => setLhuta(lhuta === "brzy" ? "" : "brzy")}
-            title="kelímky, kterým brzy končí lhůta">končí lhůta ${brzyKs.length ? "(" + brzyKs.length + ")" : ""}</button>
+            title=${preloz("kelímky, kterým brzy končí lhůta")}>${preloz("končí lhůta")} ${brzyKs.length ? "(" + brzyKs.length + ")" : ""}</button>
           <button className=${"chip" + (lhuta === "prosle" ? " on" : "")} onClick=${() => setLhuta(lhuta === "prosle" ? "" : "prosle")}
-            title="kelímky po lhůtě">po lhůtě ${prosleKs.length ? "(" + prosleKs.length + ")" : ""}</button>
+            title=${preloz("kelímky po lhůtě")}>${preloz("po lhůtě")} ${prosleKs.length ? "(" + prosleKs.length + ")" : ""}</button>
           <span style=${{ width: 12 }}></span>
           <button className=${"chip" + (jenSMnozstvim ? " on" : "")} onClick=${() => setJenSMnozstvim((v) => !v)}
-            title="skrýt kelímky, které už jsou dobrané">jen s množstvím</button>
+            title=${preloz("skrýt kelímky, které už jsou dobrané")}>${preloz("jen s množstvím")}</button>
           ${vTisku.length > 0 && html`<button className=${"chip" + (lhuta === "vtisku" ? " on" : "")}
             onClick=${() => setLhuta(lhuta === "vtisku" ? "" : "vtisku")}
-            title="dávky označené při míchání, u kterých se ještě nezapsal zbytek">v tisku (${vTisku.length})</button>`}
+            title=${preloz("dávky označené při míchání, u kterých se ještě nezapsal zbytek")}>${preloz("v tisku")} (${vTisku.length})</button>`}
         </div>
         <input className="search" value=${q} onChange=${(e) => setQ(e.target.value)}
-          placeholder="Hledat podle kódu, barvy, zakázky nebo složky…" style=${{ marginBottom: 12 }} />
+          placeholder=${preloz("Hledat podle kódu, barvy, zakázky nebo složky…")} style=${{ marginBottom: 12 }} />
 
         ${!filtr.length ? html`
           <div className="empty">
-            ${(zbytky || []).length ? "Filtru nic neodpovídá." : "Zatím žádné zbytky. Uložit je můžete i rovnou z kalkulace po namíchání."}
+            ${(zbytky || []).length ? preloz("Filtru nic neodpovídá.") : preloz("Zatím žádné zbytky. Uložit je můžete i rovnou z kalkulace po namíchání.")}
           </div>` : html`
           <${React.Fragment}>
-            <p className="note">Celkem ve filtru <b>${fmt(celkem)} g</b> barvy${
-              vTisku.length ? " (dávky v tisku se nepočítají — ještě se z nich tiskne)" : ""}.</p>
+            <p className="note">${preloz("Celkem ve filtru")} <b>${fmt(celkem)} g</b> ${preloz("barvy")}${
+              vTisku.length ? preloz(" (dávky v tisku se nepočítají — ještě se z nich tiskne)") : ""}.</p>
             <table className="t">
-              <thead><tr><th /><th>Kód</th><th>Barva</th><th className="num">g</th>
-                <th>Báze</th><th>Lhůta</th><th>Viskozita</th><th>Zakázka</th><th /></tr></thead>
+              <thead><tr><th /><th>${preloz("Kód")}</th><th>${preloz("Barva")}</th><th className="num">g</th>
+                <th>${preloz("Báze")}</th><th>${preloz("Lhůta")}</th><th>${preloz("Viskozita")}</th><th>${preloz("Zakázka")}</th><th /></tr></thead>
               <tbody>
                 ${filtr.slice(0, 200).map((z) => {
                   const st = stavy[z.kod] || stavZbytku(z, ted);
@@ -213,44 +214,44 @@ function ZbytkyTab({ zbytky, setZbytky, recipes, materialy, guardDelete, otevren
                     <td>
                       <div style=${{ fontWeight: 700 }}>${z.nazev}
                         ${z.stav === "vtisku" && html`<span className="tag" style=${{ marginLeft: 6, background: "var(--key)", color: "#fff", boxShadow: "none" }}
-                          title="označeno při míchání, zbytek se teprve zapíše">v tisku</span>`}
-                        ${z.tuzidlo && html`<span className="tag" style=${{ marginLeft: 6 }}>s tužidlem</span>`}
+                          title=${preloz("označeno při míchání, zbytek se teprve zapíše")}>${preloz("v tisku")}</span>`}
+                        ${z.tuzidlo && html`<span className="tag" style=${{ marginLeft: 6 }}>${preloz("s tužidlem")}</span>`}
                         ${z.shluk && html`<span className="tag" style=${{ marginLeft: 6 }}
-                          title=${"slito z " + fmt((z.slito || []).length, 0) + " kelímků"}>shluk</span>`}
+                          title=${preloz("slito z {n} kelímků", { n: fmt((z.slito || []).length, 0) })}>${preloz("shluk")}</span>`}
                         ${kamSlito.has(z.kod) && html`<span className="tag" style=${{ marginLeft: 6 }}
-                          title="obsah pokračuje ve shluku">slito do ${kamSlito.get(z.kod)}</span>`}</div>
-                      <div className="note">${(z.slozeni || []).map((c) => c.name + " " + fmt(n(c.pct)) + " %").join(" · ") || "složení neuvedeno"}</div>
+                          title=${preloz("obsah pokračuje ve shluku")}>${preloz("slito do")} ${kamSlito.get(z.kod)}</span>`}</div>
+                      <div className="note">${(z.slozeni || []).map((c) => c.name + " " + fmt(n(c.pct)) + " %").join(" · ") || preloz("složení neuvedeno")}</div>
                     </td>
                     <td className="num">
                       <input type="number" step="1" min="0" value=${z.gramu} style=${{ width: 78, textAlign: "right" }}
                         onChange=${(e) => uprav(z.kod, { gramu: n(e.target.value) })} />
                     </td>
-                    <td><span className="tag">${maBazi(z) ? "s bází" : "bez báze"}</span></td>
+                    <td><span className="tag">${maBazi(z) ? preloz("s bází") : preloz("bez báze")}</span></td>
                     <td style=${{ minWidth: 150 }}>
                       ${st.doKdy
                         ? html`<div style=${{ color: barvaStavu, fontWeight: st.stav === "ok" ? 400 : 700 }}>
-                            ${st.stav === "prosle" ? "po lhůtě " + zbyvaText(st.zbyva)
-                              : (st.stav === "brzy" ? "končí " + zbyvaText(st.zbyva) : zbyvaText(st.zbyva))}
+                            ${st.stav === "prosle" ? preloz("po lhůtě {t}", { t: zbyvaText(st.zbyva) })
+                              : (st.stav === "brzy" ? preloz("končí {t}", { t: zbyvaText(st.zbyva) }) : zbyvaText(st.zbyva))}
                           </div>
                           <div className="note">${st.duvod}</div>`
-                        : html`<span className="note">bez lhůty</span>`}
+                        : html`<span className="note">${preloz("bez lhůty")}</span>`}
                       <div className="rowline" style=${{ gap: 4, marginTop: 4, marginBottom: 0 }}>
                         <input type="date" value=${z.expirace || ""} style=${{ width: 132, padding: "4px 6px", fontSize: 12 }}
-                          title="spotřebovat do" onChange=${(e) => uprav(z.kod, { expirace: e.target.value })} />
+                          title=${preloz("spotřebovat do")} onChange=${(e) => uprav(z.kod, { expirace: e.target.value })} />
                       </div>
                       <div className="rowline" style=${{ gap: 4, marginTop: 4, marginBottom: 0 }}>
                         <input type="number" step="0.5" min="0" placeholder="pot life h"
                           value=${z.potlifeH == null ? "" : z.potlifeH} style=${{ width: 74, padding: "4px 6px", fontSize: 12 }}
-                          title="čas použitelnosti po namíchání (hodin)"
+                          title=${preloz("čas použitelnosti po namíchání (hodin)")}
                           onChange=${(e) => uprav(z.kod, { potlifeH: e.target.value === "" ? null : n(e.target.value),
                             namichano: n(z.namichano) || n(z.ulozeno) || Date.now() })} />
                         <label className="note" style=${{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer" }}
-                          title="dvousložková barva — pot life se počítá od namíchání">
+                          title=${preloz("dvousložková barva — pot life se počítá od namíchání")}>
                           <input type="checkbox" checked=${!!z.tuzidlo} style=${{ width: "auto" }}
                             onChange=${(e) => uprav(z.kod, { tuzidlo: e.target.checked,
                               potlifeH: e.target.checked && z.potlifeH == null ? POTLIFE_VYCHOZI : z.potlifeH,
                               namichano: n(z.namichano) || n(z.ulozeno) || Date.now() })} />
-                          tužidlo
+                          ${preloz("tužidlo")}
                         </label>
                       </div>
                     </td>
@@ -258,22 +259,22 @@ function ZbytkyTab({ zbytky, setZbytky, recipes, materialy, guardDelete, otevren
                       ${z.viskozita
                         ? html`<${React.Fragment}>
                             <div><b>${fmt(n(z.viskozita), 1)} s</b>${z.viskPohar ? " · " + z.viskPohar : ""}</div>
-                            <div className="note">měřeno ${z.viskKdy ? new Date(z.viskKdy).toLocaleDateString("cs-CZ") : "—"}
-                              ${predchozi ? " · dřív " + fmt(predchozi.s, 1) + " s"
-                                + (n(z.viskozita) > predchozi.s ? " (zhoustla)" : "") : ""}</div>
+                            <div className="note">${preloz("měřeno")} ${z.viskKdy ? new Date(z.viskKdy).toLocaleDateString("cs-CZ") : "—"}
+                              ${predchozi ? preloz(" · dřív {s} s", { s: fmt(predchozi.s, 1) })
+                                + (n(z.viskozita) > predchozi.s ? preloz(" (zhoustla)") : "") : ""}</div>
                           <//>`
-                        : html`<span className="note">neměřeno</span>`}
+                        : html`<span className="note">${preloz("neměřeno")}</span>`}
                       <button className="btn sec sm" style=${{ marginTop: 4 }}
-                        onClick=${() => setMerim({ kod: z.kod, s: "", pohar: z.viskPohar || POHARKY[0] })}>Změřit</button>
+                        onClick=${() => setMerim({ kod: z.kod, s: "", pohar: z.viskPohar || POHARKY[0] })}>${preloz("Změřit")}</button>
                     </td>
                     <td className="note">${z.zakazka || "—"}<br />${z.ulozeno ? new Date(z.ulozeno).toLocaleDateString("cs-CZ") : ""}</td>
                     <td style=${{ whiteSpace: "nowrap" }}>
                       ${z.stav === "vtisku" && html`<${React.Fragment}>
                         <button className="btn sm" onClick=${() => onDoplnit && onDoplnit(z.kod)}
-                          title="zapsat, kolik z dávky zbylo">Zadat zbytek</button>${" "}<//>`}
-                      <button className="btn sec sm" onClick=${() => setStitek(z.kod)}>Štítek</button>
+                          title=${preloz("zapsat, kolik z dávky zbylo")}>${preloz("Zadat zbytek")}</button>${" "}<//>`}
+                      <button className="btn sec sm" onClick=${() => setStitek(z.kod)}>${preloz("Štítek")}</button>
                       ${" "}
-                      <button className="btn danger sm" onClick=${() => smaz(z)}>Smazat</button>
+                      <button className="btn danger sm" onClick=${() => smaz(z)}>${preloz("Smazat")}</button>
                     </td>
                   </tr>`; })}
               </tbody>
@@ -283,10 +284,10 @@ function ZbytkyTab({ zbytky, setZbytky, recipes, materialy, guardDelete, otevren
 
       ${navrhy.length > 0 && html`
         <div className="card">
-          <h2 style=${{ margin: "0 0 12px" }}>Slít do jedné nádoby (${fmt(navrhy.length, 0)})</h2>
+          <h2 style=${{ margin: "0 0 12px" }}>${preloz("Slít do jedné nádoby")} (${fmt(navrhy.length, 0)})</h2>
           <table className="t">
-            <thead><tr><th /><th>Vznikne</th><th className="num">g</th>
-              <th>Z kelímků</th><th /></tr></thead>
+            <thead><tr><th /><th>${preloz("Vznikne")}</th><th className="num">g</th>
+              <th>${preloz("Z kelímků")}</th><th /></tr></thead>
             <tbody>
               ${navrhy.map((nav) => html`
                 <tr key=${nav.klic}>
@@ -294,18 +295,18 @@ function ZbytkyTab({ zbytky, setZbytky, recipes, materialy, guardDelete, otevren
                   <td>
                     <div style=${{ fontWeight: 700 }}>
                       ${nav.cil ? nav.cil.kod : nav.shluk.nazev}
-                      ${nav.cil && html`<span className="tag" style=${{ marginLeft: 6 }}>přilít do shluku</span>`}
+                      ${nav.cil && html`<span className="tag" style=${{ marginLeft: 6 }}>${preloz("přilít do shluku")}</span>`}
                     </div>
                     <div className="note">${nav.shluk.slozeni.map((c) => c.name + " " + fmt(c.pct) + " %").join(" · ")}</div>
                   </td>
                   <td className="num">
                     <b>${fmt(nav.shluk.gramu)}</b>
-                    <div className="note">z jednoho nejvýš ${fmt(nav.nejvetsi)}</div>
+                    <div className="note">${preloz("z jednoho nejvýš {g}", { g: fmt(nav.nejvetsi) })}</div>
                   </td>
                   <td className="note">
                     ${nav.kelimky.map((z) => z.kod + " (" + fmt(n(z.gramu)) + " g)").join(" · ")}
                   </td>
-                  <td><button className="btn sm" onClick=${() => setSliti(nav)}>Slít</button></td>
+                  <td><button className="btn sm" onClick=${() => setSliti(nav)}>${preloz("Slít")}</button></td>
                 </tr>`)}
             </tbody>
           </table>
@@ -315,49 +316,49 @@ function ZbytkyTab({ zbytky, setZbytky, recipes, materialy, guardDelete, otevren
         <div className="modalbg" onClick=${(e) => { if (e.target === e.currentTarget) setNovy(null); }}>
           <div className="modalbox" style=${{ width: "min(560px,100%)" }}>
             <div className="card" style=${{ margin: 0 }}>
-              <h2 style=${{ margin: 0 }}>Uložit zbytek do evidence</h2>
-              <p className="hint">Složení se převezme z vybrané receptury — podle něj se pak pozná, na jakou zakázku zbytek sedí.</p>
+              <h2 style=${{ margin: 0 }}>${preloz("Uložit zbytek do evidence")}</h2>
+              <p className="hint">${preloz("Složení se převezme z vybrané receptury — podle něj se pak pozná, na jakou zakázku zbytek sedí.")}</p>
               <div className="frow c2">
                 <div>
-                  <label className="f">Receptura</label>
+                  <label className="f">${preloz("Receptura")}</label>
                   <select value=${novy.receptId} onChange=${(e) => {
                     const r = recipes.find((x) => x.id === e.target.value);
                     setNovy(Object.assign({}, novy, { receptId: e.target.value,
                       nazev: r ? r.name : novy.nazev }));
                   }}>
-                    <option value="">— bez receptury (jen název) —</option>
+                    <option value="">${preloz("— bez receptury (jen název) —")}</option>
                     ${recipes.slice(0, 400).map((r) => html`<option key=${r.id} value=${r.id}>${r.name}${r.series ? " · " + r.series : ""}</option>`)}
                   </select>
                 </div>
                 <div>
-                  <label className="f">Název barvy</label>
+                  <label className="f">${preloz("Název barvy")}</label>
                   <input value=${novy.nazev} onChange=${(e) => setNovy(Object.assign({}, novy, { nazev: e.target.value }))}
-                    placeholder="např. PANTONE 485 C" />
+                    placeholder=${preloz("např. PANTONE 485 C")} />
                 </div>
               </div>
               <div className="frow c3">
                 <div>
-                  <label className="f">Množství (g)</label>
+                  <label className="f">${preloz("Množství (g)")}</label>
                   <input type="number" step="1" min="0" value=${novy.gramu}
                     onChange=${(e) => setNovy(Object.assign({}, novy, { gramu: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="f">Ze zakázky</label>
+                  <label className="f">${preloz("Ze zakázky")}</label>
                   <input value=${novy.zakazka} onChange=${(e) => setNovy(Object.assign({}, novy, { zakazka: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="f">Spotřebovat do</label>
+                  <label className="f">${preloz("Spotřebovat do")}</label>
                   <input type="date" value=${novy.expirace}
                     onChange=${(e) => setNovy(Object.assign({}, novy, { expirace: e.target.value }))} />
                 </div>
               </div>
-              <label className="f">Poznámka</label>
+              <label className="f">${preloz("Poznámka")}</label>
               <input value=${novy.pozn} onChange=${(e) => setNovy(Object.assign({}, novy, { pozn: e.target.value }))} />
               <div className="rowline" style=${{ marginTop: 14, marginBottom: 0 }}>
                 <button className="btn" disabled=${!novy.nazev.trim() || !(n(novy.gramu) > 0)} onClick=${ulozNovy}>
-                  Uložit a vytisknout štítek
+                  ${preloz("Uložit a vytisknout štítek")}
                 </button>
-                <button className="btn sec" onClick=${() => setNovy(null)}>Zrušit</button>
+                <button className="btn sec" onClick=${() => setNovy(null)}>${preloz("Zrušit")}</button>
               </div>
             </div>
           </div>
@@ -367,19 +368,18 @@ function ZbytkyTab({ zbytky, setZbytky, recipes, materialy, guardDelete, otevren
         <div className="modalbg" onClick=${(e) => { if (e.target === e.currentTarget) setMerim(null); }}>
           <div className="modalbox" style=${{ width: "min(440px,100%)" }}>
             <div className="card" style=${{ margin: 0 }}>
-              <h2 style=${{ margin: 0 }}>Změřit viskozitu</h2>
+              <h2 style=${{ margin: 0 }}>${preloz("Změřit viskozitu")}</h2>
               <p className="hint">
-                Výtokový čas z pohárku v sekundách. Barva časem houstne — předchozí měření
-                zůstane uložené, takže je posun vidět.
+                ${preloz("Výtokový čas z pohárku v sekundách. Barva časem houstne — předchozí měření zůstane uložené, takže je posun vidět.")}
               </p>
               <div className="frow c2">
                 <div>
-                  <label className="f">Výtokový čas (s)</label>
+                  <label className="f">${preloz("Výtokový čas (s)")}</label>
                   <input type="number" step="0.1" min="0" autoFocus value=${merim.s}
                     onChange=${(e) => setMerim(Object.assign({}, merim, { s: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="f">Pohárek</label>
+                  <label className="f">${preloz("Pohárek")}</label>
                   <select value=${merim.pohar} onChange=${(e) => setMerim(Object.assign({}, merim, { pohar: e.target.value }))}>
                     ${POHARKY.map((p) => html`<option key=${p} value=${p}>${p}</option>`)}
                   </select>
@@ -390,7 +390,7 @@ function ZbytkyTab({ zbytky, setZbytky, recipes, materialy, guardDelete, otevren
                 const h = z ? (z.viskHist || []).concat(z.viskozita ? [{ s: n(z.viskozita), kdy: n(z.viskKdy) }] : []) : [];
                 return h.length ? html`
                   <${React.Fragment}>
-                    <label className="f" style=${{ marginTop: 10 }}>Dosavadní měření</label>
+                    <label className="f" style=${{ marginTop: 10 }}>${preloz("Dosavadní měření")}</label>
                     <div className="note">
                       ${h.map((m, i) => html`<span key=${i}>${i ? " → " : ""}${fmt(m.s, 1)} s
                         (${m.kdy ? new Date(m.kdy).toLocaleDateString("cs-CZ") : "?"})</span>`)}
@@ -398,8 +398,8 @@ function ZbytkyTab({ zbytky, setZbytky, recipes, materialy, guardDelete, otevren
                   <//>` : null;
               })()}
               <div className="rowline" style=${{ marginTop: 14, marginBottom: 0 }}>
-                <button className="btn" disabled=${!(n(merim.s) > 0)} onClick=${zapisViskozitu}>Zapsat měření</button>
-                <button className="btn sec" onClick=${() => setMerim(null)}>Zrušit</button>
+                <button className="btn" disabled=${!(n(merim.s) > 0)} onClick=${zapisViskozitu}>${preloz("Zapsat měření")}</button>
+                <button className="btn sec" onClick=${() => setMerim(null)}>${preloz("Zrušit")}</button>
               </div>
             </div>
           </div>
@@ -410,42 +410,41 @@ function ZbytkyTab({ zbytky, setZbytky, recipes, materialy, guardDelete, otevren
           <div className="modalbox" style=${{ width: "min(620px,100%)" }}>
             <div className="card" style=${{ margin: 0 }}>
               <h2 style=${{ margin: 0 }}>
-                ${sliti.cil ? "Přilít do shluku " + sliti.cil.kod : "Slít kelímky do jedné nádoby"}
+                ${sliti.cil ? preloz("Přilít do shluku {kod}", { kod: sliti.cil.kod }) : preloz("Slít kelímky do jedné nádoby")}
               </h2>
               <div className="warnbox" style=${{ marginTop: 12 }}>
-                <b>Slití je nevratné.</b> ${fmt(sliti.kelimky.length, 0) + " "}
-                ${sliti.kelimky.length === 1 ? "kelímek se vyleje"
-                  : (sliti.kelimky.length < 5 ? "kelímky se vylijí" : "kelímků se vylije")}
-                ${" do jedné nádoby a jejich obsah pojede dál pod jedním kódem. Sada složek"
-                  + " se tím nemění — nádoba sedne na tytéž receptury jako kelímky teď."}
+                <b>${preloz("Slití je nevratné.")}</b> ${fmt(sliti.kelimky.length, 0) + " "}
+                ${sliti.kelimky.length === 1 ? preloz("kelímek se vyleje")
+                  : (sliti.kelimky.length < 5 ? preloz("kelímky se vylijí") : preloz("kelímků se vylije"))}
+                ${preloz(" do jedné nádoby a jejich obsah pojede dál pod jedním kódem. Sada složek se tím nemění — nádoba sedne na tytéž receptury jako kelímky teď.")}
               </div>
               <table className="t">
-                <thead><tr><th>Kód</th><th>Barva</th><th className="num">g</th><th>Lhůta</th></tr></thead>
+                <thead><tr><th>${preloz("Kód")}</th><th>${preloz("Barva")}</th><th className="num">g</th><th>${preloz("Lhůta")}</th></tr></thead>
                 <tbody>
                   ${(sliti.cil ? [sliti.cil] : []).concat(sliti.kelimky).map((z) => {
                     const st = stavy[z.kod] || stavZbytku(z, ted);
                     return html`
                       <tr key=${z.kod}>
                         <td style=${{ fontFamily: "var(--mono)", fontWeight: 700 }}>${z.kod}
-                          ${z.shluk && html`<span className="tag" style=${{ marginLeft: 6 }}>nádoba</span>`}</td>
+                          ${z.shluk && html`<span className="tag" style=${{ marginLeft: 6 }}>${preloz("nádoba")}</span>`}</td>
                         <td>${z.nazev}</td>
                         <td className="num">${fmt(n(z.gramu))}</td>
-                        <td className="note">${st.doKdy ? zbyvaText(st.zbyva) : "bez lhůty"}</td>
+                        <td className="note">${st.doKdy ? zbyvaText(st.zbyva) : preloz("bez lhůty")}</td>
                       </tr>`;
                   })}
                 </tbody>
               </table>
               <p className="note">
-                Vznikne <b>${fmt(sliti.shluk.gramu)} g</b>${" — "}
+                ${preloz("Vznikne")} <b>${fmt(sliti.shluk.gramu)} g</b>${" — "}
                 ${sliti.shluk.slozeni.map((c) => c.name + " " + fmt(c.pct) + " %").join(" · ") + "."}
                 ${sliti.shluk.expirace
-                  ? " Spotřebovat do " + new Date(sliti.shluk.expirace + "T00:00:00").toLocaleDateString("cs-CZ")
-                    + "; platí nejbližší lhůta ze slitých kelímků."
+                  ? preloz(" Spotřebovat do {d}; platí nejbližší lhůta ze slitých kelímků.",
+                      { d: new Date(sliti.shluk.expirace + "T00:00:00").toLocaleDateString("cs-CZ") })
                   : ""}
               </p>
               <div className="rowline" style=${{ marginTop: 14, marginBottom: 0 }}>
-                <button className="btn" onClick=${provedSliti}>Slít a vytisknout štítek</button>
-                <button className="btn sec" onClick=${() => setSliti(null)}>Zrušit</button>
+                <button className="btn" onClick=${provedSliti}>${preloz("Slít a vytisknout štítek")}</button>
+                <button className="btn sec" onClick=${() => setSliti(null)}>${preloz("Zrušit")}</button>
               </div>
             </div>
           </div>

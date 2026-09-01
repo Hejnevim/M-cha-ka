@@ -3,7 +3,10 @@
 .card .hint{color:var(--ink-2);font-size:var(--pismo-poznamka);margin:0 0 14px}
 .frow{display:grid;gap:var(--mezera-poli);margin-bottom:var(--mezera-poli)}
 @media(min-width:640px){.frow.c2{grid-template-columns:1fr 1fr}.frow.c3{grid-template-columns:1fr 1fr 1fr}.frow.c4{grid-template-columns:1fr 1fr 1fr 1fr}}
-label.f{display:block;font-size:var(--pismo-popisek);line-height:1.25;font-weight:700;letter-spacing:var(--prostrkani);text-transform:uppercase;color:var(--ink-2);margin-bottom:5px}
+/* overflow-wrap: pojistka pro jazyky s dlouhými slovy — portugalské
+   PROFUNDIDADE měřilo 170 px ve sloupci širokém 140 px a trčelo ven.
+   Zalomí se jen slovo, které se na řádek nevejde; kratší texty beze změny. */
+label.f{display:block;font-size:var(--pismo-popisek);line-height:1.25;font-weight:700;letter-spacing:var(--prostrkani);text-transform:uppercase;color:var(--ink-2);margin-bottom:5px;overflow-wrap:break-word}
 /* Popisek se v užším okně zalomí na dva řádky a pole pod ním se propadne níž
    než sousední. Popisek v mřížce má proto vždy výšku dvou řádků a text sedí
    u jeho spodní hrany — pole v řádku tak drží linku při každé šířce okna. */

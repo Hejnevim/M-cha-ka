@@ -95,7 +95,9 @@
 .michbg .card .simposuv{margin:calc(var(--mich-mezera) + var(--mich-tl-odpojit-vyska) +
     var(--mich-mezera) * 1.5 + var(--mich-tl-tara-vyska) - 175px)
   calc(var(--mich-tl-tara-sirka) + var(--mich-mezera)) 10px 0}
-.michbg .card .simposuv input[type=range]{width:100%}
+/* margin:0 — prohlížeč dává posuvníku výchozí okraj 2px; se šířkou 100%
+   pak pravý konec přesahoval rámeček řádku o 2 px (změřeno detektorem). */
+.michbg .card .simposuv input[type=range]{width:100%;margin:0}
 /* KAŽDÉ TLAČÍTKO ZVLÁŠŤ. Hodnota proměnné je velikost písma tlačítka;
    odsazení se dopočítává týmiž poměry jako u společných pravidel výš
    (velké: .87 a 1.47 z písma, malé: .667 a 1.111 — poměry 9/13,5 a 15/13,5
@@ -173,6 +175,42 @@
   padding:calc(var(--mich-tl-dalsi) * .87) calc(var(--mich-tl-dalsi) * 1.47);
   width:var(--mich-tl-dalsi-sirka);height:var(--mich-tl-dalsi-vyska);
   transform:translate(var(--mich-tl-dalsi-posun-x),var(--mich-tl-dalsi-posun-y))}
+
+/* Rozměry dlaždic se ladí na češtinu (barvy.html) a česky platí
+   přesně. Jiný jazyk sází delší slova: anglické „Disconnect" je jedno
+   nezalomitelné slovo o 11 px širší než celá dlaždice Odpojit (změřeno
+   5,4 px ven na každé straně) a dvouřádkové „Compute coverage from the
+   preview" přetékalo 2,7 px pod tlačítko krycí plochy. V cizím jazyce
+   jsou proto laděná čísla jen minima — dlaždice s textem vyroste,
+   místo aby ho pustila ven. */
+html:not([lang="cs"]) .michbg .okbox .btn,
+html:not([lang="cs"]) .michbg .warnbox .btn,
+html:not([lang="cs"]) .michbg .specbar .btn{width:auto;height:auto;
+  min-width:var(--mich-tl-hlaseni-sirka);min-height:var(--mich-tl-hlaseni-vyska)}
+html:not([lang="cs"]) .michbg .card .btn.sm{width:auto;height:auto;
+  min-width:var(--mich-tl-pomocna-sirka);min-height:var(--mich-tl-pomocna-vyska)}
+html:not([lang="cs"]) .michbg .btn.mich-tl-zpet{width:auto;height:auto;
+  min-width:var(--mich-tl-zpet-sirka);min-height:var(--mich-tl-zpet-vyska)}
+html:not([lang="cs"]) .michbg .btn.mich-tl-plocha{width:auto;height:auto;
+  min-width:var(--mich-tl-plocha-sirka);min-height:var(--mich-tl-plocha-vyska)}
+html:not([lang="cs"]) .michbg .btn.mich-tl-rucne{width:auto;height:auto;
+  min-width:var(--mich-tl-rucne-sirka);min-height:var(--mich-tl-rucne-vyska)}
+html:not([lang="cs"]) .michbg .btn.mich-tl-znam{width:auto;height:auto;
+  min-width:var(--mich-tl-znam-sirka);min-height:var(--mich-tl-znam-vyska)}
+html:not([lang="cs"]) .michbg .btn.mich-tl-viskozita{width:auto;height:auto;
+  min-width:var(--mich-tl-viskozita-sirka);min-height:var(--mich-tl-viskozita-vyska)}
+html:not([lang="cs"]) .michbg .card .btn.mich-tl-pripojit{width:auto;height:auto;
+  min-width:var(--mich-tl-pripojit-sirka);min-height:var(--mich-tl-pripojit-vyska)}
+html:not([lang="cs"]) .michbg .card .btn.mich-tl-simulace{width:auto;height:auto;
+  min-width:var(--mich-tl-simulace-sirka);min-height:var(--mich-tl-simulace-vyska)}
+html:not([lang="cs"]) .michbg .card .btn.mich-tl-tara{width:auto;height:auto;
+  min-width:var(--mich-tl-tara-sirka);min-height:var(--mich-tl-tara-vyska)}
+html:not([lang="cs"]) .michbg .card .btn.mich-tl-odpojit{width:auto;height:auto;
+  min-width:var(--mich-tl-odpojit-sirka);min-height:var(--mich-tl-odpojit-vyska)}
+html:not([lang="cs"]) .michbg .card .btn.mich-tl-sarze{width:auto;height:auto;
+  min-width:var(--mich-tl-sarze-sirka);min-height:var(--mich-tl-sarze-vyska)}
+html:not([lang="cs"]) .michbg .card .btn.mich-tl-dalsi{width:auto;height:auto;
+  min-width:var(--mich-tl-dalsi-sirka);min-height:var(--mich-tl-dalsi-vyska)}
 .michbg .result-big{font-size:var(--mich-vysledek)}
 .michbg .wbar{height:var(--mich-wbar)}
 .michbg .note,.michbg .result-sub{font-size:var(--mich-poznamka)}

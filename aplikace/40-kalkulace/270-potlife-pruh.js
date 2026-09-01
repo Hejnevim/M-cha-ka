@@ -41,7 +41,7 @@ function PotlifePruh({ cfg, bazeG, zacatek, onSpustit, onZnovu, onUzavrit, davka
       <div className="note" style=${{ marginTop: 6 }}>
         ${st.stav === "prosle"
           ? preloz("Vytvrzenou barvu nejde naředit zpátky — namíchejte novou dávku.")
-          : preloz("Houstne {jak} — {rada}.", { jak: cfg.hustnutiPopis, rada: cfg.hustnutiRada })}
+          : preloz("Houstne {jak} — {rada}.", { jak: preloz(cfg.hustnutiPopis), rada: preloz(cfg.hustnutiRada) })}
         ${preloz(" V kelímku je {c} g ({b} g báze + {t} g tužidla).",
           { c: fmt(tuz.celkem), b: fmt(tuz.baze), t: fmtG(tuz.tuzidlo) })}
       </div>

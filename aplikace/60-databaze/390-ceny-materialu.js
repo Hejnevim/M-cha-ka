@@ -67,40 +67,37 @@ function CenyMaterialu({ recipes, materialy, onUlozit, stav, mostOk, smiMenit })
 
   return html`
     <div className="card">
-      <h2>Ceny materiálů (${fmt(seznam.length, 0)})</h2>
+      <h2>${preloz("Ceny materiálů")} (${fmt(seznam.length, 0)})</h2>
       <p className="hint">
-        Nákupní cena za kilogram nebo litr. Z ní se počítá cena namíchané dávky
-        a cena barvy na kus. Jméno se musí shodovat se jménem složky v receptuře —
-        jinak se cena nespáruje a do součtu se nedostane.
-        ${bezCeny > 0 ? " Cena chybí u " + fmt(bezCeny, 0) + " z " + fmt(seznam.length, 0) + " složek." : ""}
+        ${preloz("Nákupní cena za kilogram nebo litr. Z ní se počítá cena namíchané dávky a cena barvy na kus. Jméno se musí shodovat se jménem složky v receptuře — jinak se cena nespáruje a do součtu se nedostane.")}
+        ${bezCeny > 0 ? preloz(" Cena chybí u {a} z {b} složek.", { a: fmt(bezCeny, 0), b: fmt(seznam.length, 0) }) : ""}
       </p>
       ${!mostOk && html`<div className="warnbox">
-        Ceník je společný pro celou dílnu, proto se ukládá do souboru
-        <b> parametry/${SOUBOR_PIGMENTY}</b> — a na to je potřeba běžící most.
-        Bez něj si ceny můžete prohlédnout, ale neuloží se.
+        ${preloz("Ceník je společný pro celou dílnu, proto se ukládá do souboru")}
+        <b> parametry/${SOUBOR_PIGMENTY}</b>${preloz(" — a na to je potřeba běžící most. Bez něj si ceny můžete prohlédnout, ale neuloží se.")}
       </div>`}
       <div className="rowline">
         <input className="search" value=${q} onChange=${(e) => setQ(e.target.value)}
-          placeholder="Hledat složku…" style=${{ flex: "1 1 220px", marginBottom: 0 }} />
+          placeholder=${preloz("Hledat složku…")} style=${{ flex: "1 1 220px", marginBottom: 0 }} />
         <label className="tgl"><input type="checkbox" checked=${jenBez}
-          onChange=${(e) => setJenBez(e.target.checked)} /><span className="tglt"></span>jen bez ceny</label>
+          onChange=${(e) => setJenBez(e.target.checked)} /><span className="tglt"></span>${preloz("jen bez ceny")}</label>
       </div>
-      ${!seznam.length ? html`<div className="empty">Zatím nejsou nahrané žádné receptury ani materiály.</div>` : html`
+      ${!seznam.length ? html`<div className="empty">${preloz("Zatím nejsou nahrané žádné receptury ani materiály.")}</div>` : html`
         <${RolovaniSListou} styl=${{ marginTop: 10 }}>
         <table className="t">
-          <thead><tr><th>Složka</th><th>Druh</th><th className="num">v recepturách</th>
-            <th className="num">cena</th><th>za</th><th>měna</th>
-            <th className="num">VOC %</th><th>bezpečnostní list</th></tr></thead>
+          <thead><tr><th>${preloz("Složka")}</th><th>${preloz("Druh")}</th><th className="num">${preloz("v recepturách")}</th>
+            <th className="num">${preloz("cena")}</th><th>${preloz("za")}</th><th>${preloz("měna")}</th>
+            <th className="num">VOC %</th><th>${preloz("bezpečnostní list")}</th></tr></thead>
           <tbody>
             ${videt.slice(0, 120).map((z) => html`
               <tr key=${z.klic}>
                 <td style=${{ fontWeight: 600 }}>${z.nazev}
-                  ${!z.vTabulce && html`<span className="note" style=${{ marginLeft: 6 }}>není v tabulce</span>`}</td>
+                  ${!z.vTabulce && html`<span className="note" style=${{ marginLeft: 6 }}>${preloz("není v tabulce")}</span>`}</td>
                 <td>
                   <select value=${hodnota(z, "role")} onChange=${(e) => uprav(z, "role", e.target.value)}>
-                    <option value="">— neurčeno —</option>
+                    <option value="">${preloz("— neurčeno —")}</option>
                     ${Object.keys(ROLE_MATERIALU).map((k) => html`
-                      <option key=${k} value=${k}>${ROLE_MATERIALU[k].popis}</option>`)}
+                      <option key=${k} value=${k}>${preloz(ROLE_MATERIALU[k].popis)}</option>`)}
                   </select>
                 </td>
                 <td className="num">${z.pouziti ? fmt(z.pouziti, 0) : "—"}</td>
@@ -129,22 +126,18 @@ function CenyMaterialu({ recipes, materialy, onUlozit, stav, mostOk, smiMenit })
                 <td>
                   <input value=${hodnota(z, "bezplist")}
                     onChange=${(e) => uprav(z, "bezplist", e.target.value)}
-                    style=${{ width: 170 }} placeholder="odkaz nebo cesta" />
+                    style=${{ width: 170 }} placeholder=${preloz("odkaz nebo cesta")} />
                   ${String(hodnota(z, "bezplist") || "").trim() && html`
                     <a href=${String(hodnota(z, "bezplist")).trim()} target="_blank" rel="noopener"
-                      style=${{ marginLeft: 6 }} title="Otevřít bezpečnostní list">list ↗</a>`}
+                      style=${{ marginLeft: 6 }} title=${preloz("Otevřít bezpečnostní list")}>${preloz("list")} ↗</a>`}
                 </td>
               </tr>`)}
           </tbody>
         </table>
         <//>
-        ${videt.length > 120 && html`<p className="note">Zobrazeno prvních 120 z ${fmt(videt.length, 0)} — upřesněte hledání.</p>`}`}
+        ${videt.length > 120 && html`<p className="note">${preloz("Zobrazeno prvních 120 z {n} — upřesněte hledání.", { n: fmt(videt.length, 0) })}</p>`}`}
       <p className="note" style=${{ marginTop: 8 }}>
-        Cena za litr se na gramy přepočítá hustotou receptury (g/ml je totéž číslo
-        jako kg/l). Materiál v jiné měně se do součtu nepočítá — kurz aplikace nezná.
-        VOC je podíl těkavých látek v % hmotnosti z bezpečnostního listu; z něj
-        kalkulace počítá gramy VOC na dávku. Nula platí (bez těkavých látek),
-        prázdné pole znamená „neuvedeno".
+        ${preloz("Cena za litr se na gramy přepočítá hustotou receptury (g/ml je totéž číslo jako kg/l). Materiál v jiné měně se do součtu nepočítá — kurz aplikace nezná. VOC je podíl těkavých látek v % hmotnosti z bezpečnostního listu; z něj kalkulace počítá gramy VOC na dávku. Nula platí (bez těkavých látek), prázdné pole znamená „neuvedeno“.")}
       </p>
       ${(() => {
         /* Pravidla zástupnosti se tady nezapisují, jen ukazují. Je to údaj
@@ -154,45 +147,38 @@ function CenyMaterialu({ recipes, materialy, onUlozit, stav, mostOk, smiMenit })
         const kz = kontrolaZastupnosti(materialy);
         return html`
           <div style=${{ marginTop: 14 }}>
-            <b>Pravidla zástupnosti (${fmt(kz.pravidla.length, 0)})</b>
+            <b>${preloz("Pravidla zástupnosti")} (${fmt(kz.pravidla.length, 0)})</b>
             <p className="note" style=${{ marginTop: 4 }}>
-              Dražší složka smí zaskočit za levnější, opačně ne. Zbytek, ve kterém
-              je zapsaný zástupce, pak na dávku sedne, i když ta složka v receptuře
-              není. Zapisuje se do sloupce <b>zastupuje</b> v souboru
-              ${" parametry/" + SOUBOR_PIGMENTY} — u složky se vyjmenuje, za koho smí
-              naskočit; víc jmen se odděluje svislítkem.
+              ${preloz("Dražší složka smí zaskočit za levnější, opačně ne. Zbytek, ve kterém je zapsaný zástupce, pak na dávku sedne, i když ta složka v receptuře není. Zapisuje se do sloupce")}
+              <b> zastupuje</b>${preloz(" v souboru parametry/{f} — u složky se vyjmenuje, za koho smí naskočit; víc jmen se odděluje svislítkem.", { f: SOUBOR_PIGMENTY })}
             </p>
             ${!kz.pravidla.length
-              ? html`<p className="note">Zatím není zapsané žádné — zbytky se počítají jako dosud.</p>`
+              ? html`<p className="note">${preloz("Zatím není zapsané žádné — zbytky se počítají jako dosud.")}</p>`
               : html`<ul className="note" style=${{ marginTop: 4, paddingLeft: 18 }}>
                   ${kz.pravidla.map((p, i) => html`<li key=${i}>
-                    <b>${p.zastupce}</b> smí zaskočit za <b>${p.misto}</b>${
-                      p.levnejsi ? " — ale je levnější" : (!p.porovnano ? " — ceny nejdou porovnat" : "")}
+                    <b>${p.zastupce}</b> ${preloz("smí zaskočit za")} <b>${p.misto}</b>${
+                      p.levnejsi ? preloz(" — ale je levnější") : (!p.porovnano ? preloz(" — ceny nejdou porovnat") : "")}
                   </li>`)}
                 </ul>`}
             ${kz.obracene.length > 0 && html`<div className="warnbox">
-              ${kz.obracene.length === 1 ? "Jedno pravidlo míří" : fmt(kz.obracene.length, 0) + " pravidla míří"}
-              ${" "}proti ceně: levnější složka zaskakuje za dražší. Aplikace ho poslechne,
-              zapsal ho člověk — ale namíchá se tím lacinější barva, než za jakou
-              zákazník platí.
+              ${kz.obracene.length === 1 ? preloz("Jedno pravidlo míří") : preloz("{n} pravidla míří", { n: fmt(kz.obracene.length, 0) })}
+              ${" "}${preloz("proti ceně: levnější složka zaskakuje za dražší. Aplikace ho poslechne, zapsal ho člověk — ale namíchá se tím lacinější barva, než za jakou zákazník platí.")}
             </div>`}
             ${kz.neporovnane.length > 0 && html`<p className="note" style=${{ marginTop: 6 }}>
-              Kde ceny nejdou porovnat, směr aplikace neověří: buď je složka mimo ceník,
-              nebo u ní chybí cena, nebo je vedená v jiné měně či za jinou jednotku.
-              Pravidlo platí dál — jen za ně ručí ten, kdo ho napsal.
+              ${preloz("Kde ceny nejdou porovnat, směr aplikace neověří: buď je složka mimo ceník, nebo u ní chybí cena, nebo je vedená v jiné měně či za jinou jednotku. Pravidlo platí dál — jen za ně ručí ten, kdo ho napsal.")}
             </p>`}
           </div>`;
       })()}
       <div className="rowline" style=${{ marginTop: 12, marginBottom: 0 }}>
         <button className="btn" disabled=${!pocetZmen || !mostOk || smiMenit === false || stav.stav === "uklada"}
           onClick=${ulozit}>
-          ${stav.stav === "uklada" ? "Ukládám…" : "Uložit ceny do souboru"}
+          ${stav.stav === "uklada" ? preloz("Ukládám…") : preloz("Uložit ceny do souboru")}
           ${pocetZmen ? " (" + fmt(pocetZmen, 0) + ")" : ""}
         </button>
-        ${pocetZmen > 0 && html`<button className="btn sec" onClick=${() => setZmeny({})}>Zahodit změny</button>`}
-        ${stav.stav === "ulozeno" && !pocetZmen && html`<span className="note" style=${{ color: "var(--ok)" }}>Uloženo do ${SOUBOR_PIGMENTY}.</span>`}
-        ${stav.stav === "chyba" && html`<span className="note" style=${{ color: "var(--danger)" }}>Nepodařilo se uložit: ${stav.chyba}</span>`}
-        ${smiMenit === false && html`<span className="note">Ceník mění technolog — ceník je společný pro celou dílnu.</span>`}
+        ${pocetZmen > 0 && html`<button className="btn sec" onClick=${() => setZmeny({})}>${preloz("Zahodit změny")}</button>`}
+        ${stav.stav === "ulozeno" && !pocetZmen && html`<span className="note" style=${{ color: "var(--ok)" }}>${preloz("Uloženo do {f}.", { f: SOUBOR_PIGMENTY })}</span>`}
+        ${stav.stav === "chyba" && html`<span className="note" style=${{ color: "var(--danger)" }}>${preloz("Nepodařilo se uložit: {e}", { e: stav.chyba })}</span>`}
+        ${smiMenit === false && html`<span className="note">${preloz("Ceník mění technolog — ceník je společný pro celou dílnu.")}</span>`}
       </div>
     </div>`;
 }

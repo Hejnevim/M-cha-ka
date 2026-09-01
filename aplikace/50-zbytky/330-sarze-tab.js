@@ -37,19 +37,19 @@ function SarzeTab({ sarze, setSarze, davky, materialy }) {
   return html`
     <${React.Fragment}>
       <div className="card">
-        <h2>Dohledání šarže</h2>
+        <h2>${preloz("Dohledání šarže")}</h2>
         <div className="searchwrap">
           <div className="searchbar">
             <input value=${dotaz} onChange=${(e) => setDotaz(e.target.value)}
-              placeholder="kód šarže z konve" />
+              placeholder=${preloz("kód šarže z konve")} />
             ${dotaz.trim() && html`<span className="count">${nalezeno.length}</span>`}
           </div>
         </div>
         ${!dotaz.trim() ? null : (nalezeno.length ? html`
           <table className="t" style=${{ marginTop: 10 }}>
             <thead><tr>
-              <th>Dávka</th><th>Namícháno</th><th>Barva</th>
-              <th>Zakázka</th><th>Produkt</th><th>Z které konve</th>
+              <th>${preloz("Dávka")}</th><th>${preloz("Namícháno")}</th><th>${preloz("Barva")}</th>
+              <th>${preloz("Zakázka")}</th><th>${preloz("Produkt")}</th><th>${preloz("Z které konve")}</th>
             </tr></thead>
             <tbody>
               ${nalezeno.map((x) => html`
@@ -65,15 +65,15 @@ function SarzeTab({ sarze, setSarze, davky, materialy }) {
                 </tr>`)}
             </tbody>
           </table>`
-        : html`<div className="empty">Šarže ${dotaz.trim()} není v žádné zapsané dávce.</div>`)}
+        : html`<div className="empty">${preloz("Šarže {kod} není v žádné zapsané dávce.", { kod: dotaz.trim() })}</div>`)}
       </div>
 
       <div className="card">
-        <h2>Otevřené konve</h2>
+        <h2>${preloz("Otevřené konve")}</h2>
         ${konve.length ? html`
           <table className="t">
             <thead><tr>
-              <th>Materiál</th><th>Šarže</th><th>Otevřeno</th><th>Dodavatel</th><th></th>
+              <th>${preloz("Materiál")}</th><th>${preloz("Šarže")}</th><th>${preloz("Otevřeno")}</th><th>${preloz("Dodavatel")}</th><th></th>
             </tr></thead>
             <tbody>
               ${konve.map((z) => html`
@@ -81,7 +81,7 @@ function SarzeTab({ sarze, setSarze, davky, materialy }) {
                   <tr className=${z.otevrena ? "" : "rowline"}>
                     <td>${z.material}</td>
                     <td style=${{ fontFamily: "var(--mono)" }}>
-                      ${z.otevrena ? html`<b>${z.otevrena.kod}</b>` : html`<span className="note">žádná otevřená</span>`}
+                      ${z.otevrena ? html`<b>${z.otevrena.kod}</b>` : html`<span className="note">${preloz("žádná otevřená")}</span>`}
                     </td>
                     <td>${z.otevrena ? den(z.otevrena.otevreno) : "—"}</td>
                     <td>${(z.otevrena && z.otevrena.dodavatel) || "—"}</td>
@@ -89,12 +89,12 @@ function SarzeTab({ sarze, setSarze, davky, materialy }) {
                       ${z.otevrena && html`
                         <button className="btn sec sm" onClick=${() =>
                           setSarze((prev) => dojetaKonev(prev, z.otevrena.kod, z.material))}>
-                          Konev dojela
+                          ${preloz("Konev dojela")}
                         </button>`}
                       ${z.historie.length ? html`
                         <button className="btn sec sm" style=${{ marginLeft: 6 }}
                           onClick=${() => setRozbaleno(rozbaleno === z.material ? "" : z.material)}>
-                          ${rozbaleno === z.material ? "Skrýt" : "Dřívější (" + z.historie.length + ")"}
+                          ${rozbaleno === z.material ? preloz("Skrýt") : preloz("Dřívější ({n})", { n: z.historie.length })}
                         </button>` : null}
                     </td>
                   </tr>
@@ -104,39 +104,38 @@ function SarzeTab({ sarze, setSarze, davky, materialy }) {
                       <td className="note" style=${{ fontFamily: "var(--mono)" }}>${s.kod}</td>
                       <td className="note">${den(s.otevreno)}</td>
                       <td className="note">${s.dodavatel || "—"}</td>
-                      <td className="note num">dojela ${den(s.dojeto)}</td>
+                      <td className="note num">${preloz("dojela")} ${den(s.dojeto)}</td>
                     </tr>`)}
                 <//>`)}
             </tbody>
           </table>`
-        : html`<div className="empty">Zatím není otevřená žádná konev. Šarže se zapisuje u váhy
-            při navažování — nebo tady níž.</div>`}
+        : html`<div className="empty">${preloz("Zatím není otevřená žádná konev. Šarže se zapisuje u váhy při navažování — nebo tady níž.")}</div>`}
 
         <div className="frow c3" style=${{ marginTop: 12 }}>
           <div>
-            <label className="f">Materiál</label>
+            <label className="f">${preloz("Materiál")}</label>
             <input list="sarze-materialy" value=${novyMaterial}
-              onChange=${(e) => setNovyMaterial(e.target.value)} placeholder="název jako v receptuře" />
+              onChange=${(e) => setNovyMaterial(e.target.value)} placeholder=${preloz("název jako v receptuře")} />
             <datalist id="sarze-materialy">
               ${nabidka.map((m) => html`<option key=${m} value=${m} />`)}
             </datalist>
           </div>
           <div>
-            <label className="f">Šarže z konve</label>
+            <label className="f">${preloz("Šarže z konve")}</label>
             <input value=${novyKod} onChange=${(e) => setNovyKod(e.target.value)}
               onKeyDown=${(e) => { if (e.key === "Enter") otevri(); }} />
           </div>
           <div>
-            <label className="f">Dodavatel</label>
+            <label className="f">${preloz("Dodavatel")}</label>
             <input value=${novyDodavatel} onChange=${(e) => setNovyDodavatel(e.target.value)} />
           </div>
         </div>
         <div className="rowline">
           <button className="btn" disabled=${!novyMaterial.trim() || !novyKod.trim()}
-            onClick=${otevri}>Otevřít konev</button>
+            onClick=${otevri}>${preloz("Otevřít konev")}</button>
           ${novyMaterial.trim() && otevrenaSarze(sarze, novyMaterial) && html`
-            <span className="note">Dosavadní konev
-              ${" " + otevrenaSarze(sarze, novyMaterial).kod} se tím uzavře jako dojetá.</span>`}
+            <span className="note">${preloz("Dosavadní konev {kod} se tím uzavře jako dojetá.",
+              { kod: otevrenaSarze(sarze, novyMaterial).kod })}</span>`}
         </div>
       </div>
     <//>`;

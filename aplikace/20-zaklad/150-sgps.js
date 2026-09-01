@@ -31,9 +31,9 @@ const sgpsBase = () => sgpsAdresa() + "/api";
 /* Ověří, že na dané adrese opravdu odpovídá most (a ne třeba jiný web). */
 async function zkusMost(adresa) {
   const r = await fetch(adresa + "/api/stav", { cache: "no-store" });
-  if (!r.ok) throw new Error("odpověď " + r.status);
+  if (!r.ok) throw new Error(preloz("odpověď {n}", { n: r.status }));
   const d = await r.json();
-  if (!d || d.ok !== true || d.verze === undefined) throw new Error("na téhle adrese neodpovídá most");
+  if (!d || d.ok !== true || d.verze === undefined) throw new Error(preloz("na téhle adrese neodpovídá most"));
   return d;
 }
 
@@ -42,7 +42,7 @@ async function sgpsGet(cesta) {
   let data = null;
   try { data = await r.json(); } catch (e) {}
   if (!r.ok || (data && data.ok === false)) {
-    throw new Error((data && data.chyba) || ("most odpověděl " + r.status));
+    throw new Error((data && data.chyba) || (preloz("most odpověděl {n}", { n: r.status })));
   }
   return data;
 }
@@ -76,7 +76,7 @@ function useSgps() {
       } catch (e) { posledni = String((e && e.message) || e); }
     }
     MOST_NALEZENY = "";
-    setStav({ stav: "chyba", chyba: posledni || "most se neozval", most: false });
+    setStav({ stav: "chyba", chyba: posledni || preloz("most se neozval"), most: false });
   };
   useEffect(() => { zjisti(); }, []);
   // Dokud most neběží, zkoušíme to dál — spustí-li se kdykoli později,

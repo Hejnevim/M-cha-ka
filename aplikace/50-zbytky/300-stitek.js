@@ -43,15 +43,15 @@ function StitekZbytku({ zbytek, onClose }) {
     <div className="modalbg" onClick=${(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="modalbox" style=${{ width: "min(420px,100%)" }}>
         <div className="card" style=${{ margin: 0, textAlign: "center" }}>
-          <h2 style=${{ margin: 0 }}>Štítek na kelímek</h2>
+          <h2 style=${{ margin: 0 }}>${preloz("Štítek na kelímek")}</h2>
           <img src=${code128Url(zbytek.kod, 90, 2)} alt=${zbytek.kod}
             style=${{ maxWidth: "100%", margin: "14px auto 6px", display: "block", background: "#fff", padding: 8, borderRadius: 8 }} />
           <div style=${{ fontFamily: "var(--mono)", fontSize: 22, fontWeight: 800, letterSpacing: ".08em" }}>${zbytek.kod}</div>
           <div style=${{ fontWeight: 700, marginTop: 6 }}>${zbytek.nazev || "—"}</div>
-          <div className="note">${fmt(n(zbytek.gramu))} g${zbytek.zakazka ? " · zakázka " + zbytek.zakazka : ""}</div>
+          <div className="note">${fmt(n(zbytek.gramu))} g${zbytek.zakazka ? preloz(" · zakázka {z}", { z: zbytek.zakazka }) : ""}</div>
           <div className="rowline" style=${{ marginTop: 14, marginBottom: 0, justifyContent: "center" }}>
-            <button className="btn" onClick=${vytiskni}>Vytisknout štítek</button>
-            <button className="btn sec" onClick=${onClose}>Zavřít</button>
+            <button className="btn" onClick=${vytiskni}>${preloz("Vytisknout štítek")}</button>
+            <button className="btn sec" onClick=${onClose}>${preloz("Zavřít")}</button>
           </div>
         </div>
       </div>

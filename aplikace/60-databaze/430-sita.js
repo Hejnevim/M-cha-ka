@@ -49,7 +49,7 @@ function dopocitejSito(s) {
 
 function csvNaSita(text) {
   const rows = parseCsv(text);
-  if (!rows.length) throw new Error("Soubor sít je prázdný.");
+  if (!rows.length) throw new Error(preloz("Soubor sít je prázdný."));
   const head = rows[0].map((h) => h.toLowerCase().trim());
   const i = (re) => head.findIndex((h) => re.test(h));
   const ci = {
@@ -62,7 +62,7 @@ function csvNaSita(text) {
     poharek: i(/^(poharek|poh.rek|cup)/),
     pozn: i(/^(pozn|note)/),
   };
-  if (ci.sito < 0) throw new Error("CSV sít musí mít sloupec sito.");
+  if (ci.sito < 0) throw new Error(preloz("CSV sít musí mít sloupec sito."));
   return rows.slice(1).map((r) => {
     const zaznam = {
       tech: ci.tech >= 0 ? String(r[ci.tech] || "").toUpperCase().trim() : "",
@@ -115,13 +115,13 @@ function koefProHodnotu(tabulka, hodnota) {
 
 function csvNaKoeficienty(text) {
   const rows = parseCsv(text);
-  if (!rows.length) throw new Error("Soubor koeficientů je prázdný.");
+  if (!rows.length) throw new Error(preloz("Soubor koeficientů je prázdný."));
   const head = rows[0].map((h) => h.toLowerCase().trim());
   const i = (re) => head.findIndex((h) => re.test(h));
   const ci = { druh: i(/^(druh|typ|kategorie)/), klic: i(/^(klic|kl..|hodnota|nazev|n.zev)/),
     koef: i(/^(koef|nasobek|n.sobek|factor)/) };
   if (ci.druh < 0 || ci.klic < 0 || ci.koef < 0)
-    throw new Error("CSV koeficientů musí mít sloupce druh, klic, koef.");
+    throw new Error(preloz("CSV koeficientů musí mít sloupce druh, klic, koef."));
   const out = { kryvost: {}, material: {}, podklad: {}, viskozita: {} };
   for (const r of rows.slice(1)) {
     const druh = String(r[ci.druh] || "").toLowerCase().trim();

@@ -106,7 +106,7 @@ function resolveSpec(parsed, products, recipes) {
   const num = (key, min) => {
     if (f[key] == null || f[key] === "") return null;
     const v = n(f[key], NaN);
-    if (isNaN(v) || v < min) { r.warn.push(SPEC_LABEL[key] + ": „" + f[key] + "“ není platné číslo."); return null; }
+    if (isNaN(v) || v < min) { r.warn.push(preloz("{l}: „{v}“ není platné číslo.", { l: preloz(SPEC_LABEL[key]), v: f[key] })); return null; }
     return v;
   };
 
@@ -116,17 +116,17 @@ function resolveSpec(parsed, products, recipes) {
       || products.find((p) => String(p.id || "").toLowerCase() === s)
       || products.find((p) => (String(p.ref || "") + " " + p.name).toLowerCase().includes(s))
       || null;
-    if (r.product) r.ok.push("Produkt: " + (r.product.ref ? r.product.ref + " · " : "") + r.product.name);
-    else r.warn.push("Produkt „" + f.ref + "“ není v katalogu.");
+    if (r.product) r.ok.push(preloz("Produkt: {p}", { p: (r.product.ref ? r.product.ref + " · " : "") + r.product.name }));
+    else r.warn.push(preloz("Produkt „{r}“ není v katalogu.", { r: f.ref }));
   } else {
-    r.warn.push("Kód neobsahuje referenci produktu.");
+    r.warn.push(preloz("Kód neobsahuje referenci produktu."));
   }
 
   // technologie ze specu ("Tampontisk" i holé "PDP") — rozliší polohy stejného jména;
   // kód potisku ji nese také, takže poslouží i když je kolonka Technologie prázdná
   const zKodu = rozborKoduPolohy(f.poscode);
   const techKod = (f.tech ? mapTech(f.tech) : null) || (zKodu ? mapTech(zKodu.tech) : null);
-  if (f.tech && !techKod) r.warn.push("Technologii „" + f.tech + "“ neznám — poloha se vybere bez ní.");
+  if (f.tech && !techKod) r.warn.push(preloz("Technologii „{t}“ neznám — poloha se vybere bez ní.", { t: f.tech }));
 
   if (r.product) {
     let poss = r.product.positions || [];
@@ -134,10 +134,10 @@ function resolveSpec(parsed, products, recipes) {
     const dlePresnehoKodu = polohaDleKodu(poss, f.poscode);
     if (dlePresnehoKodu) {
       r.position = dlePresnehoKodu;
-      r.ok.push("Poloha dle kódu " + f.poscode + ": " + r.position.name
-        + " · " + r.position.w + "×" + r.position.h + " mm · " + r.position.tech);
+      r.ok.push(preloz("Poloha dle kódu {k}: {p}", { k: f.poscode, p: r.position.name
+        + " · " + r.position.w + "×" + r.position.h + " mm · " + r.position.tech }));
     } else if (f.poscode && zKodu) {
-      r.warn.push("Kód potisku „" + f.poscode + "“ neodpovídá žádné poloze v katalogu — poloha se hledá podle názvu.");
+      r.warn.push(preloz("Kód potisku „{k}“ neodpovídá žádné poloze v katalogu — poloha se hledá podle názvu.", { k: f.poscode }));
     }
     if (!r.position && f.pos) {
       const vyber = (seznam) => {
@@ -165,17 +165,17 @@ function resolveSpec(parsed, products, recipes) {
       r.position = (dleTech.length ? (vyber(dleTech) || dleSlov(dleTech)) : null)
         || vyber(poss) || dleSlov(poss);
       if (r.position) {
-        r.ok.push("Poloha: " + r.position.name + " · " + r.position.w + "×" + r.position.h
-          + " mm · " + r.position.tech
-          + (dleTech.length > 1 ? " (z " + dleTech.length + " poloh dle technologie)" : ""));
+        r.ok.push(preloz("Poloha: {p}", { p: r.position.name + " · " + r.position.w + "×" + r.position.h
+          + " mm · " + r.position.tech })
+          + (dleTech.length > 1 ? preloz(" (z {n} poloh dle technologie)", { n: dleTech.length }) : ""));
       } else {
-        r.warn.push("Poloha „" + f.pos + "“ u tohoto produktu neexistuje — ponechána stávající.");
+        r.warn.push(preloz("Poloha „{p}“ u tohoto produktu neexistuje — ponechána stávající.", { p: f.pos }));
       }
     } else if (!r.position && techKod) {
       const dleTech = poss.filter((p) => p.tech === techKod);
-      if (dleTech.length === 1) { r.position = dleTech[0]; r.ok.push("Poloha dle technologie: " + r.position.name); }
-      else if (dleTech.length > 1) r.warn.push("Technologie " + techKod + " má " + dleTech.length + " poloh — vyberte ručně.");
-      else r.warn.push("Produkt nemá polohu pro technologii " + techKod + ".");
+      if (dleTech.length === 1) { r.position = dleTech[0]; r.ok.push(preloz("Poloha dle technologie: {p}", { p: r.position.name })); }
+      else if (dleTech.length > 1) r.warn.push(preloz("Technologie {t} má {n} poloh — vyberte ručně.", { t: techKod, n: dleTech.length }));
+      else r.warn.push(preloz("Produkt nemá polohu pro technologii {t}.", { t: techKod }));
     }
     if (f.color) {
       // hodnota bývá složená („105 — Červená", „105 / cervena") — zkoušíme
@@ -198,8 +198,8 @@ function resolveSpec(parsed, products, recipes) {
         if (i >= 0) break;
       }
       r.colorIdx = i;
-      if (i >= 0) r.ok.push("Barva: " + (cs[i].code || "") + (cs[i].name ? " — " + cs[i].name : ""));
-      else r.warn.push("Barva „" + f.color + "“ u tohoto produktu neexistuje — ponechána stávající.");
+      if (i >= 0) r.ok.push(preloz("Barva: {b}", { b: (cs[i].code || "") + (cs[i].name ? " — " + cs[i].name : "") }));
+      else r.warn.push(preloz("Barva „{b}“ u tohoto produktu neexistuje — ponechána stávající.", { b: f.color }));
     }
   }
 
@@ -217,13 +217,13 @@ function resolveSpec(parsed, products, recipes) {
       || null;
     r.recipe = (vRade.length ? najdi(vRade) : null) || najdi(recipes);
     if (r.recipe) {
-      r.ok.push("Receptura: " + r.recipe.name + (r.recipe.series ? " · " + r.recipe.series : ""));
+      r.ok.push(preloz("Receptura: {r}", { r: r.recipe.name + (r.recipe.series ? " · " + r.recipe.series : "") }));
       if (rada && !String(r.recipe.series || "").toLowerCase().includes(rada))
-        r.warn.push("Typ barvy „" + f.series + "“ se neshoduje s typem barvy receptury („" + (r.recipe.series || "—") + "“) — ověřte.");
+        r.warn.push(preloz("Typ barvy „{a}“ se neshoduje s typem barvy receptury („{b}“) — ověřte.", { a: f.series, b: r.recipe.series || "—" }));
     } else if (rada && recipes.length && !vRade.length) {
-      r.warn.push("Typ barvy „" + f.series + "“ není v databázi receptur — receptura nenalezena.");
+      r.warn.push(preloz("Typ barvy „{t}“ není v databázi receptur — receptura nenalezena.", { t: f.series }));
     } else {
-      r.warn.push("Receptura „" + f.recipe + "“ nebyla nalezena — nahrajte databázi v Import / data.");
+      r.warn.push(preloz("Receptura „{r}“ nebyla nalezena — nahrajte databázi v Import / data.", { r: f.recipe }));
     }
   }
 
@@ -234,10 +234,10 @@ function resolveSpec(parsed, products, recipes) {
     const m = String(f.size).match(/(\d+(?:[.,]\d+)?)\s*[x×*]\s*(\d+(?:[.,]\d+)?)/i);
     if (m) {
       r.w = n(m[1]); r.h = n(m[2]);
-      r.ok.push("Rozměr motivu: " + fmt(r.w, 1) + "×" + fmt(r.h, 1) + " mm"
-        + (r.position ? " (katalog uvádí max. " + fmt(n(r.position.w), 0) + "×" + fmt(n(r.position.h), 0) + " mm)" : ""));
+      r.ok.push(preloz("Rozměr motivu: {r} mm", { r: fmt(r.w, 1) + "×" + fmt(r.h, 1) })
+        + (r.position ? preloz(" (katalog uvádí max. {m} mm)", { m: fmt(n(r.position.w), 0) + "×" + fmt(n(r.position.h), 0) }) : ""));
     } else {
-      r.warn.push("Rozměr „" + f.size + "“ se nepodařilo přečíst — použije se rozměr z katalogu.");
+      r.warn.push(preloz("Rozměr „{s}“ se nepodařilo přečíst — použije se rozměr z katalogu.", { s: f.size }));
     }
   }
 
@@ -245,7 +245,7 @@ function resolveSpec(parsed, products, recipes) {
   r.gm2 = num("gm2", 0.01);
   r.loss = num("loss", 0);
   r.minBatch = num("minBatch", 0);
-  if (r.qty != null) r.ok.push("Počet kusů: " + fmt(r.qty, 0));
+  if (r.qty != null) r.ok.push(preloz("Počet kusů: {n}", { n: fmt(r.qty, 0) }));
   return r;
 }
 

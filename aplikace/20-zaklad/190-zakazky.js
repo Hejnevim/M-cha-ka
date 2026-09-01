@@ -22,29 +22,29 @@ function ZakazkyTab({ sgps, onOtevri }) {
 
   if (sgps.stav.stav !== "ok") return html`
     <div className="card">
-      <h2>Zakázky ze SGPS</h2>
+      <h2>${preloz("Zakázky ze SGPS")}</h2>
       ${sgps.stav.stav === "hleda"
-        ? html`<p className="hint">Hledám most…</p>`
+        ? html`<p className="hint">${preloz("Hledám most…")}</p>`
         : html`
           <${React.Fragment}>
             <div className="warnbox" style=${{ marginTop: 0 }}>
-              <b>Most na SGPS neběží.</b><br />
+              <b>${preloz("Most na SGPS neběží.")}</b><br />
               ${sgps.stav.chyba || ""}
             </div>
             <p className="hint" style=${{ marginTop: 12 }}>
-              Ve složce aplikace otevřete příkazový řádek a spusťte:
+              ${preloz("Ve složce aplikace otevřete příkazový řádek a spusťte:")}
             </p>
             <pre className="tpl">python most.py</pre>
             <p className="note">
-              Most se postará o spojení se SGPS a zároveň aplikaci obslouží
-              na adrese <b>http://localhost:${port}</b>. Nechte ho běžet po celou dobu práce.
-              ${jeSoubor ? " Doporučujeme aplikaci otevírat z té adresy — z dvojkliku na soubor je spojení omezené." : ""}
+              ${preloz("Most se postará o spojení se SGPS a zároveň aplikaci obslouží na adrese")}
+              <b> http://localhost:${port}</b>. ${preloz("Nechte ho běžet po celou dobu práce.")}
+              ${jeSoubor ? preloz(" Doporučujeme aplikaci otevírat z té adresy — z dvojkliku na soubor je spojení omezené.") : ""}
             </p>
             <div className="rowline" style=${{ marginTop: 12 }}>
-              <button className="btn" onClick=${sgps.zjisti}>Zkusit znovu</button>
-              <span className="note">port</span>
+              <button className="btn" onClick=${sgps.zjisti}>${preloz("Zkusit znovu")}</button>
+              <span className="note">${preloz("port")}</span>
               <input style=${{ width: 90 }} value=${port} onChange=${(e) => setPort(e.target.value)} />
-              <button className="btn sec sm" onClick=${zapniPort}>Použít port</button>
+              <button className="btn sec sm" onClick=${zapniPort}>${preloz("Použít port")}</button>
             </div>
           <//>`}
     </div>`;
@@ -53,28 +53,27 @@ function ZakazkyTab({ sgps, onOtevri }) {
     <${React.Fragment}>
       <div className="card">
         <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          <h2 style=${{ margin: 0 }}>Zakázky ze SGPS (${list.length})</h2>
+          <h2 style=${{ margin: 0 }}>${preloz("Zakázky ze SGPS")} (${list.length})</h2>
           <div className="rowline" style=${{ margin: 0 }}>
-            <span className="tag tech">${sgps.stav.popis || sgps.stav.rezim}</span>
-            <button className="btn sec sm" onClick=${() => { sgps.zjisti(); nacti(q); }}>Obnovit</button>
+            <span className="tag tech">${preloz(sgps.stav.popis || sgps.stav.rezim)}</span>
+            <button className="btn sec sm" onClick=${() => { sgps.zjisti(); nacti(q); }}>${preloz("Obnovit")}</button>
           </div>
         </div>
         ${sgps.stav.rezim === "demo" && html`
-          <div className="warnbox">Most běží v <b>ukázkovém režimu</b> — zakázky jsou vymyšlené.
-          Až bude jasné, co SGPS nabízí, přepněte v souboru <code>sgps_config.json</code>
-          položku <code>rezim</code> na <code>soubor</code> nebo <code>rest</code>.</div>`}
+          <div className="warnbox">${preloz("Most běží v")} <b>${preloz("ukázkovém režimu")}</b>${preloz(" — zakázky jsou vymyšlené. Až bude jasné, co SGPS nabízí, přepněte v souboru")} <code>sgps_config.json</code>
+          ${preloz("položku")} <code>rezim</code> ${preloz("na")} <code>soubor</code> ${preloz("nebo")} <code>rest</code>.</div>`}
         <div className="rowline" style=${{ marginTop: 12 }}>
           <input style=${{ flex: "1 1 260px" }} value=${q}
             onChange=${(e) => { setQ(e.target.value); nacti(e.target.value); }}
-            placeholder="Hledat podle čísla zakázky, produktu nebo zákazníka…" />
-          ${nacita && html`<span className="note">načítám…</span>`}
+            placeholder=${preloz("Hledat podle čísla zakázky, produktu nebo zákazníka…")} />
+          ${nacita && html`<span className="note">${preloz("načítám…")}</span>`}
         </div>
         ${err && html`<div className="warnbox">${err}</div>`}
         ${!err && !list.length && !nacita
-          ? html`<div className="empty" style=${{ marginTop: 12 }}>Žádné zakázky.</div>`
+          ? html`<div className="empty" style=${{ marginTop: 12 }}>${preloz("Žádné zakázky.")}</div>`
           : html`
           <table className="t" style=${{ marginTop: 12 }}>
-            <thead><tr><th>Zakázka</th><th>Produkt</th><th className="num">Ks</th><th>Barva</th><th>Receptura</th><th>Zákazník</th><th>Termín</th><th /></tr></thead>
+            <thead><tr><th>${preloz("Zakázka")}</th><th>${preloz("Produkt")}</th><th className="num">${preloz("Ks")}</th><th>${preloz("Barva")}</th><th>${preloz("Receptura")}</th><th>${preloz("Zákazník")}</th><th>${preloz("Termín")}</th><th /></tr></thead>
             <tbody>
               ${list.map((z) => html`
                 <tr key=${z.cislo}>
@@ -86,8 +85,8 @@ function ZakazkyTab({ sgps, onOtevri }) {
                   <td>${z.zakaznik || ""}</td>
                   <td className="note">${z.termin || ""}</td>
                   <td style=${{ whiteSpace: "nowrap" }}>
-                    <button className="btn sm" onClick=${() => onOtevri(z)}>Otevřít →</button>${" "}
-                    <button className="btn sec sm" onClick=${() => setDetail(detail === z.cislo ? null : z.cislo)} title="Zobrazit, co přesně SGPS poslalo">⋯</button>
+                    <button className="btn sm" onClick=${() => onOtevri(z)}>${preloz("Otevřít →")}</button>${" "}
+                    <button className="btn sec sm" onClick=${() => setDetail(detail === z.cislo ? null : z.cislo)} title=${preloz("Zobrazit, co přesně SGPS poslalo")}>⋯</button>
                   </td>
                 </tr>
                 ${detail === z.cislo && html`
@@ -98,12 +97,10 @@ function ZakazkyTab({ sgps, onOtevri }) {
           </table>`}
       </div>
       <div className="card">
-        <h2>Jak je to zapojené</h2>
-        <p className="hint">Aplikace nemluví se SGPS přímo — z prohlížeče to nejde. Data dodává skript
-        <code> most.py</code>, který běží na tomto počítači. Ten se stará o spojení, přihlašovací
-        údaje i překlad názvů polí, takže při změně na straně SGPS se upravuje jen jeho konfigurace.</p>
-        <p className="note">Tlačítko <b>⋯</b> u zakázky ukáže, co přesně SGPS poslalo — podle toho se
-        v <code>sgps_config.json</code> v sekci <code>mapovani</code> doplní názvy polí.</p>
+        <h2>${preloz("Jak je to zapojené")}</h2>
+        <p className="hint">${preloz("Aplikace nemluví se SGPS přímo — z prohlížeče to nejde. Data dodává skript")}
+        <code> most.py</code>${preloz(", který běží na tomto počítači. Ten se stará o spojení, přihlašovací údaje i překlad názvů polí, takže při změně na straně SGPS se upravuje jen jeho konfigurace.")}</p>
+        <p className="note">${preloz("Tlačítko")} <b>⋯</b> ${preloz("u zakázky ukáže, co přesně SGPS poslalo — podle toho se v")} <code>sgps_config.json</code> ${preloz("v sekci")} <code>mapovani</code> ${preloz("doplní názvy polí.")}</p>
       </div>
     <//>`;
 }

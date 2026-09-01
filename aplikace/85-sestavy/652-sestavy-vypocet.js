@@ -34,7 +34,7 @@ const posunMesice = (kdy, o) => {
   return new Date(d.getFullYear(), d.getMonth() + o, 1).getTime();
 };
 const nazevMesice = (kdy) =>
-  new Date(n(kdy)).toLocaleDateString("cs-CZ", { month: "long", year: "numeric" });
+  new Date(n(kdy)).toLocaleDateString(jazykProstredi(), { month: "long", year: "numeric" });
 
 /* Kelímku na stole se říká jménem barvy, ne kódem receptury — a receptury
    dostávají id při každém načtení nové, takže se na ně vázat nedá. */

@@ -94,50 +94,49 @@ function SkladTab({ sklad, sarze, onUlozit, stav, mostOk, smiMenit }) {
       <div className="card">
         <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "center",
           marginBottom: 12, gap: 10, flexWrap: "wrap" }}>
-          <h2 style=${{ margin: 0 }}>Sklad surovin (${fmt(sklad.radky.length, 0)})</h2>
+          <h2 style=${{ margin: 0 }}>${preloz("Sklad surovin")} (${fmt(sklad.radky.length, 0)})</h2>
           <div className="chips">
             ${SKLAD_FILTRY.map((f) => html`
               <button key=${f.kod} className=${"chip" + (f.kod === filtr ? " on" : "")}
-                onClick=${() => setFiltr(f.kod)}>${f.popis}</button>`)}
+                onClick=${() => setFiltr(f.kod)}>${preloz(f.popis)}</button>`)}
           </div>
         </div>
 
         <div className="specbar" style=${{ marginTop: 0 }}>
           <span className="dot" style=${{ background: p.chybi ? "var(--danger)"
             : (p.dochazi ? "var(--warn)" : "var(--ok)") }}></span>
-          <span>Došlo <b>${fmt(p.chybi, 0)}</b></span>
-          <span>Pod minimem <b>${fmt(p.dochazi, 0)}</b></span>
-          <span>Stačí <b>${fmt(p.dost, 0)}</b></span>
-          <span>Bez inventury <b>${fmt(p.neznamy, 0)}</b></span>
+          <span>${preloz("Došlo")} <b>${fmt(p.chybi, 0)}</b></span>
+          <span>${preloz("Pod minimem")} <b>${fmt(p.dochazi, 0)}</b></span>
+          <span>${preloz("Stačí")} <b>${fmt(p.dost, 0)}</b></span>
+          <span>${preloz("Bez inventury")} <b>${fmt(p.neznamy, 0)}</b></span>
           ${sklad.podkladDnu > 0 && html`
-            <span>Spotřeba z posledních <b>${fmt(sklad.podkladDnu, 0)}</b> dní</span>`}
+            <span>${preloz("Spotřeba z posledních")} <b>${fmt(sklad.podkladDnu, 0)}</b> ${preloz("dní")}</span>`}
         </div>
 
         ${!mostOk && html`<div className="warnbox">
-          Zásoby jsou společné pro celou dílnu, proto se ukládají do souboru
-          <b> parametry/${SOUBOR_PIGMENTY}</b> — a na to je potřeba běžící most.
-          Bez něj si sklad prohlédnete, ale nic se neuloží.
+          ${preloz("Zásoby jsou společné pro celou dílnu, proto se ukládají do souboru")}
+          <b> parametry/${SOUBOR_PIGMENTY}</b>${preloz(" — a na to je potřeba běžící most. Bez něj si sklad prohlédnete, ale nic se neuloží.")}
         </div>`}
 
         <div className="rowline">
           <input className="search" value=${q} onChange=${(e) => setQ(e.target.value)}
-            placeholder="Hledat složku…" style=${{ flex: "1 1 220px", marginBottom: 0 }} />
+            placeholder=${preloz("Hledat složku…")} style=${{ flex: "1 1 220px", marginBottom: 0 }} />
         </div>
 
         ${!sklad.radky.length ? html`
-          <div className="empty">V ceníku zatím nejsou žádné složky — sklad se vede
-            nad toutéž tabulkou materiálů (parametry/${SOUBOR_PIGMENTY}).</div>`
+          <div className="empty">${preloz("V ceníku zatím nejsou žádné složky — sklad se vede nad toutéž tabulkou materiálů (parametry/{f}).",
+            { f: SOUBOR_PIGMENTY })}</div>`
         : !videt.length ? html`
           <div className="empty">${filtr === "resit"
-            ? "Nic nedochází — žádná složka není pod minimem."
-            : "Hledání nic nenašlo."}</div>`
+            ? preloz("Nic nedochází — žádná složka není pod minimem.")
+            : preloz("Hledání nic nenašlo.")}</div>`
         : html`
           <table className="t" style=${{ marginTop: 10 }}>
             <thead><tr>
-              <th>Složka</th><th className="num">Zbývá</th><th className="num">Denně</th>
-              <th className="num">Vydrží</th><th className="num">Minimum kg</th>
-              <th className="num">Balení kg</th><th className="num">Inventura kg</th>
-              <th className="num">Objednat</th>
+              <th>${preloz("Složka")}</th><th className="num">${preloz("Zbývá")}</th><th className="num">${preloz("Denně")}</th>
+              <th className="num">${preloz("Vydrží")}</th><th className="num">${preloz("Minimum kg")}</th>
+              <th className="num">${preloz("Balení kg")}</th><th className="num">${preloz("Inventura kg")}</th>
+              <th className="num">${preloz("Objednat")}</th>
             </tr></thead>
             <tbody>
               ${videt.slice(0, 120).map((r) => html`
@@ -146,19 +145,20 @@ function SkladTab({ sklad, sarze, onUlozit, stav, mostOk, smiMenit }) {
                     <span className="cdot" style=${{ background: barvaStavu[r.stav] }}></span>
                     ${r.nazev}
                     ${r.role && html`<span className="tag" style=${{ marginLeft: 6 }}>
-                      ${(ROLE_MATERIALU[r.role] || {}).popis || r.role}</span>`}
+                      ${preloz((ROLE_MATERIALU[r.role] || {}).popis || r.role)}</span>`}
                     ${!r.odecitaSe && html`<span className="tag" style=${{ marginLeft: 6 }}
-                      title="lije se podle viskozity a do záznamu dávky se to nedostane — ze zásoby se neodečítá">
-                      neodečítá se</span>`}
+                      title=${preloz("lije se podle viskozity a do záznamu dávky se to nedostane — ze zásoby se neodečítá")}>
+                      ${preloz("neodečítá se")}</span>`}
                   </td>
                   <td className="num" title=${r.zasobaKdy
-                    ? "inventura " + den(r.zasobaKdy) + ", od té doby spotřebováno "
-                      + fmt(r.spotrebaG, 0) + " g" : "zásoba se ještě nepočítala"}>
-                    ${r.zbyvaKg == null ? html`<span className="note">nepočítáno</span>`
+                    ? preloz("inventura {d}, od té doby spotřebováno {g} g",
+                        { d: den(r.zasobaKdy), g: fmt(r.spotrebaG, 0) })
+                    : preloz("zásoba se ještě nepočítala")}>
+                    ${r.zbyvaKg == null ? html`<span className="note">${preloz("nepočítáno")}</span>`
                       : html`<b>${kg(Math.max(0, r.zbyvaKg))}</b>`}
                   </td>
                   <td className="num">${r.denniG > 0 ? fmt(r.denniG, 0) + " g" : "—"}</td>
-                  <td className="num">${r.dnu == null ? "—" : fmt(r.dnu, 0) + " dní"}</td>
+                  <td className="num">${r.dnu == null ? "—" : fmt(r.dnu, 0) + " " + preloz("dní")}</td>
                   <td className="num">
                     <input type="number" step="0.1" min="0" value=${hodnota(r, "minZasoba")}
                       onChange=${(e) => uprav(r, "minZasoba", e.target.value)}
@@ -173,69 +173,65 @@ function SkladTab({ sklad, sarze, onUlozit, stav, mostOk, smiMenit }) {
                     <input type="number" step="0.01" min="0" value=${hodnota(r, "zasoba")}
                       onChange=${(e) => uprav(r, "zasoba", e.target.value)}
                       style=${{ width: 90, textAlign: "right" }}
-                      placeholder=${r.zasoba == null ? "napočítat" : fmt(r.zasoba, 2)}
-                      title=${r.zasobaKdy ? "naposledy počítáno " + den(r.zasobaKdy)
-                        : "kolik toho v regálu je teď"} />
+                      placeholder=${r.zasoba == null ? preloz("napočítat") : fmt(r.zasoba, 2)}
+                      title=${r.zasobaKdy ? preloz("naposledy počítáno {d}", { d: den(r.zasobaKdy) })
+                        : preloz("kolik toho v regálu je teď")} />
                   </td>
                   <td className="num">${n(r.objednatKg) > 0
                     ? html`<b>${kg(r.objednatKg)}</b>` : "—"}</td>
                 </tr>`)}
             </tbody>
           </table>`}
-        ${videt.length > 120 && html`<p className="note">Zobrazeno prvních 120
-          z ${fmt(videt.length, 0)} — upřesněte hledání.</p>`}
+        ${videt.length > 120 && html`<p className="note">${preloz("Zobrazeno prvních 120 z {n} — upřesněte hledání.",
+          { n: fmt(videt.length, 0) })}</p>`}
 
         <div className="rowline" style=${{ marginTop: 12, marginBottom: 0 }}>
           <button className="btn" disabled=${!pocetZmen || !mostOk || smiMenit === false
             || stav.stav === "uklada"} onClick=${ulozit}>
-            ${stav.stav === "uklada" ? "Ukládám…" : "Uložit zásoby do souboru"}
+            ${stav.stav === "uklada" ? preloz("Ukládám…") : preloz("Uložit zásoby do souboru")}
             ${pocetZmen ? " (" + fmt(pocetZmen, 0) + ")" : ""}
           </button>
           ${pocetZmen > 0 && html`<button className="btn sec"
-            onClick=${() => setZmeny({})}>Zahodit změny</button>`}
+            onClick=${() => setZmeny({})}>${preloz("Zahodit změny")}</button>`}
           ${stav.stav === "ulozeno" && !pocetZmen && html`<span className="note"
-            style=${{ color: "var(--ok)" }}>Uloženo do ${SOUBOR_PIGMENTY}.</span>`}
+            style=${{ color: "var(--ok)" }}>${preloz("Uloženo do {f}.", { f: SOUBOR_PIGMENTY })}</span>`}
           ${stav.stav === "chyba" && html`<span className="note"
-            style=${{ color: "var(--danger)" }}>Nepodařilo se uložit: ${stav.chyba}</span>`}
-          ${smiMenit === false && html`<span className="note">Zásoby zapisuje technolog —
-            tabulka materiálů je společná pro celou dílnu.</span>`}
+            style=${{ color: "var(--danger)" }}>${preloz("Nepodařilo se uložit: {e}", { e: stav.chyba })}</span>`}
+          ${smiMenit === false && html`<span className="note">${preloz("Zásoby zapisuje technolog — tabulka materiálů je společná pro celou dílnu.")}</span>`}
         </div>
 
         ${sklad.mimoCenik.length > 0 && html`
           <p className="note" style=${{ marginTop: 10 }}>
-            Mimo ceník se za posledních ${fmt(sklad.podkladDnu, 0)} dní míchalo
-            z ${fmt(sklad.mimoCenik.length, 0)} složek — ${sklad.mimoCenik.slice(0, 5)
-              .map((x) => x.nazev + " (" + fmt(x.gramu, 0) + " g)").join(" · ")}${
-              sklad.mimoCenik.length > 5 ? " a další" : ""}. Sklad je vést nemůže,
-            dokud nebudou v parametry/${SOUBOR_PIGMENTY}.</p>`}
+            ${preloz("Mimo ceník se za posledních {d} dní míchalo z {n} složek — {list}{dalsi}. Sklad je vést nemůže, dokud nebudou v parametry/{f}.",
+              { d: fmt(sklad.podkladDnu, 0), n: fmt(sklad.mimoCenik.length, 0),
+                list: sklad.mimoCenik.slice(0, 5)
+                  .map((x) => x.nazev + " (" + fmt(x.gramu, 0) + " g)").join(" · "),
+                dalsi: sklad.mimoCenik.length > 5 ? preloz(" a další") : "",
+                f: SOUBOR_PIGMENTY })}</p>`}
         ${sklad.bezSlozeni.length > 0 && html`
           <p className="note" style=${{ marginTop: 6 }}>
-            U ${fmt(sklad.bezSlozeni.length, 0)} zapsaných směsí se nedohledalo složení —
-            receptura toho jména už v databázi není. Jejich spotřeba se ze skladu
-            neodečetla, zůstatky jsou o ně vyšší, než jaké doopravdy jsou.</p>`}
+            ${preloz("U {n} zapsaných směsí se nedohledalo složení — receptura toho jména už v databázi není. Jejich spotřeba se ze skladu neodečetla, zůstatky jsou o ně vyšší, než jaké doopravdy jsou.",
+              { n: fmt(sklad.bezSlozeni.length, 0) })}</p>`}
         ${sklad.bezZdroje > 0 && html`
           <p className="note" style=${{ marginTop: 6 }}>
-            U ${fmt(sklad.bezZdroje, 0)} dávek se ví, kolik gramů přišlo ze zbytku, ale
-            ne z kterého kelímku — zapisuje se to teprve od sloupce zbytek_kod. Ty gramy
-            se ze skladu odečetly jako čerstvá barva, i když z konve nešly.</p>`}
+            ${preloz("U {n} dávek se ví, kolik gramů přišlo ze zbytku, ale ne z kterého kelímku — zapisuje se to teprve od sloupce zbytek_kod. Ty gramy se ze skladu odečetly jako čerstvá barva, i když z konve nešly.",
+              { n: fmt(sklad.bezZdroje, 0) })}</p>`}
         ${sklad.tuzidloNeurcene > 0 && html`
           <p className="note" style=${{ marginTop: 6 }}>
-            ${fmt(sklad.tuzidloNeurcene, 0)} g tužidla se nepřiřadilo k žádné složce —
-            receptura ho nejmenuje a v ceníku není právě jedno. Doplňte název tužidla
-            u receptury, jinak se jeho zásoba neodečítá.</p>`}
+            ${preloz("{g} g tužidla se nepřiřadilo k žádné složce — receptura ho nejmenuje a v ceníku není právě jedno. Doplňte název tužidla u receptury, jinak se jeho zásoba neodečítá.",
+              { g: fmt(sklad.tuzidloNeurcene, 0) })}</p>`}
       </div>
 
       <div className="card">
-        <h2>Co objednat (${fmt(objednavka.length, 0)})</h2>
+        <h2>${preloz("Co objednat")} (${fmt(objednavka.length, 0)})</h2>
         ${!objednavka.length ? html`
-          <div className="empty">Nic pod minimem. Objednávka se sestaví sama, jakmile
-            zůstatek některé složky spadne pod zapsanou minimální zásobu.</div>`
+          <div className="empty">${preloz("Nic pod minimem. Objednávka se sestaví sama, jakmile zůstatek některé složky spadne pod zapsanou minimální zásobu.")}</div>`
         : html`
           <${React.Fragment}>
             <table className="t">
-              <thead><tr><th>Složka</th><th>Dodavatel</th><th className="num">Zbývá</th>
-                <th className="num">Minimum</th><th className="num">Objednat</th>
-                <th className="num">Cena</th></tr></thead>
+              <thead><tr><th>${preloz("Složka")}</th><th>${preloz("Dodavatel")}</th><th className="num">${preloz("Zbývá")}</th>
+                <th className="num">${preloz("Minimum")}</th><th className="num">${preloz("Objednat")}</th>
+                <th className="num">${preloz("Cena")}</th></tr></thead>
               <tbody>
                 ${objednavka.map((r) => html`
                   <tr key=${r.klic}>
@@ -254,13 +250,11 @@ function SkladTab({ sklad, sarze, onUlozit, stav, mostOk, smiMenit }) {
             </table>
             <div className="specbar" style=${{ marginTop: 10 }}>
               <span className="dot" style=${{ background: "var(--key)" }}></span>
-              <span>Objednávka celkem <b>${cenaText(sklad.hodnotaObjednavky, sklad.mena)}</b></span>
-              <span>Položek <b>${fmt(objednavka.length, 0)}</b></span>
+              <span>${preloz("Objednávka celkem")} <b>${cenaText(sklad.hodnotaObjednavky, sklad.mena)}</b></span>
+              <span>${preloz("Položek")} <b>${fmt(objednavka.length, 0)}</b></span>
             </div>
             ${!sklad.hodnotaUplna && html`<p className="note" style=${{ marginTop: 6 }}>
-              U složek s cenou za litr nebo bez ceny se hodnota nepočítá — přepočet litru
-              na kilogram visí na hustotě, kterou ceník nevede. Objednávka bude dražší
-              než uvedená částka.</p>`}
+              ${preloz("U složek s cenou za litr nebo bez ceny se hodnota nepočítá — přepočet litru na kilogram visí na hustotě, kterou ceník nevede. Objednávka bude dražší než uvedená částka.")}</p>`}
           <//>`}
       </div>
     <//>`;

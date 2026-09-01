@@ -79,7 +79,7 @@ function zapisTypPolohyDoCsv(text, ref, tech, poloha, typy) {
   const ci = { ref: najdi(/^(ref|produkt)/), tech: najdi(/^(tech|technologie)/),
     poloha: najdi(/^(poloha|pozice|komponenta)/), typy: najdi(/^(typy|typ|rady|.ady|databaze)/) };
   if (ci.ref < 0 || ci.poloha < 0 || ci.typy < 0)
-    throw new Error("Soubor typů poloh nemá sloupce ref, poloha a typy.");
+    throw new Error(preloz("Soubor typů poloh nemá sloupce ref, poloha a typy."));
   const hledany = klicTypuPolohy(ref, tech, poloha);
   const hodnota = (typy || []).join(",");
   // rozdelRadek nechává buňku i s uvozovkami (aby šla složit zpět beze změny);

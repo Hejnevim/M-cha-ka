@@ -1,39 +1,46 @@
 <title>Od zakázkového listu ke kelímku</title>
 <style>
   /* ---------------------------------------------------------------
-     Paleta je z aplikace samotné, ne vymyšlená k prezentaci: šedá
-     plocha, karty z ní vystupují stínem, inkoust je černý a barva
-     zůstala jen tam, kde nese význam — odstín, varování, stav vážení.
+     Paleta je z aplikace samotné, ne vymyšlená k prezentaci — tokeny
+     opsané z 020-promenne.css po přeladění na neumorfismus (kap.
+     141–144): plocha #c9c9c9, karty světlejší #ededed vystupují
+     barvou i stínem, tmavý režim #373d43/#31383f se zeleným
+     a oranžovým akcentem. Jen --ok a --warn zůstávají ve světlém
+     režimu tmavší než v aplikaci: tady jsou to barvy textu na
+     světlém platně, ne výplně, a appkové odstíny by nešly přečíst.
      Světlá sada je úplná, tmavá jen přepisuje tokeny.
      --------------------------------------------------------------- */
   :root{
-    --bg:#949494; --paper:#dbdbdb; --paper-2:#e6e6e6;
-    --ink:#141414; --ink-2:#767676; --line:#c7c7c7;
+    --bg:#c9c9c9; --paper:#ededed; --paper-2:#e4e4e4;
+    --ink:#2D2D2D; --ink-2:#757575; --line:#c6c6c6;
     --inkoust:#DA291C;          /* PANTONE 485 C — jediná sytá barva na stránce */
-    --ok:#2f9e4f; --warn:#b8860b; --stin-tmavy:rgba(0,0,0,.43);
-    --stin-svetly:rgba(255,255,255,.55);
-    --neu:-5px -5px 20px var(--stin-svetly), 5px 5px 20px var(--stin-tmavy);
-    --neu-sm:-3px -3px 10px var(--stin-svetly), 3px 3px 10px var(--stin-tmavy);
-    --neu-in:inset 2px 2px 5px var(--stin-tmavy), inset -2px -2px 5px var(--stin-svetly);
-    --radius:23px; --radius-btn:35px; --radius-pole:15px;
+    --ok:#2f9e4f; --warn:#b8860b;
+    --neu:-11px -11px 24px rgba(255,255,255,0.39), 11px 11px 24px rgba(0,0,0,0.38);
+    --neu-sm:-5px -5px 15px rgba(255,255,255,0.371), 5px 5px 15px rgba(0,0,0,0.418);
+    --neu-in:inset 4px 4px 6px rgba(0,0,0,0.342), inset -4px -4px 6px rgba(255,255,255,0.371);
+    --radius:32px; --radius-btn:999px; --radius-pole:20px;
     --sans:system-ui,"Segoe UI",sans-serif;
     --prostrkani:.07em;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --bg:#545454; --paper:#333333; --paper-2:#3d3d3d;
-      --ink:#EDEDED; --ink-2:#9a9a9a; --line:#5e5e5e;
+      --bg:#373d43; --paper:#31383f; --paper-2:#2c3238;
+      --ink:#E2E8F0; --ink-2:#94A3B8; --line:#495057;
       --inkoust:#F0523F;
-      --ok:#3dc760; --warn:#e8c545;
-      --stin-tmavy:rgba(0,0,0,.55); --stin-svetly:rgba(255,255,255,.07);
+      --ok:#10B981; --warn:#F59E0B;
+      --neu:-10px -10px 20px rgba(255,255,255,0.08), 10px 10px 20px rgba(0,0,0,0.3);
+      --neu-sm:-5px -5px 12px rgba(255,255,255,0.076), 5px 5px 12px rgba(0,0,0,0.33);
+      --neu-in:inset 4px 4px 6px rgba(0,0,0,0.27), inset -4px -4px 6px rgba(255,255,255,0.076);
     }
   }
   :root[data-theme="dark"]{
-    --bg:#545454; --paper:#333333; --paper-2:#3d3d3d;
-    --ink:#EDEDED; --ink-2:#9a9a9a; --line:#5e5e5e;
+    --bg:#373d43; --paper:#31383f; --paper-2:#2c3238;
+    --ink:#E2E8F0; --ink-2:#94A3B8; --line:#495057;
     --inkoust:#F0523F;
-    --ok:#3dc760; --warn:#e8c545;
-    --stin-tmavy:rgba(0,0,0,.55); --stin-svetly:rgba(255,255,255,.07);
+    --ok:#10B981; --warn:#F59E0B;
+    --neu:-10px -10px 20px rgba(255,255,255,0.08), 10px 10px 20px rgba(0,0,0,0.3);
+    --neu-sm:-5px -5px 12px rgba(255,255,255,0.076), 5px 5px 12px rgba(0,0,0,0.33);
+    --neu-in:inset 4px 4px 6px rgba(0,0,0,0.27), inset -4px -4px 6px rgba(255,255,255,0.076);
   }
 
   *{box-sizing:border-box}
@@ -217,31 +224,83 @@
 
   <div class="platno" id="platno">
 
-    <!-- 1. úvod -->
+    <!-- 1. úvod: dvě cesty k aplikaci a co nese uvnitř -->
     <section class="scena" data-s="0">
-      <svg viewBox="0 0 620 240" role="img" aria-label="Tři karty s rozsahem dat">
-        <g class="anim a1"><rect class="karta" x="20" y="40" width="170" height="150" rx="16"/>
-          <text class="val" x="105" y="105" font-size="34" text-anchor="middle">1 320</text>
-          <text class="lbl" x="105" y="130" text-anchor="middle">produktů</text></g>
-        <g class="anim a2"><rect class="karta" x="225" y="40" width="170" height="150" rx="16"/>
-          <text class="val" x="310" y="105" font-size="34" text-anchor="middle">3 468</text>
-          <text class="lbl" x="310" y="130" text-anchor="middle">receptur</text></g>
-        <g class="anim a3"><rect class="karta" x="430" y="40" width="170" height="150" rx="16"/>
-          <text class="val" x="515" y="105" font-size="34" text-anchor="middle">5 583</text>
-          <text class="lbl" x="515" y="130" text-anchor="middle">obrázků</text></g>
-        <g class="anim a4"><text class="txt2" x="310" y="220" text-anchor="middle">sedmnáct záložek, jeden soubor v prohlížeči — i bez internetu</text></g>
+      <svg viewBox="0 0 620 240" role="img" aria-label="Dvě cesty k aplikaci a co nese uvnitř">
+        <g class="anim a1"><rect class="karta" x="20" y="36" width="170" height="62" rx="12"/>
+          <text class="txt" x="105" y="62" text-anchor="middle">stáhnout</text>
+          <text class="txt2" x="105" y="82" text-anchor="middle">soubor do počítače</text></g>
+        <g class="anim a2"><rect class="karta" x="20" y="142" width="170" height="62" rx="12"/>
+          <text class="txt" x="105" y="168" text-anchor="middle">jen v prohlížeči</text>
+          <text class="txt2" x="105" y="188" text-anchor="middle">bez instalace</text></g>
+        <g class="anim a3">
+          <path class="cara" d="M198 67h30c14 0 14 0 14 22v9"/>
+          <path class="cara" d="M198 173h30c14 0 14 0 14-22v-9"/>
+          <rect class="karta" x="212" y="98" width="130" height="44" rx="12"/>
+          <text class="val" x="277" y="118" font-size="15" text-anchor="middle">jeden soubor</text>
+          <text class="lbl" x="277" y="134" text-anchor="middle">celá aplikace</text></g>
+        <g class="anim a4"><path class="cara" d="M348 120h34M370 112l12 8-12 8"/>
+          <rect class="karta" x="400" y="36" width="200" height="168" rx="16"/>
+          <text class="lbl" x="418" y="64">uvnitř</text>
+          <text class="txt" x="418" y="90">aktuální katalog produktů</text>
+          <text class="txt2" x="418" y="110">se všemi potiskovanými místy</text>
+          <line class="cara" x1="418" y1="126" x2="582" y2="126"/>
+          <text class="txt" x="418" y="150">všechny barevné řady dílny</text>
+          <g transform="translate(418,160)">
+            <circle cx="7" cy="7" r="7" fill="var(--inkoust)"/><circle cx="29" cy="7" r="7" fill="#2E5EA8"/>
+            <circle cx="51" cy="7" r="7" fill="#C56A2E"/><circle cx="73" cy="7" r="7" fill="var(--ok)"/></g>
+          <text class="txt2" x="418" y="192">Xpression · 786 · 660 · 10KK</text></g>
+        <g class="anim a5"><text class="txt2" x="310" y="232" text-anchor="middle">běží bez serveru i bez internetu — i na telefonu</text></g>
       </svg>
     </section>
 
-    <!-- 2. zadání -->
+    <!-- 2. barevné řady přiřazené k místům potisku -->
     <section class="scena" data-s="1">
-      <svg viewBox="0 0 620 240" role="img" aria-label="Údaje přeskakují z PDF do formuláře">
-        <g class="anim a1"><rect class="karta" x="18" y="26" width="150" height="188" rx="10"/>
-          <text class="lbl" x="93" y="52" text-anchor="middle">zakázkový list</text>
-          <g stroke="var(--line)" stroke-width="7" stroke-linecap="round">
-            <path d="M40 76h106M40 96h106M40 116h72M40 136h106M40 156h56"/></g></g>
-        <g class="anim a2"><path class="cara" d="M180 120h56" marker-end=""/>
-          <path class="cara" d="M226 112l12 8-12 8"/></g>
+      <svg viewBox="0 0 620 240" role="img" aria-label="Každé potiskované místo má přiřazené barevné řady">
+        <g class="anim a1"><rect class="karta" x="20" y="30" width="200" height="180" rx="16"/>
+          <text class="lbl" x="120" y="56" text-anchor="middle">produkt · propiska</text>
+          <rect class="karta" x="36" y="70" width="168" height="52" rx="10"/>
+          <text class="txt" x="120" y="92" text-anchor="middle">tělo pera</text>
+          <text class="txt2" x="120" y="112" text-anchor="middle">tampontisk</text>
+          <rect class="karta" x="36" y="134" width="168" height="52" rx="10"/>
+          <text class="txt" x="120" y="156" text-anchor="middle">klip</text>
+          <text class="txt2" x="120" y="176" text-anchor="middle">sítotisk</text></g>
+        <g class="anim a2"><path class="cara" d="M220 96h32M244 88l10 8-10 8"/>
+          <rect class="karta" x="262" y="81" width="86" height="30" rx="15"/>
+          <text class="txt" x="305" y="101" text-anchor="middle">MS 786</text>
+          <rect class="karta" x="356" y="81" width="86" height="30" rx="15"/>
+          <text class="txt" x="399" y="101" text-anchor="middle">MS 660</text>
+          <rect class="karta" x="450" y="81" width="86" height="30" rx="15"/>
+          <text class="txt" x="493" y="101" text-anchor="middle">10KK</text></g>
+        <g class="anim a3"><path class="cara" d="M220 160h32M244 152l10 8-10 8"/>
+          <rect class="karta" x="262" y="145" width="86" height="30" rx="15"/>
+          <text class="txt" x="305" y="165" text-anchor="middle">MS 660</text>
+          <rect class="karta" x="356" y="145" width="86" height="30" rx="15"/>
+          <text class="txt" x="399" y="165" text-anchor="middle">10KK</text></g>
+        <g class="anim a4">
+          <rect x="450" y="145" width="86" height="30" rx="15" fill="none"
+            stroke="var(--line)" stroke-width="1.5" stroke-dasharray="7 5"/>
+          <text class="txt2" x="493" y="165" text-anchor="middle">Xpression</text>
+          <text class="txt2" x="493" y="192" text-anchor="middle">jen vypalování —</text>
+          <text class="txt2" x="493" y="208" text-anchor="middle">nenabídne se</text></g>
+        <g class="anim a5"><text class="txt2" x="310" y="232" text-anchor="middle">řady jsou přiřazené každému místu — kdo míchá, vidí jen to, co smí</text></g>
+      </svg>
+    </section>
+
+    <!-- 3. spec: přetažením PDF, jednou přímo ze SGPS -->
+    <section class="scena" data-s="2">
+      <svg viewBox="0 0 620 240" role="img" aria-label="Spec přijde přetažením PDF, jednou přímo ze SGPS">
+        <g class="anim a1"><rect class="karta" x="18" y="26" width="150" height="92" rx="10"/>
+          <text class="lbl" x="93" y="50" text-anchor="middle">spec · PDF</text>
+          <g stroke="var(--line)" stroke-width="6" stroke-linecap="round">
+            <path d="M40 68h106M40 84h72M40 100h106"/></g>
+          <text class="txt2" x="93" y="136" text-anchor="middle">přetáhnout do okna</text></g>
+        <g class="anim a2"><rect x="18" y="152" width="150" height="62" rx="10" fill="none"
+            stroke="var(--line)" stroke-width="1.5" stroke-dasharray="7 5"/>
+          <text class="txt" x="93" y="178" text-anchor="middle">SGPS</text>
+          <text class="txt2" x="93" y="198" text-anchor="middle">až bude propojení</text>
+          <path class="cara" d="M180 72h56M226 64l12 8-12 8"/>
+          <path class="cara" d="M180 183h30c26 0 26 0 26-30v-65" stroke-dasharray="6 5"/></g>
         <g class="anim a3 leti"><rect class="karta" x="252" y="34" width="160" height="34" rx="9"/>
           <text class="txt" x="266" y="56">produkt · ref 11154</text></g>
         <g class="anim a4 leti"><rect class="karta" x="252" y="78" width="160" height="34" rx="9"/>
@@ -251,19 +310,16 @@
         <g class="anim a6"><rect class="karta" x="252" y="166" width="160" height="34" rx="9"/>
           <circle cx="270" cy="183" r="7" fill="var(--inkoust)"/>
           <text class="txt" x="286" y="188">PANTONE 485 C</text></g>
-        <g class="anim a6"><text class="val" x="520" y="106" font-size="44" text-anchor="middle">14</text>
-          <text class="lbl" x="520" y="130" text-anchor="middle">údajů samo</text>
-          <g class="puls" transform="translate(478,152)" fill="var(--ink)">
-            <rect width="3" height="26"/><rect x="6" width="2" height="26"/><rect x="12" width="5" height="26"/>
-            <rect x="21" width="2" height="26"/><rect x="26" width="4" height="26"/><rect x="34" width="2" height="26"/>
-            <rect x="39" width="5" height="26"/><rect x="48" width="3" height="26"/><rect x="55" width="2" height="26"/>
-            <rect x="60" width="4" height="26"/></g></g>
+        <g class="anim a6">
+          <text class="lbl" x="440" y="96">všechno, co spec nese,</text>
+          <text class="lbl" x="440" y="114">se vytáhne samo</text>
+          <text class="txt2" x="440" y="140">nic se neopisuje ručně</text></g>
       </svg>
     </section>
 
-    <!-- 3. krycí plocha -->
-    <section class="scena" data-s="2">
-      <svg viewBox="0 0 620 240" role="img" aria-label="Obdélník kolem motivu se smrští na skutečné pokrytí">
+    <!-- 4. dávka podle síta i podle velikosti loga -->
+    <section class="scena" data-s="3">
+      <svg viewBox="0 0 620 240" role="img" aria-label="Dávka podle síta i podle skutečné velikosti loga">
         <g class="anim a1"><rect x="42" y="42" width="180" height="150" rx="6" fill="none"
             stroke="var(--ink-2)" stroke-width="2" stroke-dasharray="6 5"/>
           <text class="lbl" x="132" y="214" text-anchor="middle">obdélník kolem motivu</text></g>
@@ -271,39 +327,17 @@
           <g class="smrst" style="transform-origin:132px 117px">
             <path d="M72 150 L132 62 L192 150 Z" fill="var(--inkoust)" opacity=".9"/>
             <circle cx="132" cy="132" r="17" fill="var(--paper-2)"/></g></g>
+        <g class="anim a3">
+          <text class="lbl" x="300" y="56">podle síta</text>
+          <text class="txt" x="300" y="80">120-34 · 6 g/m² — kolik barvy síto pustí</text></g>
         <g class="anim a4">
-          <text class="lbl" x="300" y="56">dnes — obdélník</text>
-          <text class="val" x="300" y="82" font-size="21">25,71 cm²  ·  3,1 g/ks</text>
-          <text class="lbl" x="300" y="112">mezikrok — obrys motivu</text>
-          <text class="val" x="300" y="138" font-size="21" fill="var(--ink-2)">10,94 cm²  ·  1,3 g/ks</text>
-          <line class="cara" x1="300" y1="152" x2="596" y2="152"/>
-          <text class="lbl" x="300" y="176" fill="var(--ok)">aplikace — skutečné pokrytí</text>
-          <text class="val" x="300" y="202" font-size="21" fill="var(--ok)">3,25 cm²  ·  0,4 g/ks</text></g>
-      </svg>
-    </section>
-
-    <!-- 4. dávka -->
-    <section class="scena" data-s="3">
-      <svg viewBox="0 0 620 240" role="img" aria-label="Řetěz výpočtu dávky">
-        <g class="anim a1"><rect class="karta" x="14" y="86" width="104" height="62" rx="12"/>
-          <text class="lbl" x="66" y="110" text-anchor="middle">plocha</text>
-          <text class="val" x="66" y="134" font-size="18" text-anchor="middle">3,25 cm²</text></g>
-        <text class="val anim a2" x="130" y="124" font-size="20">×</text>
-        <g class="anim a2"><rect class="karta" x="148" y="86" width="104" height="62" rx="12"/>
-          <text class="lbl" x="200" y="110" text-anchor="middle">kusů</text>
-          <text class="val" x="200" y="134" font-size="18" text-anchor="middle">2 500</text></g>
-        <text class="val anim a3" x="264" y="124" font-size="20">×</text>
-        <g class="anim a3"><rect class="karta" x="282" y="86" width="104" height="62" rx="12"/>
-          <text class="lbl" x="334" y="110" text-anchor="middle">síto 120-34</text>
-          <text class="val" x="334" y="134" font-size="18" text-anchor="middle">6 g/m²</text></g>
-        <text class="val anim a4" x="398" y="124" font-size="20">+</text>
-        <g class="anim a4"><rect class="karta" x="416" y="86" width="86" height="62" rx="12"/>
-          <text class="lbl" x="459" y="110" text-anchor="middle">ztráty</text>
-          <text class="val" x="459" y="134" font-size="18" text-anchor="middle">12 %</text></g>
-        <g class="anim a5"><path class="cara" d="M512 117h24M528 109l10 8-10 8"/>
-          <text class="val" x="556" y="112" font-size="30" text-anchor="middle">546</text>
-          <text class="lbl" x="556" y="134" text-anchor="middle">gramů</text></g>
-        <text class="txt2 anim a6" x="310" y="206" text-anchor="middle">pod nejmenší dávku se nejde — menší množství se nedá poctivě promíchat</text>
+          <text class="lbl" x="300" y="112">a k tomu podle velikosti loga</text>
+          <text class="txt" x="300" y="136" style="fill:var(--ok)">3,25 cm² — body, kde barva opravdu je</text>
+          <text class="txt2" x="300" y="156">obdélník kolem motivu měří 25,71 cm²</text></g>
+        <g class="anim a5"><line class="cara" x1="300" y1="172" x2="596" y2="172"/>
+          <text class="val" x="300" y="196" font-size="22" style="fill:var(--ok)">3,1 → 0,4 g na kus</text>
+          <text class="txt2" x="300" y="216">zakázka 138823 · osmkrát menší plocha</text></g>
+        <g class="anim a6"><text class="txt2" x="310" y="236" text-anchor="middle">pod nejmenší dávku se nejde — menší množství se nedá poctivě promíchat</text></g>
       </svg>
     </section>
 
@@ -383,6 +417,8 @@
             stroke="var(--line)" stroke-width="1.5"/>
           <rect class="jede" x="24" y="176" height="18" rx="9" fill="var(--ok)" style="--w:238px"/>
           <text class="lbl" x="24" y="216" fill="var(--ok)">✓ v toleranci ±0,5 g</text></g>
+        <!-- názvy jazyků se nepřekládají nikdy (kap. 125) — řádek je v obou verzích stejný -->
+        <g class="anim a5"><text class="lbl" x="24" y="236">česky · English · Português</text></g>
         <g class="anim a4">
           <text class="lbl" x="316" y="60">navažuje se kumulativně</text>
           <g class="txt">
@@ -830,21 +866,21 @@
         a nesmí spadnout na chybějícím souboru. */
   var SCENY = [
     { nadpis:"Jeden soubor, žádná instalace",
-      text:"Ink Recipe Manager je celá aplikace v jednom souboru. Otevře se v prohlížeči, běží bez serveru i bez internetu — a nese katalog 1 320 produktů, 3 468 receptur a 5 583 obrázků.",
-      rec:"Ink Recipe Manager je celá aplikace v jednom souboru. Otevře se v prohlížeči, běží bez serveru i bez internetu, a nese katalog tisíce tří set dvaceti produktů, tří tisíc čtyř set šedesáti osmi receptur a pěti tisíc pěti set osmdesáti tří obrázků.",
+      text:"Ink Recipe Manager si můžete stáhnout, nebo ho mít jen v prohlížeči — je to jedna stránka, bez instalace a bez serveru. Uvnitř je <b>aktuální katalog produktů</b> se všemi potiskovanými místy a <b>všechny barevné řady</b>, se kterými se v dílně pracuje.",
+      rec:"Ink Recipe Manager si můžete stáhnout, nebo ho mít jen v prohlížeči. Je to jedna stránka, bez instalace a bez serveru. Uvnitř je aktuální katalog produktů se všemi potiskovanými místy a všechny barevné řady, se kterými se v dílně pracuje.",
       cas:17 },
-    { nadpis:"Zadání se přečte samo",
-      text:"Zakázkový list přijde jako PDF. Aplikace si z něj vytáhne <b>14 údajů</b> — produkt, odstín, počet kusů i polohu potisku. Kdo má čtečku, načte zadání čárovým kódem.",
-      rec:"Zakázkový list přijde jako pé dé ef. Aplikace si z něj vytáhne čtrnáct údajů: produkt, odstín, počet kusů i polohu potisku. Kdo má čtečku, načte zadání čárovým kódem.",
-      cas:14 },
-    { nadpis:"Spotřeba z toho, co barva pokryje",
-      text:"Nepočítá se obdélník kolem motivu, ale body, kde barva opravdu je — i s rozpitím, a bez pomocné grafiky. Na zakázce 138823 to je <b>osmkrát menší plocha</b>: 3,1 → 0,4 gramu na kus.",
-      rec:"Nepočítá se obdélník kolem motivu, ale body, kde barva opravdu je, i s rozpitím a bez pomocné grafiky. Na zakázce sto třicet osm tisíc osm set dvacet tři to je osmkrát menší plocha: z tří celých jedné desetiny na čtyři desetiny gramu na kus.",
-      cas:16 },
-    { nadpis:"Kolik namíchat",
-      text:"Z plochy, počtu kusů, hustoty síta a ztrát vyjde dávka. Pod nejmenší dávku se nejde — menší množství se nedá poctivě promíchat.",
-      rec:"Z plochy, počtu kusů, hustoty síta a ztrát vyjde dávka. Pod nejmenší dávku se nejde: menší množství se nedá poctivě promíchat.",
-      cas:10 },
+    { nadpis:"Každé místo na produktu zná své barvy",
+      text:"Naše hlavní výhoda: každé potiskované místo na každém produktu má <b>přiřazenou svou řadu barev</b>. Kdo míchá, nevybírá ze všeho — aplikace sama nabídne jen barvy, které na to místo a tu technologii smí.",
+      rec:"Naše hlavní výhoda: každé potiskované místo na každém produktu má přiřazenou svou řadu barev. Kdo míchá, nevybírá ze všeho. Aplikace sama nabídne jen ty barvy, které na to místo a na tu technologii smí.",
+      cas:15 },
+    { nadpis:"Spec se načte sám",
+      text:"Spec zakázky se do aplikace dostane <b>přetažením PDF</b> — a jednou přímo ze systému SGPS, až ho půjde s aplikací propojit. Všechno, co spec nese, si aplikace vytáhne sama: produkt, odstín, počet kusů i polohu potisku.",
+      rec:"Spec zakázky se do aplikace dostane přetažením pé dé efka. A jednou přímo ze systému es gé pé es, až ho půjde s aplikací propojit. Všechno, co spec nese, si aplikace vytáhne sama: produkt, odstín, počet kusů i polohu potisku.",
+      cas:17 },
+    { nadpis:"Kolik barvy — podle síta i podle loga",
+      text:"Dávka se nepočítá jen podle síta. Aplikace ji umí spočítat i podle <b>skutečné velikosti loga</b> — z bodů, kde barva opravdu je, ne z obdélníku kolem motivu. Na zakázce 138823 to je osmkrát menší plocha: <b>3,1 → 0,4 g na kus</b>. A pod nejmenší dávku se nejde — menší množství se nedá poctivě promíchat.",
+      rec:"Dávka se nepočítá jen podle síta. Aplikace ji umí spočítat i podle skutečné velikosti samotného loga, z bodů, kde barva opravdu je, ne z obdélníku kolem motivu. Na zakázce sto třicet osm tisíc osm set dvacet tři to je osmkrát menší plocha: z tří celých jedné desetiny na čtyři desetiny gramu na kus. A pod nejmenší dávku se nejde, menší množství se nedá poctivě promíchat.",
+      cas:26 },
     { nadpis:"Nejdřív sklad, potom čerstvá barva",
       text:"Ve skladu stojí kelímky po minulých zakázkách. Má-li některý <b>totožné složení</b>, nemíchá se nic — jen se přelije. U jiného odstínu aplikace dopočítá, co přidat — a umí vzít i <b>dva kelímky naráz</b>, když spolu do dávky dostanou víc než každý sám.",
       rec:"Ve skladu stojí kelímky po minulých zakázkách. Má-li některý totožné složení, nemíchá se nic, jen se přelije. U jiného odstínu aplikace dopočítá, co přidat. A umí vzít i dva kelímky naráz, když spolu do dávky dostanou víc než každý sám.",
@@ -858,9 +894,9 @@
       rec:"Odpočet začíná přidáním tužidla, ne navážením báze. A tužidlo se počítá z váhy báze, ne z obsahu nádoby. Dávka je samostatný záznam, takže odpočet přežije i zavření aplikace.",
       cas:14 },
     { nadpis:"Míchací režim se čte od váhy",
-      text:"Vlastní sada velikostí pro čtení ve stoje a v rukavicích. Váha se připojí přes USB a asistent vede navažování složku po složce. Po ruce jsou i bezpečnostní listy složek a gramy těkavých látek v dávce.",
-      rec:"Míchací režim má vlastní sadu velikostí pro čtení ve stoje a v rukavicích. Váha se připojí přes u es bé a asistent vede navažování složku po složce. Po ruce jsou i bezpečnostní listy složek a gramy těkavých látek v dávce.",
-      cas:15 },
+      text:"Vlastní sada velikostí pro čtení ve stoje a v rukavicích. Váha se připojí přes USB a asistent vede navažování složku po složce — <b>česky, anglicky nebo portugalsky</b>, podle toho, kdo u váhy stojí. Po ruce jsou i bezpečnostní listy složek a gramy těkavých látek v dávce.",
+      rec:"Míchací režim má vlastní sadu velikostí pro čtení ve stoje a v rukavicích. Váha se připojí přes u es bé a asistent vede navažování složku po složce. Česky, anglicky nebo portugalsky, podle toho, kdo u váhy stojí. Po ruce jsou i bezpečnostní listy složek a gramy těkavých látek v dávce.",
+      cas:20 },
     { nadpis:"Co ta dávka stojí",
       text:"U každé dávky je vidět cena i to, kolik z ní padne na jeden kus. Ceny vidí mistr — u váhy se dají schovat a pak se netisknou ani na míchací lístek.",
       rec:"U každé dávky je vidět cena i to, kolik z ní padne na jeden kus. Ceny vidí mistr: u váhy se dají schovat a pak se netisknou ani na míchací lístek.",

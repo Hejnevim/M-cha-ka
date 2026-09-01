@@ -52,6 +52,8 @@ kelímku). **Nic z licencovaných databází v ní není** — viz `irm-data`.
 `ukazka_en.html` je táž ukázka v angličtině, se stejnými scénami, čísly
 i dodatkem; nahrávky má ve složce `audio_en/` jako `scene-01.mp3` …
 `scene-21.mp3`. Česky zůstává jen kód a komentáře, jako všude v projektu.
+Publikována jako Artifact na
+https://claude.ai/code/artifact/cbc0cd85-ca6b-4951-9358-40019bd522c1
 
 **Obě verze se mění spolu.** Když se v jedné opraví číslo nebo přeformuluje
 scéna, musí se totéž stát i ve druhé — jinak si dvě publikované ukázky začnou

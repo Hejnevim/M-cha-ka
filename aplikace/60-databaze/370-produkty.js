@@ -26,9 +26,9 @@ function TypyPolohyChipy({ produkt, poloha, recipes, dbTech, typyPoloh, ulozTypP
       ${dostupne.map((s) => html`
         <button key=${s} className=${"chip mini" + (prirazene.indexOf(s) >= 0 ? " on" : "")}
           title=${(prirazene.indexOf(s) >= 0
-              ? "Typ " + nazevDb(s) + " je poloze přiřazený — klik ho odebere"
-              : "Přiřadit typ " + nazevDb(s) + " této poloze")
-            + (mostOk ? "" : " (most neběží — zatím jen v tomhle prohlížeči)")}
+              ? preloz("Typ {t} je poloze přiřazený — klik ho odebere", { t: nazevDb(s) })
+              : preloz("Přiřadit typ {t} této poloze", { t: nazevDb(s) }))
+            + (mostOk ? "" : preloz(" (most neběží — zatím jen v tomhle prohlížeči)"))}
           onClick=${() => prepni(s)}>${nazevDb(s)}</button>`)}
     </span>`;
 }
@@ -76,40 +76,38 @@ function Products({ products, setProducts, guardDelete,
   return html`
     <div className="card">
       <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 10, flexWrap: "wrap" }}>
-        <h2 style=${{ margin: 0 }}>Katalog produktů (${products.length})</h2>
+        <h2 style=${{ margin: 0 }}>${preloz("Katalog produktů")} (${products.length})</h2>
         <div style=${{ display: "flex", gap: 8, alignItems: "center" }}>
           <div className="viewtoggle">
-            <button className=${view === "table" ? "on" : ""} onClick=${() => setView("table")} title="Zobrazit jako tabulku" aria-label="Tabulka">☰</button>
-            <button className=${view === "grid" ? "on" : ""} onClick=${() => setView("grid")} title="Zobrazit jako mřížku" aria-label="Mřížka">▦</button>
+            <button className=${view === "table" ? "on" : ""} onClick=${() => setView("table")} title=${preloz("Zobrazit jako tabulku")} aria-label=${preloz("Tabulka")}>☰</button>
+            <button className=${view === "grid" ? "on" : ""} onClick=${() => setView("grid")} title=${preloz("Zobrazit jako mřížku")} aria-label=${preloz("Mřížka")}>▦</button>
           </div>
           <button className="btn sec" onClick=${exportCsv}>Export CSV</button>
-          <button className="btn" onClick=${() => setEdit({ id: uid(), ref: "", name: "", material: "", img: "", positions: [{ id: uid(), name: "", w: 50, h: 30, cover: 100, tech: "SCR", img: "" }] })}>+ Nový produkt</button>
+          <button className="btn" onClick=${() => setEdit({ id: uid(), ref: "", name: "", material: "", img: "", positions: [{ id: uid(), name: "", w: 50, h: 30, cover: 100, tech: "SCR", img: "" }] })}>${preloz("+ Nový produkt")}</button>
         </div>
       </div>
-      <input className="search" value=${q} onChange=${(e) => setQ(e.target.value)} placeholder="Hledat produkt / ref…" style=${{ marginBottom: 14 }} />
+      <input className="search" value=${q} onChange=${(e) => setQ(e.target.value)} placeholder=${preloz("Hledat produkt / ref…")} style=${{ marginBottom: 14 }} />
       ${typyZapis && typyZapis.stav === "chyba" && html`
         <div className="warnbox" style=${{ marginBottom: 10 }}>
-          Přiřazení platí v tomhle prohlížeči, ale do souboru
-          <b> parametry/typy_poloh.csv</b> se nezapsalo: ${typyZapis.chyba}.
-          Na ostatních počítačích zatím neplatí.
+          ${preloz("Přiřazení platí v tomhle prohlížeči, ale do souboru")}
+          <b> parametry/typy_poloh.csv</b>${preloz(" se nezapsalo: {e}. Na ostatních počítačích zatím neplatí.", { e: typyZapis.chyba })}
         </div>`}
       ${typyZapis && typyZapis.stav === "ulozeno" && html`
         <p className="note" style=${{ marginBottom: 10 }}>
-          Přiřazení typů uloženo do parametry/typy_poloh.csv — platí i na ostatních počítačích v dílně.
+          ${preloz("Přiřazení typů uloženo do parametry/typy_poloh.csv — platí i na ostatních počítačích v dílně.")}
         </p>`}
       ${typyZapis && typyZapis.stav === "prohlizec" && html`
         <p className="note" style=${{ marginBottom: 10 }}>
-          Přiřazení typů platí zatím jen v tomhle prohlížeči — most neběží. Až poběží,
-          další změna se zapíše do parametry/typy_poloh.csv pro celou dílnu.
+          ${preloz("Přiřazení typů platí zatím jen v tomhle prohlížeči — most neběží. Až poběží, další změna se zapíše do parametry/typy_poloh.csv pro celou dílnu.")}
         </p>`}
-      ${!filtered.length ? html`<div className="empty">Nic nenalezeno.</div>` : (view === "grid" ? html`
+      ${!filtered.length ? html`<div className="empty">${preloz("Nic nenalezeno.")}</div>` : (view === "grid" ? html`
         <div className="pgrid">
           ${filtered.slice(0, 300).map((p) => html`
             <div key=${p.id} className="pgcard">
               <div className="pgcard-img">
                 <${Img} src=${p.img} alt=${p.name}
-                  fallback=${html`<span className="note">bez fotky</span>`}
-                  errFallback=${html`<span className="note imgwarn" style=${{ padding: "4px 8px", borderRadius: 8 }}>chybí fotka</span>`} />
+                  fallback=${html`<span className="note">${preloz("bez fotky")}</span>`}
+                  errFallback=${html`<span className="note imgwarn" style=${{ padding: "4px 8px", borderRadius: 8 }}>${preloz("chybí fotka")}</span>`} />
               </div>
               <div>
                 <div className="pgcard-ref">${p.ref}</div>
@@ -120,18 +118,18 @@ function Products({ products, setProducts, guardDelete,
                     ${p.colors.slice(0, 12).map((c, i) => html`<span key=${i} className="cdot" title=${(c.code ? c.code + " " : "") + (c.name || "")} style=${{ background: c.hex || "#CCCCCC" }}></span>`)}
                     ${p.colors.length > 12 ? html`<span className="note">+${p.colors.length - 12}</span>` : ""}
                   </div>` : ""}
-                <div className="note" style=${{ marginTop: 4 }}>${p.positions.length} tiskov${p.positions.length === 1 ? "á poloha" : (p.positions.length < 5 ? "é polohy" : "ých poloh")}</div>
+                <div className="note" style=${{ marginTop: 4 }}>${p.positions.length} ${p.positions.length === 1 ? preloz("tisková poloha") : (p.positions.length < 5 ? preloz("tiskové polohy") : preloz("tiskových poloh"))}</div>
               </div>
               <div className="pgcard-actions">
-                <button className="btn sec sm" style=${{ flex: 1 }} onClick=${() => setEdit(JSON.parse(JSON.stringify(p)))}>Upravit</button>
-                <button className="btn danger sm" onClick=${() => guardDelete(() => setProducts((prev) => prev.filter((x) => x.id !== p.id)), "smazání produktu " + (p.ref || p.name))}>Smazat</button>
+                <button className="btn sec sm" style=${{ flex: 1 }} onClick=${() => setEdit(JSON.parse(JSON.stringify(p)))}>${preloz("Upravit")}</button>
+                <button className="btn danger sm" onClick=${() => guardDelete(() => setProducts((prev) => prev.filter((x) => x.id !== p.id)), preloz("smazání produktu {p}", { p: p.ref || p.name }))}>${preloz("Smazat")}</button>
               </div>
             </div>`)}
         </div>
-        ${filtered.length > 300 && html`<p className="note" style=${{ marginTop: 10 }}>Zobrazeno prvních 300 — upřesněte hledání.</p>`}
+        ${filtered.length > 300 && html`<p className="note" style=${{ marginTop: 10 }}>${preloz("Zobrazeno prvních 300 — upřesněte hledání.")}</p>`}
       ` : html`
         <table className="t">
-          <thead><tr><th /><th className="num">Ref.</th><th>Produkt</th><th>Materiál</th><th>Tiskové polohy</th><th /></tr></thead>
+          <thead><tr><th /><th className="num">${preloz("Ref.")}</th><th>${preloz("Produkt")}</th><th>${preloz("Materiál")}</th><th>${preloz("Tiskové polohy")}</th><th /></tr></thead>
           <tbody>
             ${filtered.slice(0, 300).map((p) => html`
               <tr key=${p.id}>
@@ -149,19 +147,19 @@ function Products({ products, setProducts, guardDelete,
                 <td>
                   ${p.positions.map((x) => html`
                     <div key=${x.id} className="note">
-                      ${x.name} — ${x.w}×${x.h} mm · pokrytí ${x.cover != null ? x.cover : 100} % · <span className="tag tech">${x.tech}</span>
+                      ${x.name} — ${x.w}×${x.h} mm · ${preloz("pokrytí")} ${x.cover != null ? x.cover : 100} % · <span className="tag tech">${x.tech}</span>
                       <${TypyPolohyChipy} produkt=${p} poloha=${x} recipes=${recipes} dbTech=${dbTech}
                         typyPoloh=${typyPoloh} ulozTypPolohy=${ulozTypPolohy} mostOk=${mostOk} />
                     </div>`)}
                 </td>
                 <td style=${{ whiteSpace: "nowrap" }}>
-                  <button className="btn sec sm" onClick=${() => setEdit(JSON.parse(JSON.stringify(p)))}>Upravit</button>${" "}
-                  <button className="btn danger sm" onClick=${() => guardDelete(() => setProducts((prev) => prev.filter((x) => x.id !== p.id)), "smazání produktu " + (p.ref || p.name))}>Smazat</button>
+                  <button className="btn sec sm" onClick=${() => setEdit(JSON.parse(JSON.stringify(p)))}>${preloz("Upravit")}</button>${" "}
+                  <button className="btn danger sm" onClick=${() => guardDelete(() => setProducts((prev) => prev.filter((x) => x.id !== p.id)), preloz("smazání produktu {p}", { p: p.ref || p.name }))}>${preloz("Smazat")}</button>
                 </td>
               </tr>`)}
           </tbody>
         </table>
-        ${filtered.length > 300 && html`<p className="note">Zobrazeno prvních 300 — upřesněte hledání.</p>`}`)}
+        ${filtered.length > 300 && html`<p className="note">${preloz("Zobrazeno prvních 300 — upřesněte hledání.")}</p>`}`)}
     </div>`;
 }
 
@@ -173,22 +171,22 @@ function ProductForm({ initial, onSave, onCancel,
 
   return html`
     <div className="card">
-      <h2>${initial.name ? "Upravit produkt" : "Nový produkt"}</h2>
-      <p className="hint">Každá poloha má vlastní rozměr, pokrytí motivu a předurčenou technologii tisku.</p>
+      <h2>${initial.name ? preloz("Upravit produkt") : preloz("Nový produkt")}</h2>
+      <p className="hint">${preloz("Každá poloha má vlastní rozměr, pokrytí motivu a předurčenou technologii tisku.")}</p>
       <div className="frow c3">
-        <div><label className="f">Ref. číslo</label><input value=${p.ref || ""} onChange=${(e) => setP(Object.assign({}, p, { ref: e.target.value }))} placeholder="Např. 11101" /></div>
-        <div><label className="f">Název produktu</label><input value=${p.name} onChange=${(e) => setP(Object.assign({}, p, { name: e.target.value }))} placeholder="Např. hliníkové kuličkové pero" /></div>
-        <div><label className="f">Materiál</label><input value=${p.material} onChange=${(e) => setP(Object.assign({}, p, { material: e.target.value }))} placeholder="Např. keramika, PP, hliník…" /></div>
+        <div><label className="f">${preloz("Ref. číslo")}</label><input value=${p.ref || ""} onChange=${(e) => setP(Object.assign({}, p, { ref: e.target.value }))} placeholder=${preloz("Např. 11101")} /></div>
+        <div><label className="f">${preloz("Název produktu")}</label><input value=${p.name} onChange=${(e) => setP(Object.assign({}, p, { name: e.target.value }))} placeholder=${preloz("Např. hliníkové kuličkové pero")} /></div>
+        <div><label className="f">${preloz("Materiál")}</label><input value=${p.material} onChange=${(e) => setP(Object.assign({}, p, { material: e.target.value }))} placeholder=${preloz("Např. keramika, PP, hliník…")} /></div>
       </div>
 
-      <label className="f" style=${{ marginTop: 10 }}>Tiskové polohy</label>
+      <label className="f" style=${{ marginTop: 10 }}>${preloz("Tiskové polohy")}</label>
       ${p.positions.map((x) => html`
         <div key=${x.id} className="rowline" style=${{ borderRadius: 10, padding: 12, boxShadow: "var(--neu-in)" }}>
-          <input style=${{ flex: "2 1 160px" }} value=${x.name} onChange=${(e) => setPos(x.id, "name", e.target.value)} placeholder="Název polohy" />
-          <input style=${{ flex: "0 1 90px" }} type="number" value=${x.w} onChange=${(e) => setPos(x.id, "w", e.target.value)} title="šířka mm" placeholder="š (mm)" />
+          <input style=${{ flex: "2 1 160px" }} value=${x.name} onChange=${(e) => setPos(x.id, "name", e.target.value)} placeholder=${preloz("Název polohy")} />
+          <input style=${{ flex: "0 1 90px" }} type="number" value=${x.w} onChange=${(e) => setPos(x.id, "w", e.target.value)} title=${preloz("šířka mm")} placeholder=${preloz("š (mm)")} />
           <span className="note">×</span>
-          <input style=${{ flex: "0 1 90px" }} type="number" value=${x.h} onChange=${(e) => setPos(x.id, "h", e.target.value)} title="výška mm" placeholder="v (mm)" />
-          <input style=${{ flex: "0 1 90px" }} type="number" value=${x.cover} onChange=${(e) => setPos(x.id, "cover", e.target.value)} title="pokrytí %" placeholder="% pokrytí" />
+          <input style=${{ flex: "0 1 90px" }} type="number" value=${x.h} onChange=${(e) => setPos(x.id, "h", e.target.value)} title=${preloz("výška mm")} placeholder=${preloz("v (mm)")} />
+          <input style=${{ flex: "0 1 90px" }} type="number" value=${x.cover} onChange=${(e) => setPos(x.id, "cover", e.target.value)} title=${preloz("pokrytí %")} placeholder=${preloz("% pokrytí")} />
           <select style=${{ flex: "0 1 130px" }} value=${x.tech} onChange=${(e) => setPos(x.id, "tech", e.target.value)}>
             ${Object.keys(TECHS).map((t) => html`<option key=${t}>${t}</option>`)}
           </select>
@@ -202,30 +200,29 @@ function ProductForm({ initial, onSave, onCancel,
                bez typů. -->
           ${String(x.name || "").trim() && html`
             <span style=${{ flexBasis: "100%", display: "flex", alignItems: "center", gap: 8 }}>
-              <span className="note">typ barvy:</span>
+              <span className="note">${preloz("typ barvy:")}</span>
               <${TypyPolohyChipy} produkt=${p} poloha=${x} recipes=${recipes} dbTech=${dbTech}
                 typyPoloh=${typyPoloh} ulozTypPolohy=${ulozTypPolohy} mostOk=${mostOk} />
             </span>`}
         </div>`)}
       ${typyZapis && typyZapis.stav === "chyba" && html`
         <div className="warnbox" style=${{ marginTop: 8 }}>
-          Přiřazení platí v tomhle prohlížeči, ale do souboru
-          <b> parametry/typy_poloh.csv</b> se nezapsalo: ${typyZapis.chyba}.
-          Na ostatních počítačích zatím neplatí.
+          ${preloz("Přiřazení platí v tomhle prohlížeči, ale do souboru")}
+          <b> parametry/typy_poloh.csv</b>${preloz(" se nezapsalo: {e}. Na ostatních počítačích zatím neplatí.", { e: typyZapis.chyba })}
         </div>`}
       ${typyZapis && typyZapis.stav === "ulozeno" && html`
         <p className="note" style=${{ marginTop: 8 }}>
-          Přiřazení typů uloženo do parametry/typy_poloh.csv — platí hned, bez ohledu na tlačítko Uložit produkt.
+          ${preloz("Přiřazení typů uloženo do parametry/typy_poloh.csv — platí hned, bez ohledu na tlačítko Uložit produkt.")}
         </p>`}
       ${typyZapis && typyZapis.stav === "prohlizec" && html`
         <p className="note" style=${{ marginTop: 8 }}>
-          Přiřazení typů platí hned, zatím jen v tomhle prohlížeči — most neběží.
+          ${preloz("Přiřazení typů platí hned, zatím jen v tomhle prohlížeči — most neběží.")}
         </p>`}
-      <button className="btn sec sm" onClick=${() => setP(Object.assign({}, p, { positions: p.positions.concat([{ id: uid(), name: "", w: 50, h: 30, cover: 100, tech: "SCR", img: "" }]) }))}>+ Přidat polohu</button>
+      <button className="btn sec sm" onClick=${() => setP(Object.assign({}, p, { positions: p.positions.concat([{ id: uid(), name: "", w: 50, h: 30, cover: 100, tech: "SCR", img: "" }]) }))}>${preloz("+ Přidat polohu")}</button>
 
       <div style=${{ marginTop: 18, display: "flex", gap: 10 }}>
-        <button className="btn" disabled=${!valid} onClick=${() => onSave(p)}>Uložit produkt</button>
-        <button className="btn sec" onClick=${onCancel}>Zrušit</button>
+        <button className="btn" disabled=${!valid} onClick=${() => onSave(p)}>${preloz("Uložit produkt")}</button>
+        <button className="btn sec" onClick=${onCancel}>${preloz("Zrušit")}</button>
       </div>
     </div>`;
 }

@@ -70,7 +70,13 @@
    Proto jsou tahle tři pole výrazně větší než všechna ostatní a vyplní kartu.
    Roste s nimi i popisek, šipka a nabídka, jinak by na velkém poli zůstaly
    drobné a pole by vypadalo jako omylem zvětšené. */
-.karta-tisk label.f{font-size:calc(var(--pismo-popisek) * 1.5);margin-bottom:10px;text-align:center}
+/* overflow-wrap:anywhere — sloupce dlaždic se na 1100 px zúží na 87 px
+   a jedno slovo popisku je širší (změřeno: KRYVOST 93 px, portugalské
+   OPACIDADE ještě víc). `break-word` tu prohlížeč nezalomí — šířku slova
+   měří bez prostrkání, takže si myslí, že se vejde; `anywhere` zalomí
+   doopravdy. Platí jen tady: popisky dlaždic nikde neurčují šířku sloupce,
+   takže agresivnější zalamování nemá kde uškodit. */
+.karta-tisk label.f{font-size:calc(var(--pismo-popisek) * 1.5);margin-bottom:10px;text-align:center;overflow-wrap:anywhere}
 /* Dlaždice připomíná náhled produktu, hodnota uprostřed. Roztažené pole přes
    celou třetinu řádku se z odstupu čte hůř než blok, který má tvar — oko
    najde dřív dlaždici než dlouhý pruh. */
@@ -96,20 +102,15 @@
 .karta-tisk select{font-size:min(calc(var(--pismo) * 2), 11cqw);font-weight:700;text-align:center;
   width:100%;flex:1;min-height:178px;box-sizing:border-box;
   display:flex;align-items:center;justify-content:center;
-  /* Hodnota a šipka stojí pod sebou jako jedna dvojice na středu dlaždice.
-     Proto se tady nekreslí šipka pozadím jako u ostatních polí — pozadí je
-     přilepené k okraji a text by zůstal nad středem. Místo toho se použije
-     šipka, kterou prohlížeč k výběru sám přidává: je to skutečný prvek, takže
-     ji lze do dvojice postavit a vycentrovat obojí naráz. */
-  flex-direction:column;gap:4cqw;padding:5cqw;background-image:none}
-/* Prohlížeč šipku sám odsouvá k pravému okraji (`margin-inline-start:auto`),
-   protože počítá s tím, že stojí vedle textu. Ve sloupci ji to vytlačí na kraj
-   místo na střed — okraj se proto ruší. Text vedle ní se roztahuje na celou
-   šířku, což by dvojici rozhodilo taky. */
-.karta-tisk select::picker-icon{display:block;width:9cqw;height:9cqw;margin:0;flex:none;
-  color:var(--ink-2);transition:rotate .15s}
+  /* Dlaždice ukazuje jen hodnotu na středu — má připomínat náhled produktu,
+     ne formulářové pole. Šipka pozadím se tu nekreslí (`background-image:none`
+     ruší tu z ostatních polí — byla by přilepená k okraji a text by zůstal
+     nad středem) a šipka, kterou prohlížeč k výběru sám přidává, je schovaná
+     přes `::picker-icon` níž. Že se dlaždicí dá vybírat, prozradí kliknutí;
+     z odstupu se čte jen hodnota. */
+  flex-direction:column;padding:5cqw;background-image:none}
+.karta-tisk select::picker-icon{display:none}
 .karta-tisk select::select-fallback-button-text{flex:0 1 auto;text-align:center}
-.karta-tisk select:open::picker-icon{rotate:180deg}
 .karta-tisk select::picker(select){font-size:calc(var(--pismo) * 1.5)}
 .karta-tisk option{padding:calc(var(--pole-y) * 1.4) calc(var(--pole-x) * 1.4)}
 /* Pod 640px se `.frow` skládá na jeden sloupec (viz pravidlo výš) a
@@ -118,7 +119,6 @@
    dlaždice snížena přibližně o polovinu (178 → 88 px). */
 @media(max-width:640px){
   .karta-tisk select{font-size:min(var(--pismo), 5.5cqw);min-height:88px}
-  .karta-tisk select::picker-icon{width:4.5cqw;height:4.5cqw}
 }
 .bigform select:focus,.bigform input:focus{box-shadow:var(--neu-sm),0 0 0 3px var(--focus)}
 .bigform .frow{gap:calc(var(--mezera-poli) * 1.33);margin-bottom:calc(var(--mezera-poli) * 1.33)}

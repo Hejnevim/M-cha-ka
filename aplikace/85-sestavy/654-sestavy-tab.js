@@ -13,8 +13,10 @@ function SestavyTab({ davky, zbytky, materialy }) {
   const [vseOdstiny, setVseOdstiny] = useState(false);
 
   const zvolene = SESTAVY_OBDOBI.find((o) => o.kod === obdobi) || SESTAVY_OBDOBI[1];
+  /* jazykAplikace v závislostech: názvy měsíců se skládají uvnitř výpočtu,
+     bez něj by po přepnutí jazyka zůstaly ve staré řeči */
   const prehled = useMemo(() => prehledSestav({ davky: davky, zbytky: zbytky,
-    materialy: materialy, mesicu: zvolene.mesicu }), [davky, zbytky, materialy, zvolene.mesicu]);
+    materialy: materialy, mesicu: zvolene.mesicu }), [davky, zbytky, materialy, zvolene.mesicu, jazykAplikace]);
 
   const g = (v) => fmt(n(v), 0);
   const procenta = (v) => (v > 0 ? "+" : (v < 0 ? "−" : "")) + fmt(Math.abs(v) * 100, 0) + " %";
@@ -32,40 +34,39 @@ function SestavyTab({ davky, zbytky, materialy }) {
       <div className="card">
         <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "center",
           marginBottom: 12, gap: 10, flexWrap: "wrap" }}>
-          <h2 style=${{ margin: 0 }}>Sestavy a trendy</h2>
+          <h2 style=${{ margin: 0 }}>${preloz("Sestavy a trendy")}</h2>
           <div className="chips">
             ${SESTAVY_OBDOBI.map((o) => html`
               <button key=${o.kod} className=${"chip" + (o.kod === obdobi ? " on" : "")}
-                onClick=${() => setObdobi(o.kod)}>${o.popis}</button>`)}
+                onClick=${() => setObdobi(o.kod)}>${preloz(o.popis)}</button>`)}
           </div>
         </div>
 
         <div className="specbar" style=${{ marginTop: 0 }}>
           <span className="dot" style=${{ background: prehled.celkem.davek ? "var(--ok)" : "var(--ink-2)" }}></span>
-          <span>Namícháno <b>${g(prehled.celkem.gramu)} g</b></span>
-          <span>Dávek <b>${fmt(prehled.celkem.davek, 0)}</b></span>
-          <span>Odstínů <b>${fmt(prehled.celkem.odstinu, 0)}</b></span>
-          <span>Vyhozeno <b>${g(prehled.celkem.vyhozenoG)} g</b>${prehled.celkem.vyhozenoPodil != null
-            ? " · " + fmt(prehled.celkem.vyhozenoPodil * 100, 1) + " % namíchaného" : ""}</span>
+          <span>${preloz("Namícháno")} <b>${g(prehled.celkem.gramu)} g</b></span>
+          <span>${preloz("Dávek")} <b>${fmt(prehled.celkem.davek, 0)}</b></span>
+          <span>${preloz("Odstínů")} <b>${fmt(prehled.celkem.odstinu, 0)}</b></span>
+          <span>${preloz("Vyhozeno")} <b>${g(prehled.celkem.vyhozenoG)} g</b>${prehled.celkem.vyhozenoPodil != null
+            ? " · " + fmt(prehled.celkem.vyhozenoPodil * 100, 1) + preloz(" % namíchaného") : ""}</span>
           ${zb.vyuzito.uspora > 0 && html`
-            <span>Ze zbytků ušetřeno <b>${cenaText(zb.vyuzito.uspora, prehled.mena)}</b></span>`}
+            <span>${preloz("Ze zbytků ušetřeno")} <b>${cenaText(zb.vyuzito.uspora, prehled.mena)}</b></span>`}
         </div>
 
         ${!prehled.celkem.davek ? html`
           <div className="empty">
-            Za zvolené období není zapsaná žádná dávka. Sestavy se sčítají z evidence:
-            dávka vzniká označením štítkem u váhy, kelímek uložením zbytku po zakázce.
+            ${preloz("Za zvolené období není zapsaná žádná dávka. Sestavy se sčítají z evidence: dávka vzniká označením štítkem u váhy, kelímek uložením zbytku po zakázce.")}
           </div>` : html`
           <${React.Fragment}>
-            <h2 style=${{ marginTop: 18 }}>Spotřeba po měsících</h2>
+            <h2 style=${{ marginTop: 18 }}>${preloz("Spotřeba po měsících")}</h2>
             <table className="t">
-              <thead><tr><th>Měsíc</th><th className="num">Dávek</th>
-                <th className="num">Namícháno g</th><th style=${{ width: "28%" }} />
-                <th className="num">Vyhozeno g</th><th className="num">Proti minulému</th></tr></thead>
+              <thead><tr><th>${preloz("Měsíc")}</th><th className="num">${preloz("Dávek")}</th>
+                <th className="num">${preloz("Namícháno g")}</th><th style=${{ width: "28%" }} />
+                <th className="num">${preloz("Vyhozeno g")}</th><th className="num">${preloz("Proti minulému")}</th></tr></thead>
               <tbody>
                 ${prehled.mesice.map((m) => html`
                   <tr key=${m.kdy}>
-                    <td style=${{ fontWeight: 700 }}>${m.nazev}${m.bezi ? " (běží)" : ""}</td>
+                    <td style=${{ fontWeight: 700 }}>${m.nazev}${m.bezi ? preloz(" (běží)") : ""}</td>
                     <td className="num">${fmt(m.pocet, 0)}</td>
                     <td className="num">${g(m.gramu)}</td>
                     <td>
@@ -81,20 +82,19 @@ function SestavyTab({ davky, zbytky, materialy }) {
             </table>
             ${prehled.zkraceno > 0 && html`
               <p className="note" style=${{ marginTop: 8 }}>
-                Prvních ${fmt(prehled.zkraceno, 0)} měsíců okna je bez zápisu — sestava
-                začíná ${prehled.mesice.length ? prehled.mesice[0].nazev : ""}, kdy se do
-                evidence dostala první dávka.</p>`}
+                ${preloz("Prvních {n} měsíců okna je bez zápisu — sestava začíná {m}, kdy se do evidence dostala první dávka.",
+                  { n: fmt(prehled.zkraceno, 0), m: prehled.mesice.length ? prehled.mesice[0].nazev : "" })}</p>`}
             ${posledni && posledni.bezi && html`
               <p className="note" style=${{ marginTop: 8 }}>
-                ${posledni.nazev} ještě neskončil — ${g(posledni.gramu)} g je zatím,
-                ne za celý měsíc${minuly && minuly.gramu > 0
-                  ? "; minulý měsíc jich bylo " + g(minuly.gramu) : ""}.</p>`}
+                ${preloz("{m} ještě neskončil — {g} g je zatím, ne za celý měsíc",
+                  { m: posledni.nazev, g: g(posledni.gramu) })}${minuly && minuly.gramu > 0
+                  ? preloz("; minulý měsíc jich bylo {g}", { g: g(minuly.gramu) }) : ""}.</p>`}
 
-            <h2 style=${{ marginTop: 18 }}>Nejčastější odstíny</h2>
+            <h2 style=${{ marginTop: 18 }}>${preloz("Nejčastější odstíny")}</h2>
             <table className="t">
-              <thead><tr><th /><th>Barva</th><th className="num">Kolikrát</th>
-                <th className="num">Namícháno g</th><th className="num">Podíl</th>
-                <th>Naposledy</th></tr></thead>
+              <thead><tr><th /><th>${preloz("Barva")}</th><th className="num">${preloz("Kolikrát")}</th>
+                <th className="num">${preloz("Namícháno g")}</th><th className="num">${preloz("Podíl")}</th>
+                <th>${preloz("Naposledy")}</th></tr></thead>
               <tbody>
                 ${odstiny.map((o) => html`
                   <tr key=${o.nazev}>
@@ -110,34 +110,33 @@ function SestavyTab({ davky, zbytky, materialy }) {
             ${prehled.odstiny.length > SESTAVY_ODSTINU && html`
               <div className="rowline" style=${{ marginTop: 8 }}>
                 <button className="btn sec sm" onClick=${() => setVseOdstiny((v) => !v)}>
-                  ${vseOdstiny ? "Zobrazit jen prvních " + SESTAVY_ODSTINU
-                    : "Zobrazit všech " + fmt(prehled.odstiny.length, 0)}
+                  ${vseOdstiny ? preloz("Zobrazit jen prvních {n}", { n: SESTAVY_ODSTINU })
+                    : preloz("Zobrazit všech {n}", { n: fmt(prehled.odstiny.length, 0) })}
                 </button>
               </div>`}
 
-            <h2 style=${{ marginTop: 18 }}>Zbytky — co se vrátilo a co propadlo</h2>
+            <h2 style=${{ marginTop: 18 }}>${preloz("Zbytky — co se vrátilo a co propadlo")}</h2>
             <div className="specbar" style=${{ marginTop: 0 }}>
               <span className="dot" style=${{ background: zb.propadlo.ks ? "var(--warn)" : "var(--ok)" }}></span>
-              <span>Ve skladu <b>${g(zb.naSklade.gramu)} g</b> · ${fmt(zb.naSklade.ks, 0)} kelímků</span>
-              <span>Znovu použito <b>${g(zb.vyuzito.gramu)} g</b> · ${fmt(zb.vyuzito.ks, 0)} dávek</span>
-              <span>Ušetřeno <b>${cenaText(zb.vyuzito.uspora, prehled.mena)}</b>${
+              <span>${preloz("Ve skladu")} <b>${g(zb.naSklade.gramu)} g</b> · ${fmt(zb.naSklade.ks, 0)} ${preloz("kelímků")}</span>
+              <span>${preloz("Znovu použito")} <b>${g(zb.vyuzito.gramu)} g</b> · ${fmt(zb.vyuzito.ks, 0)} ${preloz("dávek")}</span>
+              <span>${preloz("Ušetřeno")} <b>${cenaText(zb.vyuzito.uspora, prehled.mena)}</b>${
                 zb.vyuzito.likvidace > 0
-                  ? " · svoz " + cenaText(zb.vyuzito.likvidace, prehled.mena) : ""}</span>
-              <span>Propadlo <b>${g(zb.propadlo.gramu)} g</b> · ${fmt(zb.propadlo.ks, 0)} kelímků</span>
+                  ? preloz(" · svoz {c}", { c: cenaText(zb.vyuzito.likvidace, prehled.mena) }) : ""}</span>
+              <span>${preloz("Propadlo")} <b>${g(zb.propadlo.gramu)} g</b> · ${fmt(zb.propadlo.ks, 0)} ${preloz("kelímků")}</span>
             </div>
             ${zb.vyuzito.bezGramu > 0 && html`
               <p className="note" style=${{ marginTop: 8 }}>
-                U ${fmt(zb.vyuzito.bezGramu, 0)} z ${fmt(zb.vyuzito.ks, 0)} dávek se gramy vzaté
-                ze zbytku nezapisovaly — v ušetřených korunách jsou, v gramech ne. Zpětně se
-                dopočítat nedají, cena gramu se od té doby změnila.</p>`}
+                ${preloz("U {a} z {b} dávek se gramy vzaté ze zbytku nezapisovaly — v ušetřených korunách jsou, v gramech ne. Zpětně se dopočítat nedají, cena gramu se od té doby změnila.",
+                  { a: fmt(zb.vyuzito.bezGramu, 0), b: fmt(zb.vyuzito.ks, 0) })}</p>`}
             ${zb.propadlo.ks > 0 && html`
               <p className="note" style=${{ marginTop: 8 }}>
-                V propadlých kelímcích je za ${cenaText(zb.propadlo.hodnota, prehled.mena)} barvy${
+                ${preloz("V propadlých kelímcích je za {c} barvy", { c: cenaText(zb.propadlo.hodnota, prehled.mena) })}${
                   zb.propadlo.likvidace > 0
-                    ? " a svoz do nebezpečného odpadu stojí dalších "
-                      + cenaText(zb.propadlo.likvidace, prehled.mena) : ""}.${
-                  zb.propadlo.uplne ? "" : " Ceník nezná cenu všech složek, skutečná ztráta je vyšší."}
-                Co propadne v nejbližších dnech, ukáže záložka <b>Co propadne</b>.</p>`}
+                    ? preloz(" a svoz do nebezpečného odpadu stojí dalších {c}",
+                        { c: cenaText(zb.propadlo.likvidace, prehled.mena) }) : ""}.${
+                  zb.propadlo.uplne ? "" : preloz(" Ceník nezná cenu všech složek, skutečná ztráta je vyšší.")}
+                ${preloz("Co propadne v nejbližších dnech, ukáže záložka")} <b>${preloz("Co propadne")}</b>.</p>`}
           <//>`}
       </div>
     <//>`;
