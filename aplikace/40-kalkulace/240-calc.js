@@ -1641,7 +1641,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
 
   return html`
     <div>
-      <div className="searchwrap">
+      <div className="searchwrap hledani-katalog">
         <div className="searchbar">
           <span className="ic" aria-hidden="true">⌕</span>
           <input value=${q}
@@ -1658,8 +1658,8 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
             ${filtered.slice(0, 12).map((p) => html`
               <div key=${p.id} className="searchitem" onMouseDown=${() => pickProduct(p.id)}>
                 <${Img} className="searchitem-img" src=${p.img} alt=${p.name}
-                  fallback=${html`<div className="searchitem-img noimg" style=${{ height: 40 }}></div>`}
-                  errFallback=${html`<div className="searchitem-img noimg" style=${{ height: 40 }}></div>`} />
+                  fallback=${html`<div className="searchitem-img noimg" style=${{ height: 60 }}></div>`}
+                  errFallback=${html`<div className="searchitem-img noimg" style=${{ height: 60 }}></div>`} />
                 <div style=${{ minWidth: 0 }}>
                   <div className="searchitem-nm">${p.ref ? p.ref + " · " : ""}${p.name}</div>
                   <div className="searchitem-dm">${p.material || ""}</div>

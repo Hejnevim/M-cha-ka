@@ -98,12 +98,6 @@ function MichaciRezim({ aktivni, onZavrit, recipe, calcAkt, rozpis, vyuziti, sta
               ${preloz("Složení téhle receptury není v aplikaci zadané. Namíchejte {g} g podle firemní receptury.",
                 { g: fmt(calcAkt.totalG) })}
             </div>`}
-          <p className="note" style=${{ marginTop: 12 }}>
-            ${preloz("Váží se kumulativně do jedné nádoby — displej váhy má po každé složce ukazovat hodnotu ve sloupci „kumulativně\"{tara}. Zavřít můžete klávesou Esc.",
-              { tara: vyuziti
-                ? preloz(" (váhu vytárujte i s kelímkem; v nádobě pak bude {g} g)", { g: fmt(calcAkt.totalG) })
-                : "" })}
-          </p>
           ${riziko}
           ${natisk}
           ${viskozita}

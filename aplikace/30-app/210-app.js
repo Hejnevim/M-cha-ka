@@ -991,7 +991,7 @@ function App() {
           </button>
           ${menuOpen && html`
             <div className="navdrop">
-              <div className="note" style=${{ padding: "6px 14px 2px", letterSpacing: ".06em" }}>${preloz("ROLE")}</div>
+              <div className="note" style=${{ padding: "10.5px 24.5px 3.5px", letterSpacing: ".06em" }}>${preloz("ROLE")}</div>
               ${ROLE_PORADI.map((rl) => html`
                 <button key=${rl} className=${role === rl ? "on" : ""}
                   onClick=${() => prepniRoli(rl)} title=${preloz(ROLE[rl].popis)}>
@@ -1000,7 +1000,7 @@ function App() {
                     ${role === rl ? preloz("teď") : (smiRole(rl, "receptury") && deletePw ? preloz("na heslo") : "")}
                   </span>
                 </button>`)}
-              <div style=${{ borderTop: "1px solid var(--line)", margin: "6px 8px" }}></div>
+              <div style=${{ borderTop: "1px solid var(--line)", margin: "10.5px 14px" }}></div>
               <button onClick=${() => setTechRozbaleno((o) => !o)} aria-expanded=${techRozbaleno}
                 title=${techRozbaleno ? preloz("Sbalit výběr technologie") : preloz("Rozbalit výběr technologie")}>
                 <span className="note" style=${{ float: "right" }}>${technologie || preloz("vše")}</span>
@@ -1037,7 +1037,7 @@ function App() {
                     ${preloz("Co chybí k odemčení…")}
                   </button>`}
               <//>`}
-              <div style=${{ borderTop: "1px solid var(--line)", margin: "6px 8px" }}></div>
+              <div style=${{ borderTop: "1px solid var(--line)", margin: "10.5px 14px" }}></div>
               <!-- Načtení zakázky (PDF i čárový kód) je v kartě Vybraný produkt —
                    zakázka se načítá tam, kde se s ní hned počítá. Obě záložky
                    dál existují: PDF pro opravu rozpoznaných polí, Čárový kód
@@ -1066,12 +1066,12 @@ function App() {
               ${otevreneSkupiny.michani && html`<${React.Fragment}>
                 <button className=${tab === "schval" ? "on" : ""} onClick=${() => { setTab("schval"); setMenuOpen(false); }}>
                   ${preloz("Ke schválení")}
-                  ${cekaSchvaleni > 0 && html`<span className="tag" style=${{ marginLeft: 8 }}
+                  ${cekaSchvaleni > 0 && html`<span className="tag" style=${{ marginLeft: 14 }}
                     title=${preloz("čeká na schválení {n}", { n: cekaSchvaleni })}>${cekaSchvaleni}</span>`}
                 </button>
                 <button className=${tab === "fronta" ? "on" : ""} onClick=${() => { setTab("fronta"); setMenuOpen(false); }}>
                   ${preloz("Fronta míchání")}
-                  ${frontaPocet > 0 && html`<span className="tag" style=${{ marginLeft: 8 }}
+                  ${frontaPocet > 0 && html`<span className="tag" style=${{ marginLeft: 14 }}
                     title=${preloz("ve frontě čeká {n}", { n: frontaPocet })}>${frontaPocet}</span>`}
                 </button>
                 <button className=${tab === "opravy" ? "on" : ""} onClick=${() => { setTab("opravy"); setMenuOpen(false); }}>${preloz("Opravy po nátisku")}</button>
@@ -1093,7 +1093,7 @@ function App() {
                 <button className=${tab === "sklad" ? "on" : ""} onClick=${() => { setTab("sklad"); setMenuOpen(false); }}>
                   ${preloz("Sklad surovin")}
                   ${skladPocet > 0 && html`<span className="tag"
-                    style=${{ marginLeft: 8, background: sklad.pocet.chybi ? "#B23B2A" : "var(--warn)",
+                    style=${{ marginLeft: 14, background: sklad.pocet.chybi ? "#B23B2A" : "var(--warn)",
                       color: "#fff", boxShadow: "none" }}
                     title=${[sklad.pocet.chybi ? preloz("{n} došlo", { n: sklad.pocet.chybi }) : "",
                       sklad.pocet.dochazi ? preloz("{n} pod minimem", { n: sklad.pocet.dochazi }) : ""].filter(Boolean).join(", ")}>
@@ -1102,7 +1102,7 @@ function App() {
                 <button className=${tab === "zbytky" ? "on" : ""} onClick=${() => { setTab("zbytky"); setMenuOpen(false); }}>
                   ${preloz("Zbytky barev")}
                   ${lhutyPocet.prosle + lhutyPocet.brzy > 0 && html`<span className="tag"
-                    style=${{ marginLeft: 8, background: lhutyPocet.prosle ? "#B23B2A" : "var(--warn)",
+                    style=${{ marginLeft: 14, background: lhutyPocet.prosle ? "#B23B2A" : "var(--warn)",
                       color: "#fff", boxShadow: "none" }}
                     title=${[lhutyPocet.prosle ? preloz("{n} po lhůtě", { n: lhutyPocet.prosle }) : "",
                       lhutyPocet.brzy ? preloz("{n} brzy končí", { n: lhutyPocet.brzy }) : ""].filter(Boolean).join(", ")}>
@@ -1121,8 +1121,8 @@ function App() {
                 <button className=${tab === "most" ? "on" : ""} onClick=${() => { setTab("most"); setMenuOpen(false); }}>${preloz("Připojení k mostu")}</button>
                 <button className=${tab === "imp" ? "on" : ""} onClick=${() => { setTab("imp"); setMenuOpen(false); }}>${preloz("Import / data")}</button>
               <//>`}
-              <div style=${{ borderTop: "1px solid var(--line)", margin: "6px 8px" }}></div>
-              <div className="note" style=${{ padding: "6px 14px 2px", letterSpacing: ".06em" }}>${preloz("JAZYK")}</div>
+              <div style=${{ borderTop: "1px solid var(--line)", margin: "10.5px 14px" }}></div>
+              <div className="note" style=${{ padding: "10.5px 24.5px 3.5px", letterSpacing: ".06em" }}>${preloz("JAZYK")}</div>
               ${JAZYKY_PORADI.map((j) => html`
                 <button key=${j} className=${jazyk === j ? "on" : ""} onClick=${() => prepniJazyk(j)}>
                   ${JAZYKY[j]}

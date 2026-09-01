@@ -9,17 +9,24 @@
 .tgl input:checked + .tglt::after{transform:translateX(18px)}
 #chyba{max-width:700px;margin:60px auto;background:var(--paper);color:#8A5A1E;border-radius:12px;padding:24px;font-size:15px;display:none;box-shadow:var(--neu)}
 .searchwrap{position:relative;margin-bottom:20px}
-.searchbar{background:var(--paper);border-radius:var(--radius);padding:12px 18px;display:flex;align-items:center;gap:12px;box-shadow:var(--neu)}
+/* Jen hledání katalogu na hlavní stránce — hledání šarží sdílí .searchwrap,
+   ale žije uvnitř karty a zužovat se nesmí. Zlom 960 px je týž, od kterého
+   platí mřížka karet (.grid.calc): pod ním se pole vrací na celou šířku. */
+@media(min-width:960px){.hledani-katalog{width:var(--hledani-sirka);margin-left:auto;margin-right:auto}}
+.searchbar{background:var(--paper);border-radius:var(--radius);padding:19px 18px;display:flex;align-items:center;gap:12px;box-shadow:var(--neu)}
 .searchbar .ic{flex:0 0 auto;font-size:16px;opacity:.6}
 .searchbar input{border:none;background:transparent;padding:6px 0;font-size:15px;box-shadow:none !important}
 .searchbar input:focus{border:none;box-shadow:none !important}
 .searchbar .count{white-space:nowrap;color:var(--ink-2);font-size:12.5px}
-.searchdrop{position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--paper);border-radius:12px;box-shadow:var(--neu);z-index:40;max-height:400px;overflow:auto}
-.searchitem{display:flex;gap:12px;align-items:center;padding:10px 14px;cursor:pointer}
+/* Položky našeptávače v původní velikosti (obrázek 40 px, písmo 13/11 px)
+   byly u váhy špatně čitelné — všechny rozměry jedou na 1,5násobku, a strop
+   výšky roste stejně, aby zůstal vidět týž počet položek naráz. */
+.searchdrop{position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--paper);border-radius:12px;box-shadow:var(--neu);z-index:40;max-height:600px;overflow:auto}
+.searchitem{display:flex;gap:18px;align-items:center;padding:15px 21px;cursor:pointer}
 .searchitem:hover,.searchitem.hi{background:var(--zvyraz)}
-.searchitem-img{width:40px;height:40px;flex:0 0 auto;object-fit:contain;border-radius:8px;background:var(--paper);box-shadow:var(--neu-sm)}
-.searchitem-nm{font-size:13px;font-weight:700;line-height:1.3}
-.searchitem-dm{font-family:var(--mono);font-size:11px;color:var(--ink-2);margin-top:2px}
+.searchitem-img{width:60px;height:60px;flex:0 0 auto;object-fit:contain;border-radius:12px;background:var(--paper);box-shadow:var(--neu-sm)}
+.searchitem-nm{font-size:19.5px;font-weight:700;line-height:1.3}
+.searchitem-dm{font-family:var(--mono);font-size:16.5px;color:var(--ink-2);margin-top:3px}
 .viewtoggle{display:flex;gap:2px;background:var(--paper);border-radius:999px;padding:4px;box-shadow:var(--neu-in)}
 .viewtoggle button{border:none;background:none;padding:7px 13px;border-radius:999px;cursor:pointer;color:var(--ink-2);font-size:15px;line-height:1;transition:background .15s,color .15s}
 .viewtoggle button.on{background:var(--key);color:var(--btn-ink)}

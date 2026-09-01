@@ -284,6 +284,29 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 08:50 | Dlaždice míchacího režimu v cizím jazyce rostou s textem (Disconnect trčel 5,4 px), popisky dlaždic tisku se zalamují doopravdy a prekryv.py umí --jazyk i přetok z prvku |
 | 08:58 | Ukázka má přestavěné první čtyři scény: úvod bez počtů, nová scéna o řadách přiřazených každému místu potisku, spec s SGPS čárkovaně jako budoucí cestou a dávka podle síta i podle velikosti loga — obě jazykové verze, nové nahrávky |
 | 09:02 | Prázdná dlaždice říká jen „nevybráno" — bez pomlček ve všech třech jazycích a bez šipky pod hodnotou |
+| 09:54 | Ceník zná barevné řady — u složky stojí, ze kterých řad je, filtr podle řady, a jedním stiskem dostane všech 77 barev ze 4 řad vlastní řádek v souboru s prázdnou cenou k postupnému doplnění |
+| 10:41 | Přiřazení barev k řadám drží i soubor — ceník má sloupec `rada`, všech 77 barev ho má vyplněný a doplnění řady nesmaže zapsanou cenu |
+| 10:42 | Logo splývá s plochou v obou motivech a tmavá plocha zesvětlala na #464d53, aby karty vystupovaly barvou |
+| 11:11 | Logo IRM je kreslené SVG podle předlohy — noha R vplývá do M, v obou motivech splývá s plochou a stínuje ho drop-shadow laditelný v barvy.html |
+| 11:29 | Kreslené logo vráceno — ručně skládané křivky předloze neodpovídaly, v hlavičce je zpět textový nápis IRM |
+| 11:37 | Menu a přepínač režimu jsou dvakrát větší (42 → 84 px, ikony 27 → 54 px) — dva nejčastější hmaty hlavičky jdou trefit i po paměti |
+| 11:43 | Vyskakovací menu je o tři čtvrtiny větší (řádek 13,5 → 23,625 px, šířka 180 → 315 px) — drží poměr ke zdvojnásobenému tlačítku a čte se ze stoje |
+| 11:50 | Hledání katalogu drží šířku prostřední karty a stojí na středu — horní řádek hlavní stránky je souměrný; šířka jde přeladit v barvy.html |
+| 11:56 | Vyhledávač je o čtvrtinu vyšší (56 → 70 px) — výraznější první hmat hlavní stránky, stejně narostlo i hledání šarží |
+| 12:05 | Našeptávač hledání je o polovinu větší (obrázek 40 → 60 px, písmo 13 → 19,5 px) — položky jdou přečíst od váhy |
+| 12:27 | Menu a přepínač režimu couvly o čtvrtinu (84 → 63 px, ikony 54 → 40,5 px) — dvojnásobek přitahoval oko víc než práce, 1,5násobek proti původním 42 px stačí i po paměti |
+| 12:33 | Vedle tlačítka „Zobrazit ceny“ už nestojí poznámka „ceny jsou schované“ — že jsou schované, říká samo tlačítko |
+| 12:40 | Pod tabulkou navážky v míchacím režimu už nestojí odstavec o kumulativním vážení — sloupec „kumulativně“ a box „V nádobě už je“ říkají totéž čísly, výklad je v NAVOD_PODKLADY.md |
+| 13:38 | Logo IRM leží v ploše pod celou aplikací — deset tahů vytažených z předlohy IRMLOGO.pdf, vložených jako maska, takže barvu (tmavě šedá #4A4F55, v noci #5C666F) i sílu řídí proměnné z barvy.html |
+| 13:48 | **Obrat:** logo v ploše vráceno — předloha IRMLOGO.pdf je jen výřez deseti tahů, ne celý znak; plocha je zpátky holá a čeká se na předloha s celým logem |
+| 14:17 | Plochou pod aplikací vede diagonální čára — ve dne červená CMYK 0/100/90/0 (#FF001A), v noci modrá 100/38/0/16 (#0085D6), tloušťka 48 px; barva, tloušťka i sytost se ladí v barvy.html |
+| 14:26 | Čára v ploše začíná uprostřed horní hrany, ne v rohu, a je dvakrát tlustší (48 → 96 px) — poloha se drží na každé velikosti okna, změřeno ze snímků |
+| 14:36 | Čára v ploše se v barvy.html posouvá ve dvou osách — posuvníky vodorovně a svisle místo jednoho posunu podél šikmé osy; +25vw ji na okně 1600 px posunulo přesně o 160 px |
+| 15:11 | Z čáry v ploše je tenká linka — tloušťka 96 → 10 px a posun −50 → −45vh; horní hranu protíná 756 px místo 801, tedy 44 px vlevo od středu, a nesplývá s hranou karty |
+| 15:22 | Čára v ploše couvla dál od karet — posun −45 → −37vh, horní hranu protíná 684 px místo 756 |
+| 15:37 | Čára v ploše vede z levého horního rohu — posun −47vw / −44vh a tloušťka 10 → 14 px; poprvé je zapojený i vodorovný posun, takže poloha nově závisí i na šířce okna |
+| 15:55 | Tlačítko tárování říká jen „Tára“ — nula v závorce vypadala jako hodnota na váze; stejně zkrácené i „Tare“ a „Tara“ |
+| 15:56 | Pod displejem váhy už nestojí „na váze · receptura …“ — název receptury drží hlavička míchacího režimu, poznámka jen opakovala známé; zrušená ve všech třech jazycích |
 
 ---
 
@@ -6951,3 +6974,738 @@ text dlaždic: „nevybráno" bez pomlček; s podstrčeným jazykem
 (`JSON.stringify`, viz past z kap. 126) čtou všechny tři dlaždice
 en „not selected" a pt „não selecionado". Snímek potvrzuje dlaždici jen
 s hodnotou na středu, bez šipky.
+
+
+## 151. Barvy z barevných řad se přiřadily do ceníku
+
+**Problém.** Ceny materiálů se mají postupně vyplnit pro všechny barvy,
+ze kterých se v dílně míchá — ale ceník je znal jen jako bezejmenný seznam
+složek posbíraný z receptur. U složky nebylo vidět, ze které barevné řady
+pochází (u německých názvů Printcoloru se to nepozná ani odhadem), nešlo si
+vyfiltrovat jednu řadu a projít ji barvu po barvě, a hlavně: dokud někdo
+nezapsal cenu, složka v souboru ceníku vůbec neexistovala. Seznam barev
+k nacenění tak viděl jen prohlížeč s načtenými databázemi — účtárna ani
+druhý počítač ne.
+
+**Co se změnilo.**
+
+| co | jak |
+|---|---|
+| sloupec **řada** | u složky se vypisují řady, ve kterých se objevuje; sbírá se z receptur při skládání seznamu |
+| filtr podle řady | nabídka vedle hledání — vybere se řada a projde se barva po barvě |
+| tlačítko **Doplnit barvy z řad do ceníku (n)** | každá barva z načtených řad, která v souboru ještě nemá řádek, se jedním stiskem zapíše do `parametry/pigmenty.csv` s druhem `barva` a prázdnou cenou; ukáže se, jen dokud je co doplnit |
+| nový druh materiálu **barva** | hotová míchací barva z nakoupené řady není pigment ani báze; bez vlastního druhu by všechny stály jako „neurčeno" — a ruční uložení ceny u barvy z řady už se také neukládá jako `pigment`, ale jako `barva` |
+
+Tatáž barva smí být ve víc řadách (neony a metalízy sdílí MS 660 s MS 786)
+— v ceníku je to jeden řádek s jednou cenou, protože je to týž materiál.
+Zápis jde stávající cestou `zapisCenyDoCsv`: mění jen dotčené buňky, nové
+řádky připisuje na konec a vysvětlivek v souboru se nedotkne. Texty mají
+položky ve slovníku (en i pt).
+
+**Změřeno:** zkouška v Node nad skutečnými soubory: 3 468 receptur ze
+4 řad + vlastní, 77 unikátních barev, 14 z nich ve více řadách; zápis do
+kopie ceníku přidal 76 řádků (jedna barva už v souboru byla), všech
+18 původních materiálů zůstalo beze změny včetně cen, odstínů a `maxpodil`,
+druhý průchod už neměl co doplnit a kontrolní vzorek s úmyslně neúplným
+zápisem zkouška chytila. V prohlížeči skutečným kliknutím: tlačítko
+ukazovalo (76), po stisku „Uloženo do pigmenty.csv.", tlačítko zmizelo
+a soubor narostl ze 43 na 119 řádků, z toho 76 nových s druhem `barva`.
+Filtr řady sedí v řádku vedle hledání (oba y = 84,44 px, šířka 136,5 px
+místo roztažení přes celou kartu, které tam bylo napřed).
+
+**Falešný poplach:** porovnání souboru se zálohou hlásilo 18 změněných
+řádků — ale jen proto, že PowerShell četl zálohu bez BOM jako ANSI.
+Po přečtení obou souborů jako UTF-8 jsou původní řádky totožné; jediný
+bajtový rozdíl je BOM na začátku, který přidává už existující ukládací
+cesta mostu a čtení ho odlupuje.
+
+
+## 152. Řada barvy stojí i v souboru ceníku
+
+**Problém.** Sloupec s řadou v ceníku se skládal jen z načtených receptur —
+v `parametry/pigmenty.csv` po včerejším doplnění stálo 76 řádků druhu
+`barva` bez jediné stopy, ke které řadě barva patří. Kdo soubor otevřel bez
+aplikace (účtárna, objednávka u dodavatele), viděl hromadu německých názvů
+bez ladu. Přiřazení k řadě je přitom údaj o materiálu a patří do souboru,
+ne jen do prohlížeče.
+
+**Co se změnilo.** Tabulka materiálů vede nový sloupec `rada`; víc řad se
+odděluje svislítkem jako u zastupnosti. Zapisuje se toutéž cestou jako cena
+(jen dotčené buňky, starší soubor sloupec dostane do hlavičky i řádků):
+
+| kdy | co se stane |
+|---|---|
+| stisk „Doplnit barvy z řad do ceníku" | doplní chybějící řádky **i** řadu k řádkům, které ji nemají; tlačítko se ukáže, dokud něco z toho chybí |
+| ruční uložení ceny | přibalí řadu, je-li odkud ji vzít; bez podkladu nechá buňku na pokoji — mohl ji upravit člověk |
+| čtení souboru | řada ze souboru platí i bez načtených databází — sloupec i filtr v ceníku fungují na každém počítači |
+
+U doplnění řady k existujícímu řádku se posílá i jeho dosavadní cena, měna
+a jednotka — zápis je přepisuje vždycky, takže bez toho by doplnění řady
+zapsané ceny smazalo. Řádek s už vyplněnou řadou se nechává být.
+
+**Chyba, kterou to nejdřív mělo:** první zápis přenesl do souboru
+i „odvozeno z PANTONE …" — u odvozeného odstínu nese pole řady původ, který
+píše kalkulace, ne barevnou řadu. Soubor se vrátil ze zálohy, sběr řad
+dostal filtr na tuhle značku a zápis se pustil znovu; do zkoušky přibyla
+kontrola, že se původ odvozených odstínů do souboru nedostane.
+
+**Změřeno:** zkouška v Node (13 kontrol): 77 barev, po filtru původů 7 ve
+více řadách (bylo jich falešně 14); modelový řádek s cenou 420,50 CZK/kg
+doplnění řady přežil beze změny a uložení ceny bez podkladu řadu nesmazalo;
+94 řádků souboru před zápisem beze změny. V prohlížeči skutečným kliknutím:
+tlačítko (77) → „Uloženo do pigmenty.csv.", tlačítko zmizelo, v hlavičce
+přibyl sloupec `rada`, 76 řádků druhu `barva` má řadu (např.
+`Printcolor MS 660|Printcolor MS 786` u sdílených neonů) a Transparentní
+báze dostala `Printcolor 390`, aniž přišla o `maxpodil` 15 a poznámku.
+Počet řádků souboru 119 před i po — nic nepřibylo dvakrát.
+## 153. Logo splynulo s plochou a tmavá plocha se prosvětlila
+
+**Problém.** Nápis IRM v hlavičce stál na vlastním podkladu #E0E0E0, světlejším
+než plocha #c9c9c9 — kolem loga svítil obdélník, který tam nic nedělal.
+V tmavém režimu byl problém opačný: plocha #373d43 a karty #31383f se lišily
+tak málo, že karty z plochy skoro nevystupovaly a hloubka stála jen na stínech.
+
+**Co se změnilo.** Hodnoty naladěné v barvy.html se zanesly do
+aplikace/10-styl/020-promenne.css. Logo v obou motivech splývá s plochou
+(--logo = --bg: světlý #c9c9c9, tmavý #464d53) a vystupuje jen stínem. Tmavá
+plocha zesvětlala z #373d43 na #464d53, takže tmavší karty #31383f z ní
+vystupují barvou stejně jako ve světlém motivu — jen obráceně, karta je „dál
+od světla". Stín modálních oken klesl z 15 na 16 px. Komentář u tmavého bloku
+je přepsaný, aby čísla v něm odpovídala skutečným hodnotám.
+
+**Změřeno:** sonda ve světlém režimu: --logo #c9c9c9 = --bg #c9c9c9,
+--modal-shadow 0 16px 48px rgba(0,0,0,0.76); v tmavém: --bg #464d53,
+--logo #464d53, --paper #31383f. kontrola_aplikace.py: kořen 1 potomek,
+chyby žádné. barvy.html přegenerované (15 barev, 9+5 stínů).
+
+
+## 154. Logo je kreslený tvar — noha R vplývá do M
+
+**Problém.** Nápis IRM v hlavičce bylo obyčejné systémové písmo. Dílna dostala
+vlastní logo — baculaté, měkce vykrojené litery, kde noha R přetéká obloukem do
+M — a to žádné písmo v počítači neumí. Vložit ho jako obrázek by znamenalo
+pevnou barvu: v tmavém režimu by světlá bitmapa svítila a nešla by přeladit
+v barvy.html.
+
+**Co se změnilo.** Logo je inline SVG kreslené pěti tahy (šířka 30 jednotek,
+kulatá zakončení): dřík I, dřík R, bublina R, noha R s háčkem a lomená čára M.
+Háček nohy R končí 13 jednotek od dříku M, takže se při tloušťce tahu 30 obě
+čáry slijí v jeden tvar — ligatura z předlohy. Barvu nese tah `currentColor`
+z tokenu `--logo`, logo tedy dál v obou motivech splývá s plochou a vystupuje
+jen ražbou. Stín se přestěhoval z `text-shadow` (na SVG nedosáhne) do filtru
+`drop-shadow`, který obtéká křivky písmen: token `--logo-shadow` nahradil
+`--logo-filtr` a barvy_nastroj.py ho v novém tvaru čte i zapisuje, posuvníky
+Stínování loga fungují beze změny. Tmavý režim dostal vlastní, silnější ražbu
+(bílá 20 %, černá 30 %, rozostření 3 px) — na tmavší ploše by světlá složka
+14 % zanikla. Velikost dál řídí `--logo-velikost` přes font-size nadpisu,
+SVG drží `.9em`, tedy zhruba výšku verzálek původního nápisu.
+
+**Změřeno:** sonda: SVG v hlavičce 1×, výška 104,391 px (0,9 × 116 px),
+výška h1 162,391 px před i po výměně — hlavička se nepohnula. Světlý režim:
+--logo #c9c9c9, filtr drop-shadow(-2px -2px 2px rgba(255,255,255,0.14))
+drop-shadow(2px 2px 2px rgba(0,0,0,0.1)); tmavý: --logo #464d53, filtr
+drop-shadow(-2px -2px 3px rgba(255,255,255,0.2)) drop-shadow(2px 2px 3px
+rgba(0,0,0,0.3)). Snímky obou režimů ukazují ražbu s ligaturou R–M.
+kontrola_aplikace.py: kořen 1 potomek, chyby žádné. barvy.html přegenerované,
+--logo-filtr 5×, --logo-shadow 0×.
+
+
+## 155. Kreslené logo se vrátilo — ručně skládané křivky na předlohu nestačí
+
+**Problém.** Kapitola 154 nahradila nápis IRM kresleným SVG podle dodaného
+loga. Tvar z pěti ručně skládaných tahů ale předloze neodpovídal natolik,
+aby v hlavičce obstál — písmena vyšla hranatější a proporce jiné než na
+předloze. Logo, které má dílnu reprezentovat, nesmí vypadat „skoro".
+
+**Co se změnilo.** Výměna je vrácená celá: v hlavičce je zpět textový nápis
+IRM se `text-shadow`, token `--logo-filtr` zmizel a `--logo-shadow` má
+v obou motivech původní hodnoty, barvy_nastroj.py zase čte i zapisuje
+text-shadow. Ponaučení do příště: věrné převedení předlohy chce křivky
+vytažené z obrázku (vektorizací), ne tahy skládané od oka — samotná mechanika
+(SVG přes currentColor z --logo, stín filtrem drop-shadow laditelným
+v barvy.html) fungovala a dá se použít znovu.
+
+**Změřeno:** sonda: SVG v hlavičce 0×, písmo h1 116 px, výška h1 162,391 px
+— shodná s výchozím stavem před kapitolou 154. --logo-shadow
+-2px -2px 2px rgba(255,255,255,0.14), 2px 2px 2px rgba(0,0,0,0.1)
+v obou motivech, --logo-filtr prázdný. kontrola_aplikace.py: kořen
+1 potomek, chyby žádné. barvy.html přegenerované.
+
+
+## 156. Menu a přepínač režimu jsou dvakrát větší
+
+**Problém.** Kruhová tlačítka v rozích hlavičky — menu vlevo a přepínač
+světlého a tmavého režimu vpravo — měla 42 px. Jsou to dva nejčastější hmaty
+v hlavičce a na 42 px se z dálky nebo v rukavicích trefují špatně.
+
+**Co se změnilo.** Obě tlačítka (`.navbtn`, `.themebtn`) narostla na
+dvojnásobek: 42 → 84 px. Ikony uvnitř dostaly vlastní pravidlo `.navbtn svg,
+.themebtn svg` (27 → 54 px), protože globální velikost ikon `--ikona` by je
+nechala malé uprostřed velkého kruhu — pravidlo stojí až za pravidlem ikon,
+při stejné specifičnosti vyhrává pozdější. Písmo přepínače úměrně 18 → 36 px.
+
+**Změřeno:** sonda: obě tlačítka 84 × 84 px, ikony v nich 54 px, výška
+hlavičky 180,391 px před i po — tlačítka se do ní vešla, výšku drží nadpis.
+kontrola_aplikace.py: kořen 1 potomek, chyby žádné. Snímek 1 280 px: obě
+tlačítka v rozích, úměrné ikony. Snímek 400 px: tlačítka se lehce překrývají
+s okraji vybledlého loga (krajní sloupce mřížky 1fr jsou užší než 84 px) —
+nic nepřetéká a logo zůstává klikatelné středem; nechává se být, dokud to
+na telefonu nezačne vadit.
+
+
+## 157. Vyskakovací menu je o tři čtvrtiny větší
+
+**Problém.** Menu pod zvětšeným tlačítkem (kapitola 156) zůstalo v původní
+drobné velikosti — řádky 13,5 px se ze stoje od váhy čtou špatně a nepoměr
+k dvakrát většímu tlačítku bil do očí.
+
+**Co se změnilo.** Celé menu (`.navdrop`) narostlo na 1,75násobek: šířka
+180 → 315 px, písmo řádku 13,5 → 23,625 px, odsazení řádku 10 14 → 17,5
+24,5 px. Poznámky a štítky uvnitř menu dostaly vlastní přepočet z týchž
+tokenů jako jinde (vzor `.bigpanel .note`): `.navdrop .note` je
+(--pismo-poznamka − 0,5 px) × 1,75, `.navdrop .tag` --pismo-popisek × 1,75.
+Inline rozměry v JSX (hlavičky ROLE a JAZYK, oddělovače, odsazení štítků
+u počtů) jsou přepočítané stejným poměrem — inline styl by pravidlo z CSS
+přebil, takže se musely změnit u zdroje.
+
+**Změřeno:** po kliknutí na menu: min-width 315 px, písmo řádku 23,625 px,
+odsazení 17,5 px 24,5 px, poznámky 23,625 px, štítky 21,875 px — vše přesně
+1,75× původních hodnot. kontrola_aplikace.py: kořen 1 potomek, chyby žádné.
+Snímek 1 280 px s rozbaleným menu: hlavičky, řádky, štítek počtu u MÍCHÁNÍ
+i oddělovače drží společný poměr.
+
+
+## 158. Hledání katalogu drží šířku prostřední karty
+
+**Problém.** Vyhledávací pole nad kartami jelo přes celou šířku stránky.
+Mřížka pod ním je přitom souměrná — prostřední karta parametrů tisku stojí
+na středu — a pruh přes celou šířku nad ní působil jako cizí prvek; hrany
+pole nelícovaly s ničím.
+
+**Co se změnilo.** Šířku pole vede nová proměnná `--hledani-sirka` (výchozí
+33 %, stejně jako `--tisk-sirka`) a pole stojí na středu — hrany lícují
+s hranami prostřední karty. Platí od zlomu 960 px, pod ním se karty skládají
+pod sebe a pole se vrací na celou šířku. Třídu `hledani-katalog` dostalo jen
+hledání na hlavní stránce: hledání šarží sdílí `.searchwrap`, ale žije uvnitř
+karty a zužovat se nesmí. Proměnná se ladí v barvy.html na stránce Rozvržení
+(„Šířka hledání katalogu" — předvolby i vlastní hodnota) a vyhledávací pole
+přibylo do ukázky rozvržení, takže je změna hned vidět.
+
+**Změřeno:** sonda, okno 1 584 px: hledání i karta tisku shodně x 543,84,
+šířka 496,31, pravá hrana 1 040,16; okraj vlevo i vpravo 543,84 px — přesně
+na střed. Okno 900 px (pod zlomem): pole 830,97 px, tedy celá šířka stránky.
+prekryv.py: 4 šířky × 2 režimy čisté. kontrola_aplikace.py: kořen 1 potomek,
+chyby žádné. barvy.html: ovladač `--hledani-sirka` přítomen (pocet 1).
+## 159. Vyhledávač je o čtvrtinu vyšší
+
+**Problém.** Vyhledávací pole je první hmat hlavní stránky, ale po zvětšení
+menu a přepínače režimu (kapitoly 156–157) zůstalo nízkým pruhem — 56 px
+vedle 84px tlačítek hlavičky zapadalo a špatně se trefovalo.
+
+**Co se změnilo.** Svislé odsazení `.searchbar` narostlo z 12 na 19 px,
+vodorovné zůstalo 18 px. Pravidlo je společné, takže stejně narostlo
+i hledání šarží ve skladu — týž prvek vypadá na obou místech stejně.
+
+**Změřeno:** sonda: výška pole 56 → 70 px, přesně 1,25×; šířka i poloha beze
+změny (x 543,84, šířka 496,31). prekryv.py: 4 šířky × 2 režimy čisté.
+kontrola_aplikace.py: kořen 1 potomek, chyby žádné.
+## 160. Našeptávač hledání je o polovinu větší
+
+**Problém.** Zvětšování prvních hmatů hlavní stránky (kapitoly 156–159)
+skončilo u samotného pole — seznam produktů, který se pod ním rozbalí, zůstal
+drobný: obrázek 40 px a písmo 13/11 px. Kdo hledá produkt od váhy, musel se
+k obrazovce naklánět, aby rozlišil tři varianty téhož trička.
+
+**Co se změnilo.** Všechny rozměry položky našeptávače (`.searchitem`) jedou
+na 1,5násobku: obrázek 40 → 60 px, název 13 → 19,5 px, materiál 11 → 16,5 px,
+odsazení 10×14 → 15×21 px, mezera 12 → 18 px. Stejně narostl i strop výšky
+seznamu (400 → 600 px), takže zůstává vidět týž počet položek naráz. Náhradní
+dlaždice bez obrázku měla výšku 40 px zapsanou inline v komponentě — ta by
+CSS přebila, proto narostla spolu s ním (240-calc.js).
+
+**Změřeno:** snimek.py po skutečném kliknutí do pole: našeptávač otevřený,
+obrázky 60 px, řádek položky 90 px (60 + 2×15), ve stropu 600 px jich je
+vidět 6,7 — stejně jako dřív 400/60. prekryv.py: 4 šířky × 2 režimy čisté.
+kontrola_aplikace.py: kořen 1 potomek, chyby žádné.
+
+## 161. Menu a přepínač režimu couvly na 1,5násobek
+
+**Problém.** Zdvojnásobená tlačítka hlavičky z kapitoly vedle časové osy
+11:37 (42 → 84 px) se ukázala jako přehnaná — dva kruhy velké skoro jako
+logo přitahovaly oko víc než samotná práce na stránce. Snadný hmat po
+paměti nevyžaduje dvojnásobek, stačí, aby cíl zůstal výrazně větší než
+původní drobek.
+
+**Co se změnilo.** Obě kulatá tlačítka hlavičky (`.navbtn`, `.themebtn`)
+jsou o čtvrtinu menší: kruh 84 → 63 px, kresba ikony uvnitř 54 → 40,5 px.
+Proti původnímu stavu před zvětšováním je to 1,5násobek (42 → 63 px), takže
+smysl úpravy — trefit menu a přepínač i ze stoje — zůstává. Vyskakovací
+menu (1,75násobek) se nemění; k tlačítku 63 px poměrově sedí dál.
+
+**Změřeno:** sonda.py: `.navbtn` i `.themebtn` 63 × 63 px, obě SVG kresby
+40,5 × 40,5 px, obě tlačítka na téže výšce y = 58,69 px. prekryv.py:
+4 šířky × 2 režimy čisté. kontrola_aplikace.py: kořen 1 potomek, chyby
+žádné.
+
+## 162. Poznámka „ceny jsou schované" zmizela
+
+**Problém.** Když se finanční box schová, zbyde po něm řádek s tlačítkem
+„Zobrazit ceny" a hned vedle šedivá poznámka „ceny jsou schované". Ta věta
+neříká nic, co by tlačítko vedle ní neřeklo samo — jen zabírá místo v řádku
+a nutí oko číst text, po kterém nenásleduje žádná akce. Tiché rozhraní
+znamená, že popisek smí zůstat jen tam, kde bez něj není jasné, co dělat.
+
+**Co se změnilo.** Ze skrytého stavu `FinancniBox` zmizel `<span
+className="note">`; v řádku zůstalo jen tlačítko „Zobrazit ceny" s popiskem
+na najetí („Cena dávky a cena barvy na kus"), který nese totéž vysvětlení bez
+zabraného místa. Se zrušeným textem padl i jeho klíč ve slovníku — mrtvý klíč
+by v `127-jazyk.js` zůstal ležet i s anglickým a portugalským překladem
+a nikdo by ho už nenašel.
+
+**Změřeno:** výskyt řetězce „ceny jsou schované" v `aplikace/`: 0 (před
+změnou 2 — obrazovka a slovník). kontrola_aplikace.py: kořen 1 potomek,
+8 672 znaků, chyby žádné. Sestavení se nepouštělo — soupis částí se neměnil.
+
+## 163. Míchací režim přišel o odstavec pod tabulkou
+
+**Problém.** Pod tabulkou navážky stál v míchacím režimu na celou obrazovku
+odstavec: že se váží kumulativně do jedné nádoby, že displej váhy má po každé
+složce ukazovat hodnotu ze sloupce „kumulativně", že se váha táruje i
+s kelímkem — a že se zavírá klávesou Esc. Míchací režim je ale obrazovka pro
+práci u váhy, kde se čtou čísla, ne věty. Tři z těch čtyř věcí navíc říkají
+samy prvky nad odstavcem: sloupec „kumulativně" ta narůstající čísla ukazuje,
+box „V nádobě už je" hlásí, kolik zbytku v kelímku leží, a Esc má popisek na
+najetí u tlačítka *✕ Zpět do kalkulace*.
+
+**Co se změnilo.** Z `MichaciRezim` zmizel `<p className="note">` pod tabulkou
+i s dopočítávanou vsuvkou o tárování s kelímkem; ze slovníku padly oba klíče
+(hlavní věta i vsuvka) včetně en a pt. Text se neztratil — celý i s výkladem,
+proč tam stál, je v `NAVOD_PODKLADY.md` v oddílu *Asistent navážení*, odkud se
+jednou postaví návod. V samotné obrazovce se nezměnilo nic jiného: tabulka,
+hlavička i asistent zůstávají, jak byly.
+
+**Změřeno:** míchací režim vykreslen se dvěma složkami (800 + 200 g):
+`.michtab` stojí, tabulka má 3 řádky, hlavička dál `["", "Komponenta",
+"navážit", "kumulativně"]`, odstavců `p.note` uvnitř `.michbg` **0**, řetězec
+„nádoby" v textu režimu nenalezen (index −1), celý text režimu 155 znaků.
+Tlačítko *✕ Zpět do kalkulace* na místě. `node --check` na části 0,
+kontrola_aplikace.py 0 (kořen 1 potomek, chyby žádné). Sestavení se
+nepouštělo — soupis částí se neměnil.
+
+## 164. Logo v ploše — z předlohy, ne od oka
+
+**Problém.** Plocha pod aplikací byla holá šeď. Nápis IRM v hlavičce je malý
+a v obou motivech schválně splývá s plochou, takže aplikace nikde neukáže,
+čí je. Kreslit logo znovu od oka už jednou selhalo (kapitola 149): ručně
+skládané křivky předloze neodpovídaly a nápis se musel vrátit.
+
+**Co se změnilo.** Křivky se vzaly z předlohy `IRMLOGO.pdf`. Obsah stránky
+se přečetl `pdf_spec.py` (čtečka PDF, kterou projekt už má), rozebraly se
+operátory kreslení a z tahů vznikla cesta v SVG. PDF kreslí 18 cest, ale
+osm z nich jsou ořezové obdélníky stránky (`re W* n`) — kresba je deset
+tahů (`S`, šířka 3,2 pt) na stránce 841,92 × 1190,64 pt, osa y otočená do
+souřadnic SVG.
+
+Do CSS jde SVG **jako maska**, ne jako obrázek:
+
+```css
+body::before{--logo-pozadi-kresba:url("data:image/svg+xml,…");
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:var(--logo-pozadi-barva);opacity:var(--logo-pozadi-sila);
+  mask:var(--logo-pozadi-kresba) center/cover no-repeat}
+```
+
+Maska nese jen tvar, barvu určuje proměnná — proto se logo v tmavém motivu
+přebarví samo a nemusí existovat druhý obrázek. `cover` škáluje v obou osách
+stejně, takže se kresba na široké obrazovce ořízne, ale tahy si drží sklon.
+Vrstva je `fixed` a `pointer-events:none`: je to plocha, ne prvek, takže
+nechytá myš ani neroluje s obsahem.
+
+Barva je tmavě šedá `#4A4F55`. V tmavém motivu musela zesvětlat na `#5C666F`
+— proti ploše `#464d53` je původní odstín skoro k nerozeznání a kresba by
+zmizela. Obojí i síla (`--logo-pozadi-sila`, výchozí 1) se ladí v `barvy.html`:
+barva ve skupině *Logo*, síla posuvníkem mezi tvary.
+
+**Změřeno:** vrstva `body::before` — `position: fixed`, `z-index: -1`,
+`pointer-events: none`, `mask-size: cover`, délka masky 685 znaků. Barva ve
+světlém motivu `rgb(74, 79, 85)` nad plochou `#c9c9c9`, v tmavém
+`rgb(92, 102, 111)`; síla 1 v obou. `barvy.html` po přegenerování: 16 barev,
+12 tvarů a ikon, 128 prvků `[data-tvar]`. prekryv.py: 4 šířky × 2 motivy
+čisté. kontrola_aplikace.py: kořen 1 potomek, chyby žádné. Sestavení se
+nepouštělo — soupis částí se neměnil.
+
+**Co předloha neobsahuje.** `IRMLOGO.pdf` není celé logo, ale jeho výřez:
+tahy končí přesně na hraně stránky, protože je tam ořezová cesta. Do plochy
+se to hodí (kresba stejně přesahuje přes celou obrazovku), ale kdyby mělo
+logo někdy stát celé — na štítku, v hlavičce —, musí přijít předloha, která
+je celá.
+
+## 165. Logo v ploše vráceno — chyba byla v předloze
+
+**Problém.** Logo zavedené do plochy (kapitola 164) vyšlo z `IRMLOGO.pdf`
+a technicky sedělo: křivky se vytáhly z předlohy, maska držela barvu
+z proměnné, nic se nepřekrývalo. Jenže samotná předloha nebyla to, co měla
+být — PDF nese jen **výřez** loga, deset tahů oříznutých hranou stránky.
+V ploše z toho vznikly diagonály přes celou obrazovku, ne logo IRM.
+
+**Co se změnilo.** Zpátky do stavu před 164: z `030-zaklad.css` zmizelo
+pravidlo `body::before` i s vloženou maskou, z `020-promenne.css` obě
+proměnné (`--logo-pozadi-barva` ve světlém i tmavém bloku,
+`--logo-pozadi-sila`), z `barvy_nastroj.py` řádek ve skupině *Logo*,
+posuvník mezi tvary a výchozí hodnota. `barvy.html` přegenerováno.
+
+**Změřeno:** zbylých výskytů řetězce `logo-pozadi` v `aplikace/`
+a v `barvy_nastroj.py`: **0**. `body::before` — `content: none`,
+`mask-image: none`. `barvy.html` zpátky na 15 barev a 11 tvarů a ikon
+(s logem to bylo 16 a 12). kontrola_aplikace.py: kořen 1 potomek, chyby
+žádné. Sestavení se nepouštělo — soupis částí se neměnil.
+
+**Co z toho platí dál.** Cesta z PDF do CSS funguje a je popsaná v kapitole
+164: `pdf_spec.py` přečte obsah stránky, z operátorů `m`/`l`/`S` vzniknou
+tahy (ořezové `re W* n` se zahodí), SVG se vloží jako maska, aby barvu
+řídila proměnná a tmavý motiv se přebarvil sám. Až přijde předloha s celým
+logem, opakuje se to na ní — kreslit od oka se nebude ani příště.
+
+## 166. Čára přes plochu
+
+**Problém.** Plocha pod aplikací byla holá šeď a nic na ní nedrží oko. Pokus
+položit do ní logo z předlohy skončil obratem (kapitoly 164 a 165) — předloha
+byla jen výřez. Zůstal ale záměr: plocha má něco nést, a firemní barva je to,
+co se dá zadat přesně.
+
+**Co se změnilo.** Plochou vede jeden diagonální pás z levého horního rohu do
+pravého dolního. Kreslí ho gradient v `body::before`, ne obrázek — vrstva je
+`fixed`, leží pod celou aplikací (`z-index: -1`) a nechytá myš:
+
+```css
+background:linear-gradient(to top right,
+  transparent calc(50% - var(--pozadi-cara-sirka) / 2),
+  var(--pozadi-cara-barva) calc(50% - var(--pozadi-cara-sirka) / 2), …)
+```
+
+Osa gradientu míří do pravého horního rohu a pásy jsou na ni kolmé — proto
+čára padá opačným směrem, než míří osa. Zarážky se měří podél osy, takže
+`--pozadi-cara-sirka` je **kolmá tloušťka pásu** a nemění se s poměrem stran
+okna.
+
+Barvy jsou zadané v CMYK, jak se barva v dílně popisuje. Do RGB se přepočetly
+obrácením převodu, který má aplikace v `rgbNaCmyk` (R = 255 × (1−C) × (1−K)):
+
+| motiv | CMYK | hex |
+|---|---|---|
+| světlý | 0 / 100 / 90 / 0 | `#FF001A` |
+| tmavý | 100 / 38 / 0 / 16 | `#0085D6` |
+
+Ladí se v `barvy.html`: barva ve skupině *Plocha a papír*, tloušťka a sytost
+posuvníkem mezi tvary (`--pozadi-cara-sirka` 48 px, `--pozadi-cara-sila` 1).
+
+**Změřeno:** zkouška v Node nad `120-barva-potisku.js` (část načtená ze
+souboru, ne opsaný vzorec): `#FF001A` → 0/100/90/0 a `#0085D6` → 100/38/0/16,
+tedy zpětný převod vrací **přesně** zadané hodnoty. `body::before`:
+`position: fixed`, `z-index: -1`, `pointer-events: none`, `opacity: 1`,
+gradient `to right top` se zarážkami `calc(50% - 24px)` a barvou
+`rgb(255, 0, 26)`. `barvy.html` po přegenerování: 16 barev, 13 tvarů a ikon,
+129 prvků `[data-tvar]`. prekryv.py: 4 šířky × 2 motivy čisté.
+kontrola_aplikace.py: kořen 1 potomek, chyby žádné. Sestavení se nepouštělo
+— soupis částí se neměnil.
+
+## 167. Čára v ploše začíná uprostřed horní hrany
+
+**Problém.** Čára z kapitoly 166 vedla od rohu k rohu — gradient bez posunu
+klade pás středem plochy. Z rohu ale vypadá jako přeškrtnutá stránka, ne jako
+značka. Měla začínat nahoře uprostřed a být výraznější.
+
+**Co se změnilo.** Osa gradientu je nově zapsaná úhlem (`45deg`) místo
+`to top right`: úhel drží sklon 45° na každém tvaru okna, kdežto `to top
+right` mířil do rohu, takže se sklon měnil s poměrem stran. K zarážkám
+přibyl posun `--pozadi-cara-posun`.
+
+Posun je v `vh`, a to má důvod: procenta se v gradientu měří podél osy,
+jejíž délka závisí na obou rozměrech okna. Vzdálenost, o kterou se má pás
+posunout, aby prošel bodem uprostřed horní hrany, ale závisí jen na výšce —
+je to průmět poloviny výšky na osu, tedy 50vh × cos 45° = **35,36vh**.
+Hodnota 0 vrátí čáru doprostřed plochy, od rohu k rohu.
+
+Tloušťka se zdvojnásobila: 48 → **96 px** (kolmá šířka pásu).
+
+**Změřeno** ze snímků, ne od oka — snímek se čte po pixelech a na řádku
+y = 1 se hledají pixely barvy čáry:
+
+| okno | střed čáry na horní hraně | střed okna | kolmá tloušťka |
+|---|---|---|---|
+| 1600 × 900 | 801,0 px | 800 px | 95,5 px |
+| 1200 × 1000 | 601,0 px | 600 px | 95,5 px |
+| 900 × 700 | 451,0 px | 450 px | 95,5 px |
+
+Odchylka 1 px je tím, že se měří na druhém řádku snímku, ne přesně na hraně;
+tloušťka 95,5 px proti zadaným 96 px je hrana pásu rozostřená vyhlazováním.
+Poloha ani tloušťka se s velikostí okna nemění — to je smysl zápisu v `vh`.
+
+`barvy.html` po přegenerování: 16 barev, 14 tvarů a ikon, 130 prvků
+`[data-tvar]` (přibyl posuvník *Posun čáry v ploše*). prekryv.py: 4 šířky ×
+2 motivy čisté. kontrola_aplikace.py: kořen 1 potomek, chyby žádné.
+
+## 168. Čára v ploše se posouvá ve dvou osách
+
+**Problém.** Polohu čáry držel jeden posuvník — posun podél šikmé osy
+gradientu (kapitola 167). Číslo, které míchá obě osy dohromady, se ale ladí
+špatně: kdo chce čáru „o kus doprava", nemá to kam zadat.
+
+**Co se změnilo.** Poloha se řídí posunem celé vrstvy, ne zarážkami
+gradientu: `translate: var(--pozadi-cara-x) var(--pozadi-cara-y)`. Gradient
+sám vede pás středem vrstvy a výchozí posun **0 / −50vh** ho zvedne tak, aby
+čára začínala uprostřed horní hrany — tedy přesně tam, kde byla. V
+`barvy.html` k tomu patří dva posuvníky, *Posun čáry vodorovně* a *svisle*
+(−150 až 150 vw/vh).
+
+Vrstva nově přesahuje okno o 100vmax na každou stranu. Posunutá vrstva
+velikosti okna by za sebou nechala nepokrytý pruh a čára by „končila"
+uprostřed plochy; s přesahem zůstane plocha krytá i při posunu na doraz.
+
+**Co se ovládáním nezmění.** Pás je nekonečná přímka, takže posun po jejím
+vlastním směru (obě osy stejným dílem dolů doprava) nedělá nic — vidět je jen
+složka kolmá na čáru. Není to chyba ovládání, je to geometrie; v CSS u toho
+stojí poznámka, aby se to příště nehledalo jako závada.
+
+**Změřeno** ze snímků, čtených po pixelech na řádku y = 1 (okno 1600 × 900):
+
+| nastavení | střed čáry na horní hraně | čekáno |
+|---|---|---|
+| výchozí 0 / −50vh | 801,0 px | 801 px (jako před změnou) |
+| x = +10vw | 961,0 px | 801 + 160 = 961 |
+| y = −40vh | 711,0 px | 801 − 90 = 711 |
+
+Kolmá tloušťka zůstala 95,5 px ve všech případech. Posuvník v `barvy.html`
+byl vyzkoušen doopravdy: nastavení na 25 zapsalo `--pozadi-cara-x: 25vw` na
+kořen stránky, číselné pole ukázalo `25vw` a výstup CSS obsahuje
+`--pozadi-cara-x:25vw;` — hodnota tedy dojde až do `020-promenne.css`.
+
+`barvy.html`: 16 barev, 15 tvarů a ikon, 131 prvků `[data-tvar]`.
+prekryv.py: 4 šířky × 2 motivy čisté. kontrola_aplikace.py: kořen 1 potomek,
+chyby žádné.
+
+## 169. Čára v ploše doladěná — z pásu je linka
+
+**Problém.** Nastavení z kapitoly 168 (96 px, posun −50vh) vedlo čáru přesně
+přes střed horní hrany — tam, kde v okně končí levý sloupec karet. Čára
+a hrana karty splývaly a přestalo být poznat, co je značka a co rozvržení.
+Při ladění se navíc ukázalo, že široký pás soupeří s obsahem: čím byl
+tlustší, tím míň působil jako podpis v ploše.
+
+**Co se změnilo.** Dvě hodnoty v `020-promenne.css`, laděné posuvníky
+v `barvy.html` a odtud opsané. Šlo to ve třech krocích a skončilo to na tenké
+lince posazené kousek vlevo od středu horní hrany:
+
+| krok | tloušťka | posun svisle | průsečík s horní hranou |
+|---|---|---|---|
+| výchozí (kap. 168) | 96 px | −50vh | 801,0 px |
+| 1 | 96 px | −43vh | 738,0 px |
+| 2 | 120 px | −40vh | 711,0 px |
+| **konečné** | **10 px** | **−45vh** | **756,0 px** |
+
+Barvy, sytost i přesah vrstvy zůstaly. Poznámka nad proměnnou drží obojí:
+−50vh jako geometrický záchytný bod (při něm čára začíná přesně uprostřed
+horní hrany) i to, proč je nastaveno jinak.
+
+**Změřeno** ze snímků okna 1600 × 900, čtených po pixelech na řádku y = 1
+(tmavý motiv, čára #0085D6). Konečné nastavení:
+
+| veličina | naměřeno | zadáno |
+|---|---|---|
+| průsečík s horní hranou | 756,0 px | 756 px (5vh × 9 px vlevo od 801) |
+| vodorovný záběr na hraně | 15 px | 10 × √2 = 14,1 px |
+| kolmá tloušťka | 10,6 px | 10 px |
+
+Poloha sedí přesně. Tloušťka vyšla o 0,6 px větší, než je zadáno — u pásu
+širokého 10 px váží vyhlazování obou hran proporčně mnohem víc než u 96
+a 120 px, kde měření naopak o půl pixelu podstřelilo. Posun svisle
+a tloušťka na sebe nesahají: krok 2 dal na −40vh 711 px při tloušťce 120 px
+stejně, jako kapitola 168 naměřila při 96 px.
+
+kontrola_aplikace.py: kořen 1 potomek, 8 672 znaků, chyby žádné.
+
+## 170. Čára v ploše couvla dál od karet
+
+**Problém.** Na −45vh (kapitola 169) linka horní hranu protínala 756 px, tedy
+44 px vlevo od středu okna. Na širokém okně to na hranu levého sloupce karet
+pořád dosedalo blízko — čára se četla jako součást rozvržení, ne jako podpis
+v ploše.
+
+**Co se změnilo.** Jediná hodnota v `020-promenne.css`, opsaná z posuvníku
+*Posun čáry svisle* v `barvy.html`: `--pozadi-cara-y` z −45vh na −37vh.
+Tloušťka, barvy, sytost i vodorovný posun zůstaly. Poznámka nad proměnnou
+drží dál −50vh jako geometrický záchytný bod a nové číslo vedle něj.
+
+Sestavovat se nic nemuselo — `index.html` na `020-promenne.css` jen odkazuje,
+kód aplikace v něm není.
+
+**Změřeno** ze snímku okna 1600 × 900, tmavý motiv (čára #0085D6), čteno po
+pixelech na řádku y = 1:
+
+| nastavení | průsečík s horní hranou | čekáno |
+|---|---|---|
+| −50vh (záchytný bod) | 801,0 px | střed hrany |
+| −45vh (kap. 169) | 756,0 px | 801 − 5 × 9 = 756 |
+| **−37vh** | **684,0 px** | 756 − 8 × 9 = 684 |
+
+Sedí to na krok 9 px na 1vh (okno vysoké 900 px), který platil už
+v kapitolách 168 a 169. Vodorovný záběr na hraně 15 px, tedy kolmá tloušťka
+15 / √2 = 10,6 px — stejná jako předtím, posun a tloušťka na sebe dál
+nesahají.
+
+**Poznámka k měření.** Nástroj na čtení pixelů ze snímku v repozitáři není
+a `PIL` ani `numpy` v tomhle prostředí nejsou nainstalované; snímek se četl
+vlastní čtečkou PNG nad `zlib` ve scratchpadu. Do balíčku se nepřidávala —
+kdyby se pixely měly číst pravidelně, patří to do `balicek/` jako nástroj,
+ne do jednorázového skriptu.
+
+sonda.py: `--pozadi-cara-y` na kořeni stránky vrací `-37vh`.
+kontrola_aplikace.py: kořen 1 potomek, 8 672 znaků, chyby žádné.
+
+## 171. Čára v ploše vede z levého horního rohu
+
+**Problém.** Na −37vh (kapitola 170) linka protínala horní hranu 684 px, tedy
+v otevřeném pruhu nad kartami, a hned zase mizela za první kartou. Vidět z ní
+byl krátký šikmý úsek uprostřed — ne podpis, spíš škrt.
+
+**Co se změnilo.** Tři hodnoty v `020-promenne.css`, opsané z posuvníků
+v `barvy.html`:
+
+| proměnná | dřív | teď |
+|---|---|---|
+| `--pozadi-cara-sirka` | 10px | **14px** |
+| `--pozadi-cara-x` | 0vw | **−47vw** |
+| `--pozadi-cara-y` | −37vh | **−44vh** |
+
+Čára tím vychází z levého horního rohu okna a jde napříč plochou dolů
+doprava. Vodorovný posun je zapojený poprvé — do teď stálo `--pozadi-cara-x`
+na nule a polohu držel sám svislý posun.
+
+**Změřeno** ze snímků v tmavém motivu (čára #0085D6), čteno po pixelech
+vlastní čtečkou PNG. Pás je pod 45°, takže na horní hraně platí: každý 1 px
+posunu vodorovně posune průsečík o +1 px, každý 1 px svisle o −1 px.
+
+Okno 1600 × 900 (1vw = 16 px, 1vh = 9 px):
+
+| veličina | naměřeno | čekáno |
+|---|---|---|
+| průsečík s horní hranou | mimo okno | 801 − 47 × 16 − 6 × 9 = −5 px |
+| průsečík s levou hranou | y = 8,0 px | 6 px, viz níž |
+| vodorovný záběr (y = 20 až 120) | 19 px | 14 × √2 = 19,8 px |
+| kolmá tloušťka | 13,4 px | 14 px |
+
+Průsečík s levou hranou vyšel o 2 px níž, než plyne z geometrie, a není to
+odchylka vykreslení: pás je tam oříznutý horní hranou okna (naměřený shluk
+běží od y = 0, ne od y = −4), takže těžiště klesne. Na okně 1200 × 800, kde
+pás celý leží uvnitř okna, sedí na pixel.
+
+Okno 1200 × 800 (1vw = 12 px):
+
+| veličina | naměřeno | čekáno |
+|---|---|---|
+| průsečík s horní hranou | není | 600 − 47 × 12 − 6 × 8 = −12 |
+| průsečík s levou hranou | y = 13,0 px | 12 + 1 = 13 |
+
+Poloha sedí na obou velikostech okna na pixel přesně.
+
+**Co z toho plyne pro jiná okna.** Vodorovný posun je ve `vw`, svislý ve
+`vh` — poloha čáry teď závisí na obou rozměrech okna, ne jen na výšce. Na
+širším okně čára couvá doleva rychleji, než na vyšším couvá doprava, takže
+na 1200 × 800 už horní hranu neprotíná vůbec a do plochy vstupuje levou
+hranou. Za rohem se neztratí (vrstva má přesah 100vmax), ale kde přesně
+vstoupí, se s tvarem okna mění víc než dřív.
+
+**Co se schválně nechalo být.** Kapitoly 167 a 169 čáru z rohu naopak
+odsouvaly — 167 proto, aby nezačínala přesně v rohu okna, 169 proto, aby
+nesplývala s hranou levého sloupce karet. Návrat do rohu je vědomé
+rozhodnutí, ne opomenutí: čára je teď o kus tlustší a jde napříč celou
+plochou, takže roh čte oko jako začátek tahu, ne jako shodu náhod. Zbytek
+trasy je stejně za kartami — v otevřené ploše je z ní vidět úsek od rohu
+zhruba po y = 120 px.
+
+sonda.py: na kořeni stránky `--pozadi-cara-x` = `-47vw`, `--pozadi-cara-y`
+= `-44vh`, `--pozadi-cara-sirka` = `14px`.
+kontrola_aplikace.py: kořen 1 potomek, 8 672 znaků, chyby žádné.
+
+## 172. Tlačítko tárování říká jen „Tára“
+
+**Problém.** Tlačítko v rohu asistenta navážení se jmenovalo „Tára (0)“.
+Nula v závorce měla znamenat „vynuluj“, jenže sedí kousek pod displejem
+váhy, kde se čtou gramy — a tam se každé číslo v závorce čte jako hodnota.
+U váhy se to tlačítko mačká po každé nádobě, jedním hmatem a bez čtení;
+závorka k tomu nepřidávala nic, co by z názvu nebylo poznat, a do obou
+cizích jazyků se jen tak táhla dál.
+
+**Co se změnilo.** Text tlačítka a s ním klíč ve slovníku — český text je
+klíčem, takže se musela přejmenovat celá položka, jinak by nový text tiše
+spadl do češtiny (`irm-jazyk`, bod 4).
+
+| jazyk | dřív | teď |
+|---|---|---|
+| čeština | Tára (0) | **Tára** |
+| angličtina | Tare (0) | **Tare** |
+| portugalština | Tara (0) | **Tara** |
+
+Stejný nápis nese i náhled tlačítka v ladicím nástroji `barvy_nastroj.py`,
+odkud se `barvy.html` generuje — jinak by se vzhled ladil na textu, který
+v aplikaci není.
+
+**Změřeno** v míchacím režimu se simulovanou váhou (`snimek.py`, klik na
+míchací režim a na „Vyzkoušet v simulaci“), jazyk podstrčený do úložiště
+před načtením stránky:
+
+| jazyk | `lang` kořene | text tlačítka | velikost |
+|---|---|---|---|
+| čeština | cs | Tára | 116 × 100 px |
+| angličtina | en | Tare | 116 × 100 px |
+| portugalština | pt | Tara | 116 × 100 px |
+
+Velikost tlačítka se nehnula — drží ji `--mich-tl-tara-sirka` a
+`--mich-tl-tara-vyska`, ne délka textu; cizí jazyky mají tytéž hodnoty jako
+`min-width`/`min-height`, a zkrácený text je do nich pohodlně pod mez.
+Nápis, který dřív padal na dva řádky, je teď na jednom.
+
+Slovník po přejmenování zkoušen v Node: starý klíč `Tára (0)` je pryč, nový
+`Tára` vrací `Tare` a `Tara`.
+kontrola_aplikace.py: kořen 1 potomek, 8 672 znaků, chyby žádné.
+sestav.py --kontrola: index.html odpovídá soupisu (82 částí).
+
+## 173. Pod displejem váhy už nestojí, čí receptura se váží
+
+**Problém.** Nad posuvníkem simulace, přesně pod velkým číslem váhy, stála
+poznámka „na váze · receptura PANTONE Cool Gray 1 C“. Míchá se v míchacím
+režimu, kde název receptury i její kód stojí v hlavičce a v tabulce navážky
+nad tím — obsluha se dívá na displej kvůli gramům, ne kvůli tomu, co míchá.
+Poznámka tak jen podruhé odpovídala na otázku, kterou nikdo u váhy neklade,
+a přitom sedí na nejsledovanějším místě celé obrazovky.
+
+**Co se změnilo.** Řádek `result-sub` z asistenta navážení zmizel a s ním
+i klíč ve slovníku — mrtvý klíč by později nikdo nenašel (`irm-jazyk`,
+bod 4). Prop `recipeName` zůstává, asistent podle něj pozná, že se váží jiná
+receptura, a začne od začátku.
+
+| jazyk | dřív | teď |
+|---|---|---|
+| čeština | na váze · receptura {r} | — |
+| angličtina | on the scale · recipe {r} | — |
+| portugalština | na balança · receita {r} | — |
+
+Stejná poznámka byla i v náhledu asistenta v `barvy_nastroj.py`, odkud se
+generuje `barvy.html`; jinak by se vzhled ladil na textu, který v aplikaci
+není. `barvy.html` přegenerováno — 16 barev, 9 stínů, 88 vlastností
+míchacího režimu.
+
+**Změřeno** se spuštěnou simulací váhy (`snimek.py`, jazyk podstrčený do
+úložiště před vykreslením), přečtené texty tříd `result-sub`, `result-big`
+a `tag`:
+
+| jazyk | `lang` | displej váhy | `result-sub` na obrazovce |
+|---|---|---|---|
+| čeština | cs | 0,0 g, štítek „simulace váhy“ | jen ≈ 41,7 ml při hustotě 1,20 g/ml |
+| angličtina | en | štítek „scale simulation“ | jen ≈ 41,7 ml at density 1,20 g/ml |
+| portugalština | pt | štítek „simulação da balança“ | jen ≈ 41,7 ml à densidade 1,20 g/ml |
+
+Jediný zbylý `result-sub` patří přepočtu na mililitry o kus výš, ne váze.
+V `barvy.html` po přegenerování žádný výskyt.
+kontrola_aplikace.py: kořen 1 potomek, 8 672 znaků, chyby žádné.
+sestav.py --kontrola: index.html odpovídá soupisu (82 částí).

@@ -519,7 +519,6 @@ const SLOVNIK = {
   /* --- finanční box --- */
   "Cena dávky a cena barvy na kus": { en: "Batch price and ink price per piece", pt: "Preço do lote e da tinta por peça" },
   "Zobrazit ceny": { en: "Show prices", pt: "Mostrar preços" },
-  "ceny jsou schované": { en: "prices are hidden", pt: "os preços estão ocultos" },
   "Náklady na barvu": { en: "Ink costs", pt: "Custos de tinta" },
   "Schovat ceny": { en: "Hide prices", pt: "Ocultar preços" },
   "Skrýt ceny": { en: "Hide prices", pt: "Ocultar preços" },
@@ -615,12 +614,6 @@ const SLOVNIK = {
   "Složení téhle receptury není v aplikaci zadané. Namíchejte {g} g podle firemní receptury.":
     { en: "The composition of this recipe is not entered in the app. Mix {g} g according to the company recipe.",
       pt: "A composição desta receita não está preenchida na aplicação. Misture {g} g segundo a receita da empresa." },
-  "Váží se kumulativně do jedné nádoby — displej váhy má po každé složce ukazovat hodnotu ve sloupci „kumulativně\"{tara}. Zavřít můžete klávesou Esc.":
-    { en: "Weigh cumulatively into one container — after each component the scale display should show the value in the “cumulative” column{tara}. You can close with the Esc key.",
-      pt: "Pesa-se cumulativamente num só recipiente — após cada componente o visor da balança deve mostrar o valor da coluna «acumulado»{tara}. Pode fechar com a tecla Esc." },
-  " (váhu vytárujte i s kelímkem; v nádobě pak bude {g} g)":
-    { en: " (tare the scale with the cup on it; the container will then hold {g} g)",
-      pt: " (tare a balança já com o copo; no recipiente ficarão {g} g)" },
 
   /* --- míchací režim: rady (podklad, pigment a báze) --- */
   "Barva na podkladu": { en: "Ink on the substrate", pt: "Tinta sobre o substrato" },
@@ -916,7 +909,7 @@ const SLOVNIK = {
   /* --- míchací režim: asistent navážení --- */
   "Asistent navážení": { en: "Weighing assistant", pt: "Assistente de pesagem" },
   "Odpojit": { en: "Disconnect", pt: "Desligar" },
-  "Tára (0)": { en: "Tare (0)", pt: "Tara (0)" },
+  "Tára": { en: "Tare", pt: "Tara" },
   "Asistent vede vážení po komponentách — zadejte nejdřív složení receptury. Celkovou dávku {g} g můžete zatím navážit podle míchacího lístku.":
     { en: "The assistant guides the weighing component by component — enter the recipe composition first. Meanwhile you can weigh the total batch of {g} g according to the mixing sheet.",
       pt: "O assistente conduz a pesagem componente a componente — introduza primeiro a composição da receita. Entretanto pode pesar o lote total de {g} g segundo a folha de mistura." },
@@ -925,7 +918,6 @@ const SLOVNIK = {
   "Vyzkoušet v simulaci": { en: "Try it in simulation", pt: "Experimentar em simulação" },
   "váha připojena": { en: "scale connected", pt: "balança ligada" },
   "simulace váhy": { en: "scale simulation", pt: "simulação da balança" },
-  "na váze · receptura {r}": { en: "on the scale · recipe {r}", pt: "na balança · receita {r}" },
   "Simulace — přidávejte barvu posuvníkem":
     { en: "Simulation — add ink with the slider", pt: "Simulação — adicione tinta com o cursor" },
   "— asistent vede jen dolití zbylých složek.":
@@ -1873,6 +1865,14 @@ const SLOVNIK = {
     { en: " — and that needs the bridge running. Without it you can browse the prices, but they will not be saved.",
       pt: " — e para isso é preciso a ponte a correr. Sem ela pode ver os preços, mas não se guardam." },
   "jen bez ceny": { en: "only without a price", pt: "só sem preço" },
+  "řada": { en: "series", pt: "série" },
+  "všechny řady": { en: "all series", pt: "todas as séries" },
+  "Doplnit barvy z řad do ceníku ({n})":
+    { en: "Add the series colors to the price list ({n})",
+      pt: "Adicionar as cores das séries à lista de preços ({n})" },
+  "Každá barva z načtených barevných řad dostane v ceníku vlastní řádek a zapsanou řadu — cena se k ní pak jen dopíše.":
+    { en: "Every color from the loaded color series gets its own row in the price list with its series written down — then you only fill in its price.",
+      pt: "Cada cor das séries de cores carregadas recebe a sua própria linha na lista de preços com a série anotada — depois só se preenche o preço." },
   "Zatím nejsou nahrané žádné receptury ani materiály.": { en: "No recipes or materials are loaded yet.", pt: "Ainda não há receitas nem materiais carregados." },
   "Druh": { en: "Kind", pt: "Tipo" },
   "v recepturách": { en: "in recipes", pt: "em receitas" },

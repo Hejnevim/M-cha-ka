@@ -20,6 +20,12 @@ const MAX_PODIL_PIGMENTU = 15;   // % dávky; strop, není-li u báze uvedený v
 const ROLE_MATERIALU = {
   pigment:    { popis: "pigment", vzor: /^pigment/ },
   baze:       { popis: "báze",    vzor: /^b[áa]ze|^base/ },
+  // Míchací barva z nakoupené řady (Printcolor, Xpression, RUCOLOR…) není
+  // pigment ani báze — je to hotová barva, která se s ostatními jen míchá
+  // v poměru z receptury. Bez vlastního druhu by v ceníku všechny stály
+  // jako „neurčeno" a nešlo by odlišit, co je z řady a co je sortiment
+  // pigment + báze (Matsui).
+  barva:      { popis: "barva",   vzor: /^barva|^ink|^mischfarb/ },
   tuzidlo:    { popis: "tužidlo", vzor: /^tu[žz]idlo|^hardener/ },
   redidlo:    { popis: "ředidlo", vzor: /^[řr]edidlo|^thinner|^rozpou/ },
   // Zpomalovač stojí obvykle násobek ředidla, takže se do ceníku musí dostat

@@ -5,11 +5,11 @@
 > `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — nepřepisují
 > se ručně a nemohou se rozejít se skutečností. Text mimo ně píše člověk.
 
-> Poslední zapsaná změna ve vývojovém deníku: **1. září 09:02 — Prázdná dlaždice říká jen „nevybráno" — bez pomlček ve všech třech jazycích a bez šipky pod hodnotou**
+> Poslední zapsaná změna ve vývojovém deníku: **1. září 15:56 — Pod displejem váhy už nestojí „na váze · receptura …“ — název receptury drží hlavička míchacího režimu, poznámka jen opakovala známé; zrušená ve všech třech jazycích**
 
 | soubor | řádků | velikost |
 |---|---:|---:|
-| `aplikace/ (82 souborů)` | 18 618 | 1 123 kB |
+| `aplikace/ (82 souborů)` | 18 772 | 1 132 kB |
 | `index.html` | 110 | 6 kB |
 | `most.py` | 727 | 31 kB |
 | `pdf_spec.py` | 1 071 | 42 kB |
@@ -17,7 +17,7 @@
 | `prevod_printcolor.py` | 188 | 7 kB |
 | `kontrola_aplikace.py` | 169 | 7 kB |
 | `rozbor_aktualizuj.py` | 359 | 13 kB |
-| **celkem** | **21 455** | |
+| **celkem** | **21 609** | |
 <!-- /AUTO:stav -->
 
 ---

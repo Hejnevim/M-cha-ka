@@ -121,6 +121,7 @@ function csvNaPigmenty(text) {
     hex: i(/^(hex|odstin|odst.n|barva)/), max: i(/^(maxpodil|max)/),
     cena: i(/^(cena|price_per_unit|price)/), mena: i(/^(mena|m.na|currency)/),
     jednotka: i(/^(jednotka|unit)/),
+    rada: i(/^(rada|.ada|series)/),
     zastupuje: i(/^(zastupuje|zastupnost|z.stupnost|nahrazuje)/),
     voc: i(/^(voc|t.kav|tekav|volatile)/),
     bezplist: i(/^(bezplist|bezp|sds|msds|safety)/),
@@ -154,6 +155,10 @@ function csvNaPigmenty(text) {
       mena: ci.mena >= 0 && String(r[ci.mena] || "").trim()
         ? String(r[ci.mena]).trim().toUpperCase() : MENA_VYCHOZI,
       jednotka: JEDNOTKY_CENY.indexOf(jed) >= 0 ? jed : "kg",
+      /* ke které barevné řadě barva patří — popisek pro každého, kdo soubor
+         otevře bez aplikace (u německých názvů Printcoloru se to nepozná);
+         víc řad se odděluje svislítkem jako u zastupnosti */
+      rada: ci.rada >= 0 ? String(r[ci.rada] || "").trim() : "",
       // za koho ta složka smí zaskočit; chybí-li sloupec, nezastupuje nikoho
       zastupuje: ci.zastupuje >= 0 ? seznamZastupnosti(r[ci.zastupuje]) : [],
       // starší soubor sloupce nemá — složka je pak bez údaje, čte se dál

@@ -37,6 +37,7 @@ SKUPINY = [
         ("--bg", "plocha stránky"),
         ("--paper", "karty, lišty, tlačítka, pole"),
         ("--zvyraz", "zvýrazněný řádek (pod myší, právě vážená složka)"),
+        ("--pozadi-cara-barva", "čára přes plochu (pod celou aplikací)"),
     ]),
     ("Text a linky", [
         ("--ink", "hlavní text"),
@@ -118,6 +119,13 @@ TVARY = [
     ("--ikona-tah", "Tloušťka tahu ikon", 0.5, 5, 0.1, ""),
     ("--ikona-pruhlednost", "Průsvitnost ikon", 0, 1, 0.05, ""),
     ("--pruhlednost-karty", "Průsvitnost karet", 0.2, 1, 0.01, ""),
+    ("--pozadi-cara-sirka", "Tloušťka čáry v ploše", 0, 200, 2, "px"),
+    # Poloha čáry ve dvou osách okna. 0 / 0 je střed plochy (čára od rohu
+    # k rohu), 0 / −50 ji posadí doprostřed horní hrany. Posun ve směru
+    # samotné čáry (obojí stejným dílem) se neprojeví — pás je nekonečný.
+    ("--pozadi-cara-x", "Posun čáry vodorovně", -150, 150, 1, "vw"),
+    ("--pozadi-cara-y", "Posun čáry svisle", -150, 150, 1, "vh"),
+    ("--pozadi-cara-sila", "Sytost čáry v ploše", 0, 1, 0.05, ""),
 ]
 # Zakončení tahu — kulaté, uťaté, hranaté. Mění charakter kresby víc než
 # tloušťka, proto je to volba, ne posuvník.
@@ -278,6 +286,8 @@ VYCHOZI_TVARY = {"--radius": "32px", "--radius-btn": "999px", "--radius-pole": "
                  "--ikona": "20px", "--ikona-tah": "2", "--ikona-pruhlednost": "1",
                  "--ikona-radek": "1.2em",
                  "--pruhlednost-karty": "1", "--ikona-konec": "round",
+                 "--pozadi-cara-sirka": "96px", "--pozadi-cara-sila": "1",
+                 "--pozadi-cara-x": "0vw", "--pozadi-cara-y": "-50vh",
                  "--pismo": "14px", "--pismo-nadpis": "14px", "--pismo-popisek": "11px",
                  "--pismo-poznamka": "12.5px", "--pismo-tabulka": "13.5px",
                  "--pismo-vysledek": "34px", "--logo-velikost": "90px",
@@ -325,6 +335,9 @@ VYCHOZI_TVARY.update({
     "--tisk-sloupec": "1 / -1", "--tisk-radek": "3",
     "--tisk-sirka": "calc((100% - var(--mezera-sloupcu)) / 2)",
     "--tisk-zarovnani": "center", "--tisk-vyska": "auto"})
+# Vyhledávání katalogu nad mřížkou — drží šířku prostřední karty, aby horní
+# řádek zůstal souměrný. „auto" tu znamená celou šířku stránky jako dřív.
+VYCHOZI_TVARY.update({"--hledani-sirka": "33%"})
 
 
 def skupina(nadpis, telo, otevreno=True):
@@ -547,7 +560,9 @@ def main():
     ], False))
 
     # ---- stránka Rozvržení: vlevo stránka a sloupce, vpravo jednotlivé karty
-    stranka_html = [vyber("--sirka-stranky", "Největší šířka stránky", SIRKY_STRANKY)]
+    stranka_html = [vyber("--sirka-stranky", "Největší šířka stránky", SIRKY_STRANKY),
+                    vyber("--hledani-sirka", "Šířka hledání katalogu", SIRKY,
+                          volny=True)]
     stranka_html += [posuvnik(*r, atr="data-tvar") for r in ROZVRZENI]
     stranka_html = [skupina("Stránka a sloupce", stranka_html)]
 
@@ -899,13 +914,12 @@ SABLONA = r"""<!doctype html>
                 </div>
                 <div class="asistroh">
                   <button class="btn danger sm mich-tl-odpojit">Odpojit</button>
-                  <button class="btn sec sm mich-tl-tara">Tára (0)</button>
+                  <button class="btn sec sm mich-tl-tara">Tára</button>
                 </div>
                 <div class="rowline">
                   <span class="tag tech">simulace váhy</span>
                 </div>
                 <div class="result-big">0,0 g</div>
-                <div class="result-sub">na váze · receptura PANTONE Cool Gray 1 C</div>
                 <div class="wbar" style="margin-top:10px"><span style="width:34%;background:var(--cyan)"></span></div>
                 <p class="note" style="margin-top:8px"><b>19 3601 White</b> — přidat 72,0 g
                   · šarže neuvedena
@@ -1011,6 +1025,11 @@ SABLONA = r"""<!doctype html>
      PŘIDÁNÍ DALŠÍ KARTY: sem její značka a řádek do seznamu KARTY. -->
 <template id="ukazka-hlavni">
   <div class="wrap">
+    <div class="searchwrap hledani-katalog">
+      <div class="searchbar"><span class="ic">&#8981;</span>
+        <input placeholder="Hledat produkt podle názvu nebo ref. čísla…" readonly>
+        <span class="count">298 z 1319</span></div>
+    </div>
     <div class="grid calc">
       <div class="card karta-produkt" style="margin:0">
         <h2>Vybraný produkt</h2>

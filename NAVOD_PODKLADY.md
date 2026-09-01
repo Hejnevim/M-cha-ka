@@ -260,6 +260,20 @@ tlačítko *Vyzkoušet v simulaci* je cesta, jak si postup projít bez váhy.
 Do návodu patří i to, co v kartě zůstalo: bez zadaného složení receptury
 asistent vážení nevede a hlásí, že se dávka váží podle míchacího lístku.
 
+> Váží se kumulativně do jedné nádoby — displej váhy má po každé složce
+> ukazovat hodnotu ve sloupci „kumulativně" (váhu vytárujte i s kelímkem;
+> v nádobě pak bude 1 000 g). Zavřít můžete klávesou Esc.
+
+**Stálo:** pod tabulkou navážky v míchacím režimu na celou obrazovku.
+**Vysvětluje:** tři věci — že se všechny složky sypou do jedné nádoby, a co
+tedy má stát na displeji váhy (sloupec „kumulativně" ta čísla ukazuje sám);
+že při dováženi do kelímku se tára bere i s kelímkem, takže v nádobě nakonec
+bude celá dávka včetně zbytku; a že se režim zavírá klávesou Esc. Poslední dvě
+věci říká aplikace dál i beze slov: gramy v nádobě stojí v boxu „V nádobě už
+je“ nad tabulkou a Esc připomíná popisek na najetí u tlačítka *✕ Zpět do
+kalkulace*. Do návodu patří hlavně ta první — kumulativní vážení je návyk,
+který se dá vysvětlit jednou a pak už se jen dělá.
+
 ---
 
 ## Barva na podkladu

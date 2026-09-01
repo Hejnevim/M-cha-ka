@@ -1,19 +1,19 @@
 # Rejstřík kódu aplikace
 
 > Generuje `mapa.py` ze skutečných souborů — neupravovat ručně.
-> Kód není v `index.html`, leží v `aplikace/` v 82 částech (18618 řádků).
+> Kód není v `index.html`, leží v `aplikace/` v 82 částech (18772 řádků).
 > Čísla u položek jsou `část:řádek` — část podle tabulky níž.
 
 | # | část | řádků |
 |---:|---|---:|
 | 1 | `00-hlava/010-hlava.html` | 6 |
-| 2 | `10-styl/020-promenne.css` | 148 |
-| 3 | `10-styl/030-zaklad.css` | 87 |
+| 2 | `10-styl/020-promenne.css` | 174 |
+| 3 | `10-styl/030-zaklad.css` | 131 |
 | 4 | `10-styl/040-rozvrzeni.css` | 131 |
 | 5 | `10-styl/050-prvky.css` | 148 |
 | 6 | `10-styl/060-produkty.css` | 34 |
 | 7 | `10-styl/070-michani.css` | 255 |
-| 8 | `10-styl/080-ovladani.css` | 70 |
+| 8 | `10-styl/080-ovladani.css` | 77 |
 | 9 | `00-hlava/090-kostra.html` | 18 |
 | 10 | `20-zaklad/100-uvod.js` | 31 |
 | 11 | `20-zaklad/110-technologie.js` | 66 |
@@ -38,10 +38,10 @@
 | 30 | `40-kalkulace/230-odemykani.js` | 71 |
 | 31 | `40-kalkulace/240-calc.js` | 2366 |
 | 32 | `40-kalkulace/250-vaha.js` | 104 |
-| 33 | `40-kalkulace/260-financni-box.js` | 128 |
+| 33 | `40-kalkulace/260-financni-box.js` | 127 |
 | 34 | `40-kalkulace/270-potlife-pruh.js` | 69 |
-| 35 | `40-kalkulace/280-michaci-rezim.js` | 124 |
-| 36 | `40-kalkulace/290-vazeni.js` | 455 |
+| 35 | `40-kalkulace/280-michaci-rezim.js` | 118 |
+| 36 | `40-kalkulace/290-vazeni.js` | 454 |
 | 37 | `50-zbytky/300-stitek.js` | 60 |
 | 38 | `50-zbytky/310-zbytky-tab.js` | 458 |
 | 39 | `50-zbytky/320-fronta-tab.js` | 194 |
@@ -51,18 +51,18 @@
 | 43 | `60-databaze/360-sito-tab.js` | 272 |
 | 44 | `60-databaze/370-produkty.js` | 229 |
 | 45 | `60-databaze/380-receptury.js` | 189 |
-| 46 | `60-databaze/390-ceny-materialu.js` | 185 |
+| 46 | `60-databaze/390-ceny-materialu.js` | 254 |
 | 47 | `60-databaze/400-recept-form.js` | 157 |
 | 48 | `60-databaze/405-schvaleni-tab.js` | 176 |
 | 49 | `60-databaze/410-import.js` | 279 |
 | 50 | `60-databaze/420-vlastni-db.js` | 139 |
 | 51 | `60-databaze/430-sita.js` | 149 |
 | 52 | `70-pravidla/440-podklad.js` | 79 |
-| 53 | `70-pravidla/450-zamek.js` | 332 |
+| 53 | `70-pravidla/450-zamek.js` | 337 |
 | 54 | `70-pravidla/455-material.js` | 85 |
 | 55 | `70-pravidla/456-typ-polohy.js` | 114 |
-| 56 | `70-pravidla/460-pigment-baze.js` | 135 |
-| 57 | `70-pravidla/470-zastupnost.js` | 203 |
+| 56 | `70-pravidla/460-pigment-baze.js` | 141 |
+| 57 | `70-pravidla/470-zastupnost.js` | 208 |
 | 58 | `70-pravidla/480-korekce.js` | 137 |
 | 59 | `70-pravidla/490-prepocet-sortimentu.js` | 124 |
 | 60 | `50-zbytky/500-evidence.js` | 112 |
@@ -89,72 +89,75 @@
 | 81 | `99-zaver/670-importer.js` | 216 |
 | 82 | `99-zaver/680-konec.js` | 2 |
 
-## Proměnné vzhledu (173)
+## Proměnné vzhledu (179)
 
 `--bg` 2:15 · `--paper` 2:15 · `--zvyraz` 2:15 · `--logo` 2:15 · `--ink` 2:16 · `--ink-2` 2:16 · `--line` 2:16
 `--line-2` 2:16 · `--cyan` 2:17 · `--magenta` 2:17 · `--yellow` 2:17 · `--key` 2:17 · `--btn-ink` 2:18
-`--focus` 2:18 · `--danger` 2:18 · `--ok` 2:19 · `--warn` 2:19 · `--radius` 2:29 · `--radius-btn` 2:29
-`--radius-pole` 2:29 · `--radius-dlazdice` 2:29 · `--radius-stitek` 2:30 · `--ikona` 2:31 · `--ikona-tah` 2:31
-`--ikona-konec` 2:31 · `--ikona-pruhlednost` 2:31 · `--ikona-radek` 2:32 · `--ikona-barva` 2:32
-`--pruhlednost-karty` 2:33 · `--pismo` 2:37 · `--pismo-nadpis` 2:37 · `--pismo-popisek` 2:37
-`--pismo-poznamka` 2:38 · `--pismo-tabulka` 2:38 · `--pismo-vysledek` 2:38 · `--logo-velikost` 2:39
-`--prostrkani` 2:39 · `--tloustka-nadpisu` 2:39 · `--radek` 2:39 · `--mich-nazev` 2:45 · `--mich-davka` 2:45
-`--mich-vzorek` 2:45 · `--mich-hlavicka` 2:46 · `--mich-tabulka` 2:46 · `--mich-gramy` 2:46
-`--mich-radek` 2:47 · `--mich-vysledek` 2:47 · `--mich-wbar` 2:47 · `--mich-tlacitko` 2:48
-`--mich-mezera` 2:48 · `--mich-pole` 2:49 · `--mich-hlaseni` 2:49 · `--mich-stitek` 2:49
-`--mich-prepinac` 2:50 · `--mich-tl-zpet` 2:55 · `--mich-tl-plocha` 2:55 · `--mich-tl-rucne` 2:55
-`--mich-tl-znam` 2:56 · `--mich-tl-viskozita` 2:56 · `--mich-tl-pripojit` 2:57 · `--mich-tl-simulace` 2:57
-`--mich-tl-tara` 2:57 · `--mich-tl-odpojit` 2:58 · `--mich-tl-sarze` 2:58 · `--mich-tl-dalsi` 2:58
-`--mich-tl-stitek` 2:59 · `--mich-tl-hlaseni` 2:59 · `--mich-tl-pomocna` 2:59 · `--mich-nadpis` 2:60
-`--mich-poznamka` 2:60 · `--mich-znak` 2:60 · `--mich-tl-zpet-sirka` 2:66 · `--mich-tl-zpet-vyska` 2:66
-`--mich-tl-zpet-posun-x` 2:66 · `--mich-tl-zpet-posun-y` 2:66 · `--mich-tl-plocha-sirka` 2:67
-`--mich-tl-plocha-vyska` 2:67 · `--mich-tl-plocha-posun-x` 2:67 · `--mich-tl-plocha-posun-y` 2:67
-`--mich-tl-rucne-sirka` 2:68 · `--mich-tl-rucne-vyska` 2:68 · `--mich-tl-rucne-posun-x` 2:68
-`--mich-tl-rucne-posun-y` 2:68 · `--mich-tl-znam-sirka` 2:69 · `--mich-tl-znam-vyska` 2:69
-`--mich-tl-znam-posun-x` 2:69 · `--mich-tl-znam-posun-y` 2:69 · `--mich-tl-viskozita-sirka` 2:70
-`--mich-tl-viskozita-vyska` 2:70 · `--mich-tl-viskozita-posun-x` 2:70 · `--mich-tl-viskozita-posun-y` 2:70
-`--mich-tl-pripojit-sirka` 2:71 · `--mich-tl-pripojit-vyska` 2:71 · `--mich-tl-pripojit-posun-x` 2:71
-`--mich-tl-pripojit-posun-y` 2:71 · `--mich-tl-simulace-sirka` 2:72 · `--mich-tl-simulace-vyska` 2:72
-`--mich-tl-simulace-posun-x` 2:72 · `--mich-tl-simulace-posun-y` 2:72 · `--mich-tl-tara-sirka` 2:73
-`--mich-tl-tara-vyska` 2:73 · `--mich-tl-tara-posun-x` 2:73 · `--mich-tl-tara-posun-y` 2:73
-`--mich-tl-odpojit-sirka` 2:74 · `--mich-tl-odpojit-vyska` 2:74 · `--mich-tl-odpojit-posun-x` 2:74
-`--mich-tl-odpojit-posun-y` 2:74 · `--mich-tl-sarze-sirka` 2:75 · `--mich-tl-sarze-vyska` 2:75
-`--mich-tl-sarze-posun-x` 2:75 · `--mich-tl-sarze-posun-y` 2:75 · `--mich-tl-dalsi-sirka` 2:76
-`--mich-tl-dalsi-vyska` 2:76 · `--mich-tl-dalsi-posun-x` 2:76 · `--mich-tl-dalsi-posun-y` 2:76
-`--mich-tl-hlaseni-sirka` 2:77 · `--mich-tl-hlaseni-vyska` 2:77 · `--mich-tl-hlaseni-posun-x` 2:77
-`--mich-tl-hlaseni-posun-y` 2:77 · `--mich-tl-pomocna-sirka` 2:78 · `--mich-tl-pomocna-vyska` 2:78
-`--mich-tl-pomocna-posun-x` 2:78 · `--mich-tl-pomocna-posun-y` 2:78 · `--mich-tl-stitek-posun-x` 2:79
-`--mich-tl-stitek-posun-y` 2:79 · `--mich-prepinac-posun-x` 2:80 · `--mich-prepinac-posun-y` 2:80
-`--mezera-karta-y` 2:81 · `--mezera-karta-x` 2:81 · `--mezera-karet` 2:81 · `--mezera-poli` 2:82
-`--pole-y` 2:82 · `--pole-x` 2:82 · `--tlacitko-y` 2:83 · `--tlacitko-x` 2:83 · `--okraj-stranky` 2:83
-`--sirka-stranky` 2:89 · `--sloupec-1` 2:89 · `--sloupec-2` 2:89 · `--mezera-sloupcu` 2:89
-`--produkt-sloupec` 2:90 · `--produkt-radek` 2:90 · `--produkt-sirka` 2:90 · `--produkt-zarovnani` 2:91
-`--produkt-vyska` 2:91 · `--vysledek-sloupec` 2:92 · `--vysledek-radek` 2:92 · `--vysledek-sirka` 2:92
-`--vysledek-zarovnani` 2:93 · `--vysledek-vyska` 2:93 · `--recept-sloupec` 2:94 · `--recept-radek` 2:94
-`--recept-sirka` 2:94 · `--recept-zarovnani` 2:95 · `--recept-vyska` 2:95 · `--zakazka-sloupec` 2:96
-`--zakazka-radek` 2:96 · `--zakazka-sirka` 2:96 · `--zakazka-zarovnani` 2:97 · `--zakazka-vyska` 2:97
-`--tisk-sloupec` 2:98 · `--tisk-radek` 2:98 · `--tisk-sirka` 2:99 · `--tisk-zarovnani` 2:100
-`--tisk-vyska` 2:100 · `--neu` 2:105 · `--neu-sm` 2:106 · `--neu-in` 2:107 · `--neu-in-lg` 2:108
-`--modal-shadow` 2:109 · `--logo-shadow` 2:110 · `--mono` 2:111 · `--sans` 2:112
+`--focus` 2:18 · `--danger` 2:18 · `--ok` 2:19 · `--warn` 2:19 · `--pozadi-cara-barva` 2:32
+`--pozadi-cara-sirka` 2:32 · `--pozadi-cara-sila` 2:32 · `--pozadi-cara-x` 2:33 · `--pozadi-cara-y` 2:33
+`--radius` 2:43 · `--radius-btn` 2:43 · `--radius-pole` 2:43 · `--radius-dlazdice` 2:43
+`--radius-stitek` 2:44 · `--ikona` 2:45 · `--ikona-tah` 2:45 · `--ikona-konec` 2:45
+`--ikona-pruhlednost` 2:45 · `--ikona-radek` 2:46 · `--ikona-barva` 2:46 · `--pruhlednost-karty` 2:47
+`--pismo` 2:51 · `--pismo-nadpis` 2:51 · `--pismo-popisek` 2:51 · `--pismo-poznamka` 2:52
+`--pismo-tabulka` 2:52 · `--pismo-vysledek` 2:52 · `--logo-velikost` 2:53 · `--prostrkani` 2:53
+`--tloustka-nadpisu` 2:53 · `--radek` 2:53 · `--mich-nazev` 2:59 · `--mich-davka` 2:59 · `--mich-vzorek` 2:59
+`--mich-hlavicka` 2:60 · `--mich-tabulka` 2:60 · `--mich-gramy` 2:60 · `--mich-radek` 2:61
+`--mich-vysledek` 2:61 · `--mich-wbar` 2:61 · `--mich-tlacitko` 2:62 · `--mich-mezera` 2:62
+`--mich-pole` 2:63 · `--mich-hlaseni` 2:63 · `--mich-stitek` 2:63 · `--mich-prepinac` 2:64
+`--mich-tl-zpet` 2:69 · `--mich-tl-plocha` 2:69 · `--mich-tl-rucne` 2:69 · `--mich-tl-znam` 2:70
+`--mich-tl-viskozita` 2:70 · `--mich-tl-pripojit` 2:71 · `--mich-tl-simulace` 2:71 · `--mich-tl-tara` 2:71
+`--mich-tl-odpojit` 2:72 · `--mich-tl-sarze` 2:72 · `--mich-tl-dalsi` 2:72 · `--mich-tl-stitek` 2:73
+`--mich-tl-hlaseni` 2:73 · `--mich-tl-pomocna` 2:73 · `--mich-nadpis` 2:74 · `--mich-poznamka` 2:74
+`--mich-znak` 2:74 · `--mich-tl-zpet-sirka` 2:80 · `--mich-tl-zpet-vyska` 2:80 · `--mich-tl-zpet-posun-x` 2:80
+`--mich-tl-zpet-posun-y` 2:80 · `--mich-tl-plocha-sirka` 2:81 · `--mich-tl-plocha-vyska` 2:81
+`--mich-tl-plocha-posun-x` 2:81 · `--mich-tl-plocha-posun-y` 2:81 · `--mich-tl-rucne-sirka` 2:82
+`--mich-tl-rucne-vyska` 2:82 · `--mich-tl-rucne-posun-x` 2:82 · `--mich-tl-rucne-posun-y` 2:82
+`--mich-tl-znam-sirka` 2:83 · `--mich-tl-znam-vyska` 2:83 · `--mich-tl-znam-posun-x` 2:83
+`--mich-tl-znam-posun-y` 2:83 · `--mich-tl-viskozita-sirka` 2:84 · `--mich-tl-viskozita-vyska` 2:84
+`--mich-tl-viskozita-posun-x` 2:84 · `--mich-tl-viskozita-posun-y` 2:84 · `--mich-tl-pripojit-sirka` 2:85
+`--mich-tl-pripojit-vyska` 2:85 · `--mich-tl-pripojit-posun-x` 2:85 · `--mich-tl-pripojit-posun-y` 2:85
+`--mich-tl-simulace-sirka` 2:86 · `--mich-tl-simulace-vyska` 2:86 · `--mich-tl-simulace-posun-x` 2:86
+`--mich-tl-simulace-posun-y` 2:86 · `--mich-tl-tara-sirka` 2:87 · `--mich-tl-tara-vyska` 2:87
+`--mich-tl-tara-posun-x` 2:87 · `--mich-tl-tara-posun-y` 2:87 · `--mich-tl-odpojit-sirka` 2:88
+`--mich-tl-odpojit-vyska` 2:88 · `--mich-tl-odpojit-posun-x` 2:88 · `--mich-tl-odpojit-posun-y` 2:88
+`--mich-tl-sarze-sirka` 2:89 · `--mich-tl-sarze-vyska` 2:89 · `--mich-tl-sarze-posun-x` 2:89
+`--mich-tl-sarze-posun-y` 2:89 · `--mich-tl-dalsi-sirka` 2:90 · `--mich-tl-dalsi-vyska` 2:90
+`--mich-tl-dalsi-posun-x` 2:90 · `--mich-tl-dalsi-posun-y` 2:90 · `--mich-tl-hlaseni-sirka` 2:91
+`--mich-tl-hlaseni-vyska` 2:91 · `--mich-tl-hlaseni-posun-x` 2:91 · `--mich-tl-hlaseni-posun-y` 2:91
+`--mich-tl-pomocna-sirka` 2:92 · `--mich-tl-pomocna-vyska` 2:92 · `--mich-tl-pomocna-posun-x` 2:92
+`--mich-tl-pomocna-posun-y` 2:92 · `--mich-tl-stitek-posun-x` 2:93 · `--mich-tl-stitek-posun-y` 2:93
+`--mich-prepinac-posun-x` 2:94 · `--mich-prepinac-posun-y` 2:94 · `--mezera-karta-y` 2:95
+`--mezera-karta-x` 2:95 · `--mezera-karet` 2:95 · `--mezera-poli` 2:96 · `--pole-y` 2:96 · `--pole-x` 2:96
+`--tlacitko-y` 2:97 · `--tlacitko-x` 2:97 · `--okraj-stranky` 2:97 · `--sirka-stranky` 2:103
+`--sloupec-1` 2:103 · `--sloupec-2` 2:103 · `--mezera-sloupcu` 2:103 · `--produkt-sloupec` 2:104
+`--produkt-radek` 2:104 · `--produkt-sirka` 2:104 · `--produkt-zarovnani` 2:105 · `--produkt-vyska` 2:105
+`--vysledek-sloupec` 2:106 · `--vysledek-radek` 2:106 · `--vysledek-sirka` 2:106
+`--vysledek-zarovnani` 2:107 · `--vysledek-vyska` 2:107 · `--recept-sloupec` 2:108 · `--recept-radek` 2:108
+`--recept-sirka` 2:108 · `--recept-zarovnani` 2:109 · `--recept-vyska` 2:109 · `--zakazka-sloupec` 2:110
+`--zakazka-radek` 2:110 · `--zakazka-sirka` 2:110 · `--zakazka-zarovnani` 2:111 · `--zakazka-vyska` 2:111
+`--tisk-sloupec` 2:112 · `--tisk-radek` 2:112 · `--tisk-sirka` 2:113 · `--tisk-zarovnani` 2:114
+`--tisk-vyska` 2:114 · `--hledani-sirka` 2:119 · `--neu` 2:124 · `--neu-sm` 2:125 · `--neu-in` 2:126
+`--neu-in-lg` 2:127 · `--modal-shadow` 2:128 · `--logo-shadow` 2:129 · `--mono` 2:130 · `--sans` 2:131
 
-## Pravidla CSS (278)
+## Pravidla CSS (282)
 
-`:root` 2:1 · `:root[data-theme="dark"]` 2:114 · `:root:not([data-theme="dark"]) .michbg` 2:143
-`:root[data-theme="dark"] .michbg` 2:144
-`:root[data-theme="dark"] .warnbox,:root[data-theme="dark"] #chyba` 2:146
-`:root[data-theme="dark"] .okbox` 2:147 · `:root[data-theme="dark"] .imgwarn` 2:148 · `*` 3:1 · `body` 3:2
-`input,select,button,textarea` 3:3 · `input,select,textarea` 3:4
-`input:focus,select:focus,textarea:focus` 3:5 · `button:focus-visible` 3:6 · `input[type=number]` 3:7
-`input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button` 3:8
-`select` 3:9 · `input[type=color]` 3:52 · `input[type=color]::-webkit-color-swatch-wrapper` 3:53
-`input[type=color]::-webkit-color-swatch` 3:54 · `input[type=color]::-moz-color-swatch` 3:55 · `textarea` 3:56
-`svg[viewBox="0 0 24 24"]` 3:60
-`svg[viewBox="0 0 24 24"] path,svg[viewBox="0 0 24 24"] circle,svg[viewBox="0 0 24 24"] line` 3:61
-`svg[viewBox="0 0 24 24"].ikona-radek` 3:68 · `.hdr` 3:70 · `.themebtn` 3:71 · `.themebtn:hover` 3:72
-`.hdr h1` 3:73 · `.hdr h1:hover` 3:74 · `.menuwrap` 3:75 · `.navleft` 3:76 · `.backbtn` 3:77
-`.backbtn:hover` 3:78 · `.backbtn:active` 3:79 · `.navbtn` 3:81 · `.navbtn:hover` 3:82 · `.navdrop` 3:83
-`.navdrop button` 3:84 · `.navdrop button:hover` 3:85 · `.navdrop button.on` 3:86
-`:root[data-theme="dark"] .navdrop button:hover` 3:87 · `.wrap` 4:1 · `.grid` 4:2
+`:root` 2:1 · `:root[data-theme="dark"]` 2:133 · `:root:not([data-theme="dark"]) .michbg` 2:169
+`:root[data-theme="dark"] .michbg` 2:170
+`:root[data-theme="dark"] .warnbox,:root[data-theme="dark"] #chyba` 2:172
+`:root[data-theme="dark"] .okbox` 2:173 · `:root[data-theme="dark"] .imgwarn` 2:174 · `*` 3:1 · `body` 3:2
+`body::before` 3:25 · `input,select,button,textarea` 3:33 · `input,select,textarea` 3:34
+`input:focus,select:focus,textarea:focus` 3:35 · `button:focus-visible` 3:36 · `input[type=number]` 3:37
+`input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button` 3:38
+`select` 3:39 · `input[type=color]` 3:82 · `input[type=color]::-webkit-color-swatch-wrapper` 3:83
+`input[type=color]::-webkit-color-swatch` 3:84 · `input[type=color]::-moz-color-swatch` 3:85 · `textarea` 3:86
+`svg[viewBox="0 0 24 24"]` 3:90
+`svg[viewBox="0 0 24 24"] path,svg[viewBox="0 0 24 24"] circle,svg[viewBox="0 0 24 24"] line` 3:91
+`svg[viewBox="0 0 24 24"].ikona-radek` 3:98 · `.hdr` 3:100 · `.themebtn` 3:101 · `.themebtn:hover` 3:102
+`.hdr h1` 3:103 · `.hdr h1:hover` 3:104 · `.menuwrap` 3:105 · `.navleft` 3:106 · `.backbtn` 3:107
+`.backbtn:hover` 3:108 · `.backbtn:active` 3:109 · `.navbtn` 3:111 · `.navbtn:hover` 3:112
+`.navbtn svg,.themebtn svg` 3:119 · `.navdrop` 3:125 · `.navdrop button` 3:126 · `.navdrop button:hover` 3:127
+`.navdrop button.on` 3:128 · `.navdrop .note` 3:129 · `.navdrop .tag` 3:130
+`:root[data-theme="dark"] .navdrop button:hover` 3:131 · `.wrap` 4:1 · `.grid` 4:2
 `.karta-produkt .produkt-nazev` 4:20 · `.karta-produkt .rowline` 4:21 · `.grid.calc>.bigpanel` 4:42
 `.bigpanel>.card` 4:43 · `.bigpanel .michtl` 4:44 · `.bigpanel .card` 4:47 · `.bigpanel .card h2` 4:48
 `.bigpanel .card .hint` 4:49 · `.bigpanel .result-big` 4:50 · `.bigpanel .result-sub` 4:51
@@ -219,23 +222,23 @@
 `.michbg .warnbox,.michbg .okbox` 7:226 · `.michbg .tag` 7:228 · `.michbg .pickbox` 7:230 · `.linkbox` 8:1
 `.pickbox` 8:2 · `.flags` 8:3 · `.tgl` 8:4 · `.tgl input` 8:5 · `.tglt` 8:6 · `.tglt::after` 8:7
 `.tgl input:checked + .tglt` 8:8 · `.tgl input:checked + .tglt::after` 8:9 · `#chyba` 8:10
-`.searchwrap` 8:11 · `.searchbar` 8:12 · `.searchbar .ic` 8:13 · `.searchbar input` 8:14
-`.searchbar input:focus` 8:15 · `.searchbar .count` 8:16 · `.searchdrop` 8:17 · `.searchitem` 8:18
-`.searchitem:hover,.searchitem.hi` 8:19 · `.searchitem-img` 8:20 · `.searchitem-nm` 8:21
-`.searchitem-dm` 8:22 · `.viewtoggle` 8:23 · `.viewtoggle button` 8:24 · `.viewtoggle button.on` 8:25
-`.pgrid` 8:26 · `.pgcard` 8:42 · `.pgcard-img` 8:43 · `.pgcard-img img` 8:44 · `.pgcard-nm` 8:45
-`.pgcard-ref` 8:46 · `.pgcard-mat` 8:47 · `.pgcard-dots` 8:48 · `.pgcard-actions` 8:49
-`.pgcard.receptura .pgcard-img` 8:54 · `.toast` 8:55 · `.toast.bad` 8:56
-`:root[data-theme="dark"] .toast.bad` 8:57 · `.scanrow` 8:58 · `.scanrow:last-child` 8:59 · `.scanraw` 8:60
-`.dot` 8:61 · `.cam` 8:62 · `.specbar` 8:63 · `.specbar b` 8:64 · `.specbar a` 8:67 · `.kv` 8:68
-`.kv .k` 8:69 · `.kv .v` 8:70
+`.searchwrap` 8:11 · `.searchbar` 8:16 · `.searchbar .ic` 8:17 · `.searchbar input` 8:18
+`.searchbar input:focus` 8:19 · `.searchbar .count` 8:20 · `.searchdrop` 8:24 · `.searchitem` 8:25
+`.searchitem:hover,.searchitem.hi` 8:26 · `.searchitem-img` 8:27 · `.searchitem-nm` 8:28
+`.searchitem-dm` 8:29 · `.viewtoggle` 8:30 · `.viewtoggle button` 8:31 · `.viewtoggle button.on` 8:32
+`.pgrid` 8:33 · `.pgcard` 8:49 · `.pgcard-img` 8:50 · `.pgcard-img img` 8:51 · `.pgcard-nm` 8:52
+`.pgcard-ref` 8:53 · `.pgcard-mat` 8:54 · `.pgcard-dots` 8:55 · `.pgcard-actions` 8:56
+`.pgcard.receptura .pgcard-img` 8:61 · `.toast` 8:62 · `.toast.bad` 8:63
+`:root[data-theme="dark"] .toast.bad` 8:64 · `.scanrow` 8:65 · `.scanrow:last-child` 8:66 · `.scanraw` 8:67
+`.dot` 8:68 · `.cam` 8:69 · `.specbar` 8:70 · `.specbar b` 8:71 · `.specbar a` 8:74 · `.kv` 8:75
+`.kv .k` 8:76 · `.kv .v` 8:77
 
-### Uvnitř @media a @supports (49)
+### Uvnitř @media a @supports (50)
 
-`select,::picker(select)` 3:20 · `select::picker-icon` 3:23 · `select` 3:27 · `select:open` 3:28
-`.bigform select:open` 3:29 · `::picker(select)` 3:30 · `option` 3:39 · `option:hover,option:focus` 3:44
-`option:checked` 3:45 · `option:disabled` 3:46 · `option::checkmark` 3:49
-`option:not(:checked)::checkmark` 3:50 · `.backbtn` 3:80 · `.backbtn span` 3:80 · `.grid.calc` 4:5
+`select,::picker(select)` 3:50 · `select::picker-icon` 3:53 · `select` 3:57 · `select:open` 3:58
+`.bigform select:open` 3:59 · `::picker(select)` 3:60 · `option` 3:69 · `option:hover,option:focus` 3:74
+`option:checked` 3:75 · `option:disabled` 3:76 · `option::checkmark` 3:79
+`option:not(:checked)::checkmark` 3:80 · `.backbtn` 3:110 · `.backbtn span` 3:110 · `.grid.calc` 4:5
 `.grid.calc>.karta-produkt` 4:23 · `.grid.calc>.bigpanel` 4:25 · `.grid.calc>.karta-recept` 4:27
 `.grid.calc>.karta-cisla` 4:29 · `.grid.calc>.karta-tisk` 4:31 · `.grid.calc>.card` 4:33
 `.karta-produkt` 4:34 · `.karta-produkt .produkt-nazev` 4:39 · `.karta-produkt .rowline` 4:40
@@ -244,17 +247,17 @@
 `.frow>.flags` 5:16 · `table.t` 5:37 · `table.t th,table.t td` 5:43 · `table.t td[colspan]` 5:46
 `table.t select` 5:52 · `.rolovani-telo>table.t` 5:55 · `.zakazka-cisla` 5:146 · `.zakazka-cisla input` 5:147
 `.michtelo` 7:237 · `.michtab` 7:238 · `.michtab .g` 7:239 · `.michbg table.t` 7:253 · `.michbg` 7:255
-`.pgrid` 8:27 · `.pgrid` 8:28 · `.pgrid` 8:29 · `.pgrid` 8:30 · `.pgrid:has(.pgcard.receptura)` 8:38
-`.pgcard.receptura` 8:39 · `.pgcard.receptura .pgcard-actions` 8:40
+`.hledani-katalog` 8:15 · `.pgrid` 8:34 · `.pgrid` 8:35 · `.pgrid` 8:36 · `.pgrid` 8:37
+`.pgrid:has(.pgcard.receptura)` 8:45 · `.pgcard.receptura` 8:46 · `.pgcard.receptura .pgcard-actions` 8:47
 
-### Podmínky (16)
+### Podmínky (17)
 
-`@supports (appearance: base-select)` 3:19 · `@media(max-width:720px)` 3:80 · `@media(min-width:960px)` 4:5
+`@supports (appearance: base-select)` 3:49 · `@media(max-width:720px)` 3:110 · `@media(min-width:960px)` 4:5
 `@media(min-width:960px)` 4:22 · `@media(max-width:640px)` 4:120 · `@media(min-width:640px)` 5:5
 `@media(min-width:640px)` 5:13 · `@media(max-width:800px)` 5:36 · `@media(max-width:560px)` 5:145
-`@media (max-width:1000px)` 7:231 · `@media print` 7:255 · `@media(max-width:1500px)` 8:27
-`@media(max-width:1150px)` 8:28 · `@media(max-width:800px)` 8:29 · `@media(max-width:480px)` 8:30
-`@media(max-width:800px)` 8:37
+`@media (max-width:1000px)` 7:231 · `@media print` 7:255 · `@media(min-width:960px)` 8:15
+`@media(max-width:1500px)` 8:34 · `@media(max-width:1150px)` 8:35 · `@media(max-width:800px)` 8:36
+`@media(max-width:480px)` 8:37 · `@media(max-width:800px)` 8:44
 
 ## Komponenty (40)
 
@@ -267,7 +270,7 @@
 `Recipes` 45:3 · `CenyMaterialu` 46:2 · `RecipeForm` 47:2 · `SchvaleniTab` 48:11 · `SestavyTab` 77:11
 `SkladTab` 79:23 · `PruhSlozeni` 80:28 · `FiltrDatabaze` 80:58 · `Importer` 81:2
 
-## Funkce (435)
+## Funkce (436)
 
 `techMaSito` 10:15 · `produktUmi` 11:13 · `polohyTech` 11:15 · `mapTech` 11:28 · `toLocalImg` 11:36
 `uid` 11:63 · `n` 11:64 · `fmt` 11:65 · `hexNaRgb` 12:8 · `rgbNaCmyk` 12:14 · `cmykText` 12:21
@@ -298,14 +301,14 @@
 `zapisOpravu` 31:724 · `spustitPotlife` 31:739 · `uzavritDavku` 31:754 · `odpojDavku` 31:773
 `odepisZbytku` 31:794 · `oznacDavku` 31:810 · `ulozZbytekZKalkulace` 31:855 · `esc` 31:900
 `tiskLisku` 31:901 · `rizikoBody` 31:1484 · `useScale` 32:6 · `prepocetDavky` 32:76 · `fmtG` 32:94
-`useTikot` 33:112 · `naKlavesu` 35:8 · `zacatek` 36:27 · `zacniZnovu` 36:48 · `potvrdKonev` 36:87
+`useTikot` 33:111 · `naKlavesu` 35:8 · `zacatek` 36:27 · `zacniZnovu` 36:48 · `potvrdKonev` 36:87
 `prijmoutPrepocet` 36:107 · `dalsiKrok` 36:115 · `vytiskni` 37:4 · `e` 37:7 · `uprav` 38:36 · `smaz` 38:38
 `zapisViskozitu` 38:67 · `provedSliti` 38:97 · `ulozNovy` 38:115 · `prerovnej` 39:28 · `presun` 39:32
 `uzavri` 39:39 · `zdrojText` 39:44 · `zpusobText` 39:50 · `den` 40:25 · `otevri` 40:27 · `uzavri` 41:19
 `kusy` 41:23 · `hodnotaText` 41:34 · `kdyText` 42:22 · `velke` 43:47 · `cislem` 43:60 · `receptur` 43:74
 `uReceptur` 43:75 · `prepni` 44:19 · `save` 44:50 · `exportCsv` 44:59 · `setPos` 44:169 · `save` 45:36
-`exportCsv` 45:48 · `pridej` 46:9 · `hodnota` 46:32 · `uprav` 46:43 · `ulozit` 46:55 · `setC` 47:10
-`zapniTuzidlo` 47:21 · `rozdilProti` 48:25 · `vazbyText` 48:46 · `uprav` 48:49 · `schval` 48:51
+`exportCsv` 45:48 · `pridej` 46:10 · `hodnota` 46:60 · `uprav` 46:71 · `doplnitZRad` 46:97 · `ulozit` 46:103
+`setC` 47:10 · `zapniTuzidlo` 47:21 · `rozdilProti` 48:25 · `vazbyText` 48:46 · `uprav` 48:49 · `schval` 48:51
 `zamitni` 48:57 · `vratZpet` 48:65 · `kdyText` 48:71 · `radek` 48:76 · `parseCsv` 49:3 · `rowsToItems` 49:38
 `jsonToItems` 49:59 · `csvToRecipes` 49:90 · `idx` 49:94 · `klicReceptury` 49:187 · `klicSirotka` 49:192
 `sloucReceptury` 49:195 · `drz` 49:247 · `vazbyReceptury` 50:11 · `nazevDb` 50:18 · `zdrojOdvozeni` 50:25
@@ -314,15 +317,15 @@
 `i` 51:120 · `sitaPro` 51:139 · `tridaPodkladu` 52:2 · `odstinNazev` 52:35 · `analyzaPodkladu` 52:46
 `csvNaTechStav` 53:12 · `i` 53:16 · `csvNaDbTech` 53:37 · `i` 53:41 · `vychoziTechCsv` 53:57
 `rozdelRadek` 53:69 · `zmenStavVCsv` 53:88 · `zapisCenyDoCsv` 53:126 · `najdi` 53:130 · `dopln` 53:137
-`bunka` 53:158 · `zapisSkladDoCsv` 53:213 · `najdi` 53:217 · `dopln` 53:223 · `naplnit` 53:245
-`pripravenostTech` 53:286 · `techOstra` 53:330 · `rozlozMaterialy` 54:24 · `klicMaterialu` 54:33
+`bunka` 53:161 · `zapisSkladDoCsv` 53:218 · `najdi` 53:222 · `dopln` 53:228 · `naplnit` 53:250
+`pripravenostTech` 53:291 · `techOstra` 53:335 · `rozlozMaterialy` 54:24 · `klicMaterialu` 54:33
 `materialyProduktu` 54:42 · `materialyTypu` 54:47 · `vhodnostTypu` 54:59 · `csvNaDbMaterialy` 54:71
 `i` 54:75 · `klicTypuPolohy` 55:23 · `csvNaTypyPoloh` 55:32 · `i` 55:36 · `typyProPolohu` 55:55
 `vychoziTypyPolohCsv` 55:62 · `zapisTypPolohyDoCsv` 55:74 · `najdi` 55:78 · `bez` 55:87
-`roleMaterialu` 56:34 · `znakMeny` 56:45 · `cenaZaGram` 56:51 · `vocDavky` 56:72 · `pridej` 56:78
-`podilySlozeni` 56:130 · `seznamZastupnosti` 57:23 · `tabulkaZastupnosti` 57:29 · `prevodZastupnosti` 57:47
+`roleMaterialu` 56:40 · `znakMeny` 56:51 · `cenaZaGram` 56:57 · `vocDavky` 56:78 · `pridej` 56:84
+`podilySlozeni` 56:136 · `seznamZastupnosti` 57:23 · `tabulkaZastupnosti` 57:29 · `prevodZastupnosti` 57:47
 `popisZastoupeni` 57:66 · `textZastoupeni` 57:81 · `textZastoupeniObr` 57:85 · `kontrolaZastupnosti` 57:92
-`csvNaPigmenty` 57:115 · `i` 57:119 · `naVoc` 57:136 · `rozborSlozeni` 57:184 · `korekceOdstinu` 58:16
+`csvNaPigmenty` 57:115 · `i` 57:119 · `naVoc` 57:137 · `rozborSlozeni` 57:189 · `korekceOdstinu` 58:16
 `doporucKorekci` 58:59 · `spotrebaZeSita` 58:97 · `prepocetSortimentu` 59:18 · `spotreba` 59:40
 `median` 59:103 · `novyKodZbytku` 60:12 · `jeKodZbytku` 60:21 · `maBazi` 60:26 · `normKomp` 60:27
 `popisKelimku` 60:36 · `kodHustnuti` 60:68 · `naPodil` 60:76 · `potlifeReceptury` 60:87
@@ -373,8 +376,8 @@
 `HDR` 49:27 · `SOUBOR_VLASTNI` 50:8 · `SLOZKA_PARAMETRY` 51:21 · `SOUBOR_SITA` 51:22 · `SOUBOR_KOEF` 51:23
 `PRENOS_VYCHOZI` 51:24 · `MEZ_PODTISK` 52:18 · `MEZ_RIZIKO` 52:19 · `MEZ_SYTOST_PODKLADU` 52:20
 `PASMA_ODSTINU` 52:31 · `SOUBOR_TECHNOLOGIE` 53:10 · `SOUBOR_DATABAZE` 53:35 · `SOUBOR_TYPY_POLOH` 55:18
-`SOUBOR_PIGMENTY` 56:14 · `MAX_PODIL_PIGMENTU` 56:15 · `ROLE_MATERIALU` 56:20 · `MENA_VYCHOZI` 56:43
-`MENA_ZNAK` 56:44 · `JEDNOTKY_CENY` 56:50 · `KROKY_KOREKCE` 58:10 · `T` 58:18 · `SMERY_KOREKCE` 58:47
+`SOUBOR_PIGMENTY` 56:14 · `MAX_PODIL_PIGMENTU` 56:15 · `ROLE_MATERIALU` 56:20 · `MENA_VYCHOZI` 56:49
+`MENA_ZNAK` 56:50 · `JEDNOTKY_CENY` 56:56 · `KROKY_KOREKCE` 58:10 · `T` 58:18 · `SMERY_KOREKCE` 58:47
 `POSUN_KOREKCE` 58:57 · `REFERENCE_G` 59:34 · `SOUBOR_ZBYTKY` 60:7 · `SLOZKA_EVIDENCE` 60:8
 `ZNAKY_KODU` 60:11 · `VZOR_BAZE` 60:25 · `ZBYTEK_RUCNI` 60:30 · `HODINA` 60:43 · `MINUTA` 60:44
 `POTLIFE_VYCHOZI` 60:45 · `POTLIFE_MIN_VYCHOZI` 60:52 · `POMER_TUZIDLA_VYCHOZI` 60:53

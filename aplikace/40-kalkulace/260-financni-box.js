@@ -5,7 +5,6 @@ function FinancniBox({ naklady, ks, uspora, likvidace, usporaKod, videt, onPrepn
     <div className="rowline" style=${{ marginTop: 12, marginBottom: 0 }}>
       <button className="btn sec sm" onClick=${onPrepnout}
         title=${preloz("Cena dávky a cena barvy na kus")}>${preloz("Zobrazit ceny")}</button>
-      <span className="note">${preloz("ceny jsou schované")}</span>
     </div>`;
 
   const naKus = cenaNaKus(naklady.celkem, ks);

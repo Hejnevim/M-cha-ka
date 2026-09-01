@@ -140,7 +140,7 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
       ${sc.mode !== "off" && html`
         <div className="asistroh">
           <button className="btn danger sm mich-tl-odpojit" onClick=${sc.disconnect}>${preloz("Odpojit")}</button>
-          <button className="btn sec sm mich-tl-tara" onClick=${sc.tare}>${preloz("Tára (0)")}</button>
+          <button className="btn sec sm mich-tl-tara" onClick=${sc.tare}>${preloz("Tára")}</button>
         </div>`}
       ${!comps.length && html`<div className="warnbox" style=${{ marginTop: 0 }}>
         ${preloz("Asistent vede vážení po komponentách — zadejte nejdřív složení receptury. Celkovou dávku {g} g můžete zatím navážit podle míchacího lístku.",
@@ -166,7 +166,6 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
       ${sc.mode !== "off" && html`
         <${React.Fragment}>
           <div className="result-big" style=${{ marginTop: 10 }}>${fmt(w, 1)} g</div>
-          <div className="result-sub">${preloz("na váze · receptura {r}", { r: recipeName })}</div>
 
           ${sc.mode === "sim" && html`
             <div className="simposuv">

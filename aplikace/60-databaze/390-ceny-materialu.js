@@ -3,6 +3,7 @@ function CenyMaterialu({ recipes, materialy, onUlozit, stav, mostOk, smiMenit })
   const [zmeny, setZmeny] = useState({});
   const [q, setQ] = useState("");
   const [jenBez, setJenBez] = useState(false);
+  const [radaF, setRadaF] = useState("");
 
   const seznam = useMemo(() => {
     const mapa = new Map();
@@ -10,7 +11,7 @@ function CenyMaterialu({ recipes, materialy, onUlozit, stav, mostOk, smiMenit })
       const klic = String(nazev || "").trim().toLowerCase();
       if (!klic) return null;
       if (!mapa.has(klic)) mapa.set(klic, { klic: klic, nazev: String(nazev).trim(),
-        role: role || "", pouziti: 0, vTabulce: false });
+        role: role || "", pouziti: 0, vTabulce: false, rady: [], radyZReceptur: [] });
       const z = mapa.get(klic);
       if (role && !z.role) z.role = role;
       return z;
@@ -18,16 +19,43 @@ function CenyMaterialu({ recipes, materialy, onUlozit, stav, mostOk, smiMenit })
     for (const k of Object.keys(materialy || {})) {
       const m = materialy[k];
       const z = pridej(m.nazev, m.role);
-      if (z) { z.vTabulce = true; z.mat = m; }
+      if (!z) continue;
+      z.vTabulce = true; z.mat = m;
+      // řada zapsaná v souboru platí i bez načtených databází
+      for (const rr of String(m.rada || "").split("|")) {
+        const t = rr.trim();
+        if (t && !z.rady.includes(t)) z.rady.push(t);
+      }
     }
-    for (const r of (recipes || []))
+    // U složky se vede i to, ze kterých barevných řad pochází. Tatáž barva
+    // smí být ve víc řadách (neony a metalízy sdílí MS 660 s MS 786) —
+    // v ceníku je to jeden řádek s jednou cenou, protože je to týž materiál.
+    // Řady z receptur se drží i zvlášť: podle nich se pozná řádek souboru,
+    // kterému zápis řady ještě chybí.
+    for (const r of (recipes || [])) {
+      // U odvozeného odstínu nese `series` původ („odvozeno z PANTONE …",
+      // píše ho kalkulace) — to není barevná řada a do ceníku nepatří.
+      let rada = String(r.series || "").trim();
+      if (/^odvozeno z /.test(rada)) rada = "";
       for (const c of (r.components || [])) {
         const z = pridej(c.name, "");
-        if (z) z.pouziti++;
+        if (!z) continue;
+        z.pouziti++;
+        if (rada && !z.rady.includes(rada)) z.rady.push(rada);
+        if (rada && !z.radyZReceptur.includes(rada)) z.radyZReceptur.push(rada);
       }
-    return Array.from(mapa.values()).sort((a, b) => b.pouziti - a.pouziti
+    }
+    const vsechny = Array.from(mapa.values());
+    for (const z of vsechny) z.rady.sort((a, b) => a.localeCompare(b, "cs"));
+    return vsechny.sort((a, b) => b.pouziti - a.pouziti
       || String(a.nazev).localeCompare(String(b.nazev), "cs"));
   }, [recipes, materialy]);
+
+  const rady = useMemo(() => {
+    const s = new Set();
+    for (const z of seznam) for (const r of z.rady) s.add(r);
+    return Array.from(s).sort((a, b) => a.localeCompare(b, "cs"));
+  }, [seznam]);
 
   const hodnota = (z, pole) => {
     const zm = zmeny[z.klic];
@@ -46,20 +74,47 @@ function CenyMaterialu({ recipes, materialy, onUlozit, stav, mostOk, smiMenit })
   const videt = useMemo(() => {
     const s = q.trim().toLowerCase();
     return seznam.filter((z) => (!s || z.nazev.toLowerCase().includes(s))
+      && (!radaF || z.rady.includes(radaF))
       && (!jenBez || !(n(hodnota(z, "cena")) > 0)));
-  }, [seznam, q, jenBez, zmeny]);
+  }, [seznam, q, jenBez, radaF, zmeny]);
 
   const bezCeny = seznam.filter((z) => !(n(hodnota(z, "cena")) > 0)).length;
   const pocetZmen = Object.keys(zmeny).length;
+
+  /* Barvy z barevných řad, kterým v souboru ceníku něco chybí: buď celý
+     řádek, nebo zapsaná řada. Bez zápisu do souboru je vidí jen prohlížeč
+     s načtenými databázemi — účtárna ani druhý počítač ne, a bez sloupce
+     `rada` je soubor pro člověka hromada německých názvů bez ladu. Jedním
+     stiskem se všechno přiřadí do parametry/pigmenty.csv; ceny se pak
+     dopisují postupně, jak chodí od dodavatelů.
+
+     U řádku, který v souboru už je, se posílá jeho dosavadní cena, měna
+     a jednotka — zápis je přepisuje vždycky, takže se musí poslat, co tam
+     stojí, jinak by doplnění řady smazalo zapsané ceny. Řádek se zapsanou
+     řadou se nechává být: mohl ji upravit člověk. */
+  const kDoplneni = seznam.filter((z) => z.radyZReceptur.length
+    && (!z.vTabulce || !z.mat.rada));
+  const doplnitZRad = () => onUlozit(kDoplneni.map((z) => ({ nazev: z.nazev,
+    role: z.role || "barva",
+    cena: z.mat && z.mat.cena != null ? z.mat.cena : "",
+    mena: z.mat ? z.mat.mena : "", jednotka: z.mat ? z.mat.jednotka : "",
+    rada: z.rady.join("|") })));
 
   const ulozit = () => {
     const davka = Object.keys(zmeny).map((klic) => {
       const z = seznam.find((x) => x.klic === klic);
       if (!z) return null;
-      return { nazev: z.nazev, role: hodnota(z, "role") || z.role || "pigment",
+      // barva z řady se bez vybraného druhu ukládá jako „barva", ne „pigment"
+      // — pigment je koncentrát ze sortimentu pigment + báze, tohle je hotová
+      // míchací barva z nakoupené řady
+      return { nazev: z.nazev, role: hodnota(z, "role") || z.role
+          || (z.rady.length ? "barva" : "pigment"),
         cena: hodnota(z, "cena"), mena: String(hodnota(z, "mena") || MENA_VYCHOZI).toUpperCase(),
         jednotka: hodnota(z, "jednotka") || "kg",
-        voc: hodnota(z, "voc"), bezplist: String(hodnota(z, "bezplist") || "").trim() };
+        voc: hodnota(z, "voc"), bezplist: String(hodnota(z, "bezplist") || "").trim(),
+        // řada se přikládá, jen když je odkud ji vzít — undefined nechá
+        // buňku v souboru na pokoji (mohl ji upravit člověk)
+        rada: z.rady.length ? z.rady.join("|") : undefined };
     }).filter(Boolean);
     if (davka.length) onUlozit(davka);
     setZmeny({});
@@ -79,13 +134,26 @@ function CenyMaterialu({ recipes, materialy, onUlozit, stav, mostOk, smiMenit })
       <div className="rowline">
         <input className="search" value=${q} onChange=${(e) => setQ(e.target.value)}
           placeholder=${preloz("Hledat složku…")} style=${{ flex: "1 1 220px", marginBottom: 0 }} />
+        ${rady.length > 0 && html`
+          <select value=${radaF} onChange=${(e) => setRadaF(e.target.value)}
+            style=${{ width: "auto", flex: "0 1 auto", marginBottom: 0 }}>
+            <option value="">${preloz("všechny řady")}</option>
+            ${rady.map((r) => html`<option key=${r} value=${r}>${r}</option>`)}
+          </select>`}
         <label className="tgl"><input type="checkbox" checked=${jenBez}
           onChange=${(e) => setJenBez(e.target.checked)} /><span className="tglt"></span>${preloz("jen bez ceny")}</label>
       </div>
+      ${kDoplneni.length > 0 && html`<div className="rowline" style=${{ marginTop: 8 }}>
+        <button className="btn sec" disabled=${!mostOk || smiMenit === false || stav.stav === "uklada"}
+          onClick=${doplnitZRad}>
+          ${preloz("Doplnit barvy z řad do ceníku ({n})", { n: fmt(kDoplneni.length, 0) })}
+        </button>
+        <span className="note">${preloz("Každá barva z načtených barevných řad dostane v ceníku vlastní řádek a zapsanou řadu — cena se k ní pak jen dopíše.")}</span>
+      </div>`}
       ${!seznam.length ? html`<div className="empty">${preloz("Zatím nejsou nahrané žádné receptury ani materiály.")}</div>` : html`
         <${RolovaniSListou} styl=${{ marginTop: 10 }}>
         <table className="t">
-          <thead><tr><th>${preloz("Složka")}</th><th>${preloz("Druh")}</th><th className="num">${preloz("v recepturách")}</th>
+          <thead><tr><th>${preloz("Složka")}</th><th>${preloz("řada")}</th><th>${preloz("Druh")}</th><th className="num">${preloz("v recepturách")}</th>
             <th className="num">${preloz("cena")}</th><th>${preloz("za")}</th><th>${preloz("měna")}</th>
             <th className="num">VOC %</th><th>${preloz("bezpečnostní list")}</th></tr></thead>
           <tbody>
@@ -93,6 +161,7 @@ function CenyMaterialu({ recipes, materialy, onUlozit, stav, mostOk, smiMenit })
               <tr key=${z.klic}>
                 <td style=${{ fontWeight: 600 }}>${z.nazev}
                   ${!z.vTabulce && html`<span className="note" style=${{ marginLeft: 6 }}>${preloz("není v tabulce")}</span>`}</td>
+                <td>${z.rady.length ? z.rady.join(", ") : "—"}</td>
                 <td>
                   <select value=${hodnota(z, "role")} onChange=${(e) => uprav(z, "role", e.target.value)}>
                     <option value="">${preloz("— neurčeno —")}</option>

@@ -19,11 +19,25 @@
      světlu", což hraje se směrem stínů (světlo zleva shora). Dvojice stínů
      hloubku dál nese; s rozdílem podkladů karty vypadají míň jako vytlačené
      z plochy a víc jako položené desky — to je tady záměr. */
-  --bg:#c9c9c9; --paper:#ededed; --zvyraz:#c8c8c8; --logo:#E0E0E0;
+  --bg:#c9c9c9; --paper:#ededed; --zvyraz:#c8c8c8; --logo:#c9c9c9;
   --ink:#2D2D2D; --ink-2:#757575; --line:#d4d4d4; --line-2:#c6c6c6;
   --cyan:#2D2D2D; --magenta:#C97B63; --yellow:#D9B44A; --key:#2D2D2D;
   --btn-ink:#FFFFFF; --focus:rgba(45,45,45,.20); --danger:#b31919;
   --ok:#3dc760; --warn:#e8c545;
+  /* Čára přes plochu. Barvy jsou zadané v CMYK, protože tak se v dílně
+     barva popisuje; do RGB se přepočítaly stejnou úvahou, jakou má
+     aplikace v rgbNaCmyk (120-barva-potisku.js) — jen obráceně, tedy
+     R = 255 × (1−C) × (1−K). Zpětný převod dá zadané hodnoty přesně:
+     #FF001A → 0/100/90/0. Tloušťka je kolmá šířka pásu, ne vodorovná.
+     Poloha čáry se řídí posunem v osách okna: 0 / 0 ji vede středem
+     plochy od rohu k rohu, 0 / −50vh ji zvedne tak, aby začínala uprostřed
+     horní hrany. Nastaveno je −47vw / −44vh — čára tím vyjde z levého
+     horního rohu a prochází celou plochou. Posun ve směru samotné čáry
+     (stejný počet pixelů v obou osách) se neprojeví — vidět je jen složka
+     kolmá na ni; pás je pod 45°, takže na horní hraně posune průsečík
+     každý 1 px vodorovně o +1 px a každý 1 px svisle o −1 px. */
+  --pozadi-cara-barva:#FF001A; --pozadi-cara-sirka:14px; --pozadi-cara-sila:1;
+  --pozadi-cara-x:-47vw; --pozadi-cara-y:-44vh;
   /* Tvary: každý druh prvku má vlastní zaoblení, aby šlo ladit zvlášť
      karty, tlačítka, pole a dlaždice. Ikony jsou kreslené, ne obrázkové —
      velikost, tloušťka tahu i zakončení se řídí odsud. Ikona stojící uvnitř
@@ -105,6 +119,11 @@
   --tisk-sloupec:1 / -1; --tisk-radek:2;
   --tisk-sirka:33%;
   --tisk-zarovnani:center; --tisk-vyska:auto;
+  /* Vyhledávání katalogu nad kartami: přes celou stránku působilo jako cizí
+     pruh nad souměrnou mřížkou. Drží proto tutéž šířku jako prostřední karta
+     (parametry tisku) a stojí na středu — hrany pole lícují s hranami karet.
+     Platí od 960 px; pod tím se karty skládají a pole potřebuje celou šířku. */
+  --hledani-sirka:33%;
   /* Stíny jsou ve tvaru rgba(bílá)+rgba(černá) — jediný tvar, který umí
      barvy.html číst a ladit. Proti neumorfnímu základu jsou ztlumené: bílá
      kolem 37–39 % — karty jsou samy světlé, silnější „osvícení" by kolem
@@ -113,19 +132,26 @@
   --neu-sm:-5px -5px 15px rgba(255,255,255,0.371), 5px 5px 15px rgba(0,0,0,0.418);
   --neu-in:inset 4px 4px 6px rgba(0,0,0,0.342), inset -4px -4px 6px rgba(255,255,255,0.371);
   --neu-in-lg:inset 6px 6px 9px rgba(0,0,0,0.38), inset -6px -6px 9px rgba(255,255,255,0.39);
-  --modal-shadow:0 15px 48px rgba(0,0,0,0.76);
+  --modal-shadow:0 16px 48px rgba(0,0,0,0.76);
   --logo-shadow:-2px -2px 2px rgba(255,255,255,0.14), 2px 2px 2px rgba(0,0,0,0.1);
   --mono:'Segoe UI',system-ui,sans-serif;
   --sans:system-ui,sans-serif;
 }
 :root[data-theme="dark"]{
-  /* Tmavý neumorfismus: plocha #373d43, povrch o chlup tmavší #31383f — ne
+  /* Tmavý neumorfismus: plocha #464d53, povrch tmavší #31383f — ne
      černá, na černé nejde plochu „osvítit" a horní světlý stín by zmizel.
      Hloubku dělá tmavý stín vpravo dole a jemně světlejší šeď vlevo nahoře,
-     žádné rámečky; rozdíl podkladů je stejně jako ve světlém motivu záměrně
-     malý. Aktivní prvky nesou zelený akcent (#10B981), upozornění teplý
-     oranžový (#F59E0B). Hlavní tlačítko je světlé s tmavým písmem. */
-  --bg:#373d43; --paper:#31383f; --zvyraz:#2b3035; --logo:#212529;
+     žádné rámečky; rozdíl podkladů je tu větší než ve světlém motivu —
+     zesvětlená plocha nechává tmavší karty vystoupit stejným směrem jako
+     ve světlém motivu, jen obráceně (karta je „dál od světla"). Aktivní
+     prvky nesou zelený akcent (#10B981), upozornění teplý oranžový
+     (#F59E0B). Hlavní tlačítko je světlé s tmavým písmem. Logo v obou
+     motivech splývá s plochou (--logo = --bg), vystupuje jen stínem. */
+  --bg:#464d53; --paper:#31383f; --zvyraz:#2b3035; --logo:#464d53;
+  /* V noci je čára modrá: CMYK 100/38/0/16 → #0085D6 (zpětný převod
+     vrací zadané hodnoty přesně). Tloušťku i sílu drží společné proměnné
+     ze světlého bloku. */
+  --pozadi-cara-barva:#0085D6;
   --ink:#E2E8F0; --ink-2:#94A3B8; --line:#343a40; --line-2:#495057;
   --cyan:#10B981; --magenta:#C97B63; --yellow:#D9B44A; --key:#E2E8F0;
   --btn-ink:#212529; --focus:rgba(226,232,240,.22); --danger:#b31919;
@@ -155,6 +181,36 @@
 :root[data-theme="dark"] .imgwarn{background:#2C2317 !important;color:#E0AE6B !important}
 *{box-sizing:border-box}
 body{margin:0;font-family:var(--sans);line-height:var(--radek);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
+/* Čára v ploše leží pod celou aplikací: je to plocha, ne prvek, takže
+   nechytá myš a neroluje s obsahem. Kreslí ji gradient, ne obrázek —
+   barvu tak řídí proměnná a v tmavém motivu se přebarví sama.
+
+   Osa gradientu je 45°, pásy jsou na ni kolmé, takže čára padá dolů
+   doprava pod stálým sklonem bez ohledu na tvar okna. Zarážky se měří
+   podél osy: --pozadi-cara-sirka je proto kolmá tloušťka pásu, ne
+   vodorovná stopa.
+
+   Poloha se řídí posunem celé vrstvy (--pozadi-cara-x a -y), ne
+   zarážkami gradientu — dvě čísla v osách okna se ladí líp než jedno
+   podél šikmé osy. Sám gradient tedy vede pás středem vrstvy; výchozí
+   posun −50vh ho zvedne tak, aby čára začínala uprostřed horní hrany.
+
+   Vrstva přesahuje okno o 100vmax na každou stranu. Posunutá vrstva
+   velikosti okna by za sebou nechala nepokrytý pruh, kterým by čára
+   „končila" uprostřed plochy; s přesahem zůstane plocha krytá i při
+   posunu na doraz.
+
+   Pozor při ladění: pás je nekonečná přímka, takže posun po jejím
+   vlastním směru (x a y stejným dílem dolů doprava) nic nezmění.
+   Vidět je jen složka kolmá na čáru — to není chyba ovládání. */
+body::before{content:"";position:fixed;inset:-100vmax;z-index:-1;pointer-events:none;
+  opacity:var(--pozadi-cara-sila);
+  translate:var(--pozadi-cara-x) var(--pozadi-cara-y);
+  background:linear-gradient(45deg,
+    transparent calc(50% - var(--pozadi-cara-sirka) / 2),
+    var(--pozadi-cara-barva) calc(50% - var(--pozadi-cara-sirka) / 2),
+    var(--pozadi-cara-barva) calc(50% + var(--pozadi-cara-sirka) / 2),
+    transparent calc(50% + var(--pozadi-cara-sirka) / 2))}
 input,select,button,textarea{font-family:inherit;font-size:var(--pismo)}
 input,select,textarea{border:none;border-radius:var(--radius-pole);padding:var(--pole-y) var(--pole-x);background:var(--paper);color:var(--ink);width:100%;box-shadow:var(--neu-in);transition:box-shadow .15s}
 input:focus,select:focus,textarea:focus{outline:none;box-shadow:var(--neu-in),0 0 0 3px var(--focus)}
@@ -223,7 +279,7 @@ svg[viewBox="0 0 24 24"] path,svg[viewBox="0 0 24 24"] circle,svg[viewBox="0 0 2
 svg[viewBox="0 0 24 24"].ikona-radek{width:var(--ikona-radek);height:var(--ikona-radek);
   vertical-align:-.24em;margin-right:.3em;color:inherit}
 .hdr{background:transparent;color:var(--ink);padding:9px clamp(16px,3vw,40px);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
-.themebtn{grid-column:3;justify-self:end;flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:none;background:var(--paper);box-shadow:var(--neu-sm);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;line-height:1;transition:opacity .15s;color:var(--ink)}
+.themebtn{grid-column:3;justify-self:end;flex:0 0 auto;width:63px;height:63px;border-radius:50%;border:none;background:var(--paper);box-shadow:var(--neu-sm);cursor:pointer;font-size:36px;display:flex;align-items:center;justify-content:center;line-height:1;transition:opacity .15s;color:var(--ink)}
 .themebtn:hover{opacity:.8}
 .hdr h1{grid-column:2;margin:0;font-size:clamp(calc(var(--logo-velikost) * .73),8.4vw,var(--logo-velikost));font-weight:var(--tloustka-nadpisu);letter-spacing:.04em;text-align:center;color:var(--logo);text-shadow:var(--logo-shadow);cursor:pointer;transition:opacity .15s}
 .hdr h1:hover{opacity:.85}
@@ -233,12 +289,26 @@ svg[viewBox="0 0 24 24"].ikona-radek{width:var(--ikona-radek);height:var(--ikona
 .backbtn:hover{opacity:.8}
 .backbtn:active{box-shadow:var(--neu-in)}
 @media(max-width:720px){.backbtn{padding:0;width:42px;border-radius:50%;justify-content:center}.backbtn span{display:none}}
-.navbtn{width:42px;height:42px;border-radius:50%;border:none;background:var(--paper);box-shadow:var(--neu-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink);transition:opacity .15s}
+.navbtn{width:63px;height:63px;border-radius:50%;border:none;background:var(--paper);box-shadow:var(--neu-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink);transition:opacity .15s}
 .navbtn:hover{opacity:.8}
-.navdrop{position:absolute;top:calc(100% + 10px);left:0;background:var(--paper);border-radius:14px;box-shadow:var(--neu);padding:6px;z-index:45;min-width:180px;display:flex;flex-direction:column;gap:2px}
-.navdrop button{background:none;border:none;text-align:left;padding:10px 14px;border-radius:10px;font-weight:600;font-size:13.5px;color:var(--ink);cursor:pointer;transition:background .15s}
+/* Menu a přepínač režimu jsou zvětšené na 1,5násobek (42 → 63 px) — jsou to
+   dva nejčastější hmaty v hlavičce a mají být k trefení i po paměti; původní
+   dvojnásobek (84 px) byl na obrazovce příliš dominantní. Ikona uvnitř musí
+   mít vlastní pravidlo: globální velikost ikon (--ikona) by ji nechala malou
+   uprostřed velkého kruhu. Stejná specifičnost, pozdější pravidlo vyhrává —
+   proto stojí až za pravidlem ikon. */
+.navbtn svg,.themebtn svg{width:40.5px;height:40.5px}
+/* Vyskakovací menu je zvětšené na 1,75násobek původních hodnot (písmo řádku
+   13,5 → 23,625 px, šířka 180 → 315 px) — stejně jako tlačítka hlavičky je to
+   častý hmat a čte se ze stoje od váhy. Poznámky a štítky uvnitř mají vlastní
+   přepočet z týchž tokenů jako všude jinde (vzor .bigpanel .note), aby se
+   zvětšovaly dál se základní škálou písma. */
+.navdrop{position:absolute;top:calc(100% + 10px);left:0;background:var(--paper);border-radius:24.5px;box-shadow:var(--neu);padding:10.5px;z-index:45;min-width:315px;display:flex;flex-direction:column;gap:3.5px}
+.navdrop button{background:none;border:none;text-align:left;padding:17.5px 24.5px;border-radius:17.5px;font-weight:600;font-size:23.625px;color:var(--ink);cursor:pointer;transition:background .15s}
 .navdrop button:hover{background:var(--zvyraz)}
 .navdrop button.on{color:var(--cyan);font-weight:800}
+.navdrop .note{font-size:calc((var(--pismo-poznamka) - .5px) * 1.75)}
+.navdrop .tag{font-size:calc(var(--pismo-popisek) * 1.75);padding:5.25px 15.75px}
 :root[data-theme="dark"] .navdrop button:hover{background:rgba(127,163,217,.16)}
 .wrap{max-width:var(--sirka-stranky);margin:0 auto;padding:var(--okraj-stranky) clamp(16px,3vw,40px) 56px}
 .grid{display:grid;gap:var(--mezera-karet)}
@@ -257,6 +327,10 @@ svg[viewBox="0 0 24 24"].ikona-radek{width:var(--ikona-radek);height:var(--ikona
    sloupcům vyjdou dlaždice parametrů na chlup stejně velké jako náhledy
    produktu — a to při každé šířce okna, ne jen při jedné. Přestavuje se to
    v barvy.html na stránce Rozvržení, ne tady. */
+/* Na úzké obrazovce karta není flex a auto-margin by vyšel na nulu — název
+   i řádek výběru si proto drží pevné odstupy jako dřív. */
+.karta-produkt .produkt-nazev{margin-top:14px}
+.karta-produkt .rowline{margin-top:10px;margin-bottom:0}
 @media(min-width:960px){
   .grid.calc>.karta-produkt{grid-column:var(--produkt-sloupec);grid-row:var(--produkt-radek);
     width:var(--produkt-sirka);justify-self:var(--produkt-zarovnani);min-height:var(--produkt-vyska)}
@@ -270,6 +344,12 @@ svg[viewBox="0 0 24 24"].ikona-radek{width:var(--ikona-radek);height:var(--ikona
     width:var(--tisk-sirka);justify-self:var(--tisk-zarovnani);min-height:var(--tisk-vyska)}
   .grid.calc>.card{margin-bottom:0}
   .karta-produkt{display:flex;flex-direction:column}
+  /* Název produktu s materiálem a řádek výběru technologie, rozměru a barvy
+     stojí pohromadě v levém dolním rohu karty: karta je díky min-height vyšší
+     než obsah a bez auto-marginu by celá skupina visela uprostřed volného
+     místa hned pod náhledy. */
+  .karta-produkt .produkt-nazev{margin-top:auto;padding-top:14px}
+  .karta-produkt .rowline{margin-top:10px;margin-bottom:0}
 }
 .grid.calc>.bigpanel{align-content:stretch}
 .bigpanel>.card{height:100%;display:flex;flex-direction:column}
@@ -302,7 +382,13 @@ svg[viewBox="0 0 24 24"].ikona-radek{width:var(--ikona-radek);height:var(--ikona
    Proto jsou tahle tři pole výrazně větší než všechna ostatní a vyplní kartu.
    Roste s nimi i popisek, šipka a nabídka, jinak by na velkém poli zůstaly
    drobné a pole by vypadalo jako omylem zvětšené. */
-.karta-tisk label.f{font-size:calc(var(--pismo-popisek) * 1.5);margin-bottom:10px;text-align:center}
+/* overflow-wrap:anywhere — sloupce dlaždic se na 1100 px zúží na 87 px
+   a jedno slovo popisku je širší (změřeno: KRYVOST 93 px, portugalské
+   OPACIDADE ještě víc). `break-word` tu prohlížeč nezalomí — šířku slova
+   měří bez prostrkání, takže si myslí, že se vejde; `anywhere` zalomí
+   doopravdy. Platí jen tady: popisky dlaždic nikde neurčují šířku sloupce,
+   takže agresivnější zalamování nemá kde uškodit. */
+.karta-tisk label.f{font-size:calc(var(--pismo-popisek) * 1.5);margin-bottom:10px;text-align:center;overflow-wrap:anywhere}
 /* Dlaždice připomíná náhled produktu, hodnota uprostřed. Roztažené pole přes
    celou třetinu řádku se z odstupu čte hůř než blok, který má tvar — oko
    najde dřív dlaždici než dlouhý pruh. */
@@ -328,20 +414,15 @@ svg[viewBox="0 0 24 24"].ikona-radek{width:var(--ikona-radek);height:var(--ikona
 .karta-tisk select{font-size:min(calc(var(--pismo) * 2), 11cqw);font-weight:700;text-align:center;
   width:100%;flex:1;min-height:178px;box-sizing:border-box;
   display:flex;align-items:center;justify-content:center;
-  /* Hodnota a šipka stojí pod sebou jako jedna dvojice na středu dlaždice.
-     Proto se tady nekreslí šipka pozadím jako u ostatních polí — pozadí je
-     přilepené k okraji a text by zůstal nad středem. Místo toho se použije
-     šipka, kterou prohlížeč k výběru sám přidává: je to skutečný prvek, takže
-     ji lze do dvojice postavit a vycentrovat obojí naráz. */
-  flex-direction:column;gap:4cqw;padding:5cqw;background-image:none}
-/* Prohlížeč šipku sám odsouvá k pravému okraji (`margin-inline-start:auto`),
-   protože počítá s tím, že stojí vedle textu. Ve sloupci ji to vytlačí na kraj
-   místo na střed — okraj se proto ruší. Text vedle ní se roztahuje na celou
-   šířku, což by dvojici rozhodilo taky. */
-.karta-tisk select::picker-icon{display:block;width:9cqw;height:9cqw;margin:0;flex:none;
-  color:var(--ink-2);transition:rotate .15s}
+  /* Dlaždice ukazuje jen hodnotu na středu — má připomínat náhled produktu,
+     ne formulářové pole. Šipka pozadím se tu nekreslí (`background-image:none`
+     ruší tu z ostatních polí — byla by přilepená k okraji a text by zůstal
+     nad středem) a šipka, kterou prohlížeč k výběru sám přidává, je schovaná
+     přes `::picker-icon` níž. Že se dlaždicí dá vybírat, prozradí kliknutí;
+     z odstupu se čte jen hodnota. */
+  flex-direction:column;padding:5cqw;background-image:none}
+.karta-tisk select::picker-icon{display:none}
 .karta-tisk select::select-fallback-button-text{flex:0 1 auto;text-align:center}
-.karta-tisk select:open::picker-icon{rotate:180deg}
 .karta-tisk select::picker(select){font-size:calc(var(--pismo) * 1.5)}
 .karta-tisk option{padding:calc(var(--pole-y) * 1.4) calc(var(--pole-x) * 1.4)}
 /* Pod 640px se `.frow` skládá na jeden sloupec (viz pravidlo výš) a
@@ -350,7 +431,6 @@ svg[viewBox="0 0 24 24"].ikona-radek{width:var(--ikona-radek);height:var(--ikona
    dlaždice snížena přibližně o polovinu (178 → 88 px). */
 @media(max-width:640px){
   .karta-tisk select{font-size:min(var(--pismo), 5.5cqw);min-height:88px}
-  .karta-tisk select::picker-icon{width:4.5cqw;height:4.5cqw}
 }
 .bigform select:focus,.bigform input:focus{box-shadow:var(--neu-sm),0 0 0 3px var(--focus)}
 .bigform .frow{gap:calc(var(--mezera-poli) * 1.33);margin-bottom:calc(var(--mezera-poli) * 1.33)}
@@ -366,7 +446,10 @@ svg[viewBox="0 0 24 24"].ikona-radek{width:var(--ikona-radek);height:var(--ikona
 .card .hint{color:var(--ink-2);font-size:var(--pismo-poznamka);margin:0 0 14px}
 .frow{display:grid;gap:var(--mezera-poli);margin-bottom:var(--mezera-poli)}
 @media(min-width:640px){.frow.c2{grid-template-columns:1fr 1fr}.frow.c3{grid-template-columns:1fr 1fr 1fr}.frow.c4{grid-template-columns:1fr 1fr 1fr 1fr}}
-label.f{display:block;font-size:var(--pismo-popisek);line-height:1.25;font-weight:700;letter-spacing:var(--prostrkani);text-transform:uppercase;color:var(--ink-2);margin-bottom:5px}
+/* overflow-wrap: pojistka pro jazyky s dlouhými slovy — portugalské
+   PROFUNDIDADE měřilo 170 px ve sloupci širokém 140 px a trčelo ven.
+   Zalomí se jen slovo, které se na řádek nevejde; kratší texty beze změny. */
+label.f{display:block;font-size:var(--pismo-popisek);line-height:1.25;font-weight:700;letter-spacing:var(--prostrkani);text-transform:uppercase;color:var(--ink-2);margin-bottom:5px;overflow-wrap:break-word}
 /* Popisek se v užším okně zalomí na dva řádky a pole pod ním se propadne níž
    než sousední. Popisek v mřížce má proto vždy výšku dvou řádků a text sedí
    u jeho spodní hrany — pole v řádku tak drží linku při každé šířce okna. */
@@ -637,7 +720,9 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
 .michbg .card .simposuv{margin:calc(var(--mich-mezera) + var(--mich-tl-odpojit-vyska) +
     var(--mich-mezera) * 1.5 + var(--mich-tl-tara-vyska) - 175px)
   calc(var(--mich-tl-tara-sirka) + var(--mich-mezera)) 10px 0}
-.michbg .card .simposuv input[type=range]{width:100%}
+/* margin:0 — prohlížeč dává posuvníku výchozí okraj 2px; se šířkou 100%
+   pak pravý konec přesahoval rámeček řádku o 2 px (změřeno detektorem). */
+.michbg .card .simposuv input[type=range]{width:100%;margin:0}
 /* KAŽDÉ TLAČÍTKO ZVLÁŠŤ. Hodnota proměnné je velikost písma tlačítka;
    odsazení se dopočítává týmiž poměry jako u společných pravidel výš
    (velké: .87 a 1.47 z písma, malé: .667 a 1.111 — poměry 9/13,5 a 15/13,5
@@ -715,6 +800,42 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
   padding:calc(var(--mich-tl-dalsi) * .87) calc(var(--mich-tl-dalsi) * 1.47);
   width:var(--mich-tl-dalsi-sirka);height:var(--mich-tl-dalsi-vyska);
   transform:translate(var(--mich-tl-dalsi-posun-x),var(--mich-tl-dalsi-posun-y))}
+
+/* Rozměry dlaždic se ladí na češtinu (barvy.html) a česky platí
+   přesně. Jiný jazyk sází delší slova: anglické „Disconnect" je jedno
+   nezalomitelné slovo o 11 px širší než celá dlaždice Odpojit (změřeno
+   5,4 px ven na každé straně) a dvouřádkové „Compute coverage from the
+   preview" přetékalo 2,7 px pod tlačítko krycí plochy. V cizím jazyce
+   jsou proto laděná čísla jen minima — dlaždice s textem vyroste,
+   místo aby ho pustila ven. */
+html:not([lang="cs"]) .michbg .okbox .btn,
+html:not([lang="cs"]) .michbg .warnbox .btn,
+html:not([lang="cs"]) .michbg .specbar .btn{width:auto;height:auto;
+  min-width:var(--mich-tl-hlaseni-sirka);min-height:var(--mich-tl-hlaseni-vyska)}
+html:not([lang="cs"]) .michbg .card .btn.sm{width:auto;height:auto;
+  min-width:var(--mich-tl-pomocna-sirka);min-height:var(--mich-tl-pomocna-vyska)}
+html:not([lang="cs"]) .michbg .btn.mich-tl-zpet{width:auto;height:auto;
+  min-width:var(--mich-tl-zpet-sirka);min-height:var(--mich-tl-zpet-vyska)}
+html:not([lang="cs"]) .michbg .btn.mich-tl-plocha{width:auto;height:auto;
+  min-width:var(--mich-tl-plocha-sirka);min-height:var(--mich-tl-plocha-vyska)}
+html:not([lang="cs"]) .michbg .btn.mich-tl-rucne{width:auto;height:auto;
+  min-width:var(--mich-tl-rucne-sirka);min-height:var(--mich-tl-rucne-vyska)}
+html:not([lang="cs"]) .michbg .btn.mich-tl-znam{width:auto;height:auto;
+  min-width:var(--mich-tl-znam-sirka);min-height:var(--mich-tl-znam-vyska)}
+html:not([lang="cs"]) .michbg .btn.mich-tl-viskozita{width:auto;height:auto;
+  min-width:var(--mich-tl-viskozita-sirka);min-height:var(--mich-tl-viskozita-vyska)}
+html:not([lang="cs"]) .michbg .card .btn.mich-tl-pripojit{width:auto;height:auto;
+  min-width:var(--mich-tl-pripojit-sirka);min-height:var(--mich-tl-pripojit-vyska)}
+html:not([lang="cs"]) .michbg .card .btn.mich-tl-simulace{width:auto;height:auto;
+  min-width:var(--mich-tl-simulace-sirka);min-height:var(--mich-tl-simulace-vyska)}
+html:not([lang="cs"]) .michbg .card .btn.mich-tl-tara{width:auto;height:auto;
+  min-width:var(--mich-tl-tara-sirka);min-height:var(--mich-tl-tara-vyska)}
+html:not([lang="cs"]) .michbg .card .btn.mich-tl-odpojit{width:auto;height:auto;
+  min-width:var(--mich-tl-odpojit-sirka);min-height:var(--mich-tl-odpojit-vyska)}
+html:not([lang="cs"]) .michbg .card .btn.mich-tl-sarze{width:auto;height:auto;
+  min-width:var(--mich-tl-sarze-sirka);min-height:var(--mich-tl-sarze-vyska)}
+html:not([lang="cs"]) .michbg .card .btn.mich-tl-dalsi{width:auto;height:auto;
+  min-width:var(--mich-tl-dalsi-sirka);min-height:var(--mich-tl-dalsi-vyska)}
 .michbg .result-big{font-size:var(--mich-vysledek)}
 .michbg .wbar{height:var(--mich-wbar)}
 .michbg .note,.michbg .result-sub{font-size:var(--mich-poznamka)}
@@ -768,17 +889,24 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
 .tgl input:checked + .tglt::after{transform:translateX(18px)}
 #chyba{max-width:700px;margin:60px auto;background:var(--paper);color:#8A5A1E;border-radius:12px;padding:24px;font-size:15px;display:none;box-shadow:var(--neu)}
 .searchwrap{position:relative;margin-bottom:20px}
-.searchbar{background:var(--paper);border-radius:var(--radius);padding:12px 18px;display:flex;align-items:center;gap:12px;box-shadow:var(--neu)}
+/* Jen hledání katalogu na hlavní stránce — hledání šarží sdílí .searchwrap,
+   ale žije uvnitř karty a zužovat se nesmí. Zlom 960 px je týž, od kterého
+   platí mřížka karet (.grid.calc): pod ním se pole vrací na celou šířku. */
+@media(min-width:960px){.hledani-katalog{width:var(--hledani-sirka);margin-left:auto;margin-right:auto}}
+.searchbar{background:var(--paper);border-radius:var(--radius);padding:19px 18px;display:flex;align-items:center;gap:12px;box-shadow:var(--neu)}
 .searchbar .ic{flex:0 0 auto;font-size:16px;opacity:.6}
 .searchbar input{border:none;background:transparent;padding:6px 0;font-size:15px;box-shadow:none !important}
 .searchbar input:focus{border:none;box-shadow:none !important}
 .searchbar .count{white-space:nowrap;color:var(--ink-2);font-size:12.5px}
-.searchdrop{position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--paper);border-radius:12px;box-shadow:var(--neu);z-index:40;max-height:400px;overflow:auto}
-.searchitem{display:flex;gap:12px;align-items:center;padding:10px 14px;cursor:pointer}
+/* Položky našeptávače v původní velikosti (obrázek 40 px, písmo 13/11 px)
+   byly u váhy špatně čitelné — všechny rozměry jedou na 1,5násobku, a strop
+   výšky roste stejně, aby zůstal vidět týž počet položek naráz. */
+.searchdrop{position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--paper);border-radius:12px;box-shadow:var(--neu);z-index:40;max-height:600px;overflow:auto}
+.searchitem{display:flex;gap:18px;align-items:center;padding:15px 21px;cursor:pointer}
 .searchitem:hover,.searchitem.hi{background:var(--zvyraz)}
-.searchitem-img{width:40px;height:40px;flex:0 0 auto;object-fit:contain;border-radius:8px;background:var(--paper);box-shadow:var(--neu-sm)}
-.searchitem-nm{font-size:13px;font-weight:700;line-height:1.3}
-.searchitem-dm{font-family:var(--mono);font-size:11px;color:var(--ink-2);margin-top:2px}
+.searchitem-img{width:60px;height:60px;flex:0 0 auto;object-fit:contain;border-radius:12px;background:var(--paper);box-shadow:var(--neu-sm)}
+.searchitem-nm{font-size:19.5px;font-weight:700;line-height:1.3}
+.searchitem-dm{font-family:var(--mono);font-size:16.5px;color:var(--ink-2);margin-top:3px}
 .viewtoggle{display:flex;gap:2px;background:var(--paper);border-radius:999px;padding:4px;box-shadow:var(--neu-in)}
 .viewtoggle button{border:none;background:none;padding:7px 13px;border-radius:999px;cursor:pointer;color:var(--ink-2);font-size:15px;line-height:1;transition:background .15s,color .15s}
 .viewtoggle button.on{background:var(--key);color:var(--btn-ink)}
@@ -958,6 +1086,10 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
 <div class="posuv" data-tvar="--ikona-tah"><div class="hlava"><span>Tloušťka tahu ikon</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0.5" max="5" step="0.1" data-role="posuv" data-jed="" /></div>
 <div class="posuv" data-tvar="--ikona-pruhlednost"><div class="hlava"><span>Průsvitnost ikon</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="1" step="0.05" data-role="posuv" data-jed="" /></div>
 <div class="posuv" data-tvar="--pruhlednost-karty"><div class="hlava"><span>Průsvitnost karet</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0.2" max="1" step="0.01" data-role="posuv" data-jed="" /></div>
+<div class="posuv" data-tvar="--pozadi-cara-sirka"><div class="hlava"><span>Tloušťka čáry v ploše</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="200" step="2" data-role="posuv" data-jed="px" /></div>
+<div class="posuv" data-tvar="--pozadi-cara-x"><div class="hlava"><span>Posun čáry vodorovně</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-150" max="150" step="1" data-role="posuv" data-jed="vw" /></div>
+<div class="posuv" data-tvar="--pozadi-cara-y"><div class="hlava"><span>Posun čáry svisle</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="-150" max="150" step="1" data-role="posuv" data-jed="vh" /></div>
+<div class="posuv" data-tvar="--pozadi-cara-sila"><div class="hlava"><span>Sytost čáry v ploše</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0" max="1" step="0.05" data-role="posuv" data-jed="" /></div>
 <div class="hlava" style="margin:14px 0 6px"><span>Zakončení tahu ikon</span></div>
 <div class="chips" id="konce">
 <button class="chip" data-konec="round">kulaté</button>
@@ -1094,7 +1226,8 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
 <p class="note" id="stav-stranky" style="margin:0 0 10px"></p>
 <details class="skupina" open><summary>Plocha a papír</summary><label class="radek" data-klic="--bg"><input type="color" data-role="barva" /><span class="txt"><b>--bg</b><span class="note">plocha stránky</span></span><input type="text" data-role="hex" spellcheck="false" /></label>
 <label class="radek" data-klic="--paper"><input type="color" data-role="barva" /><span class="txt"><b>--paper</b><span class="note">karty, lišty, tlačítka, pole</span></span><input type="text" data-role="hex" spellcheck="false" /></label>
-<label class="radek" data-klic="--zvyraz"><input type="color" data-role="barva" /><span class="txt"><b>--zvyraz</b><span class="note">zvýrazněný řádek (pod myší, právě vážená složka)</span></span><input type="text" data-role="hex" spellcheck="false" /></label></details>
+<label class="radek" data-klic="--zvyraz"><input type="color" data-role="barva" /><span class="txt"><b>--zvyraz</b><span class="note">zvýrazněný řádek (pod myší, právě vážená složka)</span></span><input type="text" data-role="hex" spellcheck="false" /></label>
+<label class="radek" data-klic="--pozadi-cara-barva"><input type="color" data-role="barva" /><span class="txt"><b>--pozadi-cara-barva</b><span class="note">čára přes plochu (pod celou aplikací)</span></span><input type="text" data-role="hex" spellcheck="false" /></label></details>
 <details class="skupina" open><summary>Text a linky</summary><label class="radek" data-klic="--ink"><input type="color" data-role="barva" /><span class="txt"><b>--ink</b><span class="note">hlavní text</span></span><input type="text" data-role="hex" spellcheck="false" /></label>
 <label class="radek" data-klic="--ink-2"><input type="color" data-role="barva" /><span class="txt"><b>--ink-2</b><span class="note">vedlejší text a popisky</span></span><input type="text" data-role="hex" spellcheck="false" /></label>
 <label class="radek" data-klic="--ikona-barva"><input type="color" data-role="barva" /><span class="txt"><b>--ikona-barva</b><span class="note">samostatné ikony (menu, šipka zpět, přepínač režimu)</span></span><input type="text" data-role="hex" spellcheck="false" /></label>
@@ -1213,13 +1346,12 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
                 </div>
                 <div class="asistroh">
                   <button class="btn danger sm mich-tl-odpojit">Odpojit</button>
-                  <button class="btn sec sm mich-tl-tara">Tára (0)</button>
+                  <button class="btn sec sm mich-tl-tara">Tára</button>
                 </div>
                 <div class="rowline">
                   <span class="tag tech">simulace váhy</span>
                 </div>
                 <div class="result-big">0,0 g</div>
-                <div class="result-sub">na váze · receptura PANTONE Cool Gray 1 C</div>
                 <div class="wbar" style="margin-top:10px"><span style="width:34%;background:var(--cyan)"></span></div>
                 <p class="note" style="margin-top:8px"><b>19 3601 White</b> — přidat 72,0 g
                   · šarže neuvedena
@@ -1356,6 +1488,16 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
 <option value="2000px">2000 px</option>
 <option value="2400px">2400 px</option>
 </select>
+</div>
+<div class="posuv" data-volny="--hledani-sirka"><div class="hlava"><span>Šířka hledání katalogu</span></div><select data-vyber="--hledani-sirka">
+<option value="auto">celá šířka místa</option>
+<option value="calc((100% - var(--mezera-sloupcu)) / 2)">přesně jako jeden sloupec</option>
+<option value="75%">tři čtvrtiny</option>
+<option value="50%">polovina</option>
+<option value="33%">třetina</option>
+<option value="__vlastni">vlastní</option>
+</select>
+<input class="rucne siroke" data-role="volny" spellcheck="false" title="přesná hodnota v CSS — px, %, fr, calc(), auto" />
 </div>
 <div class="posuv" data-tvar="--sloupec-1"><div class="hlava"><span>Šířka levého sloupce</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0.4" max="3" step="0.05" data-role="posuv" data-jed="fr" /></div>
 <div class="posuv" data-tvar="--sloupec-2"><div class="hlava"><span>Šířka pravého sloupce</span><input class="rucne" data-role="cislo" spellcheck="false" title="přesná hodnota — dá se přepsat i mimo rozsah posuvníku" /></div><input type="range" min="0.4" max="3" step="0.05" data-role="posuv" data-jed="fr" /></div>
@@ -1575,6 +1717,11 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
      PŘIDÁNÍ DALŠÍ KARTY: sem její značka a řádek do seznamu KARTY. -->
 <template id="ukazka-hlavni">
   <div class="wrap">
+    <div class="searchwrap hledani-katalog">
+      <div class="searchbar"><span class="ic">&#8981;</span>
+        <input placeholder="Hledat produkt podle názvu nebo ref. čísla…" readonly>
+        <span class="count">298 z 1319</span></div>
+    </div>
     <div class="grid calc">
       <div class="card karta-produkt" style="margin:0">
         <h2>Vybraný produkt</h2>
@@ -1676,11 +1823,11 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
 </template>
 
 <script>
-var VYCH_BARVY = {"light": {"--bg": "#c9c9c9", "--paper": "#ededed", "--zvyraz": "#c8c8c8", "--ink": "#2D2D2D", "--ink-2": "#757575", "--ikona-barva": "#4A4A4A", "--line": "#d4d4d4", "--line-2": "#c6c6c6", "--key": "#2D2D2D", "--btn-ink": "#FFFFFF", "--cyan": "#2D2D2D", "--ok": "#3dc760", "--warn": "#e8c545", "--danger": "#b31919", "--logo": "#E0E0E0"}, "dark": {"--bg": "#373d43", "--paper": "#31383f", "--zvyraz": "#2b3035", "--ink": "#E2E8F0", "--ink-2": "#94A3B8", "--ikona-barva": "#CBD5E1", "--line": "#343a40", "--line-2": "#495057", "--key": "#E2E8F0", "--btn-ink": "#212529", "--cyan": "#10B981", "--ok": "#10B981", "--warn": "#F59E0B", "--danger": "#b31919", "--logo": "#212529"}}, VYCH_STINY = {"light": {"uhel": 135, "dVelky": 16, "blurVelky": 24, "dMaly": 7, "blurMaly": 15, "dVsazeny": 6, "blurVsazeny": 6, "silaSvetla": 39, "silaStinu": 38, "logoUhel": 135, "logoD": 3, "logoBlur": 2, "logoSvetlo": 14, "logoStin": 10}, "dark": {"uhel": 135, "dVelky": 14, "blurVelky": 20, "dMaly": 7, "blurMaly": 12, "dVsazeny": 6, "blurVsazeny": 6, "silaSvetla": 8, "silaStinu": 30, "logoUhel": 135, "logoD": 3, "logoBlur": 2, "logoSvetlo": 14, "logoStin": 10}}, VYCH_TVARY = {"--radius": "32px", "--radius-btn": "999px", "--radius-pole": "20px", "--radius-dlazdice": "20px", "--radius-stitek": "999px", "--ikona": "27px", "--ikona-tah": "1.5", "--ikona-pruhlednost": "1", "--ikona-radek": "1.2em", "--pruhlednost-karty": "1", "--ikona-konec": "round", "--pismo": "15.5px", "--pismo-nadpis": "19.5px", "--pismo-popisek": "12.5px", "--pismo-poznamka": "14px", "--pismo-tabulka": "19px", "--pismo-vysledek": "50px", "--logo-velikost": "116px", "--prostrkani": "0.07em", "--tloustka-nadpisu": "900", "--radek": "1.4", "--mezera-karta-y": "20px", "--mezera-karta-x": "22px", "--mezera-karet": "16px", "--mezera-poli": "12px", "--pole-y": "9px", "--pole-x": "12px", "--tlacitko-y": "10px", "--tlacitko-x": "18px", "--okraj-stranky": "20px", "--sans": "system-ui,sans-serif", "--mono": "'Segoe UI',system-ui,sans-serif", "--mich-nazev": "26px", "--mich-davka": "37px", "--mich-vzorek": "52px", "--mich-hlavicka": "12px", "--mich-tabulka": "20px", "--mich-gramy": "26px", "--mich-radek": "11px", "--mich-vysledek": "64px", "--mich-wbar": "19px", "--mich-tlacitko": "14px", "--mich-mezera": "15px", "--mich-pole": "17px", "--mich-hlaseni": "14px", "--mich-stitek": "14px", "--mich-prepinac": "16px", "--mich-tl-zpet": "17px", "--mich-tl-plocha": "16px", "--mich-tl-rucne": "18px", "--mich-tl-znam": "18px", "--mich-tl-viskozita": "16px", "--mich-tl-pripojit": "16px", "--mich-tl-simulace": "16px", "--mich-tl-tara": "24.5px", "--mich-tl-odpojit": "24.5px", "--mich-tl-sarze": "15px", "--mich-tl-dalsi": "16px", "--mich-tl-stitek": "23px", "--mich-tl-hlaseni": "14px", "--mich-tl-pomocna": "15px", "--mich-nadpis": "21px", "--mich-poznamka": "14px", "--mich-znak": "25px", "--sirka-stranky": "none", "--sloupec-1": "1fr", "--sloupec-2": "1fr", "--mezera-sloupcu": "40px", "--mich-tl-zpet-sirka": "auto", "--mich-tl-zpet-vyska": "50px", "--mich-tl-zpet-posun-x": "0px", "--mich-tl-zpet-posun-y": "0px", "--mich-tl-plocha-sirka": "288px", "--mich-tl-plocha-vyska": "50px", "--mich-tl-plocha-posun-x": "0px", "--mich-tl-plocha-posun-y": "0px", "--mich-tl-rucne-sirka": "auto", "--mich-tl-rucne-vyska": "auto", "--mich-tl-rucne-posun-x": "0px", "--mich-tl-rucne-posun-y": "0px", "--mich-tl-znam-sirka": "auto", "--mich-tl-znam-vyska": "auto", "--mich-tl-znam-posun-x": "0px", "--mich-tl-znam-posun-y": "0px", "--mich-tl-viskozita-sirka": "180px", "--mich-tl-viskozita-vyska": "50px", "--mich-tl-viskozita-posun-x": "306px", "--mich-tl-viskozita-posun-y": "24px", "--mich-tl-pripojit-sirka": "auto", "--mich-tl-pripojit-vyska": "auto", "--mich-tl-pripojit-posun-x": "0px", "--mich-tl-pripojit-posun-y": "0px", "--mich-tl-simulace-sirka": "auto", "--mich-tl-simulace-vyska": "auto", "--mich-tl-simulace-posun-x": "0px", "--mich-tl-simulace-posun-y": "0px", "--mich-tl-tara-sirka": "116px", "--mich-tl-tara-vyska": "100px", "--mich-tl-tara-posun-x": "0px", "--mich-tl-tara-posun-y": "0px", "--mich-tl-odpojit-sirka": "116px", "--mich-tl-odpojit-vyska": "100px", "--mich-tl-odpojit-posun-x": "0px", "--mich-tl-odpojit-posun-y": "0px", "--mich-tl-sarze-sirka": "auto", "--mich-tl-sarze-vyska": "auto", "--mich-tl-sarze-posun-x": "65px", "--mich-tl-sarze-posun-y": "0px", "--mich-tl-dalsi-sirka": "auto", "--mich-tl-dalsi-vyska": "auto", "--mich-tl-dalsi-posun-x": "0px", "--mich-tl-dalsi-posun-y": "0px", "--mich-tl-hlaseni-sirka": "auto", "--mich-tl-hlaseni-vyska": "auto", "--mich-tl-hlaseni-posun-x": "0px", "--mich-tl-hlaseni-posun-y": "0px", "--mich-tl-pomocna-sirka": "auto", "--mich-tl-pomocna-vyska": "auto", "--mich-tl-pomocna-posun-x": "0px", "--mich-tl-pomocna-posun-y": "0px", "--mich-tl-stitek-posun-x": "0px", "--mich-tl-stitek-posun-y": "0px", "--mich-prepinac-posun-x": "0px", "--mich-prepinac-posun-y": "0px", "--produkt-sloupec": "1", "--produkt-radek": "1", "--produkt-sirka": "auto", "--produkt-zarovnani": "stretch", "--produkt-vyska": "auto", "--vysledek-sloupec": "2", "--vysledek-radek": "1", "--vysledek-sirka": "auto", "--vysledek-zarovnani": "stretch", "--vysledek-vyska": "auto", "--recept-sloupec": "1", "--recept-radek": "2", "--recept-sirka": "67%", "--recept-zarovnani": "start", "--recept-vyska": "auto", "--zakazka-sloupec": "1 / -1", "--zakazka-radek": "2", "--zakazka-sirka": "32.7%", "--zakazka-zarovnani": "end", "--zakazka-vyska": "auto", "--tisk-sloupec": "1 / -1", "--tisk-radek": "2", "--tisk-sirka": "33%", "--tisk-zarovnani": "center", "--tisk-vyska": "auto"};
+var VYCH_BARVY = {"light": {"--bg": "#c9c9c9", "--paper": "#ededed", "--zvyraz": "#c8c8c8", "--pozadi-cara-barva": "#FF001A", "--ink": "#2D2D2D", "--ink-2": "#757575", "--ikona-barva": "#4A4A4A", "--line": "#d4d4d4", "--line-2": "#c6c6c6", "--key": "#2D2D2D", "--btn-ink": "#FFFFFF", "--cyan": "#2D2D2D", "--ok": "#3dc760", "--warn": "#e8c545", "--danger": "#b31919", "--logo": "#c9c9c9"}, "dark": {"--bg": "#464d53", "--paper": "#31383f", "--zvyraz": "#2b3035", "--pozadi-cara-barva": "#0085D6", "--ink": "#E2E8F0", "--ink-2": "#94A3B8", "--ikona-barva": "#CBD5E1", "--line": "#343a40", "--line-2": "#495057", "--key": "#E2E8F0", "--btn-ink": "#212529", "--cyan": "#10B981", "--ok": "#10B981", "--warn": "#F59E0B", "--danger": "#b31919", "--logo": "#464d53"}}, VYCH_STINY = {"light": {"uhel": 135, "dVelky": 16, "blurVelky": 24, "dMaly": 7, "blurMaly": 15, "dVsazeny": 6, "blurVsazeny": 6, "silaSvetla": 39, "silaStinu": 38, "logoUhel": 135, "logoD": 3, "logoBlur": 2, "logoSvetlo": 14, "logoStin": 10}, "dark": {"uhel": 135, "dVelky": 14, "blurVelky": 20, "dMaly": 7, "blurMaly": 12, "dVsazeny": 6, "blurVsazeny": 6, "silaSvetla": 8, "silaStinu": 30, "logoUhel": 135, "logoD": 3, "logoBlur": 2, "logoSvetlo": 14, "logoStin": 10}}, VYCH_TVARY = {"--radius": "32px", "--radius-btn": "999px", "--radius-pole": "20px", "--radius-dlazdice": "20px", "--radius-stitek": "999px", "--ikona": "27px", "--ikona-tah": "1.5", "--ikona-pruhlednost": "1", "--ikona-radek": "1.2em", "--pruhlednost-karty": "1", "--ikona-konec": "round", "--pozadi-cara-sirka": "14px", "--pozadi-cara-sila": "1", "--pozadi-cara-x": "-47vw", "--pozadi-cara-y": "-44vh", "--pismo": "15.5px", "--pismo-nadpis": "19.5px", "--pismo-popisek": "12.5px", "--pismo-poznamka": "14px", "--pismo-tabulka": "19px", "--pismo-vysledek": "50px", "--logo-velikost": "116px", "--prostrkani": "0.07em", "--tloustka-nadpisu": "900", "--radek": "1.4", "--mezera-karta-y": "20px", "--mezera-karta-x": "22px", "--mezera-karet": "16px", "--mezera-poli": "12px", "--pole-y": "9px", "--pole-x": "12px", "--tlacitko-y": "10px", "--tlacitko-x": "18px", "--okraj-stranky": "20px", "--sans": "system-ui,sans-serif", "--mono": "'Segoe UI',system-ui,sans-serif", "--mich-nazev": "26px", "--mich-davka": "37px", "--mich-vzorek": "52px", "--mich-hlavicka": "12px", "--mich-tabulka": "20px", "--mich-gramy": "26px", "--mich-radek": "11px", "--mich-vysledek": "64px", "--mich-wbar": "19px", "--mich-tlacitko": "14px", "--mich-mezera": "15px", "--mich-pole": "17px", "--mich-hlaseni": "14px", "--mich-stitek": "14px", "--mich-prepinac": "16px", "--mich-tl-zpet": "17px", "--mich-tl-plocha": "16px", "--mich-tl-rucne": "18px", "--mich-tl-znam": "18px", "--mich-tl-viskozita": "16px", "--mich-tl-pripojit": "16px", "--mich-tl-simulace": "16px", "--mich-tl-tara": "24.5px", "--mich-tl-odpojit": "24.5px", "--mich-tl-sarze": "15px", "--mich-tl-dalsi": "16px", "--mich-tl-stitek": "23px", "--mich-tl-hlaseni": "14px", "--mich-tl-pomocna": "15px", "--mich-nadpis": "21px", "--mich-poznamka": "14px", "--mich-znak": "25px", "--sirka-stranky": "none", "--sloupec-1": "1fr", "--sloupec-2": "1fr", "--mezera-sloupcu": "40px", "--mich-tl-zpet-sirka": "auto", "--mich-tl-zpet-vyska": "50px", "--mich-tl-zpet-posun-x": "0px", "--mich-tl-zpet-posun-y": "0px", "--mich-tl-plocha-sirka": "288px", "--mich-tl-plocha-vyska": "50px", "--mich-tl-plocha-posun-x": "0px", "--mich-tl-plocha-posun-y": "0px", "--mich-tl-rucne-sirka": "auto", "--mich-tl-rucne-vyska": "auto", "--mich-tl-rucne-posun-x": "0px", "--mich-tl-rucne-posun-y": "0px", "--mich-tl-znam-sirka": "auto", "--mich-tl-znam-vyska": "auto", "--mich-tl-znam-posun-x": "0px", "--mich-tl-znam-posun-y": "0px", "--mich-tl-viskozita-sirka": "180px", "--mich-tl-viskozita-vyska": "50px", "--mich-tl-viskozita-posun-x": "306px", "--mich-tl-viskozita-posun-y": "24px", "--mich-tl-pripojit-sirka": "auto", "--mich-tl-pripojit-vyska": "auto", "--mich-tl-pripojit-posun-x": "0px", "--mich-tl-pripojit-posun-y": "0px", "--mich-tl-simulace-sirka": "auto", "--mich-tl-simulace-vyska": "auto", "--mich-tl-simulace-posun-x": "0px", "--mich-tl-simulace-posun-y": "0px", "--mich-tl-tara-sirka": "116px", "--mich-tl-tara-vyska": "100px", "--mich-tl-tara-posun-x": "0px", "--mich-tl-tara-posun-y": "0px", "--mich-tl-odpojit-sirka": "116px", "--mich-tl-odpojit-vyska": "100px", "--mich-tl-odpojit-posun-x": "0px", "--mich-tl-odpojit-posun-y": "0px", "--mich-tl-sarze-sirka": "auto", "--mich-tl-sarze-vyska": "auto", "--mich-tl-sarze-posun-x": "65px", "--mich-tl-sarze-posun-y": "0px", "--mich-tl-dalsi-sirka": "auto", "--mich-tl-dalsi-vyska": "auto", "--mich-tl-dalsi-posun-x": "0px", "--mich-tl-dalsi-posun-y": "0px", "--mich-tl-hlaseni-sirka": "auto", "--mich-tl-hlaseni-vyska": "auto", "--mich-tl-hlaseni-posun-x": "0px", "--mich-tl-hlaseni-posun-y": "0px", "--mich-tl-pomocna-sirka": "auto", "--mich-tl-pomocna-vyska": "auto", "--mich-tl-pomocna-posun-x": "0px", "--mich-tl-pomocna-posun-y": "0px", "--mich-tl-stitek-posun-x": "0px", "--mich-tl-stitek-posun-y": "0px", "--mich-prepinac-posun-x": "0px", "--mich-prepinac-posun-y": "0px", "--produkt-sloupec": "1", "--produkt-radek": "1", "--produkt-sirka": "auto", "--produkt-zarovnani": "stretch", "--produkt-vyska": "auto", "--vysledek-sloupec": "2", "--vysledek-radek": "1", "--vysledek-sirka": "auto", "--vysledek-zarovnani": "stretch", "--vysledek-vyska": "auto", "--recept-sloupec": "1", "--recept-radek": "2", "--recept-sirka": "67%", "--recept-zarovnani": "start", "--recept-vyska": "auto", "--zakazka-sloupec": "1 / -1", "--zakazka-radek": "2", "--zakazka-sirka": "32.7%", "--zakazka-zarovnani": "end", "--zakazka-vyska": "auto", "--tisk-sloupec": "1 / -1", "--tisk-radek": "2", "--tisk-sirka": "33%", "--tisk-zarovnani": "center", "--tisk-vyska": "auto", "--hledani-sirka": "33%"};
 var STRANKY = [{"sel": "", "nazev": "Základ (celá aplikace)"}, {"sel": ".michbg", "nazev": "Míchací režim"}], VYCH_PRESAHY = {".michbg": {"light": {"--paper": "#cccccc", "--zvyraz": "#919191", "--ink": "#000000", "--ink-2": "#8b8b8b", "--line": "#9e9e9e", "--line-2": "#949494", "--key": "#000000", "--btn-ink": "#ffffff", "--cyan": "#000000", "--bg": "#ffffff"}, "dark": {"--paper": "#2e2e2e", "--zvyraz": "#545454"}}}, KARTY = [{"klic": "produkt", "nazev": "Vybraný produkt", "sel": ".karta-produkt"}, {"klic": "vysledek", "nazev": "Kolik namíchat", "sel": ".bigpanel"}, {"klic": "recept", "nazev": "Receptura a barva", "sel": ".karta-recept"}, {"klic": "zakazka", "nazev": "Zakázka", "sel": ".karta-cisla"}, {"klic": "tisk", "nazev": "Parametry tisku", "sel": ".karta-tisk"}];
 var ZAC_STRANEK = "/* ZACATEK BAREV STRANEK */", KON_STRANEK = "/* KONEC BAREV STRANEK */";
 var PRED_SVETLY = ":root:not([data-theme=\"dark\"]) ", PRED_TMAVY = ":root[data-theme=\"dark\"] ";
-var BLOK = { light: "\n  /* Vzhled z\u016fst\u00e1v\u00e1 m\u011bkk\u00fd \u2014 karty vystupuj\u00ed z plochy st\u00ednem, ne r\u00e1me\u010dkem.\n     Plocha je neutr\u00e1ln\u011b \u0161ed\u00e1 a inkoust tmav\u00fd, aby se na to dalo d\u00edvat cel\u00fd\n     den. Barevn\u00fd akcent nep\u0159ibyl; zv\u00fdrazn\u011bn\u00ed d\u011bl\u00e1 inkoust, barva z\u016fstala\n     tam, kde nese v\u00fdznam (odst\u00edn barvy, varov\u00e1n\u00ed, stav v\u00e1\u017een\u00ed). */\n  /* --bg maluje JEN plochu str\u00e1nky; v\u0161echno, co na n\u00ed le\u017e\u00ed (karty, li\u0161ty,\n     tla\u010d\u00edtka, pole, \u0161t\u00edtky), bere barvu z --paper. Ty dv\u011b prom\u011bnn\u00e9 jdou\n     nastavit nez\u00e1visle \u2014 plocha je samostatn\u00e1 jednotka. */\n  /* Plocha a povrch se od p\u0159\u00edsn\u00e9ho neumorfn\u00edho z\u00e1kladu (oboj\u00ed #E0E0E0)\n     roze\u0161ly: plocha ztmavla na #c9c9c9 a karty zesv\u011btlaly na #ededed, tak\u017ee\n     vystupuj\u00ed barvou i st\u00ednem \u2014 sv\u011btlej\u0161\u00ed povrch \u010dte oko jako \u201ebl\u00ed\u017e ke\n     sv\u011btlu\", co\u017e hraje se sm\u011brem st\u00edn\u016f (sv\u011btlo zleva shora). Dvojice st\u00edn\u016f\n     hloubku d\u00e1l nese; s rozd\u00edlem podklad\u016f karty vypadaj\u00ed m\u00ed\u0148 jako vytla\u010den\u00e9\n     z plochy a v\u00edc jako polo\u017een\u00e9 desky \u2014 to je tady z\u00e1m\u011br. */\n  --bg:#c9c9c9; --paper:#ededed; --zvyraz:#c8c8c8; --logo:#E0E0E0;\n  --ink:#2D2D2D; --ink-2:#757575; --line:#d4d4d4; --line-2:#c6c6c6;\n  --cyan:#2D2D2D; --magenta:#C97B63; --yellow:#D9B44A; --key:#2D2D2D;\n  --btn-ink:#FFFFFF; --focus:rgba(45,45,45,.20); --danger:#b31919;\n  --ok:#3dc760; --warn:#e8c545;\n  /* Tvary: ka\u017ed\u00fd druh prvku m\u00e1 vlastn\u00ed zaoblen\u00ed, aby \u0161lo ladit zvl\u00e1\u0161\u0165\n     karty, tla\u010d\u00edtka, pole a dla\u017edice. Ikony jsou kreslen\u00e9, ne obr\u00e1zkov\u00e9 \u2014\n     velikost, tlou\u0161\u0165ka tahu i zakon\u010den\u00ed se \u0159\u00edd\u00ed odsud. Ikona stoj\u00edc\u00ed uvnit\u0159\n     \u0159\u00e1dku textu se ne\u0159\u00edd\u00ed velikost\u00ed samostatn\u00fdch ikon, ale p\u00edsmem kolem sebe\n     \u2014 proto je v em a zmen\u0161\u00ed se s n\u00edm. */\n  /* Neumorfn\u00ed geometrie: karty 32 px, pole a dla\u017edice 20 px, tla\u010d\u00edtka a\n     \u0161t\u00edtky pilulka (999 px). Kontejnery nemaj\u00ed r\u00e1me\u010dky \u2014 hloubku d\u011blaj\u00ed\n     jen st\u00edny, proto se zaoblen\u00ed nesm\u00ed srazit k nule, hrana by prozradila,\n     \u017ee tam \u017e\u00e1dn\u00e1 deska nen\u00ed. */\n  --radius:32px; --radius-btn:999px; --radius-pole:20px; --radius-dlazdice:20px;\n  --radius-stitek:999px;\n  --ikona:27px; --ikona-tah:1.5; --ikona-konec:round; --ikona-pruhlednost:1;\n  --ikona-radek:1.2em; --ikona-barva:#4A4A4A;\n  --pruhlednost-karty:1;\n  /* P\u00edsmo se \u0159\u00edd\u00ed podle role, ne podle prvku: co je nadpis, co popisek, co\n     v\u00fdsledek. Zv\u011bt\u0161en\u00e9 varianty na domovsk\u00e9 str\u00e1nce se z t\u011bchto hodnot\n     dopo\u010d\u00edtaj\u00ed, tak\u017ee cel\u00e1 \u0161k\u00e1la dr\u017e\u00ed pohromad\u011b. */\n  --pismo:15.5px; --pismo-nadpis:19.5px; --pismo-popisek:12.5px;\n  --pismo-poznamka:14px; --pismo-tabulka:19px; --pismo-vysledek:50px;\n  --logo-velikost:116px; --prostrkani:0.07em; --tloustka-nadpisu:900; --radek:1.4;\n  /* Rozestupy: odsazen\u00ed uvnit\u0159 karty, mezera mezi kartami, mezera mezi poli\n     v \u0159\u00e1dku a odsazen\u00ed uvnit\u0159 pol\u00ed a tla\u010d\u00edtek (to ur\u010duje jejich v\u00fd\u0161ku). */\n  /* M\u00edchac\u00ed re\u017eim m\u00e1 vlastn\u00ed sadu rozm\u011br\u016f. Ne\u010dte se od kl\u00e1vesnice, ale od\n     v\u00e1hy \u2014 \u010dasto ve stoje a v rukavic\u00edch \u2014 tak\u017ee se lad\u00ed zvl\u00e1\u0161\u0165 od zbytku\n     aplikace a nesm\u00ed se h\u00fdbat, kdy\u017e se s\u00e1hne na obecnou \u0161k\u00e1lu. */\n  --mich-nazev:26px; --mich-davka:37px; --mich-vzorek:52px;\n  --mich-hlavicka:12px; --mich-tabulka:20px; --mich-gramy:26px;\n  --mich-radek:11px; --mich-vysledek:64px; --mich-wbar:19px;\n  --mich-tlacitko:14px; --mich-mezera:15px;\n  --mich-pole:17px; --mich-hlaseni:14px; --mich-stitek:14px;\n  --mich-prepinac:16px;\n  /* Ka\u017ed\u00e9 st\u00e1l\u00e9 tla\u010d\u00edtko m\u00edchac\u00edho re\u017eimu zvl\u00e1\u0161\u0165: hodnota je velikost p\u00edsma,\n     odsazen\u00ed se z n\u00ed dopo\u010d\u00edt\u00e1v\u00e1, tak\u017ee tvar tla\u010d\u00edtka dr\u017e\u00ed a m\u011bn\u00ed se jen\n     velikost. Lad\u00ed se na str\u00e1nce M\u00edchac\u00ed re\u017eim v barvy.html. Tla\u010d\u00edtka, kter\u00e1\n     tu vyjmenovan\u00e1 nejsou (vz\u00e1cn\u00e9 stavy), dr\u017e\u00ed spole\u010dn\u00e9 --mich-tlacitko. */\n  --mich-tl-zpet:17px; --mich-tl-plocha:16px; --mich-tl-rucne:18px;\n  --mich-tl-znam:18px; --mich-tl-viskozita:16px;\n  --mich-tl-pripojit:16px; --mich-tl-simulace:16px; --mich-tl-tara:24.5px;\n  --mich-tl-odpojit:24.5px; --mich-tl-sarze:15px; --mich-tl-dalsi:16px;\n  --mich-tl-stitek:23px; --mich-tl-hlaseni:14px; --mich-tl-pomocna:15px;\n  --mich-nadpis:21px; --mich-poznamka:14px; --mich-znak:25px;\n  /* Tvar a poloha tla\u010d\u00edtek: \u0161\u00ed\u0159ka a v\u00fd\u0161ka \u201eauto\" nechaj\u00ed tla\u010d\u00edtku tvar\n     podle textu, \u010d\u00edslo z n\u011bj ud\u011bl\u00e1 blok (stejn\u00e1 \u0161\u00ed\u0159ka a v\u00fd\u0161ka = \u010dtverec;\n     text se zalom\u00ed a vycentruje s\u00e1m, je to <button>). Posun je vizu\u00e1ln\u00ed\n     odchylka od p\u0159irozen\u00e9ho m\u00edsta v toku \u2014 tla\u010d\u00edtko se vykresl\u00ed jinde,\n     ale m\u00edsto v \u0159\u00e1dku si d\u00e1l dr\u017e\u00ed, tak\u017ee se rozvr\u017een\u00ed nerozsype. */\n  --mich-tl-zpet-sirka:auto; --mich-tl-zpet-vyska:50px; --mich-tl-zpet-posun-x:0px; --mich-tl-zpet-posun-y:0px;\n  --mich-tl-plocha-sirka:288px; --mich-tl-plocha-vyska:50px; --mich-tl-plocha-posun-x:0px; --mich-tl-plocha-posun-y:0px;\n  --mich-tl-rucne-sirka:auto; --mich-tl-rucne-vyska:auto; --mich-tl-rucne-posun-x:0px; --mich-tl-rucne-posun-y:0px;\n  --mich-tl-znam-sirka:auto; --mich-tl-znam-vyska:auto; --mich-tl-znam-posun-x:0px; --mich-tl-znam-posun-y:0px;\n  --mich-tl-viskozita-sirka:180px; --mich-tl-viskozita-vyska:50px; --mich-tl-viskozita-posun-x:306px; --mich-tl-viskozita-posun-y:24px;\n  --mich-tl-pripojit-sirka:auto; --mich-tl-pripojit-vyska:auto; --mich-tl-pripojit-posun-x:0px; --mich-tl-pripojit-posun-y:0px;\n  --mich-tl-simulace-sirka:auto; --mich-tl-simulace-vyska:auto; --mich-tl-simulace-posun-x:0px; --mich-tl-simulace-posun-y:0px;\n  --mich-tl-tara-sirka:116px; --mich-tl-tara-vyska:100px; --mich-tl-tara-posun-x:0px; --mich-tl-tara-posun-y:0px;\n  --mich-tl-odpojit-sirka:116px; --mich-tl-odpojit-vyska:100px; --mich-tl-odpojit-posun-x:0px; --mich-tl-odpojit-posun-y:0px;\n  --mich-tl-sarze-sirka:auto; --mich-tl-sarze-vyska:auto; --mich-tl-sarze-posun-x:65px; --mich-tl-sarze-posun-y:0px;\n  --mich-tl-dalsi-sirka:auto; --mich-tl-dalsi-vyska:auto; --mich-tl-dalsi-posun-x:0px; --mich-tl-dalsi-posun-y:0px;\n  --mich-tl-hlaseni-sirka:auto; --mich-tl-hlaseni-vyska:auto; --mich-tl-hlaseni-posun-x:0px; --mich-tl-hlaseni-posun-y:0px;\n  --mich-tl-pomocna-sirka:auto; --mich-tl-pomocna-vyska:auto; --mich-tl-pomocna-posun-x:0px; --mich-tl-pomocna-posun-y:0px;\n  --mich-tl-stitek-posun-x:0px; --mich-tl-stitek-posun-y:0px;\n  --mich-prepinac-posun-x:0px; --mich-prepinac-posun-y:0px;\n  --mezera-karta-y:20px; --mezera-karta-x:22px; --mezera-karet:16px;\n  --mezera-poli:12px; --pole-y:9px; --pole-x:12px;\n  --tlacitko-y:10px; --tlacitko-x:18px; --okraj-stranky:20px;\n  /* Rozvr\u017een\u00ed hlavn\u00ed str\u00e1nky: kde kter\u00e1 karta stoj\u00ed, jak je \u0161irok\u00e1 a jak\n     vysok\u00e1. Ka\u017ed\u00e1 karta m\u00e1 sloupec, \u0159\u00e1dek, \u0161\u00ed\u0159ku, zarovn\u00e1n\u00ed a nejmen\u0161\u00ed v\u00fd\u0161ku\n     \u2014 dohromady tedy polohu i velikost. Lad\u00ed se v barvy.html na str\u00e1nce\n     Rozvr\u017een\u00ed; plat\u00ed od \u0161\u00ed\u0159ky okna 960 px, pod n\u00ed se karty skl\u00e1daj\u00ed pod sebe.\n     Dv\u011b karty ve stejn\u00e9m sloupci a \u0159\u00e1dku by se p\u0159ekryly \u2014 n\u00e1stroj to hl\u00edd\u00e1. */\n  --sirka-stranky:none; --sloupec-1:1fr; --sloupec-2:1fr; --mezera-sloupcu:40px;\n  --produkt-sloupec:1; --produkt-radek:1; --produkt-sirka:auto;\n  --produkt-zarovnani:stretch; --produkt-vyska:auto;\n  --vysledek-sloupec:2; --vysledek-radek:1; --vysledek-sirka:auto;\n  --vysledek-zarovnani:stretch; --vysledek-vyska:auto;\n  --recept-sloupec:1; --recept-radek:2; --recept-sirka:67%;\n  --recept-zarovnani:start; --recept-vyska:auto;\n  --zakazka-sloupec:1 / -1; --zakazka-radek:2; --zakazka-sirka:32.7%;\n  --zakazka-zarovnani:end; --zakazka-vyska:auto;\n  --tisk-sloupec:1 / -1; --tisk-radek:2;\n  --tisk-sirka:33%;\n  --tisk-zarovnani:center; --tisk-vyska:auto;\n  /* St\u00edny jsou ve tvaru rgba(b\u00edl\u00e1)+rgba(\u010dern\u00e1) \u2014 jedin\u00fd tvar, kter\u00fd um\u00ed\n     barvy.html \u010d\u00edst a ladit. Proti neumorfn\u00edmu z\u00e1kladu jsou ztlumen\u00e9: b\u00edl\u00e1\n     kolem 37\u201339 % \u2014 karty jsou samy sv\u011btl\u00e9, siln\u011bj\u0161\u00ed \u201eosv\u00edcen\u00ed\" by kolem\n     nich na \u0161ed\u00e9 plo\u0161e sv\u00edtilo \u2014 a \u010dern\u00e1 je siln\u011bj\u0161\u00ed, aby hloubka dr\u017eela. */\n  --neu:-11px -11px 24px rgba(255,255,255,0.39), 11px 11px 24px rgba(0,0,0,0.38);\n  --neu-sm:-5px -5px 15px rgba(255,255,255,0.371), 5px 5px 15px rgba(0,0,0,0.418);\n  --neu-in:inset 4px 4px 6px rgba(0,0,0,0.342), inset -4px -4px 6px rgba(255,255,255,0.371);\n  --neu-in-lg:inset 6px 6px 9px rgba(0,0,0,0.38), inset -6px -6px 9px rgba(255,255,255,0.39);\n  --modal-shadow:0 15px 48px rgba(0,0,0,0.76);\n  --logo-shadow:-2px -2px 2px rgba(255,255,255,0.14), 2px 2px 2px rgba(0,0,0,0.1);\n  --mono:'Segoe UI',system-ui,sans-serif;\n  --sans:system-ui,sans-serif;\n", dark: "\n  /* Tmav\u00fd neumorfismus: plocha #373d43, povrch o chlup tmav\u0161\u00ed #31383f \u2014 ne\n     \u010dern\u00e1, na \u010dern\u00e9 nejde plochu \u201eosv\u00edtit\" a horn\u00ed sv\u011btl\u00fd st\u00edn by zmizel.\n     Hloubku d\u011bl\u00e1 tmav\u00fd st\u00edn vpravo dole a jemn\u011b sv\u011btlej\u0161\u00ed \u0161e\u010f vlevo naho\u0159e,\n     \u017e\u00e1dn\u00e9 r\u00e1me\u010dky; rozd\u00edl podklad\u016f je stejn\u011b jako ve sv\u011btl\u00e9m motivu z\u00e1m\u011brn\u011b\n     mal\u00fd. Aktivn\u00ed prvky nesou zelen\u00fd akcent (#10B981), upozorn\u011bn\u00ed tepl\u00fd\n     oran\u017eov\u00fd (#F59E0B). Hlavn\u00ed tla\u010d\u00edtko je sv\u011btl\u00e9 s tmav\u00fdm p\u00edsmem. */\n  --bg:#373d43; --paper:#31383f; --zvyraz:#2b3035; --logo:#212529;\n  --ink:#E2E8F0; --ink-2:#94A3B8; --line:#343a40; --line-2:#495057;\n  --cyan:#10B981; --magenta:#C97B63; --yellow:#D9B44A; --key:#E2E8F0;\n  --btn-ink:#212529; --focus:rgba(226,232,240,.22); --danger:#b31919;\n  --ok:#10B981; --warn:#F59E0B;\n  --ikona-barva:#CBD5E1;\n  /* St\u00edny v rgba kv\u016fli barvy.html \u2014 viz pozn\u00e1mka u sv\u011btl\u00fdch st\u00edn\u016f. Tmav\u00e9\n     odst\u00edny jsou \u010dern\u00e1 27\u201333 %, sv\u011btl\u00e9 b\u00edl\u00e1 7,6\u20138 %; b\u00edl\u00e1 je proti p\u016fvodn\u00edmu\n     n\u00e1vrhu siln\u011bj\u0161\u00ed, proto\u017ee plocha zesv\u011btlala a slab\u0161\u00ed \u201eosv\u00edcen\u00ed\" by na n\u00ed\n     zaniklo. */\n  --neu:-10px -10px 20px rgba(255,255,255,0.08), 10px 10px 20px rgba(0,0,0,0.3);\n  --neu-sm:-5px -5px 12px rgba(255,255,255,0.076), 5px 5px 12px rgba(0,0,0,0.33);\n  --neu-in:inset 4px 4px 6px rgba(0,0,0,0.27), inset -4px -4px 6px rgba(255,255,255,0.076);\n  --neu-in-lg:inset 6px 6px 9px rgba(0,0,0,0.3), inset -6px -6px 9px rgba(255,255,255,0.08);\n  --modal-shadow:0 14px 40px rgba(0,0,0,0.6);\n  --logo-shadow:-2px -2px 2px rgba(255,255,255,0.14), 2px 2px 2px rgba(0,0,0,0.1);\n" };
+var BLOK = { light: "\n  /* Vzhled z\u016fst\u00e1v\u00e1 m\u011bkk\u00fd \u2014 karty vystupuj\u00ed z plochy st\u00ednem, ne r\u00e1me\u010dkem.\n     Plocha je neutr\u00e1ln\u011b \u0161ed\u00e1 a inkoust tmav\u00fd, aby se na to dalo d\u00edvat cel\u00fd\n     den. Barevn\u00fd akcent nep\u0159ibyl; zv\u00fdrazn\u011bn\u00ed d\u011bl\u00e1 inkoust, barva z\u016fstala\n     tam, kde nese v\u00fdznam (odst\u00edn barvy, varov\u00e1n\u00ed, stav v\u00e1\u017een\u00ed). */\n  /* --bg maluje JEN plochu str\u00e1nky; v\u0161echno, co na n\u00ed le\u017e\u00ed (karty, li\u0161ty,\n     tla\u010d\u00edtka, pole, \u0161t\u00edtky), bere barvu z --paper. Ty dv\u011b prom\u011bnn\u00e9 jdou\n     nastavit nez\u00e1visle \u2014 plocha je samostatn\u00e1 jednotka. */\n  /* Plocha a povrch se od p\u0159\u00edsn\u00e9ho neumorfn\u00edho z\u00e1kladu (oboj\u00ed #E0E0E0)\n     roze\u0161ly: plocha ztmavla na #c9c9c9 a karty zesv\u011btlaly na #ededed, tak\u017ee\n     vystupuj\u00ed barvou i st\u00ednem \u2014 sv\u011btlej\u0161\u00ed povrch \u010dte oko jako \u201ebl\u00ed\u017e ke\n     sv\u011btlu\", co\u017e hraje se sm\u011brem st\u00edn\u016f (sv\u011btlo zleva shora). Dvojice st\u00edn\u016f\n     hloubku d\u00e1l nese; s rozd\u00edlem podklad\u016f karty vypadaj\u00ed m\u00ed\u0148 jako vytla\u010den\u00e9\n     z plochy a v\u00edc jako polo\u017een\u00e9 desky \u2014 to je tady z\u00e1m\u011br. */\n  --bg:#c9c9c9; --paper:#ededed; --zvyraz:#c8c8c8; --logo:#c9c9c9;\n  --ink:#2D2D2D; --ink-2:#757575; --line:#d4d4d4; --line-2:#c6c6c6;\n  --cyan:#2D2D2D; --magenta:#C97B63; --yellow:#D9B44A; --key:#2D2D2D;\n  --btn-ink:#FFFFFF; --focus:rgba(45,45,45,.20); --danger:#b31919;\n  --ok:#3dc760; --warn:#e8c545;\n  /* \u010c\u00e1ra p\u0159es plochu. Barvy jsou zadan\u00e9 v CMYK, proto\u017ee tak se v d\u00edln\u011b\n     barva popisuje; do RGB se p\u0159epo\u010d\u00edtaly stejnou \u00favahou, jakou m\u00e1\n     aplikace v rgbNaCmyk (120-barva-potisku.js) \u2014 jen obr\u00e1cen\u011b, tedy\n     R = 255 \u00d7 (1\u2212C) \u00d7 (1\u2212K). Zp\u011btn\u00fd p\u0159evod d\u00e1 zadan\u00e9 hodnoty p\u0159esn\u011b:\n     #FF001A \u2192 0/100/90/0. Tlou\u0161\u0165ka je kolm\u00e1 \u0161\u00ed\u0159ka p\u00e1su, ne vodorovn\u00e1.\n     Poloha \u010d\u00e1ry se \u0159\u00edd\u00ed posunem v os\u00e1ch okna: 0 / 0 ji vede st\u0159edem\n     plochy od rohu k rohu, 0 / \u221250vh ji zvedne tak, aby za\u010d\u00ednala uprost\u0159ed\n     horn\u00ed hrany. Nastaveno je \u221247vw / \u221244vh \u2014 \u010d\u00e1ra t\u00edm vyjde z lev\u00e9ho\n     horn\u00edho rohu a proch\u00e1z\u00ed celou plochou. Posun ve sm\u011bru samotn\u00e9 \u010d\u00e1ry\n     (stejn\u00fd po\u010det pixel\u016f v obou os\u00e1ch) se neprojev\u00ed \u2014 vid\u011bt je jen slo\u017eka\n     kolm\u00e1 na ni; p\u00e1s je pod 45\u00b0, tak\u017ee na horn\u00ed hran\u011b posune pr\u016fse\u010d\u00edk\n     ka\u017ed\u00fd 1 px vodorovn\u011b o +1 px a ka\u017ed\u00fd 1 px svisle o \u22121 px. */\n  --pozadi-cara-barva:#FF001A; --pozadi-cara-sirka:14px; --pozadi-cara-sila:1;\n  --pozadi-cara-x:-47vw; --pozadi-cara-y:-44vh;\n  /* Tvary: ka\u017ed\u00fd druh prvku m\u00e1 vlastn\u00ed zaoblen\u00ed, aby \u0161lo ladit zvl\u00e1\u0161\u0165\n     karty, tla\u010d\u00edtka, pole a dla\u017edice. Ikony jsou kreslen\u00e9, ne obr\u00e1zkov\u00e9 \u2014\n     velikost, tlou\u0161\u0165ka tahu i zakon\u010den\u00ed se \u0159\u00edd\u00ed odsud. Ikona stoj\u00edc\u00ed uvnit\u0159\n     \u0159\u00e1dku textu se ne\u0159\u00edd\u00ed velikost\u00ed samostatn\u00fdch ikon, ale p\u00edsmem kolem sebe\n     \u2014 proto je v em a zmen\u0161\u00ed se s n\u00edm. */\n  /* Neumorfn\u00ed geometrie: karty 32 px, pole a dla\u017edice 20 px, tla\u010d\u00edtka a\n     \u0161t\u00edtky pilulka (999 px). Kontejnery nemaj\u00ed r\u00e1me\u010dky \u2014 hloubku d\u011blaj\u00ed\n     jen st\u00edny, proto se zaoblen\u00ed nesm\u00ed srazit k nule, hrana by prozradila,\n     \u017ee tam \u017e\u00e1dn\u00e1 deska nen\u00ed. */\n  --radius:32px; --radius-btn:999px; --radius-pole:20px; --radius-dlazdice:20px;\n  --radius-stitek:999px;\n  --ikona:27px; --ikona-tah:1.5; --ikona-konec:round; --ikona-pruhlednost:1;\n  --ikona-radek:1.2em; --ikona-barva:#4A4A4A;\n  --pruhlednost-karty:1;\n  /* P\u00edsmo se \u0159\u00edd\u00ed podle role, ne podle prvku: co je nadpis, co popisek, co\n     v\u00fdsledek. Zv\u011bt\u0161en\u00e9 varianty na domovsk\u00e9 str\u00e1nce se z t\u011bchto hodnot\n     dopo\u010d\u00edtaj\u00ed, tak\u017ee cel\u00e1 \u0161k\u00e1la dr\u017e\u00ed pohromad\u011b. */\n  --pismo:15.5px; --pismo-nadpis:19.5px; --pismo-popisek:12.5px;\n  --pismo-poznamka:14px; --pismo-tabulka:19px; --pismo-vysledek:50px;\n  --logo-velikost:116px; --prostrkani:0.07em; --tloustka-nadpisu:900; --radek:1.4;\n  /* Rozestupy: odsazen\u00ed uvnit\u0159 karty, mezera mezi kartami, mezera mezi poli\n     v \u0159\u00e1dku a odsazen\u00ed uvnit\u0159 pol\u00ed a tla\u010d\u00edtek (to ur\u010duje jejich v\u00fd\u0161ku). */\n  /* M\u00edchac\u00ed re\u017eim m\u00e1 vlastn\u00ed sadu rozm\u011br\u016f. Ne\u010dte se od kl\u00e1vesnice, ale od\n     v\u00e1hy \u2014 \u010dasto ve stoje a v rukavic\u00edch \u2014 tak\u017ee se lad\u00ed zvl\u00e1\u0161\u0165 od zbytku\n     aplikace a nesm\u00ed se h\u00fdbat, kdy\u017e se s\u00e1hne na obecnou \u0161k\u00e1lu. */\n  --mich-nazev:26px; --mich-davka:37px; --mich-vzorek:52px;\n  --mich-hlavicka:12px; --mich-tabulka:20px; --mich-gramy:26px;\n  --mich-radek:11px; --mich-vysledek:64px; --mich-wbar:19px;\n  --mich-tlacitko:14px; --mich-mezera:15px;\n  --mich-pole:17px; --mich-hlaseni:14px; --mich-stitek:14px;\n  --mich-prepinac:16px;\n  /* Ka\u017ed\u00e9 st\u00e1l\u00e9 tla\u010d\u00edtko m\u00edchac\u00edho re\u017eimu zvl\u00e1\u0161\u0165: hodnota je velikost p\u00edsma,\n     odsazen\u00ed se z n\u00ed dopo\u010d\u00edt\u00e1v\u00e1, tak\u017ee tvar tla\u010d\u00edtka dr\u017e\u00ed a m\u011bn\u00ed se jen\n     velikost. Lad\u00ed se na str\u00e1nce M\u00edchac\u00ed re\u017eim v barvy.html. Tla\u010d\u00edtka, kter\u00e1\n     tu vyjmenovan\u00e1 nejsou (vz\u00e1cn\u00e9 stavy), dr\u017e\u00ed spole\u010dn\u00e9 --mich-tlacitko. */\n  --mich-tl-zpet:17px; --mich-tl-plocha:16px; --mich-tl-rucne:18px;\n  --mich-tl-znam:18px; --mich-tl-viskozita:16px;\n  --mich-tl-pripojit:16px; --mich-tl-simulace:16px; --mich-tl-tara:24.5px;\n  --mich-tl-odpojit:24.5px; --mich-tl-sarze:15px; --mich-tl-dalsi:16px;\n  --mich-tl-stitek:23px; --mich-tl-hlaseni:14px; --mich-tl-pomocna:15px;\n  --mich-nadpis:21px; --mich-poznamka:14px; --mich-znak:25px;\n  /* Tvar a poloha tla\u010d\u00edtek: \u0161\u00ed\u0159ka a v\u00fd\u0161ka \u201eauto\" nechaj\u00ed tla\u010d\u00edtku tvar\n     podle textu, \u010d\u00edslo z n\u011bj ud\u011bl\u00e1 blok (stejn\u00e1 \u0161\u00ed\u0159ka a v\u00fd\u0161ka = \u010dtverec;\n     text se zalom\u00ed a vycentruje s\u00e1m, je to <button>). Posun je vizu\u00e1ln\u00ed\n     odchylka od p\u0159irozen\u00e9ho m\u00edsta v toku \u2014 tla\u010d\u00edtko se vykresl\u00ed jinde,\n     ale m\u00edsto v \u0159\u00e1dku si d\u00e1l dr\u017e\u00ed, tak\u017ee se rozvr\u017een\u00ed nerozsype. */\n  --mich-tl-zpet-sirka:auto; --mich-tl-zpet-vyska:50px; --mich-tl-zpet-posun-x:0px; --mich-tl-zpet-posun-y:0px;\n  --mich-tl-plocha-sirka:288px; --mich-tl-plocha-vyska:50px; --mich-tl-plocha-posun-x:0px; --mich-tl-plocha-posun-y:0px;\n  --mich-tl-rucne-sirka:auto; --mich-tl-rucne-vyska:auto; --mich-tl-rucne-posun-x:0px; --mich-tl-rucne-posun-y:0px;\n  --mich-tl-znam-sirka:auto; --mich-tl-znam-vyska:auto; --mich-tl-znam-posun-x:0px; --mich-tl-znam-posun-y:0px;\n  --mich-tl-viskozita-sirka:180px; --mich-tl-viskozita-vyska:50px; --mich-tl-viskozita-posun-x:306px; --mich-tl-viskozita-posun-y:24px;\n  --mich-tl-pripojit-sirka:auto; --mich-tl-pripojit-vyska:auto; --mich-tl-pripojit-posun-x:0px; --mich-tl-pripojit-posun-y:0px;\n  --mich-tl-simulace-sirka:auto; --mich-tl-simulace-vyska:auto; --mich-tl-simulace-posun-x:0px; --mich-tl-simulace-posun-y:0px;\n  --mich-tl-tara-sirka:116px; --mich-tl-tara-vyska:100px; --mich-tl-tara-posun-x:0px; --mich-tl-tara-posun-y:0px;\n  --mich-tl-odpojit-sirka:116px; --mich-tl-odpojit-vyska:100px; --mich-tl-odpojit-posun-x:0px; --mich-tl-odpojit-posun-y:0px;\n  --mich-tl-sarze-sirka:auto; --mich-tl-sarze-vyska:auto; --mich-tl-sarze-posun-x:65px; --mich-tl-sarze-posun-y:0px;\n  --mich-tl-dalsi-sirka:auto; --mich-tl-dalsi-vyska:auto; --mich-tl-dalsi-posun-x:0px; --mich-tl-dalsi-posun-y:0px;\n  --mich-tl-hlaseni-sirka:auto; --mich-tl-hlaseni-vyska:auto; --mich-tl-hlaseni-posun-x:0px; --mich-tl-hlaseni-posun-y:0px;\n  --mich-tl-pomocna-sirka:auto; --mich-tl-pomocna-vyska:auto; --mich-tl-pomocna-posun-x:0px; --mich-tl-pomocna-posun-y:0px;\n  --mich-tl-stitek-posun-x:0px; --mich-tl-stitek-posun-y:0px;\n  --mich-prepinac-posun-x:0px; --mich-prepinac-posun-y:0px;\n  --mezera-karta-y:20px; --mezera-karta-x:22px; --mezera-karet:16px;\n  --mezera-poli:12px; --pole-y:9px; --pole-x:12px;\n  --tlacitko-y:10px; --tlacitko-x:18px; --okraj-stranky:20px;\n  /* Rozvr\u017een\u00ed hlavn\u00ed str\u00e1nky: kde kter\u00e1 karta stoj\u00ed, jak je \u0161irok\u00e1 a jak\n     vysok\u00e1. Ka\u017ed\u00e1 karta m\u00e1 sloupec, \u0159\u00e1dek, \u0161\u00ed\u0159ku, zarovn\u00e1n\u00ed a nejmen\u0161\u00ed v\u00fd\u0161ku\n     \u2014 dohromady tedy polohu i velikost. Lad\u00ed se v barvy.html na str\u00e1nce\n     Rozvr\u017een\u00ed; plat\u00ed od \u0161\u00ed\u0159ky okna 960 px, pod n\u00ed se karty skl\u00e1daj\u00ed pod sebe.\n     Dv\u011b karty ve stejn\u00e9m sloupci a \u0159\u00e1dku by se p\u0159ekryly \u2014 n\u00e1stroj to hl\u00edd\u00e1. */\n  --sirka-stranky:none; --sloupec-1:1fr; --sloupec-2:1fr; --mezera-sloupcu:40px;\n  --produkt-sloupec:1; --produkt-radek:1; --produkt-sirka:auto;\n  --produkt-zarovnani:stretch; --produkt-vyska:auto;\n  --vysledek-sloupec:2; --vysledek-radek:1; --vysledek-sirka:auto;\n  --vysledek-zarovnani:stretch; --vysledek-vyska:auto;\n  --recept-sloupec:1; --recept-radek:2; --recept-sirka:67%;\n  --recept-zarovnani:start; --recept-vyska:auto;\n  --zakazka-sloupec:1 / -1; --zakazka-radek:2; --zakazka-sirka:32.7%;\n  --zakazka-zarovnani:end; --zakazka-vyska:auto;\n  --tisk-sloupec:1 / -1; --tisk-radek:2;\n  --tisk-sirka:33%;\n  --tisk-zarovnani:center; --tisk-vyska:auto;\n  /* Vyhled\u00e1v\u00e1n\u00ed katalogu nad kartami: p\u0159es celou str\u00e1nku p\u016fsobilo jako ciz\u00ed\n     pruh nad soum\u011brnou m\u0159\u00ed\u017ekou. Dr\u017e\u00ed proto tut\u00e9\u017e \u0161\u00ed\u0159ku jako prost\u0159edn\u00ed karta\n     (parametry tisku) a stoj\u00ed na st\u0159edu \u2014 hrany pole l\u00edcuj\u00ed s hranami karet.\n     Plat\u00ed od 960 px; pod t\u00edm se karty skl\u00e1daj\u00ed a pole pot\u0159ebuje celou \u0161\u00ed\u0159ku. */\n  --hledani-sirka:33%;\n  /* St\u00edny jsou ve tvaru rgba(b\u00edl\u00e1)+rgba(\u010dern\u00e1) \u2014 jedin\u00fd tvar, kter\u00fd um\u00ed\n     barvy.html \u010d\u00edst a ladit. Proti neumorfn\u00edmu z\u00e1kladu jsou ztlumen\u00e9: b\u00edl\u00e1\n     kolem 37\u201339 % \u2014 karty jsou samy sv\u011btl\u00e9, siln\u011bj\u0161\u00ed \u201eosv\u00edcen\u00ed\" by kolem\n     nich na \u0161ed\u00e9 plo\u0161e sv\u00edtilo \u2014 a \u010dern\u00e1 je siln\u011bj\u0161\u00ed, aby hloubka dr\u017eela. */\n  --neu:-11px -11px 24px rgba(255,255,255,0.39), 11px 11px 24px rgba(0,0,0,0.38);\n  --neu-sm:-5px -5px 15px rgba(255,255,255,0.371), 5px 5px 15px rgba(0,0,0,0.418);\n  --neu-in:inset 4px 4px 6px rgba(0,0,0,0.342), inset -4px -4px 6px rgba(255,255,255,0.371);\n  --neu-in-lg:inset 6px 6px 9px rgba(0,0,0,0.38), inset -6px -6px 9px rgba(255,255,255,0.39);\n  --modal-shadow:0 16px 48px rgba(0,0,0,0.76);\n  --logo-shadow:-2px -2px 2px rgba(255,255,255,0.14), 2px 2px 2px rgba(0,0,0,0.1);\n  --mono:'Segoe UI',system-ui,sans-serif;\n  --sans:system-ui,sans-serif;\n", dark: "\n  /* Tmav\u00fd neumorfismus: plocha #464d53, povrch tmav\u0161\u00ed #31383f \u2014 ne\n     \u010dern\u00e1, na \u010dern\u00e9 nejde plochu \u201eosv\u00edtit\" a horn\u00ed sv\u011btl\u00fd st\u00edn by zmizel.\n     Hloubku d\u011bl\u00e1 tmav\u00fd st\u00edn vpravo dole a jemn\u011b sv\u011btlej\u0161\u00ed \u0161e\u010f vlevo naho\u0159e,\n     \u017e\u00e1dn\u00e9 r\u00e1me\u010dky; rozd\u00edl podklad\u016f je tu v\u011bt\u0161\u00ed ne\u017e ve sv\u011btl\u00e9m motivu \u2014\n     zesv\u011btlen\u00e1 plocha nech\u00e1v\u00e1 tmav\u0161\u00ed karty vystoupit stejn\u00fdm sm\u011brem jako\n     ve sv\u011btl\u00e9m motivu, jen obr\u00e1cen\u011b (karta je \u201ed\u00e1l od sv\u011btla\"). Aktivn\u00ed\n     prvky nesou zelen\u00fd akcent (#10B981), upozorn\u011bn\u00ed tepl\u00fd oran\u017eov\u00fd\n     (#F59E0B). Hlavn\u00ed tla\u010d\u00edtko je sv\u011btl\u00e9 s tmav\u00fdm p\u00edsmem. Logo v obou\n     motivech spl\u00fdv\u00e1 s plochou (--logo = --bg), vystupuje jen st\u00ednem. */\n  --bg:#464d53; --paper:#31383f; --zvyraz:#2b3035; --logo:#464d53;\n  /* V noci je \u010d\u00e1ra modr\u00e1: CMYK 100/38/0/16 \u2192 #0085D6 (zp\u011btn\u00fd p\u0159evod\n     vrac\u00ed zadan\u00e9 hodnoty p\u0159esn\u011b). Tlou\u0161\u0165ku i s\u00edlu dr\u017e\u00ed spole\u010dn\u00e9 prom\u011bnn\u00e9\n     ze sv\u011btl\u00e9ho bloku. */\n  --pozadi-cara-barva:#0085D6;\n  --ink:#E2E8F0; --ink-2:#94A3B8; --line:#343a40; --line-2:#495057;\n  --cyan:#10B981; --magenta:#C97B63; --yellow:#D9B44A; --key:#E2E8F0;\n  --btn-ink:#212529; --focus:rgba(226,232,240,.22); --danger:#b31919;\n  --ok:#10B981; --warn:#F59E0B;\n  --ikona-barva:#CBD5E1;\n  /* St\u00edny v rgba kv\u016fli barvy.html \u2014 viz pozn\u00e1mka u sv\u011btl\u00fdch st\u00edn\u016f. Tmav\u00e9\n     odst\u00edny jsou \u010dern\u00e1 27\u201333 %, sv\u011btl\u00e9 b\u00edl\u00e1 7,6\u20138 %; b\u00edl\u00e1 je proti p\u016fvodn\u00edmu\n     n\u00e1vrhu siln\u011bj\u0161\u00ed, proto\u017ee plocha zesv\u011btlala a slab\u0161\u00ed \u201eosv\u00edcen\u00ed\" by na n\u00ed\n     zaniklo. */\n  --neu:-10px -10px 20px rgba(255,255,255,0.08), 10px 10px 20px rgba(0,0,0,0.3);\n  --neu-sm:-5px -5px 12px rgba(255,255,255,0.076), 5px 5px 12px rgba(0,0,0,0.33);\n  --neu-in:inset 4px 4px 6px rgba(0,0,0,0.27), inset -4px -4px 6px rgba(255,255,255,0.076);\n  --neu-in-lg:inset 6px 6px 9px rgba(0,0,0,0.3), inset -6px -6px 9px rgba(255,255,255,0.08);\n  --modal-shadow:0 14px 40px rgba(0,0,0,0.6);\n  --logo-shadow:-2px -2px 2px rgba(255,255,255,0.14), 2px 2px 2px rgba(0,0,0,0.1);\n" };
 var barvy = JSON.parse(JSON.stringify(VYCH_BARVY));
 var stiny = JSON.parse(JSON.stringify(VYCH_STINY));
 var tvary = JSON.parse(JSON.stringify(VYCH_TVARY));

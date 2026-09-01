@@ -151,6 +151,9 @@ function zapisCenyDoCsv(text, zmeny) {
   // tatáž tabulka materiálů a totéž pravidlo: mění se jen dotčené buňky
   const iVoc = dopln("voc", /^(voc|t.kav|tekav|volatile)/);
   const iList = dopln("bezplist", /^(bezplist|bezp|sds|msds|safety)/);
+  // ke které barevné řadě barva patří — bez toho je soubor pro člověka
+  // hromada německých názvů bez ladu; víc řad odděluje svislítko
+  const iRada = dopln("rada", /^(rada|.ada|series)/);
   radky[0] = hlavicka.join(";");
 
   // odkaz na bezpečnostní list může nést středník (URL s parametry) — bez
@@ -166,7 +169,7 @@ function zapisCenyDoCsv(text, zmeny) {
     const klic = String(b[iNazev] || "").trim().toLowerCase();
     const z = zbyva.get(klic);
     if (!z) continue;
-    while (b.length <= Math.max(iCena, iMena, iJed, iVoc, iList)) b.push("");
+    while (b.length <= Math.max(iCena, iMena, iJed, iVoc, iList, iRada)) b.push("");
     b[iCena] = z.cena == null || z.cena === "" ? "" : cislo(z.cena, 2);
     b[iMena] = z.mena || "";
     b[iJed] = z.jednotka || "";
@@ -174,6 +177,7 @@ function zapisCenyDoCsv(text, zmeny) {
     // co v buňkách už je (nula u VOC je platný údaj, maže jen prázdno)
     if (z.voc !== undefined) b[iVoc] = z.voc == null || z.voc === "" ? "" : cislo(z.voc, 2);
     if (z.bezplist !== undefined) b[iList] = bunka(z.bezplist || "");
+    if (z.rada !== undefined) b[iRada] = bunka(z.rada || "");
     radky[i] = b.join(";");
     zbyva.delete(klic);
   }
@@ -191,6 +195,7 @@ function zapisCenyDoCsv(text, zmeny) {
     b[iJed] = z.jednotka || "";
     if (z.voc !== undefined) b[iVoc] = z.voc == null || z.voc === "" ? "" : cislo(z.voc, 2);
     if (z.bezplist !== undefined) b[iList] = bunka(z.bezplist || "");
+    if (z.rada !== undefined) b[iRada] = bunka(z.rada || "");
     while (radky.length && !radky[radky.length - 1].trim()) radky.pop();
     radky.push(b.join(";"));
   }
