@@ -25,8 +25,9 @@ Bez --rada se jméno řady odvodí z názvu souboru (MIXFORM_10KK_B_... →
 RUCOLOR 10KK). Bez --vystup se CSV jmenuje receptury_<řada bez mezer>.csv
 a uloží se do složky "databaze barev".
 
-Odstíny (hex) v PDF nejsou, dohledávají se podle názvu pantonu v databázích,
-které už ve složce jsou — stejně jako u prevod_printcolor.py.
+Odstíny (hex) v PDF nejsou, berou se z tabulky parametry/odstiny_pantone.csv.
+Pantony, které v ní ještě nejsou, doplní "python odstiny.py --stahni" — ten
+je stáhne a rovnou zapíše do všech databází.
 
 Vyžaduje knihovnu pypdfium2 (python -m pip install pypdfium2) — bez ní
 pdf_spec neumí souřadnice jednotlivých znaků a tenhle převod nejde udělat
@@ -182,23 +183,18 @@ def zaznamy_ze_stranky(page):
 
 
 def odstiny_z_databazi():
-    """Pantone → hex z CSV, která už ve složce 'databaze barev' jsou."""
-    mapa = {}
-    if not os.path.isdir(CIL):
-        return mapa
-    for jmeno in os.listdir(CIL):
-        if not jmeno.lower().endswith(".csv"):
-            continue
-        try:
-            with open(os.path.join(CIL, jmeno), encoding="utf-8-sig", newline="") as f:
-                for radek in csv.DictReader(f, delimiter=";"):
-                    nazev = (radek.get("nazev") or "").strip().upper()
-                    hex_ = (radek.get("hex") or "").strip()
-                    if nazev.startswith("PANTONE") and hex_:
-                        mapa.setdefault(re.sub(r"\s+", " ", nazev), hex_)
-        except Exception:
-            continue
-    return mapa
+    """Pantone → hex z tabulky parametry/odstiny_pantone.csv.
+
+    Dřív se hex bral „ze sousední databáze, kde už nějaký je". Bylo to
+    pohodlné, ale každý převod tím roznášel chyby toho předchozího: při
+    kontrole proti colorxs.com mělo 139 ze 141 namátkou ověřených odstínů
+    odchylku ΔE nad 5, medián 26,8. Zdroj je proto jeden a společný; co
+    v něm není, zůstane prázdné a doplní ho odstiny.py --stahni."""
+    try:
+        import odstiny
+    except Exception:
+        return {}
+    return dict((p, v["hex"].lstrip("#")) for p, v in odstiny.nacti_tabulku().items())
 
 
 def rada_z_nazvu_souboru(cesta):

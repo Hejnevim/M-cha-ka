@@ -16,9 +16,9 @@ Použití:
 Bez --vystup se jméno odvodí z míchacího systému (MS 786 → receptury_PMS_786.csv)
 a soubor se uloží do složky "databaze barev".
 
-Odstíny (hex) v PDF nejsou, dohledávají se podle názvu pantonu v databázích,
-které už ve složce jsou. Co se nedohledá, zůstane prázdné — aplikace pak
-u takové receptury neporadí s korekcí ani s prosvítáním, ale míchat podle ní jde.
+Odstíny (hex) v PDF nejsou, berou se z tabulky parametry/odstiny_pantone.csv.
+Pantony, které v ní ještě nejsou, doplní "python odstiny.py --stahni" — ten
+je stáhne a rovnou zapíše do všech databází.
 """
 
 import argparse
@@ -88,23 +88,18 @@ def zaznamy_z_textu(text):
 
 
 def odstiny_z_databazi():
-    """Pantone → hex z CSV, která už ve složce jsou."""
-    mapa = {}
-    if not os.path.isdir(CIL):
-        return mapa
-    for jmeno in os.listdir(CIL):
-        if not jmeno.lower().endswith(".csv"):
-            continue
-        try:
-            with open(os.path.join(CIL, jmeno), encoding="utf-8-sig", newline="") as f:
-                for radek in csv.DictReader(f, delimiter=";"):
-                    nazev = (radek.get("nazev") or "").strip().upper()
-                    hex_ = (radek.get("hex") or "").strip()
-                    if nazev.startswith("PANTONE") and hex_:
-                        mapa.setdefault(re.sub(r"\s+", " ", nazev), hex_)
-        except Exception:
-            continue
-    return mapa
+    """Pantone → hex z tabulky parametry/odstiny_pantone.csv.
+
+    Dřív se hex bral „ze sousední databáze, kde už nějaký je". Bylo to
+    pohodlné, ale každý převod tím roznášel chyby toho předchozího: při
+    kontrole proti colorxs.com mělo 139 ze 141 namátkou ověřených odstínů
+    odchylku ΔE nad 5, medián 26,8. Zdroj je proto jeden a společný; co
+    v něm není, zůstane prázdné a doplní ho odstiny.py --stahni."""
+    try:
+        import odstiny
+    except Exception:
+        return {}
+    return dict((p, v["hex"].lstrip("#")) for p, v in odstiny.nacti_tabulku().items())
 
 
 def main():

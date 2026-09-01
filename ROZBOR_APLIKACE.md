@@ -14,10 +14,10 @@
 | `most.py` | 727 | 31 kB |
 | `pdf_spec.py` | 1 071 | 42 kB |
 | `odemkni.py` | 213 | 8 kB |
-| `prevod_printcolor.py` | 188 | 7 kB |
+| `prevod_printcolor.py` | 183 | 7 kB |
 | `kontrola_aplikace.py` | 169 | 7 kB |
 | `rozbor_aktualizuj.py` | 359 | 13 kB |
-| **celkem** | **21 609** | |
+| **celkem** | **21 604** | |
 <!-- /AUTO:stav -->
 
 ---
