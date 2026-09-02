@@ -121,17 +121,13 @@
   padding:calc(var(--mich-tl-zpet) * .87) calc(var(--mich-tl-zpet) * 1.47);
   width:var(--mich-tl-zpet-sirka);height:var(--mich-tl-zpet-vyska);
   transform:translate(var(--mich-tl-zpet-posun-x),var(--mich-tl-zpet-posun-y))}
-.michbg .btn.mich-tl-plocha{font-size:var(--mich-tl-plocha);
-  padding:calc(var(--mich-tl-plocha) * .667) calc(var(--mich-tl-plocha) * 1.111);
-  width:var(--mich-tl-plocha-sirka);height:var(--mich-tl-plocha-vyska);
-  transform:translate(var(--mich-tl-plocha-posun-x),var(--mich-tl-plocha-posun-y))}
-/* Tlačítko krycí plochy stojí u pravé hrany sloupce, zarovnané s tabulkou
-   navážení pod ním — u váhy je vpravo ruka i pohled. Auto okraj místo
-   pevného posunu: štítek vlevo („krycí plocha 100,0 % · z katalogu") mění
-   délku podle hodnot a pevné číslo by s každou změnou textu přestalo sedět.
-   `first-of-type` proto, aby si dvojice tlačítek (Upravit / Zpět na katalog)
-   nerozdělila volné místo mezi sebe — okraj dostane jen první z nich. */
-.michbg .rowline .btn.mich-tl-plocha:first-of-type{margin-left:auto}
+/* Barva a poloha potisku v hlavičce režimu — otevírá dialog kombinace nad
+   mícháním (custom receptura se zakládá u váhy). Stejná výška jako Zpět,
+   ať hlavička drží jeden řádek. */
+.michbg .btn.mich-tl-kombinace{font-size:var(--mich-tl-kombinace);
+  padding:calc(var(--mich-tl-kombinace) * .87) calc(var(--mich-tl-kombinace) * 1.47);
+  width:var(--mich-tl-kombinace-sirka);height:var(--mich-tl-kombinace-vyska);
+  transform:translate(var(--mich-tl-kombinace-posun-x),var(--mich-tl-kombinace-posun-y))}
 .michbg .btn.mich-tl-rucne{font-size:var(--mich-tl-rucne);
   padding:calc(var(--mich-tl-rucne) * .667) calc(var(--mich-tl-rucne) * 1.111);
   width:var(--mich-tl-rucne-sirka);height:var(--mich-tl-rucne-vyska);
@@ -191,8 +187,8 @@ html:not([lang="cs"]) .michbg .card .btn.sm{width:auto;height:auto;
   min-width:var(--mich-tl-pomocna-sirka);min-height:var(--mich-tl-pomocna-vyska)}
 html:not([lang="cs"]) .michbg .btn.mich-tl-zpet{width:auto;height:auto;
   min-width:var(--mich-tl-zpet-sirka);min-height:var(--mich-tl-zpet-vyska)}
-html:not([lang="cs"]) .michbg .btn.mich-tl-plocha{width:auto;height:auto;
-  min-width:var(--mich-tl-plocha-sirka);min-height:var(--mich-tl-plocha-vyska)}
+html:not([lang="cs"]) .michbg .btn.mich-tl-kombinace{width:auto;height:auto;
+  min-width:var(--mich-tl-kombinace-sirka);min-height:var(--mich-tl-kombinace-vyska)}
 html:not([lang="cs"]) .michbg .btn.mich-tl-rucne{width:auto;height:auto;
   min-width:var(--mich-tl-rucne-sirka);min-height:var(--mich-tl-rucne-vyska)}
 html:not([lang="cs"]) .michbg .btn.mich-tl-znam{width:auto;height:auto;

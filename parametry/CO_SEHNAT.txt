@@ -65,7 +65,34 @@ POZOR: dokud pro PDP žádné klišé není, aplikace u tampontisku spotřebu
 nepočítá a nenabízí — sítotiskovou tkaninu si nepůjčí.
 
 
-3) KOEFICIENTY  →  koeficienty.csv
+3) SÍTO A STĚRKA KE KAŽDÉMU PRODUKTU  →  sita.csv (sloupce vychozi, produkty)
+--------------------------------------------------------------------------------
+Každý produkt má v dílně podle technologie svoje síto a svoji šířku stěrky
+(těrky). Dokud to není zapsané, vybírá je tiskař v kalkulaci ručně a spočtená
+spotřeba stojí na tom, co zrovna zvolil.
+
+SÍTO — kam to zapsat už existuje, zbývá to naplnit:
+    vychozi     ano = síto, které technologie používá u všech produktů
+                bez vlastního řádku
+    produkty    ref. čísla produktů oddělená čárkou, které jedou na tomto
+                sítu (ref je číslo produktu z katalogu)
+    Kalkulace pak síto doplní sama, jakmile je vybraný produkt. TXP už tak
+    zapsané je (výchozí 54-64, jemnější 90-48 pro vyjmenované produkty);
+    projít zbývá produkty SCR, PDP (klišé) a TRS.
+
+ŠÍŘKA STĚRKY — kam to zapsat zatím NENÍ:
+    dnes je to ruční pole v kalkulaci (s rychlou volbou stěrek, které pro
+    technologii v dílně visí) a umí ji přinést i naskenovaný kód zakázky.
+    K produktu ji ale aplikace uložit neumí — místo pro ni se musí nejdřív
+    postavit. Mezitím sepište seznam produkt → šířka stěrky v mm; přepíše
+    se tam, jakmile bude kam.
+
+JAK SE TO HLÍDÁ: obojí je vidět v aplikaci v záložce Odemykání technologií —
+    každá technologie tam má body „síto přiřazené k produktům" a „šířka
+    stěrky k produktům" a odškrtávají se samy podle sita.csv.
+
+
+4) KOEFICIENTY  →  koeficienty.csv
 --------------------------------------------------------------------------------
 To, co z geometrie nevyplývá. Všechny jsou teď 1,00 = beze změny.
 Odhadovat je za vás nebudu, vyjdou ze zkušenosti dílny.
@@ -90,7 +117,7 @@ barvy se skutečně spotřebovalo, a porovnejte s tím, co aplikace spočítá
 při koeficientech 1,00. Podíl skutečnost/výpočet je hledaný koeficient.
 
 
-4) BAREVNÉ DATABÁZE PRO ZBÝVAJÍCÍ TECHNOLOGIE  →  složka "databaze barev"
+5) BAREVNÉ DATABÁZE PRO ZBÝVAJÍCÍ TECHNOLOGIE  →  složka "databaze barev"
 --------------------------------------------------------------------------------
 Každá technologie potřebuje svoji řadu barev. Tohle je stav k 20. 8. 2026;
 přiřazení databází k technologiím se nastavuje v parametry/databaze.csv.
@@ -106,10 +133,29 @@ přiřazení databází k technologiím se nastavuje v parametry/databaze.csv.
     TRS   žádná                                3 vlastní      CHYBÍ CELÁ
 
 CO SEHNAT:
-    - dalších 12 barevných řad. Podklady se teprve sbírají; každá se převede
-      a přiřadí k technologiím zvlášť, jak bude přicházet. Tabulka výš tedy
-      ještě poroste a přiřazení se bude měnit.
-    - databázi barev pro TRANSFER (TRS) — zatím není vůbec žádná
+    - dalších 12 barevných řad (receptů). Které to jsou a ke kterým
+      technologiím patří, už je rozhodnuté (dodavatel — řada):
+
+          TRS   Tiflex — Himalaya, Avient — Union Ink
+          TXP   Tiflex — Himalaya, Avient — Union Ink, Coates — TP/PP,
+                Debuit — 470, Engler — Serilon, Engler — Texylon
+          PDP   Marabu — TPR, Coates — TP 300, Coates — TP 253,
+                Coates — TP/PP, Marabu — PP new
+          SCR   Marabu — LIP, Coates — TP/PP, Engler — Serilon,
+                SK — serie 4700, Debuit — 470, Engler — Texylon
+
+      Unikátních řad je právě dvanáct — část slouží víc technologiím naráz
+      (Coates TP/PP třem; Himalaya, Union Ink, Debuit 470, Serilon
+      a Texylon dvěma). Podklady (PDF) se teprve sbírají; každá řada se
+      převede a přiřadí zvlášť, jak bude přicházet.
+
+      Tenhle plán stojí i v souboru parametry/plan_databazi.csv a aplikace
+      ho ukazuje v záložce Odemykání technologií — každá řada je tam bod
+      u své technologie. Po převodu řady zapište do sloupce soubor jméno
+      CSV ze složky "databaze barev"; bod se odškrtne sám, jakmile je ten
+      soubor v parametry/databaze.csv přiřazený téže technologii.
+    - databázi barev pro TRANSFER (TRS) mají pokrýt Himalaya a Union Ink
+      z tabulky výš — zatím není vůbec žádná
     - potvrdit u Printcolor, jestli na TXP a SCR stačí MS 660, nebo jestli
       mají pro textil a pro plast vlastní míchací systém
     - u nových databází stačí PDF, převod je hotový pro obojí, co chodí:
@@ -122,14 +168,26 @@ CO V PDF NENÍ a musí se doplnit jinak:
     hustota barvy (g/ml)  - nechala ji prázdnou každá ze čtyř nakoupených
                             databází, aplikace počítá s 1,20. Bývá
                             v technickém listu barvy.
-    odstín (hex)          - dohledal se podle názvu pantonu z jiných databází;
-                            chybí u 460 receptur: 223 MS 660, 190 MS 786,
-                            47 RUCOLOR 10KK.
+    odstín (hex)          - HOTOVO, ale hlídejte si ho u nových databází.
+                            Bere se z tabulky parametry/odstiny_pantone.csv,
+                            kterou plní "python odstiny.py --stahni" ze tří
+                            webů (columbiaomnistudio, hextopms, colorxs).
+                            Po převodu každého nového PDF ten příkaz
+                            spusťte, jinak nová řada přijde bez odstínů.
+                            Chybí u 2 receptur z 3 468, obě v MS 660:
+                              PANTONE 3-9 C   není pantone, ale kód katalogu
+                              PANTONE 4219 U  existuje jen coated (4219 C)
+                            Třetí, PANTONE 1985 C ve Ferro Xpression, drží
+                            starou nezkontrolovanou hodnotu FDF5F6 — pantone
+                            toho čísla žádný vzorník nevede (řada jde 1905,
+                            1915, 1925, 1935, 1945, 1955), takže je to nejspíš
+                            překlep v podkladu. Opravit ho může jen ten, kdo
+                            ví, která barva to má být.
                             Bez odstínu aplikace neporadí s prosvítáním
                             ani s korekcí, míchat podle receptury ale jde.
 
 
-5) NÁKUPNÍ CENY MATERIÁLŮ  →  pigmenty.csv (sloupce cena, mena, jednotka)
+6) NÁKUPNÍ CENY MATERIÁLŮ  →  pigmenty.csv (sloupce cena, mena, jednotka)
 --------------------------------------------------------------------------------
 Bez cen aplikace nespočítá, co dávka stojí, ani cenu barvy na kus. Nedopočítává
 je odhadem — složka bez ceny se do součtu nedostane a aplikace to napíše.
@@ -161,7 +219,7 @@ MĚNY SE NESČÍTAJÍ: kurz aplikace nezná. Materiál v jiné měně než ta, k
 v ceníku převažuje, se do součtu nezapočítá a řekne se to.
 
 
-6) K ČEMU SE TO POUŽIJE
+7) K ČEMU SE TO POUŽIJE
 --------------------------------------------------------------------------------
     V [cm³/m²] = otevřená plocha × tloušťka tkaniny  (u klišé hloubka leptu)
     g/m² = V × přenos × hustota barvy

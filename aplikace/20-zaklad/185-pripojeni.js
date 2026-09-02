@@ -1,6 +1,6 @@
 "use strict";
 function PripojeniTab({ sgps, databaze, recipes, links, vlastniStav, onOdebratZdroj,
-                        dbTech, setDbTech }) {
+                        onSloucitKopie, dbTech, setDbTech }) {
   // kolik receptur je v aplikaci z kterého souboru
   const recepturyZdroju = useMemo(() => {
     const m = {};
@@ -14,6 +14,24 @@ function PripojeniTab({ sgps, databaze, recipes, links, vlastniStav, onOdebratZd
     const jsou = new Set((databaze.soubory || []).map((s) => s.jmeno));
     return zdrojeReceptur(recipes).filter((z) => z.zdroj && !jsou.has(z.zdroj));
   }, [databaze, recipes]);
+  /* Receptury nahrané starší verzí aplikace nemají poznamenané, ze kterého
+     souboru jsou. Aplikace na ně schválně nesahá — mezi nimi sedí i ručně
+     zadané barvy dílny, které v žádném souboru nejsou —, jenže ty, které
+     jsou kopií souboru, se pak ze složky neobnovují: drží odstín z doby,
+     kdy vznikly, a v seznamu stojí podruhé vedle té ze souboru.
+
+     Vlastní barvy (Custom) se nepočítají — ty svůj soubor mají.
+
+     Slučuje se jen to, co kopie doopravdy je: nabízí se počet těch, ke
+     kterým se najde receptura téhož jména se zdrojem. Zbytek jsou ruční
+     barvy dílny a ty musejí zůstat. */
+  const bezDatabaze = useMemo(
+    () => recipes.filter((r) => !r.zdroj && r.type !== "Custom"), [recipes]);
+  const kopie = useMemo(() => {
+    const jmena = new Set(recipes.filter((r) => r.zdroj)
+      .map((r) => String(r.name || "").toLowerCase()));
+    return bezDatabaze.filter((r) => jmena.has(String(r.name || "").toLowerCase()));
+  }, [recipes, bezDatabaze]);
   const [adresa, setAdresa] = useState(() =>
     String(loadLS("irm-most-adresa", "") || "").trim() || sgpsAdresa() || MOST_VYCHOZI);
   const [zkouska, setZkouska] = useState(null);
@@ -151,6 +169,19 @@ function PripojeniTab({ sgps, databaze, recipes, links, vlastniStav, onOdebratZd
                 </button>
               </div>
             </div>`)}
+          ${kopie.length > 0 && html`
+            <div className="warnbox">
+              <b>${preloz("Receptury bez uvedené databáze: {n}", { n: fmt(kopie.length, 0) })}</b><br />
+              ${preloz("Zůstaly v prohlížeči po starší verzi aplikace, která si u receptury nepamatovala, ze kterého souboru je. Ze složky se neobnovují, takže drží odstíny a složení z doby, kdy vznikly, a v seznamu stojí podruhé vedle těch ze souboru.")}
+              <div style=${{ marginTop: 8 }}>
+                <button className="btn sm" onClick=${() => onSloucitKopie && onSloucitKopie()}>
+                  ${preloz("Sloučit s databázemi ({n})", { n: fmt(kopie.length, 0) })}
+                </button>
+                <span className="note" style=${{ marginLeft: 8 }}>
+                  ${preloz("vazby na produkt a barvu přejdou na recepturu ze souboru; ručně zadané barvy zůstanou")}
+                </span>
+              </div>
+            </div>`}
           <div className="rowline" style=${{ marginTop: 12, marginBottom: 0 }}>
             <button className="btn sec sm" onClick=${() => {
               saveLS("irm-databaze-verze", {});

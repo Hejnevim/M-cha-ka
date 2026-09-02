@@ -201,6 +201,9 @@
   .zaklad td{padding:8px 10px 8px 0; border-bottom:1px solid var(--line);
     font-variant-numeric:tabular-nums; vertical-align:top}
   .zaklad td.c{white-space:nowrap; font-weight:700}
+  /* Tlačítka v „Cestě jedné zakázky": plná velikost .drobne by řádky
+     tabulky roztáhla, tak jsou o stupeň menší a nezalamují se. */
+  .kroky td button{padding:5px 12px; font-size:12.5px; white-space:nowrap}
 
   @media (prefers-reduced-motion: reduce){
     .scena .anim{opacity:1}
@@ -779,6 +782,56 @@
   <p class="pozn" id="pozn"></p>
 </div>
 
+<!-- Cesta jedné zakázky pod přehrávačem — anglické dvojče oddílu
+     z ukazka.html; obě verze se mění spolu. Komentáře zůstávají česky
+     jako všude v projektu. -->
+<section class="dodatek">
+  <div>
+    <h2>One job, start to finish — in brief</h2>
+    <p style="margin-top:6px">The whole process, from assigning a colour range to
+      a print position all the way to an ink mixed to the size of the job, the mesh
+      openness and the real size of the logo. Each button jumps to the scene that
+      shows the step; a step without a button has no scene of its own yet.</p>
+  </div>
+  <div class="zaklad kroky">
+    <table>
+      <thead><tr><th>step</th><th>what happens</th><th>scene</th></tr></thead>
+      <tbody>
+        <tr><td class="c">1 · colour range</td>
+          <td>Every print position on a product has its colour ranges assigned — whoever mixes sees only the inks allowed for that spot and its technology.</td>
+          <td><button class="drobne" data-skok="2">scene 2</button></td></tr>
+        <tr><td class="c">2 · the job</td>
+          <td>The spec arrives by dragging the PDF in, by barcode reader, or typed by hand — product, shade, quantity and print position are pulled out automatically.</td>
+          <td><button class="drobne" data-skok="3">scene 3</button></td></tr>
+        <tr><td class="c">3 · technology</td>
+          <td>The technology is set by the print position, not by a global setting — one product is routinely printed with several technologies.</td>
+          <td><button class="drobne" data-skok="2">scene 2</button></td></tr>
+        <tr><td class="c">4 · recipe</td>
+          <td>A standard from a purchased range, the shop's own shade derived from an existing recipe (valid only on its product), or a work-in-progress colour from the spec. Whatever was mixed for the combination last time is offered first.</td>
+          <td>—</td></tr>
+        <tr><td class="c">5 · size of the logo</td>
+          <td>Coverage is computed from the points where ink actually lands, not from the box around the artwork — 25.71 → 3.25 cm².</td>
+          <td><button class="drobne" data-skok="4">scene 4</button></td></tr>
+        <tr><td class="c">6 · mesh openness</td>
+          <td>How much ink the mesh lets through: open area × fabric thickness × transfer factor, or etch depth of the cliché in pad printing. Without manufacturer data, indicative only.</td>
+          <td><button class="drobne" data-skok="4">scene 4</button></td></tr>
+        <tr><td class="c">7 · the batch</td>
+          <td>Area × quantity × g/m², plus losses in per cent — and the minimum batch, the floor below which the app will not go.</td>
+          <td><button class="drobne" data-skok="4">scene 4</button></td></tr>
+        <tr><td class="c">8 · leftovers</td>
+          <td>Stock first: a cup with the identical composition is simply poured over; for a different shade the app works out what to add.</td>
+          <td><button class="drobne" data-skok="5">scene 5</button></td></tr>
+        <tr><td class="c">9 · mixing</td>
+          <td>A mixing ticket with cumulative weighing, and the assistant at the scale walks through component by component; an overpour is levelled out by growing the whole batch, keeping the shade.</td>
+          <td><button class="drobne" data-skok="8">scene 8</button></td></tr>
+        <tr><td class="c">10 · the label</td>
+          <td>The cup gets a barcode label; after the job the leftover goes back into the register and the loop closes.</td>
+          <td><button class="drobne" data-skok="10">scene 10</button></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
 <section class="dodatek">
   <div>
     <h2>Appendix — what it costs today and what it saves</h2>
@@ -1121,6 +1174,16 @@
     else if (e.key === " "){ e.preventDefault(); bezi ? pauza() : spust(); }
   });
   window.addEventListener("beforeunload", stopni);
+
+  /* Kroky v „Cestě jedné zakázky" skáčou na scénu, která krok předvádí —
+     bez toho by čtenář scénu dohledával po číslech na liště. Po skoku se
+     stránka vrátí k jevišti, jinak to vypadá, že tlačítko nedělá nic. */
+  [].slice.call(document.querySelectorAll("[data-skok]")).forEach(function(b){
+    b.addEventListener("click", function(){
+      skoc(parseInt(b.getAttribute("data-skok"), 10) - 1);
+      elJeviste.scrollIntoView({ behavior: "smooth" });
+    });
+  });
 
   vykresli();
 

@@ -3,10 +3,10 @@
 /* Přehled toho, co které technologii chybí, aby se dala odemknout. Body si
    aplikace odškrtává sama z dat — seznam tedy neukazuje, co si kdo myslí,
    ale co doopravdy je ve složce parametrů a v databázích. */
-function OdemykaniTab({ techStav, products, sita, koef, pigmenty, recipes, dbTech,
+function OdemykaniTab({ techStav, products, sita, koef, pigmenty, recipes, dbTech, planDb,
                         technologie, setTechnologie, prepniTech, techZapis, guard, mostOk }) {
   const rady = TECH_PORADI.filter((t) => TECHS[t]).map(
-    (t) => pripravenostTech(t, { sita, koef, pigmenty, recipes, dbTech, techStav }));
+    (t) => pripravenostTech(t, { sita, koef, pigmenty, recipes, dbTech, techStav, planDb }));
   return html`
     <div className="card">
       <h2>${preloz("Odemykání technologií")}</h2>

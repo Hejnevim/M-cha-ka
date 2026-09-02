@@ -201,7 +201,7 @@ MICHANI = [pol for _n, _pols in MICHANI_SKUPINY for pol in _pols]
 # jsou rodiny — stavová tlačítka bez vlastního jména.
 MICH_TLACITKA = [
     ("--mich-tl-zpet", "✕ Zpět do kalkulace"),
-    ("--mich-tl-plocha", "Krycí plocha (Spočítat / Upravit / Zpět)"),
+    ("--mich-tl-kombinace", "Barva a poloha potisku →"),
     ("--mich-tl-rucne", "Zbytek není v evidenci — zadat ručně"),
     ("--mich-tl-znam", "Znám zbytek rovnou"),
     ("--mich-tl-viskozita", "Uložit k receptuře"),
@@ -304,7 +304,7 @@ VYCHOZI_TVARY = {"--radius": "32px", "--radius-btn": "999px", "--radius-pole": "
                  "--mich-tlacitko": "15px", "--mich-mezera": "22px",
                  "--mich-pole": "20px", "--mich-hlaseni": "15px", "--mich-stitek": "14px",
                  "--mich-prepinac": "13px",
-                 "--mich-tl-zpet": "15px", "--mich-tl-plocha": "13.5px",
+                 "--mich-tl-zpet": "15px", "--mich-tl-kombinace": "16px",
                  "--mich-tl-rucne": "13.5px", "--mich-tl-znam": "13.5px",
                  "--mich-tl-viskozita": "13.5px", "--mich-tl-pripojit": "15px",
                  "--mich-tl-simulace": "15px", "--mich-tl-tara": "13.5px",
@@ -856,6 +856,7 @@ SABLONA = r"""<!doctype html>
               <span class="nazev" style="display:block">PANTONE Cool Gray 1 C</span>
               <span class="kde">93804 · 106 · FIR Džbánek / Tělo lahve</span>
             </span>
+            <button class="btn sec mich-tl-kombinace">Barva a poloha potisku →</button>
             <span class="michdavka"><b>72,4 g</b><span>≈ 60,4 ml</span></span>
             <button class="btn sec mich-tl-zpet">✕ Zpět do kalkulace</button>
           </div>
@@ -864,10 +865,6 @@ SABLONA = r"""<!doctype html>
                  Kartu má jen asistent navážení — ukázka to musí držet stejně,
                  jinak by se podle ní ladilo něco, co v aplikaci není. -->
             <div>
-              <div class="rowline">
-                <span class="tag">krycí plocha 100,0 % · z katalogu</span>
-                <button class="btn sec sm mich-tl-plocha">Spočítat krycí plochu z náhledu</button>
-              </div>
               <table class="michtab">
                 <thead><tr><th>Komponenta</th><th class="num">Navážit</th><th class="num">Kumulativně</th></tr></thead>
                 <tbody>

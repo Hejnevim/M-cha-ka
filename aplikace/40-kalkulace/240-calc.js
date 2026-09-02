@@ -346,7 +346,20 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
   const [qty, setQty] = useState(500);
   const [gm2, setGm2] = useState(TECHS[tech] ? TECHS[tech].gm2 : 6);
   const [loss, setLoss] = useState(15);
-  const [minBatch, setMinBatch] = useState(50);
+  /* V základu 1 g, tedy prakticky bez podlahy: dávku má zvedat až hodnota
+     ze zakázkového listu nebo obsluha, ne aby každá drobná zakázka mlčky
+     narostla na dřívějších výchozích 50 g. */
+  const [minBatch, setMinBatch] = useState(1);
+  /* Šířka stěrky je vlastnost tisku, ne receptury: totéž síto se stejnou barvou
+     jede jednou v malém rámu a podruhé v širokém. Prázdné pole znamená
+     „nevím“ a rezerva se nepočítá — viz 495-naplne-sita.js. */
+  const [sterka, setSterka] = useState("");
+  /* Stěrky, které pro technologii v dílně skutečně visí (TECHS.sterky) —
+     dlaždice je pak výběr s těmito šířkami v nabídce, ať se nic nepíše
+     z hlavy; technologie bez seznamu má dál ruční pole. */
+  const sterkyTech = (TECHS[tech] && TECHS[tech].sterky) || [];
+  const [naTah, setNaTah] = useState(1);
+  useEffect(() => { if (!maSito) { setSterka(""); setNaTah(1); } }, [maSito]);
   useEffect(() => {
     if (pend.current.gm2 != null) { setGm2(pend.current.gm2); pend.current.gm2 = null; return; }
     setGm2(TECHS[tech] ? TECHS[tech].gm2 : 6);
@@ -382,6 +395,8 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     if (spec.gm2 != null) setGm2(spec.gm2);
     if (spec.loss != null) setLoss(spec.loss);
     if (spec.minBatch != null) setMinBatch(spec.minBatch);
+    if (spec.sterka != null) setSterka(spec.sterka);
+    if (spec.naTah != null) setNaTah(spec.naTah);
     const f = spec.fields;
     setZak((f.order || f.customer || f.note || f.mesh || f.opacity || f.surface || spec.w)
       ? { order: f.order || "", customer: f.customer || "", note: f.note || "",
@@ -406,11 +421,32 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     else setRecipes((prev) => prev.map((x) => x.id === recipe.id ? Object.assign({}, x, patch) : x));
   };
 
+  /* Síto podle produktu (parametry/sita.csv, sloupce vychozi a produkty; proč
+     to není volba obsluhy, stojí u sitoProProdukt v části 430). Doplní se
+     samo, jakmile je jasný produkt, technologie a receptura — a drží: dokud
+     pravidlo platí, receptura nemá jiné síto než to z pravidla, ať se do ní
+     dostalo odkudkoli (starší zápis v souboru, zakázkový list). Dlaždice Síto
+     pak nabízí jen tohle jedno síto (sitaKVyberu v části 430); dřív nabízela
+     obě síta textilu a ruční volba platila do výměny produktu — jenže tím
+     mohl technolog vybrat jiné síto, než na které produkt jede, a to pravidlo
+     nemá dovolit. Technologie bez pravidla nechá síto receptury na pokoji
+     a nabízí celou řadu, chová se jako dřív. */
+  const sitoPodleProduktu = useMemo(
+    () => sitoProProdukt(sita, tech, product ? (product.ref || product.id) : ""),
+    [sita, tech, product]);
+  useEffect(() => {
+    if (!recipe || !sitoPodleProduktu || recipe.mesh === sitoPodleProduktu) return;
+    upravRecepturu({ mesh: sitoPodleProduktu });
+  }, [sitoPodleProduktu, recipe && recipe.id, recipe && recipe.mesh]);
+  const nabidkaSita = useMemo(() => sitaKVyberu(sitaProTech, sitoPodleProduktu),
+    [sitaProTech, sitoPodleProduktu]);
+
   // zápis parametrů ze specu (síto / kryvost / povrch) do vybrané receptury — jen na vyžádání
   const zapsatParametry = () => {
     if (!zak || !recipe) return;
     const patch = {};
-    if (zak.mesh) patch.mesh = zak.mesh;
+    // síto dané produktem má přednost před požadavkem z listu (viz výš)
+    if (zak.mesh && !sitoPodleProduktu) patch.mesh = zak.mesh;
     if (zak.opacity) patch.opacity = zak.opacity;
     if (zak.surface) patch.surface = zak.surface;
     if (zak.customer) patch.customer = zak.customer;
@@ -430,15 +466,26 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     const areaM2 = (sirka * vyska / 1000000) * (pokryti / 100);
     const netto = areaM2 * n(qty) * n(gm2);
     const withLoss = netto * (1 + n(loss) / 100);
-    const totalG = Math.max(withLoss, n(minBatch));
+    /* Rezerva se přičítá, nezapočítává se do ztrát: ztráty jsou barva, která
+       se z dílny už nevrátí (stěrka, karty, okraje síta), houska před stěrkou
+       se na konci seškrábne zpátky do kelímku. Kdyby se schovala do procenta
+       ztrát, rostla by s velikostí zakázky — a ona je pořád stejná, protože
+       závisí jen na šířce stěrky. */
+    const rezerva = rezervaSita({ sirkaSterkyMm: sterka,
+      hustota: n(recipe.density, 1.2) });
+    const rezervaG = rezerva ? rezerva.g : 0;
+    const potreba = withLoss + rezervaG;
+    const totalG = Math.max(potreba, n(minBatch));
     const totalMl = totalG / (n(recipe.density, 1) || 1);
     const pctSum = recipe.components.reduce((s, c) => s + n(c.pct), 0);
     const comps = recipe.components.map((c) => {
       const share = pctSum ? n(c.pct) / pctSum : 0;
       return Object.assign({}, c, { g: totalG * share, ml: totalMl * share, norm: share * 100 });
     });
-    return { areaM2, netto, totalG, totalMl, comps, pctSum, minApplied: totalG > withLoss + 1e-9 };
-  }, [position, recipe, qty, gm2, loss, minBatch, sirka, vyska, pokryti]);
+    return { areaM2, netto, withLoss, rezerva, rezervaG, potreba,
+      tahy: tahyZakazky({ kusu: qty, naTah: naTah }),
+      totalG, totalMl, comps, pctSum, minApplied: totalG > potreba + 1e-9 };
+  }, [position, recipe, qty, gm2, loss, minBatch, sirka, vyska, pokryti, sterka, naTah]);
 
   /* Pravidla zástupnosti z ceníku — která složka smí zaskočit za kterou.
      Počítají se jednou pro celou obrazovku; mění se jen s ceníkem. */
@@ -987,7 +1034,9 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     <div><div class="lbl">Poloha potisku</div><div class="val">${esc(position.name)} · ${fmt(sirka, 1)}×${fmt(vyska, 1)} mm${rozmerListu ? " (dle listu)" : ""} · krycí plocha ${fmt(pokryti, 1)} %${pokrytiJob != null
       ? " (z náhledu motivu" + (odsazeniJob ? ", odsazení " + fmt(odsazeniJob, 1) + " mm" : "") + ")" : ""}</div></div>
     <div><div class="lbl">Technologie</div><div class="val">${esc(tech)} — ${esc(TECHS[tech] ? TECHS[tech].name : "")}</div></div>
-    <div><div class="lbl">Zakázka</div><div class="val">${fmt(n(qty), 0)} ks · ${fmt(n(gm2), 1)} g/m² · ztráty ${fmt(n(loss), 0)} %</div></div>
+    <div><div class="lbl">Zakázka</div><div class="val">${fmt(n(qty), 0)} ks · ${fmt(n(gm2), 1)} g/m² · ztráty ${fmt(n(loss), 0)} %${
+      calc && calc.rezerva ? " · rezerva síta " + fmt(calc.rezervaG) + " g (stěrka " + fmt(calc.rezerva.sirka, 0) + " mm)" : ""}${
+      calc && calc.tahy && calc.tahy.naTah > 1 ? " · " + fmt(calc.tahy.tahu, 0) + " tahů po " + fmt(calc.tahy.naTah, 0) : ""}</div></div>
     ${kodDavky ? `<div><div class="lbl">Kód kelímku</div><div class="val" style="font-family:Consolas,monospace;font-weight:800">${esc(kodDavky)}
       <img src="${code128Url(kodDavky, 34, 1)}" alt="${esc(kodDavky)}" style="display:block;margin-top:2px">
       <span style="font-size:10px;color:#78766C;font-family:Segoe UI,Arial,sans-serif;font-weight:400">po zakázce načtěte a zapište zbytek</span></div></div>` : ""}
@@ -1157,21 +1206,10 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
           <//>` : null;
 
   /* Domovská stránka nese jen výsledek: kolik a jakou barvu. Všechno, co se
-     dělá až u míchačky — krycí plocha z náhledu, zbytky ze skladu, štítek
-     a navažování — se přesunulo do míchacího režimu. Po výběru zakázky tak
-     na obrazovce nezůstane nic, co v tu chvíli nikdo nepotřebuje. */
-  const blokPokryti = calcAkt ? html`
-            <div className="rowline" style=${{ marginTop: 0, marginBottom: 10 }}>
-              <span className="tag" title=${preloz("Podíl plochy, který barva doopravdy pokryje")}>
-                ${preloz("krycí plocha")} ${fmt(pokryti, 1)} %${pokrytiJob != null
-                  ? preloz(" · z náhledu") + (odsazeniJob ? " + " + fmt(odsazeniJob, 1) + " mm" : "")
-                  : preloz(" · z katalogu")}
-              </span>
-              <button className="btn sec sm mich-tl-plocha" onClick=${() => setPokrytiOkno(true)}>
-                ${pokrytiJob != null ? preloz("Upravit krycí plochu") : preloz("Spočítat krycí plochu z náhledu")}
-              </button>
-              ${pokrytiJob != null && html`<button className="btn sec sm mich-tl-plocha" onClick=${() => { setPokrytiJob(null); setOdsazeniJob(null); }}>${preloz("Zpět na katalog")}</button>`}
-            </div>` : null;
+     dělá až u míchačky — zbytky ze skladu, štítek a navažování — se
+     přesunulo do míchacího režimu. Krycí plocha je výjimka: počítá se
+     z náhledu zakázkového listu, takže její tlačítko stojí v kartě Vybraný
+     produkt pod načtením PDF a kódu, kde ten náhled vzniká. */
   const blokZbytku = calcAkt ? html`<${React.Fragment}>
             ${!pouzityZbytek && nabidky.length > 0 && html`
               <div className="okbox">
@@ -1727,6 +1765,25 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                       <${KodVKalkulaci} hidOn=${hidOn} setHidOn=${setHidOn}
                         onCode=${onCode} onNastaveni=${onNastaveniCtecky} />
                     </div>`}
+                  <!-- Krycí plocha se počítá z náhledu zakázkového listu,
+                       proto tlačítko stojí hned pod jeho načtením — dřív
+                       bylo až v míchacím režimu a od PDF, ze kterého čte,
+                       ho dělila celá obrazovka. Bez kalkulace (není vybraná
+                       receptura a množství) nemá co přepočítávat, tak se
+                       neukazuje — stejná podmínka jako dřív. -->
+                  ${calcAkt && html`
+                    <div style=${{ marginTop: 8 }}>
+                      <button className="btn sec sm" style=${{ width: "100%" }} onClick=${() => setPokrytiOkno(true)}>
+                        ${pokrytiJob != null ? preloz("Upravit krycí plochu") : preloz("Spočítat krycí plochu z náhledu")}
+                      </button>
+                      ${pokrytiJob != null && html`<button className="btn sec sm" style=${{ width: "100%", marginTop: 6 }}
+                        onClick=${() => { setPokrytiJob(null); setOdsazeniJob(null); }}>${preloz("Zpět na katalog")}</button>`}
+                      <div className="popiska" title=${preloz("Podíl plochy, který barva doopravdy pokryje")}>
+                        ${preloz("krycí plocha")} ${fmt(pokryti, 1)} %${pokrytiJob != null
+                          ? preloz(" · z náhledu") + (odsazeniJob ? " + " + fmt(odsazeniJob, 1) + " mm" : "")
+                          : preloz(" · z katalogu")}
+                      </div>
+                    </div>`}
                 </div>`}
             </div>
             <div className="produkt-nazev">
@@ -1909,7 +1966,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
 
             <div className="card bigform karta-cisla" style=${{ margin: 0 }}>
             <h2>${preloz("Zakázka")}</h2>
-            <div className="zakazka-cisla">
+            <div className=${"zakazka-cisla" + (maSito ? " sest" : "")}>
               <div>
                 <label className="f">${preloz("Počet kusů")}</label>
                 <input type="number" min="1" value=${qty} onChange=${(e) => setQty(e.target.value)} />
@@ -1926,6 +1983,36 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 <label className="f">${preloz("Min. dávka (g)")}</label>
                 <input type="number" step="10" value=${minBatch} onChange=${(e) => setMinBatch(e.target.value)} />
               </div>
+              ${maSito && html`
+                <${React.Fragment}>
+                  <div>
+                    <label className="f">${preloz("Šířka stěrky (mm)")}</label>
+                    ${/* Kde má technologie seznam stěrek (TECHS.sterky), je
+                        dlaždice výběr a šířky jsou rovnou v nabídce — čipy pod
+                        polem se do dlaždice (≈140 px na 1600 px okna) nevešly
+                        a lámaly se pod ni, a psát se sem stejně nemá co: vybírá
+                        se z toho, co v dílně visí. Jen čísla, jednotka je
+                        v popisku. Prázdná volba „—“ = nevím, rezerva síta se
+                        pak nepočítá (viz 495-naplne-sita.js). Šířka mimo
+                        seznam (ze čtečky zakázkového listu) dostane vlastní
+                        položku, ať se neztratí. */""}
+                    ${sterkyTech.length > 0 ? html`
+                      <select value=${String(sterka)} onChange=${(e) => setSterka(e.target.value)}>
+                        <option value="">—</option>
+                        ${sterkyTech.map((s) => html`<option key=${s} value=${s}>${s}</option>`)}
+                        ${sterka !== "" && !sterkyTech.some((s) => s === n(sterka))
+                          && html`<option value=${String(sterka)}>${n(sterka)}</option>`}
+                      </select>`
+                    : html`
+                      <input type="number" min="0" step="10" value=${sterka}
+                        onChange=${(e) => setSterka(e.target.value)} />`}
+                  </div>
+                  <div>
+                    <label className="f">${preloz("Potisků na tah")}</label>
+                    <input type="number" min="1" step="1" value=${naTah}
+                      onChange=${(e) => setNaTah(e.target.value)} />
+                  </div>
+                <//>`}
             </div>
             ${zeSita && html`
                 <div className=${Math.abs(zeSita.gm2 - n(gm2)) > 0.05 ? "okbox" : "specbar"} style=${{ marginTop: 4 }}>
@@ -1965,11 +2052,13 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 ${maSito && html`
                   <div>
                     <label className="f">${preloz("Síto")}</label>
+                    ${/* U produktu se sítem podle pravidla je v nabídce jen ono
+                        a prázdná volba „—“ se nenabízí — síto tu není na výběr. */""}
                     <select value=${recipe.mesh || ""} onChange=${(e) => upravRecepturu({ mesh: e.target.value })}>
-                      <option value="">${preloz("nevybráno")}</option>
-                      ${sitaProTech.map((m) => html`<option key=${m.sito} value=${m.sito}>${m.sito}${
+                      ${!sitoPodleProduktu && html`<option value="">—</option>`}
+                      ${nabidkaSita.map((m) => html`<option key=${m.sito} value=${m.sito}>${m.sito}${
                         m.vth > 0 ? " · " + fmt(m.vth, 0) + " cm³/m²" : ""}</option>`)}
-                      ${recipe.mesh && !sitaProTech.some((m) => m.sito === recipe.mesh)
+                      ${recipe.mesh && !nabidkaSita.some((m) => m.sito === recipe.mesh)
                         && html`<option value=${recipe.mesh}>${recipe.mesh} ${preloz("(není v parametrech {tech})", { tech: tech })}</option>`}
                     </select>
                   </div>`}
@@ -1977,7 +2066,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                   <div>
                     <label className="f">${preloz("Klišé (hloubka leptu)")}</label>
                     <select value=${recipe.mesh || ""} onChange=${(e) => upravRecepturu({ mesh: e.target.value })}>
-                      <option value="">${preloz("nevybráno")}</option>
+                      <option value="">—</option>
                       ${klisePro.map((m) => html`<option key=${m.sito} value=${m.sito}>${m.sito}${
                         m.hloubka > 0 ? " · " + fmt(m.hloubka, 0) + " µm" : ""}</option>`)}
                     </select>
@@ -1985,14 +2074,14 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 <div>
                   <label className="f">${preloz("Kryvost")}</label>
                   <select value=${recipe.opacity || ""} onChange=${(e) => upravRecepturu({ opacity: e.target.value })}>
-                    <option value="">${preloz("nevybráno")}</option>
+                    <option value="">—</option>
                     ${KRYVOSTI.map((m) => html`<option key=${m} value=${m}>${m}</option>`)}
                   </select>
                 </div>
                 <div>
                   <label className="f">${preloz("Povrch")}</label>
                   <select value=${recipe.surface || ""} onChange=${(e) => upravRecepturu({ surface: e.target.value })}>
-                    <option value="">${preloz("nevybráno")}</option>
+                    <option value="">—</option>
                     ${POVRCHY.map((m) => html`<option key=${m} value=${m}>${m}</option>`)}
                   </select>
                 </div>
@@ -2035,6 +2124,24 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
             <div className="result-big">${fmt(calcAkt.totalG)} g</div>
             <div className="result-sub">≈ ${fmt(calcAkt.totalMl)} ml ${preloz("při hustotě")} ${fmt(n(recipe.density, 1), 2)} g/ml${
               calcAkt.zvetseno ? preloz(" · zakázka potřebuje {g} g", { g: fmt(calcAkt.davkaZakazky) }) : ""}</div>
+
+            ${/* Rozpis kroku, ze kterych davka vznikla. Technolog musi umet cislo
+                  prepocitat rucne; bez nej je to jen udaj, kteremu se veri. */
+              calc && html`
+              <div className="note" style=${{ marginTop: 6 }}>
+                ${preloz("{a} m² × {k} % krycí plocha × {n} ks × {g} g/m² = {netto} g",
+                  { a: fmt(sirka * vyska / 1000000, 4), k: fmt(pokryti, 1), n: fmt(n(qty), 0),
+                    g: fmt(n(gm2), 1), netto: fmt(calc.netto) })}
+                ${preloz(" · ztráty {z} % → {s} g", { z: fmt(n(loss), 1), s: fmt(calc.withLoss) })}
+                ${!maSito ? ""
+                  : (calc.rezerva
+                    ? preloz(" · rezerva síta {r} g (stěrka {w} mm) → {c} g",
+                        { r: fmt(calc.rezervaG), w: fmt(calc.rezerva.sirka, 0), c: fmt(calc.potreba) })
+                    : preloz(" · rezerva síta se nepočítá — šířka stěrky není zadaná"))}
+                ${calc.tahy && calc.tahy.naTah > 1
+                  ? preloz(" · {t} tahů po {p} potiscích", { t: fmt(calc.tahy.tahu, 0), p: fmt(calc.tahy.naTah, 0) })
+                  : ""}
+              </div>`}
 
             ${calcAkt.comps.length > 0 && html`<${PruhSlozeni} recipe=${recipe} comps=${calcAkt.comps} />`}
 
@@ -2089,7 +2196,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                   ${ztratyNavrh != null
                     ? html`<span className="note">${preloz(" Se ztrátami {a} % místo {b} % by dávka vyšla na {c} g a nezbylo by nic.",
                         { a: fmt(ztratyNavrh, 1), b: fmt(n(loss), 1),
-                          c: fmt(Math.max(calc.netto * (1 + ztratyNavrh / 100), n(minBatch))) })}</span>`
+                          c: fmt(Math.max(calc.netto * (1 + ztratyNavrh / 100) + calc.rezervaG, n(minBatch))) })}</span>`
                     : html`<span className="note">${preloz(" Ztráty už níž nemají kam — zbytek je z minimální dávky nebo z netta.")}</span>`}
                 </span>
                 ${ztratyNavrh != null && html`
@@ -2145,10 +2252,12 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
             </div>
           </div>
           <${MichaciRezim} aktivni=${michRezim} onZavrit=${zavriMichani}
+            onKombinace=${() => setPickerOpen(true)}
+            modalNahore=${pickerOpen || !!odvod}
             recipe=${recipe} calcAkt=${calcAkt} rozpis=${rozpisZbytku} vyuziti=${vyuzitiZbytku}
             stav=${michStav} product=${product} colorSel=${colorSel} position=${position}
             tech=${tech} zak=${zak} kodDavky=${kodDavky} potlife=${michRezim ? blokPotlife : null}
-            pokryti=${blokPokryti} zbytky=${blokZbytku}
+            zbytky=${blokZbytku}
             stitekTlacitko=${blokStitkuTlacitko} rady=${blokRady}
             aditiva=${blokAditiv} riziko=${michRezim ? blokRizika : null}
             natisk=${michRezim ? blokNatisku : null} viskozita=${michRezim ? blokViskozita : null}>
@@ -2353,12 +2462,17 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
 
       ${pokrytiOkno && html`<${PokrytiModal} obrazky=${pdfObrazky} stranky=${pdfStranky} pdfId=${pdfId}
         sirka=${sirka} vyska=${vyska} gm2=${n(gm2)} qty=${n(qty)}
+        sitaTech=${sitaProTech} tech=${tech} koef=${koef}
+        material=${product ? product.material : ""} podkladHex=${colorSel ? colorSel.hex : ""}
+        ztraty=${n(loss)} sterka=${n(sterka)} recipes=${recipes}
+        sitoVychozi=${recipe ? recipe.mesh : ""}
         odsazeniVychozi=${odsazeniJob} onPouzit=${ulozPokryti} onClose=${() => setPokrytiOkno(false)} />`}
 
       ${odvod && odvod.mode === "edit" && html`
         <div className="modalbg" onClick=${(e) => { if (e.target === e.currentTarget) setOdvod(null); }}>
           <div className="modalbox">
-            <${RecipeForm} initial=${odvod.initial} onSave=${ulozOdvozenou} onCancel=${() => setOdvod(null)} sita=${sita} />
+            <${RecipeForm} initial=${odvod.initial} onSave=${ulozOdvozenou} onCancel=${() => setOdvod(null)} sita=${sita}
+              sitaTech=${maSito ? sitaProTech : klisePro} sitoVychozi=${sitoPodleProduktu} />
           </div>
         </div>`}
     </div>`;

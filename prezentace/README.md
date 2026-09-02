@@ -66,6 +66,15 @@ tempem −5 % přes `edge-tts` (jednorázový skript ve scratchpadu, čte `rec`
 přímo z ukázky). Pole `cas` u scény se pak srovná na skutečnou délku
 nahrávky, aby pruh pod jevištěm doběhl s hlasem, ne dřív.
 
+## Cesta jedné zakázky
+
+Pod přehrávačem (nad dodatkem s úsporou) je tabulka deseti kroků celého
+procesu — od přiřazení barevné řady k potiskovanému místu po namíchání dávky
+a štítek na kelímek. Tlačítka v ní skáčou na scénu, která krok předvádí;
+krok bez tlačítka (výběr receptury) vlastní scénu zatím nemá a je popsaný
+jen tam. Obě jazykové verze mají tabulku stejnou, čísla v ní jsou táž
+schválená jako ve scénách (25,71 → 3,25 cm²).
+
 ## Dodatek — co to stojí dnes a co se ušetří
 
 Pod přehrávačem je oddíl s úsporou. Čísla jsou z A3 **P26-31-01 INK and DAC

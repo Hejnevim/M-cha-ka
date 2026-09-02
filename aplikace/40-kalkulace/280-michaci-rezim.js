@@ -1,14 +1,17 @@
 "use strict";
-function MichaciRezim({ aktivni, onZavrit, recipe, calcAkt, rozpis, vyuziti, stav,
+function MichaciRezim({ aktivni, onZavrit, onKombinace, modalNahore, recipe, calcAkt, rozpis, vyuziti, stav,
                         product, colorSel, position, tech, zak, kodDavky,
-                        pokryti, zbytky, stitekTlacitko, rady, potlife, aditiva, riziko, natisk, viskozita,
+                        zbytky, stitekTlacitko, rady, potlife, aditiva, riziko, natisk, viskozita,
                         children }) {
   useEffect(() => {
     if (!aktivni) return;
-    const naKlavesu = (e) => { if (e.key === "Escape") onZavrit(); };
+    /* Dialog Barva a poloha potisku (a editace receptury) se otevírá NAD
+       režimem — Esc v něm nesmí zavřít míchání pod ním, jinak by tiskaři
+       po zavření dialogu zmizela rozdělaná obrazovka s váhou. */
+    const naKlavesu = (e) => { if (e.key === "Escape" && !modalNahore) onZavrit(); };
     window.addEventListener("keydown", naKlavesu);
     return () => window.removeEventListener("keydown", naKlavesu);
-  }, [aktivni, onZavrit]);
+  }, [aktivni, onZavrit, modalNahore]);
 
   // Zavřený režim asistenta neschovává ze stromu, jen z očí: kdyby se odpojil,
   // přišel by o rozpracované vážení i o otevřený port váhy.
@@ -36,6 +39,16 @@ function MichaciRezim({ aktivni, onZavrit, recipe, calcAkt, rozpis, vyuziti, sta
           <div className="nazev">${recipe.name}</div>
           <div className="kde">${kdo || "—"}</div>
         </div>
+        ${/* Custom receptura vzniká a váže se na kombinaci právě u váhy —
+              proto se dialog Barva a poloha potisku otevírá i odsud, nad
+              režimem (modalbg 90 > michbg 80), a nemíchá se naslepo přes
+              přepínání do kalkulace a zpátky. Tlačítko stojí u textu
+              kombinace, které se týká, ne u Zpět. */ ""}
+        ${onKombinace && html`
+          <button className="btn sec mich-tl-kombinace" onClick=${onKombinace}
+            title=${preloz("Založit custom recepturu nebo změnit kombinaci — bez opuštění míchání")}>
+            ${preloz("Barva a poloha potisku →")}
+          </button>`}
         <div className="michdavka">
           <b>${fmt(davka)} g</b>
           <span>${calcAkt.zvetseno || Math.abs(davka - calcAkt.totalG) > 0.05
@@ -51,7 +64,6 @@ function MichaciRezim({ aktivni, onZavrit, recipe, calcAkt, rozpis, vyuziti, sta
         <div>
           ${potlife}
           ${rady}
-          ${pokryti}
           ${vyuziti && html`
             <div className="okbox" style=${{ marginTop: 0, marginBottom: 12, fontSize: 15 }}>
               ${preloz("V nádobě už je")} <b>${fmt(vyuziti.pouzit)} g</b> ${preloz(vyuziti.dvojice ? "ze dvou zbytků" : "ze zbytku")}

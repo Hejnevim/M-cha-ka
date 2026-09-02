@@ -98,6 +98,24 @@ def zapis_tabulku(tab):
 
 
 # ------------------------------------------------------------- stahování
+#
+# Zdroje jsou tři a berou se v tomhle pořadí:
+#
+#   1. columbiaomnistudio.com  jedna stránka, 9 915 pantonů včetně uncoated.
+#                              Na 1 285 coated pantonech se shoduje s colorxs
+#                              na chlup (medián ΔE 0,00, 100 % do ΔE 2), takže
+#                              jsou to nezávisle potvrzené hodnoty.
+#   2. hextopms.com            dvě stránky po 1 124 pantonech, coated a
+#                              uncoated. Umí jmenné barvy (Col Grey, Warm Grey,
+#                              Process, Hexachrome), které první tabulka nevede.
+#                              Je ale volnější: proti už ověřeným hodnotám má
+#                              medián ΔE 2,61 (do ΔE 2 jen 34 %), proto se z ní
+#                              bere jen to, co jinde není.
+#   3. colorxs.com             po jedné barvě zvlášť. Pomalé, ale zná i to, co
+#                              v tabulkách není.
+#
+# První dva zdroje stačí stáhnout jednou pro celou novou databázi; po jedné
+# barvě se doptává jen zbytek.
 HLAVICKY_HTTP = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                   "(KHTML, like Gecko) Chrome/124.0 Safari/537.36",
@@ -105,6 +123,63 @@ HLAVICKY_HTTP = {
 }
 # title="#9EB356 PANTONE 2303 C CMS Pantone PMS - Color codes …"
 VZOR_HEX = re.compile(r'title="#([0-9A-Fa-f]{6})\s+(PANTONE [^"]*?)\s+CMS Pantone', re.I)
+
+TABULKA_COLUMBIA = ("https://columbiaomnistudio.com/pages/"
+                    "pantone-graphics-colors-hex-rgb-cmyk-chart")
+VZOR_COLUMBIA = re.compile(
+    r'<b>(?:<a[^>]*>)?PANTONE ([^<]{1,26}?)(?:</a>)?</b><br>HEX:\s*([0-9A-Fa-f]{6})')
+
+TABULKA_HEXTOPMS_C = "https://hextopms.com/color-matching-tables/hex-to-pantone-solid-coated/"
+TABULKA_HEXTOPMS_U = "https://hextopms.com/color-matching-tables/hex-to-pantone-solid-uncoated/"
+VZOR_HEXTOPMS = re.compile(
+    r'PANTONE ([0-9A-Za-z][^<>"\']{0,22}?) to HEX #([0-9A-Fa-f]{6})')
+
+
+def varianty(pantone, jen_uncoated):
+    """Jména, pod kterými tentýž odstín může v tabulce stát.
+
+    Vzorníky si nejsou v zápisu jmenných barev věrné. Uncoated tabulka
+    hextopms píše „Col Grey 2 U" tam, kde katalog má „Cool Gray 2 U",
+    a protože je celá uncoated, u části barev koncové „U" vůbec neuvádí
+    („Green", „Warm Red"). Britské „Grey" proti americkému „Gray" se
+    střídá i mezi vzorníky.
+
+    Není to hádání odstínu — je to hádání zápisu téhož jména. Odstín se
+    pořád bere jen ten, který u nalezeného jména stojí."""
+    z = klic(pantone)
+    ven = [z]
+    for a, b in ((" GRAY", " GREY"), (" GREY", " GRAY")):
+        if a in z:
+            ven.append(z.replace(a, b))
+    if "COOL GRAY" in z or "COOL GREY" in z:
+        ven.append(re.sub(r"COOL GR[AE]Y", "COL GREY", z))
+    # Dva zápisy z německého vzorníku Printcolor: pantone se jmenuje
+    # Rubine Red (ne Rubin) a Violet (ne Violett).
+    if "RUBIN RED" in z and "RUBINE" not in z:
+        ven.append(z.replace("RUBIN RED", "RUBINE RED"))
+    if "VIOLETT" in z:
+        ven.append(z.replace("VIOLETT", "VIOLET"))
+    if jen_uncoated:
+        # Celá tabulka je uncoated, koncové „U" u části jmen chybí.
+        ven += [v[:-2].strip() for v in list(ven) if v.endswith(" U")]
+    else:
+        # Nakoupené vzorníky jsou coated; jméno bez přípony je zkrácený
+        # zápis té coated varianty ("PANTONE 5507" = "PANTONE 5507 C").
+        ven += [v + " C" for v in list(ven) if not re.search(r"\s[CU]$", v)]
+    ven2 = []
+    for v in ven:
+        if v not in ven2:
+            ven2.append(v)
+    return ven2
+
+
+def stahni_tabulku_webu(url, vzor):
+    """Jedna stránka se seznamem pantonů → {klíč: "#RRGGBB"}."""
+    html = stahni_stranku(url)
+    if not html:
+        return {}
+    return dict((klic("PANTONE " + m.group(1)), "#" + m.group(2).upper())
+                for m in vzor.finditer(html))
 
 
 def adresa(pantone):
@@ -138,45 +213,76 @@ def stahni_stranku(url, pokusy=4):
 
 
 def stahni_odstin(pantone):
-    """(hex, jméno na stránce) nebo (None, důvod)."""
-    html = stahni_stranku(adresa(pantone))
-    if html is None:
-        return None, "stránka neexistuje"
-    m = VZOR_HEX.search(html)
-    if not m:
-        return None, "odstín na stránce nenalezen"
-    return "#" + m.group(1).upper(), m.group(2).strip()
+    """(hex, jméno na stránce) nebo (None, důvod).
+
+    Zkouší i jiné zápisy téhož jména — colorxs zná „Rubine Red C", kdežto
+    v podkladu stojí „RUBIN RED C" a adresa by skončila 410."""
+    posledni = "stránka neexistuje"
+    for v in varianty(pantone, False):
+        html = stahni_stranku(adresa(v))
+        if html is None:
+            continue
+        m = VZOR_HEX.search(html)
+        if m:
+            return "#" + m.group(1).upper(), m.group(2).strip()
+        posledni = "odstín na stránce nenalezen"
+    return None, posledni
 
 
 VLAKEN = 4          # stahuje se po čtyřech; víc už by na cizí web bylo hrubé
 
 
 def doplnit_tabulku(tab, chybejici):
-    """Stahuje po čtyřech a průběžně ukládá — přerušené stahování tak
-    nepřijde o to, co už má, a při příštím spuštění dojede zbytek.
+    """Doplní chybějící pantony ze tří zdrojů. Vrací (kolik přibylo, marné)."""
+    nove, zbyva = 0, sorted(chybejici)
 
-    Tisíc šest set pantonů po jednom je přes hodinu čekání, proto vlákna.
-    Prodleva v každém vlákně zůstává: nejde o to stáhnout to co nejrychleji,
-    ale neposlat na cizí server salvu."""
-    nove, marne = 0, []
-    seznam = sorted(chybejici)
-
-    def jeden(p):
-        hex_, jak = stahni_odstin(p)
-        time.sleep(0.3)
-        return p, hex_, jak
-
-    with concurrent.futures.ThreadPoolExecutor(max_workers=VLAKEN) as bazen:
-        for i, (p, hex_, jak) in enumerate(bazen.map(jeden, seznam), 1):
-            if hex_:
-                tab[klic(p)] = {"hex": hex_, "zdroj": "colorxs.com"}
+    for popis, url, vzor, jen_u in (
+            ("columbiaomnistudio.com", TABULKA_COLUMBIA, VZOR_COLUMBIA, False),
+            ("hextopms.com coated", TABULKA_HEXTOPMS_C, VZOR_HEXTOPMS, False),
+            ("hextopms.com uncoated", TABULKA_HEXTOPMS_U, VZOR_HEXTOPMS, True)):
+        if not zbyva:
+            break
+        print("  %s — stahuji seznam…" % popis)
+        sys.stdout.flush()
+        seznam = stahni_tabulku_webu(url, vzor)
+        if not seznam:
+            print("    seznam se nepodařilo stáhnout, zkouším další zdroj")
+            continue
+        dal = []
+        for p in zbyva:
+            nalez = next((seznam[v] for v in varianty(p, jen_u) if v in seznam), None)
+            if nalez:
+                tab[klic(p)] = {"hex": nalez, "zdroj": popis}
                 nove += 1
             else:
-                marne.append((p, jak))
-            if i % 50 == 0:
-                zapis_tabulku(tab)
-                print("  staženo %d/%d" % (i, len(seznam)))
-                sys.stdout.flush()
+                dal.append(p)
+        print("    doplněno %d, zbývá %d" % (len(zbyva) - len(dal), len(dal)))
+        zapis_tabulku(tab)
+        zbyva = dal
+
+    # Zbytek po jedné barvě. Prodleva ve vlákně zůstává i tady: nejde o to
+    # stáhnout to co nejrychleji, ale neposlat na cizí server salvu.
+    marne = []
+    if zbyva:
+        print("  colorxs.com — %d barev po jedné…" % len(zbyva))
+        sys.stdout.flush()
+
+        def jeden(p):
+            hex_, jak = stahni_odstin(p)
+            time.sleep(0.3)
+            return p, hex_, jak
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=VLAKEN) as bazen:
+            for i, (p, hex_, jak) in enumerate(bazen.map(jeden, zbyva), 1):
+                if hex_:
+                    tab[klic(p)] = {"hex": hex_, "zdroj": "colorxs.com"}
+                    nove += 1
+                else:
+                    marne.append((p, jak))
+                if i % 50 == 0:
+                    zapis_tabulku(tab)
+                    print("    staženo %d/%d" % (i, len(zbyva)))
+                    sys.stdout.flush()
     zapis_tabulku(tab)
     return nove, marne
 
@@ -242,7 +348,7 @@ def projdi(zapisovat, tab):
     Řádek CSV je jedna komponenta receptury, ne celá receptura — proto se
     receptury bez odstínu sbírají do množiny, jinak by jich napočítal
     tolik, kolik je dohromady navážek."""
-    zmeny, bez, chybi = [], set(), set()
+    zmeny, bez, chybi = set(), set(), set()
     for cesta in soubory_databazi():
         hlavicka, radky, tvar = nacti_csv(cesta)
         sl = dict((n.strip().lower(), i) for i, n in enumerate(hlavicka))
@@ -278,14 +384,17 @@ def projdi(zapisovat, tab):
                 continue
             novy = zaznam["hex"].lstrip("#")
             if stary != novy:
-                zmeny.append((os.path.basename(cesta), nazev, stary or u"—", novy))
+                # Řádek CSV je jedna navážka, ne celá receptura — proto se
+                # změny sbírají po dvojici (soubor, receptura), jinak by
+                # výpis hlásil čtyřnásobky.
+                zmeny.add((os.path.basename(cesta), nazev, stary or u"—", novy))
                 if zapisovat:
                     r[i_hex] = novy
                     zmeneno = True
         if zapisovat and zmeneno:
             shutil.copyfile(cesta, cesta + ".pred-odstiny.bak")
             zapis_csv(cesta, hlavicka, radky, tvar)
-    return zmeny, bez, sorted(chybi)
+    return sorted(zmeny), bez, sorted(chybi)
 
 
 # ------------------------------------------------------------------ běh

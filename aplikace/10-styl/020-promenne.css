@@ -66,7 +66,7 @@
      odsazení se z ní dopočítává, takže tvar tlačítka drží a mění se jen
      velikost. Ladí se na stránce Míchací režim v barvy.html. Tlačítka, která
      tu vyjmenovaná nejsou (vzácné stavy), drží společné --mich-tlacitko. */
-  --mich-tl-zpet:17px; --mich-tl-plocha:16px; --mich-tl-rucne:18px;
+  --mich-tl-zpet:17px; --mich-tl-kombinace:16px; --mich-tl-rucne:18px;
   --mich-tl-znam:18px; --mich-tl-viskozita:16px;
   --mich-tl-pripojit:16px; --mich-tl-simulace:16px; --mich-tl-tara:24.5px;
   --mich-tl-odpojit:24.5px; --mich-tl-sarze:15px; --mich-tl-dalsi:16px;
@@ -78,7 +78,7 @@
      odchylka od přirozeného místa v toku — tlačítko se vykreslí jinde,
      ale místo v řádku si dál drží, takže se rozvržení nerozsype. */
   --mich-tl-zpet-sirka:auto; --mich-tl-zpet-vyska:50px; --mich-tl-zpet-posun-x:0px; --mich-tl-zpet-posun-y:0px;
-  --mich-tl-plocha-sirka:288px; --mich-tl-plocha-vyska:50px; --mich-tl-plocha-posun-x:0px; --mich-tl-plocha-posun-y:0px;
+  --mich-tl-kombinace-sirka:auto; --mich-tl-kombinace-vyska:50px; --mich-tl-kombinace-posun-x:0px; --mich-tl-kombinace-posun-y:0px;
   --mich-tl-rucne-sirka:auto; --mich-tl-rucne-vyska:auto; --mich-tl-rucne-posun-x:0px; --mich-tl-rucne-posun-y:0px;
   --mich-tl-znam-sirka:auto; --mich-tl-znam-vyska:auto; --mich-tl-znam-posun-x:0px; --mich-tl-znam-posun-y:0px;
   --mich-tl-viskozita-sirka:180px; --mich-tl-viskozita-vyska:50px; --mich-tl-viskozita-posun-x:306px; --mich-tl-viskozita-posun-y:24px;

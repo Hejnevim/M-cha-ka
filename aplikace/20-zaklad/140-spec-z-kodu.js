@@ -18,6 +18,8 @@ const SPEC_ALIAS = {
   gm2:      /^(gm2|g_m2|spotreba|spot.eba)$/i,
   loss:     /^(ztraty|ztr.ty|loss|odpad)$/i,
   minBatch: /^(min|mindavka|min_davka|minbatch)$/i,
+  sterka:   /^(sterka|st.rka|sirkasterky|squeegee|racle)$/i,
+  naTah:    /^(natah|na_tah|potisku|potisk.|nup|n_up)$/i,
   order:    /^(obj|objednavka|objedn.vka|zakazka|zak.zka|order|po)$/i,
   customer: /^(zakaznik|z.kazn.k|customer|objednavatel|odberatel|odb.ratel)$/i,
   mesh:     /^(sito|s.to|mesh)$/i,
@@ -30,6 +32,7 @@ const SPEC_LABEL = {
   recipe: "Receptura", series: "Řada barvy", tech: "Technologie",
   size: "Rozměr motivu", component: "Komponenta", poscode: "Kód potisku",
   gm2: "Spotřeba g/m²", loss: "Ztráty %", minBatch: "Min. dávka g",
+  sterka: "Šířka stěrky mm", naTah: "Potisků na tah",
   order: "Zakázka", customer: "Objednavatel", mesh: "Síto", opacity: "Kryvost",
   surface: "Povrch", note: "Poznámka",
 };
@@ -102,7 +105,8 @@ function parseSpec(text) {
 function resolveSpec(parsed, products, recipes) {
   const f = parsed.fields;
   const r = { parsed: parsed, fields: f, product: null, position: null, colorIdx: -1,
-    recipe: null, qty: null, gm2: null, loss: null, minBatch: null, warn: [], ok: [] };
+    recipe: null, qty: null, gm2: null, loss: null, minBatch: null,
+    sterka: null, naTah: null, warn: [], ok: [] };
   const num = (key, min) => {
     if (f[key] == null || f[key] === "") return null;
     const v = n(f[key], NaN);
@@ -245,6 +249,8 @@ function resolveSpec(parsed, products, recipes) {
   r.gm2 = num("gm2", 0.01);
   r.loss = num("loss", 0);
   r.minBatch = num("minBatch", 0);
+  r.sterka = num("sterka", 0);
+  r.naTah = num("naTah", 1);
   if (r.qty != null) r.ok.push(preloz("Počet kusů: {n}", { n: fmt(r.qty, 0) }));
   return r;
 }

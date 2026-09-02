@@ -61,6 +61,8 @@
 70-pravidla/470-zastupnost.js
 70-pravidla/480-korekce.js
 70-pravidla/490-prepocet-sortimentu.js
+70-pravidla/495-naplne-sita.js
+70-pravidla/496-separace-vypocet.js
 50-zbytky/500-evidence.js
 70-pravidla/510-aditiva.js
 80-cena/520-cena-davky.js

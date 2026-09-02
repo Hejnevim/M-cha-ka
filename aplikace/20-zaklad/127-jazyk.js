@@ -318,6 +318,20 @@ const SLOVNIK = {
   "Spotřeba (g/m²)": { en: "Consumption (g/m²)", pt: "Consumo (g/m²)" },
   "Ztráty (%)": { en: "Losses (%)", pt: "Perdas (%)" },
   "Min. dávka (g)": { en: "Min. batch (g)", pt: "Lote mín. (g)" },
+  "Šířka stěrky (mm)": { en: "Squeegee width (mm)", pt: "Largura do rodo (mm)" },
+  "Potisků na tah": { en: "Prints per stroke", pt: "Impressões por passagem" },
+  "{a} m² × {k} % krycí plocha × {n} ks × {g} g/m² = {netto} g":
+    { en: "{a} m² × {k} % covered area × {n} pcs × {g} g/m² = {netto} g",
+      pt: "{a} m² × {k} % área coberta × {n} pçs × {g} g/m² = {netto} g" },
+  " · ztráty {z} % → {s} g": { en: " · losses {z} % → {s} g", pt: " · perdas {z} % → {s} g" },
+  " · rezerva síta {r} g (stěrka {w} mm) → {c} g":
+    { en: " · screen reserve {r} g (squeegee {w} mm) → {c} g",
+      pt: " · reserva na malha {r} g (rodo {w} mm) → {c} g" },
+  " · rezerva síta se nepočítá — šířka stěrky není zadaná":
+    { en: " · screen reserve not counted — squeegee width not entered",
+      pt: " · reserva na malha não calculada — largura do rodo não indicada" },
+  " · {t} tahů po {p} potiscích":
+    { en: " · {t} strokes of {p} prints", pt: " · {t} passagens de {p} impressões" },
   "Ze síta {mesh} vychází {g} g/m²": { en: "Mesh {mesh} yields {g} g/m²", pt: "Da malha {mesh} resultam {g} g/m²" },
   "Z klišé {mesh} vychází {g} g/m²": { en: "Cliché {mesh} yields {g} g/m²", pt: "Do clichê {mesh} resultam {g} g/m²" },
   " — teď je nastaveno {g} g/m².": { en: " — currently set to {g} g/m².", pt: " — agora está definido {g} g/m²." },
@@ -335,7 +349,6 @@ const SLOVNIK = {
   "viskozita": { en: "viscosity", pt: "viscosidade" },
   "Parametry tisku": { en: "Print parameters", pt: "Parâmetros de impressão" },
   "Síto": { en: "Mesh", pt: "Malha" },
-  "nevybráno": { en: "not selected", pt: "não selecionado" },
   "(není v parametrech {tech})": { en: "(not in the {tech} parameters)", pt: "(não está nos parâmetros {tech})" },
   /* pt zkráceně: „profundidade" je jedno nezalomitelné slovo o 30 px širší
      než sloupec dlaždice — celé se do rozvržení nevejde v žádném zalomení */
@@ -603,6 +616,9 @@ const SLOVNIK = {
   "kelímek {kod}": { en: "cup {kod}", pt: "copo {kod}" },
   "zakázka potřebuje {g} g": { en: "the order needs {g} g", pt: "a encomenda precisa de {g} g" },
   "Zavřít můžete i klávesou Esc": { en: "You can also close with the Esc key", pt: "Também pode fechar com a tecla Esc" },
+  "Založit custom recepturu nebo změnit kombinaci — bez opuštění míchání":
+    { en: "Create a custom recipe or change the combination — without leaving the mixing screen",
+      pt: "Criar uma receita própria ou mudar a combinação — sem sair da mistura" },
   "✕ Zpět do kalkulace": { en: "✕ Back to the calculation", pt: "✕ Voltar ao cálculo" },
   "V nádobě už je": { en: "The container already holds", pt: "No recipiente já há" },
   "— navažuje se jen sloupec „navážit\".":
@@ -1314,6 +1330,18 @@ const SLOVNIK = {
     { en: "is no longer in the folder, but {n} of its recipes stay in the app. If you renamed it, it will load again under the new name — these will then be left over.",
       pt: "já não está na pasta, mas {n} das suas receitas ficam na aplicação. Se o renomeou, voltará a carregar-se com o nome novo — estas ficarão então a mais." },
   "Odebrat receptury z {n}": { en: "Remove the recipes from {n}", pt: "Remover as receitas de {n}" },
+  "Receptury bez uvedené databáze: {n}":
+    { en: "Recipes with no database given: {n}", pt: "Receitas sem base de dados indicada: {n}" },
+  "Zůstaly v prohlížeči po starší verzi aplikace, která si u receptury nepamatovala, ze kterého souboru je. Ze složky se neobnovují, takže drží odstíny a složení z doby, kdy vznikly, a v seznamu stojí podruhé vedle těch ze souboru.":
+    { en: "They were left in the browser by an older version of the app, which did not remember which file a recipe came from. They are not refreshed from the folder, so they keep the shade and composition they had when they were created, and they stand in the list a second time next to the ones from the file.",
+      pt: "Ficaram no navegador de uma versão mais antiga da aplicação, que não guardava de que ficheiro vinha cada receita. Não se atualizam a partir da pasta, por isso mantêm o tom e a composição de quando foram criadas e aparecem na lista uma segunda vez ao lado das do ficheiro." },
+  "Sloučit s databázemi ({n})": { en: "Merge with the databases ({n})", pt: "Juntar às bases de dados ({n})" },
+  "vazby na produkt a barvu přejdou na recepturu ze souboru; ručně zadané barvy zůstanou":
+    { en: "the links to product and colour move to the recipe from the file; hand-entered colours stay",
+      pt: "as ligações ao produto e à cor passam para a receita do ficheiro; as cores introduzidas à mão ficam" },
+  "Sloučeno s databázemi: {n} — v seznamu zůstaly receptury ze souborů.":
+    { en: "Merged with the databases: {n} — the recipes from the files stayed in the list.",
+      pt: "Juntas às bases de dados: {n} — na lista ficaram as receitas dos ficheiros." },
   "Načíst databáze znovu": { en: "Reload the databases", pt: "Recarregar as bases de dados" },
   "projede soubory znovu, i když se od minule nezměnily":
     { en: "goes through the files again even if they have not changed since last time",
@@ -2011,6 +2039,17 @@ const SLOVNIK = {
   "sít jen podle názvu": { en: "meshes by name only", pt: "malhas só pelo nome" },
   "klišé bez hloubky": { en: "clichés without a depth", pt: "clichês sem profundidade" },
   "nejsou": { en: "none", pt: "não há" },
+  "barevná řada {r}": { en: "ink series {r}", pt: "série de tinta {r}" },
+  "čeká se na podklady": { en: "waiting for the source data", pt: "à espera dos dados" },
+  "soubor není přiřazený technologii": { en: "the file is not assigned to the technology", pt: "o ficheiro não está atribuído à tecnologia" },
+  "síto přiřazené k produktům": { en: "a mesh assigned to the products", pt: "malha atribuída aos produtos" },
+  "klišé přiřazené k produktům": { en: "a cliché assigned to the products", pt: "clichê atribuído aos produtos" },
+  "vybírá se ručně": { en: "picked by hand", pt: "escolhe-se à mão" },
+  "výchozí pro všechny": { en: "a default for all", pt: "padrão para todos" },
+  "výchozí + {n} produktů zvlášť": { en: "a default + {n} products set apart", pt: "padrão + {n} produtos à parte" },
+  "šířka stěrky k produktům": { en: "a squeegee width for the products", pt: "largura do rodo para os produtos" },
+  "zatím jen rychlé volby {v} mm": { en: "so far only the quick choices {v} mm", pt: "por enquanto só as escolhas rápidas {v} mm" },
+  "zatím ruční pole v kalkulaci": { en: "so far a manual field in the calculation", pt: "por enquanto um campo manual no cálculo" },
   "koeficienty spotřeby": { en: "consumption coefficients", pt: "coeficientes de consumo" },
   "hodnot": { en: "values", pt: "valores" },
   "pigmenty a báze": { en: "pigments and bases", pt: "pigmentos e bases" },
@@ -2092,6 +2131,38 @@ const SLOVNIK = {
   "Spotřeba g/m²": { en: "Consumption g/m²", pt: "Consumo g/m²" },
   "Ztráty %": { en: "Losses %", pt: "Perdas %" },
   "Min. dávka g": { en: "Min. batch g", pt: "Lote mín. g" },
+  "Šířka stěrky mm": { en: "Squeegee width mm", pt: "Largura do rodo mm" },
+
+  /* --- rozpis po barvách (separace) v okně krycí plochy --- */
+  "Bez rozměru potisku chybí měřítko — plochy po barvách se v cm² spočítat nedají.":
+    { en: "Without the print size there is no scale — per-color areas in cm² cannot be computed.",
+      pt: "Sem o tamanho da impressão falta a escala — as áreas por cor em cm² não se podem calcular." },
+  " · odchylka ΔE {d} · {h} g/ml": { en: " · deviation ΔE {d} · {h} g/ml", pt: " · desvio ΔE {d} · {h} g/ml" },
+  "Rozpis po barvách — každá barva má své síto a svůj kelímek":
+    { en: "Per-color breakdown — each color has its own mesh and its own cup",
+      pt: "Detalhe por cor — cada cor tem a sua malha e o seu copo" },
+  "Motiv je ve výřezu": { en: "Motif appears in the crop", pt: "O motivo aparece no recorte" },
+  "Tmavý textil — bílý podtisk": { en: "Dark textile — white underbase", pt: "Têxtil escuro — base branca" },
+  "Dvojitý nános (×1,8)": { en: "Double deposit (×1.8)", pt: "Camada dupla (×1,8)" },
+  "cm² na kus": { en: "cm² per piece", pt: "cm² por peça" },
+  "Na zakázku": { en: "Per job", pt: "Por encomenda" },
+  "Na zakázku (g)": { en: "Per job (g)", pt: "Por encomenda (g)" },
+  "Barva {n}": { en: "Color {n}", pt: "Cor {n}" },
+  "Bílý podtisk": { en: "White underbase", pt: "Base branca" },
+  "{n} sít · celkem {ml} ml na zakázku":
+    { en: "{n} screens · {ml} ml total for the job", pt: "{n} telas · {ml} ml no total da encomenda" },
+  " — v tom rezerva {r} ml na každé síto (stěrka {w} mm)":
+    { en: " — including a reserve of {r} ml per screen (squeegee {w} mm)",
+      pt: " — incluindo reserva de {r} ml por tela (rodo {w} mm)" },
+  " — rezerva síta se nepočítá, šířka stěrky není v kalkulaci zadaná":
+    { en: " — screen reserve not counted, squeegee width not entered in the calculation",
+      pt: " — reserva na tela não calculada, largura do rodo não indicada no cálculo" },
+  "U {n} vrstev není vybrané síto — bez něj se nános nepočítá a v součtu chybí.":
+    { en: "{n} layers have no mesh selected — without it the deposit is not computed and is missing from the total.",
+      pt: "{n} camadas sem malha escolhida — sem ela a camada não se calcula e falta no total." },
+  "Na zakázku = nános × {k} ks × (1 + ztráty {z} %) + rezerva síta. Gramy jen u barev s přiřazenou recepturou — bez hustoty se ml na gramy nepřevádí.":
+    { en: "Per job = deposit × {k} pcs × (1 + losses {z} %) + screen reserve. Grams only for colors with a matched recipe — without density, ml is not converted to grams.",
+      pt: "Por encomenda = camada × {k} pçs × (1 + perdas {z} %) + reserva da tela. Gramas só para cores com receita atribuída — sem densidade, ml não se converte em gramas." },
   "Zákazník": { en: "Customer", pt: "Cliente" },
   "Termín": { en: "Deadline", pt: "Prazo" },
   "Rozměr potisku": { en: "Print dimensions", pt: "Dimensão da impressão" },

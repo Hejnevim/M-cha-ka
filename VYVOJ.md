@@ -307,6 +307,28 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 15:37 | Čára v ploše vede z levého horního rohu — posun −47vw / −44vh a tloušťka 10 → 14 px; poprvé je zapojený i vodorovný posun, takže poloha nově závisí i na šířce okna |
 | 15:55 | Tlačítko tárování říká jen „Tára“ — nula v závorce vypadala jako hodnota na váze; stejně zkrácené i „Tare“ a „Tara“ |
 | 15:56 | Pod displejem váhy už nestojí „na váze · receptura …“ — název receptury drží hlavička míchacího režimu, poznámka jen opakovala známé; zrušená ve všech třech jazycích |
+| 17:12 | Odstíny receptur berou z jedné tabulky místo od sousedních databází — 3 322 receptur z 3 468 dostalo správný hex, receptur bez odstínu ubylo z 460 na 124, kolečko u PANTONE 2303 C je z rgb(136,136,136) konečně #9EB356 |
+
+### 2. září — odstíny dojely do konce
+| čas | co |
+|---|---|
+| 08:35 | Odstín má 3 466 receptur z 3 468 — nástroj bere ze čtyř seznamů podle spolehlivosti (columbia sedí s colorxs na 1 285 pantonech na ΔE 0,00) a zná i jiné zápisy téhož jména, takže dojely i uncoated a Process barvy |
+| 08:58 | Kopie receptur po starší verzi aplikace jdou sloučit tlačítkem v „Připojení k mostu“ — páruje se podle jména i řady, vazby na produkt přejdou na recepturu ze souboru a ručně zadané barvy zůstanou (3 471 → 3 469, bez zdroje zbyla 1) |
+| 09:53 | Dávka počítá s houskou barvy v sítě: šířka stěrky → rezerva 108 g na 300 mm, rozpis pod výsledkem, potisků na tah (4× na sítě = 125 tahů, spotřeba stejná) |
+| 10:18 | Motiv z PDF se rozkládá na separace: plocha každé barvy zvlášť (bod patří nejbližší barvě), síto na barvu, bílý podtisk z nečerné plochy (dvojitý nános ×1,8), rezerva na každé síto — ověřeno na geometrii 8:4:1, součet 378 ml na 4 síta |
+| 10:33 | Spočítat krycí plochu z náhledu stojí u zakázkového listu — pod načtením PDF a kódu, ne až v míchacím režimu |
+| 10:48 | Minimální dávka začíná na 1 g — vzorová zakázka počítá 1,8 g místo mlčky navážených 50 g; podlahu zvedá jen zakázkový list nebo obsluha |
+| 12:44 | Ukázka má pod přehrávačem „Cestu jedné zakázky" — tabulku deseti kroků od barevné řady k potiskovanému místu po štítek, s tlačítky skákajícími na scény; obě jazykové verze publikované na stejné adresy |
+| 14:06 | Custom receptura se zakládá u váhy — „Barva a poloha potisku“ se otevírá i nad míchacím režimem: odvození, razítko schválení i vazba na kombinaci bez opuštění vážení |
+| 14:10 | Síto se u textilu vybírá samo podle produktu — 54-64 pro všechny, 90-48 pro devět vyjmenovaných; pravidlo stojí v parametry/sita.csv (sloupce vychozi a produkty), ne v kódu, a ruční změna platí do výměny produktu nebo receptury |
+| 14:19 | Síto podle produktu i v editoru custom receptury — odvozená barva v TXP dostane 54-64 / 90-48 předvyplněné a editor z kalkulace nabízí jen síta technologie; záložka Receptury beze změny |
+| 14:40 | Stěrky textilu na jedno klepnutí — TXP nabízí pod polem šířky stěrky čipy 250 a 420 mm; klik vyplní pole a hned naskočí rezerva síta (90 g na 250 mm) |
+| 15:03 | Plán doplnění zkonkrétněl: 12 chybějících barevných řad má jména i technologie (Tiflex, Avient, Coates, Debuit, Engler, Marabu, SK — 19 přiřazení) a ke každému produktu se podle technologie přiřadí síto a šířka stěrky — síto do hotových sloupců sita.csv, pro stěrku se místo teprve postaví |
+| 15:43 | Plán je vidět v Odemykání technologií: bod za každou domluvenou barevnou řadu (19 z parametry/plan_databazi.csv, odškrtne se až přiřazeným souborem) a body „síto/klišé přiřazené k produktům" a „šířka stěrky k produktům" — SCR hotovo 3 ze 12, TXP 4 ze 12, PDP 4 ze 10, TRS 2 ze 8, FIR 3 ze 6 |
+| 16:17 | Šířka stěrky u textilu se vybírá rovnou v dlaždici — šířky 250 a 420 mm jsou ve výběrové nabídce místo čipů pod polem; klik na 420 hned počítá rezervu síta 151,2 g |
+| 16:21 | Síto podle produktu už není na výběr — dlaždice Síto u textilu nabízí jen síto, které produktu patří (90-48 u devíti vyjmenovaných, 54-64 u ostatních), bez „nevybráno"; totéž v editoru receptury z kalkulace; technologie bez pravidla nabízejí celou řadu jako dřív |
+| 16:37 | Prázdná dlaždice ukazuje „—" jako šířka stěrky — Síto, Klišé, Kryvost a Povrch v kalkulaci i v editoru receptury; slovo „nevybráno" a jeho překlady zmizely ze slovníku |
+| 16:44 | Výběr barvy a polohy potisku stojí v pravém dolním rohu karty produktu — tlačítko dojelo k pravému okraji karty (553 → 750 px), štítky zůstaly vlevo u názvu; na telefonu má vlastní řádku a drží vpravo |
 
 ---
 
@@ -7709,3 +7731,750 @@ Jediný zbylý `result-sub` patří přepočtu na mililitry o kus výš, ne váz
 V `barvy.html` po přegenerování žádný výskyt.
 kontrola_aplikace.py: kořen 1 potomek, 8 672 znaků, chyby žádné.
 sestav.py --kontrola: index.html odpovídá soupisu (82 částí).
+
+## 174. Kolečko odstínu ukazovalo šedou — a tam, kde ukazovalo barvu, byla špatná
+
+**Problém.** Vedle jména receptury stojí kolečko s odstínem: v kartě „Kolik
+namíchat" a v hlavičce míchacího režimu. U PANTONE 2303 C bylo šedé.
+Kreslení za to nemohlo — sloupec `hex` byl v CSV prázdný a import za prázdnou
+hodnotu dosazuje `#888888`. Takhle na tom bylo 460 receptur z 3 468.
+
+Horší bylo to, co se ukázalo cestou. Odstíny, které v databázích byly, se do
+nich dostaly „dohledáním z jiné databáze, kde už nějaký je" (`prevod_printcolor.py`,
+`prevod_rucolor.py`), takže se jedna chyba rozšířila do všech čtyř souborů
+a nikdo ji neměl proti čemu poznat. PANTONE 346 C měl ve všech čtyřech
+`E6F2DE`, tedy skoro bílou, ačkoli je to střední zelená. PANTONE 656 C měl
+fialovou `440199`, ačkoli je to bledě modrá.
+
+**Co se změnilo.** Zdrojem odstínů je jedna tabulka `parametry/odstiny_pantone.csv`
+(pantone → hex → odkud) a nový nástroj `odstiny.py`:
+
+| příkaz | co udělá |
+|---|---|
+| `python odstiny.py --kontrola` | nic nezapíše, vypíše, co by se změnilo |
+| `python odstiny.py` | zapíše odstíny z tabulky do všech databází |
+| `python odstiny.py --stahni` | doplní tabulku z colorxs.com a pak zapíše |
+
+Převodníky nových databází berou odstín odtud, ne od sousedů, takže se
+další chyba nemá jak rozšířit. Odvozené vlastní receptury dostávají odstín
+té receptury, ze které vznikly — míchá se jinak, cíl je pořád tentýž pantone.
+Před přepsáním si každý soubor odloží kopii `<soubor>.pred-odstiny.bak`
+a zachová se tvar souboru: Ferro Xpression přišlo s LF, zbylé tři s CRLF,
+vlastní receptury mají uvozovky kolem každé buňky.
+
+**Že je zdroj v pořádku a chyba byla v databázi** potvrzuje PANTONE 485 C:
+zdroj vrací `#DA291C` — přesně tu hodnotu, kterou má napevno zapsaná ukázková
+receptura v `20-zaklad/110-technologie.js`. V databázi stálo `F2602F`.
+
+**Slepá ulička: odstín ze složení receptury.** Nabízelo se odstín dopočítat
+z toho, co je v receptuře namícháno. Proložení odstínů složek přes 555
+receptur MS 660 se známým hexem a křížové ověření na pětinách dalo medián
+odchylky ΔE 11,6 a devátý decil 27,8; u PANTONE 2303 C model vydal žlutou,
+ačkoli podklad recepturu vede jako GRÜN. Navíc složky v `parametry/pigmenty.csv`
+žádný odstín nemají, takže by nebylo z čeho počítat. Nepoužito.
+
+**Past při stahování.** První průchod ohlásil 194 nedohledaných pantonů.
+Druhý průchod jich 68 dohledal — server při vyšším tempu odpovídá 429
+a to skončilo ve stejné větvi jako „stránka neexistuje". Když nástroj
+hlásí nedohledané, vyplatí se pustit ho ještě jednou.
+
+**Změřeno:**
+
+- kontrolní vzorek 141 pantonů, u kterých odstín v databázi byl: shoda na
+  chlup **2 ze 141**, medián odchylky **ΔE 26,8**, devátý decil 35,1,
+  do ΔE 5 jen 2 %; databáze byla světlejší u 125 ze 141, medián o 15,3 L*
+- PANTONE 2303 C v kartě „Kolik namíchat": **rgb(136, 136, 136) → rgb(158, 179, 86)**
+  (`#9EB356`); v hlavičce míchacího režimu tatáž hodnota
+- PANTONE 485 C `F2602F` → `DA291C`, Cool Gray 1 C `FDFEFE` → `D9D9D6`,
+  Cool Gray 2 C `FCFBFC` → `D0D0CE`, Warm Gray 2 C `FCFCFC` → `CBC4BC`
+- zapsáno **3 322 receptur z 3 468**; tabulka má 1 342 pantonů
+- odvozené vlastní receptury: 2 dostaly odstín svého podkladu, třetí
+  (`Firemní zelená CUST-014`, vlastní vyvzorkovaná) si svůj odstín drží
+- bez odstínu zůstává **124 receptur** (91 MS 660, 33 MS 786) proti 460 dřív;
+  103 ze 120 jmen jsou varianty „U" (uncoated), které zdroj nevede
+- `kontrola_aplikace.py` 0, `mapa.py --kontrola` 0
+
+## 175. Odstín má i posledních 124 receptur — zdroje se doplňují, ne nahrazují
+
+**Problém.** Po kapitole 174 zůstalo 124 receptur bez odstínu. Nebyla to
+náhodná zbytkovina: colorxs uncoated varianty nevede vůbec, a katalogy
+Printcolor jich mají 104. Zbytek byly jmenné barvy (Process, Hexachrome,
+Cool Gray U) a dva zápisy z německého vzorníku, na které adresa neseděla.
+
+**Co se změnilo.** `odstiny.py` bere odstíny ze čtyř seznamů v pořadí podle
+toho, jak jsou spolehlivé, a každý další doplňuje jen to, co předchozí neměl:
+
+| pořadí | zdroj | co umí | jak sedí |
+|---|---|---|---|
+| 1. | columbiaomnistudio.com | 9 915 pantonů, coated i uncoated, jedna stránka | na 1 285 coated **medián ΔE 0,00**, 100 % do ΔE 2 |
+| 2. | hextopms.com coated | 1 124 pantonů včetně Process a Hexachrome | medián ΔE 2,61, do ΔE 2 jen 34 % |
+| 3. | hextopms.com uncoated | 1 124 pantonů včetně jmenných šedí | medián ΔE 2,07 proti columbii |
+| 4. | colorxs.com | po jedné barvě, zná i to, co v seznamech není | referenční |
+
+Že první zdroj sedí, není domněnka: na 1 285 společných pantonech vrací
+**identická čísla** jako colorxs. Dva nezávislé weby, stejné hodnoty.
+
+Praktický dopad na nové databáze je stejně velký jako ten na přesnost:
+místo 1 600 dotazů po jedné barvě stačí stáhnout tři stránky.
+
+**Jména se hledají ve variantách, odstíny se nehádají.** Vzorníky si nejsou
+v zápisu věrné — `Cool Gray 2 U` stojí v uncoated tabulce jako `Col Grey 2 U`,
+`Green U` jen jako `Green`, a v podkladu Printcolor je `RUBIN RED C`
+(správně Rubine Red) a `VIOLETT` (správně Violet). Funkce `varianty()`
+zkusí tyhle zápisy téhož jména. Hádá se zápis jména, ne barva — odstín se
+vždycky vezme ten, který u nalezeného jména stojí.
+
+**Změřeno:**
+
+- receptur bez odstínu: **460 → 124 → 2** ze 3 468
+- PANTONE 137 U v mřížce odstínů: `#888888` → naměřeno **rgb(255, 159, 55)**
+  (`#FF9F37`)
+- doplněno 113 pantonů ze seznamů (99 columbia, 14 hextopms), pak dalších
+  7 z coated tabulky a 3 přes varianty jmen na colorxs
+- tabulka odstínů: 1 342 → **1 465 pantonů**
+- zbývají dvě receptury, obě v MS 660: `PANTONE 3-9 C` (kód katalogu, ne
+  pantone) a `PANTONE 4219 U` (existuje jen coated). Třetí, `PANTONE 1985 C`
+  ve Ferro Xpression, drží starou nezkontrolovanou hodnotu `FDF5F6` — pantone
+  toho čísla žádný vzorník nevede, řada jde 1905, 1915, 1925, 1935, 1945,
+  1955, takže je to nejspíš překlep v podkladu
+- `kontrola_aplikace.py` 0
+
+**Falešný poplach po cestě.** První průchod ohlásil 194 nedohledaných
+pantonů, druhý jich 68 dohledal beze změny kódu. Server při vyšším tempu
+odpovídá 429 a to padalo do stejné větve jako „stránka neexistuje" — číslo
+o nedohledaných tedy nebylo o barvách, ale o tempu stahování.
+
+## 176. Kopie receptur po starší verzi jde sloučit tlačítkem, ne konzolí
+
+**Problém.** V prohlížeči dílny stálo 4 565 receptur, ačkoli soubory jich mají
+3 468. Rozdíl — 1 097, přesně počet receptur Ferro Xpression — byly kopie
+z doby, kdy si aplikace u receptury nepamatovala, ze kterého souboru je.
+Na takové receptury se schválně nesahá, protože mezi nimi sedí i ručně
+zadané barvy dílny. Jenže ty, které kopií souboru jsou, se pak ze složky
+neobnovují: v seznamu stojí podruhé vedle té ze souboru a drží odstín z doby,
+kdy vznikly. Po opravě odstínů to vypadalo, že se náhledy neaktualizovaly.
+
+**Chyba, kterou to nejdřív mělo.** Napadlo mě pustit znovu jednorázové
+přeznačení, které aplikace pro tenhle případ má (`irm-databaze-znacky`).
+V prázdném prohlížeči to sedělo — kopie zmizela, ručně zadaná receptura
+zůstala. Zkouška proti skutečnému stavu ale ukázala, že to nestačí: přeznačení
+se v `sloucReceptury` dostane ke slovu jen tehdy, když se receptura ze souboru
+v prohlížeči **ještě nenašla**. Jsou-li tam obojí — a v dílně jsou —, `stary`
+se najde podle klíče a větev s adopcí se přeskočí. Kdybych to neproklikal,
+poradil bych postup, který nefunguje.
+
+**Co se změnilo.** V záložce „Připojení k mostu“ se objeví blok, ale jen když
+je co slučovat, a nabídne počet **skutečných kopií** — tedy těch, ke kterým se
+najde receptura téhož jména se zdrojem. Ručně zadané barvy se do počtu
+nepočítají a tlačítko se jich nedotkne.
+
+Slučuje se přes `onSloucitKopie` v `210-app.js`, ne mazáním:
+
+| krok | proč |
+|---|---|
+| kopie se páruje podle **jména i řady** | tentýž pantone je v každé databázi namíchaný z jiných barev; vazba na Ferro nesmí skončit u RUCOLORu |
+| vazba na produkt a polohu se přepne na nalezenou recepturu | na `id` kopie visí to, co nastavil technolog — prosté smazání by o to přišlo |
+| co se nespáruje, zůstává | je to ruční barva dílny, v žádném souboru není |
+| jde přes `guardDelete` | stejné hrdlo jako u ostatního mazání, tiskař u váhy maže omylem |
+
+**Změřeno** (prohlížeč nasazený se dvěma kopiemi a jednou ruční barvou):
+
+- blok napsal `Receptury bez uvedené databáze: 2` — ruční barvu nepočítal
+- po stisku: 3 471 → **3 469** receptur, bez zdroje zůstala **1**
+  (`Dílenská zelená RUC-77` i se svým `#0E8A5F`)
+- `PANTONE 346 C` po sloučení jen ze souborů, všechny `#71CC98`
+- vazba `11003|124|PDP|Víčko lahve` ukazovala na kopii, po sloučení ukazuje
+  na `PANTONE 346 C` z **receptury_Ferro_Xpresssion.csv** — tedy na tu řadu,
+  kterou kopie nesla. Před přidáním párování podle řady skončila u RUCOLORu.
+- `kontrola_aplikace.py` 0, `sestav.py --kontrola` 0, slovník doplněn
+  o 4 položky v en i pt (ověřeno `sonda.py --jazyk`)
+
+**Ještě jedna vlastní chyba.** Zkouška běžela proti živému mostu a zapsala
+zkušební recepturu do `receptury_vlastni.csv`. Odstranil jsem ji a soubor
+porovnal řádek po řádku proti záloze: 12 řádků, stejné klíče, liší se jen
+sloupec `hex` u dvou odvozených receptur. Pravidlo „před testem, který
+proklikává ukládání, most vypnout“ platí i pro test, který ukládat nemá
+v úmyslu.
+
+## 177. Dávka počítá i s barvou, která leží v sítě a nikdy se nespotřebuje
+
+**Problém.** Dávka se počítala jen z toho, co skončí na výrobku: plocha × krycí
+plocha × kusy × g/m², plus procento ztrát. Jenže než se udělá první tah, musí
+před stěrkou ležet souvislá houska barvy — jinak stěrka nabírá vzduch a tisk
+vynechává. U velké zakázky se to ztratí, u malé ne: na 500 propisek vychází
+netto 3,8 g, a s takovou dávkou by se nedalo tisknout vůbec. Dílna to řešila
+pravidlem palce „100 až 200 g na síto navíc", které v aplikaci nikde nestálo.
+A druhá věc z téže metodiky: když je na sítě logo čtyřikrát, celková spotřeba
+se NEMĚNÍ (barva se přenáší na kusy, ne na tahy) — ale širší stěrka drží
+v sítě víc barvy. Aplikace neměla, jak obojí říct.
+
+**Co se změnilo.** Nová část `70-pravidla/495-naplne-sita.js` a dvě pole
+v kartě Zakázka (jen u technologií se sítem; tampontisk bere barvu z kalíšku
+a pole nemá):
+
+| pole | co dělá |
+|---|---|
+| Šířka stěrky (mm) | rezerva = šířka × průřez housky (300 mm² ≈ pás 20 × 15 mm) × hustota receptury; přičítá se k dávce |
+| Potisků na tah | počet tahů = kusy / potisky na tah; spotřebu nemění a měnit nesmí |
+
+Rezerva se **přičítá, není ve ztrátách**: ztráty jsou barva, která se nevrátí
+(stěrka, karty, okraje), houska se po zakázce seškrábne zpátky do kelímku —
+proto se pak objeví v předpovědi zbytku jako to, co zbude. A protože závisí
+jen na šířce stěrky, nesmí růst se zakázkou jako procento. Bez zadané šířky
+stěrky se rezerva nepočítá a rozpis to řekne — dosadit průměrnou stěrku dílny
+by byl odhad vydávaný za měření.
+
+Pod výsledkem „Kolik namíchat" je nově celý rozpis, aby šel přepočítat ručně:
+`0,0011 m² × 100,0 % krycí plocha × 500 ks × 6,0 g/m² = 3,3 g · ztráty 15,0 %
+→ 3,8 g · rezerva síta 108,0 g (stěrka 300 mm) → 111,8 g · 125 tahů po
+4 potiscích`. Tentýž údaj jde i na míchací lístek (česky, jako celý lístek).
+Šířka stěrky a potisků na tah jdou načíst i ze zakázkového listu
+(`sterka=300|natah=4`). Ze savosti z metodiky je zapsaný první koeficient
+spotřeby, který není 1,00: bavlna 1,25 (střed rozsahu +20 až 30 % proti
+nepropustnému plastu) v `parametry/koeficienty.csv`. Vysvětlení, proč rezerva
+není ztráta a proč vícenásobný motiv nezvyšuje spotřebu, je
+v `NAVOD_PODKLADY.md` — obrazovka zůstává tichá.
+
+**Změřeno:**
+
+- zkouška v Node (14 mezí): stěrka 300 mm × 1,2 g/ml → 90 ml = 108 g,
+  500 mm → 180 g — obojí uvnitř pásma 100–200 g z pravidla palce; prázdná,
+  nulová i nesmyslná šířka → rezerva se nepočítá; 1 000 ks po 3 → 334 tahů
+  (zaokrouhluje nahoru)
+- v prohlížeči po skutečném vyplnění (11070, SCR 55×20 mm, 500 ks, 6 g/m²,
+  ztráty 15 %, stěrka 300, 4 na tah): výsledek 3,8 g → **111,8 g**,
+  rozpis slovo od slova jak výše
+- karta Zakázka se šesti dlaždicemi jde do tří sloupců: obě sousední karty
+  415 px, všech šest dlaždic 140 × 100 px (ve dvou sloupcích to bylo 513 px
+  a výběry Parametrů tisku se roztáhly na ~340 px — proto tři sloupce);
+  popisky dostaly dvouřádkovou dolní mez, bez ní dlaždice pod zalomeným
+  „SPOTŘEBA (G/M²)" začínala na 100 px proti 123 px sousedek
+- telefon 390 px: dvě dlaždice vedle sebe po 149 × 88 px, tři řádky — méně
+  rolování, než dnes zabírají čtyři dlaždice v jednom sloupci
+- jazyky snímkem po přepnutí: en „screen reserve 108,0 g (squeegee 300 mm)
+  → 111,8 g · 125 strokes of 4 prints", pt „reserva na malha 108,0 g (rodo
+  300 mm) → 111,8 g · 125 passagens de 4 impressões"; slovník strojově —
+  8 nových klíčů, všechny s en i pt a se shodnými jmenovkami
+- `kontrola_aplikace.py` 0, `sestav.py --kontrola` 0 (přibyla část
+  v `poradi.txt`)
+
+**Co se nechalo být.** Přepočet sortimentu na síto rezervu nepřičítá a pole
+stěrky nedostal: je to srovnávací tabulka receptur a rezerva by všem řádkům
+přičetla touž konstantu — pořadí ani rozdíly by se nezměnily. Kdyby někdy
+sloužil k nacenění zakázky, přidá se tam.
+
+## 178. Vícebarevný motiv z PDF se rozloží na separace — každá barva své síto, svůj kelímek
+
+**Problém.** Rozbor náhledu uměl spočítat krycí plochu motivu, ale jen jako
+celek: vybrané barvy se sečetly do jedné plochy a ta šla do kalkulace jedné
+receptury. Dvoubarevné logo s podtiskem jsou přitom tři síta a tři kelímky
+a každá vrstva má jinou plochu i jiný nános. Tiskař to počítal ručně vedle
+aplikace — a na bílý podtisk pod světlé barvy na tmavém textilu se zapomínalo
+úplně, protože nikde nestál.
+
+**Co se změnilo.** Rozbor náhledu (`analyzujPokryti`) nově vrací plochu
+**každé vybrané barvy zvlášť**: bod motivu patří právě té barvě, které je
+nejblíž, takže součet ploch po barvách je přesně plocha motivu a nic se
+nepočítá dvakrát. S vnějším odsazením se každá barva nafukuje zvlášť — každá
+se rozpíjí na svém sítě. Nad tím stojí čistý výpočet
+`70-pravidla/496-separace-vypocet.js` (`rozborSeparaci`) a tabulka v okně
+krycí plochy:
+
+| co | jak |
+|---|---|
+| síto na barvu | nabídka z `parametry/sita.csv` přes `spotrebaZeSita` — žádná druhá tabulka nánosů v kódu |
+| receptura k barvě | podle odstínu (`nejblizsiPantone`, mez ΔE 25) — z ní hustota a předvolba síta |
+| ml vs. gramy | objem sítem prošlý na hustotě nezávisí, počítá se v ml; na gramy se převádí jen s hustotou přiřazené receptury |
+| bílý podtisk | plocha = součet NEčerných barev (černá = jas pod 60, tiskne se rovnou); vlastní síto (předvolba nejhrubší), volitelný dvojitý nános ×1,8 |
+| rezerva síta | z šířky stěrky zadané v kalkulaci, na **každé** síto zvlášť (kap. 177) |
+| motiv ve výřezu N× | plocha na kus = změřená / N; spotřeba zakázky se nemění — násobí se kusy, ne tahy |
+
+Kalkulace oknu předává síta technologie, koeficienty, materiál, podklad,
+ztráty i šířku stěrky — rozpis počítá týmiž pravidly jako dávka jedné barvy.
+Kde síto vybrané není, nános se nepočítá a součet to řekne; kde chybí rozměr
+potisku, řekne rozpis, že bez měřítka nejsou cm².
+
+**Změřeno:**
+
+- zkouška v Node (19 mezí): 77T (vth 22, přenos 0,7) → 15,4 ml/m²; červená
+  4 000 mm² × 1 000 ks × 15,4 = 61,6 ml, +15 % a +90 ml rezervy = 160,84 ml,
+  se hustotou 1,15 → 184,97 g; podtisk jen z nečerné plochy 98 ml netto,
+  dvojitý nános 176,4 ml; motiv 4× → čtvrtinová plocha na kus; síto bez
+  objemu → „—" a počitadlo bezSita; podtisk pod samotnou černou nevznikne
+- v prohlížeči na umělém obrázku se známou geometrií (červená 20 000 px,
+  černá 10 000 px, modrá 2 500 px na bílé, rozměr potisku 55×20 mm):
+  plochy **2,63 / 1,31 / 0,33 cm²** — přesně poměr 8:4:1; krycí plocha
+  52,1 % = 32 500 / 62 400 bodů obálky; červená rozpoznána jako
+  **PANTONE 485 C s ΔE 0,0** (kreslila se přesně #DA291C)
+- rozpis při 500 ks, ztrátách 15 %, stěrce 300 mm, sítech 43-80 a podtisku
+  přes 32-100: 96 + 93 + 91 + 99 ml, součet **378 ml na 4 síta** — sedí
+  s ručním přepočtem na desetinu ml; gramy jen u barev s recepturou
+  (115,0 / 111,5 / 108,9), bílý podtisk bez receptury zůstal v ml
+- jazyky: en „4 screens · 378 ml total for the job — including a reserve of
+  90 ml per screen (squeegee 300 mm)", pt „Cor 1 ≈ PANTONE 485 C · desvio
+  ΔE 0,0"; slovník strojově — 16 nových klíčů, všechny s en i pt a se
+  shodnými jmenovkami
+- telefon 390 px: stránka bez vodorovného rolování (390/390), tabulka
+  roluje ve svém boxu
+- `kontrola_aplikace.py` 0, `sestav.py --kontrola` 0 (84 částí)
+
+**Vlastní chyba po cestě.** První verze přiřazovala recepturu voláním
+`nejblizsiPantone` s objektem barvy z nabídky — funkce ale bere RGB trojici.
+Spadlo to až při otevřeném okně (`rgb.map is not a function`) a React shodil
+celý strom; kontrola vykreslení to nechytila, protože okno se při ní
+neotevírá. Našlo se to posluchačem chyb ve skutečném prokliku.
+
+**Co se nechalo být.** Rozpis se zatím nedá poslat do fronty dávek jedním
+tlačítkem — každá barva se míchá přes kalkulaci jako dosud. Až se ukáže, že
+dílna rozpis používá, přidá se „založit dávky z rozpisu".
+## 179. Krycí plocha se počítá tam, kde se načítá zakázkový list
+
+**Problém.** Tlačítko „Spočítat krycí plochu z náhledu" stálo v míchacím
+režimu nad tabulkou navážení. Krycí plocha se ale počítá z náhledu
+zakázkového listu — od PDF, ze kterého čte, ho dělila celá obrazovka:
+list se nahrává v kartě *Vybraný produkt* na domovské stránce, na plochu
+si tiskař musel vzpomenout až u váhy. A když ji přepočítal až tam, změnila
+se mu dávka pod rukama v půlce navažování.
+
+**Co se změnilo.** Tlačítko i stavový řádek („krycí plocha 100,0 % ·
+z katalogu / z náhledu") se přestěhovaly do karty *Vybraný produkt*, do
+sloupce zakázkového listu — pod dlaždici PDF a tlačítko *Načíst kód*, kde
+náhled vzniká. Podmínka zobrazení zůstala: bez vybrané receptury a množství
+se tlačítko neukazuje, protože nemá co přepočítávat. Míchací režim o řádek
+přišel úplně a tabulka navážení začíná hned nahoře; s tlačítkem odešla
+i jeho laditelná pětice z barvy.html (ovladačů míchacího režimu 88 → 83)
+a proměnné `--mich-tl-plocha-*` z `:root` — ovládání, které ztratilo cíl,
+se ruší celé.
+
+**Změřeno** (`sonda.py`, 1 600 px): všechny prvky sloupce na shodném
+x 531,33 px a šířce 218,67 px; *Načíst kód* y 592,23 px (výška 51 px),
+tlačítko krycí plochy y 651,23 px (výška 50 px) — mezera přesně 8,0 px,
+stavový řádek y 708,23 px. `prekryv.py` 0 (8 měření, 4 šířky × 2 režimy),
+`kontrola_aplikace.py` 0; snímek při 390 px: sloupec se skládá pod sebe
+a nic nepřetéká. Snímek míchacího režimu: řádek krycí plochy pryč, tabulka
+navážení začíná na vrchu sloupce.
+## 180. Minimální dávka je v základu 1 g — podlahu určuje zakázka, ne aplikace
+
+**Problém.** Pole *Min. dávka (g)* začínalo na 50 g. Každá drobná zakázka
+tak mlčky narostla na padesátigramovou dávku — u vzorové zakázky s potřebou
+1,8 g se navažovalo 50 g a rozdíl šel do zbytků nebo do koše, aniž si o to
+kdo řekl.
+
+**Co se změnilo.** Výchozí hodnota v `240-calc.js` je 1 g, tedy prakticky
+bez podlahy: dávku zvedá až hodnota ze zakázkového listu či kódu (převzetí
+specifikace hodnotu přepisuje beze změny) nebo obsluha v poli. Výpočet se
+nezměnil — pořád platí `max(potřeba, min. dávka)`.
+
+**Změřeno** (`sonda.py`, čerstvé načtení): pole Zakázky drží 500 ks ·
+2,5 g/m² · 15 % · min. dávka 1; výsledek vzorové zakázky 1,8 g (dřív 50,0 g
+s hlášením „Uplatněna minimální dávka 50 g") a hlášení o uplatněné minimální
+dávce zmizelo. `kontrola_aplikace.py` 0.
+
+## 181. Ukázka popisuje cestu jedné zakázky vcelku, ne jen po scénách
+
+**Problém.** Scény ukázky předvádějí cestu zakázky po kouscích, ale celý
+proces — od přiřazení barevné řady k potiskovanému místu až po namíchání
+podle velikosti zakázky, propustnosti síta a skutečné velikosti loga — nebyl
+nikde k přečtení pohromadě. Kdo si ukázku nepustil nebo do ní skočil
+doprostřed, postup vcelku neviděl; krok výběru receptury navíc nemá ani
+vlastní scénu, takže o třech cestách k receptuře ukázka mlčela úplně.
+
+**Co se změnilo.** Pod přehrávačem je nový oddíl **Cesta jedné zakázky —
+stručně** (anglicky *One job, start to finish — in brief*), stejný vzor jako
+dodatek s úsporou: čte se, neposlouchá. Tabulka deseti kroků — barevná řada,
+zadání, technologie, receptura, velikost loga, propustnost síta, dávka,
+zbytky, namíchání, štítek — a v posledním sloupci tlačítko, které skočí na
+scénu, jež krok předvádí, a vrátí stránku k jevišti. Krok *receptura* (tři
+cesty: standard z řady, vlastní odvozený odstín, rozpracovaná barva; paměť
+poslední volby na kombinaci) vlastní scénu zatím nemá a je popsaný jen tady.
+Obě jazykové verze se změnily spolu a jsou publikované na tytéž adresy;
+scénář, nahrávky ani počet scén se neměnily.
+
+**Změřeno:** zkouška v Node — syntaxe skriptu obou stránek v pořádku,
+21 sekcí = 21 položek `SCENY`, `data-s` souvislé, 9 tlačítek se skokem míří
+na scény 2, 3, 4, 5, 8 a 10 (všechny existují). Kontrola vykreslení
+(`kontrola_aplikace.py` nad kopií obalenou kostrou artifactu): kořen
+7 potomků, 81 427 znaků česky / 84 158 anglicky, chyby žádné. Čísla
+v tabulce jsou táž schválená jako ve scénách: 25,71 → 3,25 cm².
+
+## 182. Custom receptura se zakládá u váhy — výběr kombinace se otevírá nad mícháním
+
+**Problém.** Vlastní odstín vzniká u váhy: míchá se, koriguje a výsledné
+složení má zůstat uložené k produktu a poloze. Jenže dialog *Barva a poloha
+potisku* — jediné místo, kde se custom receptura zakládá a váže na
+kombinaci — byl dostupný jen z kalkulace. Z míchacího režimu se muselo
+klávesou Esc ven, receptura založit tam a režim otevřít znovu; přetvořit
+složení, nechat ho potvrdit technologem a hned podle něj vážit na jednom
+místě nešlo.
+
+**Co se změnilo.** V hlavičce míchacího režimu vedle textu kombinace stojí
+tlačítko **Barva a poloha potisku →** — stejný název jako v kalkulaci,
+protože otevírá týž dialog (týž údaj se na obou místech jmenuje stejně).
+Dialog se otevře **nad** režimem (`.modalbg` z-index 90 nad `.michbg` 80),
+takže rozdělané vážení zůstává pod ním: jde přepnout barvu produktu nebo
+polohu a hlavně založit custom recepturu pro rozdělanou kombinaci — odvodit
+z databázové formule, upravit složení a uložit. Uložení funguje jako dosud:
+razítko při vzniku (od technologa schválená založením, od tiskaře čeká
+a platí jen na kombinaci, kvůli které vznikla), vazba na produkt + barva +
+technologie + poloha a odklad do `receptury_vlastni.csv` přes most. Míchací
+tabulka i asistent navážení se na nové složení přepočítají hned — váží se
+bez přepínání obrazovek.
+
+Dvě drobnosti pod povrchem:
+
+- **Esc s otevřeným dialogem míchání nezavírá.** Posluchač Esc v režimu
+  dostal příznak `modalNahore` — jinak by tiskaři po zavření dialogu
+  zmizela i obrazovka s váhou pod ním.
+- Tlačítko má vlastní sadu proměnných `--mich-tl-kombinace` (písmo, šířka,
+  výška, posun) jako ostatní stálá tlačítka režimu — ladí se na stránce
+  Míchací režim v `barvy.html`; v cizím jazyce jsou laděná čísla jen
+  minima a tlačítko s delším textem roste.
+
+**Změřeno:** dialog nad režimem doopravdy stojí — po skutečném kliknutí
+z režimu má `.modalbg` z-index 90, `.michbg` 80 a nadpis dialogu se přečetl
+z DOMu. Tlačítko 238,4 × 50,0 px na y 20,3 — stejná výška i horní hrana
+jako *Zpět do kalkulace* (50,0 px, y 20,3); anglicky roste na 271,3 px
+a nepřetéká. Esc s otevřeným dialogem: režim i dialog zůstaly; po zavření
+dialogu křížkem týž Esc režim zavřel. `prekryv.py` 8 kombinací šířek
+a motivů čistých, `kontrola_aplikace.py` bez hlášek.
+
+## 183. Síto se u textilu vybírá samo podle produktu
+
+**Problém.** Síto stojí u receptury a vybíralo se ručně v kartě Parametry
+tisku. Jenže u textilu není síto vlastnost barvy, ale produktu: dílna tiskne
+na tašky a textil sítem 54-64 a devět vyjmenovaných produktů (92850, 92833,
+92931, 92874, 92871, 92925, 92906, 92930, 92910) jede na jemnějším 90-48.
+Kdo to nevěděl, nechal síto z receptury nebo vybral podle sebe — a spotřeba
+ze síta u téže zakázky vycházela pokaždé jinak (ze 54-64 a z 90-48 vyjde
+jiný teoretický objem). Pravidlo znal technolog, aplikace ne.
+
+**Co se změnilo.** Pravidlo stojí v `parametry/sita.csv`, ne v kódu — aby
+šlo produkt přeřadit v Excelu bez zásahu do aplikace. Soubor dostal dva
+nepovinné sloupce na konci:
+
+| sloupec | význam |
+|---|---|
+| `vychozi` | `ano` (bere se i `x`, `1`, `yes`) = výchozí síto technologie pro všechny produkty bez vlastního řádku |
+| `produkty` | ref produktů oddělené čárkou, které jedou na tomhle sítu — řádek má přednost před výchozím |
+
+Pro TXP přibyly řádky `54-64` (výchozí) a `90-48` (devět produktů). Tím se
+u textilu nabízejí jen tahle dvě síta místo celé standardní řady — jak už
+dřív platilo pro každou technologii, která má v souboru vlastní řádky.
+
+Čtení je v části 430 (`csvNaSita` čte oba sloupce; starší soubor bez nich dá
+`false` a prázdný seznam). Pravidlo dává funkce `sitoProProdukt(sita, tech,
+ref)`: napřed řádky té technologie (produkt → výchozí), pak řádky bez
+technologie, jinak prázdno. Kalkulace (část 240) ho doplní efektem, jakmile
+je jasný produkt, technologie a receptura — reaguje na výsledek pravidla a na
+výměnu receptury, ne na samotné síto, takže **ruční změna v kartě platí,
+dokud se nezmění produkt nebo receptura**. Technologie bez pravidla (SCR,
+PDP, TRS, FIR) nechá síto receptury být, chová se jako dřív. Vnitřní příznak
+`vychozi: true` u vestavěné řady sít se přejmenoval na `standardni`, aby se
+nepletl se sloupcem; nic ho nečetlo.
+
+**Co se nechalo být.** Rozhraní je tiché: dlaždice Síto nenese hlášku „podle
+produktu", vysvětlení šlo do `NAVOD_PODKLADY.md`. Síto zůstává vlastností
+receptury (pravidlo do ní jen zapisuje) — oddělit ho na zakázku by byl jiný,
+větší zásah. Síta 54-64 a 90-48 mají u TXP zatím jen název, takže spotřeba
+z nich je dopočet z geometrie tkaniny, označený jako orientační; údaje
+výrobce se doplní do týchž řádků.
+
+**Změřeno:** zkouška v Node proti skutečným částem (75 částí načteno,
+30 kontrol, 0 chyb): `sita.csv` dává 30 sít (26 SCR, 2 TXP, 2 klišé PDP);
+všech devět vyjmenovaných ref → `90-48`, ref 11031, 92851, prázdno i číslo
+místo textu → `54-64`, SCR/PDP/TRS → prázdno; nabídka TXP = přesně
+`54-64`, `90-48`; záloha souboru bez nových sloupců → TXP bez pravidla
+a nabídka 26 standardních sít (jako dřív); anglická hlavička
+`tech;mesh;default;ref` se čte stejně a obecný řádek bez technologie platí
+až po řádcích technologie. V prohlížeči s běžícím mostem (`snimek.py`,
+technologie TXP, produkt vyhledaný podle ref): 92850 → síto `90-48`,
+11031 → `54-64`, nabídka `["", "54-64", "90-48"]`; dlaždice ukazuje
+„90-48 · 25 cm³/m²" a spotřeba hlásí „Ze síta 90-48 vychází 20,8 g/m²"
+(dopočet z geometrie — orientační). `kontrola_aplikace.py` 0,
+`mapa.py --kontrola` 0, `rozbor_aktualizuj.py` beze změn.
+
+## 184. Síto podle produktu i v editoru custom receptury
+
+**Problém.** Kapitola 183 doplnila síto podle produktu do karty Parametry
+tisku, ale editor receptury („Upravit recepturu"), ve kterém vzniká custom
+barva odvozením, o pravidle nevěděl: odvozená receptura vznikala bez síta,
+editor ukazoval „nevybráno" a nabízel celou standardní řadu 26 sít, zatímco
+karta vedle měla u textilu jen dvě. Technolog síto vybíral znovu ručně —
+a mohl vybrat jiné, než jaké pak kalkulace u produktu použije.
+
+**Co se změnilo.** Část 400 dostala dvě funkce mimo komponentu, aby šly
+zkoušet: `nabidkaSitEditoru(sita, sitaTech)` — z kalkulace se předává
+nabídka technologie (táž jako v kartě Parametry tisku), ze záložky Receptury
+dál všechna zapsaná síta i klišé — a `sPredvyplnenymSitem(initial,
+sitoVychozi)`, která prázdné síto doplní pravidlem a zapsané nechá.
+Kalkulace (část 240) předává editoru `sitaTech` (síta, u tampontisku klišé)
+a `sitoVychozi` = síto podle produktu. Platí to pro všechny tři cesty do
+editoru z kalkulace: odvození z databáze, uložení rozpracované barvy
+i úprava vázané receptury. Záložka Receptury zůstává jak byla — bez produktu
+není podle čeho vybírat.
+
+**Slepá ulička při měření.** První průchod prohlížečem hlásil „chybí
+tlačítko Custom receptura", ačkoli na snímku okno výběru bylo: výraz četl
+DOM ve stejném tiku, ve kterém kliknul, a React okno vykreslil až po jeho
+skončení. Snímkovač umí počkat na promise, tak řetěz kliknutí čeká mezi
+kroky 400–600 ms; teprve pak měření platí.
+
+**Změřeno:** zkouška v Node proti skutečným částem (75 částí, 11 kontrol,
+0 chyb): nabídka z kalkulace v TXP = `54-64`, `90-48`; v SCR 26 sít; u TRS
+bez řádků standardní řada; ze záložky Receptury 28 sít bez opakování; nová
+odvozená v TXP u 92850 → `90-48`, u 11031 → `54-64`, zapsané `77-55` zůstává,
+u SCR zůstává prázdné, původní objekt se nemění. V prohlížeči s běžícím
+mostem (`snimek.py`, TXP, cesta Barva a poloha potisku → ＋ Custom receptura
+→ základ PANTONE 1235 C (PMS 660) → Odvodit a upravit): editor „Upravit
+recepturu" s názvem `PANTONE 1235 C (PMS 660) · 92850 · 107 · TXP Taška /
+Přední` má síto `90-48`, u 11031 `54-64`, nabídka `["", "54-64", "90-48"]`.
+`kontrola_aplikace.py` 0, `mapa.py --kontrola` 0.
+
+## 185. Šířka stěrky se u textilu nevypisuje z hlavy — dílna má 250 a 420 mm
+
+**Problém.** Šířka stěrky se v kalkulaci psala ručně do prázdného pole.
+Dílna má přitom pro textil (TXP) dvě stěrky — 250 mm a 420 mm — a každé
+opisování z paměti je příležitost k překlepu; bez zadané šířky se navíc
+nepočítá rezerva síta, takže pole často zůstávalo prázdné a dávka vycházela
+o housku barvy menší.
+
+**Co se změnilo.** Technologie v `TECHS` může nést seznam `sterky` — šířky
+stěrek, které pro ni v dílně skutečně visí; TXP má `[250, 420]`. Kalkulace
+je pod polem „Šířka stěrky (mm)“ nabídne jako čipy (týž vzor `.chip`/`.on`
+jako výběr barev v rozboru náhledu): klepnutí vyplní pole, zvolený čip se
+zvýrazní, ruční zadání zůstává pro výjimky. Technologie bez seznamu žádnou
+nabídku nedostane, u tampontisku se s polem schová i nabídka.
+
+**Rozhodnutí po cestě.** Na čipech jsou jen čísla, jednotka zůstává
+v popisku dlaždice: „250 mm“ na dvou čipech se do dlaždice (≈140 px při
+okně 1600 px) nevešlo a čipy se lámaly pod sebe — změřeno, 68 + 8 + 69 px
+na 140 px šířky. Číselné čipy 42 px vyjdou vedle sebe i na telefonu.
+
+**Změřeno:** čipy 42 × 21 px vedle sebe (x 1266 a 1315, společné y 768);
+klik na „250“ → pole „Šířka stěrky (mm)“ = 250, čip má stav `on` a ve
+výsledku přibylo „rezerva síta 90,0 g (stěrka 250 mm) → 717,9 g“
+(250 mm × 300 mm²·mm průřez housky × 1,2 g/ml = 90 g). Světlý režim: pozadí
+čipu rgb(237, 237, 237), písmo rgb(45, 45, 45). Telefon 390 px: čipy vedle
+sebe (x 67 a 116, y 489), rozvržení drží. `kontrola_aplikace.py` 0,
+`prekryv.py` 0 (čtyři šířky, oba režimy), `mapa.py` přegenerována.
+
+## 186. Dvanáct chybějících barevných řad má jména — a síto se stěrkou se přiřadí ke každému produktu
+
+**Problém.** V plánu doplnění (`parametry/CO_SEHNAT.txt`) stálo u barevných
+databází jen „dalších 12 řad, podklady se teprve sbírají" — beze jmen, takže
+se nedalo hlídat, který dodavatel už podklady poslal a co ještě chybí. A to,
+že každý produkt má v dílně podle technologie svoje síto a svoji šířku
+stěrky, v plánu nestálo vůbec: síto se od kapitoly 183 umí k produktu
+přiřadit v `sita.csv`, ale naplněný je jen textil, a stěrka nemá u produktu
+ani kam se uložit — je to ruční pole v kalkulaci.
+
+**Co se změnilo.** `CO_SEHNAT.txt` má novou sekci 3 „Síto a stěrka ke
+každému produktu". U síta říká, že sloupce `vychozi` a `produkty` už čekají
+a zbývá projít produkty SCR, PDP a TRS; u stěrky říká rovnou, že místo pro
+ni se v aplikaci teprve musí postavit, a do té doby se seznam
+produkt → šířka stěrky vede stranou a přepíše se, až bude kam. Sekce
+barevných databází dostala rozhodnuté přiřazení dodavatel — řada:
+
+| technologie | řady (dodavatel — řada) |
+|---|---|
+| TRS | Tiflex — Himalaya, Avient — Union Ink |
+| TXP | Tiflex — Himalaya, Avient — Union Ink, Coates — TP/PP, Debuit — 470, Engler — Serilon, Engler — Texylon |
+| PDP | Marabu — TPR, Coates — TP 300, Coates — TP 253, Coates — TP/PP, Marabu — PP new |
+| SCR | Marabu — LIP, Coates — TP/PP, Engler — Serilon, SK — serie 4700, Debuit — 470, Engler — Texylon |
+
+Transfer (TRS), dosud jediná technologie úplně bez databáze, mají pokrýt
+Himalaya a Union Ink. Následující sekce souboru se posunuly na 4–7; na
+čísla sekcí se odjinud nic neodkazuje (ověřeno hledáním v `balicek/`).
+
+**Změřeno:** 19 přiřazení řada → technologie (TRS 2, TXP 6, PDP 5, SCR 6),
+po odečtení opakovaných 12 unikátních řad od 7 dodavatelů — přesně tolik,
+kolik jich plán dosud sliboval beze jmen. Coates TP/PP slouží třem
+technologiím; Himalaya, Union Ink, Debuit 470, Serilon a Texylon dvěma.
+Stav sít k produktům: TXP naplněno (výchozí 54-64, jemnější 90-48 pro
+9 produktů), SCR 26 sít a PDP 2 vzorová klišé zatím bez vazby na produkt,
+TRS bez sít úplně.
+
+## 187. Co dílna slíbila sehnat, hlídá odemykací seznam sám
+
+**Problém.** Plán z kapitoly 186 — dvanáct barevných řad a síto se stěrkou
+ke každému produktu — stál jen v `parametry/CO_SEHNAT.txt`. Textový soubor
+nikdo u stroje neotvírá: kdo se v aplikaci podíval na zamčený Transfer,
+viděl jen „žádná databáze" a nevěděl, že Himalaya s Union Ink jsou už
+domluvené a čeká se na podklady. A že produkty SCR, PDP a TRS ještě nemají
+přiřazená síta, nebylo vidět vůbec nikde.
+
+**Co se změnilo.** Záložka Odemykání technologií ukazuje i domluvené věci,
+a odškrtává je pořád sama z dat. Plán řad stojí v novém souboru
+`parametry/plan_databazi.csv` (technologie; dodavatel; řada; soubor) —
+každá řada je bod u své technologie s detailem „čeká se na podklady".
+Bod se odškrtne, až když je u řady vyplněný soubor **a** ten je
+v `parametry/databaze.csv` přiřazený téže technologii; samotné vyplněné
+jméno nestačí, řada jen z plánu by se tvářila hotová a v kalkulaci by
+nebylo z čeho vybírat. K tomu dva nové body z kapitoly 186: „síto (klišé)
+přiřazené k produktům" se odškrtává ze sloupců `vychozi`/`produkty`
+v `sita.csv`; „šířka stěrky k produktům" je schválně trvale neodškrtnutá —
+říká, že tohle přiřazení nemá v datech kam bydlet, a začne se odškrtávat,
+až pro něj místo vznikne. U tampontisku se bod stěrky nevede, klišé
+stěrku nemá. Stejná čísla vidí i menu technologií (zamčená ukazuje
+hotovo/celkem) — počítá je táž funkce s týmž plánem.
+
+**Změřeno:** zkouška v Node proti načteným částem — 42 kontrol, 0 chyb:
+19 řádků plánu (TRS 2, TXP 6, PDP 5, SCR 6; 12 unikátních řad), BOM ani
+komentářové řádky čtení nerozbijí, soubor vyplněný bez přiřazení
+v databaze.csv bod neodškrtne, s přiřazením ano a receptury počítá bez
+Custom; na staré verzi kódu zkouška spadla s kódem 1. V prohlížeči po
+skutečných klicích (menu → TECHNOLOGIE → Co chybí k odemčení):
+SCR 12 řádků a hotovo 3 ze 12, TXP 12 a 4 ze 12 (síto „výchozí
++ 9 produktů zvlášť", stěrka „zatím jen rychlé volby 250 a 420 mm"),
+PDP 10 a 4 ze 10 (bez bodu stěrky), TRS 8 a 2 ze 8, FIR 6 a 3 ze 6;
+zmínek „barevná řada" na stránce 19. `kontrola_aplikace.py` v pořádku,
+`prekryv.py --zalozky` čistý na čtyřech šířkách v obou režimech,
+slovník má pro 11 nových textů en i pt se sedícími jmenovkami.
+
+## 188. Šířka stěrky se u textilu vybírá rovnou v dlaždici — čipy pod polem skončily
+
+**Problém.** Rychlé volby 250 a 420 mm stály od kapitoly 185 jako čipy pod
+polem šířky stěrky. Dlaždice tím přestala vypadat jako její sousedky — pod
+číslem visel druhý řádek ovládání — a pořád zůstávalo ruční pole, do kterého
+se dalo napsat cokoli, přestože dílna pro textil drží právě dvě stěrky.
+
+**Co se změnilo.** Kde technologie nese seznam `sterky`, je dlaždice výběr:
+šířky jsou přímo v rozbalené nabídce (—, 250, 420) a nic se nepíše z hlavy.
+Prázdná volba „—“ dál znamená „nevím“, takže se rezerva síta nepočítá
+a rozpis to řekne. Šířka mimo seznam (ze zakázkového listu) dostane
+v nabídce vlastní položku, ať se při načtení specifikace neztratí.
+Technologie bez seznamu (SCR, TRS, FIR) mají dál ruční číselné pole.
+Vzhled jede podle idiomu dlaždicových výběrů z Parametrů tisku — hodnota na
+středu, bez šipky — ale ve velikostech číselných dlaždic Zakázky.
+
+**Rozhodnutí po cestě.** Bod „šířka stěrky k produktům“ v Odemykání
+technologií dál říká „zatím jen rychlé volby 250 a 420 mm“ — text nechán,
+šířky pořád platí a bod mluví o chybějícím přiřazení k produktům, ne o tom,
+jak se volba podává.
+
+**Změřeno:** dlaždice výběru 140,34 × 100 px na společném y 1215,02 se
+sourozenci, písmo 26,05 px — na chlup jako číselné dlaždice (okno 1600 px).
+Skutečným klikem: nabídka se otevře (volby —/250/420, položky 128 × 56 px),
+klik na „420“ → dlaždice ukazuje 420 a ve výsledku naskočí „rezerva síta
+151,2 g (stěrka 420 mm) → 779,1 g“ (420 mm × 300 mm²·mm průřezu housky
+× 1,2 g/ml = 151,2 g). Světlý režim: písmo rgb(45, 45, 45) na pozadí
+rgb(237, 237, 237), shodné s číselnými dlaždicemi. Telefon 390 px: dlaždice
+149 × 88 px vedle sousedky, písmo 13,97 px, tělo stránky 390 px bez
+vodorovného rolování, klik na „250“ vybere 250. `kontrola_aplikace.py`
+v pořádku, `prekryv.py` čistý na čtyřech šířkách v obou režimech, čipů pod
+polem 0.
+
+## 189. Síto podle produktu není na výběr — dlaždice nabízí jen to jedno
+
+**Problém.** Kapitola 183 naučila kalkulaci doplnit síto podle produktu, ale
+dlaždice Síto v kartě Parametry tisku dál nabízela u každého produktu obě
+síta textilu — 54-64 i 90-48 — a k tomu „nevybráno". Vypadalo to jako volba,
+a kdo nevěděl, že 90-48 patří jen devíti vyjmenovaným produktům, vybral podle
+sebe; ruční změna navíc platila až do výměny produktu, takže spotřeba ze síta
+u téže zakázky vycházela podle toho, kdo ji počítal. Technolog to přitom řekl
+jasně: 90-48 mají jen vyjmenované produkty, všechno ostatní jede na 54-64.
+Není co vybírat.
+
+**Co se změnilo.** Kde pravidlo z `parametry/sita.csv` platí, je v dlaždici
+jen síto produktu — jedna položka, bez „nevybráno". Dává ji nová funkce
+`sitaKVyberu(sitaTech, sitoPodleProduktu)` v části 430: s pravidlem vrátí
+jen jeho řádek (i s objemem, takže dlaždice ukazuje „90-48 · 25 cm³/m²" jako
+dřív), bez pravidla celou nabídku technologie; síto z pravidla, které
+v řádcích technologie chybí, se nabídne aspoň názvem. Receptura síto
+z pravidla drží — efekt v části 240 reaguje i na samotné síto, ne jen na
+produkt a recepturu, takže starší zápis v souboru i požadavek ze zakázkového
+listu ustoupí produktu (tlačítko *Zapsat do receptury* u produktu s pravidlem
+síto přeskočí, kryvost a povrch zapíše). Editor receptury otevřený
+z kalkulace nabízí tutéž jedinou položku (`nabidkaSitEditoru` dostal třetí
+parametr) a `sPredvyplnenymSitem` dosadí pravidlo i přes síto, které
+odvozovaná receptura už nesla — dřív se zapsané nechávalo. Technologie bez
+pravidla (SCR, PDP, TRS, FIR) se chovají jako dřív: „nevybráno" a celá řada.
+
+**Co se nechalo být.** Dlaždice zůstává výběrem s jednou položkou, ne
+statickým textem — drží tak stejný tvar, písmo i výšku jako Kryvost a Povrch
+vedle a šipka se u dlaždic stejně nekreslí, takže z odstupu nic „na výběr"
+neslibuje; kliknutí ukáže jedinou položku. Okno pokrytí (síto na každou barvu
+separace zvlášť, podtisk na nejhrubším) se nechalo být — výchozí bere
+z receptury, tedy už z pravidla. Kdo chce produkt přeřadit, přepíše řádek
+v `parametry/sita.csv`, ne dlaždici; stojí to v `NAVOD_PODKLADY.md`.
+
+**Změřeno:** zkouška v Node proti skutečným částem (75 částí, 36 kontrol,
+0 chyb): 30 sít ze souboru; všech devět vyjmenovaných ref → `90-48`, ref
+11031, 92851, prázdno i číslo → `54-64`; dlaždice u 92850 = jediná položka
+`90-48` s objemem (týž záznam jako v řádcích technologie), u 11031 = `54-64`,
+SCR bez pravidla 26 sít, síto z pravidla mimo řádky technologie se nabídne
+názvem; editor z kalkulace v TXP = jedna položka, v SCR 26, ze záložky
+Receptury 28; zapsané `77-55` v TXP → `54-64`, bez pravidla zůstává a původní
+objekt se nemění. Táž zkouška na staré verzi částí hlásí 4 nálezy a vrací
+kód 1. V prohlížeči s běžícím mostem (`snimek.py`, technologie TXP, produkt
+vyhledaný podle ref, dlaždice otevřená skutečným kliknutím): 92850 → hodnota
+`90-48`, nabídka přesně `["90-48 · 25 cm³/m²"]`, spotřeba „Ze síta 90-48
+vychází 20,8 g/m²"; 11031 → `54-64`, nabídka `["54-64 · 44 cm³/m²"]`,
+36,8 g/m²; SCR → „nevybráno" a 26 sít jako dřív. `kontrola_aplikace.py` 0,
+`mapa.py --kontrola` 0, `rozbor_aktualizuj.py` přepsal jen úsek *stav*.
+
+## 190. Prázdná dlaždice říká „—" jako šířka stěrky — ve všech jazycích
+
+**Problém.** Dlaždice Síto, Klišé, Kryvost a Povrch v kartě Parametry tisku
+ukazovaly bez zvolené hodnoty slovo „nevybráno" (en „not selected", pt „não
+selecionado"), zatímco dlaždice Šířka stěrky hned vedle ukazovala prostou
+pomlčku. Dvě prázdné dlaždice v téže kartě říkaly totéž dvěma způsoby;
+v portugalštině se slovo do dlaždice vešlo jen na dva řádky a v angličtině
+vypadalo jako stav, který se má řešit, ne jako prázdné pole.
+
+**Co se změnilo.** Prázdná volba všech výběrových dlaždic je
+`<option value="">—</option>` bez překladu — sedm míst: čtyři v části 240
+(Síto, Klišé, Kryvost, Povrch v kalkulaci) a tři v části 400 (Síto,
+Kryvost, Povrch v editoru receptury). Pomlčka je jazykově neutrální, proto
+se klíč „nevybráno" ze slovníku v části 127 smazal — podle kázně slovníku
+je rušený text i rušený klíč. Otáčí to kapitolu 150 (tam se „— nevybráno —"
+zkracovalo na „nevybráno"), tentokrát ale ve shodě s dlaždicí Šířka stěrky
+z kapitoly 188. Komentář u síta podle produktu v části 240 a věta v rozboru
+mluví o „prázdné volbě —". Hromadná náhrada šla skriptem s kontrolou počtů
+(4 + 3 + 1), který by při jiném počtu výskytů na soubor nesáhl.
+
+**Co se nechalo být.** Ukázkový čip „nevybráno" v ladicím nástroji
+`barvy.html` je vzorek stavu čipu (vybráno / nevybráno), ne text aplikace.
+Dlaždice Klišé u tampontisku je o 23 px nižší než Kryvost a Povrch vedle,
+protože její popisek zabírá tři řádky — tak to bylo už před změnou
+a s pomlčkou to nesouvisí.
+
+**Změřeno:** `sonda.py` na úvodní obrazovce (PDP, PANTONE 485 C): tři
+výběrové dlaždice karty Parametry tisku, hodnota i prázdná volba `—` ve
+všech třech; s podstrčeným jazykem `--jazyk en` (`lang=en`, popisky Cliché
+(etch depth) / Opacity / Surface) i `--jazyk pt` (`lang=pt`, Clichê (prof.
+de gravação) / Opacidade / Superfície) stále `—`; šířka dlaždic 141,89 px.
+`snimek.py` v tmavém režimu ukazuje pomlčku v dlaždicích Klišé, Kryvost
+i Povrch; proklikem Nabídka → Katalog → Receptury → + Nová receptura editor
+s dlaždicemi Síto (29 voleb), Kryvost (4), Povrch (8), prázdná volba
+i zobrazená hodnota `—`. V částech 240 a 400 nezůstal žádný
+`preloz("nevybráno")`, ve slovníku klíč není. `kontrola_aplikace.py` 0,
+`node --check` tří částí bez chyby, `mapa.py` přegenerován,
+`rozbor_aktualizuj.py` přepsal jen úsek *stav*.
+
+## 191. Výběr barvy a polohy stojí v pravém dolním rohu karty produktu
+
+**Problém.** Tlačítko „Barva a poloha potisku →" — jediná akce v kartě
+Vybraný produkt, kterou se otevírá výběr barvy a polohy — stálo uprostřed
+spodního řádku hned za štítky technologie, rozměru a barvy a končilo
+197 px před pravým okrajem karty. Pod zakázkovým listem tak zůstával
+prázdný roh 219 × 96 px a tlačítko splývalo se štítky, které jsou údaje,
+ne akce.
+
+**Co se změnilo.** Jedno pravidlo v části 040 (rozvržení):
+`.karta-produkt .rowline>.btn{margin-left:auto}`. Štítky drží vlevo
+u názvu, tlačítko dojede k vnitřnímu pravému okraji karty — na tutéž hranu,
+na které končí sloupec zakázkového listu. Na telefonu, kde se řádek láme
+a tlačítko má vlastní řádku, ho auto-margin přitáhne k pravému okraji té
+řádky; nový zlom se nezaváděl. V kartě není žádná výběrová nabídka, „výběr"
+ze zadání je tohle tlačítko — otevírá výběr polohy a barvy.
+
+**Změřeno:** 1600 px sondou: tlačítko x 361,55 → 558,42 px, pravý okraj
+553,13 → 750 px = vnitřní pravý okraj karty (772 − 22 px odsazení) = pravý
+okraj sloupce zakázkového listu (750 px); štítky beze změny (x 62 /
+192,95 / 298,33 px, y 794,14 px), y tlačítka 790,39 px beze změny, název
+produktu 688 px široký beze změny. 391 px přes `snimek.py`: tlačítko na
+vlastní řádce, x 38 → 161,4 px, pravý okraj 229,6 → 353 px = vnitřní okraj
+karty (375 − 22), `scrollWidth` 391 = šířka okna, štítky beze změny.
+`kontrola_aplikace.py` 0, `prekryv.py` (1400 / 1100 / 820 px, oba režimy)
+0, `mapa.py` přegenerován, `rozbor_aktualizuj.py` přepsal jen úsek *stav*.

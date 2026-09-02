@@ -52,6 +52,37 @@ function csvNaDbTech(text) {
   return out;
 }
 
+/* Plán barevných řad: které řady od kterých dodavatelů má která technologie
+   dostat, než se podklady seženou a převedou. Je to jediné místo odemykacího
+   seznamu, kde stojí domluva, ne stav — proto se bod odškrtne až tehdy, když
+   je u řady vyplněný soubor a ten je v parametry/databaze.csv přiřazený téže
+   technologii. Vyplněné jméno souboru samo o sobě nestačí: řada zapsaná jen
+   v plánu by se tvářila hotová, a v kalkulaci by přitom nebylo z čeho vybírat. */
+const SOUBOR_PLAN_DB = "plan_databazi.csv";
+
+function csvNaPlanDb(text) {
+  const rows = parseCsv(text);
+  if (!rows.length) throw new Error("Soubor plánu barevných řad je prázdný.");
+  const head = rows[0].map((h) => h.toLowerCase().trim());
+  const i = (re) => head.findIndex((h) => re.test(h));
+  const ci = { tech: i(/^(technologie|tech)/), dodavatel: i(/^(dodavatel|vyrobce|v.robce)/),
+    rada: i(/^(rada|.ada|serie|s.rie)/), soubor: i(/^(soubor|file)/), pozn: i(/^(pozn|note)/) };
+  if (ci.tech < 0 || ci.rada < 0)
+    throw new Error("CSV plánu barevných řad musí mít sloupce technologie a rada.");
+  const out = [];
+  for (const r of rows.slice(1)) {
+    const t = String(r[ci.tech] || "").trim().toUpperCase();
+    const rada = String(r[ci.rada] || "").trim();
+    if (!t || !TECHS[t] || !rada) continue;   // komentářové řádky mají obě pole prázdná
+    out.push({ tech: t,
+      dodavatel: ci.dodavatel >= 0 ? String(r[ci.dodavatel] || "").trim() : "",
+      rada: rada,
+      soubor: ci.soubor >= 0 ? String(r[ci.soubor] || "").trim() : "",
+      pozn: ci.pozn >= 0 ? String(r[ci.pozn] || "").trim() : "" });
+  }
+  return out;
+}
+
 /* Výchozí obsah souboru, není-li žádný — aby šlo zamykat i tehdy, když si
    dílna soubor ještě nevytvořila. Ostrá zůstane ta, ve které se pracuje. */
 function vychoziTechCsv(ostra) {
@@ -288,7 +319,7 @@ function zapisSkladDoCsv(text, zmeny) {
 /* Odemykací seznam: co které technologii chybí, aby se v ní dalo pracovat.
    Odškrtává se sám z dat, která aplikace má — zámek tím není byrokracie,
    ale ukazatel postupu. */
-function pripravenostTech(tech, { sita, koef, pigmenty, recipes, dbTech, techStav }) {
+function pripravenostTech(tech, { sita, koef, pigmenty, recipes, dbTech, techStav, planDb }) {
   const st = (techStav || {})[tech];
   const maSito = techMaSito(tech);
   // Řádek se jménem síta ještě nejsou parametry. Vzorový soubor obsahuje celou
@@ -306,15 +337,53 @@ function pripravenostTech(tech, { sita, koef, pigmenty, recipes, dbTech, techSta
     (r) => r.type === "Custom" ? false : souboryTech.indexOf(r.zdroj) >= 0).length;
   const koefu = koef ? Object.keys(koef).reduce(
     (s, k) => s + Object.keys(koef[k] || {}).length, 0) : 0;
+  // síto (klišé) přiřazené k produktům — sloupce vychozi a produkty v sita.csv.
+  // Stačí výchozí řádek NEBO aspoň jedno pravidlo pro vyjmenované produkty;
+  // bez obojího si síto vybírá obsluha a spotřeba téže zakázky vyjde pokaždé jinak.
+  const sitaProd = (sita || []).filter(
+    (s) => s.tech === tech && (s.vychozi || (s.produkty || []).length > 0));
+  const refuSitem = sitaProd.reduce((s, x) => s + (x.produkty || []).length, 0);
+  const maVychozi = sitaProd.some((s) => s.vychozi);
+
+  // plánované barevné řady téhle technologie (parametry/plan_databazi.csv) —
+  // bod za každou, hned pod bodem databází, aby „žádná databáze" nikdy
+  // nestálo samo: je vidět, které řady ji mají zaplnit a v jakém jsou stavu
+  const plan = (planDb || []).filter((p) => p.tech === tech).map((p) => ({
+    klic: "plan-" + (p.dodavatel + "-" + p.rada).toLowerCase(),
+    popis: preloz("barevná řada {r}", { r: (p.dodavatel ? p.dodavatel + " — " : "") + p.rada }),
+    hotovo: !!(p.soubor && souboryTech.indexOf(p.soubor) >= 0),
+    detail: p.soubor
+      ? (souboryTech.indexOf(p.soubor) >= 0
+        ? (recipes || []).filter((r) => r.type !== "Custom" && r.zdroj === p.soubor).length
+          + " " + preloz("receptur")
+        : preloz("soubor není přiřazený technologii"))
+      : preloz("čeká se na podklady"),
+  }));
 
   const body = [
     { klic: "receptury", popis: preloz("databáze receptur přiřazená technologii"),
       hotovo: receptur > 0, detail: receptur > 0 ? receptur + " " + preloz("receptur") : preloz("žádná databáze") },
+    ...plan,
     { klic: "sita", popis: maSito ? preloz("parametry sít od výrobce") : preloz("hloubky leptu klišé"),
       hotovo: vlastniSita.length > 0,
       detail: vlastniSita.length > 0 ? vlastniSita.length + " " + (maSito ? preloz("sít") : preloz("klišé"))
         : (jenNazvy > 0 ? jenNazvy + " " + (maSito ? preloz("sít jen podle názvu") : preloz("klišé bez hloubky"))
           : preloz("nejsou")) },
+    { klic: "sitoProd", popis: maSito ? preloz("síto přiřazené k produktům") : preloz("klišé přiřazené k produktům"),
+      hotovo: sitaProd.length > 0,
+      detail: sitaProd.length > 0
+        ? (maVychozi ? (refuSitem > 0 ? preloz("výchozí + {n} produktů zvlášť", { n: refuSitem })
+          : preloz("výchozí pro všechny")) : refuSitem + " " + preloz("produktů"))
+        : preloz("vybírá se ručně") },
+    // šířka stěrky k produktu se zatím nemá kam zapsat — v kalkulaci je to
+    // u TXP výběr z TECHS.sterky, jinde ruční pole. Bod je schválně
+    // trvale neodškrtnutý: říká, že tohle přiřazení dílně pořád chybí,
+    // a odškrtávat se začne, až pro něj v datech vznikne místo.
+    ...(maSito ? [{ klic: "sterka", popis: preloz("šířka stěrky k produktům"),
+      hotovo: false,
+      detail: (TECHS[tech].sterky || []).length
+        ? preloz("zatím jen rychlé volby {v} mm", { v: TECHS[tech].sterky.join(" a ") })
+        : preloz("zatím ruční pole v kalkulaci") }] : []),
     { klic: "koeficienty", popis: preloz("koeficienty spotřeby"),
       hotovo: koefu > 0, detail: koefu > 0 ? koefu + " " + preloz("hodnot") : preloz("nejsou") },
     { klic: "pigmenty", popis: preloz("pigmenty a báze"),

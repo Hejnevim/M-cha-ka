@@ -19,6 +19,12 @@
    i řádek výběru si proto drží pevné odstupy jako dřív. */
 .karta-produkt .produkt-nazev{margin-top:14px}
 .karta-produkt .rowline{margin-top:10px;margin-bottom:0}
+/* Tlačítko výběru barvy a polohy stojí v pravém dolním rohu karty: štítky
+   technologie, rozměru a barvy jsou údaje a drží vlevo u názvu, tlačítko je
+   jediná akce v řádku a patří na okraj — pod zakázkový list, kde byl roh
+   karty jinak prázdný. Auto-margin pracuje i po zalomení řádku na telefonu:
+   tlačítko dojede k pravému okraji své řádky. */
+.karta-produkt .rowline>.btn{margin-left:auto}
 @media(min-width:960px){
   .grid.calc>.karta-produkt{grid-column:var(--produkt-sloupec);grid-row:var(--produkt-radek);
     width:var(--produkt-sirka);justify-self:var(--produkt-zarovnani);min-height:var(--produkt-vyska)}

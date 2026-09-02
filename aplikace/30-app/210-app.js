@@ -245,6 +245,8 @@ function App() {
   const [cenyZapis, setCenyZapis] = useState({ stav: "", chyba: "" });
   const [skladZapis, setSkladZapis] = useState({ stav: "", chyba: "" });
   const [techStav, setTechStav] = useState({});
+  // plán barevných řad pro odemykací seznam (parametry/plan_databazi.csv)
+  const [planDb, setPlanDb] = useState([]);
   // původní text souboru — při přepínání se v něm mění jen jeden údaj,
   // aby zůstaly komentáře a poznámky dílny
   const [techStavText, setTechStavText] = useState("");
@@ -288,6 +290,12 @@ function App() {
         // z téhož souboru i materiály typů barev — sloupec je nepovinný
         noveDbMat = csvNaDbMaterialy(d.text);
       } catch (e) { if (!/není/.test(String(e.message || e))) chyby.push(SOUBOR_DATABAZE + ": " + e.message); }
+      let novyPlanDb = [];
+      try {
+        const d = await sgpsGet("/databaze?slozka=" + SLOZKA_PARAMETRY
+          + "&soubor=" + encodeURIComponent(SOUBOR_PLAN_DB));
+        novyPlanDb = csvNaPlanDb(d.text);
+      } catch (e) { if (!/není/.test(String(e.message || e))) chyby.push(SOUBOR_PLAN_DB + ": " + e.message); }
       let noveTypyPoloh = null, novyTypyText = "";
       try {
         const d = await sgpsGet("/databaze?slozka=" + SLOZKA_PARAMETRY
@@ -307,6 +315,7 @@ function App() {
       if (noveTypyPoloh) { setTypyPoloh((prev) => Object.assign({}, prev, noveTypyPoloh)); setTypyPolohText(novyTypyText); }
       setSita(novaSita);
       setKoef(novyKoef);
+      setPlanDb(novyPlanDb);
       setPigmenty(novePigmenty);
       setPigmentyText(novyPigmentyText);
       setParamStav({ stav: chyby.length ? "chyba" : "hotovo", chyba: chyby.join(" · "),
@@ -1017,7 +1026,7 @@ function App() {
                   const kolik = products.filter((p) => produktUmi(p, t)).length;
                   if (!kolik) return null;
                   const ostra = techOstra(t, techStav);
-                  const pr = pripravenostTech(t, { sita, koef, pigmenty, recipes, dbTech, techStav });
+                  const pr = pripravenostTech(t, { sita, koef, pigmenty, recipes, dbTech, techStav, planDb });
                   return html`
                     <button key=${t} className=${technologie === t ? "on" : ""}
                       disabled=${!ostra}
@@ -1195,9 +1204,45 @@ function App() {
             const v = loadLS("irm-databaze-verze", {});
             delete v[z];
             saveLS("irm-databaze-verze", v);
-          }, "odebrání receptur z databáze " + z)} />`}
+          }, "odebrání receptur z databáze " + z)}
+          onSloucitKopie=${() => guardDelete(() => {
+            /* Kopie receptur po starší verzi aplikace. Nesmí se prostě smazat:
+               na jejich id visí vazby na produkt a polohu, a ty by se ztratily.
+               Vazba se proto napřed přepne na recepturu téhož jména ze souboru
+               a teprve pak kopie odejde. Co se nespáruje, je ruční barva dílny
+               a zůstává — v žádném souboru není a nikdo by ji nedohledal. */
+            /* Párovat se musí i podle řady, ne jen podle jména: tentýž pantone
+               je v každé databázi namíchaný z jiných barev, a vazba, která
+               vede na Ferro, nesmí po sloučení ukazovat na RUCOLOR. Kopie po
+               starší verzi si řadu nese v `series`. Když se řada netrefí,
+               vezme se receptura téhož jména odkudkoli — pořád je to lepší
+               než vazba na recepturu, která už není. */
+            const jm = (r) => String(r.name || "").toLowerCase();
+            const jmRada = (r) => jm(r) + "|" + String(r.series || "").toLowerCase();
+            const podleJmena = new Map(), podleRady = new Map();
+            for (const r of recipes) {
+              if (!r.zdroj) continue;
+              podleJmena.set(jm(r), r);
+              podleRady.set(jmRada(r), r);
+            }
+            const nahrada = new Map();
+            const zbyva = recipes.filter((r) => {
+              if (r.zdroj || r.type === "Custom") return true;
+              const cil = podleRady.get(jmRada(r)) || podleJmena.get(jm(r));
+              if (!cil) return true;
+              nahrada.set(r.id, cil.id);
+              return false;
+            });
+            if (!nahrada.size) return;
+            const nl = {};
+            for (const k of Object.keys(links)) nl[k] = nahrada.get(links[k]) || links[k];
+            setLinks(nl);
+            setRecipes(zbyva);
+            setToast({ ok: true, text: preloz("Sloučeno s databázemi: {n} — v seznamu zůstaly receptury ze souborů.",
+              { n: fmt(nahrada.size, 0) }) });
+          }, "sloučení receptur bez databáze")} />`}
         ${tab === "odemykani" && html`<${OdemykaniTab} techStav=${techStav} products=${products}
-          sita=${sita} koef=${koef} pigmenty=${pigmenty} recipes=${recipes} dbTech=${dbTech}
+          sita=${sita} koef=${koef} pigmenty=${pigmenty} recipes=${recipes} dbTech=${dbTech} planDb=${planDb}
           technologie=${technologie} setTechnologie=${setTechnologie}
           prepniTech=${prepniTech} techZapis=${techZapis} guard=${guardDelete}
           mostOk=${sgps.stav.stav === "ok"} />`}

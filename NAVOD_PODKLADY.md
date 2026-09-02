@@ -91,6 +91,27 @@ spotřebu na kartě vedle.
 se **nezapisují k zakázce, ale k receptuře** — příště se u téže barvy nabídnou
 samy. Platí to i pro nakoupené Pantone standardy, ne jen pro vlastní barvy.
 
+> U textilu (TXP) se síto doplní samo podle produktu: 54-64 pro všechny
+> produkty, 90-48 pro produkty vyjmenované v `parametry/sita.csv`. Síto
+> tu není na výběr — dlaždice ukazuje jen to jedno, které produktu patří.
+
+**Stálo u:** nikde — síto se doplňuje tiše, v aplikaci o tom hláška není.
+**Vysvětluje:** proč je síto vyplněné dřív, než ho někdo vybral, a kde se
+pravidlo mění: sloupce `vychozi` (ano = výchozí síto technologie) a
+`produkty` (ref oddělené čárkou) v `parametry/sita.csv`. Bez mostu se soubor
+nenačte a síto se nedoplní; technologie bez řádku s těmito sloupci se chová
+jako dřív. Síta 54-64 a 90-48 mají u TXP zatím jen název, spotřeba z nich je
+dopočet z geometrie tkaniny — orientační, dokud se nedoplní údaje výrobce.
+Kdo chce u produktu jiné síto, přepíše řádek v `parametry/sita.csv`
+(ref do sloupce `produkty` u jiného síta), ne dlaždici — dřív šlo síto
+v dlaždici přepnout ručně a spotřeba téže zakázky pak vycházela podle toho,
+kdo ji počítal. Požadavek na síto ze zakázkového listu se u produktu
+s pravidlem do receptury nezapíše (kryvost a povrch ano). Totéž síto se
+předvyplní i v editoru „Upravit recepturu" otevřeném z kalkulace (odvození
+custom barvy) a editor tam nabízí tutéž jedinou položku; bez pravidla síta
+technologie. V záložce Receptury, kde produkt není, se síto nedoplňuje
+a nabízejí se všechna zapsaná.
+
 ---
 
 ## Zbytky ze skladu
@@ -315,6 +336,57 @@ receptury, ale náhodu navažování. Když takhle spočítaná zkušební dávk
 dílny) přesáhne 60 % celé dávky, nátisk už neušetří dost a aplikace ho
 **mlčky nenabídne**. Kdo to neví, myslí si, že tlačítko chybí. Výpočet
 zdůvodnění dál vrací (pole `duvod` v rozboru nátisku), jen se nezobrazuje.
+
+---
+
+## Zakázka — šířka stěrky a potisků na tah
+
+> Než se udělá první tah, musí před stěrkou ležet souvislá houska barvy —
+> jinak stěrka nabírá vzduch a tisk vynechává. Ta barva se nespotřebuje:
+> protahuje se sítem celou zakázku a na konci se seškrábne zpátky do kelímku.
+> Namíchaná ale být musí, proto se přičítá k dávce jako **rezerva síta**
+> a v předpovědi zbytku se pak objeví jako to, co zbude. Počítá se ze šířky
+> stěrky (houska ~20 × 15 mm na každý milimetr stěrky, tedy 300 mm²·mm);
+> stěrka 300 mm dá při hustotě 1,2 g/ml 108 g, stěrka 500 mm 180 g. Bez
+> zadané šířky stěrky se rezerva nepočítá a rozpis to řekne.
+
+> **Potisků na tah:** je-li na sítě motiv vícekrát (např. 4×), spotřeba barvy
+> se NEMĚNÍ — barva se přenáší na kusy, ne na tahy. Změní se jen počet tahů
+> (1 000 ks po 4 = 250 tahů) a to, že širší síto chce širší stěrku, tedy
+> větší rezervu. Přesně proto se zadává šířka stěrky, ne velikost síta.
+
+**Nikdy nestálo na obrazovce** — obě pole vznikla rovnou tichá (kap. rozpis
+dávky v Kolik namíchat ukazuje jen čísla). Vysvětluje, proč rezerva není
+totéž co ztráty (ztráty se nevrátí, rezerva ano) a proč vícenásobný motiv
+na sítě nezvyšuje spotřebu.
+
+---
+
+## Okno krycí plochy — rozpis po barvách (separace)
+
+> Vícebarevný potisk není jedna spotřeba, ale několik: každá barva se tiskne
+> vlastním sítem a míchá do vlastního kelímku. Rozbor náhledu přiřadí každý
+> bod motivu právě jedné z vybraných barev (té nejbližší), takže součet ploch
+> po barvách je přesně plocha motivu — nic se nepočítá dvakrát. Ke každé barvě
+> se podle odstínu zkusí přiřadit receptura (mez ΔE 25); z ní se bere hustota
+> pro převod ml na gramy a zapsané síto jako předvolba. Bez receptury zůstává
+> spotřeba v mililitrech — objem, který sítem projde, na hustotě nezávisí,
+> a gram z hádané hustoty by vypadal jako změřený.
+
+> **Bílý podtisk:** světlé barvy na tmavém textilu potřebují pod sebou bílou.
+> Plocha podtisku je součet ploch NEčerných barev — černá (jas pod 60) se
+> tiskne rovnou na textil. Dvojitý nános (tisk — mezisušení — tisk) násobí
+> nános podtisku 1,8×: druhá vrstva zčásti sedí na první, plné dva objemy
+> nebere. Podtisk je vrstva navíc — vlastní síto (předvybírá se nejhrubší
+> z nabídky), vlastní rezerva.
+
+> **Motiv je ve výřezu N×:** když je v označeném výřezu motiv vícekrát,
+> plocha na kus je změřená plocha děleno N. Spotřeba zakázky se tím nemění —
+> násobí se kusy, ne tahy.
+
+**Nikdy nestálo na obrazovce** — tabulka ukazuje jen čísla a vzorec v jedné
+poznámce. Vysvětluje, proč součet po barvách sedí na plochu motivu, kdy jsou
+gramy a kdy jen ml, a proč podtisk nevzniká pod černou.
 
 ---
 

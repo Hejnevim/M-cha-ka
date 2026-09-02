@@ -61,6 +61,8 @@ function csvNaSita(text) {
     viskOd: i(/^(viskozita_od|visk_od)/), viskDo: i(/^(viskozita_do|visk_do)/),
     poharek: i(/^(poharek|poh.rek|cup)/),
     pozn: i(/^(pozn|note)/),
+    // síto podle produktu — oba sloupce jsou nepovinné, viz sitoProProdukt níž
+    vychozi: i(/^(vychozi|v.choz|default)/), produkty: i(/^(produkty|produkt|ref)/),
   };
   if (ci.sito < 0) throw new Error(preloz("CSV sít musí mít sloupec sito."));
   return rows.slice(1).map((r) => {
@@ -80,6 +82,12 @@ function csvNaSita(text) {
       viskDo: ci.viskDo >= 0 ? n(r[ci.viskDo]) : 0,
       poharek: ci.poharek >= 0 ? (r[ci.poharek] || "") : "",
       pozn: ci.pozn >= 0 ? (r[ci.pozn] || "") : "",
+      // "ano" (i "x", "1", "yes") = výchozí síto technologie; seznam ref
+      // produktů čárkou = síto pro tyhle produkty. Starší soubor bez sloupců
+      // dá false a prázdný seznam, takže se nic nedoplňuje — jako dřív.
+      vychozi: ci.vychozi >= 0 && /^(ano|a|x|1|yes|true)$/i.test(String(r[ci.vychozi] || "").trim()),
+      produkty: ci.produkty >= 0 ? String(r[ci.produkty] || "").split(/[,;\s]+/)
+        .map((p) => p.trim()).filter(Boolean) : [],
     };
     if (!zaznam.vth && zaznam.hloubka > 0) { zaznam.vth = zaznam.hloubka; zaznam.klise = true; }
     // "120-34" v názvu síta nese nitky i vlákno, když sloupce chybí
@@ -142,7 +150,45 @@ function sitaPro(sita, tech, jenKlise) {
   const obecna = vsechna.filter((s) => !s.tech);
   const vybrana = moje.length ? moje.concat(obecna) : obecna;
   if (vybrana.length) return vybrana;
-  return jenKlise ? [] : SITA.map((m) => ({ sito: m, tech: "", vychozi: true }));
+  // standardni = z vestavěné řady, ne z parametrů (nic na to dnes nekouká;
+  // dřív se to jmenovalo vychozi, což by se pletlo se sloupcem v sita.csv)
+  return jenKlise ? [] : SITA.map((m) => ({ sito: m, tech: "", standardni: true }));
+}
+
+/* Síto podle produktu. U textilu má dílna dané, které síto na který produkt
+   patří: skoro všechno jede na 54-64, pár vyjmenovaných produktů na jemnějším
+   90-48. Není to volba obsluhy u stroje, ale rozhodnutí technologa — a kdyby
+   se síto vybíralo ručně, vybral by ho každý podle sebe a spotřeba by u téže
+   zakázky vycházela pokaždé jinak. Pravidlo proto stojí v parametry/sita.csv
+   (sloupce vychozi a produkty), ne v kódu, aby šlo produkt přeřadit bez
+   zásahu do aplikace.
+
+   Řádek s produktem má přednost před výchozím; řádek bez technologie platí
+   všude, ale až po řádcích té technologie. Není-li pro technologii pravidlo
+   žádné, vrátí se prázdno a síto receptury se nechá být. */
+function sitoProProdukt(sita, tech, ref) {
+  const r = String(ref == null ? "" : ref).trim();
+  const moje = (sita || []).filter((s) => s.tech === tech);
+  const obecna = (sita || []).filter((s) => !s.tech);
+  for (const sada of [moje, obecna]) {
+    const zvlast = r ? sada.find((s) => (s.produkty || []).indexOf(r) >= 0) : null;
+    if (zvlast) return zvlast.sito;
+    const vychozi = sada.find((s) => s.vychozi);
+    if (vychozi) return vychozi.sito;
+  }
+  return "";
+}
+
+/* Nabídka v dlaždici Síto. Má-li produkt síto dané pravidlem, nabízí se jen
+   ono: dlaždice, která u textilu nabízela obě síta technologie, vypadala jako
+   volba — a kdo nevěděl, že 90-48 patří jen devíti produktům, vybral podle
+   sebe a spotřeba ze síta vyšla u téže zakázky jinak. Bez pravidla (SCR, PDP,
+   TRS, FIR) zůstává celá nabídka technologie. Síto z pravidla, které v řádcích
+   technologie chybí, se nabídne aspoň názvem, ať dlaždice neukáže prázdno. */
+function sitaKVyberu(sitaTech, sitoPodleProduktu) {
+  if (!sitoPodleProduktu) return sitaTech || [];
+  const z = (sitaTech || []).find((s) => s.sito === sitoPodleProduktu);
+  return [z || { sito: sitoPodleProduktu, tech: "" }];
 }
 
 /* Podklad se dělí jen na světlý / střední / tmavý — na 4 218 barevných

@@ -1,23 +1,23 @@
 # Ink Recipe Manager — strukturovaný rozbor aplikace
 
 <!-- AUTO:stav -->
-> **Stav k 1. září 2026.** Čísla v úsecích označených `AUTO` generuje
+> **Stav k 2. září 2026.** Čísla v úsecích označených `AUTO` generuje
 > `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — nepřepisují
 > se ručně a nemohou se rozejít se skutečností. Text mimo ně píše člověk.
 
-> Poslední zapsaná změna ve vývojovém deníku: **1. září 15:56 — Pod displejem váhy už nestojí „na váze · receptura …“ — název receptury drží hlavička míchacího režimu, poznámka jen opakovala známé; zrušená ve všech třech jazycích**
+> Poslední zapsaná změna ve vývojovém deníku: **2. září 16:44 — Výběr barvy a polohy potisku stojí v pravém dolním rohu karty produktu — tlačítko dojelo k pravému okraji karty (553 → 750 px), štítky zůstaly vlevo u názvu; na telefonu má vlastní řádku a drží vpravo**
 
 | soubor | řádků | velikost |
 |---|---:|---:|
-| `aplikace/ (82 souborů)` | 18 772 | 1 132 kB |
-| `index.html` | 110 | 6 kB |
+| `aplikace/ (84 souborů)` | 19 523 | 1 183 kB |
+| `index.html` | 112 | 6 kB |
 | `most.py` | 727 | 31 kB |
 | `pdf_spec.py` | 1 071 | 42 kB |
 | `odemkni.py` | 213 | 8 kB |
 | `prevod_printcolor.py` | 183 | 7 kB |
 | `kontrola_aplikace.py` | 169 | 7 kB |
 | `rozbor_aktualizuj.py` | 359 | 13 kB |
-| **celkem** | **21 604** | |
+| **celkem** | **22 357** | |
 <!-- /AUTO:stav -->
 
 ---
@@ -41,13 +41,13 @@ v dílně.
 | produktů v katalogu | 1 320 |
 | receptur celkem | 3 468 |
 | — `receptury_Ferro_Xpresssion.csv` (FIR) | 1 097 receptur / 3 986 řádků složení |
-| — `receptury_PMS_660.csv` (TXP,PDP,SCR) | 778 receptur / 3 617 řádků složení, 223 bez odstínu |
-| — `receptury_PMS_786.csv` (PDP) | 814 receptur / 3 092 řádků složení, 190 bez odstínu |
-| — `receptury_RUCOLOR_10KK.csv` (PDP,SCR) | 776 receptur / 3 313 řádků složení, 47 bez odstínu |
+| — `receptury_PMS_660.csv` (TXP,PDP,SCR) | 778 receptur / 3 617 řádků složení, 2 bez odstínu |
+| — `receptury_PMS_786.csv` (PDP) | 814 receptur / 3 092 řádků složení |
+| — `receptury_RUCOLOR_10KK.csv` (PDP,SCR) | 776 receptur / 3 313 řádků složení |
 | — `receptury_vlastni.csv` (platí všude) | 3 receptur / 12 řádků složení |
 | obrázků produktů a poloh | 5 583 stažených z 9 209 v seznamu |
-| sít a klišé v parametrech | 28 zapsaných, z toho 2 s údaji výrobce |
-| koeficientů spotřeby | 14 zapsaných, 0 nastavených mimo 1,00 |
+| sít a klišé v parametrech | 30 zapsaných, z toho 2 s údaji výrobce |
+| koeficientů spotřeby | 14 zapsaných, 1 nastavených mimo 1,00 |
 | pigmentů a bází | 12 pigmentů, 5 bází |
 <!-- /AUTO:data -->
 
@@ -194,6 +194,20 @@ Koeficient 1,6 není odhad — vyšel ze srovnání se čtyřmi skutečnými tka
 
 Celý rozpis výpočtu je v aplikaci vidět, aby šlo číslo zkontrolovat. **Ručně
 zadanou spotřebu aplikace nikdy sama nepřepíše.**
+
+**Síto se u textilu vybírá podle produktu.** Kalkulace ho doplní sama, jakmile
+je jasný produkt, technologie a receptura: řádek v `parametry/sita.csv` se
+sloupcem `vychozi = ano` platí pro všechny produkty technologie, řádek se
+seznamem ref ve sloupci `produkty` má přednost. Dnes je pravidlo zapsané jen
+pro TXP (54-64 výchozí, 90-48 pro devět vyjmenovaných produktů); technologie
+bez pravidla nechá síto receptury být a dlaždice Síto nabízí celou řadu
+technologie. **Kde pravidlo platí, není síto na výběr:** dlaždice nabízí
+jen to jedno síto, bez prázdné volby „—", a receptura ho drží, ať se do ní
+dostalo odkudkoli — starší zápis v souboru i požadavek ze zakázkového listu
+ustoupí produktu. Totéž pravidlo předvyplní síto i v editoru receptury
+otevřeném z kalkulace (odvození custom barvy, uložení rozpracované, úprava
+vázané) a editor tam nabízí tutéž jedinou položku; bez pravidla síta
+technologie. Ze záložky Receptury, kde produkt není, se nic nedoplňuje.
 
 ### Krok 6 — Zbytek ze skladu má přednost
 
@@ -427,6 +441,9 @@ podle dat, ne podle dojmu.
 - Míchací režim na celou obrazovku: jen receptura, dávka a navážky velkým
   písmem, se zvýrazněnou právě váženou složkou; asistent se do něj přenáší
   portálem, takže se nepřeruší vážení ani spojení s váhou
+- Dialog Barva a poloha potisku se otevírá i z hlavičky režimu, nad mícháním —
+  custom receptura se odvodí, schválí razítkem a naváže na kombinaci přímo
+  u váhy; Esc pod otevřeným dialogem míchání nezavírá
 - Domovská stránka po výběru drží jen dávku a barvu; zadání se sbalí do jednoho
   řádku a práce u míchačky (krycí plocha, zbytky, štítek, vážení) je v režimu
 - Kalkulace stojí na dvou stejně velkých oknech, která se potkávají uprostřed

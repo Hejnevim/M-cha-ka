@@ -1,12 +1,30 @@
 "use strict";
-function RecipeForm({ initial, onSave, onCancel, sita, materialy }) {
-  // Editor receptury neví, pro kterou technologii se bude tisknout, proto
-  // nabídne všechna zapsaná síta i klišé; bez vlastních dat standardní řadu.
-  const nabidkaSit = useMemo(() => {
-    const z = (sita || []).map((s) => s.sito).filter(Boolean);
-    return z.length ? Array.from(new Set(z)) : SITA;
-  }, [sita]);
-  const [r, setR] = useState(initial);
+/* Nabídka sít v editoru. Má-li produkt síto dané pravidlem (sitoProProdukt
+   v části 430), nabízí se jen ono — táž jediná položka jako v dlaždici Síto
+   v kartě Parametry tisku; síto není na výběr ani tady. Bez pravidla, ale
+   se známou technologií (z kalkulace), se nabízejí její síta; ze záložky
+   Receptury editor technologii nezná a nabídne všechna zapsaná síta i klišé,
+   bez vlastních dat standardní řadu. */
+function nabidkaSitEditoru(sita, sitaTech, sitoVychozi) {
+  if (sitoVychozi) return [sitoVychozi];
+  const zdroj = (sitaTech && sitaTech.length) ? sitaTech : (sita || []);
+  const z = zdroj.map((s) => s.sito).filter(Boolean);
+  return z.length ? Array.from(new Set(z)) : SITA;
+}
+
+/* Síto podle produktu i pro novou custom recepturu. Odvozená barva vzniká bez
+   síta a technolog ho v editoru vybíral z celé řady ručně — přitom u textilu
+   je dané produktem (sitoProProdukt v části 430). Pravidlo má přednost i před
+   sítem, které receptura už nese (základ z databáze ho může mít z jiné
+   technologie); bez pravidla se zapsané síto nechá být. */
+function sPredvyplnenymSitem(initial, sitoVychozi) {
+  if (!initial || !sitoVychozi || initial.mesh === sitoVychozi) return initial;
+  return Object.assign({}, initial, { mesh: sitoVychozi });
+}
+
+function RecipeForm({ initial, onSave, onCancel, sita, materialy, sitaTech, sitoVychozi }) {
+  const nabidkaSit = useMemo(() => nabidkaSitEditoru(sita, sitaTech, sitoVychozi), [sita, sitaTech, sitoVychozi]);
+  const [r, setR] = useState(() => sPredvyplnenymSitem(initial, sitoVychozi));
   const setC = (id, k, v) => setR(Object.assign({}, r, { components: r.components.map((x) => x.id === id ? Object.assign({}, x, { [k]: v }) : x) }));
   const sum = r.components.reduce((s, c) => s + n(c.pct), 0);
   const valid = r.name.trim() && r.components.length && r.components.every((c) => c.name.trim());
@@ -43,7 +61,7 @@ function RecipeForm({ initial, onSave, onCancel, sita, materialy }) {
         <div>
           <label className="f">${preloz("Síto")}</label>
           <select value=${r.mesh || ""} onChange=${(e) => setR(Object.assign({}, r, { mesh: e.target.value }))}>
-            <option value="">${preloz("nevybráno")}</option>
+            ${!sitoVychozi && html`<option value="">—</option>`}
             ${nabidkaSit.map((m) => html`<option key=${m} value=${m}>${m}</option>`)}
             ${r.mesh && nabidkaSit.indexOf(r.mesh) < 0
               && html`<option value=${r.mesh}>${r.mesh}</option>`}
@@ -52,14 +70,14 @@ function RecipeForm({ initial, onSave, onCancel, sita, materialy }) {
         <div>
           <label className="f">${preloz("Kryvost")}</label>
           <select value=${r.opacity || ""} onChange=${(e) => setR(Object.assign({}, r, { opacity: e.target.value }))}>
-            <option value="">${preloz("nevybráno")}</option>
+            <option value="">—</option>
             ${KRYVOSTI.map((m) => html`<option key=${m} value=${m}>${preloz(m)}</option>`)}
           </select>
         </div>
         <div>
           <label className="f">${preloz("Povrch")}</label>
           <select value=${r.surface || ""} onChange=${(e) => setR(Object.assign({}, r, { surface: e.target.value }))}>
-            <option value="">${preloz("nevybráno")}</option>
+            <option value="">—</option>
             ${POVRCHY.map((m) => html`<option key=${m} value=${m}>${preloz(m)}</option>`)}
           </select>
         </div>

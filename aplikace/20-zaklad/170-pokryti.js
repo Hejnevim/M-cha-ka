@@ -205,6 +205,11 @@ function analyzujPokryti(img, prah, orezat, vyrez, odsazeniMm, rozmerMm, barvaPo
 
   let barvy = 0, x0 = w, y0 = h, x1 = -1, y1 = -1;
   const maska = new Uint8Array(w * h);
+  /* Ke kterým bodům se která vybraná barva hlásí. Každý bod patří právě
+     jedné barvě — té nejbližší —, takže součet ploch po barvách je přesně
+     plocha motivu a nic se nepočítá dvakrát. Z toho se skládá rozpis
+     separací: každá barva své síto, svá barva v kelímku. */
+  const patri = cile.length ? new Uint8Array(w * h) : null;
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
     const i = px(x, y);
     const a = d[i + 3];
@@ -214,17 +219,18 @@ function analyzujPokryti(img, prah, orezat, vyrez, odsazeniMm, rozmerMm, barvaPo
       // v jiné barvě se tím z výpočtu vyřadí.
       jeBarva = false;
       if (a > 40) {
-        let nej = 1e9;
+        let nej = 1e9, nejQ = 0;
         for (let q = 0; q < cile.length; q++) {
           const bc = cile[q];
           const r = (Math.abs(d[i] - bc.r) + Math.abs(d[i + 1] - bc.g) + Math.abs(d[i + 2] - bc.b)) / 3;
-          if (r < nej) nej = r;
+          if (r < nej) { nej = r; nejQ = q; }
         }
         // Bod se počítá, jen když je vybrané barvě blíž než pozadí. U světlých
         // odstínů by jinak větší tolerance spolkla celý bílý papír.
         const kPozadi = pruhledne ? 1e9
           : (Math.abs(d[i] - pozadi.r) + Math.abs(d[i + 1] - pozadi.g) + Math.abs(d[i + 2] - pozadi.b)) / 3;
         jeBarva = nej <= prah && nej < kPozadi;
+        if (jeBarva) patri[y * w + x] = nejQ + 1;
       }
     } else if (pruhledne) {
       jeBarva = a > 40;
@@ -238,7 +244,8 @@ function analyzujPokryti(img, prah, orezat, vyrez, odsazeniMm, rozmerMm, barvaPo
     if (y < y0) y0 = y; if (y > y1) y1 = y;
   }
   if (x1 < 0) return { pct: 0, barvy: 0, kryciPocet: 0, mm2: 0, pxNaMm: 0,
-    w: w, h: h, bw: 0, bh: 0, bwMotiv: 0, bhMotiv: 0, prazdne: true, nahled: c.toDataURL() };
+    w: w, h: h, bw: 0, bh: 0, bwMotiv: 0, bhMotiv: 0, prazdne: true, poBarvach: null,
+    nahled: c.toDataURL() };
 
   const bw = x1 - x0 + 1, bh = y1 - y0 + 1;
 
@@ -272,6 +279,30 @@ function analyzujPokryti(img, prah, orezat, vyrez, odsazeniMm, rozmerMm, barvaPo
   // plocha v mm² — přímo z ní se dá spočítat gramáž
   const mm2 = pxNaMm > 0 ? kryciPocet / (pxNaMm * pxNaMm) : 0;
 
+  /* Rozklad po barvách. Bez odsazení jsou to prosté součty příslušnosti;
+     s odsazením se každá barva nafukuje ZVLÁŠŤ, protože každá se tiskne
+     vlastním sítem a rozpíjí se sama za sebe — vrstvy se v přesazích
+     překrývají, takže součet po barvách smí být větší než plocha celku. */
+  let poBarvach = null;
+  if (patri) {
+    poBarvach = cile.map(() => ({ pocet: 0, mm2: 0 }));
+    if (polomer >= 0.5) {
+      const mez = polomer * 3;
+      const mb = new Uint8Array(w * h);
+      for (let q = 0; q < cile.length; q++) {
+        mb.fill(0);
+        for (let k = 0; k < w * h; k++) if (patri[k] === q + 1) mb[k] = 1;
+        const db = vzdalenostOdBarvy(mb, w, h);
+        let kolik = 0;
+        for (let k = 0; k < w * h; k++) if (db[k] <= mez) kolik++;
+        poBarvach[q].pocet = kolik;
+      }
+    } else {
+      for (let k = 0; k < w * h; k++) if (patri[k]) poBarvach[patri[k] - 1].pocet++;
+    }
+    for (const b of poBarvach) b.mm2 = pxNaMm > 0 ? b.pocet / (pxNaMm * pxNaMm) : 0;
+  }
+
   // náhled: motiv tmavě, přidané odsazení světleji, ohraničení oranžově
   const nc = document.createElement("canvas");
   nc.width = w; nc.height = h;
@@ -289,7 +320,8 @@ function analyzujPokryti(img, prah, orezat, vyrez, odsazeniMm, rozmerMm, barvaPo
   nctx.strokeStyle = "#C97B63"; nctx.lineWidth = Math.max(1, Math.round(w / 300));
   nctx.strokeRect(kx0 + .5, ky0 + .5, kbw, kbh);
   return { pct: pct, barvy: barvy, kryciPocet: kryciPocet, mm2: mm2, pxNaMm: pxNaMm,
-    w: w, h: h, bw: kbw, bh: kbh, bwMotiv: bw, bhMotiv: bh, nahled: nc.toDataURL() };
+    w: w, h: h, bw: kbw, bh: kbh, bwMotiv: bw, bhMotiv: bh, poBarvach: poBarvach,
+    nahled: nc.toDataURL() };
 }
 
 /* ---- přiblížení náhledů ----

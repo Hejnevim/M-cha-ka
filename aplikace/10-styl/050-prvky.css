@@ -135,8 +135,29 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
    Parametry tisku s jedním řádkem dlaždic po 178 px (~363 px). Když tedy
    Zakázka stojí v řádku sama nebo je nejvyšší, drží stejnou výšku jako
    soused, a prázdné místo nevzniká ani v ní, ani kvůli ní. */
-.zakazka-cisla input{font-size:min(calc(var(--pismo) * 3.375), 18.5625cqw);font-weight:700;text-align:center;
-  flex:1;min-height:100px;padding:5cqw;box-sizing:border-box}
+.zakazka-cisla input,.zakazka-cisla select{font-size:min(calc(var(--pismo) * 3.375), 18.5625cqw);
+  font-weight:700;text-align:center;flex:1;min-height:100px;padding:5cqw;box-sizing:border-box}
+/* Šířka stěrky je výběr, ale musí vypadat jako sousední číselné dlaždice:
+   hodnota na středu, bez šipky — stejný idiom jako dlaždicové výběry
+   v `.karta-tisk` (viz tam, proč se šipka nekreslí a hodnota centruje).
+   Zavřená dlaždice ukazuje jen číslo (nebo „—“ = nezadáno), takže velké
+   písmo číselných dlaždic tu nemá co zalomit. */
+.zakazka-cisla select{width:100%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;background-image:none}
+.zakazka-cisla select::picker-icon{display:none}
+.zakazka-cisla select::select-fallback-button-text{flex:0 1 auto;text-align:center}
+.zakazka-cisla select::picker(select){font-size:calc(var(--pismo) * 1.5)}
+.zakazka-cisla option{padding:calc(var(--pole-y) * 1.4) calc(var(--pole-x) * 1.4)}
+/* Se sítem přibudou dvě dlaždice navíc (šířka stěrky, potisků na tah).
+   Ve dvou sloupcích by z toho byly tři řádky, karta by povyrostla na 513 px
+   a se sousední Parametry tisku by se roztáhly její výběry na 340 px vysoko —
+   změřeno. Šest dlaždic proto jde do tří sloupců: dva řádky jako dosud,
+   výška karty zpátky na ~364 px. */
+.zakazka-cisla.sest{grid-template-columns:1fr 1fr 1fr}
+/* Ve třech sloupcích se popisek „SPOTŘEBA (G/M²)" nevejde na řádek a zalomí
+   se — dlaždice pod ním pak začíná níž než sousedky (změřeno 100 px proti
+   123 px). Dvouřádková dolní mez popisku srovná začátky všech šesti. */
+.zakazka-cisla.sest label.f{min-height:2.6em;display:flex;align-items:flex-end;justify-content:center}
 /* Pod 560px se sloupce skládají na jeden a dlaždice jedou přes celou šířku
    telefonu — čtyři po 178 px (+ popisky) nezvládne bez rolování žádný
    mobil, poslední zůstává mimo obrazovku. Na úzkém okně proto dolní mez
@@ -144,5 +165,9 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
    čitelné z odstupu, ale čtyři se vejdou najednou. */
 @media(max-width:560px){
   .zakazka-cisla{grid-template-columns:1fr}
-  .zakazka-cisla input{font-size:min(calc(var(--pismo) * 1.7), 9.375cqw);min-height:88px}
+  /* Šest dlaždic pod sebou by na telefonu znamenalo šest obrazovek rolování.
+     Ve dvou sloupcích jsou to tři řádky — méně, než kolik dnes zabírají
+     čtyři dlaždice v jednom sloupci. */
+  .zakazka-cisla.sest{grid-template-columns:1fr 1fr}
+  .zakazka-cisla input,.zakazka-cisla select{font-size:min(calc(var(--pismo) * 1.7), 9.375cqw);min-height:88px}
 }

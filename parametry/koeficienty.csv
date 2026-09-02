@@ -3,7 +3,7 @@
 kryvost;Vysoce krycí;1,00;"doplnte dle zkusenosti dilny"
 kryvost;Standard;1,00;
 kryvost;Transparentní;1,00;
-material;Bavlna;1,00;"savy material bere vic barvy"
+material;Bavlna;1,25;"savy material bere vic barvy - bavlna a neupraveny textil pojmou o 20-30 % vic nez nepropustny plast (metodika dilny 2026-09), stred rozsahu"
 material;Polyester;1,00;
 material;Kov;1,00;
 material;ABS;1,00;

@@ -197,6 +197,9 @@
   .zaklad td{padding:8px 10px 8px 0; border-bottom:1px solid var(--line);
     font-variant-numeric:tabular-nums; vertical-align:top}
   .zaklad td.c{white-space:nowrap; font-weight:700}
+  /* Tlačítka v „Cestě jedné zakázky": plná velikost .drobne by řádky
+     tabulky roztáhla, tak jsou o stupeň menší a nezalamují se. */
+  .kroky td button{padding:5px 12px; font-size:12.5px; white-space:nowrap}
 
   @media (prefers-reduced-motion: reduce){
     .scena .anim{opacity:1}
@@ -775,6 +778,58 @@
   <p class="pozn" id="pozn"></p>
 </div>
 
+<!-- Cesta jedné zakázky pod přehrávačem: kdo nechce pouštět scény, má tu
+     celý proces od barevné řady po namíchanou dávku na jeden pohled.
+     Čte se, neposlouchá — proto oddíl jako dodatek, ne scéna. Tlačítko
+     skočí na scénu, která krok předvádí; krok bez tlačítka svou scénu
+     zatím nemá a je popsaný jen tady. -->
+<section class="dodatek">
+  <div>
+    <h2>Cesta jedné zakázky — stručně</h2>
+    <p style="margin-top:6px">Celý proces od přiřazení barevné řady k potiskovanému
+      místu až po namíchání barvy podle velikosti zakázky, propustnosti síta
+      a skutečné velikosti loga. Tlačítko skočí na scénu, která krok předvádí;
+      krok bez tlačítka svou scénu zatím nemá.</p>
+  </div>
+  <div class="zaklad kroky">
+    <table>
+      <thead><tr><th>krok</th><th>co se stane</th><th>scéna</th></tr></thead>
+      <tbody>
+        <tr><td class="c">1 · barevná řada</td>
+          <td>Každé potiskované místo produktu má přiřazené své barevné řady — kdo míchá, vidí jen barvy, které na to místo a jeho technologii smí.</td>
+          <td><button class="drobne" data-skok="2">scéna 2</button></td></tr>
+        <tr><td class="c">2 · zadání</td>
+          <td>Spec přijde přetažením PDF, čtečkou kódu, nebo se zadá ručně — produkt, odstín, počet kusů i poloha potisku se vytáhnou samy.</td>
+          <td><button class="drobne" data-skok="3">scéna 3</button></td></tr>
+        <tr><td class="c">3 · technologie</td>
+          <td>Technologii určuje poloha potisku, ne globální nastavení — jeden produkt se běžně tiskne víc technologiemi.</td>
+          <td><button class="drobne" data-skok="2">scéna 2</button></td></tr>
+        <tr><td class="c">4 · receptura</td>
+          <td>Standard z nakoupené řady, vlastní odstín odvozený z existující receptury (platí jen na svém produktu), nebo rozpracovaná barva ze specu. Co se na danou kombinaci míchalo posledně, nabídne se samo.</td>
+          <td>—</td></tr>
+        <tr><td class="c">5 · velikost loga</td>
+          <td>Krycí plocha se spočítá z bodů, kde barva opravdu je, ne z obdélníku kolem motivu — 25,71 → 3,25 cm².</td>
+          <td><button class="drobne" data-skok="4">scéna 4</button></td></tr>
+        <tr><td class="c">6 · propustnost síta</td>
+          <td>Kolik barvy síto pustí: otevřená plocha × tloušťka tkaniny × faktor přenosu, u tampontisku hloubka leptu klišé. Bez údajů výrobce jen orientačně.</td>
+          <td><button class="drobne" data-skok="4">scéna 4</button></td></tr>
+        <tr><td class="c">7 · dávka</td>
+          <td>Plocha × počet kusů × g/m², k tomu ztráty v procentech — a minimální dávka, pod kterou se nejde.</td>
+          <td><button class="drobne" data-skok="4">scéna 4</button></td></tr>
+        <tr><td class="c">8 · zbytky</td>
+          <td>Nejdřív sklad: kelímek s totožným složením se jen přelije, u jiného odstínu se dopočítá, co přidat.</td>
+          <td><button class="drobne" data-skok="5">scéna 5</button></td></tr>
+        <tr><td class="c">9 · namíchání</td>
+          <td>Míchací lístek s kumulativním vážením, asistent u váhy vede složku po složce; přelití se dorovná zvětšením celé dávky se zachováním odstínu.</td>
+          <td><button class="drobne" data-skok="8">scéna 8</button></td></tr>
+        <tr><td class="c">10 · štítek</td>
+          <td>Kelímek dostane štítek s čárovým kódem; po zakázce se zbytek vrátí do evidence a kruh se uzavírá.</td>
+          <td><button class="drobne" data-skok="10">scéna 10</button></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
 <section class="dodatek">
   <div>
     <h2>Dodatek — co to stojí dnes a co se ušetří</h2>
@@ -1114,6 +1169,16 @@
     else if (e.key === " "){ e.preventDefault(); bezi ? pauza() : spust(); }
   });
   window.addEventListener("beforeunload", stopni);
+
+  /* Kroky v „Cestě jedné zakázky" skáčou na scénu, která krok předvádí —
+     bez toho by čtenář scénu dohledával po číslech na liště. Po skoku se
+     stránka vrátí k jevišti, jinak to vypadá, že tlačítko nedělá nic. */
+  [].slice.call(document.querySelectorAll("[data-skok]")).forEach(function(b){
+    b.addEventListener("click", function(){
+      skoc(parseInt(b.getAttribute("data-skok"), 10) - 1);
+      elJeviste.scrollIntoView({ behavior: "smooth" });
+    });
+  });
 
   vykresli();
 
