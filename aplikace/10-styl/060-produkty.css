@@ -5,6 +5,10 @@
 .produkt-dlazdice .popiska{margin-top:7px;font-size:12.5px;line-height:1.35;color:var(--ink-2);text-align:center}
 .produkt-dlazdice .popiska b{color:var(--ink);font-size:13.5px}
 .produkt-dlazdice button.prodphoto{border:none;color:var(--ink-2);font-size:13px;padding:10px}
+/* Blok krycí plochy (tlačítko a poznámka ve sloupci zakázkového listu): pod
+   zlomem stojí hned pod načtením kódu, na široké obrazovce ho část 040
+   přišpendlí k pravému dolnímu rohu karty. */
+.blok-pokryti{margin-top:8px}
 .pdfdrop{min-width:0;cursor:pointer}
 .prodphoto{width:128px;height:128px;object-fit:contain;border-radius:var(--radius-dlazdice);background:var(--paper);flex:0 0 auto;box-shadow:var(--neu-sm)}
 .poscards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:8px 0 6px}

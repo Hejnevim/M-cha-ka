@@ -5,11 +5,11 @@
 > `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — nepřepisují
 > se ručně a nemohou se rozejít se skutečností. Text mimo ně píše člověk.
 
-> Poslední zapsaná změna ve vývojovém deníku: **2. září 16:44 — Výběr barvy a polohy potisku stojí v pravém dolním rohu karty produktu — tlačítko dojelo k pravému okraji karty (553 → 750 px), štítky zůstaly vlevo u názvu; na telefonu má vlastní řádku a drží vpravo**
+> Poslední zapsaná změna ve vývojovém deníku: **2. září 16:57 — Blok krycí plochy stojí v pravém dolním rohu karty produktu — sloupec zakázkového listu se táhne až k dolnímu okraji karty a tlačítko Spočítat krycí plochu s poznámkou sjelo do rohu; přesun tlačítka výběru barvy z 16:44 vrácen**
 
 | soubor | řádků | velikost |
 |---|---:|---:|
-| `aplikace/ (84 souborů)` | 19 523 | 1 183 kB |
+| `aplikace/ (84 souborů)` | 19 539 | 1 187 kB |
 | `index.html` | 112 | 6 kB |
 | `most.py` | 727 | 31 kB |
 | `pdf_spec.py` | 1 071 | 42 kB |
@@ -17,7 +17,7 @@
 | `prevod_printcolor.py` | 183 | 7 kB |
 | `kontrola_aplikace.py` | 169 | 7 kB |
 | `rozbor_aktualizuj.py` | 359 | 13 kB |
-| **celkem** | **22 357** | |
+| **celkem** | **22 373** | |
 <!-- /AUTO:stav -->
 
 ---

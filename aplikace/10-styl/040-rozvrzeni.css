@@ -15,16 +15,10 @@
    sloupcům vyjdou dlaždice parametrů na chlup stejně velké jako náhledy
    produktu — a to při každé šířce okna, ne jen při jedné. Přestavuje se to
    v barvy.html na stránce Rozvržení, ne tady. */
-/* Na úzké obrazovce karta není flex a auto-margin by vyšel na nulu — název
-   i řádek výběru si proto drží pevné odstupy jako dřív. */
+/* Na úzké obrazovce je karta obyčejný blok a auto-margin by vyšel na nulu —
+   název i řádek výběru si proto drží pevné odstupy jako dřív. */
 .karta-produkt .produkt-nazev{margin-top:14px}
 .karta-produkt .rowline{margin-top:10px;margin-bottom:0}
-/* Tlačítko výběru barvy a polohy stojí v pravém dolním rohu karty: štítky
-   technologie, rozměru a barvy jsou údaje a drží vlevo u názvu, tlačítko je
-   jediná akce v řádku a patří na okraj — pod zakázkový list, kde byl roh
-   karty jinak prázdný. Auto-margin pracuje i po zalomení řádku na telefonu:
-   tlačítko dojede k pravému okraji své řádky. */
-.karta-produkt .rowline>.btn{margin-left:auto}
 @media(min-width:960px){
   .grid.calc>.karta-produkt{grid-column:var(--produkt-sloupec);grid-row:var(--produkt-radek);
     width:var(--produkt-sirka);justify-self:var(--produkt-zarovnani);min-height:var(--produkt-vyska)}
@@ -37,11 +31,26 @@
   .grid.calc>.karta-tisk{grid-column:var(--tisk-sloupec);grid-row:var(--tisk-radek);
     width:var(--tisk-sirka);justify-self:var(--tisk-zarovnani);min-height:var(--tisk-vyska)}
   .grid.calc>.card{margin-bottom:0}
-  .karta-produkt{display:flex;flex-direction:column}
-  /* Název produktu s materiálem a řádek výběru technologie, rozměru a barvy
-     stojí pohromadě v levém dolním rohu karty: karta je díky min-height vyšší
-     než obsah a bez auto-marginu by celá skupina visela uprostřed volného
-     místa hned pod náhledy. */
+  /* Karta produktu je na široké obrazovce mřížka o třech sloupcích stejných
+     jako dlaždice: nadpis přes všechny, pod ním řádek dlaždic, který dorovná
+     zbytek výšky karty (karta je stejně vysoká jako Kolik namíchat vedle),
+     a dole název s materiálem a řádek výběru technologie, rozměru a barvy —
+     pohromadě v levém dolním rohu, přes první dva sloupce. Obal dlaždic
+     přestává být vlastní krabicí (display:contents), aby dlaždice byly
+     buňkami téhle mřížky; třetí dlaždice (zakázkový list) se táhne až
+     k dolnímu okraji karty a blok krycí plochy v ní sjede auto-marginem
+     do pravého dolního rohu — tam, kde byl roh pod zakázkovým listem prázdný.
+     Mezera mezi sloupci je táž, jakou má mřížka dlaždic pod zlomem (16 px);
+     padding bloku drží 8 px od načtení kódu i ve chvíli, kdy karta žádné
+     volné místo nemá. Dlouhý název se přes dva sloupce zalomí — je to cena
+     za roh, který patří krycí ploše. */
+  .karta-produkt{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-template-rows:auto 1fr auto auto;column-gap:16px;row-gap:0}
+  .karta-produkt>h2{grid-column:1/-1}
+  .karta-produkt .produkt-dlazdice{display:contents}
+  .karta-produkt .produkt-dlazdice>.dlazdice:nth-child(3){grid-column:3;grid-row:2/5}
+  .karta-produkt .produkt-nazev,.karta-produkt .rowline{grid-column:1/3}
+  .karta-produkt .blok-pokryti{margin-top:auto;padding-top:8px}
   .karta-produkt .produkt-nazev{margin-top:auto;padding-top:14px}
   .karta-produkt .rowline{margin-top:10px;margin-bottom:0}
 }

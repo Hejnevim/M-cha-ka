@@ -1766,13 +1766,16 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                         onCode=${onCode} onNastaveni=${onNastaveniCtecky} />
                     </div>`}
                   <!-- Krycí plocha se počítá z náhledu zakázkového listu,
-                       proto tlačítko stojí hned pod jeho načtením — dřív
-                       bylo až v míchacím režimu a od PDF, ze kterého čte,
-                       ho dělila celá obrazovka. Bez kalkulace (není vybraná
-                       receptura a množství) nemá co přepočítávat, tak se
-                       neukazuje — stejná podmínka jako dřív. -->
+                       proto blok stojí v jeho sloupci — dřív byl až
+                       v míchacím režimu a od PDF, ze kterého čte, ho dělila
+                       celá obrazovka. Na široké obrazovce je přišpendlený
+                       k pravému dolnímu rohu karty (třída blok-pokryti,
+                       pravidlo v části 040), pod zlomem stojí hned pod
+                       načtením kódu. Bez kalkulace (není vybraná receptura
+                       a množství) nemá co přepočítávat, tak se neukazuje —
+                       stejná podmínka jako dřív. -->
                   ${calcAkt && html`
-                    <div style=${{ marginTop: 8 }}>
+                    <div className="blok-pokryti">
                       <button className="btn sec sm" style=${{ width: "100%" }} onClick=${() => setPokrytiOkno(true)}>
                         ${pokrytiJob != null ? preloz("Upravit krycí plochu") : preloz("Spočítat krycí plochu z náhledu")}
                       </button>

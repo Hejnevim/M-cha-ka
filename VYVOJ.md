@@ -328,7 +328,8 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 16:17 | Šířka stěrky u textilu se vybírá rovnou v dlaždici — šířky 250 a 420 mm jsou ve výběrové nabídce místo čipů pod polem; klik na 420 hned počítá rezervu síta 151,2 g |
 | 16:21 | Síto podle produktu už není na výběr — dlaždice Síto u textilu nabízí jen síto, které produktu patří (90-48 u devíti vyjmenovaných, 54-64 u ostatních), bez „nevybráno"; totéž v editoru receptury z kalkulace; technologie bez pravidla nabízejí celou řadu jako dřív |
 | 16:37 | Prázdná dlaždice ukazuje „—" jako šířka stěrky — Síto, Klišé, Kryvost a Povrch v kalkulaci i v editoru receptury; slovo „nevybráno" a jeho překlady zmizely ze slovníku |
-| 16:44 | Výběr barvy a polohy potisku stojí v pravém dolním rohu karty produktu — tlačítko dojelo k pravému okraji karty (553 → 750 px), štítky zůstaly vlevo u názvu; na telefonu má vlastní řádku a drží vpravo |
+| 16:44 | Výběr barvy a polohy potisku stojí v pravém dolním rohu karty produktu — tlačítko dojelo k pravému okraji karty (553 → 750 px), štítky zůstaly vlevo u názvu; na telefonu má vlastní řádku a drží vpravo — vráceno v 16:57 (kap. 192) |
+| 16:57 | Blok krycí plochy stojí v pravém dolním rohu karty produktu — sloupec zakázkového listu se táhne až k dolnímu okraji karty a tlačítko Spočítat krycí plochu s poznámkou sjelo do rohu; přesun tlačítka výběru barvy z 16:44 vrácen |
 
 ---
 
@@ -8454,6 +8455,8 @@ i zobrazená hodnota `—`. V částech 240 a 400 nezůstal žádný
 
 ## 191. Výběr barvy a polohy stojí v pravém dolním rohu karty produktu
 
+*Vráceno v kapitole 192 — špatně přečtené zadání: do rohu patřil blok krycí plochy.*
+
 **Problém.** Tlačítko „Barva a poloha potisku →" — jediná akce v kartě
 Vybraný produkt, kterou se otevírá výběr barvy a polohy — stálo uprostřed
 spodního řádku hned za štítky technologie, rozměru a barvy a končilo
@@ -8476,5 +8479,52 @@ okraj sloupce zakázkového listu (750 px); štítky beze změny (x 62 /
 produktu 688 px široký beze změny. 391 px přes `snimek.py`: tlačítko na
 vlastní řádce, x 38 → 161,4 px, pravý okraj 229,6 → 353 px = vnitřní okraj
 karty (375 − 22), `scrollWidth` 391 = šířka okna, štítky beze změny.
+`kontrola_aplikace.py` 0, `prekryv.py` (1400 / 1100 / 820 px, oba režimy)
+0, `mapa.py` přegenerován, `rozbor_aktualizuj.py` přepsal jen úsek *stav*.
+
+## 192. Krycí plocha stojí v pravém dolním rohu karty produktu — kapitola 191 vrácena
+
+**Falešný start.** Kapitola 191 posunula do rohu tlačítko „Barva a poloha
+potisku →" — zadání „posunout výběr do pravého spodního rohu" jsem četl
+jako výběr barvy a polohy. Mělo jít o tlačítko „Spočítat krycí plochu
+z náhledu": snímek u zadání ukazoval právě ten blok a prázdný roh pod ním.
+Pravidlo z kapitoly 191 je odstraněné, tlačítko výběru barvy stojí zase za
+štítky (x 361,55 px, pravý okraj 553,13 px — jako před kapitolou 191).
+
+**Problém.** Blok krycí plochy (tlačítko a poznámka „krycí plocha 100,0 %
+· z katalogu") končil ve sloupci zakázkového listu 96 px nad dolním okrajem
+karty — pod ním zůstával prázdný roh, zatímco vlevo pokračoval název
+produktu a řádek štítků.
+
+**Co se změnilo.** Karta Vybraný produkt je na široké obrazovce (od 960 px)
+mřížka o třech sloupcích shodných s dlaždicemi místo flex sloupce: nadpis
+přes všechny, řádek dlaždic dorovnává výšku karty, název a řádek štítků
+drží v levém dolním rohu přes první dva sloupce. Obal dlaždic je
+`display:contents`, třetí dlaždice (zakázkový list) se táhne přes řádky
+2–4 až k dolnímu okraji a blok krycí plochy — nově třída `blok-pokryti`
+místo vloženého `marginTop: 8`, které by auto-margin přebilo — sjede
+`margin-top:auto` do rohu; `padding-top:8px` drží odstup od načtení kódu
+i ve chvíli, kdy karta žádné volné místo nemá. Pod zlomem je karta blok
+a blok zůstává hned pod načtením kódu jako dřív (`.blok-pokryti{margin-top:8px}`
+v části 060). Blok zůstal ve sloupci zakázkového listu, ze kterého krycí
+plochu počítá — komentář v části 240 to říká.
+
+**Co to stojí.** Název a řádek štítků mají místo tří sloupců dva: na
+1600 px se název „11003 · 11003. vodotěsná nádoba…" zalomí na dva řádky
+(45 px místo 22) a tlačítko „Barva a poloha potisku →" sjede pod štítky
+(řádek 62,5 px místo 31). Na 1920 px (stránka nemá strop šířky, karta
+900 px) je název i řádek na jednom řádku. Roh patří krycí ploše, název se
+zalomit smí.
+
+**Změřeno:** 1600 px sondou: blok krycí plochy y 651,23 → 712,73 px, dolní
+okraj 725,11 → 794,61 px = dolní okraj řádku štítků = vnitřní dolní okraj
+karty; pravý okraj 750 px beze změny; třetí dlaždice výška 383,42 →
+452,92 px; karta 551 → 524,22 px, karta Kolik namíchat vedle táž výška
+524,22 px. 1920 px (`snimek.py`): název 22,4 px = jeden řádek, řádek
+štítků 31 px, blok 62,9 px v rohu, pravý okraj 918 px = vnitřní okraj karty
+(940 − 22). 1000 px (těsně nad zlomem): blok v rohu, dolní okraj 953,7 px
+= řádek štítků, `scrollWidth` 1000. 391 px: blok pod načtením kódu
+(y 591,5 px, 8 px pod tlačítkem končícím 583,5 px), název přes celou šířku
+315 px, `scrollWidth` 391 — pod zlomem se nic nepohnulo.
 `kontrola_aplikace.py` 0, `prekryv.py` (1400 / 1100 / 820 px, oba režimy)
 0, `mapa.py` přegenerován, `rozbor_aktualizuj.py` přepsal jen úsek *stav*.

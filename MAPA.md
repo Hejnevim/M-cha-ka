@@ -1,7 +1,7 @@
 # Rejstřík kódu aplikace
 
 > Generuje `mapa.py` ze skutečných souborů — neupravovat ručně.
-> Kód není v `index.html`, leží v `aplikace/` v 84 částech (19523 řádků).
+> Kód není v `index.html`, leží v `aplikace/` v 84 částech (19539 řádků).
 > Čísla u položek jsou `část:řádek` — část podle tabulky níž.
 
 | # | část | řádků |
@@ -9,9 +9,9 @@
 | 1 | `00-hlava/010-hlava.html` | 6 |
 | 2 | `10-styl/020-promenne.css` | 174 |
 | 3 | `10-styl/030-zaklad.css` | 131 |
-| 4 | `10-styl/040-rozvrzeni.css` | 137 |
+| 4 | `10-styl/040-rozvrzeni.css` | 146 |
 | 5 | `10-styl/050-prvky.css` | 173 |
-| 6 | `10-styl/060-produkty.css` | 34 |
+| 6 | `10-styl/060-produkty.css` | 38 |
 | 7 | `10-styl/070-michani.css` | 251 |
 | 8 | `10-styl/080-ovladani.css` | 77 |
 | 9 | `00-hlava/090-kostra.html` | 18 |
@@ -36,7 +36,7 @@
 | 28 | `30-app/220-heslo.js` | 28 |
 | 29 | `30-app/225-role.js` | 144 |
 | 30 | `40-kalkulace/230-odemykani.js` | 71 |
-| 31 | `40-kalkulace/240-calc.js` | 2480 |
+| 31 | `40-kalkulace/240-calc.js` | 2483 |
 | 32 | `40-kalkulace/250-vaha.js` | 104 |
 | 33 | `40-kalkulace/260-financni-box.js` | 127 |
 | 34 | `40-kalkulace/270-potlife-pruh.js` | 69 |
@@ -160,19 +160,19 @@
 `.navbtn svg,.themebtn svg` 3:119 · `.navdrop` 3:125 · `.navdrop button` 3:126 · `.navdrop button:hover` 3:127
 `.navdrop button.on` 3:128 · `.navdrop .note` 3:129 · `.navdrop .tag` 3:130
 `:root[data-theme="dark"] .navdrop button:hover` 3:131 · `.wrap` 4:1 · `.grid` 4:2
-`.karta-produkt .produkt-nazev` 4:20 · `.karta-produkt .rowline` 4:21 · `.karta-produkt .rowline>.btn` 4:27
-`.grid.calc>.bigpanel` 4:48 · `.bigpanel>.card` 4:49 · `.bigpanel .michtl` 4:50 · `.bigpanel .card` 4:53
-`.bigpanel .card h2` 4:54 · `.bigpanel .card .hint` 4:55 · `.bigpanel .result-big` 4:56
-`.bigpanel .result-sub` 4:57 · `.bigpanel .mixbar,.bigform .mixbar` 4:60 · `.bigpanel table.t` 4:61
-`.bigpanel table.t th` 4:62 · `.bigpanel table.t td` 4:63 · `.bigpanel .note` 4:64 · `.bigpanel .btn` 4:65
-`.bigpanel .swatch` 4:66 · `.bigpanel .tag` 4:67 · `.bigpanel .wbar` 4:68 · `.bigform.card>h2` 4:69
-`.bigform.card>.hint` 4:70 · `.bigform label.f` 4:71 · `.bigform select,.bigform input` 4:72
-`.bigform select` 4:73 · `.karta-tisk label.f` 4:85 · `.karta-tisk` 4:99 · `.karta-tisk>.frow` 4:100
-`.karta-tisk .frow>div` 4:107 · `.karta-tisk select` 4:108 · `.karta-tisk select::picker-icon` 4:118
-`.karta-tisk select::select-fallback-button-text` 4:119 · `.karta-tisk select::picker(select)` 4:120
-`.karta-tisk option` 4:121 · `.bigform select:focus,.bigform input:focus` 4:129 · `.bigform .frow` 4:130
-`.bigform .note` 4:131 · `.bigform .swatch` 4:132 · `.bigform .tgl` 4:133 · `.bigform .tglt` 4:134
-`.bigform .tglt::after` 4:135 · `.bigform .tgl input:checked + .tglt::after` 4:136 · `.bigform .flags` 4:137
+`.karta-produkt .produkt-nazev` 4:20 · `.karta-produkt .rowline` 4:21 · `.grid.calc>.bigpanel` 4:57
+`.bigpanel>.card` 4:58 · `.bigpanel .michtl` 4:59 · `.bigpanel .card` 4:62 · `.bigpanel .card h2` 4:63
+`.bigpanel .card .hint` 4:64 · `.bigpanel .result-big` 4:65 · `.bigpanel .result-sub` 4:66
+`.bigpanel .mixbar,.bigform .mixbar` 4:69 · `.bigpanel table.t` 4:70 · `.bigpanel table.t th` 4:71
+`.bigpanel table.t td` 4:72 · `.bigpanel .note` 4:73 · `.bigpanel .btn` 4:74 · `.bigpanel .swatch` 4:75
+`.bigpanel .tag` 4:76 · `.bigpanel .wbar` 4:77 · `.bigform.card>h2` 4:78 · `.bigform.card>.hint` 4:79
+`.bigform label.f` 4:80 · `.bigform select,.bigform input` 4:81 · `.bigform select` 4:82
+`.karta-tisk label.f` 4:94 · `.karta-tisk` 4:108 · `.karta-tisk>.frow` 4:109 · `.karta-tisk .frow>div` 4:116
+`.karta-tisk select` 4:117 · `.karta-tisk select::picker-icon` 4:127
+`.karta-tisk select::select-fallback-button-text` 4:128 · `.karta-tisk select::picker(select)` 4:129
+`.karta-tisk option` 4:130 · `.bigform select:focus,.bigform input:focus` 4:138 · `.bigform .frow` 4:139
+`.bigform .note` 4:140 · `.bigform .swatch` 4:141 · `.bigform .tgl` 4:142 · `.bigform .tglt` 4:143
+`.bigform .tglt::after` 4:144 · `.bigform .tgl input:checked + .tglt::after` 4:145 · `.bigform .flags` 4:146
 `.card` 5:1 · `.card h2` 5:2 · `.card .hint` 5:3 · `.frow` 5:4 · `label.f` 5:9 · `.chips` 5:17 · `.chip` 5:18
 `.chip.on` 5:19 · `.chip.mini` 5:22 · `.btn` 5:23 · `.btn:hover` 5:24 · `.btn.sec` 5:25
 `.btn.sec:hover` 5:26 · `.btn.sm` 5:27 · `.btn.danger` 5:28 · `.btn:disabled` 5:29 · `table.t` 5:30
@@ -188,22 +188,22 @@
 `.zakazka-cisla select::picker(select)` 5:149 · `.zakazka-cisla option` 5:150 · `.zakazka-cisla.sest` 5:156
 `.zakazka-cisla.sest label.f` 5:160 · `.produkt-dlazdice` 6:1 · `.produkt-dlazdice .dlazdice` 6:2
 `.produkt-dlazdice .prodphoto,.produkt-dlazdice .pdfdrop` 6:3 · `.produkt-dlazdice .popiska` 6:5
-`.produkt-dlazdice .popiska b` 6:6 · `.produkt-dlazdice button.prodphoto` 6:7 · `.pdfdrop` 6:8
-`.prodphoto` 6:9 · `.poscards` 6:10 · `.poscard` 6:11 · `.poscard.on` 6:12 · `.poscard img` 6:13
-`.poscard .nm` 6:14 · `.poscard .dm` 6:15 · `.noimg` 6:16 · `.thumb` 6:17 · `.wbar` 6:18 · `.wbar>span` 6:19
-`.cdot` 6:20 · `.modalbg` 6:21 · `.modalbox` 6:22 · `.modalbox .card` 6:23 · `.rizikopopup.pickbox` 6:27
-`.rizikopopup.warnbox` 6:28 · `.rizikopopup .note` 6:29 · `.rizikopopup .dot` 6:30
-`.rizikopopup .btn.sm` 6:31 · `.michbg` 7:1 · `.michhlav` 7:2 · `.michhlav .nazev` 7:5 · `.michhlav .kde` 7:6
-`.michdavka` 7:7 · `.michdavka b` 7:8 · `.michdavka span` 7:9 · `.michvzorek` 7:10 · `.michtelo` 7:12
-`.michtab` 7:14 · `.michtab th` 7:15 · `.michtab td` 7:17 · `.michtab td.num` 7:18 · `.michtab th.num` 7:23
-`.michtab .g` 7:24 · `.michtab tr.ted` 7:25 · `.michtab tr.ted td` 7:26 · `.michtab tr.hotovo td` 7:27
-`.michtab tr.hotovo .g` 7:28 · `.michstav` 7:29 · `.michbg .card` 7:34 · `.michbg .card>h2` 7:35
-`.michbg .btn` 7:36 · `.michbg .btn.sm` 7:37 · `.michbg .stitekpruh` 7:42
-`.michbg .stitekpruh .stitekobal` 7:43 · `.michbg .stitekpruh .tgl` 7:50 · `.michbg .stitekpruh .tglt` 7:54
-`.michbg .stitekpruh .tglt::after` 7:57 · `.michbg .stitekpruh .tgl input:checked + .tglt::after` 7:60
-`.michbg .stitekpruh .btn` 7:62 · `.michbg .card` 7:73 · `.michbg .asistroh` 7:74
-`.michbg .card:has(> .asistroh)>h2` 7:82 · `.michbg .card .simposuv` 7:95
-`.michbg .card .simposuv input[type=range]` 7:100
+`.produkt-dlazdice .popiska b` 6:6 · `.produkt-dlazdice button.prodphoto` 6:7 · `.blok-pokryti` 6:11
+`.pdfdrop` 6:12 · `.prodphoto` 6:13 · `.poscards` 6:14 · `.poscard` 6:15 · `.poscard.on` 6:16
+`.poscard img` 6:17 · `.poscard .nm` 6:18 · `.poscard .dm` 6:19 · `.noimg` 6:20 · `.thumb` 6:21 · `.wbar` 6:22
+`.wbar>span` 6:23 · `.cdot` 6:24 · `.modalbg` 6:25 · `.modalbox` 6:26 · `.modalbox .card` 6:27
+`.rizikopopup.pickbox` 6:31 · `.rizikopopup.warnbox` 6:32 · `.rizikopopup .note` 6:33
+`.rizikopopup .dot` 6:34 · `.rizikopopup .btn.sm` 6:35 · `.michbg` 7:1 · `.michhlav` 7:2
+`.michhlav .nazev` 7:5 · `.michhlav .kde` 7:6 · `.michdavka` 7:7 · `.michdavka b` 7:8 · `.michdavka span` 7:9
+`.michvzorek` 7:10 · `.michtelo` 7:12 · `.michtab` 7:14 · `.michtab th` 7:15 · `.michtab td` 7:17
+`.michtab td.num` 7:18 · `.michtab th.num` 7:23 · `.michtab .g` 7:24 · `.michtab tr.ted` 7:25
+`.michtab tr.ted td` 7:26 · `.michtab tr.hotovo td` 7:27 · `.michtab tr.hotovo .g` 7:28 · `.michstav` 7:29
+`.michbg .card` 7:34 · `.michbg .card>h2` 7:35 · `.michbg .btn` 7:36 · `.michbg .btn.sm` 7:37
+`.michbg .stitekpruh` 7:42 · `.michbg .stitekpruh .stitekobal` 7:43 · `.michbg .stitekpruh .tgl` 7:50
+`.michbg .stitekpruh .tglt` 7:54 · `.michbg .stitekpruh .tglt::after` 7:57
+`.michbg .stitekpruh .tgl input:checked + .tglt::after` 7:60 · `.michbg .stitekpruh .btn` 7:62
+`.michbg .card` 7:73 · `.michbg .asistroh` 7:74 · `.michbg .card:has(> .asistroh)>h2` 7:82
+`.michbg .card .simposuv` 7:95 · `.michbg .card .simposuv input[type=range]` 7:100
 `.michbg .okbox .btn,.michbg .warnbox .btn,.michbg .specbar .btn` 7:112 · `.michbg .card .btn.sm` 7:116
 `.michbg .btn.mich-tl-zpet` 7:120 · `.michbg .btn.mich-tl-kombinace` 7:127
 `.michbg .btn.mich-tl-rucne` 7:131 · `.michbg .btn.mich-tl-znam` 7:135
@@ -238,16 +238,19 @@
 `.dot` 8:68 · `.cam` 8:69 · `.specbar` 8:70 · `.specbar b` 8:71 · `.specbar a` 8:74 · `.kv` 8:75
 `.kv .k` 8:76 · `.kv .v` 8:77
 
-### Uvnitř @media a @supports (51)
+### Uvnitř @media a @supports (56)
 
 `select,::picker(select)` 3:50 · `select::picker-icon` 3:53 · `select` 3:57 · `select:open` 3:58
 `.bigform select:open` 3:59 · `::picker(select)` 3:60 · `option` 3:69 · `option:hover,option:focus` 3:74
 `option:checked` 3:75 · `option:disabled` 3:76 · `option::checkmark` 3:79
 `option:not(:checked)::checkmark` 3:80 · `.backbtn` 3:110 · `.backbtn span` 3:110 · `.grid.calc` 4:5
-`.grid.calc>.karta-produkt` 4:29 · `.grid.calc>.bigpanel` 4:31 · `.grid.calc>.karta-recept` 4:33
-`.grid.calc>.karta-cisla` 4:35 · `.grid.calc>.karta-tisk` 4:37 · `.grid.calc>.card` 4:39
-`.karta-produkt` 4:40 · `.karta-produkt .produkt-nazev` 4:45 · `.karta-produkt .rowline` 4:46
-`.karta-tisk select` 4:127 · `.frow.c2` 5:5 · `.frow.c3` 5:5 · `.frow.c4` 5:5
+`.grid.calc>.karta-produkt` 4:23 · `.grid.calc>.bigpanel` 4:25 · `.grid.calc>.karta-recept` 4:27
+`.grid.calc>.karta-cisla` 4:29 · `.grid.calc>.karta-tisk` 4:31 · `.grid.calc>.card` 4:33
+`.karta-produkt` 4:47 · `.karta-produkt>h2` 4:49 · `.karta-produkt .produkt-dlazdice` 4:50
+`.karta-produkt .produkt-dlazdice>.dlazdice:nth-child(3)` 4:51
+`.karta-produkt .produkt-nazev,.karta-produkt .rowline` 4:52 · `.karta-produkt .blok-pokryti` 4:53
+`.karta-produkt .produkt-nazev` 4:54 · `.karta-produkt .rowline` 4:55 · `.karta-tisk select` 4:136
+`.frow.c2` 5:5 · `.frow.c3` 5:5 · `.frow.c4` 5:5
 `.frow.c2>div>label.f:first-child,.frow.c3>div>label.f:first-child,.frow.c4>div>label.f:first-child` 5:13
 `.frow>.flags` 5:16 · `table.t` 5:37 · `table.t th,table.t td` 5:43 · `table.t td[colspan]` 5:46
 `table.t select` 5:52 · `.rolovani-telo>table.t` 5:55 · `.zakazka-cisla` 5:167 · `.zakazka-cisla.sest` 5:171
@@ -259,7 +262,7 @@
 ### Podmínky (17)
 
 `@supports (appearance: base-select)` 3:49 · `@media(max-width:720px)` 3:110 · `@media(min-width:960px)` 4:5
-`@media(min-width:960px)` 4:28 · `@media(max-width:640px)` 4:126 · `@media(min-width:640px)` 5:5
+`@media(min-width:960px)` 4:22 · `@media(max-width:640px)` 4:135 · `@media(min-width:640px)` 5:5
 `@media(min-width:640px)` 5:13 · `@media(max-width:800px)` 5:36 · `@media(max-width:560px)` 5:166
 `@media (max-width:1000px)` 7:227 · `@media print` 7:251 · `@media(min-width:960px)` 8:15
 `@media(max-width:1500px)` 8:34 · `@media(max-width:1150px)` 8:35 · `@media(max-width:800px)` 8:36
