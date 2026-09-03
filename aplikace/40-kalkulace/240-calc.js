@@ -312,17 +312,24 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
   useEffect(() => { setViskoz(recipe && recipe.viskozita != null ? String(recipe.viskozita) : ""); },
     [recipe && recipe.id]);
 
+  /* Hustota receptury na jednom místě: ze složek v tabulce materiálů, kde
+     ji výrobce dal (Marabu), jinak z hodnoty u receptury nebo paušálu 1,20
+     (hustotaReceptury v části 460). Berou ji spotřeba ze síta, rezerva
+     stěrky, objem dávky, cena litru i kelímek do skladu — kdyby si každý
+     sáhl na recipe.density sám, lístek a sklad by se rozešly. */
+  const hustotaRec = useMemo(() => hustotaReceptury(recipe, pigmenty), [recipe, pigmenty]);
+
   /* Spotřeba spočítaná ze síta — kolik barvy tou tkaninou projde.
      Nabízí se jen jako návrh; ručně zadanou hodnotu nepřepisuje. */
   const zeSita = useMemo(() => {
     if (!recipe || !recipe.mesh || !sita || !sita.length) return null;
     return spotrebaZeSita({
-      sito: recipe.mesh, sita: sita, tech: tech, hustota: n(recipe.density, 1.2),
+      sito: recipe.mesh, sita: sita, tech: tech, hustota: hustotaRec.hustota,
       kryvost: recipe.opacity, material: product ? product.material : "",
       podkladHex: colorSel ? colorSel.hex : "", koef: koef,
       viskozita: viskoz,
     });
-  }, [recipe, sita, koef, tech, product, colorSel, viskoz]);
+  }, [recipe, sita, koef, tech, product, colorSel, viskoz, hustotaRec]);
 
   // Podklad dosud vstupoval jen do spotřeby. Tohle je druhá otázka: projde ta
   // barva na tomhle materiálu vůbec, nebo bude prosvítat?
@@ -472,20 +479,25 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
        ztrát, rostla by s velikostí zakázky — a ona je pořád stejná, protože
        závisí jen na šířce stěrky. */
     const rezerva = rezervaSita({ sirkaSterkyMm: sterka,
-      hustota: n(recipe.density, 1.2) });
+      hustota: hustotaRec.hustota });
     const rezervaG = rezerva ? rezerva.g : 0;
     const potreba = withLoss + rezervaG;
     const totalG = Math.max(potreba, n(minBatch));
-    const totalMl = totalG / (n(recipe.density, 1) || 1);
     const pctSum = recipe.components.reduce((s, c) => s + n(c.pct), 0);
+    /* Objem složky z její vlastní hustoty (tabulka materiálů), bez ní
+       z hustoty receptury; objem dávky je součet objemů — u bílé báze
+       a pigmentu se liší o desítky ml proti podílu z jednoho čísla. */
+    const zakladHustoty = n(recipe.density, 1.2) || 1.2;
     const comps = recipe.components.map((c) => {
       const share = pctSum ? n(c.pct) / pctSum : 0;
-      return Object.assign({}, c, { g: totalG * share, ml: totalMl * share, norm: share * 100 });
+      const g = totalG * share;
+      return Object.assign({}, c, { g: g, ml: g / hustotaSlozky(c.name, pigmenty, zakladHustoty), norm: share * 100 });
     });
+    const totalMl = comps.reduce((s, c) => s + c.ml, 0) || totalG / (hustotaRec.hustota || 1);
     return { areaM2, netto, withLoss, rezerva, rezervaG, potreba,
       tahy: tahyZakazky({ kusu: qty, naTah: naTah }),
       totalG, totalMl, comps, pctSum, minApplied: totalG > potreba + 1e-9 };
-  }, [position, recipe, qty, gm2, loss, minBatch, sirka, vyska, pokryti, sterka, naTah]);
+  }, [position, recipe, qty, gm2, loss, minBatch, sirka, vyska, pokryti, sterka, naTah, pigmenty, hustotaRec]);
 
   /* Pravidla zástupnosti z ceníku — která složka smí zaskočit za kterou.
      Počítají se jednou pro celou obrazovku; mění se jen s ceníkem. */
@@ -669,7 +681,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     const tuz = dvouslozkova ? davkaTuzidla(potlifeAkt, calcAkt.totalG).tuzidlo : 0;
     return cenaDavky({
       comps: calcAkt.comps, totalG: calcAkt.totalG, materialy: pigmenty,
-      hustota: n(recipe && recipe.density, 1.2),
+      hustota: hustotaRec.hustota,
       tuzidloG: tuz, tuzidloNazev: recipe && recipe.tuzidloNazev,
       aditiva: aditivaAkt,
     });
@@ -714,8 +726,8 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
      nákupu barvy. */
   const usporaLikvidace = useMemo(() => (naklady && vyuzitiZbytku)
     ? cenaLikvidace(vyuzitiZbytku.pouzit,
-        sazbaLikvidace(pigmenty, n(recipe && recipe.density, 1.2), naklady.mena))
-    : 0, [naklady, vyuzitiZbytku, pigmenty, recipe]);
+        sazbaLikvidace(pigmenty, hustotaRec.hustota, naklady.mena))
+    : 0, [naklady, vyuzitiZbytku, pigmenty, recipe, hustotaRec]);
 
   /* ---- život namíchané dávky ----
      Až tady, protože dávka si zapisuje, kolik báze se do ní naváží, a to
@@ -861,7 +873,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     setZbytky((prev) => [{
       id: uid(), kod: kod, nazev: recipe.name, stav: "vtisku",
       gramu: calc.totalG, davkaG: calc.totalG, puvodne: calc.totalG,
-      hustota: n(recipe.density, 1.2), hex: recipe.hex,
+      hustota: hustotaRec.hustota, hex: recipe.hex,
       zakazka: (zak && zak.order) || "", produkt: (product && product.ref) || "",
       barva: colorSel ? (colorSel.code || colorSel.name || "") : "",
       tech: tech || "", poloha: position ? position.name : "",
@@ -905,7 +917,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     const pct = calc && calc.pctSum ? calc.pctSum : 100;
     setZbytky((prev) => [{
       id: uid(), kod: kod, nazev: recipe.name, gramu: n(ulozitZbytek.gramu),
-      puvodne: n(ulozitZbytek.gramu), hustota: n(recipe.density, 1.2), hex: recipe.hex,
+      puvodne: n(ulozitZbytek.gramu), hustota: hustotaRec.hustota, hex: recipe.hex,
       zakazka: (zak && zak.order) || "", produkt: (product && product.ref) || "",
       barva: colorSel ? (colorSel.code || colorSel.name || "") : "",
       tech: tech || "", poloha: position ? position.name : "",
@@ -1061,6 +1073,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     ${zak && (zak.mesh || zak.opacity || zak.surface)
       ? `<div><div class="lbl">Požadavek z listu</div><div class="val">${esc([zak.mesh, zak.opacity, zak.surface].filter(Boolean).join(" · "))}</div></div>` : ""}
     <div><div class="lbl">Příznaky</div><div class="val">${[recipe.tested ? "otestovaný" : "", recipe.fade ? "odolný vůči vyblednutí" : ""].filter(Boolean).join(" · ") || "—"}</div></div>
+    ${recipe.poznamka ? `<div><div class="lbl">Poznámka k receptuře</div><div class="val">${esc(recipe.poznamka)}</div></div>` : ""}
   </div>
   <div class="box">
     <div class="lbl">Celkem namíchat${calcAkt.minApplied ? " (uplatněna min. dávka)" : ""}</div>
@@ -2032,17 +2045,16 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                       <//>`
                     : html`<${React.Fragment}>
                         <span className="dot" style=${{ background: "var(--ok)" }}></span>
-                        <span>${preloz("Spotřeba odpovídá {co} {mesh}.", { co: preloz(zeSita.sito.klise ? "klišé" : "sítu"), mesh: recipe.mesh })}</span>
+                        ${/* Vedle síta stojí jeho teoretický objem barvy (cm³/m²) — jediné
+                            číslo, které z toho řádku tiskař u váhy potřebuje. Rozpis vzorce
+                            (× přenos × hustota × kryvost × materiál × podklad × viskozita),
+                            který tu stál jako poznámka, je od 2. 9. 2026 pryč: v kalkulaci
+                            překážel a patří do návodu (NAVOD_PODKLADY.md, Zakázka).
+                            Věta je pro síto a pro klišé celá zvlášť: skládat ji z předložky
+                            a slova („sítu" → pt „a malha") dávalo „corresponde a a malha". */""}
+                        <span>${preloz(zeSita.sito.klise ? "Spotřeba odpovídá klišé {mesh} = {v} cm³/m²" : "Spotřeba odpovídá sítu {mesh} = {v} cm³/m²",
+                          { mesh: recipe.mesh, v: fmt(zeSita.sito.vth, 1) })}</span>
                       <//>`}
-                  <div className="note" style=${{ marginTop: 6 }}>
-                    ${fmt(zeSita.sito.vth, 1)} cm³/m² ${preloz("teoreticky")}${zeSita.sito.klise ? preloz(" (hloubka leptu)") : ""}
-                    ${zeSita.sito.dopocteno ? preloz(" (dopočteno z geometrie tkaniny — orientační)") : ""}
-                    ${" " + preloz("× {p} přenos × {h} g/ml hustota", { p: fmt(zeSita.prenos, 2), h: fmt(n(recipe.density, 1), 2) })}
-                    ${zeSita.kKryvost !== 1 ? " × " + fmt(zeSita.kKryvost, 2) + " " + (recipe.opacity || preloz("kryvost")) : ""}
-                    ${zeSita.kMaterial !== 1 ? " × " + fmt(zeSita.kMaterial, 2) + " " + zeSita.materialKlic : ""}
-                    ${zeSita.kPodklad !== 1 ? " × " + fmt(zeSita.kPodklad, 2) + " " + preloz("podklad") + " " + zeSita.tridaPodkladu : ""}
-                    ${zeSita.kViskozita !== 1 ? " × " + fmt(zeSita.kViskozita, 2) + " " + preloz("viskozita") + " " + fmt(zeSita.viskozita, 1) + " s" : ""}
-                  </div>
                 </div>`}
             </div>
 
@@ -2093,6 +2105,14 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 <label className="tgl"><input type="checkbox" checked=${!!recipe.tested} onChange=${(e) => upravRecepturu({ tested: e.target.checked })} /><span className="tglt"></span>${preloz("Otestovaný")}</label>
                 <label className="tgl"><input type="checkbox" checked=${!!recipe.fade} onChange=${(e) => upravRecepturu({ fade: e.target.checked })} /><span className="tglt"></span>${preloz("Vysoce odolný vůči vyblednutí")}</label>
               </div>
+              ${/* Poznámka k receptuře („na tomhle materiálu dva průchody“) — znalost,
+                    která jinak odchází s člověkem. Stojí schválně mimo .frow: pole
+                    v .frow jsou dlaždice s dolní mezí 178 px a flex:1 (.karta-tisk),
+                    poznámka je řádek textu. Jeden řádek i v souboru, viz jedenRadek. */""}
+              <div className="pozn-receptury">
+                <label className="f">${preloz("Poznámka k receptuře")}</label>
+                <input value=${recipe.poznamka || ""} onChange=${(e) => upravRecepturu({ poznamka: e.target.value })} />
+              </div>
             </div>`}
 
         ${calcAkt && html`
@@ -2125,7 +2145,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
             </div>
 
             <div className="result-big">${fmt(calcAkt.totalG)} g</div>
-            <div className="result-sub">≈ ${fmt(calcAkt.totalMl)} ml ${preloz("při hustotě")} ${fmt(n(recipe.density, 1), 2)} g/ml${
+            <div className="result-sub">≈ ${fmt(calcAkt.totalMl)} ml ${preloz("při hustotě")} ${fmt(hustotaRec.hustota, 2)} g/ml${
               calcAkt.zvetseno ? preloz(" · zakázka potřebuje {g} g", { g: fmt(calcAkt.davkaZakazky) }) : ""}</div>
 
             ${/* Rozpis kroku, ze kterych davka vznikla. Technolog musi umet cislo
@@ -2256,6 +2276,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
           </div>
           <${MichaciRezim} aktivni=${michRezim} onZavrit=${zavriMichani}
             onKombinace=${() => setPickerOpen(true)}
+            onPoznamka=${(p) => upravRecepturu({ poznamka: p })}
             modalNahore=${pickerOpen || !!odvod}
             recipe=${recipe} calcAkt=${calcAkt} rozpis=${rozpisZbytku} vyuziti=${vyuzitiZbytku}
             stav=${michStav} product=${product} colorSel=${colorSel} position=${position}

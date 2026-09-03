@@ -92,6 +92,10 @@ function RecipeForm({ initial, onSave, onCancel, sita, materialy, sitaTech, sito
             <span className="tglt"></span>${preloz("Dvousložková — s tužidlem")}</label>
         </div>
       </div>
+      <div className="frow" style=${{ marginTop: 4 }}>
+        <div><label className="f">${preloz("Poznámka k receptuře")}</label>
+          <input value=${r.poznamka || ""} onChange=${(e) => setR(Object.assign({}, r, { poznamka: e.target.value }))} /></div>
+      </div>
       <div className="frow c2" style=${{ marginTop: 4 }}>
         <div>
           <label className="f">${preloz("Doporučené ředění (% váhy barvy)")}</label>

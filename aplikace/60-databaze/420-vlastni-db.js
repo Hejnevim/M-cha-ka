@@ -7,6 +7,10 @@
    toho, na které produkty a barvy byly použité (sloupec "vazby"). */
 const SOUBOR_VLASTNI = "receptury_vlastni.csv";
 
+/* Čtečka CSV dělí soubor po řádcích (parseCsv), takže zalomení uvnitř buňky
+   by recepturu rozlomilo na dvě. Poznámka se proto ukládá na jednom řádku. */
+const jedenRadek = (s) => String(s || "").replace(/\s*[\r\n]+\s*/g, " ").trim();
+
 /* Vazby jedné receptury: klíče "ref|barva|technologie|poloha" oddělené ~ */
 function vazbyReceptury(links, id) {
   const out = [];
@@ -109,7 +113,10 @@ function vlastniDoCsv(recipes, links) {
     /* Schválení. Prázdný sloupec znamená schválená — soubor od dodavatele ani
        soubor z dřívějška ho nemá a musí se chovat jako dřív. Čeká se jen tam,
        kde to někdo výslovně zapsal. */
-    "schvaleni", "schvalil", "schvaleno_kdy", "duvod_zamitnuti", "zadal", "zadano_kdy"];
+    "schvaleni", "schvalil", "schvaleno_kdy", "duvod_zamitnuti", "zadal", "zadano_kdy",
+    /* Poznámka technologa k receptuře — stojí na konci, aby starší soubor bez
+       ní zůstal čitelný beze změny. */
+    "poznamka"];
   const radky = [hlavicka];
   for (const r of recipes.filter(jeVlastni)) {
     const vazby = vazbyReceptury(links, r.id).join("~");
@@ -130,7 +137,8 @@ function vlastniDoCsv(recipes, links) {
         stavSchvaleni(r) === SCHV_OK ? "" : stavSchvaleni(r),
         r.schvalil || "", n(r.schvalenoKdy) > 0 ? cislo(n(r.schvalenoKdy), 0) : "",
         r.duvodZamitnuti || "", r.zadal || "",
-        n(r.zadanoKdy) > 0 ? cislo(n(r.zadanoKdy), 0) : ""]);
+        n(r.zadanoKdy) > 0 ? cislo(n(r.zadanoKdy), 0) : "",
+        jedenRadek(r.poznamka)]);
     }
   }
   return radky.map((r) => r.map((c) => '"' + String(c == null ? "" : c).replace(/"/g, '""') + '"')

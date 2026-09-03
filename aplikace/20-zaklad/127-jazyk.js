@@ -139,7 +139,6 @@ const SLOVNIK = {
   /* --- hlavička --- */
   "Zpět na „{kam}“ (Alt + ←)":
     { en: "Back to “{kam}” (Alt + ←)", pt: "Voltar a «{kam}» (Alt + ←)" },
-  "Zpět na Kalkulaci": { en: "Back to Calculation", pt: "Voltar ao Cálculo" },
   "Přepnout na světlý režim": { en: "Switch to light mode", pt: "Mudar para o modo claro" },
   "Přepnout na tmavý režim": { en: "Switch to dark mode", pt: "Mudar para o modo escuro" },
   "Přepnout světlý/tmavý režim": { en: "Toggle light/dark mode", pt: "Alternar modo claro/escuro" },
@@ -336,17 +335,14 @@ const SLOVNIK = {
   "Z klišé {mesh} vychází {g} g/m²": { en: "Cliché {mesh} yields {g} g/m²", pt: "Do clichê {mesh} resultam {g} g/m²" },
   " — teď je nastaveno {g} g/m².": { en: " — currently set to {g} g/m².", pt: " — agora está definido {g} g/m²." },
   "Použít {g} g/m²": { en: "Use {g} g/m²", pt: "Usar {g} g/m²" },
-  "Spotřeba odpovídá {co} {mesh}.": { en: "Consumption matches {co} {mesh}.", pt: "O consumo corresponde a {co} {mesh}." },
+  "Spotřeba odpovídá sítu {mesh} = {v} cm³/m²": { en: "Consumption matches mesh {mesh} = {v} cm³/m²", pt: "O consumo corresponde à malha {mesh} = {v} cm³/m²" },
+  "Spotřeba odpovídá klišé {mesh} = {v} cm³/m²": { en: "Consumption matches cliché {mesh} = {v} cm³/m²", pt: "O consumo corresponde ao clichê {mesh} = {v} cm³/m²" },
   "klišé": { en: "the cliché", pt: "o clichê" },
-  "sítu": { en: "the mesh", pt: "a malha" },
   "teoreticky": { en: "theoretical", pt: "teórico" },
   " (hloubka leptu)": { en: " (etch depth)", pt: " (profundidade de gravação)" },
   " (dopočteno z geometrie tkaniny — orientační)":
     { en: " (derived from fabric geometry — indicative)", pt: " (calculado da geometria do tecido — orientativo)" },
-  "× {p} přenos × {h} g/ml hustota": { en: "× {p} transfer × {h} g/ml density", pt: "× {p} transferência × {h} g/ml densidade" },
-  "kryvost": { en: "opacity", pt: "opacidade" },
   "podklad": { en: "substrate", pt: "substrato" },
-  "viskozita": { en: "viscosity", pt: "viscosidade" },
   "Parametry tisku": { en: "Print parameters", pt: "Parâmetros de impressão" },
   "Síto": { en: "Mesh", pt: "Malha" },
   "(není v parametrech {tech})": { en: "(not in the {tech} parameters)", pt: "(não está nos parâmetros {tech})" },
@@ -474,6 +470,7 @@ const SLOVNIK = {
   "Upravit krycí plochu": { en: "Adjust coverage area", pt: "Ajustar a área de cobertura" },
   "Spočítat krycí plochu z náhledu": { en: "Compute coverage from the preview", pt: "Calcular a cobertura da pré-visualização" },
   "Zpět na katalog": { en: "Back to catalog", pt: "Voltar ao catálogo" },
+  "Zpět na Kalkulaci": { en: "Back to Calculation", pt: "Voltar ao Cálculo" },
 
   /* --- dialog Barva a poloha potisku --- */
   "Barva a poloha potisku": { en: "Ink color and print position", pt: "Cor e posição de impressão" },
@@ -624,8 +621,9 @@ const SLOVNIK = {
   "— navažuje se jen sloupec „navážit\".":
     { en: "— only the “weigh out” column is weighed.", pt: "— pesa-se só a coluna «pesar»." },
   "Komponenta": { en: "Component", pt: "Componente" },
-  "navážit": { en: "weigh out", pt: "pesar" },
-  "kumulativně": { en: "cumulative", pt: "acumulado" },
+  "ze zbytku g": { en: "from leftover g", pt: "do resto g" },
+  "navážit g": { en: "weigh out g", pt: "pesar g" },
+  "kumulativně g": { en: "cumulative g", pt: "acumulado g" },
   "Navážit celkem": { en: "Total to weigh", pt: "Total a pesar" },
   "Složení téhle receptury není v aplikaci zadané. Namíchejte {g} g podle firemní receptury.":
     { en: "The composition of this recipe is not entered in the app. Mix {g} g according to the company recipe.",
@@ -944,8 +942,8 @@ const SLOVNIK = {
       pt: "Lote recalculado para {d} (de {p} g, +{n} g / +{pct} %) — a proporção das componentes manteve-se." },
   "Zrušit a navážit znovu": { en: "Cancel and weigh again", pt: "Cancelar e pesar de novo" },
   " — dorovnání": { en: " — topping up", pt: " — acerto" },
-  "přidat {g} g{uz} → navážit celkem do {t} g":
-    { en: "add {g} g{uz} → weigh up to {t} g in total", pt: "adicionar {g} g{uz} → pesar até {t} g no total" },
+  "přidat {g} g{ml}{uz} → navážit celkem do {t} g":
+    { en: "add {g} g{ml}{uz} → weigh up to {t} g in total", pt: "adicionar {g} g{ml}{uz} → pesar até {t} g no total" },
   " (už nalito {a} g z {c} g)": { en: " ({a} g of {c} g already poured)", pt: " (já vertidos {a} g de {c} g)" },
   "šarže z konve": { en: "batch no. from the can", pt: "lote da lata" },
   "Zapsat": { en: "Record", pt: "Registar" },
@@ -2387,6 +2385,11 @@ const SLOVNIK = {
   "Žádná ze složek tímhle směrem netáhne — potřebujete pigment, který v receptuře není.":
     { en: "None of the components pulls in that direction — you need a pigment that is not in the recipe.",
       pt: "Nenhuma das componentes puxa nessa direção — precisa de um pigmento que não está na receita." },
+  "Poznámka k receptuře": { en: "Recipe note", pt: "Nota da receita" },
+  "✎ Poznámka": { en: "✎ Note", pt: "✎ Nota" },
+  "＋ Poznámka": { en: "＋ Note", pt: "＋ Nota" },
+  "Dopsat poznámku k receptuře — uloží se až tlačítkem":
+    { en: "Add a note to the recipe — saved only with the button", pt: "Acrescentar uma nota à receita — só se guarda com o botão" },
 };
 
 /* Národní prostředí pro data psaná slovem (názvy měsíců v sestavách).

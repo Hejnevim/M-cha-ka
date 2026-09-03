@@ -408,10 +408,18 @@
             předem nalitý, stejnou cestou jako zbytek z kelímku.</td></tr>
         <tr><td class="f">Fotka a poznámka od nátisku</td>
           <td class="k">receptury vázané na produkt, technologii a polohu</td>
-          <td class="s"><span class="zn ceka">čeká</span></td>
+          <td class="s"><span class="zn cast">částečně</span></td>
           <td>„Na tomhle materiálu potřebuje dva průchody“ je znalost, která dnes odchází
             s člověkem. Cíl z A3 zní <b>postup nezávislý na tom, kdo míchá</b> — tohle je
-            nejlevnější cesta k němu.</td></tr>
+            nejlevnější cesta k němu.<br><b>Poznámka zavedena 3. 9. 2026</b> (podnět
+            z easyMEMO 2.0, kde má každá receptura pole <i>Notes</i>): jeden řádek textu
+            u receptury, píše se v kartě <i>Parametry tisku</i>, v editoru nebo rovnou
+            v míchacím režimu u váhy (uloží se až tlačítkem), čte se v míchacím režimu
+            pod kombinací, na míchacím lístku a v seznamu receptur.
+            U vlastních receptur jde do souboru <code>receptury_vlastni.csv</code>
+            (sloupec <code>poznamka</code> na konci, starší soubor zůstává čitelný);
+            u receptur z nakoupené databáze ji drží prohlížeč jako síto a kryvost.
+            Fotka od nátisku dál čeká.</td></tr>
         <tr><td class="f">Kdo míchal a čím</td>
           <td class="k">dávka jako samostatný záznam</td>
           <td class="s"><span class="zn ceka">čeká</span></td>
@@ -515,6 +523,133 @@
           <td class="s"><span class="zn ceka">čeká</span></td>
           <td>Dnes se hlásí u jedné receptury. Jeden přehled = plán, co doplnit —
             a rovnou podklad pro oddíl <b>Zbývá doplnit</b> v A3.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="karta">
+  <h2>Z průzkumu 3. 9. 2026 — co by šlo převzít</h2>
+  <p class="pozn">Průzkum přes 40 programů (PRUZKUM_MICHACI_SOFTWARE.md): výrobci barev,
+    textil a transfer, nezávislý software. Vyřazeno, co IRM už má, a co vyžaduje
+    spektrofotometr. Sloupec „u vás“ je stav k 3. 9. 2026.</p>
+
+  <h3>Funkce</h3>
+  <div class="tab">
+    <table>
+      <thead><tr><th>funkce</th><th>kdo to má</th><th>u vás</th><th>co by to dalo</th></tr></thead>
+      <tbody>
+        <tr><td class="f">Řazení variant receptury</td><td class="k">X‑Rite IFS, Colibri, RUCOLOR</td>
+          <td class="s"><span class="zn ne">nemáte</span></td>
+          <td>Týž odstín z víc databází seřazený podle ceny dávky a počtu složek. Navazuje na „cenové dvojníky“ výš — data už v souborech jsou.</td></tr>
+        <tr><td class="f">Profil úpravy receptury</td><td class="k">GSE Ink manager</td>
+          <td class="s"><span class="zn cast">částečně</span></td>
+          <td>Procentní úprava uložená <b>mimo</b> základní recepturu, tiskne se na štítek a při opakování zakázky se použije znovu. Opravy po nátisku máte zapsané, ale neuplatní se podruhé.</td></tr>
+        <tr><td class="f">Náhrada nedostupné báze</td><td class="k">Matsui ColorMixer</td>
+          <td class="s"><span class="zn cast">částečně</span></td>
+          <td>Když báze došla, přepočet na jinou. Zástupnost máte jen u zbytků; sklad už ví, co chybí.</td></tr>
+        <tr><td class="f">Receptura zvlášť pro bílý a tmavý podklad</td><td class="k">Virus Inks, Teca‑Print</td>
+          <td class="s"><span class="zn cast">částečně</span></td>
+          <td>Dvě varianty téhož odstínu podle podkladu. Podklad posuzujete, ale varianta se neukládá — custom receptura vázaná na barvu produktu je k tomu blízko.</td></tr>
+        <tr><td class="f">Vynucená složka</td><td class="k">X‑Rite IFS 6.5</td>
+          <td class="s"><span class="zn ne">nemáte</span></td>
+          <td>Lak nebo aditivum s pevným podílem v každé receptuře řady (u 2K tužidlo máte, u ostatních aditiv ne).</td></tr>
+        <tr><td class="f">Hromadná formulace jedné zakázky</td><td class="k">X‑Rite IFS, Colibri</td>
+          <td class="s"><span class="zn ne">nemáte</span></td>
+          <td>Víc odstínů jedné zakázky ze společných bází naráz — dnes po jedné, fronta míchání to částečně nahrazuje.</td></tr>
+        <tr><td class="f">Oblíbené a sdílení odkazem</td><td class="k">easyMEMO 2.0, IMS 3.0</td>
+          <td class="s"><span class="zn ne">nemáte</span></td>
+          <td>Hvězdička u receptury, odkaz, který ji rovnou otevře, odeslání e‑mailem.</td></tr>
+        <tr><td class="f">Dávka v kg a lb, přednastavené dávky</td><td class="k">ICC UltraMix, Screen Print CMS</td>
+          <td class="s"><span class="zn cast">částečně</span></td>
+          <td>Máte g a ml; kilogramy a rychlá volba 100 g–20 kg chybí.</td></tr>
+        <tr><td class="f">Chybějící odstín na vyžádání</td><td class="k">Monarch, UMX 4.0</td>
+          <td class="s"><span class="zn ne">nemáte</span></td>
+          <td>Odstín, který v databázi není, se zapíše jako požadavek technologovi — u vás by to byla fronta „k domíchání“, ne e‑mail výrobci.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="margin-top:14px">Data</h3>
+  <div class="tab">
+    <table>
+      <thead><tr><th>údaj</th><th>kdo to má</th><th>u vás</th><th>co by to dalo</th></tr></thead>
+      <tbody>
+        <tr><td class="f">Podmínky platnosti u celé databáze</td><td class="k">Coates C‑MIX, SunMatch, Tiflex</td>
+          <td class="s"><span class="zn cast">částečně</span></td>
+          <td>Síto, tloušťka vrstvy (20 / 30 µm), podklad, ředění, za kterých receptury vznikly — dnes jen síto u jedné receptury. Bez toho se receptura z cizího síta tváří stejně jistě jako ta správná.</td></tr>
+        <tr><td class="f">Volba C / U</td><td class="k">ICC UltraMix, QMX, Avient</td>
+          <td class="s"><span class="zn ne">nemáte</span></td>
+          <td>Coated a uncoated jako vlastnost receptury a filtr; dnes jen v názvu.</td></tr>
+        <tr><td class="f">Objednací číslo</td><td class="k">easyMEMO 2.0</td>
+          <td class="s"><span class="zn ne">nemáte</span></td>
+          <td>U složky i receptury; hledá se podle něj a objednávka do minima ho tiskne.</td></tr>
+        <tr><td class="f">GHS piktogramy u složky</td><td class="k">GSE, MixMaster, Omniformulation</td>
+          <td class="s"><span class="zn cast">částečně</span></td>
+          <td>VOC a bezpečnostní list máte; piktogramy na štítku kelímku ne.</td></tr>
+        <tr><td class="f">Živý zdroj receptur od výrobce</td><td class="k">easyMEMO 2.0, IMS 3.0</td>
+          <td class="s"><span class="zn ne">nemáte</span></td>
+          <td>Co přibylo od minulé aktualizace, označené „nové“. U vás: datum a zdroj u databáze a porovnání při dalším převodu.</td></tr>
+        <tr><td class="f">Certifikace a bio‑podíl</td><td class="k">CHT ColorFinder, IMS Evolve</td>
+          <td class="s"><span class="zn ne">nemáte</span></td>
+          <td>Filtr podle bluesign / GOTS / OEKO‑TEX; pro dílnu okrajové, zákazník na textil se ale ptá.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="margin-top:14px">Procesy</h3>
+  <div class="tab">
+    <table>
+      <thead><tr><th>proces</th><th>kdo to má</th><th>u vás</th><th>co by to dalo</th></tr></thead>
+      <tbody>
+        <tr><td class="f">Účet na osobu a audit</td><td class="k">easyMEMO 2.0, IMS 3.0, Autura</td>
+          <td class="s"><span class="zn cast">částečně</span></td>
+          <td>Role po počítači máte; „kdo míchal a čím“ a historie změn receptury ne.</td></tr>
+        <tr><td class="f">Víceúrovňové schválení</td><td class="k">IMS 3.0, Autura</td>
+          <td class="s"><span class="zn cast">částečně</span></td>
+          <td>Dvě role máte; schválení odstínu zákazníkem nebo mistrem jako další krok ne.</td></tr>
+        <tr><td class="f">Vratky z tisku s vazbou na zakázku</td><td class="k">GSE Return ink, SunMatch</td>
+          <td class="s"><span class="zn cast">částečně</span></td>
+          <td>Zbytek u vás vzniká po zakázce; vratka ze stroje uprostřed zakázky (výměna barvy) se neeviduje zvlášť.</td></tr>
+        <tr><td class="f">Zakázka jako úkol do míchárny</td><td class="k">GSE–CERM, X‑Rite MIS</td>
+          <td class="s"><span class="zn cast">částečně</span></td>
+          <td>MIS pošle požadavek na dávku, míchárna vrátí recepturu a kód. SGPS zatím jen čte zakázky.</td></tr>
+        <tr><td class="f">Údržba databází jako pravidelný krok</td><td class="k">easyMEMO, IMS, KCS</td>
+          <td class="s"><span class="zn ne">nemáte</span></td>
+          <td>Registrace do portálů výrobců a převod nových receptur v daném rytmu — postup v PRUZKUM_MICHACI_SOFTWARE.md, oddíly 9 a 10.</td></tr>
+        <tr><td class="f">Nápověda a prohlídka</td><td class="k">easyMEMO 2.0</td>
+          <td class="s"><span class="zn ne">nemáte</span></td>
+          <td>Rozhraní je schválně tiché; návod z NAVOD_PODKLADY.md tuhle roli převezme.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="margin-top:14px">Výběr a filtry</h3>
+  <div class="tab">
+    <table>
+      <thead><tr><th>ovládání</th><th>kdo to má</th><th>u vás</th><th>co by to dalo</th></tr></thead>
+      <tbody>
+        <tr><td class="f">Filtry řada × míchací systém × sortiment</td><td class="k">easyMEMO 2.0</td>
+          <td class="s"><span class="zn cast">částečně</span></td>
+          <td>Filtr databáze máte; skládání víc filtrů a sortimentní skupina ne.</td></tr>
+        <tr><td class="f">Jen oblíbené / jen moje / jen nové</td><td class="k">easyMEMO 2.0</td>
+          <td class="s"><span class="zn ne">nemáte</span></td>
+          <td>Tři přepínače nad seznamem receptur.</td></tr>
+        <tr><td class="f">Hledání s napovídáním</td><td class="k">easyMEMO 2.0, ICC</td>
+          <td class="s"><span class="zn cast">částečně</span></td>
+          <td>Hledáte podle názvu; napovídání během psaní a hledání podle objednacího čísla ne.</td></tr>
+        <tr><td class="f">Jednotka dávky</td><td class="k">ICC UltraMix, Screen Print CMS</td>
+          <td class="s"><span class="zn ne">nemáte</span></td>
+          <td>Přepínač g / kg / lb u dávky.</td></tr>
+        <tr><td class="f">Podklad bílý / tmavý</td><td class="k">Virus Inks</td>
+          <td class="s"><span class="zn cast">částečně</span></td>
+          <td>Přepínač, který vybere variantu receptury; u vás jde podklad z barvy produktu, varianta chybí (viz Funkce).</td></tr>
+        <tr><td class="f">Síto jako filtr receptur</td><td class="k">ICC UltraMix (24–380 tpi)</td>
+          <td class="s"><span class="zn cast">částečně</span></td>
+          <td>Síto máte jako parametr výpočtu; nabídnout jen receptury ověřené pro dané síto ne (souvisí s podmínkami platnosti u databáze).</td></tr>
+        <tr><td class="f">Krycí / standardní varianta</td><td class="k">Coates (Standard HD)</td>
+          <td class="s"><span class="zn cast">částečně</span></td>
+          <td>Kryvost máte jako údaj; přepínač na krycí variantu téhož odstínu ne.</td></tr>
       </tbody>
     </table>
   </div>

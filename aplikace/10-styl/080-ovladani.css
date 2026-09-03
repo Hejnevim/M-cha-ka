@@ -14,6 +14,13 @@
    platí mřížka karet (.grid.calc): pod ním se pole vrací na celou šířku. */
 @media(min-width:960px){.hledani-katalog{width:var(--hledani-sirka);margin-left:auto;margin-right:auto}}
 .searchbar{background:var(--paper);border-radius:var(--radius);padding:19px 18px;display:flex;align-items:center;gap:12px;box-shadow:var(--neu)}
+/* Jen hledání katalogu je matné sklo: leží nad kruhem v hlavičce a má ho
+   ukázat rozostřený a zeslabený papírem, jako když se na kruh položí
+   mléčné sklo. Papír je proto průsvitný podle krytí skla a rozostřuje se
+   vše pod polem — kruh, čára i plocha. Hledání šarží žije v kartě, kde
+   pod ním nic není, a zůstává neprůhledné. */
+.hledani-katalog .searchbar{background:color-mix(in srgb,var(--paper) calc(var(--sklo-kryti) * 100%),transparent);
+  -webkit-backdrop-filter:blur(var(--sklo-rozostreni));backdrop-filter:blur(var(--sklo-rozostreni))}
 .searchbar .ic{flex:0 0 auto;font-size:16px;opacity:.6}
 .searchbar input{border:none;background:transparent;padding:6px 0;font-size:15px;box-shadow:none !important}
 .searchbar input:focus{border:none;box-shadow:none !important}

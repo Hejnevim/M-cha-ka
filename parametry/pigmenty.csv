@@ -1,119 +1,119 @@
-﻿druh;nazev;hex;maxpodil;pozn;cena;mena;jednotka;zastupuje;voc;bezplist;rada
-;;;;"druh = pigment | baze | tuzidlo | redidlo | zpomalovac | likvidace. hex = odstin pigmentu, podle nej aplikace radi cim korigovat.";;;;;;;
-;;;;"maxpodil = jen u bazi: kolik procent pigmentu snese (Matsui ma 10-15 %).";;;;;;;
-;;;;"Nazev se musi shodovat s nazvem slozky v recepture, jinak se nespari.";;;;;;;
-;;;;"HEX NIZE JSOU ORIENTACNI - prepiste je podle sveho vzorniku.";;;;;;;
-;;;;"cena = nakupni cena za jednotku, mena = CZK | EUR | USD | PLN | GBP.";;;;;;;
-;;;;"jednotka = kg nebo l. Cena za litr se na gramy prepocita hustotou receptury.";;;;;;;
-;;;;"Z cen se pocita cena namichane davky a cena barvy na kus. Slozka bez ceny";;;;;;;
-;;;;"se do souctu nedostane a aplikace to rekne - nedopocitava odhadem.";;;;;;;
-;;;;"Ceny jde vyplnit i v aplikaci: zalozka Receptury, karta Ceny materialu.";;;;;;;
-;;;;"likvidace = sazba svozove firmy za kilogram nebezpecneho odpadu.";;;;;;;
-;;;;"Z ni se pocita, co usetri pouziti zbytku a co stoji vyhodit kelimek po lhute.";;;;;;;
-;;;;"Neni-li vyplnena, aplikace o likvidaci mlci - sazbu svozove firmy neodhaduje.";;;;;;;
-;;;;"zastupuje = za koho ta slozka smi zaskocit, kdyz se hleda pouzitelny zbytek.";;;;;;;
-;;;;"Drazsi slozka smi zaskocit za levnejsi, opacne ne. Vic jmen oddelte svislitkem.";;;;;;;
-;;;;"Priklad: u drazsi baze se napise jmeno levnejsi baze, kterou plnohodnotne nahradi.";;;;;;;
-;;;;"Plati jen jednim smerem a jen kdyz ta slozka v recepture vubec neni.";;;;;;;
-;;;;"Nevyplnujte to od stolu - musi to byt technicky overene, aplikace to neuhodne.";;;;;;;
-;;;;"voc = podil tekavych latek v % hmotnosti z bezpecnostniho listu (oddil 9, pripadne 3).";;;;;;;
-;;;;"Z nej kalkulace pocita gramy VOC v davce - vykaz pro urad se sklada z techto cisel.";;;;;;;
-;;;;"Nula je platny udaj (vodou reditelne barvy), prazdne pole znamena neuvedeno.";;;;;;;
-;;;;"bezplist = odkaz na bezpecnostni list slozky: adresa (https://...) nebo cesta k souboru.";;;;;;;
-;;;;"Odkaz se nabidne v ceniku a v kalkulaci u kazde davky, ve ktere slozka je.";;;;;;;
-pigment;Žlutá;#FFD100;;"zakladni zluty pigment";;;;;;;
-pigment;Oranžová;#FF6A00;;;;;;;;;
-pigment;Červená;#E4002B;;;;;;;;;
-pigment;Rubínová;#CE0058;;;;;;;;;
-pigment;Purpurová;#C6007E;;;;;;;;;
-pigment;Fialová;#6D2077;;;;;;;;;
-pigment;Modrá;#0057B8;;;;;;;;;
-pigment;Tyrkysová;#00A3E0;;;;;;;;;
-pigment;Zelená;#00A651;;;;;;;;;
-pigment;Hnědá;#7A4405;;;;;;;;;
-pigment;Černá;#101820;;"velmi silna - koriguje se po desetinach procenta";;;;;;;
-pigment;Bílá;#FFFFFF;;"kryci bily pigment, ne baze";;;;;;;
-baze;Standardní báze;;15;"bezna baze na svetly material";;;;;;;
-baze;Transparentní báze;;15;"nechava podklad prosvitat, na svetle materialy";;CZK;kg;;;;Printcolor 390
-baze;Krycí bílá báze;;12;"na tmavy material - kryje podklad";;;;;;;
-baze;Discharge báze;;10;"odbarvovaci, na tmavou bavlnu";;;;;;;
-baze;Strečová báze;;12;"na pruzne materialy";;;;;;;
-tuzidlo;;;;"SEM DOPLNTE NAZEV TUZIDLA presne tak, jak ho ma dilna oznacene.";;;;;;;
-redidlo;;;;"SEM DOPLNTE NAZEV REDIDLA. Redidlo se pripocita jen kdyz zadate kolik.";;;;;;;
-likvidace;Likvidace nebezpečného odpadu;;;"SEM DOPLNTE SAZBU za kilogram odpadu ze smlouvy se svozovou firmou.";;CZK;kg;;;;
-barva;19 3601 White;;;;;CZK;kg;;;;Ferro Xpression
-barva;9005 Weiss;;;;;CZK;kg;;;;Printcolor MS 786
-barva;Binder;;;;;CZK;kg;;;;Printcolor MS 660
-barva;1055 B11;;;;;CZK;kg;;;;RUCOLOR 10KK
-barva;9000 Weiss;;;;;CZK;kg;;;;Printcolor MS 660
-barva;13 3601 Yellow (Yellow C);;;;;CZK;kg;;;;Ferro Xpression
-barva;8005 Schwarz;;;;;CZK;kg;;;;Printcolor MS 786
-barva;8000 Schwarz;;;;;CZK;kg;;;;Printcolor MS 660
-barva;14 3601 Black (Black C);;;;;CZK;kg;;;;Ferro Xpression
-barva;9029 B12;;;;;CZK;kg;;;;RUCOLOR 10KK
-barva;17 3606 Violet (Violet C);;;;;CZK;kg;;;;Ferro Xpression
-barva;2291 B1;;;;;CZK;kg;;;;RUCOLOR 10KK
-barva;12 3601 Blue 1 (Process Blue C);;;;;CZK;kg;;;;Ferro Xpression
-barva;11 3601 Green (Green C);;;;;CZK;kg;;;;Ferro Xpression
-barva;1105 Mittelgelb;;;;;CZK;kg;;;;Printcolor MS 786
-barva;0026 B0;;;;;CZK;kg;;;;RUCOLOR 10KK
-barva;1100 Mittelgelb;;;;;CZK;kg;;;;Printcolor MS 660
-barva;17 3602 Red 2 (Red 032 C);;;;;CZK;kg;;;;Ferro Xpression
-barva;5005 Blau(tr);;;;;CZK;kg;;;;Printcolor MS 786
-barva;13 3602 Orange (Orange 021 C);;;;;CZK;kg;;;;Ferro Xpression
-barva;5852 B8;;;;;CZK;kg;;;;RUCOLOR 10KK
-barva;3851 B3;;;;;CZK;kg;;;;RUCOLOR 10KK
-barva;17 3601 Red 1 (Warm Red C);;;;;CZK;kg;;;;Ferro Xpression
-barva;5000 Blau(tr);;;;;CZK;kg;;;;Printcolor MS 660
-barva;6000 Grün(tr);;;;;CZK;kg;;;;Printcolor MS 660
-barva;6005 Grün(tr);;;;;CZK;kg;;;;Printcolor MS 786
-barva;4005 Violett(tr);;;;;CZK;kg;;;;Printcolor MS 786
-barva;3854 B6;;;;;CZK;kg;;;;RUCOLOR 10KK
-barva;4000 Violett(tr);;;;;CZK;kg;;;;Printcolor MS 660
-barva;3853 B5;;;;;CZK;kg;;;;RUCOLOR 10KK
-barva;3100 Magentarot(tr);;;;;CZK;kg;;;;Printcolor MS 660
-barva;2005 Orange;;;;;CZK;kg;;;;Printcolor MS 786
-barva;1200 Dunkelgelb;;;;;CZK;kg;;;;Printcolor MS 660
-barva;5851 B7;;;;;CZK;kg;;;;RUCOLOR 10KK
-barva;3852 B4;;;;;CZK;kg;;;;RUCOLOR 10KK
-barva;3305 Magenta(tr);;;;;CZK;kg;;;;Printcolor MS 786
-barva;6722 B91;;;;;CZK;kg;;;;RUCOLOR 10KK
-barva;17 3604 Red 4 (Rhodamine Red C);;;;;CZK;kg;;;;Ferro Xpression
-barva;1205 Dunkelgelb;;;;;CZK;kg;;;;Printcolor MS 786
-barva;3105 Magentarot(tr);;;;;CZK;kg;;;;Printcolor MS 786
-barva;3300 Magenta(tr);;;;;CZK;kg;;;;Printcolor MS 660
-barva;17 3603 Red 3 (Rubine Red C);;;;;CZK;kg;;;;Ferro Xpression
-barva;3005 Rot;;;;;CZK;kg;;;;Printcolor MS 786
-barva;LACK;;;;;CZK;kg;;;;Printcolor MS 786
-barva;3000 Rot;;;;;CZK;kg;;;;Printcolor MS 660
-barva;1005 Hellgelb;;;;;CZK;kg;;;;Printcolor MS 786
-barva;2000 Orange;;;;;CZK;kg;;;;Printcolor MS 660
-barva;2292 B2;;;;;CZK;kg;;;;RUCOLOR 10KK
-barva;100 Silber(Keine Daten);;;;;CZK;kg;;;;Printcolor MS 660|Printcolor MS 786
-barva;1000 Hellgelb;;;;;CZK;kg;;;;Printcolor MS 660
-barva;3200 Dunkelrot(tr);;;;;CZK;kg;;;;Printcolor MS 660
-barva;4505 Dunkelblau;;;;;CZK;kg;;;;Printcolor MS 786
-barva;1300 Gelborange(tr);;;;;CZK;kg;;;;Printcolor MS 660
-barva;7000 Braun;;;;;CZK;kg;;;;Printcolor MS 660
-barva;103 Reichbleichgold(Keine Daten);;;;;CZK;kg;;;;Printcolor MS 660|Printcolor MS 786
-barva;2100 Reinorange(tr);;;;;CZK;kg;;;;Printcolor MS 660
-barva;ST-41 Neonleuchtorange;;;;;CZK;kg;;;;Printcolor MS 660|Printcolor MS 786
-barva;106 Kupfer(Keine Daten);;;;;CZK;kg;;;;Printcolor MS 660|Printcolor MS 786
-barva;1305 Gelborange(tr);;;;;CZK;kg;;;;Printcolor MS 786
-barva;ST-40 Neoncitron;;;;;CZK;kg;;;;Printcolor MS 660|Printcolor MS 786
-barva;ST-50 Neonfuchsia;;;;;CZK;kg;;;;Printcolor MS 660|Printcolor MS 786
-barva;ST-42 Neonorange;;;;;CZK;kg;;;;Printcolor MS 660|Printcolor MS 786
-barva;07 Binder;;;;;CZK;kg;;;;Printcolor MS 660
-barva;104 Bleichgold(Keine Daten);;;;;CZK;kg;;;;Printcolor MS 660
-barva;2500 Orangerot;;;;;CZK;kg;;;;Printcolor MS 660
-barva;ST-44 Neonbrilliantrot;;;;;CZK;kg;;;;Printcolor MS 660
-barva;0900 Ultramarin(Eco);;;;;CZK;kg;;;;Printcolor MS 660
-barva;102 Reichgold(Keine Daten);;;;;CZK;kg;;;;Printcolor MS 786
-barva;200 Perlglanz-Weiss(Keine Daten);;;;;CZK;kg;;;;Printcolor MS 660
-barva;3150 Mittelrot(tr);;;;;CZK;kg;;;;Printcolor MS 786
-barva;Printcolor Black;;;;;CZK;kg;;;;Printcolor 390
-barva;Printcolor Green;;;;;CZK;kg;;;;Printcolor 390
-barva;Printcolor Yellow 012;;;;;CZK;kg;;;;Printcolor 390
-barva;Schwarz 33 IR-reflektierend;;;;;CZK;kg;;;;Printcolor MS 660
-barva;ST-43 Neonfeuerrot;;;;;CZK;kg;;;;Printcolor MS 660
-barva;ST-47 Neonleuchtgrün;;;;;CZK;kg;;;;Printcolor MS 786
+﻿druh;nazev;hex;maxpodil;pozn;cena;mena;jednotka;zastupuje;voc;bezplist;rada;hustota
+;;;;"druh = pigment | baze | tuzidlo | redidlo | zpomalovac | likvidace. hex = odstin pigmentu, podle nej aplikace radi cim korigovat.";;;;;;;;
+;;;;"maxpodil = jen u bazi: kolik procent pigmentu snese (Matsui ma 10-15 %).";;;;;;;;
+;;;;"Nazev se musi shodovat s nazvem slozky v recepture, jinak se nespari.";;;;;;;;
+;;;;"HEX NIZE JSOU ORIENTACNI - prepiste je podle sveho vzorniku.";;;;;;;;
+;;;;"cena = nakupni cena za jednotku, mena = CZK | EUR | USD | PLN | GBP.";;;;;;;;
+;;;;"jednotka = kg nebo l. Cena za litr se na gramy prepocita hustotou receptury.";;;;;;;;
+;;;;"Z cen se pocita cena namichane davky a cena barvy na kus. Slozka bez ceny";;;;;;;;
+;;;;"se do souctu nedostane a aplikace to rekne - nedopocitava odhadem.";;;;;;;;
+;;;;"Ceny jde vyplnit i v aplikaci: zalozka Receptury, karta Ceny materialu.";;;;;;;;
+;;;;"likvidace = sazba svozove firmy za kilogram nebezpecneho odpadu.";;;;;;;;
+;;;;"Z ni se pocita, co usetri pouziti zbytku a co stoji vyhodit kelimek po lhute.";;;;;;;;
+;;;;"Neni-li vyplnena, aplikace o likvidaci mlci - sazbu svozove firmy neodhaduje.";;;;;;;;
+;;;;"zastupuje = za koho ta slozka smi zaskocit, kdyz se hleda pouzitelny zbytek.";;;;;;;;
+;;;;"Drazsi slozka smi zaskocit za levnejsi, opacne ne. Vic jmen oddelte svislitkem.";;;;;;;;
+;;;;"Priklad: u drazsi baze se napise jmeno levnejsi baze, kterou plnohodnotne nahradi.";;;;;;;;
+;;;;"Plati jen jednim smerem a jen kdyz ta slozka v recepture vubec neni.";;;;;;;;
+;;;;"Nevyplnujte to od stolu - musi to byt technicky overene, aplikace to neuhodne.";;;;;;;;
+;;;;"voc = podil tekavych latek v % hmotnosti z bezpecnostniho listu (oddil 9, pripadne 3).";;;;;;;;
+;;;;"Z nej kalkulace pocita gramy VOC v davce - vykaz pro urad se sklada z techto cisel.";;;;;;;;
+;;;;"Nula je platny udaj (vodou reditelne barvy), prazdne pole znamena neuvedeno.";;;;;;;;
+;;;;"bezplist = odkaz na bezpecnostni list slozky: adresa (https://...) nebo cesta k souboru.";;;;;;;;
+;;;;"Odkaz se nabidne v ceniku a v kalkulaci u kazde davky, ve ktere slozka je.";;;;;;;;
+pigment;Žlutá;#FFD100;;"zakladni zluty pigment";;;;;;;;
+pigment;Oranžová;#FF6A00;;;;;;;;;;
+pigment;Červená;#E4002B;;;;;;;;;;
+pigment;Rubínová;#CE0058;;;;;;;;;;
+pigment;Purpurová;#C6007E;;;;;;;;;;
+pigment;Fialová;#6D2077;;;;;;;;;;
+pigment;Modrá;#0057B8;;;;;;;;;;
+pigment;Tyrkysová;#00A3E0;;;;;;;;;;
+pigment;Zelená;#00A651;;;;;;;;;;
+pigment;Hnědá;#7A4405;;;;;;;;;;
+pigment;Černá;#101820;;"velmi silna - koriguje se po desetinach procenta";;;;;;;;
+pigment;Bílá;#FFFFFF;;"kryci bily pigment, ne baze";;;;;;;;
+baze;Standardní báze;;15;"bezna baze na svetly material";;;;;;;;
+baze;Transparentní báze;;15;"nechava podklad prosvitat, na svetle materialy";;CZK;kg;;;;Printcolor 390;
+baze;Krycí bílá báze;;12;"na tmavy material - kryje podklad";;;;;;;;
+baze;Discharge báze;;10;"odbarvovaci, na tmavou bavlnu";;;;;;;;
+baze;Strečová báze;;12;"na pruzne materialy";;;;;;;;
+tuzidlo;;;;"SEM DOPLNTE NAZEV TUZIDLA presne tak, jak ho ma dilna oznacene.";;;;;;;;
+redidlo;;;;"SEM DOPLNTE NAZEV REDIDLA. Redidlo se pripocita jen kdyz zadate kolik.";;;;;;;;
+likvidace;Likvidace nebezpečného odpadu;;;"SEM DOPLNTE SAZBU za kilogram odpadu ze smlouvy se svozovou firmou.";;CZK;kg;;;;;
+barva;19 3601 White;;;;;CZK;kg;;;;Ferro Xpression;
+barva;9005 Weiss;;;;;CZK;kg;;;;Printcolor MS 786;
+barva;Binder;;;;;CZK;kg;;;;Printcolor MS 660;
+barva;1055 B11;;;;;CZK;kg;;;;RUCOLOR 10KK;
+barva;9000 Weiss;;;;;CZK;kg;;;;Printcolor MS 660;
+barva;13 3601 Yellow (Yellow C);;;;;CZK;kg;;;;Ferro Xpression;
+barva;8005 Schwarz;;;;;CZK;kg;;;;Printcolor MS 786;
+barva;8000 Schwarz;;;;;CZK;kg;;;;Printcolor MS 660;
+barva;14 3601 Black (Black C);;;;;CZK;kg;;;;Ferro Xpression;
+barva;9029 B12;;;;;CZK;kg;;;;RUCOLOR 10KK;
+barva;17 3606 Violet (Violet C);;;;;CZK;kg;;;;Ferro Xpression;
+barva;2291 B1;;;;;CZK;kg;;;;RUCOLOR 10KK;
+barva;12 3601 Blue 1 (Process Blue C);;;;;CZK;kg;;;;Ferro Xpression;
+barva;11 3601 Green (Green C);;;;;CZK;kg;;;;Ferro Xpression;
+barva;1105 Mittelgelb;;;;;CZK;kg;;;;Printcolor MS 786;
+barva;0026 B0;;;;;CZK;kg;;;;RUCOLOR 10KK;
+barva;1100 Mittelgelb;;;;;CZK;kg;;;;Printcolor MS 660;
+barva;17 3602 Red 2 (Red 032 C);;;;;CZK;kg;;;;Ferro Xpression;
+barva;5005 Blau(tr);;;;;CZK;kg;;;;Printcolor MS 786;
+barva;13 3602 Orange (Orange 021 C);;;;;CZK;kg;;;;Ferro Xpression;
+barva;5852 B8;;;;;CZK;kg;;;;RUCOLOR 10KK;
+barva;3851 B3;;;;;CZK;kg;;;;RUCOLOR 10KK;
+barva;17 3601 Red 1 (Warm Red C);;;;;CZK;kg;;;;Ferro Xpression;
+barva;5000 Blau(tr);;;;;CZK;kg;;;;Printcolor MS 660;
+barva;6000 Grün(tr);;;;;CZK;kg;;;;Printcolor MS 660;
+barva;6005 Grün(tr);;;;;CZK;kg;;;;Printcolor MS 786;
+barva;4005 Violett(tr);;;;;CZK;kg;;;;Printcolor MS 786;
+barva;3854 B6;;;;;CZK;kg;;;;RUCOLOR 10KK;
+barva;4000 Violett(tr);;;;;CZK;kg;;;;Printcolor MS 660;
+barva;3853 B5;;;;;CZK;kg;;;;RUCOLOR 10KK;
+barva;3100 Magentarot(tr);;;;;CZK;kg;;;;Printcolor MS 660;
+barva;2005 Orange;;;;;CZK;kg;;;;Printcolor MS 786;
+barva;1200 Dunkelgelb;;;;;CZK;kg;;;;Printcolor MS 660;
+barva;5851 B7;;;;;CZK;kg;;;;RUCOLOR 10KK;
+barva;3852 B4;;;;;CZK;kg;;;;RUCOLOR 10KK;
+barva;3305 Magenta(tr);;;;;CZK;kg;;;;Printcolor MS 786;
+barva;6722 B91;;;;;CZK;kg;;;;RUCOLOR 10KK;
+barva;17 3604 Red 4 (Rhodamine Red C);;;;;CZK;kg;;;;Ferro Xpression;
+barva;1205 Dunkelgelb;;;;;CZK;kg;;;;Printcolor MS 786;
+barva;3105 Magentarot(tr);;;;;CZK;kg;;;;Printcolor MS 786;
+barva;3300 Magenta(tr);;;;;CZK;kg;;;;Printcolor MS 660;
+barva;17 3603 Red 3 (Rubine Red C);;;;;CZK;kg;;;;Ferro Xpression;
+barva;3005 Rot;;;;;CZK;kg;;;;Printcolor MS 786;
+barva;LACK;;;;;CZK;kg;;;;Printcolor MS 786;
+barva;3000 Rot;;;;;CZK;kg;;;;Printcolor MS 660;
+barva;1005 Hellgelb;;;;;CZK;kg;;;;Printcolor MS 786;
+barva;2000 Orange;;;;;CZK;kg;;;;Printcolor MS 660;
+barva;2292 B2;;;;;CZK;kg;;;;RUCOLOR 10KK;
+barva;100 Silber(Keine Daten);;;;;CZK;kg;;;;Printcolor MS 660|Printcolor MS 786;
+barva;1000 Hellgelb;;;;;CZK;kg;;;;Printcolor MS 660;
+barva;3200 Dunkelrot(tr);;;;;CZK;kg;;;;Printcolor MS 660;
+barva;4505 Dunkelblau;;;;;CZK;kg;;;;Printcolor MS 786;
+barva;1300 Gelborange(tr);;;;;CZK;kg;;;;Printcolor MS 660;
+barva;7000 Braun;;;;;CZK;kg;;;;Printcolor MS 660;
+barva;103 Reichbleichgold(Keine Daten);;;;;CZK;kg;;;;Printcolor MS 660|Printcolor MS 786;
+barva;2100 Reinorange(tr);;;;;CZK;kg;;;;Printcolor MS 660;
+barva;ST-41 Neonleuchtorange;;;;;CZK;kg;;;;Printcolor MS 660|Printcolor MS 786;
+barva;106 Kupfer(Keine Daten);;;;;CZK;kg;;;;Printcolor MS 660|Printcolor MS 786;
+barva;1305 Gelborange(tr);;;;;CZK;kg;;;;Printcolor MS 786;
+barva;ST-40 Neoncitron;;;;;CZK;kg;;;;Printcolor MS 660|Printcolor MS 786;
+barva;ST-50 Neonfuchsia;;;;;CZK;kg;;;;Printcolor MS 660|Printcolor MS 786;
+barva;ST-42 Neonorange;;;;;CZK;kg;;;;Printcolor MS 660|Printcolor MS 786;
+barva;07 Binder;;;;;CZK;kg;;;;Printcolor MS 660;
+barva;104 Bleichgold(Keine Daten);;;;;CZK;kg;;;;Printcolor MS 660;
+barva;2500 Orangerot;;;;;CZK;kg;;;;Printcolor MS 660;
+barva;ST-44 Neonbrilliantrot;;;;;CZK;kg;;;;Printcolor MS 660;
+barva;0900 Ultramarin(Eco);;;;;CZK;kg;;;;Printcolor MS 660;
+barva;102 Reichgold(Keine Daten);;;;;CZK;kg;;;;Printcolor MS 786;
+barva;200 Perlglanz-Weiss(Keine Daten);;;;;CZK;kg;;;;Printcolor MS 660;
+barva;3150 Mittelrot(tr);;;;;CZK;kg;;;;Printcolor MS 786;
+barva;Printcolor Black;;;;;CZK;kg;;;;Printcolor 390;
+barva;Printcolor Green;;;;;CZK;kg;;;;Printcolor 390;
+barva;Printcolor Yellow 012;;;;;CZK;kg;;;;Printcolor 390;
+barva;Schwarz 33 IR-reflektierend;;;;;CZK;kg;;;;Printcolor MS 660;
+barva;ST-43 Neonfeuerrot;;;;;CZK;kg;;;;Printcolor MS 660;
+barva;ST-47 Neonleuchtgrün;;;;;CZK;kg;;;;Printcolor MS 786;

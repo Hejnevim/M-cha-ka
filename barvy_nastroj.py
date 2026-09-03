@@ -38,6 +38,7 @@ SKUPINY = [
         ("--paper", "karty, lišty, tlačítka, pole"),
         ("--zvyraz", "zvýrazněný řádek (pod myší, právě vážená složka)"),
         ("--pozadi-cara-barva", "čára přes plochu (pod celou aplikací)"),
+        ("--pozadi-kruh-barva", "kruh za polem hledání"),
     ]),
     ("Text a linky", [
         ("--ink", "hlavní text"),
@@ -51,13 +52,14 @@ SKUPINY = [
         ("--btn-ink", "písmo na hlavním tlačítku"),
         ("--cyan", "zvýraznění (ukazatel navážení, přepínač)"),
     ]),
+    ("Logo", [
+        ("--logo-barva", "logo — začátek přechodu"),
+        ("--logo-barva-2", "logo — konec přechodu (stejná barva = bez přechodu)"),
+    ]),
     ("Významové barvy", [
         ("--ok", "v pořádku, v toleranci"),
         ("--warn", "upozornění"),
         ("--danger", "mazání, přelití"),
-    ]),
-    ("Logo", [
-        ("--logo", "nápis IRM v hlavičce"),
     ]),
 ]
 BARVY = [k for _, dvojice in SKUPINY for k, _ in dvojice]
@@ -95,16 +97,6 @@ STINY = [
     ("silaStinu", "Síla stínu", 0, 100, 1, "%"),
 ]
 
-# Logo má vlastní sadu — je to jediné místo, kde je ražba vidět ve velkém,
-# a co sedí na kartách, na něm většinou nesedí.
-STINY_LOGO = [
-    ("logoUhel", "Odkud svítí na logo", 0, 360, 5, "°"),
-    ("logoD", "Odstávání písmen", 0, 20, 1, "px"),
-    ("logoBlur", "Rozostření", 0, 40, 1, "px"),
-    ("logoSvetlo", "Síla světla", 0, 100, 1, "%"),
-    ("logoStin", "Síla stínu", 0, 100, 1, "%"),
-]
-
 
 # Tvary a ikony nejsou barvy ani stíny — a hlavně nezávisí na režimu, proto
 # se drží jednou pro obě varianty. Klíč, popisek, od, do, krok, jednotka.
@@ -126,6 +118,34 @@ TVARY = [
     ("--pozadi-cara-x", "Posun čáry vodorovně", -150, 150, 1, "vw"),
     ("--pozadi-cara-y", "Posun čáry svisle", -150, 150, 1, "vh"),
     ("--pozadi-cara-sila", "Sytost čáry v ploše", 0, 1, 0.05, ""),
+    # Kruh za hledáním: poloha se měří od středu hlavičky, kladné y je dolů.
+    # Sklo je pole hledání — rozostření je poloměr rozmazání, krytí podíl
+    # papíru v poli (1 = neprůhledné jako dřív).
+    ("--pozadi-kruh-prumer", "Průměr kruhu za hledáním", 0, 600, 2, "px"),
+    ("--pozadi-kruh-x", "Posun kruhu vodorovně", -400, 400, 2, "px"),
+    ("--pozadi-kruh-y", "Posun kruhu svisle", -400, 400, 2, "px"),
+    ("--pozadi-kruh-sila", "Sytost kruhu", 0, 1, 0.05, ""),
+    ("--sklo-rozostreni", "Rozostření skla (hledání)", 0, 60, 1, "px"),
+    ("--sklo-kryti", "Krytí skla (papír v hledání)", 0, 1, 0.05, ""),
+]
+# Logo v hlavičce: tvar je maska (Reda ve dne, Stricker v noci), tady se
+# ladí jeho velikost, poloha od středu hlavičky, průhlednost a úhel přechodu
+# mezi dvěma barvami loga. Barvy jsou ve skupině Logo mezi barvami.
+LOGO = [
+    ("--logo-velikost", "Velikost loga", 20, 240, 2, "px"),
+    ("--logo-x", "Posun loga vodorovně", -400, 400, 2, "px"),
+    ("--logo-y", "Posun loga svisle", -200, 200, 2, "px"),
+    ("--logo-pruhlednost", "Krytí loga", 0, 1, 0.05, ""),
+    ("--logo-uhel", "Úhel přechodu barev", 0, 360, 5, "deg"),
+]
+# Stín loga má vlastní sadu — logo je barevná plocha na ploše, a co sedí
+# na kartách, na něm většinou nesedí.
+STINY_LOGO = [
+    ("logoUhel", "Odkud svítí na logo", 0, 360, 5, "°"),
+    ("logoD", "Odstávání loga", 0, 20, 1, "px"),
+    ("logoBlur", "Rozostření", 0, 40, 1, "px"),
+    ("logoSvetlo", "Síla světla", 0, 100, 1, "%"),
+    ("logoStin", "Síla stínu", 0, 100, 1, "%"),
 ]
 # Zakončení tahu — kulaté, uťaté, hranaté. Mění charakter kresby víc než
 # tloušťka, proto je to volba, ne posuvník.
@@ -140,7 +160,6 @@ PISMO = [
     ("--pismo-poznamka", "Vysvětlivky a poznámky", 9, 20, 0.5, "px"),
     ("--pismo-tabulka", "Text v tabulkách", 10, 22, 0.5, "px"),
     ("--pismo-vysledek", "Velká čísla výsledku", 20, 60, 1, "px"),
-    ("--logo-velikost", "Velikost loga", 40, 140, 2, "px"),
     ("--prostrkani", "Prostrkání verzálek", 0, 0.2, 0.005, "em"),
     ("--tloustka-nadpisu", "Tloušťka nadpisů", 300, 900, 100, ""),
     ("--radek", "Výška řádku", 1, 2, 0.05, ""),
@@ -288,9 +307,14 @@ VYCHOZI_TVARY = {"--radius": "32px", "--radius-btn": "999px", "--radius-pole": "
                  "--pruhlednost-karty": "1", "--ikona-konec": "round",
                  "--pozadi-cara-sirka": "96px", "--pozadi-cara-sila": "1",
                  "--pozadi-cara-x": "0vw", "--pozadi-cara-y": "-50vh",
+                 "--pozadi-kruh-prumer": "200px", "--pozadi-kruh-sila": ".6",
+                 "--pozadi-kruh-x": "0px", "--pozadi-kruh-y": "100px",
+                 "--sklo-rozostreni": "16px", "--sklo-kryti": ".65",
+                 "--logo-velikost": "116px", "--logo-x": "0px", "--logo-y": "0px",
+                 "--logo-pruhlednost": "1", "--logo-uhel": "135deg",
                  "--pismo": "14px", "--pismo-nadpis": "14px", "--pismo-popisek": "11px",
                  "--pismo-poznamka": "12.5px", "--pismo-tabulka": "13.5px",
-                 "--pismo-vysledek": "34px", "--logo-velikost": "90px",
+                 "--pismo-vysledek": "34px",
                  "--prostrkani": ".06em", "--tloustka-nadpisu": "800", "--radek": "1.35",
                  "--mezera-karta-y": "20px", "--mezera-karta-x": "22px",
                  "--mezera-karet": "16px", "--mezera-poli": "12px",
@@ -445,9 +469,9 @@ def stiny_z_css(blk, vychozi):
     if m:
         out["dMaly"] = int(round(math.hypot(int(m.group(1)), int(m.group(2)))))
         out["blurMaly"] = int(m.group(3))
-    lg = hodnota(blk, "--logo-shadow")
-    m = re.match(r"(-?\d+)px\s+(-?\d+)px\s+(\d+)px\s+rgba\(255,255,255,([\d.]+)\),\s*"
-                 r"(-?\d+)px\s+(-?\d+)px\s+(\d+)px\s+rgba\(0,0,0,([\d.]+)\)", lg)
+    lg = hodnota(blk, "--logo-stin")
+    m = re.match(r"drop-shadow\((-?\d+)px\s+(-?\d+)px\s+(\d+)px\s+rgba\(255,255,255,([\d.]+)\)\)\s*"
+                 r"drop-shadow\((-?\d+)px\s+(-?\d+)px\s+(\d+)px\s+rgba\(0,0,0,([\d.]+)\)\)", lg)
     if m:
         hx, hy = int(m.group(1)), int(m.group(2))
         out["logoD"] = int(round(math.hypot(hx, hy)))
@@ -465,7 +489,7 @@ def stiny_z_css(blk, vychozi):
 
 VYCHOZI_STINY = {"uhel": 135, "dVelky": 17, "blurVelky": 24, "dMaly": 8, "blurMaly": 14,
                  "dVsazeny": 6, "blurVsazeny": 8, "silaSvetla": 100, "silaStinu": 15,
-                 "logoUhel": 135, "logoD": 6, "logoBlur": 8, "logoSvetlo": 95, "logoStin": 18}
+                 "logoUhel": 135, "logoD": 3, "logoBlur": 2, "logoSvetlo": 14, "logoStin": 10}
 
 
 def main():
@@ -512,7 +536,8 @@ def main():
     telo = ['<div class="smery" id="smery"></div>']
     telo += [posuvnik(*s) for s in STINY]
     posuvniky = [skupina("Stíny", telo)]
-    posuvniky.append(skupina("Stínování loga", [posuvnik(*s) for s in STINY_LOGO], False))
+    posuvniky.append(skupina("Logo", [posuvnik(*l, atr="data-tvar") for l in LOGO]
+                             + [posuvnik(*s) for s in STINY_LOGO], False))
 
     telo = [posuvnik(*t, atr="data-tvar") for t in TVARY]
     telo.append('<div class="hlava" style="margin:14px 0 6px">'
@@ -611,9 +636,9 @@ def main():
             .replace("/*KON_STRANEK*/", json.dumps(KON_STRANEK)))
     io.open(CIL, "w", encoding="utf-8", newline="").write(html)
     print("hotovo: %s" % CIL)
-    print("barev: %d · stínů: %d (+%d logo) · tvarů a ikon: %d · písma: %d (+%d řezy)"
+    print("barev: %d · stínů: %d (+%d logo) · logo: %d · tvarů a ikon: %d · písma: %d (+%d řezy)"
           " · rozestupů: %d · míchacího režimu: %d · rozvržení: %d karet"
-          % (len(BARVY), len(STINY), len(STINY_LOGO), len(TVARY) + 1,
+          % (len(BARVY), len(STINY), len(STINY_LOGO), len(LOGO), len(TVARY) + 1,
              len(PISMO), len(RODINY), len(ROZESTUPY),
              len(MICHANI) + 5 * len(MICH_TLACITKA) + 6, len(KARTY)))
     if "--open" in sys.argv:
@@ -715,7 +740,7 @@ SABLONA = r"""<!doctype html>
 #strana-michani .michukazka button,#strana-michani .michukazka .tgl{cursor:grab}
 </style></head>
 <body>
-<div class="hdr"><div class="navleft"></div><h1>VZHLED</h1>
+<div class="hdr"><div class="navleft"></div><div class="logo"></div>
   <div class="lista" style="margin:0">
     <button class="chip on" data-strana="barvy">Barvy a vzhled</button>
     <button class="chip" data-strana="michani">Míchací režim</button>
@@ -1172,18 +1197,18 @@ function stinyCss(s){
       + Math.round(s.blurVsazeny * 1.45) + "px " + rgbaS(sv),
     "--modal-shadow": "0 " + Math.round(s.dVelky) + "px " + Math.round(s.blurVelky * 2) + "px "
       + rgbaT(Math.min(1, tm * 2)),
-    "--logo-shadow": logoCss(s)
+    "--logo-stin": logoCss(s)
   };
 }
 
-/* Logo si nese vlastní směr i sílu — je to jediné místo, kde je ražba vidět
-   ve velkém, a co sedí na kartách, na něm většinou nesedí. */
+/* Stín loga si nese vlastní směr i sílu. Je to filter drop-shadow, ne
+   box-shadow: logo je maska a stín má sledovat tvar, ne čtverec kolem něj. */
 function logoCss(s){
   var r = s.logoUhel * Math.PI / 180, d = s.logoD;
   var x = Math.round(Math.cos(r) * d), y = Math.round(-Math.sin(r) * d);
   var sv = Math.round(s.logoSvetlo * 10) / 1000, tm = Math.round(s.logoStin * 10) / 1000;
-  return x + "px " + y + "px " + s.logoBlur + "px rgba(255,255,255," + sv + "), "
-    + (-x) + "px " + (-y) + "px " + s.logoBlur + "px rgba(0,0,0," + tm + ")";
+  return "drop-shadow(" + x + "px " + y + "px " + s.logoBlur + "px rgba(255,255,255," + sv + ")) "
+    + "drop-shadow(" + (-x) + "px " + (-y) + "px " + s.logoBlur + "px rgba(0,0,0," + tm + "))";
 }
 
 function jeHex(v){ return /^#[0-9a-fA-F]{6}$/.test(v); }

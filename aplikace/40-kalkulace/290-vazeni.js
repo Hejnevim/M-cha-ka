@@ -62,6 +62,12 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
 
   const podil = korPodil || slozky.map((c) => (davkaCela > 0 ? c.g / davkaCela : 0));
   const cil = podil.map((p) => davka * p);
+  /* Objem se bere z poměru g : ml, který složka nese z receptury (c.ml
+     z hustoty receptury, totéž číslo jako na míchacím lístku) — přepočtená
+     i korigovaná dávka tak drží tutéž hustotu. Aditiva hustotu nemají,
+     u nich se objem nehádá a ukáže se pomlčka. */
+  const mlZ = (g, i) => (slozky[i] && slozky[i].ml > 0 && slozky[i].g > 0)
+    ? g * slozky[i].ml / slozky[i].g : null;
   // korekce odstínu se počítá z barevné části dávky — přilité ředidlo do ní nepatří
   const bazeCil = cil.slice(0, prvniAditivum).reduce((a, b) => a + b, 0);
   const zbyvaVse = cil.map((c, i) => Math.max(0, c - (nalito[i] || 0)));
@@ -194,10 +200,15 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
             <div style=${{ marginTop: 12 }}>
               <div style=${{ fontWeight: 800 }}>
                 ${cur.name}${(nalito[krok] || 0) > 0.05 ? preloz(" — dorovnání") : ""}
+                ${/* Podíl složky stojí u jména, ne v tabulce dole: u váhy se
+                      čte krok, tabulka je až pro srovnání. */ ""}
+                <span className="note" style=${{ fontWeight: 400, marginLeft: 8 }}>
+                  ${fmt(podil[krok] * 100)} ${preloz("% dávky")}</span>
               </div>
               <div className="note">
-                ${preloz("přidat {g} g{uz} → navážit celkem do {t} g", {
+                ${preloz("přidat {g} g{ml}{uz} → navážit celkem do {t} g", {
                   g: fmtG(zbyvaVse[krok]), t: fmt(target),
+                  ml: mlZ(zbyvaVse[krok], krok) != null ? " (≈ " + fmtG(mlZ(zbyvaVse[krok], krok)) + " ml)" : "",
                   uz: (nalito[krok] || 0) > 0.05
                     ? preloz(" (už nalito {a} g z {c} g)", { a: fmtG(nalito[krok]), c: fmtG(cil[krok]) }) : "" })}
               </div>
@@ -430,7 +441,8 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
 
           <table className="t" style=${{ marginTop: 14 }}>
             <thead><tr><th></th><th>${preloz("Komponenta")}</th><th className="num">%</th><th className="num">${preloz("cíl g")}</th>
-              <th className="num">${preloz("nalito g")}</th><th className="num">${preloz("zbývá g")}</th></tr></thead>
+              <th className="num">${preloz("nalito g")}</th><th className="num">${preloz("zbývá g")}</th>
+              <th className="num">ml</th></tr></thead>
             <tbody>
               ${slozky.map((c, i) => html`
                 <tr key=${c.id} className=${i === krok ? "rowactive" : ""}
@@ -445,6 +457,7 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
                     ? fmtG(zbyvaVse[i])
                     : html`<span className="note" title=${preloz("méně, než váha rozliší — bere se za navážené")}>${
                         zbyvaVse[i] > 0.004 ? fmtG(zbyvaVse[i]) + preloz(" ›pod tol.‹") : "—"}</span>`}</td>
+                  <td className="num">${mlZ(cil[i], i) != null ? fmt(mlZ(cil[i], i)) : "—"}</td>
                 </tr>`)}
             </tbody>
           </table>

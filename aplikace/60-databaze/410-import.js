@@ -118,6 +118,8 @@ function csvToRecipes(text, zdroj) {
     duvodZamitnuti: idx(/^(duvod.zamitnuti|d.vod.zam.tnut|rejected_reason)/),
     zadal: idx(/^(zadal|requested_by)/),
     zadanoKdy: idx(/^(zadano.kdy|zad.no.kdy|requested_at)/),
+    // poznámka technologa k receptuře; anglicky note/notes ze stejného důvodu jako u tužidla
+    poznamka: idx(/^(pozn.mka|note)/),
   };
   if (ci.name < 0 || ci.comp < 0 || ci.pct < 0)
     throw new Error(preloz("CSV musí obsahovat sloupce: nazev, komponenta, procento (volitelně typ, rada, hustota, hex)."));
@@ -164,6 +166,8 @@ function csvToRecipes(text, zdroj) {
         duvodZamitnuti: ci.duvodZamitnuti >= 0 ? String(r[ci.duvodZamitnuti] || "").trim() : "",
         zadal: ci.zadal >= 0 ? String(r[ci.zadal] || "").trim() : "",
         zadanoKdy: ci.zadanoKdy >= 0 ? n(r[ci.zadanoKdy]) : 0,
+        // poznámka k receptuře („na tomhle materiálu dva průchody“) — jeden řádek textu
+        poznamka: ci.poznamka >= 0 ? String(r[ci.poznamka] || "").trim() : "",
         // na které kombinace produkt+barva+technologie+poloha byla receptura použita
         vazby: ci.vazby >= 0
           ? String(r[ci.vazby] || "").split("~").map((s) => s.trim()).filter(Boolean) : [],
@@ -267,6 +271,8 @@ function sloucReceptury(prev, nove, adopce, zijiciSoubory) {
         duvodZamitnuti: r.duvodZamitnuti || stary.duvodZamitnuti || "",
         zadal: r.zadal || stary.zadal || "",
         zadanoKdy: n(r.zadanoKdy) || n(stary.zadanoKdy) || 0,
+        // poznámka je znalost dílny, ne dodavatele — soubor bez sloupce ji nesmí smazat
+        poznamka: r.poznamka || stary.poznamka || "",
       }));
     } else {
       pridano++;

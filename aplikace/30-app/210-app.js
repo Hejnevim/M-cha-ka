@@ -43,6 +43,27 @@ function App() {
     return fixTech(stored && stored.length ? stored : base);
   });
   const [recipes, setRecipes] = useState(() => loadLS("irm-recipes", SEED_RECIPES));
+  /* Receptury leží v IndexedDB (proč, viz idbUloz v 125-ulozeni.js). Čtou se
+     asynchronně, takže se napřed vezme, co je v localStorage — u prohlížeče,
+     který sem chodil před touhle změnou, je to celý seznam, jinak ukázkové
+     receptury — a jakmile IndexedDB odpoví, platí ona. Databáze ze souborů se
+     smějí slévat až potom (recepturyNacteny): kdyby se slily dřív, dostaly by
+     nová id a vazby na produkt a polohu, které na id visí, by se rozpojily. */
+  const [recepturyNacteny, setRecepturyNacteny] = useState(false);
+  useEffect(() => {
+    let zrusen = false;
+    (async () => {
+      try {
+        const ulozene = await idbNacti("irm-recipes");
+        if (zrusen) return;
+        if (Array.isArray(ulozene) && ulozene.length) setRecipes(ulozene);
+      } catch (e) {
+        // bez IndexedDB zůstává localStorage — zápis níže spadne na saveLS
+      }
+      if (!zrusen) setRecepturyNacteny(true);
+    })();
+    return () => { zrusen = true; };
+  }, []);
   const [links, setLinks] = useState(() => loadLS("irm-links", {}));
   useEffect(() => { saveLS("irm-links", links); }, [links]);
   const [deletePw, setDeletePw] = useState(() => loadLS("irm-delete-pw", ""));
@@ -215,7 +236,17 @@ function App() {
     if (first.current) { first.current = false; return; }
     saveLS("irm-products", products);
   }, [products]);
-  useEffect(() => { saveLS("irm-recipes", recipes); }, [recipes]);
+  useEffect(() => {
+    if (!recepturyNacteny) return;
+    let zrusen = false;
+    idbUloz("irm-recipes", recipes).then(() => {
+      // po prvním úspěšném zápisu do IndexedDB kopie v localStorage odchází —
+      // jinak by dál zabírala 3 MB z pěti a stará verze by při příštím
+      // spuštění přebila tu novou
+      if (!zrusen) zapomenLS("irm-recipes");
+    }).catch(() => saveLS("irm-recipes", recipes));
+    return () => { zrusen = true; };
+  }, [recipes, recepturyNacteny]);
 
   // ---- napojení na SGPS + čtečka čárových kódů: spec zakázky -> kalkulace ----
   const sgps = useSgps();
@@ -727,7 +758,7 @@ function App() {
 
   const [databaze, setDatabaze] = useState({ stav: "cekam", soubory: [], chyby: {}, chyba: "" });
   useEffect(() => {
-    if (sgps.stav.stav !== "ok") return;
+    if (sgps.stav.stav !== "ok" || !recepturyNacteny) return;
     let zrusen = false;
     (async () => {
       try {
@@ -797,7 +828,7 @@ function App() {
       }
     })();
     return () => { zrusen = true; };
-  }, [sgps.stav.stav]);
+  }, [sgps.stav.stav, recepturyNacteny]);
 
   /* ---- vlastní receptury se odkládají do vlastního CSV ve složce ----
      Aby vazba „tenhle produkt v téhle barvě se míchá takhle“ nezůstala jen
@@ -1149,13 +1180,9 @@ function App() {
             <span>${preloz(ZALOZKY_NAZVY[kamZpet] || kamZpet)}</span>
           </button>`}
         </div>
-        <div style=${{ gridColumn: 2, justifySelf: "center", textAlign: "center" }}>
-          <h1 title=${preloz("Zpět na Kalkulaci")} onClick=${() => setTab("calc")}>IRM</h1>
-          ${technologie && html`<div className="tag tech" style=${{ marginTop: -8 }}
-            title=${preloz((TECHS[technologie] || {}).name || "")}>
-            ${technologie} — ${preloz((TECHS[technologie] || {}).name || "").replace(/\s*\(.*/, "")}
-          </div>`}
-        </div>
+        <div className="logo" role="button" tabIndex="0" title=${preloz("Zpět na Kalkulaci")}
+          aria-label=${preloz("Zpět na Kalkulaci")} onClick=${() => setTab("calc")}
+          onKeyDown=${(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setTab("calc"); } }}></div>
         <button className="themebtn" type="button"
           onClick=${() => setTheme((t) => t === "dark" ? "light" : "dark")}
           title=${theme === "dark" ? preloz("Přepnout na světlý režim") : preloz("Přepnout na tmavý režim")}

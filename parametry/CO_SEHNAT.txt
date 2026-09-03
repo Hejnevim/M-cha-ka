@@ -125,6 +125,9 @@ přiřazení databází k technologiím se nastavuje v parametry/databaze.csv.
     FIR   Ferro Xpression                    1 097 receptur   MÁME
     PDP   Printcolor MS 786 + MS 660         2 368 receptur   MÁME
           + RUCOLOR 10KK
+          + Marabu TampaStar TPR             4 824 receptur   MÁME (3. 9. 2026,
+                                                              z exportu XLSX
+                                                              ColorManageru)
     TXP   Printcolor MS 660                    778 receptur   ověřit, zda
                                                               je to ta správná
                                                               řada na textil
@@ -146,8 +149,12 @@ CO SEHNAT:
 
       Unikátních řad je právě dvanáct — část slouží víc technologiím naráz
       (Coates TP/PP třem; Himalaya, Union Ink, Debuit 470, Serilon
-      a Texylon dvěma). Podklady (PDF) se teprve sbírají; každá řada se
+      a Texylon dvěma). Podklady se teprve sbírají; každá řada se
       převede a přiřadí zvlášť, jak bude přicházet.
+      HOTOVO: Marabu — TPR (PDP), receptury_Marabu_TPR.csv, 3. 9. 2026.
+      Marabu neposílá PDF, ale export XLSX z ColorManageru — převádí ho
+      prevod_marabu.py; stejný tvar mají i podklady Marabu PP new a LIP,
+      které jsou stažené a čekají na převod.
 
       Tenhle plán stojí i v souboru parametry/plan_databazi.csv a aplikace
       ho ukazuje v záložce Odemykání technologií — každá řada je tam bod

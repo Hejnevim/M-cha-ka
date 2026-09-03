@@ -12,7 +12,7 @@
      světlu", což hraje se směrem stínů (světlo zleva shora). Dvojice stínů
      hloubku dál nese; s rozdílem podkladů karty vypadají míň jako vytlačené
      z plochy a víc jako položené desky — to je tady záměr. */
-  --bg:#c9c9c9; --paper:#ededed; --zvyraz:#c8c8c8; --logo:#c9c9c9;
+  --bg:#c9c9c9; --paper:#ededed; --zvyraz:#c8c8c8;
   --ink:#2D2D2D; --ink-2:#757575; --line:#d4d4d4; --line-2:#c6c6c6;
   --cyan:#2D2D2D; --magenta:#C97B63; --yellow:#D9B44A; --key:#2D2D2D;
   --btn-ink:#FFFFFF; --focus:rgba(45,45,45,.20); --danger:#b31919;
@@ -28,9 +28,33 @@
      horního rohu a prochází celou plochou. Posun ve směru samotné čáry
      (stejný počet pixelů v obou osách) se neprojeví — vidět je jen složka
      kolmá na ni; pás je pod 45°, takže na horní hraně posune průsečík
-     každý 1 px vodorovně o +1 px a každý 1 px svisle o −1 px. */
-  --pozadi-cara-barva:#FF001A; --pozadi-cara-sirka:14px; --pozadi-cara-sila:1;
+     každý 1 px vodorovně o +1 px a každý 1 px svisle o −1 px.
+     Síla 0 čáru vypíná: od 2. září (kap. 197) je plocha bez čáry, jen
+     s kruhem za hledáním. Barva, tloušťka i poloha zůstávají nastavené,
+     aby se čára dala v barvy.html vrátit jediným posuvníkem. */
+  --pozadi-cara-barva:#FF001A; --pozadi-cara-sirka:14px; --pozadi-cara-sila:0;
   --pozadi-cara-x:-47vw; --pozadi-cara-y:-44vh;
+  /* Kruh za logem a polem hledání. Leží v ploše pod vším ostatním a pole
+     hledání ho ukazuje jako matné sklo: co je za ním, je rozostřené
+     a zeslabené. Barva je táž jako u čáry (v noci modrá), síla je krytí
+     kruhu nad plochou. Poloha se měří od středu hlavičky — tam stojí logo,
+     takže se kruh drží loga i při změně šířky okna; kladné y je dolů.
+     Sklo mají dvě proměnné: rozostření je poloměr rozmazání okraje, krytí
+     je podíl papíru v poli hledání (1 = neprůhledné pole jako dřív,
+     0 = čiré sklo). */
+  --pozadi-kruh-barva:#FF001A; --pozadi-kruh-prumer:200px; --pozadi-kruh-sila:0;
+  --pozadi-kruh-x:0px; --pozadi-kruh-y:66px;
+  --sklo-rozostreni:37px; --sklo-kryti:.65;
+  /* Logo v hlavičce (kap. 199): ve dne Reda, v noci Stricker. Barva je
+     přechod ze začátku do konce pod úhlem — stejné barvy = plná barva.
+     Reda je v předloze jednobarevná (#969a9e), Stricker má přechod
+     z tmavší horní poloviny (#74848d) do světlejší dolní (#909ca4), oba
+     odstíny změřené z dodaných PNG. Velikost je výška i šířka masky, posun
+     se měří od středu hlavičky, kladné y je dolů. Od 3. září (kap. 200)
+     platí hodnoty naladěné v barvy.html: logo 150 px, krytí 0,45,
+     přechod 350° ze světlé do tmavé šedi, v noci z grafitové do světlé;
+     kruh za ním je vypnutý (síla 0) a stín loga tvrdý bez rozostření. */
+  --logo-barva:#d6d6d6; --logo-barva-2:#909498;
   /* Tvary: každý druh prvku má vlastní zaoblení, aby šlo ladit zvlášť
      karty, tlačítka, pole a dlaždice. Ikony jsou kreslené, ne obrázkové —
      velikost, tloušťka tahu i zakončení se řídí odsud. Ikona stojící uvnitř
@@ -50,7 +74,8 @@
      dopočítají, takže celá škála drží pohromadě. */
   --pismo:15.5px; --pismo-nadpis:19.5px; --pismo-popisek:12.5px;
   --pismo-poznamka:14px; --pismo-tabulka:19px; --pismo-vysledek:50px;
-  --logo-velikost:116px; --prostrkani:0.07em; --tloustka-nadpisu:900; --radek:1.4;
+  --prostrkani:0.07em; --tloustka-nadpisu:900; --radek:1.4;
+  --logo-velikost:150px; --logo-x:0px; --logo-y:0px; --logo-pruhlednost:0.45; --logo-uhel:350deg;
   /* Rozestupy: odsazení uvnitř karty, mezera mezi kartami, mezera mezi poli
      v řádku a odsazení uvnitř polí a tlačítek (to určuje jejich výšku). */
   /* Míchací režim má vlastní sadu rozměrů. Nečte se od klávesnice, ale od
@@ -118,15 +143,17 @@
      Platí od 960 px; pod tím se karty skládají a pole potřebuje celou šířku. */
   --hledani-sirka:33%;
   /* Stíny jsou ve tvaru rgba(bílá)+rgba(černá) — jediný tvar, který umí
-     barvy.html číst a ladit. Proti neumorfnímu základu jsou ztlumené: bílá
-     kolem 37–39 % — karty jsou samy světlé, silnější „osvícení" by kolem
-     nich na šedé ploše svítilo — a černá je silnější, aby hloubka držela. */
-  --neu:-11px -11px 24px rgba(255,255,255,0.39), 11px 11px 24px rgba(0,0,0,0.38);
-  --neu-sm:-5px -5px 15px rgba(255,255,255,0.371), 5px 5px 15px rgba(0,0,0,0.418);
-  --neu-in:inset 4px 4px 6px rgba(0,0,0,0.342), inset -4px -4px 6px rgba(255,255,255,0.371);
-  --neu-in-lg:inset 6px 6px 9px rgba(0,0,0,0.38), inset -6px -6px 9px rgba(255,255,255,0.39);
-  --modal-shadow:0 16px 48px rgba(0,0,0,0.76);
-  --logo-shadow:-2px -2px 2px rgba(255,255,255,0.14), 2px 2px 2px rgba(0,0,0,0.1);
+     barvy.html číst a ladit. Od 2. září (kap. 197) jsou sytější než
+     neumorfní základ: bílá 57–60 %, černá 40–50 %. Karty mají rozmazání
+     38 px, takže z plochy vystupují měkce a zdaleka; malé prvky (tlačítka,
+     čipy, dlaždice) jen 10 px, aby stín zůstal těsně u hrany a nesplýval
+     se stínem karty pod nimi. Vsazená pole drží týž poměr bílé a černé. */
+  --neu:-11px -11px 38px rgba(255,255,255,0.6), 11px 11px 38px rgba(0,0,0,0.45);
+  --neu-sm:-5px -5px 10px rgba(255,255,255,0.57), 5px 5px 10px rgba(0,0,0,0.495);
+  --neu-in:inset 4px 4px 6px rgba(0,0,0,0.405), inset -4px -4px 6px rgba(255,255,255,0.57);
+  --neu-in-lg:inset 6px 6px 9px rgba(0,0,0,0.45), inset -6px -6px 9px rgba(255,255,255,0.6);
+  --modal-shadow:0 16px 76px rgba(0,0,0,0.9);
+  --logo-stin:drop-shadow(-14px -14px 0px rgba(255,255,255,0.08)) drop-shadow(14px 14px 0px rgba(0,0,0,0.66));
   --mono:'Segoe UI',system-ui,sans-serif;
   --sans:system-ui,sans-serif;
 }
@@ -138,28 +165,29 @@
      zesvětlená plocha nechává tmavší karty vystoupit stejným směrem jako
      ve světlém motivu, jen obráceně (karta je „dál od světla"). Aktivní
      prvky nesou zelený akcent (#10B981), upozornění teplý oranžový
-     (#F59E0B). Hlavní tlačítko je světlé s tmavým písmem. Logo v obou
-     motivech splývá s plochou (--logo = --bg), vystupuje jen stínem. */
-  --bg:#464d53; --paper:#31383f; --zvyraz:#2b3035; --logo:#464d53;
+     (#F59E0B). Hlavní tlačítko je světlé s tmavým písmem. */
+  --bg:#464d53; --paper:#31383f; --zvyraz:#2b3035;
   /* V noci je čára modrá: CMYK 100/38/0/16 → #0085D6 (zpětný převod
      vrací zadané hodnoty přesně). Tloušťku i sílu drží společné proměnné
      ze světlého bloku. */
-  --pozadi-cara-barva:#0085D6;
-  --ink:#E2E8F0; --ink-2:#94A3B8; --line:#343a40; --line-2:#495057;
+  --pozadi-cara-barva:#0085D6; --pozadi-kruh-barva:#0085D6;
+  --logo-barva:#232a2e; --logo-barva-2:#c7c7c7;
+  --ink:#E2E8F0; --ink-2:#94A3B8; --line:#343a40; --line-2:#5e6367;
   --cyan:#10B981; --magenta:#C97B63; --yellow:#D9B44A; --key:#E2E8F0;
   --btn-ink:#212529; --focus:rgba(226,232,240,.22); --danger:#b31919;
   --ok:#10B981; --warn:#F59E0B;
   --ikona-barva:#CBD5E1;
-  /* Stíny v rgba kvůli barvy.html — viz poznámka u světlých stínů. Tmavé
-     odstíny jsou černá 27–33 %, světlé bílá 7,6–8 %; bílá je proti původnímu
-     návrhu silnější, protože plocha zesvětlala a slabší „osvícení" by na ní
-     zaniklo. */
-  --neu:-10px -10px 20px rgba(255,255,255,0.08), 10px 10px 20px rgba(0,0,0,0.3);
-  --neu-sm:-5px -5px 12px rgba(255,255,255,0.076), 5px 5px 12px rgba(0,0,0,0.33);
-  --neu-in:inset 4px 4px 6px rgba(0,0,0,0.27), inset -4px -4px 6px rgba(255,255,255,0.076);
-  --neu-in-lg:inset 6px 6px 9px rgba(0,0,0,0.3), inset -6px -6px 9px rgba(255,255,255,0.08);
-  --modal-shadow:0 14px 40px rgba(0,0,0,0.6);
-  --logo-shadow:-2px -2px 2px rgba(255,255,255,0.14), 2px 2px 2px rgba(0,0,0,0.1);
+  /* Stíny v rgba kvůli barvy.html — viz poznámka u světlých stínů. Od
+     2. září (kap. 197): černá 40–50 %, bílá 15–16 % — dvojnásobek proti
+     dřívějším 7,6–8 %, protože slabší „osvícení" na zesvětlené ploše
+     zanikalo. Rozmazání karet je 12 px (dřív 20), stín sedí těsně u hrany
+     a karta se od plochy odděluje ostřeji než ve dne. */
+  --neu:-10px -10px 12px rgba(255,255,255,0.16), 10px 10px 12px rgba(0,0,0,0.45);
+  --neu-sm:-5px -5px 12px rgba(255,255,255,0.152), 5px 5px 12px rgba(0,0,0,0.495);
+  --neu-in:inset 4px 4px 6px rgba(0,0,0,0.405), inset -4px -4px 6px rgba(255,255,255,0.152);
+  --neu-in-lg:inset 6px 6px 9px rgba(0,0,0,0.45), inset -6px -6px 9px rgba(255,255,255,0.16);
+  --modal-shadow:0 14px 24px rgba(0,0,0,0.9);
+  --logo-stin:drop-shadow(0px 0px 8px rgba(255,255,255,1)) drop-shadow(0px 0px 8px rgba(0,0,0,1));
 }
 /* ZACATEK BAREV STRANEK */
 /* Vlastní barvy jednotlivých stránek. Proměnné se dědí, takže co se nastaví

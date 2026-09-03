@@ -144,3 +144,5 @@
 .bigform .tglt::after{width:23px;height:23px}
 .bigform .tgl input:checked + .tglt::after{transform:translateX(23px)}
 .bigform .flags{gap:28px}
+/* Poznámka k receptuře pod přepínači karty Parametry tisku — rozestup jako mezi řádky polí. */
+.pozn-receptury{margin-top:calc(var(--mezera-poli) * 1.33)}

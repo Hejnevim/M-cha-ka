@@ -74,6 +74,25 @@ nebo hledáním. Kdo to neví, může si myslet, že receptura v aplikaci chybí
 měření — a jak se dostat k přesnému číslu. **Výchozí hodnoty stojí za to
 v návodu uvést**, protože nikde jinde vidět nejsou.
 
+> 43,9 cm³/m² teoreticky (dopočteno z geometrie tkaniny — orientační)
+> × 0,70 přenos × 1,20 g/ml hustota × 1,10 kryvost × 0,95 materiál
+> × 1,05 podklad × 1,02 viskozita 25,0 s
+
+**Stálo pod:** řádkem „Spotřeba odpovídá sítu 54-64." (a pod hlášením
+„Ze síta 54-64 vychází 12,3 g/m² — teď je nastaveno …") v kartě Zakázka,
+drobným písmem. Koeficienty za hustotou se vypisovaly jen ty, které nejsou
+rovny 1; u tampontisku stálo místo „teoreticky" „(hloubka leptu)". Odstraněno
+2. 9. 2026 — řádek nad ním teď říká „Spotřeba odpovídá sítu 54-64 = 43,9 cm³/m²",
+tedy síto a jeho teoretický objem barvy; vzorec se na obrazovce neukazuje.
+**Vysvětluje:** z čeho vyšla spotřeba v g/m²: teoretický objem barvy síta
+(cm³/m², z `parametry/sita.csv`) × podíl přenosu na potisk × hustota receptury
+(g/ml), a dál koeficienty kryvosti, materiálu, podkladu a viskozity — všechno
+s dosazenými čísly, aby se to dalo přepočítat od ruky. Do návodu patří i to,
+co teď z obrazovky nejde poznat vůbec: „dopočteno z geometrie tkaniny —
+orientační" znamená síto bez údaje výrobce, jehož objem se spočítal z otevřené
+plochy a tloušťky tkaniny (u TXP síta 54-64 a 90-48) — číslo je odhad, ne
+měření, a do `parametry/sita.csv` se má doplnit údaj z listu výrobce.
+
 ---
 
 ## Parametry tisku
@@ -443,3 +462,18 @@ Vysvětlivky pokrývaly jen to, u čeho stály. Návod bude potřebovat i:
   sloupec schválení v souboru znamená **schválená** — receptury z dřívějška
   i databáze od dodavatele se tím pádem chovají jako dřív a nic se
   neblokuje
+- **poznámka k receptuře:** pole *Poznámka k receptuře* v kartě *Parametry
+  tisku* (a v editoru receptury) nemá u sebe vysvětlení. Je pro znalost, která
+  jinak odchází s člověkem — „na tomhle materiálu dva průchody, sušit 2 min".
+  Čte se v míchacím režimu hned pod kombinací produkt · barva · poloha, na
+  míchacím lístku a v seznamu receptur. V míchacím režimu se i **dopisuje**:
+  tlačítko *＋ Poznámka* (nebo *✎ Poznámka*, když už nějaká je) otevře pole;
+  text se **uloží až tlačítkem Uložit nebo Enterem** — kdo pole zavře jinak
+  (Zrušit, Esc, výměna barvy), o rozepsané přijde. Esc v tom poli nezavírá
+  míchání, jen úpravu. Je to **jeden řádek**: zalomení se při
+  uložení nahradí mezerou, protože soubor receptur se čte po řádcích. Píše se
+  česky a **nepřekládá se** — je to údaj dílny, ne text rozhraní. U vlastní
+  receptury jde do `receptury_vlastni.csv` (sloupec `poznamka` na konci);
+  u receptury z nakoupené databáze ji drží **jen tenhle prohlížeč**, stejně
+  jako síto, kryvost a nastavení tužidla — na druhém počítači ji nikdo neuvidí.
+  Kdo má poznámku sdílet, odvodí z databázové receptury vlastní

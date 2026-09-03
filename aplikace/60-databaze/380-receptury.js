@@ -47,7 +47,7 @@ function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr, techno
 
   const exportCsv = () => {
     const rows = [["nazev", "typ", "rada", "hustota", "hex", "komponenta", "procento", "sito", "kryvost", "povrch", "objednavatel", "otestovany", "vyblednuti",
-      "tuzidlo", "pomer_tuzidla", "potlife_min", "mez_potlife", "hustnuti", "tuzidlo_nazev"]];
+      "tuzidlo", "pomer_tuzidla", "potlife_min", "mez_potlife", "hustnuti", "tuzidlo_nazev", "poznamka"]];
     for (const r of recipes)
       for (const c of r.components)
         rows.push([r.name, r.type, r.series || "", r.density, (r.hex || "").replace(/^#/, ""), c.name, c.pct,
@@ -55,7 +55,7 @@ function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr, techno
           r.tuzidlo ? "ano" : "", r.pomerTuzidla == null ? "" : cislo(r.pomerTuzidla, 4),
           r.potlifeMin == null ? "" : cislo(r.potlifeMin, 0),
           r.mezPotlife == null ? "" : cislo(r.mezPotlife, 2), r.hustnuti || "",
-          r.tuzidloNazev || ""]);
+          r.tuzidloNazev || "", jedenRadek(r.poznamka)]);
     const csv = rows.map((r) => r.map((c) => '"' + String(c).replace(/"/g, '""') + '"').join(";")).join("\n");
     const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
     const a = document.createElement("a");
@@ -117,6 +117,7 @@ function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr, techno
                       : (r.components.length < 5 ? preloz("komponenty") : preloz("komponent"))}
                     ${" · "}${fmt(n(r.density), 2)} g/ml
                   </div>
+                  ${r.poznamka && html`<div className="note" style=${{ marginTop: 4 }}>${r.poznamka}</div>`}
                   ${pl.tuzidlo && html`<div className="note"
                     title=${preloz("tužidlo {p} % váhy báze · houstne {h}", { p: fmt(pl.pomer * 100, 1), h: preloz(pl.hustnutiPopis) })}>
                     2K · pot life ${dobaText(pl.minut * MINUTA)}</div>`}
@@ -151,7 +152,8 @@ function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr, techno
                       style=${{ fontWeight: 400, color: "var(--warn)" }}>${preloz(SCHV_POPIS[stavSchvaleni(r)])}</div>`}
                     ${pl.tuzidlo && html`<div className="note" style=${{ fontWeight: 400 }}
                       title=${preloz("tužidlo {p} % váhy báze · houstne {h}", { p: fmt(pl.pomer * 100, 1), h: preloz(pl.hustnutiPopis) })}>
-                      2K · pot life ${dobaText(pl.minut * MINUTA)}</div>`}</td>
+                      2K · pot life ${dobaText(pl.minut * MINUTA)}</div>`}
+                    ${r.poznamka && html`<div className="note" style=${{ fontWeight: 400 }}>${r.poznamka}</div>`}</td>
                   <td><span className="tag">${r.type === "Pantone" ? "Pantone standard" : "Custom"}</span></td>
                   <td className="note">${r.zdroj ? r.zdroj.replace(/\.csv$/i, "") : preloz("ručně v aplikaci")}</td>
                   <td>${r.series}</td>

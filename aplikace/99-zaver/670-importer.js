@@ -96,11 +96,11 @@ function Importer({ setProducts, setRecipes, guardDelete, deletePw, setDeletePw,
     e.target.value = "";
   };
 
+  // Pořadí karet: import, formát, správa dat a heslo napřed, ceník materiálu až na konci.
+  // Ceník je dlouhá tabulka — když stál nahoře, muselo se k importu a mazání rolovat,
+  // přitom práce s daty je na téhle záložce to hlavní.
   return html`
     <${React.Fragment}>
-      <${CenyMaterialu} recipes=${recipes} materialy=${materialy} onUlozit=${onUlozitCeny}
-        stav=${cenyStav || { stav: "", chyba: "" }} mostOk=${mostOk}
-        smiMenit=${smiRole(role, "cenik")} />
       <div className="card">
         <h2>${preloz("Import produktů (katalog)")}</h2>
         <p className="hint">${preloz("CSV nebo JSON. Technologie se mapují automaticky: Tampontisk → PDP · Sítotisk (plast, papír) i rotační → SCR · Sítotisk (textil) → TXP · Transfer → TRS · Firing → FIR. Opakovaný import nic nezdvojí — existující produkty se aktualizují.")}</p>
@@ -211,6 +211,9 @@ Firemní zelená CUST-014;Custom;Printcolor 390;1,22;0E8A5F;Transparentní báze
         ${pwMsg && pwMsg.ok && html`<div className="okbox">${pwMsg.ok}</div>`}
         <button className="btn" style=${{ marginTop: 10 }} onClick=${savePw}>${preloz("Uložit")}</button>
       </div>`}
+      <${CenyMaterialu} recipes=${recipes} materialy=${materialy} onUlozit=${onUlozitCeny}
+        stav=${cenyStav || { stav: "", chyba: "" }} mostOk=${mostOk}
+        smiMenit=${smiRole(role, "cenik")} />
     <//>`;
 }
 

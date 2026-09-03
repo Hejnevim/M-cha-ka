@@ -62,7 +62,7 @@ i nová nahrávka té scény; scénář pro namluvení žije jen v HTML, aby se 
 titulku a text v hlase nemohly rozejít.
 
 Hlasy: česky `cs-CZ-AntoninNeural`, anglicky `en-GB-RyanNeural`, obojí
-tempem −5 % přes `edge-tts` (jednorázový skript ve scratchpadu, čte `rec`
+tempem −5 % přes `edge-tts` (`python nahraj_ukazku.py --scena N`, čte `rec`
 přímo z ukázky). Pole `cas` u scény se pak srovná na skutečnou délku
 nahrávky, aby pruh pod jevištěm doběhl s hlasem, ne dřív.
 

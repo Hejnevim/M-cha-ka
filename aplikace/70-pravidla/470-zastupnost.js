@@ -122,6 +122,7 @@ function csvNaPigmenty(text) {
     cena: i(/^(cena|price_per_unit|price)/), mena: i(/^(mena|m.na|currency)/),
     jednotka: i(/^(jednotka|unit)/),
     rada: i(/^(rada|.ada|series)/),
+    hustota: i(/^(hustota|density)/),
     zastupuje: i(/^(zastupuje|zastupnost|z.stupnost|nahrazuje)/),
     voc: i(/^(voc|t.kav|tekav|volatile)/),
     bezplist: i(/^(bezplist|bezp|sds|msds|safety)/),
@@ -159,6 +160,11 @@ function csvNaPigmenty(text) {
          otevře bez aplikace (u německých názvů Printcoloru se to nepozná);
          víc řad se odděluje svislítkem jako u zastupnosti */
       rada: ci.rada >= 0 ? String(r[ci.rada] || "").trim() : "",
+      /* hustota složky v g/ml — Marabu ji dává u každé báze (970 Weiss 1,62,
+         pigmentové báze 1,03–1,15), ostatní výrobci ne. Bere ji objem složky
+         na lístku a cena za litr; chybí-li, platí hustota receptury. Nula
+         ani prázdno hustota není — čte se jako neuvedená. */
+      hustota: ci.hustota >= 0 && n(r[ci.hustota]) > 0 ? n(r[ci.hustota]) : null,
       // za koho ta složka smí zaskočit; chybí-li sloupec, nezastupuje nikoho
       zastupuje: ci.zastupuje >= 0 ? seznamZastupnosti(r[ci.zastupuje]) : [],
       // starší soubor sloupce nemá — složka je pak bez údaje, čte se dál

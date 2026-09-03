@@ -1,15 +1,15 @@
 # Ink Recipe Manager — strukturovaný rozbor aplikace
 
 <!-- AUTO:stav -->
-> **Stav k 2. září 2026.** Čísla v úsecích označených `AUTO` generuje
+> **Stav k 3. září 2026.** Čísla v úsecích označených `AUTO` generuje
 > `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — nepřepisují
 > se ručně a nemohou se rozejít se skutečností. Text mimo ně píše člověk.
 
-> Poslední zapsaná změna ve vývojovém deníku: **2. září 16:57 — Blok krycí plochy stojí v pravém dolním rohu karty produktu — sloupec zakázkového listu se táhne až k dolnímu okraji karty a tlačítko Spočítat krycí plochu s poznámkou sjelo do rohu; přesun tlačítka výběru barvy z 16:44 vrácen**
+> Poslední zapsaná změna ve vývojovém deníku: **3. září 15:32 — Marabu TampaStar TPR je pátá databáze — 4 824 receptur (17 610 řádků, 3 747 s odstínem) z exportu XLSX novým prevod_marabu.py, každý pantone na standardní i vysoce krycí bázi; hustota receptury z gramů a mililitrů (1,03–1,81 g/ml) a hustota 26 bází v pigmenty.csv, kalkulace bere složka → receptura → paušál 1,20; receptury přešly z localStorage (6,7 MB nad strop 5 MB) do IndexedDB; ukázka scény 19 a 20 přepsané a nahrané v obou jazycích**
 
 | soubor | řádků | velikost |
 |---|---:|---:|
-| `aplikace/ (84 souborů)` | 19 539 | 1 187 kB |
+| `aplikace/ (84 souborů)` | 19 851 | 1 206 kB |
 | `index.html` | 112 | 6 kB |
 | `most.py` | 727 | 31 kB |
 | `pdf_spec.py` | 1 071 | 42 kB |
@@ -17,7 +17,7 @@
 | `prevod_printcolor.py` | 183 | 7 kB |
 | `kontrola_aplikace.py` | 169 | 7 kB |
 | `rozbor_aktualizuj.py` | 359 | 13 kB |
-| **celkem** | **22 373** | |
+| **celkem** | **22 685** | |
 <!-- /AUTO:stav -->
 
 ---
@@ -39,8 +39,9 @@ v dílně.
 | co | kolik |
 |---|---|
 | produktů v katalogu | 1 320 |
-| receptur celkem | 3 468 |
+| receptur celkem | 8 292 |
 | — `receptury_Ferro_Xpresssion.csv` (FIR) | 1 097 receptur / 3 986 řádků složení |
+| — `receptury_Marabu_TPR.csv` (PDP) | 4 824 receptur / 17 610 řádků složení, 1 077 bez odstínu |
 | — `receptury_PMS_660.csv` (TXP,PDP,SCR) | 778 receptur / 3 617 řádků složení, 2 bez odstínu |
 | — `receptury_PMS_786.csv` (PDP) | 814 receptur / 3 092 řádků složení |
 | — `receptury_RUCOLOR_10KK.csv` (PDP,SCR) | 776 receptur / 3 313 řádků složení |
@@ -355,7 +356,7 @@ podle dat, ne podle dojmu.
 | kód | technologie | výchozí g/m² | stav | databáze receptur |
 |---|---|---:|---|---|
 | `SCR` | Sítotisk (plast, papír) / rotační | 6,0 | ostrá | PMS_660 (778), RUCOLOR_10KK (776), vlastni (3) |
-| `PDP` | Tampontisk | 2,5 | ostrá | PMS_660 (778), PMS_786 (814), RUCOLOR_10KK (776), vlastni (3) |
+| `PDP` | Tampontisk | 2,5 | ostrá | Marabu_TPR (4 824), PMS_660 (778), PMS_786 (814), RUCOLOR_10KK (776), vlastni (3) |
 | `TXP` | Sítotisk (textil) | 14,0 | ostrá | PMS_660 (778), vlastni (3) |
 | `TRS` | Transfer | 18,0 | ostrá | vlastni (3) |
 | `FIR` | Firing — Low Temperature | 8,0 | ostrá | Ferro_Xpresssion (1 097), vlastni (3) |
@@ -395,6 +396,13 @@ podle dat, ne podle dojmu.
 - Custom receptury vždy odvozené z nahrané databáze, vázané na produkt + barvu
   + technologii + polohu, ukládané do sdíleného CSV včetně vazeb
 - Mazání vlastní receptury ve dvou krocích, pod stejným heslem jako ostatní mazání
+- Poznámka k receptuře („na tomhle materiálu dva průchody, sušit 2 min"): jeden
+  řádek textu, píše se v kartě Parametry tisku nebo v editoru, čte se v míchacím
+  režimu pod kombinací (tam se i dopisuje — tlačítko ＋/✎ Poznámka, uloží se
+  až tlačítkem nebo Enterem, Esc ruší jen úpravu), na míchacím lístku
+  a v seznamu receptur; u vlastních
+  receptur ve sloupci `poznamka` na konci CSV, u databázových ji drží prohlížeč
+  jako síto a kryvost (obnova ze souboru ji nepřepíše prázdnem)
 - Odstín potisku jako Pantone nebo CMYK, vzdálenost v Lab, nejbližší shoda
 - Import/export CSV a JSON, obnova katalogu
 
@@ -509,7 +517,7 @@ podle dat, ne podle dojmu.
 | **Parametry sít** | údaje výrobce tkaniny (otevřená plocha, tloušťka, teoretický objem). Do té doby se počítá paušálem a dopočet se označuje jako orientační. Kolik sít má skutečné údaje, je v úvodní tabulce |
 | **Hloubky leptu klišé (PDP)** | bez nich se u tampontisku spotřeba nenabízí |
 | **Koeficienty spotřeby** | všechny jsou zatím 1,00; vyjdou z porovnání uzavřených zakázek se skutečnou spotřebou |
-| **Hustoty barev Printcolor** | v PDF nejsou, počítá se s 1,20 g/ml |
+| **Hustoty barev Printcolor, RUCOLOR, Ferro** | v podkladech nejsou, počítá se s 1,20 g/ml; Marabu ji nese u každé receptury (z g a ml) a u každé báze (sloupec `hustota` v `pigmenty.csv`) — pro ostatní řady ji jde dopsat v ceníku ve sloupci g/ml z technického listu |
 | **Odstíny (hex)** | chybí u části receptur Printcolor (počty v úvodní tabulce) — bez nich neporadí prosvítání ani korekce, míchat podle receptury ale jde |
 | **SGPS** | čeká na přístup do firemního systému |
 
@@ -553,7 +561,7 @@ je fyzika tkaniny, druhé zkušenost dílny.
 | **Most** | Python 3, **jen standardní knihovna**. Volitelně `pypdfium2` pro hezčí náhled stránky PDF; bez něj se použije vlastní vykreslování |
 | **Formát dat** | CSV (středníkem, UTF-8 s BOM) a JSON. Vše čitelné v Excelu i v textovém editoru |
 | **Distribuce** | jeden soubor; volitelně GitHub Pages, aby šla aplikace otevřít odkudkoli |
-| **Vzhled** | měkký: karty vystupují z plochy stínem, ne rámečkem. Paleta, stíny, tvary, kresba ikon, písmo i rozestupy jsou v proměnných na jednom místě a ladí se v `barvy.html`. Rozbalovací nabídky kreslí stránka (`appearance:base-select`), ne prohlížeč — v Chrome od verze 135; jinde se použije nabídka prohlížeče |
+| **Vzhled** | měkký: karty vystupují z plochy stínem, ne rámečkem. Paleta, stíny, tvary, kresba ikon, písmo i rozestupy jsou v proměnných na jednom místě a ladí se v `barvy.html`. V hlavičce je logo jako maska z SVG (ve dne Reda, v noci Stricker) s přechodem dvou barev a stínem `drop-shadow`, laditelné v `barvy.html`; za ním leží kruh, který pole hledání ukazuje jako matné sklo (rozostřuje pozadí `backdrop-filter`). Rozbalovací nabídky kreslí stránka (`appearance:base-select`), ne prohlížeč — v Chrome od verze 135; jinde se použije nabídka prohlížeče |
 
 **Platformy**
 

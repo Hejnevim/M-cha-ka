@@ -185,6 +185,9 @@ function zapisCenyDoCsv(text, zmeny) {
   // ke které barevné řadě barva patří — bez toho je soubor pro člověka
   // hromada německých názvů bez ladu; víc řad odděluje svislítko
   const iRada = dopln("rada", /^(rada|.ada|series)/);
+  // hustota složky v g/ml — údaj výrobce (Marabu ji dává u každé báze); z ní
+  // je objem složky na lístku a cena litru, ne z paušálu receptury
+  const iHust = dopln("hustota", /^(hustota|density)/);
   radky[0] = hlavicka.join(";");
 
   // odkaz na bezpečnostní list může nést středník (URL s parametry) — bez
@@ -200,7 +203,7 @@ function zapisCenyDoCsv(text, zmeny) {
     const klic = String(b[iNazev] || "").trim().toLowerCase();
     const z = zbyva.get(klic);
     if (!z) continue;
-    while (b.length <= Math.max(iCena, iMena, iJed, iVoc, iList, iRada)) b.push("");
+    while (b.length <= Math.max(iCena, iMena, iJed, iVoc, iList, iRada, iHust)) b.push("");
     b[iCena] = z.cena == null || z.cena === "" ? "" : cislo(z.cena, 2);
     b[iMena] = z.mena || "";
     b[iJed] = z.jednotka || "";
@@ -209,6 +212,7 @@ function zapisCenyDoCsv(text, zmeny) {
     if (z.voc !== undefined) b[iVoc] = z.voc == null || z.voc === "" ? "" : cislo(z.voc, 2);
     if (z.bezplist !== undefined) b[iList] = bunka(z.bezplist || "");
     if (z.rada !== undefined) b[iRada] = bunka(z.rada || "");
+    if (z.hustota !== undefined) b[iHust] = n(z.hustota) > 0 ? cislo(z.hustota, 3) : "";
     radky[i] = b.join(";");
     zbyva.delete(klic);
   }
@@ -227,6 +231,7 @@ function zapisCenyDoCsv(text, zmeny) {
     if (z.voc !== undefined) b[iVoc] = z.voc == null || z.voc === "" ? "" : cislo(z.voc, 2);
     if (z.bezplist !== undefined) b[iList] = bunka(z.bezplist || "");
     if (z.rada !== undefined) b[iRada] = bunka(z.rada || "");
+    if (z.hustota !== undefined) b[iHust] = n(z.hustota) > 0 ? cislo(z.hustota, 3) : "";
     while (radky.length && !radky[radky.length - 1].trim()) radky.pop();
     radky.push(b.join(";"));
   }

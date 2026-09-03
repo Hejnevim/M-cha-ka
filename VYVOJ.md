@@ -330,7 +330,30 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 16:37 | Prázdná dlaždice ukazuje „—" jako šířka stěrky — Síto, Klišé, Kryvost a Povrch v kalkulaci i v editoru receptury; slovo „nevybráno" a jeho překlady zmizely ze slovníku |
 | 16:44 | Výběr barvy a polohy potisku stojí v pravém dolním rohu karty produktu — tlačítko dojelo k pravému okraji karty (553 → 750 px), štítky zůstaly vlevo u názvu; na telefonu má vlastní řádku a drží vpravo — vráceno v 16:57 (kap. 192) |
 | 16:57 | Blok krycí plochy stojí v pravém dolním rohu karty produktu — sloupec zakázkového listu se táhne až k dolnímu okraji karty a tlačítko Spočítat krycí plochu s poznámkou sjelo do rohu; přesun tlačítka výběru barvy z 16:44 vrácen |
+| 19:03 | Řádek u síta nese jeho teoretický objem — „Spotřeba odpovídá sítu 54-64 = 43,9 cm³/m²" — a rozpis vzorce (přenos × hustota × koeficienty) z karty Zakázka zmizel; původní znění je v NAVOD_PODKLADY.md |
+| 19:13 | Věta „Spotřeba odpovídá sítu … = … cm³/m²“ je pro síto a klišé zvlášť — portugalsky „à malha“ / „ao clichê“ místo „a a malha“ z kapitoly 193; mrtvé klíče slovníku „sítu“, „kryvost“, „viskozita“ smazané |
+| 19:14 | Štítek technologie pod logem IRM zmizel — technologie zůstává v hlavičce menu a v kartě produktu; hlavička 204,9 → 180,4 px na každé obrazovce |
+| 19:51 | Kruh za logem a hledáním — nápis IRM i pole hledání ho ukazují jako matné sklo (rozostření 16 px, papír 65 %); kruh 200 px kotvený ke středu hlavičky, v noci modrý jako čára; sedm proměnných v barvy.html |
+| 20:50 | Naladěný vzhled z barvy.html přešel do aplikace — čára v ploše vypnutá (síla 0), kruh za logem výš (66 px) a sytější (0,8), sklo rozostřené 37 px, stíny karet ve dne 38 px s bílou 60 % a černou 45 %, v noci 12 px s bílou 16 % a černou 45 %; 14 ze 212 proměnných v 020-promenne.css, tvary a rozvržení beze změny |
 
+### 3. září — hlavička čeká na nové logo
+| čas | co |
+|---|---|
+| 09:10 | Interaktivní nápis IRM z hlavičky odešel — s ním jeho sklo, ražba, barva, velikost i posuvníky v barvy.html; kruh za hledáním zůstává a hlavička čeká na nové logo |
+| 09:33 | V hlavičce je nové logo — ve dne Reda, v noci Stricker; tvary vytažené z předlohy LOGA REDA STRICKER.pdf jako masky, barva, přechod, velikost, poloha, krytí i stín se ladí v barvy.html |
+| 09:50 | Naladěné logo z barvy.html přešlo do aplikace — 150 px, krytí 0,45, přechod 350° (ve dne světlá → tmavá šeď, v noci grafit → světlá), tvrdý stín 14 px, kruh za logem vypnutý; 11 z 214 proměnných |
+| 09:54 | Klik na logo vrací na Kalkulaci — jako dřív nápis IRM; logo je tlačítko i pro klávesnici (Enter, mezerník), s nápovědou ve třech jazycích |
+| 10:42 | Poznámka k receptuře — jeden řádek textu u receptury („na tomhle materiálu dva průchody“), píše se v Parametrech tisku nebo v editoru, čte se v míchacím režimu pod kombinací, na míchacím lístku a v seznamu receptur; u vlastních receptur ve sloupci poznamka v CSV; podnět z easyMEMO 2.0 |
+| 11:05 | Poznámku k receptuře jde dopsat i v míchacím režimu — tlačítko ＋/✎ Poznámka pod kombinací otevře pole, uloží se až tlačítkem Uložit nebo Enterem; Esc v poli ruší jen úpravu, míchání nezavře |
+| 14:05 | Záložka Import / data začíná importem produktů, formátem receptur, správou dat a heslem; ceník materiálů (94 složek, 6 017 px) přešel na konec — k importu se už neroluje přes celou tabulku cen |
+| 14:10 | Průzkum míchacího software a zdrojů receptur (PRUZKUM_MICHACI_SOFTWARE.md): přes 170 vyhledávání, 250 stránek; Coates C‑MIX 2000 dává 6 593 receptur zdarma v CSV, transfer jen přes Lancer ColorPro / MagnaMix / CHT ColorFinder / Avient IMS, MS 660 je řada na syntetické tkaniny, ne na trička; Marabu na pokyn vynechán |
+| 14:29 | Tabulka míchacího režimu ukazuje u každé složky i % a ml — stejné sloupce a stejný význam jako na míchacím lístku; na telefonu roluje sama v sobě (596 px obsahu v 361px sloupci, stránka 391 = 391) |
+| 14:36 | Gramové sloupce tabulky navážení nesou jednotku v hlavičce — „navážit g", „kumulativně g", „ze zbytku g" jako na lístku; vedle „%" a „ml" bylo holé „navážit" bez jednotky |
+| 14:50 | Asistent navážení říká krok i v ml a % — u jména složky podíl dávky, v řádku „přidat" objem z hustoty receptury, v tabulce asistenta sloupec ml; aditiva bez hustoty mají pomlčku |
+| 15:10 | Cesty k databázím Coates, Avient, Tiflex, Dubuit a Engler (registrace, aplikace, kontakty) v průzkumu, oddíl 10; „SK“ čeká na upřesnění. Do konkurence.html nová karta z průzkumu: funkce, data, procesy a výběr k převzetí (28 položek) |
+| 15:32 | Čtyři nové skills (úložiště prohlížeče, proklikání aplikace, podklady výrobců, uzavření změny) a dva nástroje: denik.py zapisuje kapitolu s číslem braným až při zápisu, nahraj_ukazku.py nahrává scény ukázky a srovnává cas na délku mp3 |
+
+| 15:32 | Marabu TampaStar TPR je pátá databáze — 4 824 receptur (17 610 řádků, 3 747 s odstínem) z exportu XLSX novým prevod_marabu.py, každý pantone na standardní i vysoce krycí bázi; hustota receptury z gramů a mililitrů (1,03–1,81 g/ml) a hustota 26 bází v pigmenty.csv, kalkulace bere složka → receptura → paušál 1,20; receptury přešly z localStorage (6,7 MB nad strop 5 MB) do IndexedDB; ukázka scény 19 a 20 přepsané a nahrané v obou jazycích |
 ---
 
 ## Co aplikace je
@@ -859,30 +882,38 @@ se známým výsledkem (viz čísla u bodů 3 a 8).
 
 - **Barevné databáze pro zbývající technologie.** Odemčené jsou všechny
   (`parametry/technologie.csv`), ale transfer stojí jen na vlastních
-  recepturách dílny. Stav k 20. 8. 2026:
+  recepturách dílny. Stav k 3. 9. 2026:
 
   | technologie | databáze | receptur | stav |
   |---|---|---|---|
   | FIR | Ferro Xpression | 1 097 | máme |
-  | PDP | Printcolor MS 786 + MS 660 · RUCOLOR 10KK | 2 368 | máme |
+  | PDP | Printcolor MS 786 + MS 660 · RUCOLOR 10KK · Marabu TampaStar TPR | 7 192 | máme |
   | TXP | Printcolor MS 660 | 778 | ověřit, zda je to řada na textil |
   | SCR | Printcolor MS 660 · RUCOLOR 10KK | 1 554 | RUCOLOR sedí, MS 660 ověřit |
   | TRS | žádná | 3 vlastní | **chybí celá** |
 
-  **Čeká dalších 12 barevných řad.** Podklady se teprve sbírají a přiřazovat
+  **Čeká dalších 11 barevných řad** (z dvanácti plánovaných je hotová Marabu
+  TPR, kap. 209). Podklady se teprve sbírají a přiřazovat
   se budou po jedné, jak budou přicházet — tabulka výš proto ještě poroste
   a přiřazení k technologiím se bude měnit. Do ukázky (scéna 19) to patří,
   aby nevypadala jako hotový stav.
 
-  U nových databází stačí PDF: převody jsou hotové pro obojí, co dílna
-  dostává — Printcolor easyMEMO (`prevod_printcolor.py`, řídí se stavbou
-  dokumentu, ne konkrétními čísly) i tabulka RUCOINX (`prevod_rucolor.py`,
-  bázi pozná podle polohy čísla na stránce).
+  U nových databází stačí podklad od výrobce: převody jsou hotové pro
+  všechno, co dílna dostává — Printcolor easyMEMO (`prevod_printcolor.py`,
+  řídí se stavbou dokumentu, ne konkrétními čísly), tabulka RUCOINX
+  (`prevod_rucolor.py`, bázi pozná podle polohy čísla na stránce) i export
+  XLSX z Marabu ColorManageru (`prevod_marabu.py`; stejný tvar mají už
+  stažené podklady Marabu PP new a LIP).
 - **Hustota barvy a chybějící odstíny.** Hustotu neuvádí ani jedna ze čtyř
-  nakoupených databází, aplikace počítá s 1,20 g/ml. Odstín se dohledal podle
-  názvu pantonu z jiných databází, ale chybí u 460 receptur: 223 MS 660,
-  190 MS 786, 47 RUCOLOR 10KK. Bez něj aplikace neporadí s prosvítáním ani
-  s korekcí. (Dřív tu stálo u MS 786 193 — přepočtem ze souboru vychází 190.)
+  starších nakoupených databází (u Ferro je 1,2 v CSV jen dosazená konstanta),
+  aplikace u nich počítá s 1,20 g/ml; Marabu TPR ji nese v každé receptuře
+  (z gramů a mililitrů navážek, 1,03–1,81 g/ml, kap. 209). Podklady prošlé
+  3. 9.: Printcolor, RUCOLOR ani Coates C‑MIX mililitry nemají. Odstín se dohledává
+  z tabulky `parametry/odstiny_pantone.csv` (3. 9. 2026: 2 067 pantonů, 601
+  nově z columbiaomnistudio.com); chybí u 1 079 receptur: 1 077 Marabu TPR
+  (pantony řad 4000, 2639–2644, 10xxx a jmenné, které webové vzorníky
+  nemají) a 2 MS 660 — u MS 786 a RUCOLOR už žádná. Bez něj aplikace
+  neporadí s prosvítáním ani s korekcí.
 - **SGPS** (podnikový systém) je zatím v ukázkovém režimu — čeká se na informaci
   od IT, jaké rozhraní nabízí. Most je připravený na obě varianty: soubor
   s exportem i HTTP rozhraní, přepíná se v konfiguraci.
@@ -8528,3 +8559,840 @@ karty; pravý okraj 750 px beze změny; třetí dlaždice výška 383,42 →
 315 px, `scrollWidth` 391 — pod zlomem se nic nepohnulo.
 `kontrola_aplikace.py` 0, `prekryv.py` (1400 / 1100 / 820 px, oba režimy)
 0, `mapa.py` přegenerován, `rozbor_aktualizuj.py` přepsal jen úsek *stav*.
+
+## 193. Řádek u síta nese jeho objem — rozpis vzorce z kalkulace zmizel
+
+**Problém.** Pod řádkem „Spotřeba odpovídá sítu 54-64." (a pod hlášením „Ze síta
+54-64 vychází 36,8 g/m² — teď je nastaveno …") stál v kartě Zakázka drobný
+rozpis: „43,9 cm³/m² teoreticky (dopočteno z geometrie tkaniny — orientační)
+× 0,70 přenos × 1,20 g/ml hustota", a za tím koeficienty kryvosti, materiálu,
+podkladu a viskozity, pokud nebyly rovny 1. Tiskař u váhy z toho potřebuje
+jediné číslo — kolik barvy síto teoreticky pustí. Zbytek je vysvětlivka, a ty
+v aplikaci nejsou (rozhraní je tiché, kap. 143).
+
+**Co se změnilo.** Poznámka je z části 240 pryč, včetně klíče slovníku
+„× {p} přenos × {h} g/ml hustota" (en i pt). Zelený řádek říká „Spotřeba
+odpovídá sítu 54-64 = 43,9 cm³/m²" — nový klíč „Spotřeba odpovídá {co} {mesh}
+= {v} cm³/m²" nahradil „Spotřeba odpovídá {co} {mesh}." (en „Consumption
+matches the mesh 54-64 = 43,9 cm³/m²", pt „O consumo corresponde a a malha …").
+Hlášení „Ze síta … vychází … — teď je nastaveno …" s tlačítkem Použít zůstalo,
+jen bez rozpisu pod sebou. Klíče „teoreticky" a „(dopočteno z geometrie
+tkaniny — orientační)" ve slovníku zůstávají — používá je záložka Síta
+(část 360), kde rozpis vzorce dál stojí; tam se změna netýkala. Původní
+znění poznámky je v `NAVOD_PODKLADY.md` (Zakázka) i s tím, co „dopočteno
+z geometrie tkaniny" znamená — z obrazovky to teď nejde poznat nikde.
+
+**Dvě vlastní chyby po cestě.** Skript úpravy vzor nejdřív nenašel: části
+mají konce řádků CRLF a vzor psaný s LF seděl po řádcích, ale ne vcelku —
+skript si teď konce řádků bere ze souboru. A klik snímkovače na tlačítko
+„Použít 36,8 g/m²" se dvakrát nechytil (y 897 i 1 297 px, ve vyšším okně
+také): po výběru produktu leží přes stránku okno „Barva a poloha potisku"
+a myš trefila jeho překryv. Tlačítko se stisklo skriptem ve výrazu `--po`,
+který umí počkat na Promise, a teprve po 1,5 s se četl text.
+
+**Změřeno:** slovník zkouškou v Node proti skutečné části 127: 1 534 klíčů,
+0 duplicit, každý má en i pt, jmenovky sedí; staré klíče „Spotřeba odpovídá
+{co} {mesh}." a „× {p} přenos × {h} g/ml hustota" ve slovníku nejsou.
+Prohlížeč (`snimek.py`, TXP, produkt 11031, PANTONE 485 C, po stisku Použít):
+pole spotřeby 14 → 36,8 g/m², box `.specbar` s textem „Spotřeba odpovídá sítu
+54-64 = 43,9 cm³/m²", uvnitř 0 prvků `.note`, výška 38,19 px; anglicky
+`lang=en`, „Consumption matches the mesh 54-64 = 43,9 cm³/m²", táž výška
+38,19 px. Před změnou měl box pod řádkem ještě poznámku (`.note` 1).
+`kontrola_aplikace.py` 0, `prekryv.py` (všechny šířky, oba režimy) 0,
+`mapa.py` přegenerován, `rozbor_aktualizuj.py` přepsal jen úsek *stav*.
+
+## 194. Věta u síta je pro síto a klišé zvlášť — portugalština přestala říkat „a a malha“
+
+**Problém.** Kapitola 193 změřila portugalský řádek „O consumo corresponde
+a a malha 54-64 = 43,9 cm³/m²“ a nechala ho tak. Zdvojené „a“ vzniklo
+skládáním věty z předložky a slova: klíč „Spotřeba odpovídá {co} {mesh}…“
+měl pt „O consumo corresponde a {co}…“ a za {co} se dosazoval klíč „sítu“
+s pt „a malha“ — a stejně vadně to skládal už původní klíč „Spotřeba
+odpovídá {co} {mesh}.“ z dřívějška. Vedle toho po odstranění rozpisu
+v kapitole 193 zůstaly ve slovníku klíče „kryvost“ a „viskozita“, které
+volala jen ta poznámka; zbylé výskyty těch slov v kódu jsou názvy sloupců
+CSV (části 380, 420, 160), ne texty obrazovky.
+
+**Co se změnilo.** Věta je ve slovníku pro síto a pro klišé celá zvlášť,
+jako sousední „Ze síta {mesh} vychází…“ / „Z klišé {mesh} vychází…“:
+„Spotřeba odpovídá sítu {mesh} = {v} cm³/m²“ (en „Consumption matches mesh
+{mesh} = {v} cm³/m²“, pt „O consumo corresponde à malha {mesh} = {v} cm³/m²“)
+a „Spotřeba odpovídá klišé {mesh} = {v} cm³/m²“ (en „…cliché…“, pt „…ao
+clichê…“). Část 240 vybírá klíč podle `zeSita.sito.klise` a dosazuje jen
+{mesh} a {v}; komentář u řádku říká, proč se věta neskládá. Klíč „sítu“ je
+smazaný (volal ho jen tenhle řádek), „klišé“ zůstává — používá ho odemykání
+technologií (část 450). Klíče „kryvost“ a „viskozita“ jsou smazané. Úpravy
+šly skriptem s kontrolou, že je každý vzor v souboru právě jednou, a s konci
+řádků převzatými ze souboru (CRLF).
+
+**Co se nechalo být.** Klíč „klišé“ má en „the cliché“ / pt „o clichê“
+a v části 450 se za něj dosazuje počet („3 klišé“) — se členem to v cizím
+jazyce sedí špatně už dnes, ale je to jiná věta a jiná kapitola.
+
+**Změřeno** (`snimek.py`, 1600 px, TXP podstrčené do `localStorage`, produkt
+11031 podle ref, síto 54-64 z pravidla, Použít 36,8 g/m² stisknuté z `--po`,
+text čtený po překreslení): česky „Spotřeba odpovídá sítu 54-64 = 43,9
+cm³/m²“, anglicky „Consumption matches mesh 54-64 = 43,9 cm³/m²“, portugalsky
+„O consumo corresponde à malha 54-64 = 43,9 cm³/m²“; box `.specbar` ve
+všech třech 38,19 px, `lang` cs / en / pt. Před opravou tentýž postup
+vrátil „O consumo corresponde a a malha 54-64 = 43,9 cm³/m²“. Ve slovníku
+ani v částech nezůstal výskyt `"sítu"`, `"kryvost":` ani `"viskozita":`
+jako klíče (0, 0, 0). `node --check` částí 127 a 240 bez chyby,
+`kontrola_aplikace.py` 0, `prekryv.py` 0 (1920 / 1400 / 1100 / 820 px, oba
+režimy), `mapa.py` přegenerován, `rozbor_aktualizuj.py` bez změny (řádky
+−2 v části 127, +2 v části 240). S běžícím mostem aplikace při každém
+načtení přepsala `databaze barev/receptury_vlastni.csv` — týž obsah, čtyři
+řádky jedné receptury v jiném pořadí; po měření obnoven ze zálohy bajt po
+bajtu.
+
+## 195. Technologie stojí v hlavičce jen jednou — štítek pod logem IRM zmizel
+
+**Problém.** Pod nápisem IRM v hlavičce visel štítek „TXP — Sítotisk“
+(98,31 × 23,5 px). Tatáž technologie je vidět v hlavičce menu
+(„▸ TECHNOLOGIE · TXP“, kap. 123) a v kartě Vybraný produkt jako štítek
+„TXP — Sítotisk (textil)“ — třikrát na jedné obrazovce, a ten pod logem
+nejméně přesně (název zkrácený o závorku). Zvedal hlavičku o 24,5 px na
+každé obrazovce a v každé záložce, i tam, kde technologie nehraje roli.
+
+**Co se změnilo.** Blok štítku v části 210 (hlavička App) je pryč — změna
+v kódu je z 17:18, zapsaná a změřená je až teď. Slovník se neměnil: názvy
+technologií překládá dál karta produktu a menu. Hlavička má zpět výšku
+samotného loga. Věta z kapitoly 123 „údaj zůstává vidět dvakrát: štítek
+pod logem a hlavička v menu“ platí nově pro dvojici menu a karta produktu.
+
+**Změřeno** (`snimek.py`, 1600 px, TXP podstrčené do `localStorage`,
+produkt 11031; původní stav změřený s částí 210 z posledního commitu
+dočasně na místě a obnovenou bajt po bajtu): hlavička 204,89 → 180,39 px,
+`main.wrap` začíná 204,89 → 180,39 px; `header .tag.tech` 1 → 0; logo
+247,97 × 162,39 px beze změny; štítek v kartě produktu „TXP — Sítotisk
+(textil)“ beze změny (en „TXP — Screen printing (textile)“, pt „TXP —
+Serigrafia (têxtil)“). `kontrola_aplikace.py` 0, `prekryv.py` 0
+(1920 / 1400 / 1100 / 820 px, oba režimy), `mapa.py` přegenerován,
+`rozbor_aktualizuj.py` bez změny.
+
+## 196. Kruh za logem a hledáním — nápis IRM i pole hledání ho ukazují jako matné sklo
+
+**Problém.** Plocha pod aplikací nesla jen šikmou čáru (kap. 141 a dál);
+hlavička s nápisem IRM a pole hledání pod ní stály na prázdné šedi. Předloha
+od uživatele: kruh v pozadí, jehož horní část je ostrá a všechno, co leží
+za polem hledání a za nápisem, je rozostřené jako za mléčným sklem.
+
+**Co se změnilo.** Za logem leží kruh (`.hdr::before`, část 3) — je to
+prvek hlavičky, ne plochy, protože plocha (`body::before`) stojí při
+rolování na místě a kruh musí jet s logem a hledáním. Kotví se ke středu
+hlavičky: mřížka `1fr auto 1fr` drží logo přesně uprostřed, takže týž bod
+sdílí i kresba v nápisu. Záporný z-index ho pošle pod obsah stránky —
+hlavička ani nic nad ní vrstvu nezakládá, kruh tedy končí pod polem hledání
+a pod kartami, které ho zakryjí, a nad čárou v ploše. Na h1 kotvit nejde:
+h1 má na najetí `opacity`, a to by z něj udělalo vrstvu — kruh by při
+najetí myší vyskočil nad pole hledání.
+
+Pole hledání katalogu (`.hledani-katalog .searchbar`, část 8) je matné
+sklo: papír je průsvitný podle krytí skla a `backdrop-filter: blur()`
+rozostří vše pod polem — kruh, čáru i plochu. Hledání šarží žije v kartě,
+kde pod ním nic není, a zůstává neprůhledné.
+
+Nápis IRM rozostřit jen do tvaru písmen prohlížeč neumí — `backdrop-filter`
+bere celý obdélník rámečku a kolem písmen by vznikl rozmazaný obdélník.
+Místo toho se do písmen kreslí týž kruh s měkkým okrajem: rozostřený kotouč
+je kruhový přechod, jehož okraj se rozplývá na šířku rozostření skla.
+Kreslí ho druhý opis nápisu (`h1::after`, `content:"IRM"`) přes první —
+stejné písmo, stejný rámeček, barva jen uvnitř písmen
+(`background-clip:text`), mimo kruh průhledný, takže tam zůstává šedý
+nápis se stínem. Síla je zeslabená o krytí skla — stejně jako kruh zeslabí
+papír v poli hledání; nápis papír nemá, je barvy plochy.
+
+Sedm nových proměnných v `:root` a v `barvy.html` (skupina „Plocha
+a papír" a posuvníky tvarů):
+
+| proměnná | výchozí | co řídí |
+|---|---|---|
+| `--pozadi-kruh-barva` | #FF001A / v noci #0085D6 | barva kruhu, táž jako u čáry |
+| `--pozadi-kruh-prumer` | 200 px | průměr |
+| `--pozadi-kruh-x`, `-y` | 0 / 100 px | střed kruhu od středu hlavičky, kladné y dolů |
+| `--pozadi-kruh-sila` | 0,6 | krytí kruhu nad plochou |
+| `--sklo-rozostreni` | 16 px | poloměr rozmazání — pole i nápis |
+| `--sklo-kryti` | 0,65 | podíl papíru v poli hledání (1 = neprůhledné jako dřív) |
+
+**Vlastní chyba po cestě.** První verze psala `background-clip:text` před
+zkratkou `background:` — zkratka ořez vrací na `border-box`, sonda vrátila
+`backgroundClip: "border-box"` a na snímku ležel kolem nápisu měkký
+obdélník místo kresby v písmenech. Ořez stojí až za zkratkou, s komentářem
+proč.
+
+**Změřeno** (`sonda.py` a `snimek.py`, 1 584 px okna, oba režimy): střed
+hlavičky 792 / 90,20 px = střed h1 792 / 90,20 px (shodné, kotva sedí);
+kruh 200 × 200 px, střed 792 / 190,19 px, `z-index` −1, `opacity` 0,6,
+barva rgb(255, 0, 26) ve dne, rgb(0, 133, 214) v noci; pole hledání
+543,84–1 040,16 × 200,39–270,39 px, pozadí `color(srgb .929 .929 .929 /
+.65)` ve dne a `color(srgb .192 .220 .247 / .65)` v noci,
+`backdrop-filter: blur(16px)`; nápis `radial-gradient(circle at 50%
+calc(50% + 100px), color(srgb 1 0 .102 / .21) 84px, transparent 116px)`,
+`background-clip: text`, `text-shadow: none`. Na snímcích 1 000 × 360 px
+je horní oblouk kruhu ostrý mezi písmeny a polem, v poli rozmazaný
+a zesvětlený papírem, v dolní polovině písmen měkce zbarvený; na 400 px
+(telefon) kruh drží střed nápisu a vyčnívá pod polem hledání.
+`kontrola_aplikace.py` 0, `prekryv.py` 0 (1920 / 1400 / 1100 / 820 px, oba
+režimy), `barvy.html` přegenerován: 4 posuvníky kruhu, 2 skla, 1 barva
+(137 posuvníků tvarů celkem), `mapa.py` přegenerován,
+`rozbor_aktualizuj.py` spuštěn.
+
+## 197. Plocha bez čáry, kruh výš v nápisu a sytější stíny — naladěné hodnoty z barvy.html přešly do aplikace
+
+**Problém.** Vzhled se ladí posuvníky v `barvy.html`, ale co se tam nastaví,
+žije jen v otevřené stránce nástroje. Aplikace sama držela dál starý stav:
+čáru přes celou plochu, kruh 100 px pod středem hlavičky a stíny z kapitoly
+143. Nástroj se navíc při dalším spuštění generuje ze skutečného CSS, takže
+by naladěné hodnoty při příštím `barvy_nastroj.py` zmizely. Výstup nástroje
+(blok `:root` se světlým i tmavým režimem a úsekem barev stránek) se proto
+přenesl do `aplikace/10-styl/020-promenne.css`.
+
+**Co se změnilo.** Z 212 proměnných se liší 14, všechny v plochách a stínech;
+tvary, písmo, rozestupy, rozvržení, míchací režim ani úsek barev stránek se
+nepohnuly (porovnáno skriptem po proměnných, 0 rozdílů po zápisu).
+
+| proměnná | bylo | je |
+|---|---|---|
+| `--pozadi-cara-sila` | 1 | 0 — čára je vypnutá, barva, tloušťka i poloha zůstávají pro návrat |
+| `--pozadi-kruh-sila` | 0,6 | 0,8 |
+| `--pozadi-kruh-y` | 100 px | 66 px — kruh sedí výš, horní oblouk je v písmenech IRM |
+| `--sklo-rozostreni` | 16 px | 37 px |
+| `--neu` (den) | 24 px, bílá 39 %, černá 38 % | 38 px, bílá 60 %, černá 45 % |
+| `--neu-sm` (den) | 15 px, bílá 37 %, černá 42 % | 10 px, bílá 57 %, černá 49,5 % |
+| `--neu-in` (den) | černá 34 %, bílá 37 % | černá 40,5 %, bílá 57 % |
+| `--neu-in-lg` (den) | černá 38 %, bílá 39 % | černá 45 %, bílá 60 % |
+| `--modal-shadow` (den) | 48 px, černá 76 % | 76 px, černá 90 % |
+| `--neu` (noc) | 20 px, bílá 8 %, černá 30 % | 12 px, bílá 16 %, černá 45 % |
+| `--neu-sm` (noc) | 12 px, bílá 7,6 %, černá 33 % | 12 px, bílá 15,2 %, černá 49,5 % |
+| `--neu-in` (noc) | černá 27 %, bílá 7,6 % | černá 40,5 %, bílá 15,2 % |
+| `--neu-in-lg` (noc) | černá 30 %, bílá 8 % | černá 45 %, bílá 16 % |
+| `--modal-shadow` (noc) | 40 px, černá 60 % | 24 px, černá 90 % |
+
+Ve dne jsou stíny karet delší a sytější (karty vystupují měkce a zdaleka),
+malé prvky mají stín kratší, aby zůstal u hrany a nesplýval se stínem karty
+pod nimi. V noci jsou stíny kratší a dvojnásob světlé nahoře — slabší
+„osvícení" na zesvětlené ploše zanikalo. Komentáře v `020-promenne.css`,
+které citovaly stará procenta (37–39 % ve dne, 7,6–8 % v noci), jsou
+přepsané na nová čísla; u čáry stojí, že síla 0 ji vypíná a proč zůstávají
+ostatní hodnoty nastavené.
+
+**Co se nechalo být.** Záložní mapa `VYCHOZI_TVARY` v `barvy_nastroj.py`
+se nesahala: nástroj čte hodnoty ze světlého bloku CSS a mapu použije jen
+pro proměnnou, kterou v CSS nenajde. Je v ní víc zastaralých hodnot (čára
+96 px proti 14 px, posun 0 / −50vh proti −47vw / −44vh), ale do výstupu se
+nedostanou.
+
+**Změřeno** (`sonda.py`, oba režimy): `--pozadi-cara-sila` 0 a `opacity`
+pásu `body::before` 0; kruh `.hdr::before` `opacity` 0,8, `top` 156,19 px
+(polovina hlavičky 90,2 + 66); pole hledání `backdrop-filter: blur(37px)`;
+karta `.card` ve dne `rgba(255,255,255,.6) −11 −11 38 px, rgba(0,0,0,.45)
+11 11 38 px`, v noci `rgba(255,255,255,.16) −10 −10 12 px, rgba(0,0,0,.45)
+10 10 12 px`; tlačítko `.btn` ve dne `.57 / .494` na 10 px, v noci
+`.153 / .494` na 12 px. Na snímcích 1 600 × 1 000 px (den i noc) plocha
+bez čáry, kruh červený ve dne a modrý v noci s horním obloukem v písmenech
+a rozmazaný pod polem hledání. `kontrola_aplikace.py` 0, `barvy.html`
+přegenerován (17 barev, 9 stínů + 5 logo, 21 tvarů a ikon, 10 písma,
+9 rozestupů, 88 míchacího režimu, 5 karet), `mapa.py` a
+`rozbor_aktualizuj.py` spuštěny. `prekryv.py` se nepouštěl — písmo,
+řádkování ani rozestupy se nezměnily.
+
+## 198. Interaktivní nápis IRM z hlavičky odešel — hlavička čeká na nové logo
+
+**Problém.** Uprostřed hlavičky stál nápis IRM jako klikací prvek: písmo
+116 px ražené do plochy, kruh za ním prosvítal písmeny jako matné sklo,
+klik vracel na kalkulaci a najetí myší ho ztlumilo. Logo se má nahradit
+něčím jiným. Kdyby se odebral jen nápis, zůstala by po něm v kódu barva,
+ražba a velikost, které už nikdo nečte, pět posuvníků v `barvy.html`,
+které nic neladí, a překladový klíč bez místa, kde se ukáže — přesně ten
+druh balastu, který příště nikdo nepochopí.
+
+**Co se změnilo.** Odešlo všechno, co nápis drželo, ne jen nápis:
+
+| co | kde |
+|---|---|
+| obal a `<h1>IRM</h1>` s klikem a nápovědou „Zpět na Kalkulaci" | `30-app/210-app.js` |
+| klíč „Zpět na Kalkulaci" (en, pt) | `20-zaklad/127-jazyk.js` |
+| `.hdr h1`, sklo v písmenech `.hdr h1::after`, `.hdr h1:hover` | `10-styl/030-zaklad.css` |
+| `--logo` a `--logo-shadow` v obou motivech, `--logo-velikost` | `10-styl/020-promenne.css` |
+| skupina barev *Logo*, pět posuvníků *Stínování loga*, posuvník *Velikost loga*, výpočet `logoCss` a čtení `--logo-shadow` ze zdroje | `barvy_nastroj.py` → `barvy.html` |
+| ukázkový nápis VZHLED v hlavičce ladicí stránky (stálo na pravidle `.hdr h1`) | `barvy.html` |
+
+**Co zůstává.** Kruh v hlavičce (kap. 196) — pole hledání ho dál ukazuje
+jako matné sklo. Kotví se pořád ke středu hlavičky, takže nové logo si ten
+bod najde bez měření; komentáře u kruhu i u jeho proměnných jsou přepsané,
+aby neodkazovaly na nápis, který tam není. Skupina *Kruh* v `barvy.html`
+zůstává celá, jen popisky říkají „za hledáním" místo „za logem".
+
+**Co se nechalo být.** `dist/styl.css` a `ds-bundle/` nesou starší kopii
+stylů i s pravidlem `.hdr h1` — jsou to samostatné, dávno neaktualizované
+balíky se starou paletou, ne zdroj aplikace.
+
+**Změřeno:** sondou při 1 584 px, oba motivy shodně: hlavička 180,39 →
+81 px vysoká; `h1` dřív 247,97 × 162,39 px, `cursor: pointer`, title „Zpět
+na Kalkulaci" — teď v DOM není. Kruh: střed 792 px zleva beze změny, shora
+156,19 → 106,5 px (66 px pod středem hlavičky 40,5 px); pole hledání shora
+219,39 → 120 px, tedy dál leží v kruhu (200 px, dolní okraj 206,5 px).
+Tokeny `--logo`, `--logo-shadow`, `--logo-velikost` prázdné v obou
+motivech (dřív `#c9c9c9` / `#464d53`, dvojitý stín 2 px, 116 px).
+`kontrola_aplikace.py` 0, `prekryv.py` 0 (1920 / 1400 / 1100 / 820 px, oba
+režimy), `node --check` obou částí bez chyby, `barvy_nastroj.py` sestavil
+16 barev, 9 stínů, 21 tvarů a ikon, 9 písma (+2 řezy), 9 rozestupů —
+o jednu barvu, pět stínů a jedno písmo méně než v kap. 197. Snímky 1 600
+× 1 000 px a 400 px: v hlavičce jen menu a přepínač motivu, kruh vyčnívá
+nad polem hledání. `poradi.txt` beze změny, nesestavovalo se; `mapa.py`
+a `rozbor_aktualizuj.py` spuštěny.
+
+## 199. V hlavičce je nové logo — ve dne Reda, v noci Stricker — a ladí se celé v barvy.html
+
+**Problém.** Po odchodu nápisu IRM (kap. 198) byla hlavička prázdná.
+Dodaná náhrada jsou dvě loga: Reda pro světlý režim a Stricker pro tmavý,
+s požadavkem mít nad jejich vzhledem plnou moc v `barvy.html`. Obrázek
+vložený jako PNG by to nesplnil — barva obrázku se z CSS neladí, jen
+filtruje, a stín kolem PNG je rámeček, ne tvar. A kreslit loga od oka
+(kap. 143, 11:29) se už jednou ukázalo jako slepá ulička.
+
+**Odkud jsou tvary.** Z předlohy `LOGA REDA STRICKER.pdf` (CorelDRAW,
+1 strana, 3. září 8:29). Reda je v ní vektor — tři podcesty (písmeno r,
+vnější obrys s výběžkem, vnitřní kruh), 32 příkazů, rámeček
+61,39 × 61,27 pt; do SVG se jen přepsaly s obrácenou osou y, nic se
+nekreslilo. Stricker je v PDF jen rastr 470 × 471 px v CMYK (zeleno‑modrý
+firemní přechod, bez průhlednosti). Obrys se z něj vytáhl skriptem ve
+scratchpadu: krytí = nejsilnější kanál CMYK, práh 95,5 (polovina krytí
+zelené části, schválně mimo celé číslo, aby žádný bod nepadl do středu
+pixelu), marching squares s body interpolovanými po sub‑pixelech
+a s orientovanými úsečkami (tvar po levé ruce), řetězení konec → začátek.
+Obrys vyšel jako **jedna smyčka 4 178 bodů** — tvar se na levém a pravém
+kraji dotýká hrany obrázku (oříznutý na 12 px), tam se dva řetězce napojily
+po hraně. Douglas–Peucker s tolerancí 0,35 px ji zjednodušil na 171 bodů;
+při 116 px v hlavičce je to 0,09 px, tedy pod rozlišením obrazovky.
+
+**Co se změnilo.** V hlavičce je prvek `.logo` (prostřední sloupec mřížky,
+tam, kde stál nápis). Není to obrázek, ale **maska**: SVG vložené jako data
+URI v `030-zaklad.css` (Reda 919 znaků, Stricker 2 085), pod ní přechod dvou
+barev, nad ní `filter: drop-shadow` — stín tak sleduje tvar, ne čtverec.
+Který tvar se ukáže, říká `--logo-tvar` (`--logo-reda` ve dne,
+`--logo-stricker` v noci) — prohození log mezi režimy je změna jednoho
+slova. Data URI schválně nejsou v `:root`: `barvy.html` čte `:root`
+po hodnotách a tvar není hodnota k ladění.
+
+Proměnné v `020-promenne.css` a jejich ovládání v `barvy.html`:
+
+| proměnná | kde v barvy.html | výchozí |
+|---|---|---|
+| `--logo-barva`, `--logo-barva-2` (na režim) | barvy → skupina *Logo* | den #969a9e / #969a9e (Reda je jednobarevná), noc #74848d / #909ca4 |
+| `--logo-uhel` | posuvníky → *Logo* | 135° |
+| `--logo-velikost` | posuvníky → *Logo* | 116 px |
+| `--logo-x`, `--logo-y` | posuvníky → *Logo* | 0 / 0 px od středu hlavičky |
+| `--logo-pruhlednost` | posuvníky → *Logo* | 1 |
+| `--logo-stin` (na režim) | posuvníky → *Logo*: úhel, odstávání, rozostření, síla světla a stínu | 135°, 2 px, 2 px, 14 % / 10 % |
+
+Barvy Strickeru jsou změřené z dodaného PNG po desetinách úhlopříčky:
+horní polovina #74848d, dolní #909ca4 (přechod je v předloze skokový
+u prostředního esíčka, tady spojitý pod 135°). Reda #969a9e je nejčastější
+barva dodaného PNG (33 411 z 85 849 px).
+
+**Změřeno:** sondou při 1 584 px, oba režimy: hlavička 81 → 134 px, logo
+734 × 9 / 116 × 116 px, `mask-image` začíná `url("data:image/svg+xml,…`
+(919 znaků ve dne, 2 085 v noci), `background-image`
+`linear-gradient(135deg, rgb(150,154,158), rgb(150,154,158))` ve dne
+a `…rgb(116,132,141), rgb(144,156,164)` v noci, `filter` dvojice
+`drop-shadow` 2 px, `opacity` 1. Kruh: střed 792 / 133 px (66 px pod
+středem hlavičky 67 px), pole hledání shora 173 px. Na 500 px logo
+192 / 9 px, uprostřed. Snímky 1 600 × 1 000: ve dne šedé r v kroužku nad
+červeným kruhem, v noci rozťatý prstenec Strickeru nad modrým; na 400 px
+logo uprostřed nad polem hledání. `kontrola_aplikace.py` 0, `prekryv.py`
+0, `node --check` bez chyby. `barvy.html` přegenerován: 18 barev (+2), 9
+stínů + 5 logo, 5 posuvníků loga, 141 posuvníků tvarů (dřív 136); v ukázce
+nástroje má hlavička logo 116 × 116 px s toutéž maskou. `poradi.txt`
+beze změny, `mapa.py` a `rozbor_aktualizuj.py` spuštěny.
+
+**Co se nechalo být.** Logo není klikací — nápis vracel na kalkulaci,
+u loga to nikdo nechtěl; kdyby se to hodilo, je to `onClick` na `.logo`
+a `cursor: pointer`. Skript obtahování je jednorázový ve scratchpadu:
+tvary jsou hotové a v CSS, přegenerovávat se nemají.
+
+## 200. Naladěné logo z barvy.html přešlo do aplikace — kruh za ním zhasl
+
+**Problém.** Logo (kap. 199) dostalo výchozí barvy změřené z dodaných PNG
+a mírný stín po vzoru dřívějšího nápisu. Vyladit se má v `barvy.html`,
+ne v souboru — a co se tam nastaví, musí se do aplikace přenést stejnou
+cestou jako v kap. 197: poslaný blok `:root` se **nepřepisuje celý**
+(přišel by o komentáře, ve kterých stojí, proč hodnoty jsou, jaké jsou),
+ale přenesou se jen hodnoty, které se liší.
+
+**Co se změnilo.** Skript ve scratchpadu porovnal poslaný blok s
+`020-promenne.css` po proměnných — 214 proměnných ve světlém a tmavém
+bloku, úsek barev stránek shodný — a přepsal 11 hodnot:
+
+| proměnná | dřív | teď |
+|---|---|---|
+| `--pozadi-kruh-sila` | 0,8 | **0** — kruh za logem a hledáním je vypnutý, zůstává jako čára nastavený k návratu jedním posuvníkem |
+| `--logo-velikost` | 116 px | 150 px |
+| `--logo-pruhlednost` | 1 | 0,45 — logo je průsvitné, splývá s plochou |
+| `--logo-uhel` | 135° | 350° — přechod jde zdola nahoru, mírně šikmo |
+| `--logo-barva` / `-2` ve dne | #969a9e / #969a9e | #d6d6d6 → #909498 (světlá do tmavé šedi) |
+| `--logo-barva` / `-2` v noci | #74848d / #909ca4 | #232a2e → #c7c7c7 (grafit do světlé) |
+| `--logo-stin` ve dne | 2 px měkký | 14 px **bez rozostření**, světlo 8 %, stín 66 % — tvrdý odsazený stín |
+| `--logo-stin` v noci | 2 px měkký | dvojí záře 8 px na místě (posun 0), světlo i stín 100 % |
+| `--line-2` v noci | #495057 | #5e6367 |
+
+Komentář u proměnných loga říká, že výchozí odstíny z PNG nahradily
+hodnoty z nástroje. Tvary log, poloha ani rozvržení se nezměnily.
+
+**Změřeno:** sondou při 1 584 px, oba režimy: hlavička 134 → 168 px, logo
+717 × 9 / 150 × 150 px, `background-image` `linear-gradient(350deg,
+rgb(214,214,214), rgb(144,148,152))` ve dne a `…rgb(35,42,46),
+rgb(199,199,199)` v noci, `opacity` 0,45, `filter` ve dne
+`drop-shadow(rgba(255,255,255,.08) -14px -14px 0) drop-shadow(rgba(0,0,0,.66)
+14px 14px 0)`, v noci dvakrát `0 0 8px` plnou bílou a černou; kruh
+`opacity` 0 v obou režimech, `--line-2` v noci #5e6367. Pole hledání
+shora 207 px. Snímky 1 600 × 1 000: ve dne šedé r s tvrdým stínem
+vpravo dole a bez červeného kruhu, v noci tmavý prstenec Strickeru se
+světlou dolní částí a zářením. `barvy.html` přegenerován a čte hodnoty
+zpět: velikost 150px, krytí 0.45, úhel 350deg, kruh 0, stín loga ve dne
+20 px / 0 px / 8 % / 66 % (odstávání 14 px v obou osách je 19,8 px po
+úhlopříčce — nástroj ukládá vzdálenost, ne složky), v noci 0 / 8 / 100 /
+100. `kontrola_aplikace.py` 0, `prekryv.py` 0. `poradi.txt` beze změny,
+`mapa.py` a `rozbor_aktualizuj.py` spuštěny.
+
+## 201. Klik na logo vrací na domovskou stránku
+
+**Problém.** Nápis IRM (do kap. 198) vracel klikem na kalkulaci. Nové logo
+(kap. 199) to neumělo — z Receptur nebo Zakázek se na domovskou stránku
+šlo jen přes menu nebo tlačítko zpět, které vede jen o krok, ne domů.
+
+**Co se změnilo.** Prvek `.logo` v hlavičce dostal `onClick` na
+`setTab("calc")` — tutéž cestu, jakou měl nápis, takže se odchod pamatuje
+a tlačítko zpět vede tam, odkud se šlo. Logo je pro čtečku i klávesnici
+tlačítko (`role="button"`, `tabIndex`, Enter a mezerník), nápověda
+„Zpět na Kalkulaci" se vrátila do slovníku (en *Back to Calculation*,
+pt *Voltar ao Cálculo*), kurzor je ruka.
+
+**Změřeno:** sondou `cursor: pointer`, `title` „Zpět na Kalkulaci",
+anglicky „Back to Calculation", `role` button, `tabIndex` 0. Snímky
+1 600 × 1 000: po kliku v menu na Zakázky (SGPS) je tlačítko zpět
+„Kalkulace" a karta Zakázky ze SGPS (5); po kliku na logo je zpět
+Kalkulace s tlačítkem zpět „Zakázky (SGPS)". `kontrola_aplikace.py` 0,
+`node --check` bez chyby, `barvy.html` přegenerován (jen kurzor).
+
+
+## 202. Poznámka u receptury — znalost, která jinak odchází s člověkem
+
+**Problém.** „Na tomhle materiálu potřebuje dva průchody, sušit 2 min" věděl
+ten, kdo to jednou namíchal — a nikdo jiný. Receptura nesla síto, kryvost,
+povrch a příznaky, ale žádné místo pro větu. Cíl z A3 zní postup nezávislý na
+tom, kdo míchá; tohle je jeho nejlevnější kus. Podnět dal průzkum easyMEMO 2.0
+(Printcolor, 2. 9. 2026): každá receptura tam má pole *Notes*, které se tiskne
+i na lístek.
+
+**Co se změnilo.** Receptura má pole `poznamka` — jeden řádek textu. Jde
+touž cestou jako síto a kryvost:
+
+| kde | co |
+|---|---|
+| karta *Parametry tisku* (kalkulace) | pole pod přepínači, píše kdokoli u obrazovky, stejně jako síto a kryvost |
+| editor receptury (Receptury → Upravit) | totéž pole pod objednavatelem |
+| míchací režim | řádek pod kombinací produkt · barva · poloha, plnou barvou písma — čte se od váhy |
+| míchací lístek | řádek *Poznámka k receptuře*, jen když je co tisknout |
+| seznam receptur (tabulka i mřížka) | šedý řádek pod názvem |
+| `receptury_vlastni.csv` | sloupec `poznamka` **na konci** hlavičky; záloha z Export CSV taky |
+
+Čtení je tolerantní (`poznamka`, `poznámka`, `note`, `notes`), obnova
+z databáze bez sloupce poznámku nepřepíše prázdnem (`sloucReceptury`, stejné
+pravidlo jako u tužidla). **Jeden řádek schválně:** čtečka CSV dělí soubor po
+řádcích, takže zalomení uvnitř buňky by recepturu rozlomilo na dvě — při
+zápisu se nahradí mezerou (`jedenRadek`). Text se **nepřekládá** — je to údaj
+dílny; překlad má jen popisek pole (en *Recipe note*, pt *Nota da receita*).
+Pole v kartě stojí mimo `.frow`: tam jsou dlaždice s dolní mezí 178 px
+a `flex:1`, poznámka je řádek textu.
+
+**Co zůstává jako dřív:** u receptury z nakoupené databáze drží poznámku jen
+tenhle prohlížeč — stejně jako síto, kryvost a nastavení tužidla; do souboru
+od dodavatele se nezapisuje. Kdo ji má sdílet mezi počítači, odvodí vlastní
+recepturu. Zapsáno do NAVOD_PODKLADY.md; fotka od nátisku dál čeká.
+
+**Změřeno.** Zkouška v Node proti skutečným částem: 13 kontrol — tam a zpět
+přes CSV se středníkem, uvozovkami a čárkou v textu, víceřádkový text se vrátí
+na jednom řádku, starý soubor bez sloupce dá prázdno, sloupec `notes` se
+přečte, sloučení nechá poznámku technologa, když ji soubor nemá, a vezme tu ze
+souboru, když ji má. Na kódu před změnou nesedělo 8 z 13, po změně 0.
+Karta při 1 600 px: pole má šířku 452,31 px jako řádek přepínačů, popisek
+18,75 px jako ostatní popisky karty, pole 50,91 px vysoké s písmem 18,76 px,
+rozestup pod přepínači 15,96 px (`--mezera-poli` × 1,33). Míchací režim
+(snímek po skutečném kliku, oba režimy): poznámka 16,12 px (název 26 px ×
+0,62), barva písma shodná s názvem, 4 px pod řádkem kombinace. Lístek:
+v HTML lístku (5 040 znaků, zachyceno podstrčeným `window.open`) stojí řádek
+*Poznámka k receptuře* s textem. Seznam receptur po vyhledání „485 C"
+(109 řádků): poznámka 13,5 px, váha 400, šedá, v buňce pod názvem. Popisek
+anglicky *Recipe note* s `lang=en`, portugalsky *Nota da receita*. Slovník
+1 533 klíčů, žádný bez en a pt. `kontrola_aplikace.py` 0, `prekryv.py` 0
+(4 šířky × 2 režimy), `mapa.py --kontrola` 0, `sestav.py --kontrola` 0,
+`poradi.txt` beze změny, `rozbor_aktualizuj.py` spuštěn.
+
+**Falešný poplach.** První snímek Receptur hlásil „poznámka v tabulce
+nenalezena" — tabulka ukazuje prvních 100 řádků a PANTONE 485 C mezi nimi
+není. Po vyhledání se našla; chyba byla ve zkoušce, ne v aplikaci.
+
+
+## 203. Poznámku k receptuře jde dopsat i u váhy
+
+**Problém.** Že materiál potřebuje dva průchody, se zjistí u váhy a u stroje,
+ne v kanceláři. Kapitola 202 poznámku v míchacím režimu jen ukazovala —
+dopsat ji znamenalo zavřít míchání, najít pole v kartě Parametry tisku
+a vrátit se. To se v rukavicích neudělá a poznámka se nenapíše.
+
+**Co se změnilo.** V hlavičce míchacího režimu pod kombinací produkt · barva ·
+poloha stojí vedle poznámky tlačítko *✎ Poznámka* (bez poznámky *＋ Poznámka*).
+Otevře pole s tlačítky *Uložit* a *Zrušit*; pole má hned kurzor. Rozepsaný
+text žije jen ve stavu míchacího režimu a do receptury jde **až tlačítkem**
+(nebo Enterem) — sahá se do souboru, ze kterého míchá celá dílna, a to se
+dělá jedním vědomým krokem, ne při každém stisku klávesy (`irm-zaznam`,
+bod 4). Uložení volá totéž `upravRecepturu({ poznamka })` jako karta
+v kalkulaci, takže poznámka je hned i tam a u vlastní receptury odjede
+do `receptury_vlastni.csv` stejnou cestou. Mezery na krajích se ořežou.
+
+Dvě pravidla navíc: **Esc v poli ruší jen úpravu** — událost se zastaví
+v poli (`stopPropagation`), jinak by doběhla k oknu, kde Esc zavírá celé
+míchání a tiskaři by zmizela obrazovka s váhou. A **výměna receptury
+rozepsaný text zahodí** — patřil k jiné barvě.
+
+**Změřeno** (snímky po skutečných kliknutích, 1 600 px, oba režimy):
+před úpravou tlačítko *＋ Poznámka*, po uložení textu s mezerami na krajích
+stojí v hlavičce „Dva průchody, sušit 2 min", totéž v poli karty Parametry
+tisku, pole zavřené, míchání otevřené, tlačítko *✎ Poznámka*. Esc v poli:
+míchání otevřené, pole zavřené, v kalkulaci prázdno (rozepsané se
+nezapsalo). Enter: text v hlavičce i v kalkulaci. Esc mimo pole míchání
+zavřel jako dřív. Pole 560 × 41,72 px, písmo 17 px (`--mich-pole`), kurzor
+v něm hned po otevření; Uložit 62,92 × 33,78 px, Zrušit 62,36 × 33,78 px,
+oba v řadě s polem (y 72,22). Při 820 px je pole 451 px (55 vw) a dávka
+se Zpět se po otevření pole zalomí pod řádek (y 20,11 → 120,91 px); se
+zavřeným polem se nezalamují. Nechává se tak: úprava je chvilková, hlavička
+je přilepená nahoře a nic se nepřekrývá (pole končí na 110 px, dávka začíná
+na 120,91 px). Slovník 1 536 klíčů, žádný bez en a pt; zkouška CSV
+z kap. 202 dál 13 z 13. `kontrola_aplikace.py` 0, `node --check` bez chyby,
+`poradi.txt` beze změny. `prekryv.py` se nepouštěl: měří domovskou stránku
+a záložky, míchací režim (portál) ne — jeho hlavička se místo toho změřila
+sondou přes `--po` výš.
+
+## 204. Záložka Import / data začíná importem, ceník materiálů šel na konec
+
+**Problém.** Záložka *Import / data* začínala kartou *Ceny materiálů* — tabulkou
+94 složek vysokou 6 017 px. Import produktů, formát receptur, správa dat
+a heslo pro mazání stály až pod ní: aby se člověk dostal k tlačítku *Nahrát
+soubor produktů*, roloval přes celou tabulku cen. Přitom ceník má vlastní
+kartu i v záložce Receptury, kde se ceny doplňují ve chvíli, kdy se počítá
+dávka.
+
+**Co se změnilo.** V `670-importer.js` se komponenta `CenyMaterialu` přesunula
+z prvního místa na konec fragmentu za kartu *Zabezpečení mazání*. Karty samy
+se neměnily, jen pořadí; u návratu z komponenty stojí komentář, proč.
+
+**Změřeno** (snímek po skutečných kliknutích menu → DATA → Import / data,
+1 600 × 1 400 px, tmavý režim; role technolog): pořadí karet a jejich horní
+hrana od začátku stránky — *Import produktů (katalog)* 188 px (výška 378),
+*Formát receptur (CSV)* 582 px (242), *Správa dat* 840 px (120), *Zabezpečení
+mazání* 976 px (243), *Ceny materiálů (94)* 1 235 px (6 017). Před změnou
+stál import za ceníkem, tedy zhruba 6 200 px pod hlavičkou; teď je vidět bez
+rolování. `kontrola_aplikace.py` 0, `node --check` bez chyby, `poradi.txt`
+beze změny, `mapa.py` a `rozbor_aktualizuj.py` přegenerovány. Most běžel,
+`receptury_vlastni.csv` po měření obnovena ze zálohy (`cmp` shodné).
+
+
+## 205. Průzkum: kdo dělá software na míchání barev a odkud vzít receptury
+
+**Problém.** Rozbor easyMEMO 2.0 (3. 9.) ukázal, že konkurence.html vznikla ze
+čtyř programů a výrobce barev, které dílna kupuje, v ní nebyl. K tomu chybí
+databáze receptur: transfer nemá žádnou a u textilu a sítotisku se jen tušilo,
+že Printcolor MS 660 nemusí být správná řada.
+
+**Co se udělalo.** Čtyři paralelní rešerše (výrobci barev pro sítotisk
+a tampontisk; textil, transfer a sklo; nezávislý software a open source;
+zdroje receptur) plus vlastní průchod českého trhu. Dohromady přes 170
+vyhledávání v pěti jazycích a přes 250 otevřených stránek a PDF; každý údaj
+nese, jestli byl ověřen otevřením, nebo je jen z výsledků vyhledávání. Čtvrtá
+rešerše spadla na limitu relace, její jádro (řady Printcolor a RUCO, právní
+stránka) je dohledané ručně. Výsledek je `PRUZKUM_MICHACI_SOFTWARE.md`:
+tabulky programů po oblastech, mapování řad na technologie, doporučení podle
+technologie, funkce, které IRM nemá, a co se hledalo marně. Marabu je
+na pokyn vynechán.
+
+**Zjištění, na kterých se dá stavět.**
+
+| co | číslo |
+|---|---|
+| Coates C‑MIX 2000 (přes distributora KCS) — receptury zdarma v CSV, bez registrace | 6 593 (2K 4 398, 1K 2 195; tampontisk TP 2 096; UV 137), 12 bází |
+| Sun Chemical SunMatch — PDF, solvent + UV | 928 položek Pantone C, 37 + 43 stran |
+| Fujifilm Sericol Plastical XG — PDF | 70 stran, všechny Pantone C |
+| transfer — veřejný seznam | žádný; jen v programech Lancer ColorPro (zdarma, offline), MagnaMix 4, CHT ColorFinder 2.0, Avient IMS 3.0 |
+| Printcolor Serie 660 | syntetické tkaniny, PU, TPE, pryž (deštníky, plachty) — ne bavlna, ne trička |
+| RUCOINX 10KK | plast, sklo, kov, keramika — ne textil |
+| nezávislá mobilní aplikace, open‑source míchárna | nenalezeno |
+
+Soubor `mischformeln.csv` je stažený a rozebraný (oddělovač `;`, desetinná
+čárka, cp1252, sloupce Rezeptname, Farbe_1…5, Menge_1…5, FarbTyp, Bemerkung,
+Beschreibung), uložený mimo repozitář ve `files/podklady_receptury/`.
+Převodník do tvaru IRM zatím není — je to další krok, ne součást tohoto zápisu.
+
+**Co z toho plyne pro tabulku technologií.** TXP dnes nemá správnou databázi
+vůbec (MS 660 je na syntetiku), SCR má RUCOLOR správně a MS 660 jen pro
+syntetické tkaniny; C‑MIX 2000 pokryje SCR i PDP. Přiřazení
+v `parametry/databaze.csv` se má po převodu C‑MIX upravit.
+
+## 206. U váhy je vidět i procento a objem složky
+
+**Problém.** Tabulka míchacího režimu měla jen gramy: navážit, kumulativně,
+případně ze zbytku. Jenže část barevných databází udává receptury v procentech
+nebo v mililitrech (odměrkou, ne váhou), a tiskař u váhy si chtěl řádek
+srovnat s předlohou — musel do kalkulace nebo si vytisknout lístek, který
+oba sloupce dávno má.
+
+**Co se změnilo.** V tabulce navážení (část 280) přibyly sloupce **%** za
+komponentou a **ml** na konci, v témž pořadí a s týmž významem jako na
+míchacím lístku (`tiskLisku` v části 240): procento je normalizovaný podíl
+složky (`c.norm`), objem `c.ml` je z hustoty receptury. Obojí popisuje
+složení celé dávky — míchá-li se do kelímku se zbytkem, „navážit" a
+„kumulativně" dál říkají, co má na váhu, kdežto % a ml odpovídají předloze.
+Součtový řádek má 100,0 % a celkový objem dávky, tedy totéž číslo, které
+stojí v hlavičce za „≈". Nadpisy „%" a „ml" jsou jednotky, nepřekládají se
+(stejně jako na lístku a v tabulce asistenta). Nic nového se nepočítá —
+`calcAkt.comps` obě hodnoty nesly od začátku, jen se nevykreslovaly.
+
+Na telefonu se šest sloupců do sloupce nevejde. Pod zlomem 1000 px proto
+`.michtab` dostala totéž, co už měla tabulka asistenta: `display:block;
+overflow-x:auto` a `white-space:nowrap` na buňkách — tabulka roluje sama
+v sobě, řádek zůstává řádkem. Bez `nowrap` se název složky lámal do čtyř
+řádků (změřeno: řádek 106 px místo 54) a poslední sloupec byl uříznutý.
+`barvy.html` přegenerován, nese totéž pravidlo.
+
+**Změřeno** (`snimek.py`, TXP, produkt 11031, PANTONE 485 C, 4 složky,
+dávka 627,9 g ≈ 523,3 ml): 1600 px — hlavičky ‹Komponenta, %, navážit,
+kumulativně, ml›, pravé hrany hlaviček i buněk shodné (60, 409, 500, 612,
+755, 847 px), tabulka 831,73 px široká stejně jako před změnou, součet ml
+523,3 = hlavička, `document.scrollWidth` 1600. 391 px — tabulka
+`display:block`, obsah 596 px v boxu 361 px, řádky 54,4 / 53,9 px (jeden
+řádek na složku), `document.scrollWidth` 391 = šířka okna, stránka do
+strany neroluje. `kontrola_aplikace.py` 0, `prekryv.py --zalozky` (všechny
+šířky, oba režimy, všechny záložky) 0, `mapa.py` přegenerován,
+`rozbor_aktualizuj.py` přepsal úseky stav, data, technologie.
+
+**Vlastní chyba po cestě.** První verze měla ml u „navážit" jako objem
+přidávané části (`c.ml · navážit / c.g`). Vypadalo to logicky u váhy, ale
+rozešlo se to s lístkem, kde ml je objem celé složky, a hlavně s účelem
+sloupce: srovnat řádek s databází, která udává celou recepturu. Sloupec se
+proto vrátil na konec a k celé složce. Dvě spuštění `snimek.py` za sebou
+nebo souběžně s `kontrola_aplikace.py` končila `ConnectionResetError` —
+nástroje sdílejí jeden ladicí port Chromu, měření se pouštějí po jednom.
+
+**Dodatek (14:36).** Po nasazení uživatel ukázal, že vedle „%" a „ml" stojí
+gramové sloupce bez jednotky — „navážit" a „kumulativně" nikde neříkají, že
+jsou to gramy. Hlavičky teď nesou jednotku jako na lístku: „ze zbytku g",
+„navážit g", „kumulativně g" (klíče slovníku přejmenovány, staré „navážit"
+a „kumulativně" smazány — nikde jinde se nepoužívaly; „ze zbytku" zůstává
+pro věty o kelímku). Změřeno (`snimek.py`, 1600 px): česky hlavičky
+‹Komponenta, %, navážit g, kumulativně g, ml›, anglicky `lang=en`
+‹Component, %, weigh out g, cumulative g, ml›; pravé hrany hlaviček a buněk
+shodné v obou jazycích, tabulka dál 831,73 px. `kontrola_aplikace.py` 0.
+
+## 207. Asistent navážení říká krok i v mililitrech a v procentech
+
+**Problém.** Kapitola 206 dala procenta a mililitry do tabulky míchacího
+režimu, ale krok asistenta — to, na co se tiskař u váhy dívá — dál mluvil jen
+v gramech: „přidat 449,7 g → navážit celkem do 449,7 g". Kdo má recepturu
+z databáze v procentech nebo lije odměrkou, musel očima přeskakovat do tabulky
+vlevo a hledat řádek. Tabulka pod asistentem měla procenta, mililitry ne.
+
+**Co se změnilo.** V části 290 u kroku asistenta:
+
+| kde | dřív | teď |
+|---|---|---|
+| nadpis kroku | jméno složky | jméno složky a vedle drobně **71,6 % dávky** (podíl z aktuálních podílů, tedy i po korekci či přepočtu) |
+| řádek kroku | přidat 449,7 g → navážit celkem do 449,7 g | přidat 449,7 g **(≈ 374,8 ml)** → navážit celkem do 449,7 g |
+| tabulka asistenta | Komponenta, %, cíl g, nalito g, zbývá g | … a na konci sloupec **ml** = objem celé složky (cíl), jako na lístku |
+
+Objem se nepočítá z nové hustoty, ale z poměru g : ml, který každá složka nese
+z receptury (`c.ml` z hustoty receptury, totéž číslo jako na míchacím lístku
+a v tabulce míchacího režimu) — přepočtená i korigovaná dávka tak drží tutéž
+hustotu. Aditiva (ředidlo, zpomalovač) hustotu nemají: u nich se v řádku kroku
+mililitry neukazují a v tabulce stojí pomlčka — co se neví, se nehádá.
+Mililitry u kroku jsou objem **přidávané** části, protože stojí hned za
+gramy, které převádějí; sloupec v tabulce je objem **celé složky**, stejně
+jako na lístku (poučení z kap. 206). Slovníkový klíč řádku kroku dostal
+jmenovku `{ml}` (starý klíč smazán), podíl používá stávající „% dávky";
+„ml" v hlavičce je jednotka a nepřekládá se.
+
+**Změřeno** (`snimek.py`, TXP, produkt 11031, PANTONE 485 C, míchací režim,
+simulace váhy 20,0 g, dialog Barva a poloha zavřený křížkem z `--po`):
+1600 px — nadpis kroku „17 3602 Red 2 (Red 032 C) 71,6 % dávky" (22,4 px,
+podíl 14 px vedle jména 16 px), řádek „přidat 449,7 g (≈ 374,8 ml) → navážit
+celkem do 449,7 g", pod pruhem „zbývá 429,7 g"; tabulka asistenta hlavičky
+‹Komponenta, %, cíl g, nalito g, zbývá g, ml›, pravé hrany hlaviček i buněk
+shodné (913, 1201, 1258, 1327, 1418, 1501, 1570 px), 693,25 px široká,
+sloupec ml 374,8 / 139,6 / 6,6 / 2,4 — na číslo stejný jako v tabulce
+míchacího režimu vlevo, součet 523,3 = hlavička „≈ 523,3 ml". Anglicky
+`lang=en`: „add 449,7 g (≈ 374,8 ml) → weigh up to 449,7 g in total",
+„71,6 % of the batch", hlavičky ‹Component, %, target g, poured g, left g,
+ml›, hrany hlaviček = buněk. 391 px — tabulka `display:block`, obsah 616 px
+v boxu 331 px, řádky 45,6 px (jeden řádek na složku), `document.scrollWidth`
+391 = šířka okna. Zkouška slovníku v Node: 1 537 klíčů, 0 duplicit, každý má
+en i pt, jmenovky sedí, starý klíč bez `{ml}` ve slovníku není.
+`kontrola_aplikace.py` 0, `prekryv.py --zalozky` 0, `mapa.py` přegenerován,
+`rozbor_aktualizuj.py` přepsal úseky stav a data.
+
+**Po cestě.** První snímek měl přes míchací režim otevřený dialog „Barva
+a poloha potisku" — výběr produktu ho otevírá vždycky a `--po` ho hledal jen
+podle výběru receptury, který tam není. Měření z DOMu platilo, snímek ne;
+dialog se teď zavírá křížkem přímo z `--po`.
+
+
+## 208. Kudy k recepturám šesti firem a co z průzkumu převzít
+
+**Problém.** Průzkum (kap. 205) říkal, co existuje; dílna potřebuje vědět,
+kde a jak se k databázím dostane — přes web, aplikaci nebo kontakt — u firem,
+které zvažuje: Tiflex, Avient, Coates, Engler, SK a Dubuit. Stahovat se nemá,
+podklad může přijít v jakémkoli tvaru. A konkurence.html neměla nic z toho,
+co průzkum našel.
+
+**Co se udělalo.** Do `PRUZKUM_MICHACI_SOFTWARE.md` přibyl oddíl 10 s cestou
+pro každou firmu: Coates (KCS — program a CSV bez registrace, coates.cz
+C‑MIX DATA, Farbmetrik za poplatek), Avient (registrace do IMS 3.0 s výběrem
+distributora ze seznamu, aktivace distributorem trvá dny, adresa vyhledávače
+distributorů), Tiflex (webová aplikace bez přihlášení; má vlastní API
+`listeserie`, `getgamme`, `getreference`, takže hromadné čtení je technicky
+možné, ale jen se souhlasem), Dubuit (účet v color‑management‑system:
+firma, jméno, e‑mail; guide D‑PAD na vyžádání), Engler Italia (žádný veřejný
+systém, receptury jen na vyžádání). „SK“ se nepodařilo ztotožnit s výrobcem.
+
+Do `konkurence.html` přibyla karta *Z průzkumu 3. 9. 2026* se čtyřmi
+tabulkami — funkce (9), data (6), procesy (6), výběr a filtry (7) — každá
+položka s tím, kdo ji má, stavem u nás (nemáte / částečně) a co by dala.
+Vyřazeno, co IRM má a co potřebuje spektrofotometr.
+
+**Změřeno:** oddíl 10 má 6 řádků tabulky, karta 28 řádků; stránky ověřené
+otevřením: kc‑siebdruck.de (odkazy setup.exe a mischformeln.csv, import přes
+*Rezeptur → Import Standardrezepturen*), p1ims.azurewebsites.net (registrace:
+10 polí, Company ze seznamu 500+ distributorů, 6 značek), cms.tiflex.com
+(8 koncových bodů API v `app.js`), color‑management‑system.encresdubuit.com
+(registrace: company, firstName, lastName, email, password, agreeTerms),
+engler.it (řady bez software).
+
+## 209. Marabu TampaStar TPR je pátá databáze — z exportu XLSX, s hustotou z gramů a mililitrů; receptury přešly z localStorage do IndexedDB
+
+**Problém.** Tampontisk měl Printcolor a RUCOLOR, ale ne barvy, kterými dílna
+opravdu tiskne. Marabu neposílá PDF se seznamem receptur jako Printcolor ani
+tabulku bází jako RUCOINX — dává export ze svého programu ColorManager:
+sešit XLSX, jeden řádek na recepturu, složení rozepsané do šesti pětic sloupců
+(základní odstín, pomocný prostředek, gramy, mililitry, procenta). K tomu tisk
+téže tabulky do PDF (40 MB), ze kterého se složení prostým textem přečíst
+nedá. Ani jeden z hotových převodníků na to nestačil.
+
+A druhý problém se ukázal, až když databáze byla ve složce: aplikace držela
+**všechny** receptury v `localStorage`, které má v prohlížeči strop kolem 5 MB.
+Se čtyřmi databázemi to bylo 2,9 MB; s Marabu (4 824 receptur, 17 610 řádků
+složení) 6,7 MB. Zápis končil `QuotaExceededError` třikrát za start, receptury
+zůstaly jen v paměti stránky a po F5 by chyběly — a s nimi vazby na produkt
+a polohu, poznámky a schválení, které na recepturách visí. Kontrola vykreslení
+to chytila hned; bez ní by databáze v aplikaci „byla" jen do prvního zavření
+okna. Totéž by potkalo každou z jedenácti řad, které se ještě sbírají.
+
+**Co se změnilo.**
+
+*Převod.* Nový nástroj `prevod_marabu.py` čte XLSX přímo (zip + XML,
+standardní knihovna), sloupce pozná podle záhlaví, ne podle pořadí. Tentýž
+pantone je v exportu dvakrát — na standardní a na vysoce krycí bázi, s jiným
+složením — a aplikace rozlišuje receptury v jedné databázi jménem. Krycí verze
+proto dostane do názvu příponu **„(vysoce krycí)"**; kryvost jde zároveň do
+sloupce `kryvost` (hodnoty Standard / Vysoce krycí, přesně jak je zná
+kalkulace), podklad `Weiss` do `povrch` jako „Bílé", otestovanost
+a odolnost vůči vyblednutí do `otestovany` a `vyblednuti`. „Tampon / Pad"
+v sítovině není síto, jen značka tampontisku — sloupec `sito` zůstává prázdný.
+Pomocný prostředek (910 Drucklack, tiskový lak) se bere jako složka: bez něj
+by dvě receptury nedaly 100 %.
+
+*Hustota.* Export nese u každé navážky gramy i mililitry, a to je údaj, který
+žádná z dosavadních databází neměla: hustota receptury = součet gramů / součet
+mililitrů, do sloupce `hustota` na tři desetinná místa. Paušál 1,20 g/ml by tu
+byl vedle o čtvrtinu: 970 Weiss má 1,62 g/ml a receptura s 87 % bílé 1,5 g/ml —
+jiný objem dávky, jiná spotřeba ze síta (vzorec ji násobí hustotou) i jiná cena
+gramu z litrové ceny. Hustoty složek jsou napříč souborem stálé (970 Weiss
+1,606–1,635, 122 Hellgelb hochdeckend 1,342–1,362, pigmentové báze 1,03–1,15,
+910 Drucklack 1,01), takže jdou zapsat i po složkách — a to se udělalo, viz
+*Hustota po složkách* níž.
+Ostatní podklady se na to prošly znovu: Printcolor MS 786 a MS 660 (PDF,
+158 tisíc znaků každé) nesou jen „složka: díl" bez jediného „ml", „Dichte"
+nebo „density"; RUCOLOR 10KK (PDF, 37 tisíc znaků) jen procenta bází; Coates
+C‑MIX 2000 (CSV, 6 593 receptur, čeká na převod) jen gramy `Menge_1…5`
+se součtem 100. Ferro Xpression má v CSV hustotu 1,2 u všech 3 986 řádků —
+je to konstanta dosazená při importu 27. 7., ne údaj z podkladu, a v aplikaci
+se od paušálu nijak neliší. Marabu PP new a LIP LibraPrint mají v XLSX
+mililitry stejně jako TPR, převodník jim hustotu spočítá týmž kódem.
+Řada je „Marabu TampaStar TPR", soubor
+`receptury_Marabu_TPR.csv`, přiřazení PDP v `parametry/databaze.csv`,
+řádek plánu `PDP;Marabu;TPR` má vyplněný soubor a bod v Odemykání technologií
+se tím odškrtl; `CO_SEHNAT.txt` a *Co zbývá* říkají 11 řad místo 12.
+
+*Hustota po složkách.* Tabulka materiálů `parametry/pigmenty.csv` dostala
+sloupec `hustota` (g/ml). `prevod_marabu.py --hustoty-slozek` do ní zapíše
+medián g/ml každé báze z navážek nad 1 g (26 bází Marabu připsáno na konec,
+119 původních řádků beze změny až na dorovnaný středník) a v ceníku přibyl
+sloupec **g/ml**, kam technolog dopíše hustoty i pro Printcolor nebo RUCOLOR
+z technických listů; zapisuje se týmž zapisovačem po buňkách jako cena.
+V kalkulaci platí pořadí **složka z tabulky → hustota receptury → paušál
+1,20** (`hustotaSlozky`, `hustotaReceptury` v části 460): objem složky je
+gramy / její hustota, objem dávky součet objemů, hustota receptury
+1 / Σ(podíl / hustota složky). Z jednoho místa (`hustotaRec` v kalkulaci)
+ji bere spotřeba ze síta, rezerva stěrky, objem dávky, cena za litr,
+kelímek do skladu i řádek „≈ ml při hustotě" — a lístek, míchací režim
+a asistent navážení dostávají ml složky přes `c.ml` beze změny kódu. Složka
+bez vlastní hustoty bere hustotu zapsanou u receptury, takže součet objemů
+složek dá přesně objem dávky; bez tabulky se nic nemění.
+
+*Úložiště.* Receptury se ukládají do **IndexedDB** (`idbNacti`, `idbUloz`
+v části 125), klíč zůstává `irm-recipes`. Čtení je asynchronní, takže se
+napřed vezme, co je v `localStorage` — u prohlížeče z doby před změnou celý
+seznam, jinak ukázkové receptury — a jakmile IndexedDB odpoví, platí ona.
+Slévání databází ze souborů čeká na příznak `recepturyNacteny`: kdyby běželo
+dřív, dostaly by receptury nová id a vazby by se rozpojily. Po prvním úspěšném
+zápisu do IndexedDB se kopie v `localStorage` smaže — jinak by dál zabírala
+3 MB z pěti a při příštím startu by stará verze přebila novou. Kde IndexedDB
+není (zkoušky v Node), zůstává `localStorage` jako dřív.
+
+**Změřeno.**
+
+| co | hodnota |
+|---|---|
+| receptur / řádků složení / různých složek | 4 824 / 17 610 / 26 |
+| pantonů, z toho vysoce krycích verzí | 2 435 / 2 392 |
+| součet složení = 100 % | u všech 4 824 (bez tiskového laku by 2 byly mimo: 64,26 a 87,35) |
+| duplicitní název, nerozpoznaný řádek | 0 / 0 |
+| otestovaných výrobcem | 69 |
+| křížová kontrola proti PDF od Marabu | 9 395 trojic (g, ml, %) z textu PDF — všechny v sešitu, 0 navíc; 26 názvů složek se shodným počtem výskytů; všech 2 435 názvů pantonů v PDF nalezeno |
+| hustota z gramů a mililitrů | 4 824 z 4 824 receptur, 1,030–1,809 g/ml, medián 1,322; pod paušálem 1,20 je 1 761 receptur, nad 1,50 je 1 345 |
+| odstín dohledán | 3 747 z 4 824 receptur; `odstiny.py --stahni` (68 minut na pozadí): tabulka 1 465 → 2 067 pantonů, 601 z columbiaomnistudio.com, 1 z hextopms.com, colorxs.com pro zbylých 544 stránky nemá (řady 4000–4006, 2639–2644, 10xxx a jmenné pantony Marabu); bez odstínu zůstává 1 077 Marabu + 2 MS 660 — u MS 786 a RUCOLOR dřívějších 190 a 47 chybějících tím dojelo na 0 |
+| zkouška hustoty po složkách (Node, skutečné části) | 27 z 27: 87 % bílé (1,62) + 13 % magenty (1,05) → 1,513 g/ml, 1 000 g = 660,8 ml (paušálem 833,3); částečně známé hustoty 1,379; bez tabulky 1,20 a 1,617 beze změny; cena litru 1 000 Kč přes 1,05 → 0,952 Kč/g; zápis do CSV doplní sloupec, vysvětlivka v uvozovkách přežije, nedotčený řádek jen dorovnaný |
+| ceník v aplikaci (`snimek.py`, Receptury → Ceny materiálů) | 120 složek (bylo 94), sloupce … měna · **g/ml** · VOC % …, řádek 970 Weiss má v poli g/ml 1.62 |
+| velikost seznamu receptur jako JSON | 7 042 795 znaků (6,72 MB) proti stropu 5 MB `localStorage`; z toho Marabu 4 100 158 |
+| most `/api/databaze` | `receptury_Marabu_TPR.csv`, 17 610 řádků, druh receptury; přiřazení i plán vrací nový řádek |
+| čistý profil, PDP (`snimek.py --po`, čtení IndexedDB) | 8 292 receptur: Marabu 4 824, Ferro 1 097, PMS 786 814, PMS 660 778, RUCOLOR 776, vlastní 3; klíč `irm-recipes` v localStorage odstraněn |
+| přechod z localStorage (receptura s id `ZKOUSKA01` a vazbou, prázdná IndexedDB) | po slití id zachováno, vazba `92734\|1\|PDP\|0 → ZKOUSKA01` zachována, 1 receptura toho jména, `receptury_vlastni.csv` beze změny (`cmp`) |
+| záložka Receptury pod PDP | čipy „vše (8 292)" … „receptury_Marabu_TPR (4 824)"; řádky „PANTONE 100 C" a „PANTONE 100 C (vysoce krycí)", řada Marabu TampaStar TPR |
+| hustota v aplikaci (čtení IndexedDB po načtení) | 4 824 receptur Marabu: 1,030–1,809 g/ml, medián 1,322, jen 9 náhodou rovných 1,20; všech 3 465 receptur ostatních databází má paušál 1,20 |
+| `receptury_vlastni.csv` po testech | tytéž řádky, po jednom běhu v jiném pořadí (aplikace při každém startu soubor přepíše v pořadí svého seznamu) — obnoveno ze zálohy, `cmp` shodné |
+| `kontrola_aplikace.py` | před úložištěm 1 (3× QuotaExceededError), po změně 0; po sloupci g/ml v ceníku 0 |
+| `prekryv.py --zalozky` (nový sloupec v ceníku) | 0 — všechny záložky v pořádku |
+| `parametry/pigmenty.csv` po zápisu hustot | 119 řádků beze změny (jen dorovnaný středník), hlavička + `hustota`, 26 řádků Marabu připsáno (1,010–1,830 g/ml), záloha `.pred-hustotami.bak` |
+
+**Dvě vlastní chyby po cestě.** První zkouška přechodu vypadala jako selhání:
+receptura z `localStorage` v IndexedDB nebyla. Jenže `snimek.py` stránku
+napřed načte, teprve pak spustí `--pred` a načte znovu — a první načtení už
+do IndexedDB zapsalo ukázkové receptury, které pak podle pravidla „IndexedDB
+má přednost" přebily zkušební seznam. V dílně to nastat nemůže (IndexedDB je
+před první změnou prázdná); zkouška musí v `--pred` napřed volat
+`indexedDB.deleteDatabase("irm")`. Druhá: hledání tlačítka v nabídce podle
+`/MÍCHÁNÍ/` v `--po` nenašlo nic, protože diakritika ve výrazu neprošla
+konzolí — spolehlivé je `/M.CH.N./`; a Receptury nejsou ve skupině Míchání,
+ale v Katalogu.
+
+**Co se nechalo být.** Marabu PP new a LIP LibraPrint jsou stažené v témž
+tvaru a převedou se týmž nástrojem, až se rozhodne přiřazení (PP new = PDP,
+LIP = SCR podle plánu). Sloupec `objednavatel` se z exportu nepřenáší — u
+databáze výrobce je to vždycky „Marabu", není to zákazník dílny.

@@ -4,6 +4,15 @@
   padding:calc(var(--mich-mezera) * .64) var(--mich-mezera);box-shadow:0 6px 16px rgba(24,23,15,.10)}
 .michhlav .nazev{font-size:var(--mich-nazev);font-weight:800;line-height:normal;color:var(--ink)}
 .michhlav .kde{font-size:calc(var(--mich-nazev) * .54);color:var(--ink-2);font-family:var(--mono)}
+/* Poznámka k receptuře pod kombinací: čte se od váhy jako název, proto plná
+   barva písma a ne šedá jako kombinace. */
+.michhlav .pozn{font-size:calc(var(--mich-nazev) * .62);color:var(--ink);line-height:normal;margin-top:4px}
+/* Řádek poznámky s tlačítkem, nebo pole s Uložit a Zrušit — v jedné řadě,
+   na úzkém okně se zalomí. Pole má pevnou horní mez, ať nevytlačí dávku
+   a Zpět z hlavičky. */
+.michhlav .poznrad{display:flex;align-items:center;gap:10px;margin-top:4px;flex-wrap:wrap}
+.michhlav .poznrad .pozn{margin-top:0}
+.michhlav .poznrad input{width:min(560px,55vw)}
 .michdavka{margin-left:auto;text-align:right;font-family:var(--mono)}
 .michdavka b{display:block;font-size:var(--mich-davka);font-weight:700;line-height:normal}
 .michdavka span{font-size:calc(var(--mich-davka) * .38);color:var(--ink-2)}
@@ -247,5 +256,13 @@ html:not([lang="cs"]) .michbg .card .btn.mich-tl-dalsi{width:auto;height:auto;
      v míchacím režimu, obecná `.t` se používá i jinde na širších
      obrazovkách, kde tenhle přesah nehrozí. */
   .michbg table.t{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  /* Tabulka navážení má od kapitoly 195 šest sloupců (přibyly % a ml) a na
+     telefonu se do sloupce nevejde (změřeno: 472 px tabulky v 361px sloupci
+     při 391 px okna, poslední sloupec uříznutý). Řešení je totéž jako
+     u tabulky asistenta výš — rolování v sobě, ne `table-layout:fixed`.
+     Buňky nesmí zalamovat: dokud smí, tabulka se smrskne do sloupce, název
+     složky se rozláme na čtyři řádky a řádek u váhy přestane být řádkem. */
+  .michtab{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .michtab td,.michtab th{white-space:nowrap}
 }
 @media print{.michbg{display:none}}

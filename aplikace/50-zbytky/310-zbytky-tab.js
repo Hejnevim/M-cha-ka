@@ -118,7 +118,7 @@ function ZbytkyTab({ zbytky, setZbytky, recipes, materialy, guardDelete, otevren
     const kod = novyKodZbytku(zbytky);
     setZbytky((prev) => [{
       id: uid(), kod: kod, nazev: novy.nazev.trim(), gramu: n(novy.gramu), puvodne: n(novy.gramu),
-      hustota: rec ? n(rec.density, 1.2) : 1.2, hex: rec ? rec.hex : "#888888",
+      hustota: rec ? hustotaReceptury(rec, materialy).hustota : 1.2, hex: rec ? rec.hex : "#888888",
       zakazka: novy.zakazka || "", produkt: "", barva: "", tech: "", poloha: "",
       ulozeno: Date.now(), zmeneno: Date.now(), namichano: Date.now(),
       expirace: novy.expirace || "",

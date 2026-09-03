@@ -57,11 +57,40 @@ const JEDNOTKY_CENY = ["kg", "l"];
 function cenaZaGram(mat, hustota) {
   if (!mat || !(n(mat.cena) > 0)) return null;
   if (String(mat.jednotka || "kg").toLowerCase() === "l") {
-    const h = n(hustota, 0);
+    // hustota složky z tabulky má přednost před hustotou receptury — litr
+    // bílé báze (1,62 g/ml) váží o třetinu víc než litr pigmentu (1,05)
+    const h = n(mat.hustota) > 0 ? n(mat.hustota) : n(hustota, 0);
     if (!(h > 0)) return null;          // bez hustoty se litr na gram nepřevede
     return n(mat.cena) / h / 1000;
   }
   return n(mat.cena) / 1000;
+}
+
+/* ============ HUSTOTA SLOŽEK A RECEPTURY ============
+   Receptura nese jednu hustotu (u Marabu spočítanou z gramů a mililitrů
+   navážek, jinde paušál 1,20). Tabulka materiálů může nést hustotu každé
+   složky zvlášť — a pak je objem složky gramy / její hustota, objem dávky
+   součet objemů a hustota receptury 1 / Σ(podíl / hustota složky). Receptura
+   s 87 % bílé (1,62) a 13 % pigmentu (1,05) tak vyjde na 1,51 g/ml, ne na
+   paušál 1,20 — a lístek u každé složky říká skutečné ml, ne podíl objemu
+   dávky. Složka bez vlastní hustoty bere hustotu zapsanou u receptury, aby
+   součet objemů složek dal přesně objem dávky. */
+function hustotaSlozky(nazev, materialy, hustotaReceptury) {
+  const m = materialy && materialy[String(nazev || "").trim().toLowerCase()];
+  return m && n(m.hustota) > 0 ? n(m.hustota) : (n(hustotaReceptury, 1.2) || 1.2);
+}
+function hustotaReceptury(recipe, materialy) {
+  const zaklad = n(recipe && recipe.density, 1.2) || 1.2;
+  const comps = (recipe && recipe.components) || [];
+  const pctSum = comps.reduce((s, c) => s + n(c.pct), 0);
+  let zeSlozek = 0, objem = 0;
+  for (const c of comps) {
+    const h = hustotaSlozky(c.name, materialy, zaklad);
+    if (h !== zaklad) zeSlozek++;
+    objem += (pctSum > 0 ? n(c.pct) / pctSum : 0) / h;
+  }
+  if (!zeSlozek || !(objem > 0)) return { hustota: zaklad, zeSlozek: 0, slozek: comps.length };
+  return { hustota: 1 / objem, zeSlozek: zeSlozek, slozek: comps.length };
 }
 
 /* ============ TĚKAVÉ LÁTKY A BEZPEČNOSTNÍ LISTY ============

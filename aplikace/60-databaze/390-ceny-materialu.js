@@ -66,6 +66,7 @@ function CenyMaterialu({ recipes, materialy, onUlozit, stav, mostOk, smiMenit })
     // u VOC je nula platný údaj (vodou ředitelné barvy), `||` by ji smazal
     if (pole === "voc") return z.mat.voc == null ? "" : z.mat.voc;
     if (pole === "bezplist") return z.mat.bezplist || "";
+    if (pole === "hustota") return z.mat.hustota == null ? "" : z.mat.hustota;
     return z.mat[pole] || (pole === "mena" ? MENA_VYCHOZI : "kg");
   };
   const uprav = (z, pole, v) => setZmeny(Object.assign({}, zmeny,
@@ -112,6 +113,7 @@ function CenyMaterialu({ recipes, materialy, onUlozit, stav, mostOk, smiMenit })
         cena: hodnota(z, "cena"), mena: String(hodnota(z, "mena") || MENA_VYCHOZI).toUpperCase(),
         jednotka: hodnota(z, "jednotka") || "kg",
         voc: hodnota(z, "voc"), bezplist: String(hodnota(z, "bezplist") || "").trim(),
+        hustota: hodnota(z, "hustota"),
         // řada se přikládá, jen když je odkud ji vzít — undefined nechá
         // buňku v souboru na pokoji (mohl ji upravit člověk)
         rada: z.rady.length ? z.rady.join("|") : undefined };
@@ -155,7 +157,7 @@ function CenyMaterialu({ recipes, materialy, onUlozit, stav, mostOk, smiMenit })
         <table className="t">
           <thead><tr><th>${preloz("Složka")}</th><th>${preloz("řada")}</th><th>${preloz("Druh")}</th><th className="num">${preloz("v recepturách")}</th>
             <th className="num">${preloz("cena")}</th><th>${preloz("za")}</th><th>${preloz("měna")}</th>
-            <th className="num">VOC %</th><th>${preloz("bezpečnostní list")}</th></tr></thead>
+            <th className="num">g/ml</th><th className="num">VOC %</th><th>${preloz("bezpečnostní list")}</th></tr></thead>
           <tbody>
             ${videt.slice(0, 120).map((z) => html`
               <tr key=${z.klic}>
@@ -186,6 +188,12 @@ function CenyMaterialu({ recipes, materialy, onUlozit, stav, mostOk, smiMenit })
                     style=${{ width: 88 }}>
                     ${Object.keys(MENA_ZNAK).map((m) => html`<option key=${m} value=${m}>${m}</option>`)}
                   </select>
+                </td>
+                <td className="num">
+                  ${/* hustota složky — z ní objem na lístku a cena za litr; prázdno = platí hustota receptury */""}
+                  <input type="number" step="0.01" min="0" value=${hodnota(z, "hustota")}
+                    onChange=${(e) => uprav(z, "hustota", e.target.value)}
+                    style=${{ width: 72, textAlign: "right" }} placeholder="—" />
                 </td>
                 <td className="num">
                   <input type="number" step="0.1" min="0" max="100" value=${hodnota(z, "voc")}

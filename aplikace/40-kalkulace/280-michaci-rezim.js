@@ -1,8 +1,16 @@
 "use strict";
-function MichaciRezim({ aktivni, onZavrit, onKombinace, modalNahore, recipe, calcAkt, rozpis, vyuziti, stav,
+function MichaciRezim({ aktivni, onZavrit, onKombinace, onPoznamka, modalNahore, recipe, calcAkt, rozpis, vyuziti, stav,
                         product, colorSel, position, tech, zak, kodDavky,
                         zbytky, stitekTlacitko, rady, potlife, aditiva, riziko, natisk, viskozita,
                         children }) {
+  /* Poznámka k receptuře se dopisuje i tady — právě u váhy se zjistí, že
+     „na tomhle materiálu dva průchody". Rozepsaný text žije v tomhle stavu
+     (null = neupravuje se) a do receptury jde až tlačítkem Uložit: sahá se
+     do souboru, ze kterého míchá celá dílna, a to se dělá jedním vědomým
+     krokem, ne při každém stisku klávesy v rukavicích. Výměna receptury
+     rozepsaný text zahodí — patřil k jiné barvě. */
+  const [poznUprava, setPoznUprava] = useState(null);
+  useEffect(() => { setPoznUprava(null); }, [recipe && recipe.id]);
   useEffect(() => {
     if (!aktivni) return;
     /* Dialog Barva a poloha potisku (a editace receptury) se otevírá NAD
@@ -30,6 +38,17 @@ function MichaciRezim({ aktivni, onZavrit, onKombinace, modalNahore, recipe, cal
   // kumulativní součet se počítá z toho, co se doopravdy navažuje — je-li
   // v nádobě zbytek, přibývá jen zbývající část
   let kum = 0;
+  /* Procenta a mililitry stojí v tabulce proto, že některé barevné databáze
+     udávají receptury právě tak — tiskař u váhy si pak řádek srovná
+     s předlohou bez přepočtu. Obojí popisuje složení celé dávky (c.norm,
+     c.ml z hustoty receptury), ne to, co se právě přidává: míchá-li se do
+     kelímku se zbytkem, „navážit" a „kumulativně" říkají, co má na váhu,
+     kdežto % a ml dál odpovídají předloze. Pořadí i význam sloupců jsou
+     stejné jako na míchacím lístku (tiskLisku v části 240). */
+  const ulozPoznamku = () => {
+    if (onPoznamka) onPoznamka(String(poznUprava || "").trim());
+    setPoznUprava(null);
+  };
 
   return ReactDOM.createPortal(html`
     <div className="michbg">
@@ -38,6 +57,27 @@ function MichaciRezim({ aktivni, onZavrit, onKombinace, modalNahore, recipe, cal
         <div>
           <div className="nazev">${recipe.name}</div>
           <div className="kde">${kdo || "—"}</div>
+          ${/* Poznámka k receptuře patří k váze — tam se rozhoduje o druhém
+                průchodu. Je to údaj dílny, nepřekládá se. Esc v poli ruší jen
+                úpravu a nesmí doběhnout k oknu, kde by zavřel celé míchání. */""}
+          ${poznUprava == null ? html`
+            <div className="poznrad">
+              ${recipe.poznamka && html`<span className="pozn">${recipe.poznamka}</span>`}
+              ${onPoznamka && html`
+                <button className="btn sec sm mich-tl-pozn" onClick=${() => setPoznUprava(recipe.poznamka || "")}
+                  title=${preloz("Dopsat poznámku k receptuře — uloží se až tlačítkem")}>
+                  ${recipe.poznamka ? preloz("✎ Poznámka") : preloz("＋ Poznámka")}
+                </button>`}
+            </div>` : html`
+            <div className="poznrad">
+              <input value=${poznUprava} autoFocus onChange=${(e) => setPoznUprava(e.target.value)}
+                onKeyDown=${(e) => {
+                  if (e.key === "Enter") ulozPoznamku();
+                  if (e.key === "Escape") { e.stopPropagation(); setPoznUprava(null); }
+                }} />
+              <button className="btn sm mich-tl-pozn-ulozit" onClick=${ulozPoznamku}>${preloz("Uložit")}</button>
+              <button className="btn sec sm" onClick=${() => setPoznUprava(null)}>${preloz("Zrušit")}</button>
+            </div>`}
         </div>
         ${/* Custom receptura vzniká a váže se na kombinaci právě u váhy —
               proto se dialog Barva a poloha potisku otevírá i odsud, nad
@@ -76,9 +116,14 @@ function MichaciRezim({ aktivni, onZavrit, onKombinace, modalNahore, recipe, cal
                 <tr>
                   <th style=${{ width: 34 }}></th>
                   <th>${preloz("Komponenta")}</th>
-                  ${rozpis && html`<th className="num">${preloz("ze zbytku")}</th>`}
-                  <th className="num">${preloz("navážit")}</th>
-                  <th className="num">${preloz("kumulativně")}</th>
+                  <th className="num">%</th>
+                  ${/* Jednotka patří do hlavičky každého číselného sloupce — vedle
+                        „%" a „ml" by holé „navážit" nechalo tiskaře hádat, v čem
+                        to je. Stejné nadpisy má míchací lístek (tiskLisku). */""}
+                  ${rozpis && html`<th className="num">${preloz("ze zbytku g")}</th>`}
+                  <th className="num">${preloz("navážit g")}</th>
+                  <th className="num">${preloz("kumulativně g")}</th>
+                  <th className="num">ml</th>
                 </tr>
               </thead>
               <tbody>
@@ -92,17 +137,21 @@ function MichaciRezim({ aktivni, onZavrit, onKombinace, modalNahore, recipe, cal
                     <tr key=${c.id || i} className=${jeTed ? "ted" : (jeHotovo ? "hotovo" : "")}>
                       <td><span className="michstav">${jeTed ? "▶" : (jeHotovo ? "✓" : "")}</span></td>
                       <td>${c.name}</td>
+                      <td className="num">${fmt(c.norm)}</td>
                       ${rozpis && html`<td className="num">${r && r.zeZbytku > 0.005 ? fmt(r.zeZbytku) : "—"}</td>`}
                       <td className="num g">${navazit > 0.005 ? fmt(navazit) : "—"}</td>
                       <td className="num">${fmt(kum)}</td>
+                      <td className="num">${fmt(c.ml)}</td>
                     </tr>`;
                 })}
                 <tr>
                   <td></td>
                   <td style=${{ fontWeight: 700 }}>${preloz("Navážit celkem")}</td>
+                  <td className="num" style=${{ fontWeight: 700 }}>${fmt(100)}</td>
                   ${rozpis && html`<td className="num" style=${{ fontWeight: 700 }}>${fmt(vyuziti ? vyuziti.pouzit : 0)}</td>`}
                   <td className="num g">${fmt(kum)}</td>
                   <td className="num" style=${{ fontWeight: 700 }}>${fmt(kum)}</td>
+                  <td className="num" style=${{ fontWeight: 700 }}>${fmt(calcAkt.totalMl)}</td>
                 </tr>
               </tbody>
             </table>` : html`
