@@ -373,6 +373,8 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 12:28 | Zdraví databáze: osm kontrol úplnosti přes všechny databáze naráz — z 15 191 receptur je 1 737 se špatným součtem složení a 2 398 bez odstínu |
 | 13:38 | Třináct funkcí ze seznamu konkurence: profil úpravy, náhrada došlé složky, vynucená složka řady, vratka ze stroje, dvoustupňové schválení, chybějící odstín na vyžádání, C/U, krycí varianta, oblíbené, jednotka dávky |
 | 15:11 | Mluvený manuál dohnal aplikaci — 48 scén na 54 v obou jazycích: jednotka dávky, profil úpravy, vynucená složka a náhrada báze, oblíbené a C/U, odkaz s historií, chybějící odstín; 70 přefocených obrazovek, 24 nahrávek, 0 kolizí popisků ze 432 vykreslení |
+| 17:38 | E-mail u receptury odešel — zůstává odkaz a historie |
+| 18:01 | Manuál katalogu produktů ukazoval jiný produkt kvůli špatnému selektoru — opraveno v obou jazycích |
 
 | 15:28 | Karta produktu na telefonu: dlaždice pod sebe pod 480px, kratší placeholder hledání |
 ---
@@ -10431,3 +10433,87 @@ Kontrolní měření na širokém okně (>960px): placeholder zůstal celou vět
 `getComputedStyle` na `.produkt-dlazdice` vrátil `repeat(3, minmax(0px,
 1fr))` — nezměněno. `kontrola_aplikace.py` a `prekryv.py` (čtyři šířky,
 oba režimy) bez chyby.
+
+## 226. E-mail u receptury odešel
+
+**Problém.** U každé receptury stálo vedle *Odkazu* a *Historie* tlačítko
+*E-mail*. Skládalo `mailto:` s názvem, řadou, složením a poznámkou a předávalo
+ho poštovnímu programu. V dílně, kde aplikace běží na jednom počítači u váhy,
+nemělo komu sloužit: kdo potřebuje recepturu poslat jinam, pošle odkaz, který
+ji rovnou otevře. Navíc do těla zprávy šlo složení, tedy licencovaná data —
+odesílatel je jedním kliknutím vynesl z dílny ven.
+
+**Co se změnilo.** Funkce je pryč celá, ne jen tlačítko:
+
+- obě tlačítka — v záložce Receptury (část 380) i v kalkulaci u vybrané
+  receptury (část 240),
+- pomocník `poslatEmail` v části 380,
+- skladač `mailtoReceptury` v části 458 i s hlavičkou úseku, který se
+  jmenoval „odkaz a e-mail" a teď je „odkaz na recepturu",
+- dva klíče ve slovníku (část 127): `E-mail` a popisek
+  `poslat e-mailem — otevře poštovní program`, oba ve všech třech jazycích.
+
+`odkazNaRecepturu` a `zkopirujOdkaz` zůstávají — o ně se opírá *Odkaz*.
+
+Manuál mluvil o „třech tlačítkách" ve scéně 38. Přepsaný je v obou jazykových
+verzích v témže kroku: nadpis, text, mluvené slovo i nahrávka.
+
+**Změřeno.**
+
+- `kontrola_aplikace.py`: kořenový prvek 1 potomek, 10 244 znaků, DOM
+  18 550 znaků, chyby žádné.
+- `node --check` prošel u všech čtyř dotčených částí.
+- V záložce Receptury napočítáno 307 akčních tlačítek, z toho 0 se slovem
+  „mail"; řádek receptury nese *Odkaz · Historie · Upravit · Smazat*.
+- Snímek scény 38 přefocen v obou jazycích, 348 rozmazaných buněk v obou
+  (licencované složení zůstává nečitelné).
+- Zvýraznění scény 38 přeměřena ze stínů pilulek na snímku: česky *Odkaz*
+  1 233–1 297, *Historie* 1 303–1 378; anglicky *Link* 1 275–1 325,
+  *History* 1 332–1 403. Rámečky sedí na tlačítka a nezasahují do *Upravit*.
+- Nahrávky scény 38 pořízeny znovu, pole `cas` přepsáno na skutečnou délku:
+  česky 30 s (413 znaků), anglicky 30 s (447 znaků).
+- `receptury_vlastni.csv` shodné se zálohou — testy do dat dílny nesáhly.
+
+**Past, která to zdržela.** `snimek.py` i `foto_manualu.py` sdílejí pevný
+ladicí port 9333, ale nespouštějí jen svůj prohlížeč — připojí se k tomu,
+který port drží. Osiřelý bezhlavý Chrome z dřívějšího běhu tak podstrčil
+svoje `localStorage`: české focení vrátilo anglickou obrazovku, jednou
+dokonce v roli tiskaře (chybělo *Upravit* a *Smazat*) a jednou úplně jinou
+záložku. Na velikosti souboru to poznat není. Před focením se port musí
+uvolnit a hned poté fotit; ověření je `document.documentElement.lang`
+a jazyk nadpisu, ne pohled na to, že snímek vůbec vznikl.
+
+## 227. Manuál ukazoval jiný produkt, než o kterém mluvil
+
+**Problém:** Scéna „Produkt s více polohami" v mluveném manuálu popisuje
+pero 11152 se třemi tiskovými polohami, ale snímek `11-produkt-11152.png`
+ukazoval nescrollovaný katalog s prvním produktem (11003) — vyhledávací
+pole na stránce Katalog produktů má třídu `search`, `foto_manualu.py` ale
+hledalo `.hledani-katalog input, .searchbar input` (selektor z jiné
+obrazovky), takže se hledání „11152" tiše neprovedlo. Stejnou příčinou
+trpěl `12-produkt-upravit.png`. Snímek mřížky `13-produkty-mrizka.png` byl
+taky kopií katalogu — `b.textContent||b.title` u tlačítka mřížky (▦) nikdy
+nedosáhl na `title`/`aria-label`, protože `textContent` není prázdný
+řetězec. V anglické sadě navíc `33-mich-stitek.png` zůstal kopií
+`30-mich.png`: regex hledal `Label for the`, skutečný anglický text
+tlačítka je „Cup label".
+
+Po opravě selektorů se ukázalo druhé zjištění: sloupec Tiskové polohy
+v katalogu produktů sdílí strukturu `<td><div class="note">…</div></td>`
+se sloupcem složení v Recepturách, takže ho rozmazávání licencovaných dat
+(`.t tbody td .note`) zakrývalo — ale katalog produktů žádná licencovaná
+data nenese (název polohy, rozměr a technologie jsou z katalogu výrobce).
+
+**Co se změnilo:** `foto_manualu.py` — opraven selektor vyhledávacího pole
+na `input.search`, oprava hledání tlačítka mřížky na `title`/`aria-label`,
+oprava anglického vzoru štítku na „Cup label". Přidán parametr
+`vynechat_rozmazani` do `js()`, kterým čtyři scény katalogu produktů
+(10–13) vynechávají vzor `.t tbody td .note` — je to jediná výjimka,
+zdůvodněná komentářem přímo u dat scény.
+
+**Změřeno:** Obě jazykové sady (35 snímků každá) přefoceny čistě —
+`hotovo: 35 snímků, 0 chyb` v obou. Žádné duplicitní snímky (`md5sum`
+unikátní na všech 70 souborech). Kolize popisků a přetečení textu změřeny
+přes všech 54 scén ve 4 šířkách (1600/1280/1024/768) v obou jazycích:
+0 nálezů. Rozmazání sedí na `CEKANE_ROZMAZANI` v obou jazycích (30-mich 5,
+32-mich-simulace 7, 40-receptury 348, 61-zbytky ≥50).

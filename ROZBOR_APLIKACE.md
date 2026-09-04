@@ -9,7 +9,7 @@
 
 | soubor | řádků | velikost |
 |---|---:|---:|
-| `aplikace/ (101 souborů)` | 23 547 | 1 427 kB |
+| `aplikace/ (101 souborů)` | 23 528 | 1 426 kB |
 | `index.html` | 129 | 7 kB |
 | `most.py` | 741 | 31 kB |
 | `pdf_spec.py` | 1 071 | 42 kB |
@@ -17,7 +17,7 @@
 | `prevod_printcolor.py` | 183 | 7 kB |
 | `kontrola_aplikace.py` | 169 | 7 kB |
 | `rozbor_aktualizuj.py` | 359 | 13 kB |
-| **celkem** | **26 412** | |
+| **celkem** | **26 393** | |
 <!-- /AUTO:stav -->
 
 ---
@@ -440,9 +440,9 @@ podle dat, ne podle dojmu.
   známé databáze — u prvního načtení by bylo nových všech patnáct tisíc
 - **Hledání s napovídáním** v kalkulaci i v záložce: hledá se v názvu, řadě,
   objednacím čísle a ve jménech složek; shody od začátku názvu jdou první
-- **Odkaz a e-mail**: odkaz `#receptura=…&zdroj=…` recepturu rovnou otevře
-  (databáze je v něm taky, týž pantone je v každé jiný), e-mail se skládá
-  v poštovním programu — aplikace nemá server, přes který by něco posílala
+- **Odkaz na recepturu**: `#receptura=…&zdroj=…` ji rovnou otevře (databáze
+  je v odkazu taky, týž pantone je v každé jiný). Odesílání e-mailem přes
+  `mailto:` odešlo 4. 9. 2026 — v dílně u jednoho počítače nemělo komu sloužit
 - **Historie receptury**: založení, schválení, změny podkladů, dávky s tím,
   kdo je míchal a z kterých konví, opravy a profily úprav v jedné časové řadě.
   Nic se nepočítá znovu, jen se páruje názvem

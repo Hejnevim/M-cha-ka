@@ -1,7 +1,7 @@
 # Rejstřík kódu aplikace
 
 > Generuje `mapa.py` ze skutečných souborů — neupravovat ručně.
-> Kód není v `index.html`, leží v `aplikace/` v 101 částech (23547 řádků).
+> Kód není v `index.html`, leží v `aplikace/` v 101 částech (23528 řádků).
 > Čísla u položek jsou `část:řádek` — část podle tabulky níž.
 
 | # | část | řádků |
@@ -20,7 +20,7 @@
 | 12 | `20-zaklad/120-barva-potisku.js` | 93 |
 | 13 | `20-zaklad/125-ulozeni.js` | 53 |
 | 14 | `20-zaklad/126-evidence-soubor.js` | 69 |
-| 15 | `20-zaklad/127-jazyk.js` | 2708 |
+| 15 | `20-zaklad/127-jazyk.js` | 2706 |
 | 16 | `20-zaklad/128-jednotka.js` | 32 |
 | 17 | `20-zaklad/130-ikony.js` | 29 |
 | 18 | `20-zaklad/135-rolovani.js` | 79 |
@@ -39,7 +39,7 @@
 | 31 | `30-app/225-role.js` | 223 |
 | 32 | `30-app/226-lide.js` | 34 |
 | 33 | `40-kalkulace/230-odemykani.js` | 71 |
-| 34 | `40-kalkulace/240-calc.js` | 2787 |
+| 34 | `40-kalkulace/240-calc.js` | 2785 |
 | 35 | `40-kalkulace/250-vaha.js` | 104 |
 | 36 | `40-kalkulace/260-financni-box.js` | 127 |
 | 37 | `40-kalkulace/270-potlife-pruh.js` | 69 |
@@ -55,7 +55,7 @@
 | 47 | `50-zbytky/355-zmeny-tab.js` | 157 |
 | 48 | `60-databaze/360-sito-tab.js` | 272 |
 | 49 | `60-databaze/370-produkty.js` | 256 |
-| 50 | `60-databaze/380-receptury.js` | 295 |
+| 50 | `60-databaze/380-receptury.js` | 292 |
 | 51 | `60-databaze/382-naseptavac.js` | 57 |
 | 52 | `60-databaze/384-historie-receptury.js` | 91 |
 | 53 | `60-databaze/390-ceny-materialu.js` | 262 |
@@ -69,7 +69,7 @@
 | 61 | `70-pravidla/450-zamek.js` | 411 |
 | 62 | `70-pravidla/455-material.js` | 85 |
 | 63 | `70-pravidla/456-typ-polohy.js` | 114 |
-| 64 | `70-pravidla/458-receptury-varianty.js` | 197 |
+| 64 | `70-pravidla/458-receptury-varianty.js` | 185 |
 | 65 | `70-pravidla/459-vynucene-slozky.js` | 57 |
 | 66 | `70-pravidla/460-pigment-baze.js` | 170 |
 | 67 | `70-pravidla/470-zastupnost.js` | 214 |
@@ -307,14 +307,14 @@
 `PozadavkyOdstinu` 56:8 · `SestavyTab` 94:11 · `SkladTab` 96:23 · `ZdraviTab` 98:21 · `PruhSlozeni` 99:28
 `FiltrDatabaze` 99:58 · `Importer` 100:2
 
-## Funkce (582)
+## Funkce (580)
 
 `useMediaQuery` 10:9 · `posluchac` 10:15 · `techMaSito` 10:38 · `produktUmi` 11:13 · `polohyTech` 11:15
 `mapTech` 11:28 · `toLocalImg` 11:36 · `uid` 11:63 · `n` 11:64 · `fmt` 11:65 · `hexNaRgb` 12:8
 `rgbNaCmyk` 12:14 · `cmykText` 12:21 · `rgbNaLab` 12:25 · `t` 12:31 · `deltaE` 12:35 · `pantoneZNazvu` 12:38
 `nejblizsiPantone` 12:48 · `vzornikProHodnotu` 12:63 · `popisBarvyPotisku` 12:76 · `loadLS` 13:2
 `saveLS` 13:6 · `zapomenLS` 13:10 · `idbOtevri` 13:23 · `useEvidenceSoubor` 14:18 · `nastavJazyk` 15:53
-`jazykProstredi` 15:2689 · `preloz` 15:2699 · `kodJednotky` 16:19 · `hmotnostText` 16:23
+`jazykProstredi` 15:2687 · `preloz` 15:2697 · `kodJednotky` 16:19 · `hmotnostText` 16:23
 `hmotnostNaGramy` 16:30 · `fixTech` 17:26 · `posunJezdce` 18:21 · `srovnej` 18:26 · `dolu` 18:44
 `tahni` 18:55 · `pust` 18:58 · `bezDiakritiky` 19:54 · `rozborKoduPolohy` 19:60 · `polohaDleKodu` 19:66
 `posTokeny` 19:72 · `parseSpec` 19:76 · `put` 19:80 · `resolveSpec` 19:105 · `num` 19:110 · `vyber` 19:147
@@ -354,41 +354,40 @@
 `kusy` 45:23 · `hodnotaText` 45:34 · `osaCim` 46:15 · `kdyText` 46:35 · `kdyText` 47:34 · `velke` 48:47
 `cislem` 48:60 · `receptur` 48:74 · `uReceptur` 48:75 · `prepni` 49:19 · `produktKPorovnani` 49:54
 `save` 49:62 · `smaz` 49:79 · `exportCsv` 49:86 · `setPos` 49:196 · `save` 50:73 · `smaz` 50:97
-`exportCsv` 50:104 · `kopirujOdkaz` 50:123 · `poslatEmail` 50:124 · `znacky` 50:128 · `hvezda` 50:134
-`akce` 50:138 · `vyber` 51:18 · `polozkyNaseptavace` 51:50 · `sedi` 52:15 · `kdyText` 52:16 · `pridej` 53:10
-`hodnota` 53:60 · `uprav` 53:72 · `doplnitZRad` 53:98 · `ulozit` 53:104 · `nabidkaSitEditoru` 54:8
-`sPredvyplnenymSitem` 54:20 · `setC` 54:28 · `zapniTuzidlo` 54:39 · `rozdilProti` 55:32 · `vazbyText` 55:53
-`uprav` 55:56 · `zapis` 55:58 · `schval` 55:63 · `schvalDruhy` 55:71 · `zamitni` 55:80 · `vratZpet` 55:92
-`nastavDruhy` 55:102 · `kdyText` 55:104 · `radek` 55:109 · `kdyText` 56:17 · `uprav` 56:23
-`ulozRecepturu` 56:28 · `zamitni` 56:37 · `parseCsv` 57:3 · `rowsToItems` 57:38 · `jsonToItems` 57:59
-`csvToRecipes` 57:90 · `idx` 57:94 · `klicReceptury` 57:209 · `klicSirotka` 57:214 · `sloucReceptury` 57:221
-`drz` 57:273 · `jedenRadek` 58:12 · `vazbyReceptury` 58:15 · `nazevDb` 58:22 · `zdrojOdvozeni` 58:29
-`nazevCustom` 58:40 · `castKlice` 58:57 · `customKProduktu` 58:68 · `jeVlastni` 58:106 · `vlastniDoCsv` 58:108
-`dopocitejSito` 59:35 · `csvNaSita` 59:50 · `i` 59:54 · `koefProHodnotu` 59:105 · `csvNaKoeficienty` 59:124
-`i` 59:128 · `sitaPro` 59:147 · `sitoProProdukt` 59:169 · `sitaKVyberu` 59:188 · `tridaPodkladu` 60:2
-`odstinNazev` 60:35 · `analyzaPodkladu` 60:46 · `csvNaTechStav` 61:12 · `i` 61:16 · `csvNaDbTech` 61:37
-`i` 61:41 · `csvNaPlanDb` 61:63 · `i` 61:67 · `vychoziTechCsv` 61:88 · `rozdelRadek` 61:100
-`zmenStavVCsv` 61:119 · `zapisCenyDoCsv` 61:157 · `najdi` 61:161 · `dopln` 61:168 · `bunka` 61:195
-`zapisSkladDoCsv` 61:254 · `najdi` 61:258 · `dopln` 61:264 · `naplnit` 61:286 · `pripravenostTech` 61:327
-`techOstra` 61:409 · `rozlozMaterialy` 62:24 · `klicMaterialu` 62:33 · `materialyProduktu` 62:42
-`materialyTypu` 62:47 · `vhodnostTypu` 62:59 · `csvNaDbMaterialy` 62:71 · `i` 62:75 · `klicTypuPolohy` 63:23
-`csvNaTypyPoloh` 63:32 · `i` 63:36 · `typyProPolohu` 63:55 · `vychoziTypyPolohCsv` 63:62
-`zapisTypPolohyDoCsv` 63:74 · `najdi` 63:78 · `bez` 63:87 · `cuZNazvu` 64:26 · `cuReceptury` 64:36
-`podleCu` 64:40 · `jeKryci` 64:48 · `zakladOdstinu` 64:53 · `variantyOdstinu` 64:64 · `klicOblibene` 64:88
-`nactiOblibene` 64:89 · `ulozOblibene` 64:94 · `kdyPridana` 64:107 · `jeNovaReceptura` 64:108
-`jeMoje` 64:114 · `filtrReceptur` 64:123 · `textHledaniReceptury` 64:137 · `napovedaReceptur` 64:139
-`odkazNaRecepturu` 64:157 · `recepturaZOdkazu` 64:163 · `zkopirujOdkaz` 64:179 · `hotovo` 64:181
-`mailtoReceptury` 64:189 · `csvNaVynucene` 65:20 · `i` 65:24 · `vynuceneSlozky` 65:47 · `textVynucenych` 65:56
-`roleMaterialu` 66:40 · `znakMeny` 66:51 · `cenaZaGram` 66:57 · `hustotaSlozky` 66:78
-`hustotaReceptury` 66:82 · `vocDavky` 66:107 · `pridej` 66:113 · `podilySlozeni` 66:165
-`seznamZastupnosti` 67:23 · `tabulkaZastupnosti` 67:29 · `prevodZastupnosti` 67:47 · `popisZastoupeni` 67:66
-`textZastoupeni` 67:81 · `textZastoupeniObr` 67:85 · `kontrolaZastupnosti` 67:92 · `csvNaPigmenty` 67:115
-`i` 67:119 · `naVoc` 67:138 · `rozborSlozeni` 67:195 · `nahradyProSlozku` 68:17 · `uplatniNahrady` 68:34
-`popisNahrad` 68:52 · `textNahrad` 68:62 · `textNahradObr` 68:63 · `korekceOdstinu` 69:16
-`doporucKorekci` 69:59 · `spotrebaZeSita` 69:97 · `prepocetSortimentu` 70:18 · `spotreba` 70:40
-`median` 70:103 · `rezervaSita` 71:33 · `tahyZakazky` 71:46 · `jeCernaBarva` 72:29 · `rozborSeparaci` 72:37
-`radek` 72:47 · `novyKodZbytku` 73:12 · `jeKodZbytku` 73:21 · `maBazi` 73:26 · `normKomp` 73:27
-`popisKelimku` 73:36 · `kodHustnuti` 73:68 · `naPodil` 73:76 · `potlifeReceptury` 73:87
+`exportCsv` 50:104 · `kopirujOdkaz` 50:123 · `znacky` 50:127 · `hvezda` 50:133 · `akce` 50:137 · `vyber` 51:18
+`polozkyNaseptavace` 51:50 · `sedi` 52:15 · `kdyText` 52:16 · `pridej` 53:10 · `hodnota` 53:60 · `uprav` 53:72
+`doplnitZRad` 53:98 · `ulozit` 53:104 · `nabidkaSitEditoru` 54:8 · `sPredvyplnenymSitem` 54:20 · `setC` 54:28
+`zapniTuzidlo` 54:39 · `rozdilProti` 55:32 · `vazbyText` 55:53 · `uprav` 55:56 · `zapis` 55:58
+`schval` 55:63 · `schvalDruhy` 55:71 · `zamitni` 55:80 · `vratZpet` 55:92 · `nastavDruhy` 55:102
+`kdyText` 55:104 · `radek` 55:109 · `kdyText` 56:17 · `uprav` 56:23 · `ulozRecepturu` 56:28 · `zamitni` 56:37
+`parseCsv` 57:3 · `rowsToItems` 57:38 · `jsonToItems` 57:59 · `csvToRecipes` 57:90 · `idx` 57:94
+`klicReceptury` 57:209 · `klicSirotka` 57:214 · `sloucReceptury` 57:221 · `drz` 57:273 · `jedenRadek` 58:12
+`vazbyReceptury` 58:15 · `nazevDb` 58:22 · `zdrojOdvozeni` 58:29 · `nazevCustom` 58:40 · `castKlice` 58:57
+`customKProduktu` 58:68 · `jeVlastni` 58:106 · `vlastniDoCsv` 58:108 · `dopocitejSito` 59:35
+`csvNaSita` 59:50 · `i` 59:54 · `koefProHodnotu` 59:105 · `csvNaKoeficienty` 59:124 · `i` 59:128
+`sitaPro` 59:147 · `sitoProProdukt` 59:169 · `sitaKVyberu` 59:188 · `tridaPodkladu` 60:2 · `odstinNazev` 60:35
+`analyzaPodkladu` 60:46 · `csvNaTechStav` 61:12 · `i` 61:16 · `csvNaDbTech` 61:37 · `i` 61:41
+`csvNaPlanDb` 61:63 · `i` 61:67 · `vychoziTechCsv` 61:88 · `rozdelRadek` 61:100 · `zmenStavVCsv` 61:119
+`zapisCenyDoCsv` 61:157 · `najdi` 61:161 · `dopln` 61:168 · `bunka` 61:195 · `zapisSkladDoCsv` 61:254
+`najdi` 61:258 · `dopln` 61:264 · `naplnit` 61:286 · `pripravenostTech` 61:327 · `techOstra` 61:409
+`rozlozMaterialy` 62:24 · `klicMaterialu` 62:33 · `materialyProduktu` 62:42 · `materialyTypu` 62:47
+`vhodnostTypu` 62:59 · `csvNaDbMaterialy` 62:71 · `i` 62:75 · `klicTypuPolohy` 63:23 · `csvNaTypyPoloh` 63:32
+`i` 63:36 · `typyProPolohu` 63:55 · `vychoziTypyPolohCsv` 63:62 · `zapisTypPolohyDoCsv` 63:74 · `najdi` 63:78
+`bez` 63:87 · `cuZNazvu` 64:26 · `cuReceptury` 64:36 · `podleCu` 64:40 · `jeKryci` 64:48
+`zakladOdstinu` 64:53 · `variantyOdstinu` 64:64 · `klicOblibene` 64:88 · `nactiOblibene` 64:89
+`ulozOblibene` 64:94 · `kdyPridana` 64:107 · `jeNovaReceptura` 64:108 · `jeMoje` 64:114
+`filtrReceptur` 64:123 · `textHledaniReceptury` 64:137 · `napovedaReceptur` 64:139 · `odkazNaRecepturu` 64:157
+`recepturaZOdkazu` 64:163 · `zkopirujOdkaz` 64:179 · `hotovo` 64:181 · `csvNaVynucene` 65:20 · `i` 65:24
+`vynuceneSlozky` 65:47 · `textVynucenych` 65:56 · `roleMaterialu` 66:40 · `znakMeny` 66:51
+`cenaZaGram` 66:57 · `hustotaSlozky` 66:78 · `hustotaReceptury` 66:82 · `vocDavky` 66:107 · `pridej` 66:113
+`podilySlozeni` 66:165 · `seznamZastupnosti` 67:23 · `tabulkaZastupnosti` 67:29 · `prevodZastupnosti` 67:47
+`popisZastoupeni` 67:66 · `textZastoupeni` 67:81 · `textZastoupeniObr` 67:85 · `kontrolaZastupnosti` 67:92
+`csvNaPigmenty` 67:115 · `i` 67:119 · `naVoc` 67:138 · `rozborSlozeni` 67:195 · `nahradyProSlozku` 68:17
+`uplatniNahrady` 68:34 · `popisNahrad` 68:52 · `textNahrad` 68:62 · `textNahradObr` 68:63
+`korekceOdstinu` 69:16 · `doporucKorekci` 69:59 · `spotrebaZeSita` 69:97 · `prepocetSortimentu` 70:18
+`spotreba` 70:40 · `median` 70:103 · `rezervaSita` 71:33 · `tahyZakazky` 71:46 · `jeCernaBarva` 72:29
+`rozborSeparaci` 72:37 · `radek` 72:47 · `novyKodZbytku` 73:12 · `jeKodZbytku` 73:21 · `maBazi` 73:26
+`normKomp` 73:27 · `popisKelimku` 73:36 · `kodHustnuti` 73:68 · `naPodil` 73:76 · `potlifeReceptury` 73:87
 `potlifeHodin` 73:100 · `davkaTuzidla` 73:106 · `redeniReceptury` 74:34 · `rozborNaredeni` 74:57
 `kompenzaceNaredeni` 74:93 · `stavPotlife` 74:109 · `stavZbytku` 74:124 · `dobaText` 74:157
 `zbyvaText` 74:173 · `menaDilny` 75:17 · `materialPodleJmena` 75:32 · `materialRole` 75:37 · `cenaDavky` 75:56

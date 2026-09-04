@@ -149,7 +149,7 @@ function napovedaReceptur(recipes, dotaz, strop) {
   return zac.concat(uvnitr).slice(0, strop || 12);
 }
 
-/* ---- odkaz a e-mail ----
+/* ---- odkaz na recepturu ----
    Odkaz je adresa téže stránky s recepturou za mřížkou: otevře aplikaci na
    záložce Receptury s tou jedinou recepturou nahoře. Databáze je v odkazu
    taky — týž pantone je v každé databázi jiný. Nic se nikam neposílá, odkaz
@@ -182,16 +182,4 @@ function zkopirujOdkaz(r, onToast) {
   if (navigator.clipboard && navigator.clipboard.writeText)
     navigator.clipboard.writeText(odkaz).then(hotovo, () => onToast && onToast({ ok: false, text: odkaz }));
   else if (onToast) onToast({ ok: false, text: odkaz });
-}
-/* E-mail se skládá v poštovním programu uživatele (mailto:) — aplikace nemá
-   server, přes který by něco posílala. Do těla jde název, řada, složení,
-   poznámka a odkaz; co s tím příjemce udělá, je věc odesílatele. */
-function mailtoReceptury(r) {
-  if (!r) return "";
-  const radky = [r.name + (r.series ? " · " + r.series : "")];
-  for (const c of (r.components || [])) radky.push(c.name + " — " + fmt(n(c.pct)) + " %");
-  if (r.poznamka) radky.push("Poznámka: " + r.poznamka);
-  radky.push("", odkazNaRecepturu(r));
-  return "mailto:?subject=" + encodeURIComponent("Receptura " + String(r.name || ""))
-    + "&body=" + encodeURIComponent(radky.join("\r\n"));
 }

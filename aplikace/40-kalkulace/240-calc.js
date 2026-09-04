@@ -2192,8 +2192,8 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                     + (vazbaSiroka ? preloz(" (všechny polohy)") : (position ? " · " + position.tech + " " + position.name : ""))}
                 </span>`}
               <${PruhSlozeni} recipe=${recipe} />
-              ${/* Krycí / standardní varianta téhož odstínu (část 458), odkaz,
-                    e-mail a historie — u receptury, ne u výsledku: tady se
+              ${/* Krycí / standardní varianta téhož odstínu (část 458), odkaz
+                    a historie — u receptury, ne u výsledku: tady se
                     vybírá, tam se váží. */""}
               ${recipe && !jeAdHoc && html`
                 <div className="rowline" style=${{ marginTop: 6, marginBottom: 0, gap: 6 }}>
@@ -2203,8 +2203,6 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                     title=${preloz("týž odstín ve standardní verzi z téže databáze")}>${preloz("Standardní varianta →")}</button>`}
                   <button className="btn sec sm" title=${preloz("zkopírovat odkaz, který recepturu rovnou otevře")}
                     onClick=${() => zkopirujOdkaz(recipe, onToast)}>${preloz("Odkaz")}</button>
-                  <button className="btn sec sm" title=${preloz("poslat e-mailem — otevře poštovní program")}
-                    onClick=${() => { window.location.href = mailtoReceptury(recipe); }}>${preloz("E-mail")}</button>
                   <button className="btn sec sm" title=${preloz("kdo ji založil, měnil a míchal")}
                     onClick=${() => setHistorieOtevrena(true)}>${preloz("Historie")}</button>
                 </div>`}

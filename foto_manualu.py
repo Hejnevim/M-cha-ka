@@ -279,7 +279,7 @@ SNIMKY = [
                                   "var s=tlac(/(simulaci|simulation)/i); if(s){s.click(); await cekej(1500);}")),
     ("33-mich-stitek", 1300, js(VYBER_11152, POTVRD_POLOHU,
                                 "var m=tlac(/(Míchací režim|Mixing mode)/i); if(m){m.click(); await cekej(2000);}"
-                                "var s=tlac(/(Štítek na kelímek|Label for the)/i); if(s){s.click(); await cekej(1500);}")),
+                                "var s=tlac(/(Štítek na kelímek|Cup label)/i); if(s){s.click(); await cekej(1500);}")),
     ("34-mich-poznamka", 1300, js(VYBER_11152, POTVRD_POLOHU,
                                   "var m=tlac(/(Míchací režim|Mixing mode)/i); if(m){m.click(); await cekej(2000);}"
                                   "var p=tlac(/(Poznámka|Note)/i); if(p){p.click(); await cekej(1000);}")),

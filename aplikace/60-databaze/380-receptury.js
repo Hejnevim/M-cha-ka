@@ -121,7 +121,6 @@ function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr, techno
   };
 
   const kopirujOdkaz = (r) => zkopirujOdkaz(r, onToast);
-  const poslatEmail = (r) => { window.location.href = mailtoReceptury(r); };
 
   /* Štítky u receptury — stejné v tabulce i v mřížce, aby se řádek a karta
      četly stejně. */
@@ -139,8 +138,6 @@ function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr, techno
     <${React.Fragment}>
       <button className="btn sec sm" title=${preloz("zkopírovat odkaz, který recepturu rovnou otevře")}
         onClick=${() => kopirujOdkaz(r)}>${preloz("Odkaz")}</button>${" "}
-      <button className="btn sec sm" title=${preloz("poslat e-mailem — otevře poštovní program")}
-        onClick=${() => poslatEmail(r)}>${preloz("E-mail")}</button>${" "}
       <button className="btn sec sm" title=${preloz("kdo ji založil, měnil a míchal")}
         onClick=${() => setHistorie(r)}>${preloz("Historie")}</button>
     <//>`;

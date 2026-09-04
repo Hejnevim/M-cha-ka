@@ -662,7 +662,7 @@ soubor podrobný; když se funkce změní, mění se obojí.
 | profil úpravy | 26 |
 | vynucená složka řady · náhrada došlé báze | 31 |
 | oblíbené · jen moje · jen nové · C a U | 37 |
-| odkaz · e-mail · historie receptury | 38 |
+| odkaz · historie receptury | 38 |
 | dvoustupňové schválení · lidé dílny | 42 (a 3) |
 | chybějící odstín na vyžádání | 43 |
 | vratka ze stroje | 47 |
