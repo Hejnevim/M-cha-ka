@@ -6,11 +6,18 @@
    Řádek proto ukazuje všechno, co se pro rozhodnutí potřebuje, a nic víc:
    ze které formule odstín vyšel, jak se liší složením, kdo ho zadal a na
    jakou kombinaci. Zamítnutá receptura se nemaže — tiskař, který podle ní
-   míchal, se musí dozvědět proč. */
+   míchal, se musí dozvědět proč.
 
-function SchvaleniTab({ recipes, setRecipes, links, role, jmenoRole, setJmenoRole, onToast }) {
+   Schválení má až dva stupně (část 225): technolog vždycky, po něm
+   případně mistr nebo zákazník. Na koho se čeká, stojí u každé receptury;
+   druhý stupeň se objeví až po prvním. Každý krok se zapisuje do záznamu
+   změn podkladů — schválení je zásah do podkladu dílny jako každý jiný. */
+
+function SchvaleniTab({ recipes, setRecipes, links, role, jmenoRole, setJmenoRole, onToast,
+                        pozadavky, setPozadavky, sita, materialy, zapisZmenu }) {
   const [duvody, setDuvody] = useState({});     // id receptury → rozepsaný důvod
   const [zamitam, setZamitam] = useState("");   // id receptury, u které se píše důvod
+  const [zakaznik, setZakaznik] = useState({}); // id receptury → kdo za zákazníka podepsal
   const smi = smiRole(role, "schvalovat");
 
   const cekajici = useMemo(() => (recipes || [])
@@ -47,26 +54,52 @@ function SchvaleniTab({ recipes, setRecipes, links, role, jmenoRole, setJmenoRol
     castKlice(k, 1), castKlice(k, 2), castKlice(k, 3)].filter(Boolean).join(" · "));
 
   const uprav = (r, novy) => setRecipes((prev) => prev.map((x) => x.id === r.id ? novy : x));
+  /* Záznam změny: stav schválení před a po, jako u každého jiného zásahu. */
+  const zapis = (r, novy, pozn) => {
+    if (zapisZmenu) zapisZmenu({ oblast: "schvaleni", polozka: r.name, pole: "stav",
+      pred: popisStavuSchvaleni(r), po: popisStavuSchvaleni(novy), pozn: pozn });
+  };
 
   const schval = (r) => {
-    uprav(r, razitkoSchvaleni(r, role, jmenoRole));
+    const novy = razitkoSchvaleni(r, role, jmenoRole);
+    uprav(r, novy); zapis(r, novy);
     setZamitam("");
-    if (onToast) onToast({ ok: true, text: preloz("Schváleno: {r}", { r: r.name }) });
+    if (onToast) onToast({ ok: true, text: druhyStupen(novy)
+      ? preloz("Schváleno technologem: {r} — čeká ještě {s}.", { r: r.name, s: preloz(STUPNE_SCHVALENI[druhyStupen(novy)]) })
+      : preloz("Schváleno: {r}", { r: r.name }) });
+  };
+  const schvalDruhy = (r) => {
+    const st = druhyStupen(r);
+    const kdo = String(zakaznik[r.id] || "").trim();
+    if (st === "zakaznik" && !kdo) return;
+    const novy = razitkoDruhehoStupne(r, role, jmenoRole, kdo);
+    uprav(r, novy); zapis(r, novy, st === "zakaznik" ? preloz("za zákazníka podepsal {k}", { k: kdo }) : "");
+    if (onToast) onToast({ ok: true, text: preloz("Schváleno ({s}): {r}", { s: preloz(STUPNE_SCHVALENI[st]), r: r.name }) });
   };
 
   const zamitni = (r) => {
     const duvod = String(duvody[r.id] || "").trim();
-    uprav(r, razitkoZamitnuti(r, role, jmenoRole, duvod));
+    const novy = stupenCeka(r) === "technolog"
+      ? razitkoZamitnuti(r, role, jmenoRole, duvod)
+      : razitkoZamitnuti2(r, role, jmenoRole, duvod);
+    uprav(r, novy); zapis(r, novy, duvod);
     setZamitam("");
     setDuvody(Object.assign({}, duvody, { [r.id]: "" }));
     if (onToast) onToast({ ok: true, text: preloz("Zamítnuto: {r}", { r: r.name }) });
   };
 
+  /* Vrácení ke schválení — na ten stupeň, který zamítl. */
   const vratZpet = (r) => {
-    uprav(r, Object.assign({}, r, { schvaleni: SCHV_CEKA, schvalil: "", schvalenoKdy: 0,
-      duvodZamitnuti: "" }));
+    const novy = stavPrvnihoStupne(r) === SCHV_ZAMITNUTO
+      ? Object.assign({}, r, { schvaleni: SCHV_CEKA, schvalil: "", schvalenoKdy: 0, duvodZamitnuti: "" })
+      : Object.assign({}, r, { schvaleni2: SCHV_CEKA, schvalil2: "", schvaleno2Kdy: 0, duvodZamitnuti2: "" });
+    uprav(r, novy); zapis(r, novy);
     if (onToast) onToast({ ok: true, text: preloz("Vráceno ke schválení: {r}", { r: r.name }) });
   };
+
+  /* Změna druhého stupně u čekající receptury — technolog při schvalování
+     rozhodne, jestli má odstín vidět ještě mistr nebo zákazník. */
+  const nastavDruhy = (r, st) => uprav(r, Object.assign({}, r, { druhyStupen: st, schvaleni2: "" }));
 
   const kdyText = (x) => n(x) > 0
     ? new Date(n(x)).toLocaleString("cs-CZ", { day: "numeric", month: "numeric",
@@ -77,12 +110,15 @@ function SchvaleniTab({ recipes, setRecipes, links, role, jmenoRole, setJmenoRol
     const rozdil = rozdilProti(r);
     const vazby = vazbyText(r);
     const sum = (r.components || []).reduce((s, c) => s + n(c.pct), 0);
+    const stupen = stupenCeka(r);
+    const smiTed = stupen === "technolog" ? smi : smiDruhyStupen(role, stupen);
     return html`
       <div key=${r.id} className="card" style=${{ margin: "0 0 12px" }}>
         <div style=${{ display: "flex", gap: 12, alignItems: "flex-start", flexWrap: "wrap" }}>
           <span className="swatch" style=${{ background: r.hex, width: 44, height: 44, flex: "0 0 auto" }} />
           <div style=${{ flex: "1 1 260px", minWidth: 0 }}>
-            <div style=${{ fontWeight: 700 }}>${r.name}</div>
+            <div style=${{ fontWeight: 700 }}>${r.name}
+              ${!zamitnuta && html`<span className="tag" style=${{ marginLeft: 8 }}>${preloz(popisStavuSchvaleni(r))}</span>`}</div>
             <div className="note">
               ${zdrojOdvozeni(r) ? preloz("odvozeno z databáze {db}", { db: zdrojOdvozeni(r) }) : preloz("bez uvedeného podkladu")}
               ${r.zaklad ? preloz(" · základ {z}", { z: r.zaklad }) : ""}
@@ -91,6 +127,8 @@ function SchvaleniTab({ recipes, setRecipes, links, role, jmenoRole, setJmenoRol
               ${r.zadal ? preloz("zadal {kdo}", { kdo: r.zadal }) : preloz("zadal neznámo kdo")}
               ${kdyText(r.zadanoKdy) ? " · " + kdyText(r.zadanoKdy) : ""}
             </div>
+            ${stavPrvnihoStupne(r) === SCHV_OK && r.schvalil && html`<div className="note">
+              ${preloz("technolog: schválil {kdo}", { kdo: r.schvalil })}${kdySchvalenoText(r) ? " · " + kdySchvalenoText(r) : ""}</div>`}
             <${PruhSlozeni} recipe=${r} />
             ${Math.abs(sum - 100) > 0.01 && html`<div className="note"
               style=${{ color: "var(--warn)" }}>${preloz("Součet složek {s} % — ne 100 %.", { s: fmt(sum) })}</div>`}
@@ -115,13 +153,17 @@ function SchvaleniTab({ recipes, setRecipes, links, role, jmenoRole, setJmenoRol
         </div>
         ${zamitnuta ? html`
           <div className="warnbox" style=${{ marginBottom: 0 }}>
-            ${preloz("Zamítl {kdo}", { kdo: r.schvalil || preloz("neznámo kdo") })}${kdySchvalenoText(r) ? " · " + kdySchvalenoText(r) : ""}${
-              r.duvodZamitnuti ? " — " + r.duvodZamitnuti : "."}
+            ${stavPrvnihoStupne(r) === SCHV_ZAMITNUTO
+              ? preloz("Zamítl {kdo}", { kdo: r.schvalil || preloz("neznámo kdo") }) + (kdySchvalenoText(r) ? " · " + kdySchvalenoText(r) : "")
+                + (r.duvodZamitnuti ? " — " + r.duvodZamitnuti : ".")
+              : preloz("Zamítl ({s}) {kdo}", { s: preloz(STUPNE_SCHVALENI[druhyStupen(r)] || ""), kdo: r.schvalil2 || preloz("neznámo kdo") })
+                + (kdyText(r.schvaleno2Kdy) ? " · " + kdyText(r.schvaleno2Kdy) : "")
+                + (r.duvodZamitnuti2 ? " — " + r.duvodZamitnuti2 : ".")}
             ${smi && html`<div className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
               <button className="btn sec sm" onClick=${() => vratZpet(r)}>${preloz("Vrátit ke schválení")}</button>
             </div>`}
           </div>
-        ` : (smi && html`
+        ` : html`
           <div className="rowline" style=${{ marginTop: 10, marginBottom: 0 }}>
             ${zamitam === r.id ? html`
               <input value=${duvody[r.id] || ""} style=${{ flex: "2 1 260px" }}
@@ -130,12 +172,28 @@ function SchvaleniTab({ recipes, setRecipes, links, role, jmenoRole, setJmenoRol
                 onKeyDown=${(e) => { if (e.key === "Enter") zamitni(r); }} />
               <button className="btn danger sm" onClick=${() => zamitni(r)}>${preloz("Zamítnout")}</button>
               <button className="btn sec sm" onClick=${() => setZamitam("")}>${preloz("Zpět")}</button>
-            ` : html`
+            ` : (stupen === "technolog" ? (smi ? html`
               <button className="btn sm" onClick=${() => schval(r)}>${preloz("Schválit")}</button>
               <button className="btn danger sm" onClick=${() => setZamitam(r.id)}>${preloz("Zamítnout…")}</button>
-              <span className="note">${preloz("schválená receptura se pak nabídne i u jiných zakázek")}</span>
-            `}
-          </div>`)}
+              <span className="note">${preloz("po schválení ještě:")}</span>
+              <select value=${druhyStupen(r)} style=${{ width: "auto" }} onChange=${(e) => nastavDruhy(r, e.target.value)}>
+                <option value="">${preloz("nikdo")}</option>
+                ${Object.keys(STUPNE_SCHVALENI).map((k) => html`<option key=${k} value=${k}>${preloz(STUPNE_SCHVALENI[k])}</option>`)}
+              </select>
+            ` : html`<span className="note">${preloz("schvaluje technolog")}</span>`)
+            : (stupen === "zakaznik" ? (smiTed ? html`
+              <input value=${zakaznik[r.id] || ""} style=${{ flex: "1 1 200px" }}
+                placeholder=${preloz("kdo za zákazníka podepsal nátisk")}
+                onChange=${(e) => setZakaznik(Object.assign({}, zakaznik, { [r.id]: e.target.value }))} />
+              <button className="btn sm" disabled=${!String(zakaznik[r.id] || "").trim()}
+                onClick=${() => schvalDruhy(r)}>${preloz("Zapsat schválení zákazníkem")}</button>
+              <button className="btn danger sm" onClick=${() => setZamitam(r.id)}>${preloz("Zamítnout…")}</button>
+            ` : html`<span className="note">${preloz("čeká na podpis zákazníka — zapisuje technolog nebo mistr")}</span>`)
+            : (smiTed ? html`
+              <button className="btn sm" onClick=${() => schvalDruhy(r)}>${preloz("Schválit jako mistr")}</button>
+              <button className="btn danger sm" onClick=${() => setZamitam(r.id)}>${preloz("Zamítnout…")}</button>
+            ` : html`<span className="note">${preloz("schvaluje mistr — přepněte roli v nabídce vlevo nahoře")}</span>`)))}
+          </div>`}
       </div>`;
   };
 
@@ -172,5 +230,9 @@ function SchvaleniTab({ recipes, setRecipes, links, role, jmenoRole, setJmenoRol
           <p className="hint">${preloz("Nemažou se — kdo podle nich míchal, se musí dozvědět proč.")}</p>
         </div>`}
       ${zamitnute.map((r) => radek(r, true))}
+
+      <${PozadavkyOdstinu} pozadavky=${pozadavky} setPozadavky=${setPozadavky}
+        recipes=${recipes} setRecipes=${setRecipes} role=${role} jmenoRole=${jmenoRole}
+        sita=${sita} materialy=${materialy} zapisZmenu=${zapisZmenu} onToast=${onToast} />
     <//>`;
 }

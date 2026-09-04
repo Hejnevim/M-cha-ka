@@ -1,6 +1,6 @@
 "use strict";
 function MichaciRezim({ aktivni, onZavrit, onKombinace, onPoznamka, modalNahore, recipe, calcAkt, rozpis, vyuziti, stav,
-                        product, colorSel, position, tech, zak, kodDavky,
+                        product, colorSel, position, tech, zak, kodDavky, jednotka,
                         zbytky, stitekTlacitko, rady, potlife, aditiva, riziko, natisk, viskozita,
                         children }) {
   /* Poznámka k receptuře se dopisuje i tady — právě u váhy se zjistí, že
@@ -89,10 +89,13 @@ function MichaciRezim({ aktivni, onZavrit, onKombinace, onPoznamka, modalNahore,
             title=${preloz("Založit custom recepturu nebo změnit kombinaci — bez opuštění míchání")}>
             ${preloz("Barva a poloha potisku →")}
           </button>`}
+        ${/* Dávka v jednotce zvolené v kalkulaci (g / kg / lb, část 128) —
+              totéž číslo jako na domovské stránce. Tabulka pod tím zůstává
+              v gramech: tak to ukazuje váha. */""}
         <div className="michdavka">
-          <b>${fmt(davka)} g</b>
+          <b>${hmotnostText(davka, jednotka)}</b>
           <span>${calcAkt.zvetseno || Math.abs(davka - calcAkt.totalG) > 0.05
-            ? preloz("zakázka potřebuje {g} g", { g: fmt(calcAkt.davkaZakazky || calcAkt.totalG) })
+            ? preloz("zakázka potřebuje {g}", { g: hmotnostText(calcAkt.davkaZakazky || calcAkt.totalG, jednotka) })
             : "≈ " + fmt(calcAkt.totalMl) + " ml"}</span>
         </div>
         <button className="btn sec mich-tl-zpet" onClick=${onZavrit} title=${preloz("Zavřít můžete i klávesou Esc")}>

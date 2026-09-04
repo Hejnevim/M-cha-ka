@@ -82,8 +82,31 @@ function RecipeForm({ initial, onSave, onCancel, sita, materialy, sitaTech, sito
           </select>
         </div>
       </div>
-      <div className="frow c2" style=${{ marginTop: 4 }}>
+      <div className="frow c3" style=${{ marginTop: 4 }}>
         <div><label className="f">${preloz("Objednavatel")}</label><input value=${r.customer || ""} onChange=${(e) => setR(Object.assign({}, r, { customer: e.target.value }))} placeholder=${preloz("Název zákazníka (nepovinné)")} /></div>
+        ${/* Objednací číslo u dodavatele — na faktuře stojí jen to, hledá
+              se podle něj. C / U se výslovně zapisuje jen tam, kde to název
+              nenese; jinak stačí to, co se z názvu čte samo. */""}
+        <div><label className="f">${preloz("Objednací číslo")}</label><input value=${r.objCislo || ""} onChange=${(e) => setR(Object.assign({}, r, { objCislo: e.target.value }))} placeholder=${preloz("u dodavatele (nepovinné)")} /></div>
+        <div>
+          <label className="f">${preloz("Papír C / U")}</label>
+          <select value=${r.cu || ""} onChange=${(e) => setR(Object.assign({}, r, { cu: e.target.value }))}>
+            <option value="">${cuZNazvu(r.name) ? preloz("z názvu: {cu}", { cu: cuZNazvu(r.name) }) : "—"}</option>
+            <option value="C">${preloz(CU_POPIS.C)}</option>
+            <option value="U">${preloz(CU_POPIS.U)}</option>
+          </select>
+        </div>
+      </div>
+      <div className="frow c2" style=${{ marginTop: 4 }}>
+        ${/* Druhý stupeň schválení: kdo má odstín ještě odsouhlasit po
+              technologovi. Prázdné = stačí technolog, jako dřív. */""}
+        <div>
+          <label className="f">${preloz("Ještě schvaluje")}</label>
+          <select value=${druhyStupen(r)} onChange=${(e) => setR(Object.assign({}, r, { druhyStupen: e.target.value, schvaleni2: "" }))}>
+            <option value="">${preloz("— nikdo další, stačí technolog —")}</option>
+            ${Object.keys(STUPNE_SCHVALENI).map((k) => html`<option key=${k} value=${k}>${preloz(STUPNE_SCHVALENI[k])}</option>`)}
+          </select>
+        </div>
         <div className="flags">
           <label className="tgl"><input type="checkbox" checked=${!!r.tested} onChange=${(e) => setR(Object.assign({}, r, { tested: e.target.checked }))} /><span className="tglt"></span>${preloz("Otestovaný")}</label>
           <label className="tgl"><input type="checkbox" checked=${!!r.fade} onChange=${(e) => setR(Object.assign({}, r, { fade: e.target.checked }))} /><span className="tglt"></span>${preloz("Vysoce odolný vůči vyblednutí")}</label>

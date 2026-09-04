@@ -34,7 +34,7 @@ function TypyPolohyChipy({ produkt, poloha, recipes, dbTech, typyPoloh, ulozTypP
 }
 
 function Products({ products, setProducts, guardDelete,
-                    recipes, dbTech, typyPoloh, ulozTypPolohy, typyZapis, mostOk }) {
+                    recipes, dbTech, typyPoloh, ulozTypPolohy, typyZapis, mostOk, zapisZmenu }) {
   const [edit, setEdit] = useState(null);
   const [q, setQ] = useState("");
   const [view, setView] = useState(() => loadLS("irm-prod-view", "table"));
@@ -47,14 +47,41 @@ function Products({ products, setProducts, guardDelete,
       (p.name + " " + (p.ref || "") + " " + (p.material || "")).toLowerCase().includes(s));
   }, [q, products]);
 
+  /* Produkt do porovnatelného tvaru. Polohy jsou jedna věta, ne pole za
+     každou z nich: technolog se ptá „změnily se polohy", ne „změnil se
+     druhý řádek". Rozměry jsou to, z čeho se počítá spotřeba — přepsaná
+     šířka mění navážku u všech dávek na ten produkt. */
+  const produktKPorovnani = (p) => p ? {
+    "ref": p.ref || "",
+    "název": p.name || "",
+    "materiál": p.material || "",
+    "polohy": (p.positions || []).map((x) => String(x.name || "").trim()
+      + " " + fmt(n(x.w)) + "×" + fmt(n(x.h)) + " mm").join(" · "),
+  } : null;
+
   const save = (p) => {
+    const pred = products.find((x) => x.id === p.id) || null;
     setProducts((prev) => {
       const i = prev.findIndex((x) => x.id === p.id);
       if (i === -1) return prev.concat([p]);
       const c = prev.slice(); c[i] = p; return c;
     });
+    /* Produkt určuje, co se na něj smí tisknout a jak velká je potisková
+       plocha — zásah do něj mění navážku u každé další dávky. */
+    if (zapisZmenu) zapisZmenu({ oblast: "produkt", polozka: p.ref || p.name,
+      druh: pred ? "upraveno" : "zalozeno",
+      pred: produktKPorovnani(pred), po: produktKPorovnani(p) });
     setEdit(null);
   };
+
+  /* Smazání produktu — jedno hrdlo pro obě zobrazení (tabulka i mřížka),
+     aby se záznam nezapomněl u toho druhého. */
+  const smaz = (p) => guardDelete(() => {
+    setProducts((prev) => prev.filter((x) => x.id !== p.id));
+    if (zapisZmenu) zapisZmenu({ oblast: "produkt", druh: "smazano",
+      polozka: p.ref || p.name, pole: "produkt",
+      pred: (produktKPorovnani(p) || {})["polohy"], po: "" });
+  }, preloz("smazání produktu {p}", { p: p.ref || p.name }));
 
   const exportCsv = () => {
     const rows = [["ref", "nazev", "material", "poloha", "technologie", "sirka_mm", "vyska_mm", "pokryti_pct"]];
@@ -122,7 +149,7 @@ function Products({ products, setProducts, guardDelete,
               </div>
               <div className="pgcard-actions">
                 <button className="btn sec sm" style=${{ flex: 1 }} onClick=${() => setEdit(JSON.parse(JSON.stringify(p)))}>${preloz("Upravit")}</button>
-                <button className="btn danger sm" onClick=${() => guardDelete(() => setProducts((prev) => prev.filter((x) => x.id !== p.id)), preloz("smazání produktu {p}", { p: p.ref || p.name }))}>${preloz("Smazat")}</button>
+                <button className="btn danger sm" onClick=${() => smaz(p)}>${preloz("Smazat")}</button>
               </div>
             </div>`)}
         </div>
@@ -154,7 +181,7 @@ function Products({ products, setProducts, guardDelete,
                 </td>
                 <td style=${{ whiteSpace: "nowrap" }}>
                   <button className="btn sec sm" onClick=${() => setEdit(JSON.parse(JSON.stringify(p)))}>${preloz("Upravit")}</button>${" "}
-                  <button className="btn danger sm" onClick=${() => guardDelete(() => setProducts((prev) => prev.filter((x) => x.id !== p.id)), preloz("smazání produktu {p}", { p: p.ref || p.name }))}>${preloz("Smazat")}</button>
+                  <button className="btn danger sm" onClick=${() => smaz(p)}>${preloz("Smazat")}</button>
                 </td>
               </tr>`)}
           </tbody>

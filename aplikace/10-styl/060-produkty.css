@@ -9,6 +9,15 @@
    zlomem stojí hned pod načtením kódu, na široké obrazovce ho část 040
    přišpendlí k pravému dolnímu rohu karty. */
 .blok-pokryti{margin-top:8px}
+/* Pod 480px (stejný zlom jako katalog produktů po jednom) jsou tři dlaždice
+   karty produktu ve sloupci 100 px široké — do třetí z nich se vejde jen
+   „Načíst kód" a „Spočítat krycí plochu z náhledu" se zalomí uprostřed
+   slova. Dlaždice jdou pod sebe, tlačítka uvnitř tak dostanou celou šířku
+   karty místo třetiny řádku. */
+@media(max-width:480px){
+  .produkt-dlazdice{grid-template-columns:1fr}
+  .produkt-dlazdice .prodphoto,.produkt-dlazdice .pdfdrop{width:128px;margin:0 auto}
+}
 .pdfdrop{min-width:0;cursor:pointer}
 .prodphoto{width:128px;height:128px;object-fit:contain;border-radius:var(--radius-dlazdice);background:var(--paper);flex:0 0 auto;box-shadow:var(--neu-sm)}
 .poscards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:8px 0 6px}

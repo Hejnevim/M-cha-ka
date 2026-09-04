@@ -148,15 +148,27 @@ svg[viewBox="0 0 24 24"].ikona-radek{width:var(--ikona-radek);height:var(--ikona
    uprostřed velkého kruhu. Stejná specifičnost, pozdější pravidlo vyhrává —
    proto stojí až za pravidlem ikon. */
 .navbtn svg,.themebtn svg{width:40.5px;height:40.5px}
-/* Vyskakovací menu je zvětšené na 1,75násobek původních hodnot (písmo řádku
-   13,5 → 23,625 px, šířka 180 → 315 px) — stejně jako tlačítka hlavičky je to
-   častý hmat a čte se ze stoje od váhy. Poznámky a štítky uvnitř mají vlastní
-   přepočet z týchž tokenů jako všude jinde (vzor .bigpanel .note), aby se
+/* Vyskakovací menu je zvětšené na 1,25násobek původních hodnot (písmo řádku
+   13,5 → 16,875 px); šířka 265 px je nejmenší, při které se řádek
+   „▸ TECHNOLOGIE“ i s názvem technologie vpravo nezalomí (při 225 px měl
+   71 px místo 47 px) — stejně jako tlačítka hlavičky je to
+   častý hmat a čte se ze stoje od váhy. Původní 1,75násobek (kap. 190) se
+   s přibývajícími skupinami přestal vejít do okna: při 1 920 × 1 080 měla
+   nabídka 1 042 px a začínala na 125 px, takže spodní položky (JAZYK)
+   zůstaly pod okrajem a nešlo na ně kliknout — nabídka je absolutně
+   umístěná, stránka pod ní se sice roluje, ale s ní ujíždí i hlavička.
+   Při 1,25násobku má nabídka se všemi skupinami sbalenými 756 px a končí
+   na 881 px, tedy se vejde i do skutečného okna prohlížeče (~940 px po
+   odečtení lišt). Pojistka max-height s rolováním uvnitř je pro menší
+   okna a pro rozbalené skupiny: rozbalený SKLAD přidá čtyři řádky a bez
+   ní by se spodek zase ztratil. Odečítá se 140 px = horní hrana nabídky
+   (125,5 px) a okraj. Poznámky a štítky uvnitř mají vlastní přepočet
+   z týchž tokenů jako všude jinde (vzor .bigpanel .note), aby se
    zvětšovaly dál se základní škálou písma. */
-.navdrop{position:absolute;top:calc(100% + 10px);left:0;background:var(--paper);border-radius:24.5px;box-shadow:var(--neu);padding:10.5px;z-index:45;min-width:315px;display:flex;flex-direction:column;gap:3.5px}
-.navdrop button{background:none;border:none;text-align:left;padding:17.5px 24.5px;border-radius:17.5px;font-weight:600;font-size:23.625px;color:var(--ink);cursor:pointer;transition:background .15s}
+.navdrop{position:absolute;top:calc(100% + 10px);left:0;background:var(--paper);border-radius:17.5px;box-shadow:var(--neu);padding:7.5px;z-index:45;min-width:265px;display:flex;flex-direction:column;gap:2.5px;max-height:calc(100vh - 140px);overflow-y:auto}
+.navdrop button{background:none;border:none;text-align:left;padding:12.5px 17.5px;border-radius:12.5px;font-weight:600;font-size:16.875px;color:var(--ink);cursor:pointer;transition:background .15s;flex:0 0 auto}
 .navdrop button:hover{background:var(--zvyraz)}
 .navdrop button.on{color:var(--cyan);font-weight:800}
-.navdrop .note{font-size:calc((var(--pismo-poznamka) - .5px) * 1.75)}
-.navdrop .tag{font-size:calc(var(--pismo-popisek) * 1.75);padding:5.25px 15.75px}
+.navdrop .note{font-size:calc((var(--pismo-poznamka) - .5px) * 1.25)}
+.navdrop .tag{font-size:calc(var(--pismo-popisek) * 1.25);padding:3.75px 11.25px}
 :root[data-theme="dark"] .navdrop button:hover{background:rgba(127,163,217,.16)}

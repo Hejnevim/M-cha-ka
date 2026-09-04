@@ -49,6 +49,15 @@ const ZBYTKY_HLAVICKA = ["kod", "nazev", "gramu", "puvodne", "hustota", "hex", "
   // odečítat poctivě: v nádobě je barva, která už jednou z konve odešla,
   // ale jak se ty gramy dělí mezi složky, plyne až ze složení onoho kelímku
   "zbytek_kod",
+  /* Co se do dávky přidalo nad recepturu (profil úpravy) a co se v ní
+     navážilo místo čeho (náhrada došlé složky) — na štítek a k reklamaci:
+     ze složení hotové barvy už to nikdo nepozná. */
+  "uprava", "nahrada",
+  /* Vratka ze stroje uprostřed zakázky: z které dávky a proč. Kelímek bez
+     těchhle sloupců je obyčejný zbytek po zakázce, jako dřív. */
+  "vratka", "vratka_z", "vratka_duvod",
+  // kdo kelímek zapsal — podpis role, jako u dávky
+  "kdo",
   "komponenta", "procento"];
 
 /* Čísla se zaokrouhlují — soubor někdo otevře v Excelu a 71,61999999999999

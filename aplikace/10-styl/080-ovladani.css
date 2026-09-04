@@ -34,6 +34,23 @@
 .searchitem-img{width:60px;height:60px;flex:0 0 auto;object-fit:contain;border-radius:12px;background:var(--paper);box-shadow:var(--neu-sm)}
 .searchitem-nm{font-size:19.5px;font-weight:700;line-height:1.3}
 .searchitem-dm{font-family:var(--mono);font-size:16.5px;color:var(--ink-2);margin-top:3px}
+/* Našeptávač receptur (část 382) sdílí kresbu položek s hledáním katalogu,
+   ale stojí uvnitř karty u běžného pole — velikosti jsou proto v obyčejné
+   škále aplikace, ne v 1,5násobku katalogového hledání. */
+.naseptavac{position:relative}
+.naseptavac .searchdrop{max-height:380px;top:calc(100% + 4px)}
+.naseptavac .searchitem{gap:10px;padding:9px 13px}
+.naseptavac .searchitem-nm{font-size:var(--pismo);line-height:normal}
+.naseptavac .searchitem-dm{font-size:var(--pismo-poznamka);margin-top:1px}
+/* Hvězdička oblíbené receptury — tlačítko bez rámu, aby v řádku seznamu
+   i u výběru v kalkulaci stálo jako značka, ne jako další tlačítko. */
+/* line-height:normal, ne pevná 1: hvězdička je znak s dolním dotahem a při
+   utažené výšce řádku přetekla o 2 px přes vlastní rámeček (změřeno
+   prekryv.py ve všech čtyřech šířkách a obou režimech). Pevné číslo je
+   vždycky sázka na konkrétní písmo, které se v barvy.html může vyměnit. */
+.hvezda{border:none;background:none;cursor:pointer;font-size:19px;line-height:normal;padding:2px 4px;color:var(--ink-2);opacity:.55;transition:opacity .15s,color .15s}
+.hvezda:hover{opacity:1}
+.hvezda.on{color:var(--warn);opacity:1}
 .viewtoggle{display:flex;gap:2px;background:var(--paper);border-radius:999px;padding:4px;box-shadow:var(--neu-in)}
 .viewtoggle button{border:none;background:none;padding:7px 13px;border-radius:999px;cursor:pointer;color:var(--ink-2);font-size:15px;line-height:1;transition:background .15s,color .15s}
 .viewtoggle button.on{background:var(--key);color:var(--btn-ink)}

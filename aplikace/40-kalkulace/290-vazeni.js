@@ -1,7 +1,7 @@
 "use strict";
 function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopis, onHotovo,
                   pigmenty, barvaHex, onStav, potlife, zacatekPotlife, onSpustitPotlife,
-                  sarze, onNovaKonev, onOprava }) {
+                  sarze, onNovaKonev, onOprava, onProfil }) {
   const sc = useScale();
   const [baud, setBaud] = useState("9600");
   const [tol, setTol] = useState(0.5);
@@ -14,8 +14,12 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
   /* Jméno aditiva se překládá hned tady: níž se s ním jen kreslí (řádek
      v tabulce, nadpis kroku) a algoritmus se o název neopírá. Komponenty
      receptury naproti tomu zůstávají, jak jsou — jsou to data dílny. */
+  /* Vynucená složka řady (lak, katalyzátor — část 459) se váží stejně jako
+     aditivum, ale do rozboru ředění nepatří (doRedeni: false): není to
+     ředidlo a strop ředění by hlásila naprázdno. */
   const aditivaRadky = (aditiva || []).filter((a) => n(a.g) > 0.005)
-    .map((a) => ({ id: "aditivum-" + a.druh, name: preloz(a.popis), g: n(a.g), aditivum: a.druh }));
+    .map((a) => ({ id: "aditivum-" + a.druh, name: preloz(a.popis), g: n(a.g), aditivum: a.druh,
+      doRedeni: a.doRedeni !== false }));
   const slozky = comps.concat(aditivaRadky);
   const aditivaG = aditivaRadky.reduce((s, a) => s + a.g, 0);
   const davkaCela = totalG + aditivaG;          // co má nakonec být v nádobě
@@ -86,7 +90,7 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
   const rozborVahy = redeni
     ? rozborNaredeni({ bazeG: bazeVPotu, cfg: redeni,
         aditiva: aditivaRadky.reduce((o, a, i) => {
-          o[a.aditivum] = nalito[prvniAditivum + i] || 0; return o;
+          if (a.doRedeni) o[a.aditivum] = nalito[prvniAditivum + i] || 0; return o;
         }, {}) })
     : null;
   const sarzeTed = cur && !cur.aditivum ? otevrenaSarze(sarze, cur.name) : null;
@@ -239,14 +243,18 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
                 ${over ? preloz("přelito o {g} g", { g: fmt(-rem, 1) })
                   : (inTol ? preloz("✓ v toleranci") : preloz("zbývá {g} g", { g: fmt(rem, 1) }))}
               </div>
-              ${cur.aditivum && html`
+              ${cur.aditivum && !cur.doRedeni && html`
+                <div className="note" style=${{ marginTop: 6 }}>
+                  ${preloz("Složka předepsaná řadou barvy — přidává se do každé směsi téhle řady.")}
+                </div>`}
+              ${cur.aditivum && cur.doRedeni && html`
                 <div className="note" style=${{ marginTop: 6 }}>
                   ${preloz(ADITIVA[cur.aditivum].rada)}${rozborVahy
                     ? preloz(". V nádobě je barvy {b} g, doporučené ředění {d} g, strop {s} g.",
                         { b: fmt(bazeVPotu), d: fmt(rozborVahy.doporuceno), s: fmt(rozborVahy.strop) })
                     : "."}
                 </div>`}
-              ${cur.aditivum && rozborVahy && rozborVahy.prilisRidke && html`
+              ${cur.aditivum && cur.doRedeni && rozborVahy && rozborVahy.prilisRidke && html`
                 <div className="warnbox" style=${{ marginTop: 8 }}>
                   ${preloz("Aditiv je v nádobě {a} g, strop receptury je {s} g — o {n} g víc.",
                     { a: fmt(rozborVahy.aditiva), s: fmt(rozborVahy.strop), n: fmt(rozborVahy.nadStropem) })}
@@ -435,6 +443,15 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
                       </div>
                       ${korZapsano && html`<div className="note" style=${{ marginTop: 4 }}>
                         ${preloz("Zapsáno jako {kod}. Další korekce se zapisuje zvlášť.", { kod: korZapsano })}</div>`}
+                      ${/* Profil úpravy (část 636): totéž, co se teď přidalo, se při
+                            opakování zakázky přidá samo. Nabízí se až po zapsané opravě —
+                            profil vzniká z jejího záznamu, ne z paměti obrazovky. */
+                        korZapsano && onProfil && html`
+                        <div className="rowline" style=${{ marginTop: 6, marginBottom: 0 }}>
+                          <button className="btn sm" onClick=${() => onProfil(korZapsano)}>
+                            ${preloz("Uložit jako profil úpravy pro příště")}</button>
+                          <span className="note">${preloz("při opakování zakázky se přidá samo a vytiskne na štítek")}</span>
+                        </div>`}
                     </div>`}
                 </div>`}
             </div>`}
@@ -449,7 +466,7 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
                   style=${zbyvaVse[i] <= tolerance / 2 ? { opacity: .55 } : {}}>
                   <td>${zbyvaVse[i] <= tolerance / 2 ? "✓" : (i === krok ? "▶" : "")}</td>
                   <td>${c.name}${c.aditivum
-                    ? html`<span className="tag" style=${{ marginLeft: 6 }}>${preloz("aditivum")}</span>` : ""}</td>
+                    ? html`<span className="tag" style=${{ marginLeft: 6 }}>${preloz(c.doRedeni ? "aditivum" : "složka řady")}</span>` : ""}</td>
                   <td className="num">${fmt(podil[i] * 100)}</td>
                   <td className="num">${fmtG(cil[i])}</td>
                   <td className="num">${fmtG(nalito[i] || 0)}</td>

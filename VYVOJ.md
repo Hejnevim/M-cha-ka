@@ -352,8 +352,29 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 14:50 | Asistent navážení říká krok i v ml a % — u jména složky podíl dávky, v řádku „přidat" objem z hustoty receptury, v tabulce asistenta sloupec ml; aditiva bez hustoty mají pomlčku |
 | 15:10 | Cesty k databázím Coates, Avient, Tiflex, Dubuit a Engler (registrace, aplikace, kontakty) v průzkumu, oddíl 10; „SK“ čeká na upřesnění. Do konkurence.html nová karta z průzkumu: funkce, data, procesy a výběr k převzetí (28 položek) |
 | 15:32 | Čtyři nové skills (úložiště prohlížeče, proklikání aplikace, podklady výrobců, uzavření změny) a dva nástroje: denik.py zapisuje kapitolu s číslem braným až při zápisu, nahraj_ukazku.py nahrává scény ukázky a srovnává cas na délku mp3 |
+| 19:02 | Tmavý režim: stín karet s odsazením 6 px místo 10 sedí u hrany (rozmazání 12 px), osvícení 0,17, stín okna 9 px; přeneseno z barvy.html do 020-promenne.css |
+| 19:13 | Hlavní nabídka se vejde do okna 1080p — 1,25násobek místo 1,75, rozbalené skupiny rolují uvnitř |
+| 19:15 | Poznámka z listu v pruhu zakázky se překládá — předpony stroj/materiál/předúprava/termín přes slovník, text listu zůstává v řeči listu |
+| 20:25 | Marabu MaraProp PP a LibraPrint LIP jsou šestá a sedmá databáze — 11 723 receptur ze tří řad Marabu, kód řady v názvu složky, sloupec ml |
+| 23:15 | Mluvený manuál k aplikaci — 48 scén v 10 kapitolách na skutečných snímcích obrazovky, s nahrávkami a zvýrazněním; složení na snímcích rozmazané |
 
 | 15:32 | Marabu TampaStar TPR je pátá databáze — 4 824 receptur (17 610 řádků, 3 747 s odstínem) z exportu XLSX novým prevod_marabu.py, každý pantone na standardní i vysoce krycí bázi; hustota receptury z gramů a mililitrů (1,03–1,81 g/ml) a hustota 26 bází v pigmenty.csv, kalkulace bere složka → receptura → paušál 1,20; receptury přešly z localStorage (6,7 MB nad strop 5 MB) do IndexedDB; ukázka scény 19 a 20 přepsané a nahrané v obou jazycích |
+
+### 4. září — kódování a dotažení manuálu
+| čas | co |
+|---|---|
+| 08:41 | Stránky prezentace se ze souboru četly jako Windows-1250 — most posílá charset, stránky mají <meta charset>; k tomu barva zvýraznění nezávislá na motivu a popisky, které se vejdou do výřezu |
+| 09:31 | Mluvená ukázka zrušena (dvě jazykové verze a 46 nahrávek); dál se dělá mluvený manuál, skill irm-ukazka přejmenován na irm-manual |
+| 10:26 | Mluvený manuál anglicky — 48 scén, 35 snímků anglické aplikace, 48 nahrávek; cesta ke snímkům zapsaná ve foto_manualu.py |
+| 09:03 | Popisky v mluveném manuálu se křížily na 34 ze 48 scén — stranu si teď vybírají podle změřených obdélníků, nula křížení ve čtyřech šířkách |
+| 11:50 | Zásah do podkladů dílny je samostatný záznam — vzniká sám při uložení a ukazuje, která položka se přepisuje pořád dokola |
+| 11:49 | Dávka si pamatuje, kdo ji míchal a z kterých konví — opravy se rozřazují na receptura / materiál / postup a radí podle toho, kam sáhnout |
+| 12:17 | Zakázky ze SGPS se filtrují dlaždicemi podle technologie — určuje se z katalogu, ne ze SGPS |
+| 12:28 | Zdraví databáze: osm kontrol úplnosti přes všechny databáze naráz — z 15 191 receptur je 1 737 se špatným součtem složení a 2 398 bez odstínu |
+| 13:38 | Třináct funkcí ze seznamu konkurence: profil úpravy, náhrada došlé složky, vynucená složka řady, vratka ze stroje, dvoustupňové schválení, chybějící odstín na vyžádání, C/U, krycí varianta, oblíbené, jednotka dávky |
+| 15:11 | Mluvený manuál dohnal aplikaci — 48 scén na 54 v obou jazycích: jednotka dávky, profil úpravy, vynucená složka a náhrada báze, oblíbené a C/U, odkaz s historií, chybějící odstín; 70 přefocených obrazovek, 24 nahrávek, 0 kolizí popisků ze 432 vykreslení |
+
+| 15:28 | Karta produktu na telefonu: dlaždice pod sebe pod 480px, kratší placeholder hledání |
 ---
 
 ## Co aplikace je
@@ -887,33 +908,35 @@ se známým výsledkem (viz čísla u bodů 3 a 8).
   | technologie | databáze | receptur | stav |
   |---|---|---|---|
   | FIR | Ferro Xpression | 1 097 | máme |
-  | PDP | Printcolor MS 786 + MS 660 · RUCOLOR 10KK · Marabu TampaStar TPR | 7 192 | máme |
+  | PDP | Printcolor MS 786 + MS 660 · RUCOLOR 10KK · Marabu TampaStar TPR + MaraProp PP | 11 981 | máme |
   | TXP | Printcolor MS 660 | 778 | ověřit, zda je to řada na textil |
-  | SCR | Printcolor MS 660 · RUCOLOR 10KK | 1 554 | RUCOLOR sedí, MS 660 ověřit |
+  | SCR | Printcolor MS 660 · RUCOLOR 10KK · Marabu MaraProp PP + LibraPrint LIP | 8 453 | RUCOLOR a Marabu sedí, MS 660 ověřit |
   | TRS | žádná | 3 vlastní | **chybí celá** |
 
-  **Čeká dalších 11 barevných řad** (z dvanácti plánovaných je hotová Marabu
-  TPR, kap. 209). Podklady se teprve sbírají a přiřazovat
-  se budou po jedné, jak budou přicházet — tabulka výš proto ještě poroste
-  a přiřazení k technologiím se bude měnit. Do ukázky (scéna 19) to patří,
-  aby nevypadala jako hotový stav.
+  **Čeká dalších 9 barevných řad** (ze dvanácti plánovaných jsou hotové tři
+  řady Marabu — TPR, kap. 209, PP a LIP, kap. 213). Podklady se teprve
+  sbírají a přiřazovat se budou po jedné, jak budou přicházet — tabulka výš
+  proto ještě poroste a přiřazení k technologiím se bude měnit. Do ukázky
+  (scéna 19) to patří, aby nevypadala jako hotový stav.
 
   U nových databází stačí podklad od výrobce: převody jsou hotové pro
   všechno, co dílna dostává — Printcolor easyMEMO (`prevod_printcolor.py`,
   řídí se stavbou dokumentu, ne konkrétními čísly), tabulka RUCOINX
   (`prevod_rucolor.py`, bázi pozná podle polohy čísla na stránce) i export
-  XLSX z Marabu ColorManageru (`prevod_marabu.py`; stejný tvar mají už
-  stažené podklady Marabu PP new a LIP).
+  XLSX z Marabu ColorManageru (`prevod_marabu.py`).
 - **Hustota barvy a chybějící odstíny.** Hustotu neuvádí ani jedna ze čtyř
   starších nakoupených databází (u Ferro je 1,2 v CSV jen dosazená konstanta),
-  aplikace u nich počítá s 1,20 g/ml; Marabu TPR ji nese v každé receptuře
-  (z gramů a mililitrů navážek, 1,03–1,81 g/ml, kap. 209). Podklady prošlé
-  3. 9.: Printcolor, RUCOLOR ani Coates C‑MIX mililitry nemají. Odstín se dohledává
-  z tabulky `parametry/odstiny_pantone.csv` (3. 9. 2026: 2 067 pantonů, 601
-  nově z columbiaomnistudio.com); chybí u 1 079 receptur: 1 077 Marabu TPR
-  (pantony řad 4000, 2639–2644, 10xxx a jmenné, které webové vzorníky
-  nemají) a 2 MS 660 — u MS 786 a RUCOLOR už žádná. Bez něj aplikace
-  neporadí s prosvítáním ani s korekcí.
+  aplikace u nich počítá s 1,20 g/ml; všechny tři řady Marabu ji nesou
+  v každé receptuře (z gramů a mililitrů navážek, TPR 1,03–1,81, PP
+  0,97–1,37, LIP 1,00–1,42 g/ml, kap. 209 a 213). Podklady prošlé 3. 9.:
+  Printcolor, RUCOLOR ani Coates C‑MIX mililitry nemají. Odstín se
+  dohledává z tabulky `parametry/odstiny_pantone.csv` (3. 9. 2026: 2 070
+  pantonů, 604 nově z columbiaomnistudio.com, colorxs.com po hodině
+  procházení 547 zbylých nenašel žádný); chybí u 2 398 receptur: 1 077
+  Marabu TPR, 1 073 Marabu PP a 246 Marabu LIP (pantony řad 4000,
+  2639–2644, 10xxx a jmenné, které webové vzorníky nemají) a 2 MS 660 —
+  u MS 786 a RUCOLOR už žádná. Bez něj aplikace neporadí s prosvítáním
+  ani s korekcí.
 - **SGPS** (podnikový systém) je zatím v ukázkovém režimu — čeká se na informaci
   od IT, jaké rozhraní nabízí. Most je připravený na obě varianty: soubor
   s exportem i HTTP rozhraní, přepíná se v konfiguraci.
@@ -9396,3 +9419,1015 @@ ale v Katalogu.
 tvaru a převedou se týmž nástrojem, až se rozhodne přiřazení (PP new = PDP,
 LIP = SCR podle plánu). Sloupec `objednavatel` se z exportu nepřenáší — u
 databáze výrobce je to vždycky „Marabu", není to zákazník dílny.
+
+## 210. Stín karet v noci sedí u hrany — odsazení 6 px místo 10
+
+**Problém.** V tmavém režimu se stín karty s odsazením 10 px a rozmazáním jen 12 px táhl za kartou jako druhá, ostrá hrana: rozmazání bylo kratší než posun, takže stín nepřecházel do plochy měkce, ale končil viditelnou linkou. Ve dne to nevadí — tam je rozmazání 38 px a posun 11 px se v něm ztratí.
+
+**Co se změnilo.** Naladěno v `barvy.html` a přeneseno do tmavého bloku `020-promenne.css`. Světlý blok a barvy stránek se nedotkly.
+
+| proměnná (noc) | dřív | teď |
+|---|---|---|
+| `--neu` odsazení | 10 px | 6 px |
+| `--neu` bílá | 0,16 | 0,17 |
+| `--neu-sm`, `--neu-in` bílá | 0,152 | 0,162 |
+| `--neu-in-lg` bílá | 0,16 | 0,17 |
+| `--modal-shadow` výška | 14 px | 9 px |
+
+Rozmazání 12 px, černá 0,45 / 0,495 / 0,405 a všechny denní stíny zůstaly. Nástroj `barvy.html` je přegenerovaný ze skutečných částí, takže ukazuje totéž, co aplikace.
+
+**Změřeno:** `kontrola_aplikace.py` 0 (kořen 1 potomek, žádné chyby); `sonda.py --tema dark` na `.card` vrací `rgba(255,255,255,0.17) -6px -6px 12px, rgba(0,0,0,0.45) 6px 6px 12px`, `--modal-shadow` `0 9px 24px rgba(0,0,0,0.9)`; v `barvy.html` je nový stín 1×, starý posun 10 px 0×.
+
+## 211. Hlavní nabídka se vejde do okna 1080p — zmenšená z 1,75 na 1,25násobek, delší se roluje uvnitř
+
+**Problém.** Na běžném monitoru 1 920 × 1 080 končila rozbalená hlavní
+nabídka pod spodním okrajem okna: položky JAZYK a poslední skupiny nebyly
+vidět a nešlo na ně kliknout. Nabídka je umístěná absolutně pod tlačítkem
+menu, takže rolování stránky nepomůže — hlavička s ní ujede nahoru. Od
+kapitoly 190 byla nabídka zvětšená na 1,75násobek (písmo 23,6 px, řádek
+66 px) a od té doby přibyly skupiny KATALOG, MÍCHÁNÍ, SKLAD, DATA
+a Sestavy; se dvanácti řádky, dvěma nadpisy a třemi oddělovači měla
+1 042 px a začínala na 125 px.
+
+**Co se změnilo.** `.navdrop` v `030-zaklad.css` je na 1,25násobku
+původních hodnot: písmo řádku 16,875 px, výplň 12,5 × 17,5 px, zaoblení
+12,5 px, mezera 2,5 px, poznámky a štítky × 1,25 z týchž tokenů. Nejmenší
+šířka je 265 px — při 225 px se řádek „▸ TECHNOLOGIE“ s názvem technologie
+vpravo zalomil na dva řádky (71 px místo 47). Odpovídající vnitřní styly
+v `210-app.js` (výplň nadpisů ROLE a JAZYK, okraje oddělovačů, odsazení
+štítků) jsou přepočítané stejným poměrem. Pojistka pro menší okna
+a rozbalené skupiny: `max-height:calc(100vh - 140px)` a `overflow-y:auto`,
+takže co se nevejde, roluje uvnitř nabídky a spodek nikdy nezmizí pod
+okrajem. `barvy.html` přegenerovaná.
+
+**Změřeno** (snimek.py, skutečný klik na tlačítko menu, 1 920 px):
+
+| stav | šířka | výška | spodní hrana | okno |
+|---|---:|---:|---:|---:|
+| před, sbalené skupiny | 315 | 1 041,6 | 1 167 | 1 080 |
+| po, sbalené skupiny | 265 | 748,8 | 874 | 940 |
+| po, rozbalený KATALOG a SKLAD (19 řádků) | 265 | 800 | 925,5 | 940 |
+
+Výška řádků po změně 47 px (s poznámkou vpravo 49, se štítkem MÍCHÁNÍ
+53,5). U rozbalených skupin je obsah 1 095 px, viditelných 800 —
+`overflow-y: auto`, rolování uvnitř. Okno 940 px odpovídá 1080p
+monitoru po odečtení lišt prohlížeče a hlavního panelu.
+kontrola_aplikace.py: kořen 1 potomek, chyby žádné. prekryv.py: čtyři
+šířky × dva režimy, nic se nepřekrývá.
+
+## 212. Poznámka z listu v pruhu zakázky mluví jazykem obrazovky — a co v ní zůstává, je text listu
+
+**Problém.** Po načtení zakázkového listu ukazuje pruh nad kalkulací poznámku k zakázce. Po přepnutí do angličtiny nebo portugalštiny zůstávala celá česky, i když všechno okolo („spec loaded“, „Dimension from the sheet“, „1 warnings“) už přeložené bylo. Poznámka se totiž skládá už při čtení listu (`poleNaSpec` v části 160, `zakazkaNaSpec` v části 150) do jednoho českého řetězce: text z listu plus kusy s předponami „stroj“, „materiál“, „předúprava“, „termín“, oddělené „ · “. Hotový řetězec šel na obrazovku beze změny — a stejný řetězec jde na míchací lístek, který česky zůstat má. Přeložit ho při čtení proto nešlo: lístek by dostal cizí slova a přepnutí jazyka by obrazovku nedohnalo.
+
+**Co se změnilo.** Předpony patří aplikaci, text listu zákazníkovi — a tak se s nimi i zachází:
+
+- `poznamkaListuObr(note)` (část 160, vedle `poleNaSpec`) rozebere poznámku při vykreslení zpátky na kusy podle „ · “. Kus začínající známou předponou projde `preloz("stroj {v}", …)`, ostatní kusy zůstanou, jak jsou. Seznam předpon `POZNAMKA_PREDPONY` stojí u funkce, aby se při přidání další předpony do `poleNaSpec` nezapomnělo na obrazovku.
+- Pruh zakázky (část 240) volá `poznamkaListuObr(zak.note)`; míchací lístek bere dál `zak.note` česky.
+- Slovník (část 127) dostal čtyři klíče: `stroj {v}` → machine / máquina, `materiál {v}` → material / material, `předúprava {v}` → pre-treatment / pré-tratamento, `termín {v}` → due / prazo.
+
+**Co se schválně nepřekládá.** Text z kolonky Poznámky je zákazníkův, ne náš — jeden list ho má rovnou anglicky („Small details will disappear“), jiný do něj pustil patičku formuláře („Klient musí oznámit, zda existují nějaké rozdíly …“). Ta patička stojí na listu pod prázdnou kolonkou Poznámky a čtečka ji vzala jako hodnotu kolonky; je to otázka pravidel čtení listu (`pdf_pravidla.json`), ne překladu, a tady se neřešila. Volný text listu tak zůstane na obrazovce v řeči listu ve všech třech jazycích.
+
+**Změřeno:**
+
+- zkouška v Node (všechny části načtené jako v prohlížeči): slovník má 1 541 klíčů, každý má en i pt a jmenovky sedí; poznámka „[F3] Small details will disappear · stroj SP-2 · materiál GUMA (EVA) · předúprava 1k All plastics primer · termín 2026-09-10“ dává cs beze změny, en „… · machine SP-2 · material GUMA (EVA) · pre-treatment 1k All plastics primer · due 2026-09-10“, pt „… · máquina SP-2 · material GUMA (EVA) · pré-tratamento 1k All plastics primer · prazo 2026-09-10“; prázdná poznámka → prázdný řetězec; „stroj je vypnutý“ uprostřed věty se nepřekládá, jen předpona na začátku kusu; zakázka ze SGPS „logo 1 barva · termín 2026-08-20“ → „logo 1 barva · due 2026-08-20“
+- v prohlížeči (`snimek.py`, jazyk podstrčený přes `irm-jazyk`, zakázka načtená kódem `IRM1|…|pozn=stroj SP-2 · termín 2026-09-10`): en `lang="en"`, `.specbar .note` = „machine SP-2 · due 2026-09-10“; pt `lang="pt"`, „máquina SP-2 · prazo 2026-09-10“
+- `kontrola_aplikace.py`: vykresleno, chyby žádné
+
+**Vedlejší nález, nechaný být:** v angličtině pruh hlásí „1 warnings“ — klíč `{n} upozornění` nemá jednotné číslo. Není součást téhle změny.
+
+## 213. Marabu MaraProp PP a LibraPrint LIP jsou šestá a sedmá databáze — složky nesou kód řady a mililitry, tři řady Marabu dohromady 11 723 receptur
+
+**Problém.** Vedle TampaStar TPR (kap. 209) ležely v témž tvaru další dva
+exporty z Marabu ColorManageru — MaraProp PP (řada „PP new" z plánu, pro
+tampontisk) a LibraPrint LIP (sítotisk). Převodník na ně byl, ale při
+převodu se ukázaly dvě věci, které by tiskaře u váhy poslaly vedle.
+
+První: Marabu čísluje báze v každé řadě stejně. „970 Weiss" je v TPR
+i v LIP, „170 Deckweiss" v TPR i v PP — a jsou to jiné barvy: LIP 970 Weiss
+má z navážek 1,42 g/ml, TPR 970 Weiss 1,62; PP 170 Deckweiss 1,47, TPR 1,83.
+Aplikace hledá hustotu i cenu složky **jen podle názvu** (`hustotaSlozky`
+v části 460, ceník), napříč databázemi. Kdyby LIP přišel s holým
+„970 Weiss", dostala by jeho bílá hustotu TPR (o 14 % jinou), litrová cena
+by se přepočítala špatně a lístek by neřekl, kterou plechovku vzít.
+
+Druhé: CSV z TPR neslo z exportu jen procenta a hustotu celé receptury;
+mililitry každé navážky, které Marabu jako jediný výrobce posílá, se použily
+na výpočet hustoty a zahodily. Technolog, který si CSV otevře v Excelu,
+je chtěl vidět vedle procent.
+
+**Co se změnilo.**
+
+*Složka nese kód řady.* `prevod_marabu.py` pojmenuje složky „TPR 970 Weiss",
+„PP 070 Weiss", „LIP 970 Weiss" — tak, jak to stojí na plechovce (TPR 970).
+TPR se převedla znovu týmž nástrojem, aby měla stejný tvar; složení
+a hustoty receptur jsou beze změny (17 610 řádků, rozdíl jen v předponě,
+sloupci `ml` a poznámce). 26 řádků bází TPR bez předpony v `pigmenty.csv`
+(jen řada a hustota, žádná cena) se odebralo a všech 61 bází tří řad
+připsalo znovu pod novým názvem; hustoty bází se tak nepřepisují mezi
+řadami. `--bez-predpony` nechá názvy z exportu.
+
+*Sloupec `ml`.* Vedle `procento` (gramů na 100 g) stojí `ml` — mililitrů
+složky na 100 g receptury, objemový protějšek na téže navážce. Export vede
+navážku většinou 100 g; u 91 receptur (46 TPR, 6 PP, 39 LIP) je 50 g nebo
+30 g, tam se ml přepočtou a původní navážka jde do `pozn` („navážka 50 g"),
+aby řádek šel v exportu dohledat. Aplikace sloupec nečte — ml si počítá
+z hustot složek a receptury (kap. 209) a součet ml receptury sedí na
+100 g / hustota do 0,06 ml u všech 11 723 receptur; sloupec je pro
+technologa a Excel.
+
+*Jedinečný název u PP.* Poslední úprava je u všech řádků PP 18.02.2026
+(datum exportu), takže pantone na tamponu, na sítu 120-34 a k tomu starší
+otestovaná receptura z roku 2016 (279 C, 281 C, 429 C) by dala tři řádky
+téhož jména. Datum, které nerozliší nic, se z názvu zase sundá a zkusí se
+datum vzniku z poznámky („(vznik 15.08.2016)") a nakonec „(otestovaná)".
+Jinak PP rozlišuje síto: každý pantone je tam dvakrát, „PANTONE 100 C"
+(tampon) a „PANTONE 100 C (síto 120-34)".
+
+*Přiřazení.* `parametry/databaze.csv`: PP → PDP i SCR (export nese
+2 392 receptur na tampon a 2 396 na síto 120-34 nebo 100-40; plán měl jen
+PDP), LIP → SCR. Řádky plánu `PDP;Marabu;PP new` a `SCR;Marabu;LIP` mají
+vyplněný soubor, body v Odemykání technologií se odškrtly; `CO_SEHNAT.txt`
+a *Co zbývá* říkají 9 řad místo 11. Podklady Marabu (XLSX i PDF) jsou
+přesunuté z Downloads do `Desktop\IRM databáze barev\`.
+
+**Změřeno.**
+
+| co | TPR (znovu) | PP | LIP |
+|---|---|---|---|
+| receptur / řádků složení / složek | 4 824 / 17 610 / 26 | 4 789 / 17 355 / 17 | 2 110 / 7 685 / 18 |
+| pantonů | 2 435 (2 392 vysoce krycích) | 2 396 (každý na tampon i síto) | 2 098 |
+| síto | — (tampon) | 120-34 u 2 393, 100-40 u 3, tampon 2 392, bez 1 | 120-34 u 2 095, 100-40 u 15 |
+| otestovaných výrobcem | 69 | 19 | 59 |
+| součet složení = 100 % / nerozpoznané / duplicity | všech / 0 / 0 | všech / 0 / 0 (po rozlišení vznikem a otestováním) | všech / 0 / 0 |
+| hustota z g/ml | 1,030–1,809, medián 1,322 | 0,970–1,365, medián 1,097 | 1,000–1,423, medián 1,121 |
+| navážka v exportu jiná než 100 g | 46 | 6 | 39 |
+| součet ml proti 100 g / hustota | do 0,050 ml | do 0,060 ml | do 0,051 ml |
+| křížová kontrola proti PDF (text přes `pdf_spec`) | 9 395 trojic (g, ml, %) — všechny v sešitu, 0 navíc; 2 432 názvů pantonů nalezeno | 7 969 trojic, 0 navíc; 2 396 z 2 396 pantonů | 3 550 trojic, 0 navíc; 2 098 z 2 098 |
+| odstín dohledán | 3 747 z 4 824 (1 077 bez) | 3 716 z 4 789 (1 073 bez) | 1 864 z 2 110 (246 bez) |
+
+| co | hodnota |
+|---|---|
+| `parametry/pigmenty.csv` | 118 řádků beze změny + 61 bází Marabu s kódem řady (TPR 26, PP 17, LIP 18), hustoty 0,970–1,830 g/ml; TPR 970 Weiss 1,620 proti LIP 970 Weiss 1,420, TPR 170 Deckweiss 1,830 proti PP 170 Deckweiss 1,470 |
+| dvojice (složka, procento) v CSV proti sešitu | shodné u všech tří (17 610 / 17 355 / 7 685 řádků) |
+| most `/api/databaze` | `receptury_Marabu_PP.csv` 17 355 řádků, `receptury_Marabu_LIP.csv` 7 685, druh receptury; přiřazení i plán vrací nové řádky |
+| čistý profil, PDP (`snimek.py`, Katalog → Receptury, čtení IndexedDB) | čipy „vše (15 191)", `receptury_Marabu_LIP (2 110)`, `receptury_Marabu_PP (4 789)`, `receptury_Marabu_TPR (4 824)`; v IndexedDB 15 191 receptur, z toho PP + LIP 6 899 s hustotou 0,970–1,423 a 35 složkami s předponou („LIP 970 Weiss") |
+| seznam receptur jako JSON | 11 604 713 znaků (11,1 MB) — v IndexedDB bez nálezu, v `localStorage` by to neprošlo dvakrát |
+| `kontrola_aplikace.py` | 0, žádné `Uložení selhalo` |
+| Odemykání technologií pod SCR (`snimek.py`) | body „barevná řada Marabu — LIP, 2 110 receptur" a „barevná řada Marabu — PP new, 4 789 receptur" odškrtnuté (✓), Coates a zbylé řady dál čekají (—) |
+| tabulka odstínů (`odstiny.py --stahni`) | 2 067 → 2 070 pantonů; columbiaomnistudio.com doplnil 3, hextopms.com 0, colorxs.com prošel 547 zbývajících po jednom (asi hodinu) a nenašel žádný — jmenné pantony Marabu a řady 4000, 2639–2644, 10xxx na webu nejsou |
+| bez odstínu celkem (7 databází) | 2 398 receptur — 1 077 TPR, 1 073 PP, 246 LIP, 2 MS 660; u FIR, MS 786 a RUCOLOR žádná |
+| ukázka scény 19 a 20 (obě verze), texty proti `.platno` | žádný přesah, popisky databází zkráceny („Printcolor · RUCOLOR · Marabu TPR, PP") ať se nekryjí s číslem; `cas` sladěn na skutečnou délku nahrávky (cs 38 s / 38 s, en 44 s / 41 s) |
+| `receptury_vlastni.csv` po testech | shodný s `.bak` (`cmp`) |
+
+**Chyba, kterou to nejdřív mělo.** První převod PP skončil kódem 1: tři
+duplicitní názvy „PANTONE 279 C (18.02.2026)" — datum poslední úpravy
+rozlišilo dvě receptury TPR z různých let, ale u PP je to datum exportu
+u všech 4 789 řádků. Vzniklo by „PANTONE 279 C (18.02.2026) (vznik
+15.08.2016)"; datum, které nic nerozlišilo, se proto sundá a na lístku
+stojí „PANTONE 279 C (vznik 15.08.2016)".
+
+**Co se nechalo být.** Aplikace sloupec `ml` nečte — má hustoty složek
+i receptury a ml z nich počítá stejně, jak je export vede (kap. 209);
+druhý zdroj téhož čísla by při ruční úpravě procenta zůstal starý. Coates
+C‑MIX 2000 (6 593 receptur v CSV, jen gramy) čeká na vlastní převodník.
+
+## 214. Mluvený manuál k aplikaci — 48 scén na skutečných snímcích obrazovky, stránka po stránce
+
+**Problém.** Ukázka v `prezentace/ukazka.html` říká, *co* aplikace umí, ale
+nikoho nenaučí, *kde* to v ní najít: kdo si sedne k aplikaci poprvé, neví,
+že paleta barev patří poloze produktu a ne produktu, že custom receptura
+nevzniká od nuly, ani proč u váhy zmizela tlačítka Upravit a Smazat. Zadání
+bylo stručný manuál celé aplikace — mluvený, s grafikou, kapitola po
+kapitole, funkce po funkci.
+
+**Co se změnilo.** Vedle ukázky je `prezentace/manual.html`: týž přehrávač
+(nahrávka → hlas prohlížeče → titulky, šipky a mezerník), ale místo
+kreslených scén **skutečné snímky obrazovky** ze složky `prezentace/manual/`.
+Scéna je výřez snímku (`vyrez`) a na něm postupně rozsvícená očíslovaná
+zvýraznění s popisky (`zvyr`), v pixelech snímku 1 600 px, takže se přepočet
+na šířku okna dělá v procentech a nic se neměří za běhu. Kapitoly jsou
+záložky, scény kapitoly tečky pod nimi, a pod přehrávačem je obsah —
+kdo nechce poslouchat, čte a skáče.
+
+| kapitola | scény | co ukazuje |
+|---|---|---|
+| Orientace | 1–4 | hlavička, nabídka s rolí a technologiemi, tlačítko zpět |
+| Katalog produktů | 5–9 | pero 11152 se třemi polohami ve dvou technologiích, palety u poloh |
+| Produkt a poloha | 10–15 | hledání, okno Barva a poloha potisku, zakázkový list, čtečka, krycí plocha |
+| Receptura a parametry | 16–21 | Pantone standard / custom, odvození a editor, parametry tisku, zakázka |
+| Kolik namíchat | 22–25 | rozpis výpočtu, Než začnete míchat, náklady, tři tlačítka |
+| Míchací režim | 26–32 | navážky, aditiva, zbytky ručně, asistent v simulaci, štítek, poznámka |
+| Receptury a ceník | 33–36 | záložka Receptury, editor, ceny materiálů, přepočet na síto |
+| Míchání | 37–39 | ke schválení s čekající recepturou od tiskaře, fronta, opravy |
+| Sklad | 40–43 | sklad surovin, zbytky, co propadne, šarže |
+| Sestavy a data | 44–48 | sestavy, SGPS, most, import, role tiskař |
+
+Snímky fotil `snimek.py` ve světlém režimu s produktem 11152 vybraným přes
+našeptávač a druhou polohou potvrzenou v okně Barva a poloha potisku;
+jednorázový řidič `foto.py` zůstal ve scratchpadu. **Licencovaná data na
+snímcích nejsou:** složení receptur, kódy kelímků, čísla zakázek a hlášení
+o dávkách v tisku se rozmazávají `filter: blur(7px)` ještě před vyfocením —
+`balicek/` je veřejný repozitář a snímky se commitují. Nahrávky
+`audio_manual/scena-01…48.mp3` dělá `nahraj_ukazku.py --jazyk manual`
+(bez `--jazyk` se manuál schválně nebere, výchozí běh patří dvojici ukázek).
+Publikovaná verze má snímky zmenšené na 1 067 px vlastním zmenšovačem PNG
+(jen `zlib`, plošné průměrování 3:2) a nahrávky vložené jako data: URI.
+
+**Dvě pasti po cestě.** Nástroj `nahraj_ukazku.py` hledá scénu regexem
+`{ nadpis: …` — scény manuálu začínaly polem `kap` a nástroj našel 0 scén;
+přehodit pořadí polí bylo levnější než měnit nástroj. A proklikávání zapisuje
+do dílny i tam, kde to nevypadá jako ukládání: *Štítek na kelímek* založil
+kelímek do `evidence/zbytky.csv` (čtyřikrát), *Do fronty* zapsal
+`evidence/fronta.csv`, *Uložit recepturu* od tiskaře čekající recepturu do
+`receptury_vlastni.csv`. Zbytky a fronta vráceny ze záloh (kódy řádků zbytků
+souhlasí se zálohou z 15:24, u receptur se `cmp` proti `.bak` ukázalo jako falešná jistota — aplikace si `.bak` při každém uložení otáčí, takže záloha už nesla čekající recepturu taky; čtyři řádky se musely smazat podle názvu, teprve pak rozbor hlásí 3 vlastní receptury), poučení je ve skillu
+`irm-snimek-aplikace`.
+
+**Změřeno:** 48 scén, 10 kapitol, 35 snímků (5,6 MB), nahrávky 897 s
+(14 min 57 s, nejdelší scéna 7 — palety u polohy — 30,3 s), pole `cas`
+srovnané na délku nahrávek (`--zapis-cas` přepsal 31 hodnot, rozdíl nad 1 s
+u žádné). Kontrola v Node: syntaxe skriptu, výřezy uvnitř snímků, všech
+202 zvýraznění uvnitř výřezu (jedno mimo — role tiskař — opraveno zvětšením
+výřezu na 440 px). Vykreslení: scéna 3 (nabídka 760 × 1 500 px) se vejde do
+plátna 988 × 746 px jako 368 × 726 px, tedy strop 66 vh drží; scéna 7 má
+zvýraznění na 112/61, 112/120 a 540/33 px plátna, přesně nad řádky palet
+a štítkem technologie. Publikace jako Artifact zatím neproběhla (nástroj ji v tomhle sezení nepustil) — sestavený jednosouborový `manual_artifact.html` má 13,3 MB (snímky 4,5 MB + nahrávky 5,4 MB v base64) a skládá ho skript ve scratchpadu; do repozitáře nepatří.
+
+## 215. Stránky prezentace se ze souboru četly jako Windows-1250 — most posílá charset a stránky ho mají v hlavičce
+
+**Problém.** Mluvený manuál otevřený z mostu měl místo češtiny nečitelnou
+změť: „Ink Recipe Manager odpovÄ›dÄ› na jednu otÄ›zku: kolik ÄŤeho navÄ›ĹĄit".
+Soubor přitom byl správně v UTF-8 (`Manu c3 a1 l` je „á"). Chyběla deklarace
+kódování na obou koncích: stránky v `prezentace/` jsou psané pro Artifact,
+kde hlavičku dodává hostitel, takže vlastní `<meta charset>` nikdy neměly —
+a most posílal `Content-type: text/html` bez charsetu, protože ho tak
+`SimpleHTTPRequestHandler` odvodí z přípony. Chrome pak sáhl po systémovém
+kódování Windows-1250 a čeština se rozsypala. Aplikace sama zasažená nebyla,
+`index.html` `<meta charset="utf-8">` má; problém se ukázal teprve tím, že
+manuál se poprvé otevírá ze souboru přes most, ne jako Artifact.
+
+**Co se změnilo.** Oprava je na obou stranách, aby držela i mimo most:
+
+- `most.py` dostal `guess_type()`, který u všeho `text/*` bez charsetu
+  doplní `; charset=utf-8`. Nepřepisuje typy, které si charset nesou samy.
+- Všech pět stránek v `prezentace/` (`manual.html`, `ukazka.html`,
+  `ukazka_en.html`, `konkurence.html`, `index.html`) má `<meta charset="utf-8">`
+  jako první řádek, takže se dají otevřít i dvojklikem bez mostu. Artifactu
+  meta navíc nevadí, hlavu si staví sám.
+
+Při pohledu na opravenou stránku vyšly najevo dvě vady, které s kódováním
+nesouvisely, ale byly na témž snímku:
+
+- **Zvýraznění v tmavém režimu vybledla do růžové.** Rámečky braly barvu
+  z tokenu `--inkoust`, který se pro tmavý režim zesvětluje na `#F0523F` —
+  jenže rámečky neleží na pozadí stránky, leží na snímku aplikace, a ten je
+  vždycky ve světlém režimu. Barva je teď napevno `#C8200F` a s motivem se
+  nemění.
+- **Šestnáct popisků vyčnívalo z výřezu.** Zapsaná poloha popisku byla
+  příkaz, takže u rámečku těsně pod horní hranou se popisek „nahoru" uřízl
+  (na scéně 7 zmizelo „technologie polohy"). Poloha je teď přání: vykreslení
+  spočítá, kolik místa nad a pod rámečkem ve výřezu zbývá, a popisek podle
+  toho přehodí nahoru, dolů nebo na bok; u pravé hrany se přichytí doprava,
+  respektive skočí doleva.
+
+**Změřeno:** hlavička z mostu `text/html; charset=utf-8`; prohlížeč hlásí
+`document.characterSet = "UTF-8"` a texty čte správně („Paleta barev patří
+poloze", „2. Katalog produktů", popisky „palety pro sítotisk", „palety pro
+tampontisk", „technologie polohy"). Kontrola popisků proti obdélníku výřezu
+na deseti scénách, kde jich původně vyčnívalo šestnáct: **všechny uvnitř**.
+Scéna 7 po doběhnutí animace: rámečky na 112/61, 112/120 a 540/33 px plátna,
+popisky na 693/61, 112/161 a 540/6, krytí všech tří 1. Syntaxe skriptů všech
+tří stránek přehrávače ověřená v Node.
+
+## 216. Popisky v manuálu se křížily — stranu si teď vybírají podle změřených obdélníků
+
+**Problém.** V mluveném manuálu ležel popisek zvýraznění přes sousední popisek
+nebo přes jeho číslo. Na scéně 2 zakrývalo „logo = zpět na kalkulaci" popisek
+„hledání produktu" tak, že se z obou dal přečíst jen kus. Manuál má člověka
+provést aplikací; červený chuchvalec překrytých cedulek ho místo toho nechá
+hádat, co která ukazuje.
+
+Původní kód řešil jen okraje snímku: díval se, jestli se popisek vejde nad
+nebo pod rámeček, a to na **odhadnutou** výšku 32 px. Co je vedle, ho
+nezajímalo — a šířku popisku dopředu spočítat nešlo, ta závisí na délce textu.
+Odhad platil pro jeden popisek na volném místě, ne pro sedm na jedné obrazovce.
+
+**Co se změnilo.** Zvýraznění se nejdřív vloží do stránky, pak se změří
+`getBoundingClientRect()` a teprve potom se každému popisku vybere strana.
+Zkouší se čtrnáct poloh v pořadí — zapsané přání ze scény první, pak zbytek —
+a vyhrává první, která nikam nenaráží; když se nevejde žádná, ta s nejmenším
+postihem. Popisek se má posunout, ne zmizet.
+
+| co popisek potká | postih | proč |
+|---|---|---|
+| vyjetí z výřezu | ×3 | výřez ořezává, uříznutý popisek se nepřečte vůbec |
+| cizí popisek | ×1 | text přes text |
+| cizí číslo | ×5 | kolečko je malé, i nepatrný překryv z něj udělá nečitelnou výseč |
+| cizí rámeček | ×0,15 | průhledný obrys, text přes něj projde |
+
+K původním čtyřem polohám přibyly patra (popisek o celou svou výšku dál od
+rámečku), zarovnání `bok` na spodní hranu, popisek na střed a popisek dovnitř
+rámečku jako poslední možnost. Tři tlačítka vedle sebe mají popisky širší než
+rámečky, takže se musí rozestoupit do výšky; jedno patro nestačilo, sousední
+patra dělilo 25 px a popisek vysoký 26 px do dalšího zajel.
+
+Rozmístění je oddělené od stavby scény a spouští se znovu při změně šířky
+okna. Dřív se počítalo v pixelech snímku, takže na šířce nezáleželo; teď se
+měří obrazovka, a s jinou šířkou jsou volné jiné strany. Scéna se přitom
+nepřekresluje, aby se rozsvěcování zvýraznění nerozjelo od začátku.
+
+Scéna 32 dostala výřez 1 100 × 165 místo 1 100 × 130. Na úzké obrazovce z ní
+zbýval pruh vysoký 79 px, do kterého se popisek vysoký 24 px vedle dvou
+tlačítek se šestipixelovou mezerou nevešel žádnou stranou. Tohle už není
+o rozmísťování, ale o tom, že v takovém proužku není kam.
+
+**Změřeno.** Sonda projde všech 48 scén a hlásí překryvy popisků, čísel
+a rámečků ve čtyřech šířkách:
+
+| šířka okna | scén s křížením textu — před | po |
+|---|---|---|
+| 1 600 px | 34 | 0 |
+| 1 280 px | — | 0 |
+| 1 024 px | — | 0 |
+| 768 px | — | 0 |
+
+Před opravou: 34 ze 48 scén, největší překryv popisku přes popisek 3 894 px²
+(scéna 36), nejmenší 27 px². Po opravě žádný popisek nekříží popisek ani
+číslo v žádné z měřených šířek. Zbylé nálezy jsou popisek přes průhledný
+obrys cizího rámečku (nejvíc 3 246 px², scéna 45) — text zůstává čitelný.
+
+Ostatní stránky v `prezentace/` tenhle mechanismus nemají (`zvyr` je jen
+v manuálu); `ukazka.html` i `ukazka_en.html` změřeny na přetečení textu
+z `.platno` — 21 scén, nula nálezů.
+
+Animace `najed` po měření drží: sedm zvýraznění scény 26 má po vykreslení
+`opacity 0` a zpoždění 0,3 – 8,1 s jako dřív. Zúžení jeviště na 700 px
+přeskládá pět ze sedmi popisků na jinou stranu.
+
+## 217. Zrušení mluvené ukázky — místo ní mluvený manuál
+
+**Proč.** V `prezentace/` stály vedle sebe dvě věci, které dělaly totéž jinak:
+mluvená animovaná ukázka s kreslenými scénami (`ukazka.html`, `ukazka_en.html`,
+21 scén ve třech dějstvích) a mluvený manuál se skutečnými snímky obrazovky
+(`manual.html`, 48 scén). Ukázka kreslila, jak aplikace vypadá; manuál ukazuje,
+jak doopravdy vypadá. Dvě publikované věci o téže aplikaci, které se musí držet
+v souladu, znamenají dvojí údržbu a riziko, že si začnou odporovat — a kreslená
+podoba zastarává tiše, protože se s aplikací nepřefotí. Dál se dělá manuál.
+
+**Co se změnilo.**
+
+- Smazáno `prezentace/ukazka.html` (80 kB), `ukazka_en.html` (84 kB) a nahrávky
+  `audio/` (23 souborů, 2,7 MB) a `audio_en/` (23 souborů, 2,9 MB).
+- `nahraj_ukazku.py`: z tabulky `VERZE` zůstal jediný cíl — manuál. Odpadlo
+  přeskakování manuálu při běhu bez `--jazyk`, takže `python nahraj_ukazku.py
+  --vypis` míří rovnou na manuál; `--jazyk manual` funguje dál kvůli zvyku.
+  Tabulka i smyčka přes ni zůstaly, aby šla druhá jazyková verze manuálu
+  doplnit přidáním jednoho řádku.
+- Skill `irm-ukazka` → `irm-manual`. Nebyl to jen popis ukázky: oddíl 7 a
+  pravidla o číslech, hlasu, kódování a ověření platí pro manuál stejně, takže
+  se přenesla a manuál je teď hlavní téma skillu, ne dodatek na konci.
+- Odkazy dorovnány v `CLAUDE.md`, `pravidla-projektu`, `irm-uzavreni`,
+  `irm-nastroje`, `irm-databaze-nova` a v `prezentace/README.md`. V `irm-uzavreni`
+  přibyl řádek „obrazovka, o které manuál mluví → přefotit snímek".
+- Oddíl o úspoře (A3 P26-31-01, 293 482 CZK/rok, past na mezikrok 1,3 g) byl
+  v README součástí kapitoly o ukázce. Čísla jsou z podkladu mimo repozitář a
+  jinde v `balicek/` nejsou, takže zůstala jako samostatná kapitola.
+
+**Co zůstalo schválně.** Tři věty připomínají, že ukázka byla zrušena
+(v `irm-manual`, v README a v komentáři `manual.html` u palety). Bez nich vypadá
+prázdné místo po ukázce jako nedodělek a někdo ji začne obnovovat.
+
+**Anglický manuál mezitím.** Během úklidu přibyl v `prezentace/` soubor
+`manual_en.html` (týchž 48 scén anglicky, nahrávky čeká v `audio_manual_en/`)
+— pracuje ve složce ještě někdo jiný. Do `VERZE` proto přibyl druhý řádek
+(`en-GB-RyanNeural`, `scene-NN.mp3`) a běh bez `--jazyk` projíždí obě verze;
+chybějící anglická stránka nebo nahrávka běh české verze neshodí. Pravidlo
+„obě verze se mění spolu", které dřív platilo pro dvojici ukázek, se tím
+přeneslo na dvojici manuálů.
+
+**Měřeno.** `python nahraj_ukazku.py --vypis` → `== manual (manual.html): 48
+scén` i `== manual_en (manual_en.html): 48 scén`, všech 48 českých nahrávek
+na místě (anglické zatím chybí a nástroj to hlásí, nepadá), návratový kód 0. Scény vyhodnoceny v Node:
+48 záznamů, žádný bez `rec`, `obr` nebo `cas`, součet `cas` 897 s (15 min);
+všech 35 snímků ve `manual/` na místě. Syntaxe skriptu stránky ověřena
+`new Function`. `snimek.py` v tomhle sezení nedoběhl ani na nezměněné stránce
+(vyprší bez snímku) — vykreslení v prohlížeči tedy změřené není.
+
+## 218. Mluvený manuál anglicky — na snímcích anglické aplikace, s cestou k nim zapsanou v nástroji
+
+**Problém.** Manuál byl jen česky. Anglická verze nestačí přeložit texty:
+kdyby pod anglickým výkladem svítily české obrazovky, čtenář nepozná, které
+tlačítko má hledat. Snímky se proto musely nafotit znovu s aplikací přepnutou
+do angličtiny — a cesta ke každé z 35 obrazovek nebyla nikde zapsaná.
+Jednorázový řidič z focení české verze zůstal ve scratchpadu (kap. 214)
+a byl pryč.
+
+**Co se změnilo.** Vedle `manual.html` stojí `prezentace/manual_en.html`:
+týchž 48 scén v 10 kapitolách, stejné výřezy i všech 202 souřadnic zvýraznění,
+jiné jen `nadpis`, `text`, `rec` a popisky. Snímky ve vlastní složce
+`manual/en/`, nahrávky `audio_manual_en/scene-NN.mp3` hlasem
+`en-GB-RyanNeural`. Hlas prohlížeče si stránka vybírá anglický — zůstat
+u vzoru `/^cs/` by znamenalo anglické titulky předčítané česky.
+
+Cesta ke snímkům je nově zapsaná v nástroji `foto_manualu.py`: pro každou
+obrazovku záložka, kliky a podstrčený stav. Technologie je schválně **SCR**,
+ne PDP — pero 11152 má tři polohy ve dvou technologiích a s PDP zmizí
+sítotisková poloha, takže scéna 6 („tři polohy") přestane platit; napoprvé
+se tak vyfotily jen dvě.
+
+**Chyba, která šla do veřejného repozitáře.** První běh vyfotil míchací režim
+s **čitelným složením receptury Ferro Xpression**. Rozmazání se posílalo přes
+`snimek.py --js`, jenže ten běží *před* kliky: rozmazala se domovská stránka
+a tabulka otevřená až kliknutím zůstala ostrá. Snímky přitom nejsou
+v `.gitignore` a commitují se. Rozmazání se přesunulo na konec scénáře a
+nástroj teď po každém snímku **vypíše, kolik buněk rozmazal**, a porovná to
+s očekáváním — nesedí-li to, vrátí 1 a řekne, že by licencovaná data šla ven.
+
+Vyšlo přitom najevo, že tři z pěti původních selektorů mířily do prázdna:
+`.rectab` ani `.zbytky` v aplikaci vůbec nejsou. Všechny tabulky mají třídu
+`t`, míchací režim `michtab`, kódy kelímků se poznají podle `style*='mono'`
+a složky v editoru receptury jsou `<input>`, ne buňky. Slepě opsaný selektor
+mlčí stejně jako správný — proto se ověřuje počtem.
+
+**Popisky se křížily jinak než česky.** Anglické popisky jsou delší, takže
+rozmístění vyšlo jinak a scéna 26 měla dvě křížení, která česká verze nemá.
+Příčina byla v ceně: zakrytí cizího čísla o 58 px² vyhrálo nad velkým, ale
+neškodným překryvem přes průhledný obrys rámečku. Zakrytí textu má teď pevnou
+přirážku 10 000 — text přes text se nepřečte, text přes obrys ano, a to se
+nedá poměřovat plochou. Přibyly taky polohy „popisek dovnitř u spodní hrany"
+pro vnořená zvýraznění (scéna 26: „note" leží uvnitř „shade and combination",
+takže popisek zarovnaný nahoru najel na jeho číslo).
+
+**Tři chybějící klíče ve slovníku.** Focení anglických snímků odhalilo, že
+popis režimu mostu zůstával v anglickém rozhraní česky: `most.py` posílá
+hotový text (`ukázková data (SGPS není připojeno)`, `export ze SGPS ze souboru`,
+`HTTP API systému SGPS`), obalený `preloz()`, ale bez položky ve slovníku.
+Doplněno en i pt.
+
+**Změřeno.** 48 scén, 35 snímků (5,5 MB), 48 nahrávek (5,6 MB, 954 s = 15,9
+min), pole `cas` srovnané na skutečnou délku (`--zapis-cas` přepsal 31 hodnot,
+rozdíl nad 1 s u žádné). Souřadnice zvýraznění proti české verzi: 48 bloků,
+0 rozdílů; `obr`, `vyrez` i `kap` shodné.
+
+Křížení popisků přes všech 48 scén ve čtyřech šířkách:
+
+| šířka | manual.html | manual_en.html |
+|---|---|---|
+| 1 600 px | 0 | 0 |
+| 1 280 px | 0 | 0 |
+| 1 024 px | 0 | 0 |
+| 768 px | 0 | 0 |
+
+(počítá se popisek přes popisek a popisek přes cizí číslo; překryv přes
+průhledný obrys rámečku se nepočítá, text jím prosvítá)
+
+Rozmazání na osmi obrazovkách s licencovanými daty: míchací režim 5 buněk,
+asistent 7, Receptury 348, editor receptury 3, Zbytky 50. Obrazovky „Co
+propadne" a „Šarže" jsou v téhle dílně prázdné, takže na nich licencovaná
+data nejsou — očekávaná nula je přeměřená, ne odhadnutá.
+
+Slovník: 1 544 klíčů, žádný bez `en` nebo `pt`. Data dílny po celém focení
+beze změny (md5 `evidence/*.csv` i `receptury_vlastni.csv` proti záloze
+z 9:14). `kontrola_aplikace.py` bez chyb, syntaxe obou stránek v Node OK.
+
+**Co zbývá.** Anglická verze zatím není publikovaná jako Artifact — stejně
+jako česká (kap. 214). Manuál je zatím jen česky a anglicky; portugalština,
+kterou aplikace umí, verzi nemá.
+
+## 219. Zásah do podkladů je samostatný záznam — dá se dohledat, kdo cenu přepsal
+
+**Problém.** Receptura, cena složky, zásoba, síto ani odemčená technologie
+nejsou stav, ale rozhodnutí. Po zásahu do nich ale dosud nezůstávalo nic:
+soubor nesl vždycky jen poslední tvar a otázka „kdo tuhle cenu přepsal a kdy"
+se nedala zodpovědět jinak než pamětí. Když pak vyjela dávka za jinou cenu než
+minule nebo se barva od minulého týdne míchala jinak, nedalo se zjistit, čím
+to je — a u podkladu, který se opravuje potřetí, se nepoznalo, že nesedí
+u zdroje.
+
+Záznam opravy po nátisku (kap. 195) měří něco jiného: že nátisk neseděl a
+míchalo se znovu. Tohle měří zásah do dat, ze kterých se míchá.
+
+**Co se změnilo.** Změna podkladu je samostatný záznam v `evidence/zmeny.csv`,
+sloučitelný ze dvou míchaček jako dávky, šarže a opravy. Sleduje osm oblastí
+(receptura, ceník, zásoby, síta, produkt, odemčení technologie, typy poloh,
+schválení) a nese, co ze souboru vyčíst nejde: co se změnilo, z čeho na co,
+kdy, kdo a nepovinně proč.
+
+Na rozdíl od opravy **záznam vzniká sám**. U opravy aplikace nepozná, jestli
+technolog přidal půl procenta modré kvůli nátisku, nebo ze zvědavosti — proto
+ji potvrzuje člověk. Tady se nehádá nic: „co bylo předtím" a „co je teď"
+aplikace v okamžiku zápisu drží v ruce. Kdyby se čekalo na tlačítko, zapsala
+by se jen část zásahů a hromadná čísla by lhala směrem dolů.
+
+| kde se zapisuje | co se porovnává |
+|---|---|
+| uložení receptury | složení, odstín, hustota, síto, tužidlo, pot life, schválení |
+| ceník materiálů | cena, měna, jednotka, VOC, bezpečnostní list, hustota, řada |
+| zásoby surovin | zásoba, minimum, balení |
+| odemčení technologie | stav zámku |
+| typy poloh | přiřazené typy |
+
+Zapisuje se **jeden řádek za změněné pole**, ne za otevřený formulář: mistr se
+ptá „která cena se přepisuje pořád dokola", ne „kolikrát někdo otevřel ceník".
+Uložení, po kterém se žádné pole neliší, nezapíše nic.
+
+Zápis jde do souboru až **po potvrzeném uložení**. Kdyby se zapisoval dopředu,
+zůstala by po neúspěšném zápisu v evidenci změna, ke které v souboru nic
+neodpovídá — a podklad by se pak hledal podle záznamu, který lže.
+
+Nová záložka **Změny podkladů** (skupina DATA) odpovídá na tři otázky: kolik
+zásahů za období, která položka se přepisuje nejčastěji a kdo. Zásahy bez
+podpisu se do žebříčku „kdo" nepočítají a řekne se to nahlas — stejně jako
+oprava bez kódu dávky.
+
+**Chyba, kterou to nejdřív mělo.** Ořez koncových nul (`410,0000` → `410`, aby
+se nezapisovala změna, která se nestala) byl napsaný jako `replace(/,?0+$/,"")`
+a spolkl i samotnou nulu: vynulovaná zásoba a VOC vodou ředitelné barvy se
+zapsaly jako prázdno, tedy „neuvedeno". Prázdno a nula nejsou totéž a u ceny
+je ten rozdíl mezi „cenu neznáme" a „zadarmo". Ořez teď sáhne na řetězec, jen
+když v něm desetinná značka opravdu je. Zkouška to chytila a po vrácení chyby
+zpátky spolehlivě padá (kód 1), na opravené verzi je čistá (kód 0).
+
+**Změřeno:**
+
+- 56 kontrol modelu prochází, 0 selhalo — kódy `ZMENA-RRRRMMDD-NNN` po dnech
+  (001→002→003, nový den zase od 001), cesta přes CSV tam a zpět beze změny,
+  sloučení ze dvou míchaček (pozdější `zmeneno` vyhrává, starší nepřebije),
+  starší soubor bez nových sloupců, středník a uvozovka uvnitř hodnoty
+- porovnání polí: `4` a `"4"` a `410,0000` jsou totéž číslo (0 změn), prázdno
+  proti nule je změna (`"" → "0"`), přeházené pořadí v seznamu taky
+- id receptury a název zdrojového souboru se do porovnání neberou — mění se
+  při každém načtení databáze; podstrčené `aaa`/`x.csv` → `bbb`/`jiny.csv`
+  dalo 0 změn, změna jedné složky dala 1 řádek se čtivým „Žlutá 65,0 % · …"
+- hromadná data z modelu 6 zásahů: v okně 30 dnů 5 z 6, nejpřepisovanější
+  položka 3× v poli `cena`, 4 zásahy do společných podkladů, 1 bez podpisu,
+  podíl podepsaných 80 %; prázdné období vrací podíl `null`, nedělí nulou
+- skutečným klikem v prohlížeči: úprava hustoty receptury 1,2 → 2,77 zapsala
+  `ZMENA-20260904-001` — oblast receptura, pole `hustota`, `1.2` → `2.77`,
+  podpis „Zkouska (technolog)" — a most ji uložil do `evidence/zmeny.csv`
+  s hlavičkou o 13 sloupcích (zkušební řádek po měření odstraněn)
+- záložka po kliku: 3 záznamy → „Změn 3 · Do společných podkladů 2 · Položek 2
+  · S podpisem 67 %", filtr oblasti zúžil seznam i žebříček na 1 řádek, detail
+  rozbalil „A 50,0 % → A 60,0 % · soubor receptury_vlastni.csv"
+- 33 nových položek slovníku (en + pt); kontrola slovníku: 1 592 klíčů, 0 chyb
+  — každý má en i pt a jmenovky `{x}` sedí ve všech jazycích; v angličtině
+  `lang="en"`, „Source data changes (2)", „Signed 50 %", „1 of them unsigned…"
+- `receptury_vlastni.csv` a `evidence/zbytky.csv` po zkouškách nezměněné
+
+## 220. Kdo míchal a čím — z počtu oprav se konečně dá něco vyčíst
+
+**Problém.** Za 2. 4. – 10. 8. 2026 se napočítalo 403 oprav po nátisku, ročně
+to dělá 1 209. Aplikace je uměla spočítat, seřadit podle receptury a říct,
+co bylo na nátisku vidět. Jenže s číslem „PANTONE 485 C se opravovala 2×" se
+nedá udělat nic, dokud se neví, **proč**. Jsou jenom tři možnosti a každá vede
+jinam:
+
+| příčina | co s tím |
+|---|---|
+| receptura | opravit složení v databázi — jednou pro všechny |
+| materiál | reklamace u dodavatele, konev ze stolu pryč |
+| postup | projít postup s jedním člověkem |
+
+Rozlišit je nešlo. Otisk otevřených konví dávka nesla od 17. 8. 2026, ale
+**kdo míchal, se nikde nezapisovalo** — a bez druhého rozměru se z jednoho nic
+nepozná. Reklamace u dodavatele se pak podává za chybu, kterou udělala dílna,
+a přepisuje se receptura, se kterou nikdy nic nebylo.
+
+**Co se změnilo.** Dávka si k otisku konví přibrala **podpis obsluhy**. Bere se
+z role tohohle počítače (`podpisRole`), stejně jako u záznamu změn — u váhy se
+nikdo nepodepisuje ručně, v rukavicích to nikdo dělat nebude a záznam by lhal.
+Jméno je nepovinné; když vyplněné není, zůstane v záznamu aspoň role.
+
+Zapisuje se **při založení dávky, ne při uzavření**: dávku uzavírá často někdo
+jiný, ranní směna dodělá to, co odpolední namíchala, a hledá se ten, kdo vážil.
+
+Ze spojení dávek a oprav pak `osaOpravy` u každé receptury rozhodne, čím to je.
+Podezřelý je ten člověk nebo ta konev, u kterých se opravovalo **pokaždé**,
+zatímco jinde se neopravovalo vůbec. Nezúží-li se to nikde, je to vlastnost
+receptury. Sloupec *Čím to je* v záložce Opravy po nátisku nese vedle názvu osy
+i nález (`pokaždé Jan N. (2×)`, `Baze bila, šarže K1 (2×)`) a věta pod tabulkou
+radí podle osy, ne paušálně.
+
+**Rozhoduje se jen tam, kde je z čeho.** Tři prahy, každý vznikl z jiného
+nálezu při ověřování:
+
+| práh | proč |
+|---|---|
+| aspoň 2 dávky receptury | jedna dávka nemá s čím být srovnána |
+| aspoň 2 opravy celkem | jedna oprava sedí na jednoho člověka i na jednu konev vždycky |
+| aspoň 2 opravy u téhož podezřelého | „pokaždé" nad jedinou dávkou neříká nic |
+| aspoň 1 čistá dávka odjinud | bez srovnání by vyšel podezřelý pokaždé |
+
+Nesedí-li to, hlásí se **„zatím nerozhodnuto"** i s důvodem („jediná oprava —
+zatím náhoda", „málo dávek na srovnání"). Odhad, který se tváří jako zjištění,
+by posílal reklamace dodavateli za cizí chyby.
+
+Dávky bez podpisu se do osy postupu nepočítají a obrazovka to řekne nahlas:
+*„1 z 6 dávek nemá zapsáno, kdo je míchal."* Podpis se nedomýšlí ani u dávek
+ze staršího souboru — sloupec `kdo` v `davky.csv` je nový a starší soubor se
+čte dál beze změny chování.
+
+**Změřeno.** Zkouška v Node proti skutečným částem aplikace, 23 kontrol modelu,
+všechny sedí; s vrácenou chybou hlásí nález a vrací kód 1. Model tří receptur
+proklikaný v prohlížeči na záložce Opravy po nátisku:
+
+| receptura | dávky | opravy | osa | nález |
+|---|---|---|---|---|
+| PANTONE 485 C | Jan 2, Petr 1 | Jan 2 | postup | pokaždé Jan Novak (2×) |
+| PANTONE 200 C | K1 2, K2 2 | K1 2 | materiál | Baze bila, šarže K1 (2×) |
+| PANTONE 300 C | Eva 1, Jan 1, bez podpisu 1 | Eva 1, bez podpisu 1 | receptura | napříč lidmi i konvemi (2×) |
+
+Souhrn nad tabulkou `receptura 1× · postup 1×`, podíl dávek s opravou 66,7 %
+ze 6 dávek. Anglicky přepnuto skutečným klikem: `lang="en"`, sloupec *What it
+comes down to*, hodnoty *procedure* / *material* / *recipe*.
+
+**Dvě chyby po cestě, obě z ověřování.** První našla zkouška: jediná oprava bez
+podpisu poslala reklamaci na konev K1, která za nic nemohla — práh dvou oprav
+tehdy platil jen pro osu receptury, ne pro materiál. Druhou našla až obrazovka,
+zkouška ji propustila: PANTONE 300 C hlásila **„postup — pokaždé Eva Nova
+(1×)"**, protože Eva měla jedinou dávku a v ní tu opravu. Práh dvou oprav
+platil na recepturu jako celek, ale ne na podezřelého samotného. Obojí je teď
+ve zkoušce jako případ 14–16.
+
+**Falešný poplach, který nebyl falešný.** Na prvním snímku stály pod sebou dvě
+rady, které si protiřečily: *„Podezřelá je jedna konev. Ověřit šarži."* a hned
+pod tabulkou stará věta *„Opravit složení v databázi."* Vypadalo to jako
+překlep v rozvržení, ale byla to chyba obsahu — věta pod tabulkou radila
+opravit recepturu bez ohledu na to, co osa zjistila. Rozdělila se na dva díly:
+co se stalo (`{r} se opravovala {n}×`) a rada podle osy.
+
+## 221. Míchač si v zakázkách ze SGPS vybere svou technologii
+
+**Problém.** Seznam zakázek ze SGPS chodil celý najednou. Sítotiskař u váhy
+v něm hledal svoje mezi tampontiskovými a firemní systém mu s tím nepomůže —
+technologii nemusí ve svých datech vůbec vést. Hledání v záložce umělo jen
+text: číslo zakázky, produkt, zákazník. Kdo obsluhuje jednu technologii,
+projížděl očima všechno ostatní.
+
+**Co se změnilo.** Nad tabulkou přibyla řada dlaždic — *Vše* a jedna za každou
+technologii, která je mezi načtenými zakázkami zastoupená. Klik seznam zúží,
+počet u dlaždice říká, kolik zakázek v ní čeká. Napoprvé je filtr nastavený na
+technologii, ve které se zrovna pracuje, takže míchač obvykle nemusí kliknout
+vůbec. Zamčené technologie se nenabízejí, stejně jako v hlavní nabídce.
+
+Technologie se **nebere ze SGPS, ale z katalogu** podle reference produktu.
+Firemní systém ji vydávat nemusí, kdežto polohy potisku ji nesou vždy — a je
+to i přesnější: produkt, který se tiskne víc technologiemi, se objeví v každé
+z nich. Zakázka na produkt, který v katalogu není, má ve sloupci *Technologie*
+pomlčku a **zůstává vidět v každém filtru**: že ji nelze přiřadit, je zjištění,
+ne důvod ji před dílnou schovat.
+
+V tabulce přibyl sloupec *Technologie*, aby bylo vidět i bez filtrování, co
+kam patří.
+
+**Změřeno.** Ukázková data mostu, pět zakázek: dlaždice *Vše 5*, `SCR 1`,
+`TXP 1`, `PDP 4`. Kliknutím SCR → 1 řádek, TXP → 1 řádek, PDP → 4 řádky.
+Zakázka na produkt se dvěma technologiemi je pod SCR i PDP, pořadí ze SGPS
+zůstává zachované.
+
+Souborový režim mostu se třemi zakázkami, z toho jedna na produkt mimo
+katalog: *Vše 3*, `SCR 1`, `TXP 1`, `PDP 1` — do počtů se nezapočítala. Ve
+filtru SCR jsou vidět 2 řádky (přiřazená + nepřiřazená s pomlčkou), ve filtru
+TXP rovněž 2. Protizkouška s vrácenou chybou (filtr bez výjimky pro
+nepřiřazené) nechala ve filtru TXP jediný řádek — nepřiřazená zakázka zmizela,
+jak se čekalo.
+
+Zkouška v Node proti načtené části: 22 kontrol prošlo — dvě technologie téhož
+produktu bez opakování, produkt bez poloh, produkt mimo katalog, prázdná
+reference, mezery kolem reference, prázdný katalog, pořadí dlaždic dle
+`TECH_PORADI`, vynechání zamčené technologie.
+
+Rozvržení, 1 600 px: dlaždice na jednom řádku, výška 34 px, nejširší
+`SCR — Sítotisk (plast, papír) / rotační` 283 px, `scrollWidth` 1 600 =
+šířka okna, tabulka v mezích karty (62–1 538 px). Telefon 391 px: dlaždice
+zalomené pod sebe (4 řádky), každá stále na jednom řádku výšky 34 px,
+`scrollWidth` 391 = šířka okna, stránka neroluje do strany.
+
+**Chyba, kterou to nejdřív mělo.** Název technologie se v dlaždici zkracoval
+před závorkou, jak to dělá hlavní nabídka. Tam jsou technologie pod sebou
+s počty produktů, tady stojí vedle sebe — a `SCR — Sítotisk` vedle
+`TXP — Sítotisk` jsou dvě nerozlišitelné dlaždice. Zkrácení bylo zrušeno, celé
+názvy se vejdou i na telefon.
+
+**Falešný poplach.** Hledání spolu s filtrem se napoprvé jevilo jako rozbité:
+v poli stálo „Alfa", ale tabulka ukazovala i zakázky jiných zákazníků. Vada
+byla ve zkoušce — hodnota vložená nativním setterem obejde Reactův `onChange`,
+takže se dotaz na most vůbec neodeslal (v záznamu jediné volání s prázdným
+`q=`). Most sám filtruje správně.
+
+**Co zůstalo stranou.** Dlaždice se ukazují teprve tehdy, jsou-li mezi
+zakázkami aspoň dvě technologie. Jediná dlaždice by nebyla volba, jen ozdoba.
+
+## 222. Zdraví databáze: co všechno chybí, na jedné obrazovce
+
+**Problém.** Aplikace umí u receptury poznat, že jí něco chybí — nemá odstín,
+nesedí součet složení, ceník nezná cenu složky. Říkala to ale vždycky jen o té
+jedné receptuře, která byla zrovna vybraná v kalkulaci. U patnácti tisíc
+receptur to znamená, že se na mezeru přijde ve chvíli, kdy u ní někdo stojí
+s prázdným kelímkem — tedy nejdřív, kdy už vadí. Nikde nebylo vidět, kolik
+receptur je celých, čeho chybí nejvíc a kterého souboru se to týká. Bez toho
+se nedá naplánovat, co doplnit dřív, a nedá se to ani vzít jako podklad pro
+oddíl *Zbývá doplnit*.
+
+**Co se změnilo.** Nová záložka **Zdraví databáze** ve skupině Data (části
+`659-zdravi-vypocet.js` a `661-zdravi-tab.js`). Osm kontrol úplnosti přes
+všechny databáze naráz, ve třech tabulkách: čeho chybí nejvíc, jak na tom je
+který soubor, a kterých receptur se to týká. Číslo v nabídce nese odznak,
+takže se na mezery přijde i bez otevření záložky.
+
+| nález | síla | do čeho to sahá |
+|---|---|---|
+| složení není zadané | zastaví výpočet | navážka ani cena |
+| součet složení není 100 % | zastaví výpočet | poměry se normalizují, navážka pak nesedí se zápisem |
+| složku ceník nezná | zkreslí výsledek | cena dávky, úspora ze zbytku, role složky |
+| složka bez nákupní ceny | zkreslí výsledek | cena vyjde nižší, počítá se z části navážky |
+| není uložený odstín | zkreslí výsledek | prosvítání na tmavém podkladu, korekce po nátisku |
+| chybí hustota | snižuje přesnost | objem dávky z paušálu 1,20 g/ml |
+| síto nemá parametry | snižuje přesnost | spotřeba na plochu, ztráty na sítu |
+| není označená jako otestovaná | snižuje přesnost | míchá se podle nezkoušeného poměru |
+
+Ke každému nálezu stojí, **co receptura kvůli té mezeře neumí** a **do kterého
+souboru se údaj doplňuje**. Bez toho druhého je seznam stížnost, ne plán práce.
+Kliknutím na druh nálezu nebo na databázi se seznam zúží.
+
+Nálezy nepočítají vlastní pravidla — sahají po týchž funkcích jako kalkulace
+(`materialPodleJmena`, `techReceptury`, totéž pravidlo pro náhradní odstín
+`#888888` jako `rizikoOpravy`). Kdyby se rozešly, tvrdila by aplikace o jedné
+receptuře na dvou místech dvě různé věci; zkouška to hlídá zvlášť.
+
+Dvakrát se schválně mlčí, protože **co se neví, se nehádá**:
+
+- **Chybějící technologie u receptury nález není.** Receptura bez technologie
+  platí ve všech, tak jsou řady sdílené. Hlásí se opak — databáze, které
+  technologii nikdo nepřiřadil, protože ta se v kalkulaci nenabídne vůbec.
+- **Otestovanost se posuzuje jen tam, kde ji databáze vede.** Import dosazuje
+  `false` i souboru, který sloupec nemá; z pohledu jedné receptury je pak
+  „neotestovaná" k nerozeznání od „nevíme".
+
+**Změřeno** na 15 191 recepturách z osmi databází: 1 737 nemá součet složení
+100 %, 2 398 je bez odstínu, 3 467 bez hustoty, 2 mají síto bez parametrů,
+jedna databáze nemá přiřazenou technologii. Přehled se počítá 208 ms, proto
+visí na `useMemo` nad čtyřmi vstupy, ze kterých se nález odvozuje — zaplatí se
+jednou po načtení databází z mostu, ne při každém překreslení. Zkouška v Node
+proti skutečným částem: 46 kontrol, z toho hranice tolerance součtu
+(100,005 % projde, 100,02 % už je nález) a shoda pravidla o odstínu
+s `rizikoOpravy`. Kázeň slovníku: 1 640 klíčů, 3 300 kontrol, žádná duplicita,
+56 nových textů má en i pt.
+
+**Tři chyby, které to nejdřív mělo.** Všechny tři našlo až měření na datech
+dílny, ne čtení kódu:
+
+1. **Nález „složku ceník nezná" padal na všech 15 191 receptur.** Přebíral se
+   z `rozborSlozeni`, jenže ta dělí složení na pigmenty a báze a všechno
+   ostatní hází do `nezname` — včetně role `barva`, což jsou hotové míchací
+   barvy nakoupených řad. Těch je v ceníku dílny 137 ze 155. Přehled musí
+   ptát, jestli složka v ceníku **je**, ne jak ji ta funkce třídí. Po opravě
+   15 191 → 0.
+2. **„Není otestovaná" hlásilo 99 % receptur.** Viz výše — sloupec chybí
+   čtyřem z osmi databází. Po opravě 15 044 → 11 576, a zbytek je pravda:
+   v Marabu PP je označeno 69 řádků ze 17 355.
+3. **Seznam se probíral bez `useMemo`.** Filtr přes patnáct tisíc položek při
+   každém překreslení stačil na to, aby stránka po kliknutí na několik vteřin
+   ztuhla a ladicí spojení ji nestihlo obsloužit. Rozbalený seznam navíc dostal
+   strop 150 řádků — čtyři sta jich prohlížeč vykresluje tak dlouho, že to
+   vypadá jako zamrznutí, a projít je očima stejně nejde.
+
+**Co se nechalo být.** Že 100 % receptur nemá cenu složky, není vada přehledu
+— ceník dílny nemá vyplněnou ani jednu ze 155 položek. Přesně tohle má přehled
+ukázat. Po doplnění cen by nálezy spadly na tři čtvrtiny receptur.
+
+## 223. Třináct funkcí ze seznamu konkurence naráz — od jednotky dávky po dvoustupňové schválení
+
+**Problém.** V `prezentace/konkurence.html` leželo padesát osm funkcí, které
+umí míchací software jinde. Třináct z nich mělo u sebe „nemáte" nebo
+„částečně" a všechny spojovala jedna věc: **data už v aplikaci byla, jen se
+z nich nedalo vytěžit to, co dílna potřebuje.** Opravy se zapisovaly, ale
+podruhé se neuplatnily — při opakování zakázky se míchalo znovu podle základní
+receptury, nátisk zase neseděl a znovu se přidávalo totéž půl procenta modré.
+Sklad uměl říct, že báze došla, a tím to skončilo. Barva vrácená ze stroje
+uprostřed zakázky stála u míchačky bez záznamu. Odstín, který v databázi není,
+se řešil vzkazem přes dílnu. „485 C" a „485 U" jsou dva různé odstíny, ale
+aplikace je rozeznala jen podle písmene v názvu.
+
+**Co se změnilo.** Devět nových částí, tři přestavěné, jeden nový hák.
+Podle oblastí:
+
+| funkce | kde to teď je | co drží pravdu |
+|---|---|---|
+| jednotka dávky g / kg / lb | `128-jednotka.js` | mění **jen zobrazení**; uvnitř i na váze gramy |
+| C / U jako vlastnost a filtr | `458-receptury-varianty.js` | poslední samostatné C/U v názvu, zápis má přednost |
+| krycí / standardní varianta | tamtéž | protějšek **jen z téže databáze** |
+| oblíbené · jen moje · jen nové | tamtéž + `irm-oblibene` | hvězdička patří člověku, ne počítači |
+| hledání s napovídáním | `382-naseptavac.js` | název, řada, objednací číslo, jména složek |
+| odkaz a e-mail | `458-receptury-varianty.js` | `#receptura=…&zdroj=…`, mailto — bez serveru |
+| historie receptury | `384-historie-receptury.js` | nic nepočítá znovu, páruje názvem |
+| profil úpravy | `636-profily-uprav.js` | přídavek **mimo** recepturu, dávka nenaroste |
+| náhrada došlé složky | `472-nahrada-baze.js` | zástupnost obráceně, pořád jen dražší za levnější |
+| vynucená složka řady | `459-vynucene-slozky.js` | údaj z technického listu, ne dopočet |
+| vratka ze stroje | `638-vratky.js`, `311-vratka-okno.js` | dávka **zůstává v tisku** |
+| dvoustupňové schválení | `225-role.js` (přestavěno) | stupně jdou po sobě, sloupce zvlášť |
+| chybějící odstín na vyžádání | `637-pozadavky-odstinu.js`, `406-pozadavky-tab.js` | fronta k domíchání, ne e-mail výrobci |
+
+Ke třem novým evidencím nevznikl třetí opis načítání a zápisu: `126-evidence-soubor.js`
+je jeden hák (`useEvidenceSoubor`), který dělá načtení po připojení mostu,
+sloučení podle času změny a odložený zápis pro všechny stejně. V App se ten
+trojlístek opakoval šestkrát; sedmá a osmá kopie by se od nich dřív nebo
+později lišila.
+
+**Čtyři rozhodnutí, která nejsou samozřejmá:**
+
+1. **Profil úpravy dávku nezvětší.** Přídavek se přičte a složení se přepočítá
+   na sto, takže dávka zakázky zůstává dávkou zakázky — naroste jen navážka té
+   jedné složky. Kdyby se dávka zvětšila o procenta profilu, vyrobilo by se
+   pokaždé o kus víc barvy, než zakázka žádá.
+2. **Vratka nechá dávku v tisku.** Zakázka pokračuje a kolik z ní zbude na
+   konci, se pořád neví. Vratka je samostatný kelímek s vlastním kódem, který
+   na dávku jen ukazuje; cena dávky se do ní nepřepisuje, v sestavách by se
+   započítala podruhé.
+3. **Datum „nová" dostane receptura jen při aktualizaci už známé databáze.**
+   Při prvním načtení souboru by bylo nových všech 15 191 receptur a přepínač
+   by neřekl nic.
+4. **Do sloupce `schvaleni` jde jen první stupeň.** Celkový stav by po
+   schválení technologem a před mistrem zapsal „ceka" — a po načtení souboru
+   by technologovo razítko zmizelo. Druhý stupeň má proto sloupce vlastní
+   (`druhy_stupen`, `schvaleni2`, `schvalil2`, `schvaleno2_kdy`,
+   `duvod_zamitnuti2`). Zkouška to hlídá zvlášť.
+
+**Změřeno.** 101 částí (z 88), 23 514 řádků kódu (z 21 422). Kontrola
+vykreslení 0 chyb, soupis částí i rejstřík sedí, rozbor sedí se skutečností.
+
+Zkoušky v Node proti skutečným částem načteným jako v prohlížeči: **152
+kontrol, 0 chyb** — 35 na jednotku dávky, C/U, varianty, oblíbené a odkaz;
+50 na profily, vynucené složky, náhrady a vratky; 67 na dvoustupňové
+schválení, požadavky a zpětnou kompatibilitu. Že se všech 101 částí do Node
+načte, je samo o sobě zjištění: chytá to srážku jmen mezi částmi.
+
+Naměřené hodnoty z těch zkoušek:
+
+- libra 453,592 37 g: 1 lb → 453,59 g, 453,59237 g → „1,000 lb"
+- profil 1,5 % na dávku 1 000 g: z opravy 15 g vyjde 1,5 %; po uplatnění má
+  přidaná složka 1,478 % (1,5 ze 101,5) a součet složení je 100,0 %
+- vynucené složky na dávku 628 g: Lak PP 10 % → 62,8 g, Verdünner 5 % → 31,4 g
+- vratka 300 g z dávky 1 000 g: nový kód, stav „sklad", 2 složky zděděné,
+  původní dávka dál „vtisku" s 1 000 g
+- „PANTONE Cool Gray 5 C" → C, „485 CP" → nic, „uncoated" → U
+- receptura z dřívějška bez nových sloupců: `stavSchvaleni` = schváleno,
+  míchat lze všude — chová se přesně jako dřív
+
+Kázeň slovníku: **1 789 klíčů, 7 162 kontrol, 0 chyb**, 126 nových textů má
+en i pt, žádná duplicita, jmenovky `{x}` sedí ve všech třech jazycích.
+
+V prohlížeči skutečnými kliky: záložka Receptury s 15 191 recepturami — 101
+hvězdiček, našeptávač, tlačítka Odkaz / E-mail / Historie v každém řádku,
+šest přepínačů (jen oblíbené 0, jen moje 0, jen nové 0, C i U, C, U).
+Kalkulace s přepínačem jednotky: při volbě kg hlavní číslo „0,004 kg" a pod
+ním „3,8 g". Míchací režim: dávka v jednotce, tabulka navážek dál v gramech.
+Vratka proklikaná do konce zapsala kelímek ZYM776U, 300 g, `vratkaZ` =
+ZAB12CD, stav sklad, 2 složky — a dávka zůstala v tisku s 1 000 g.
+
+**Chyba, kterou to mělo.** `prekryv.py` našel **8 překryvů** ve čtyřech
+šířkách a obou režimech: hvězdička oblíbené receptury přetékala o 2,0 px přes
+vlastní rámeček. Příčina je ta, na kterou skill upozorňuje — pevná
+`line-height: 1` u znaku s dolním dotahem. Po `line-height: normal` je
+kontrola čistá ve všech osmi kombinacích. Pevné číslo je vždycky sázka na
+konkrétní písmo, které se v `barvy.html` může vyměnit.
+
+**Co se nechalo být.** Sloupec `vynucene` v `parametry/databaze.csv` je
+založený, ale prázdný — jaká aditiva která řada předepisuje, stojí
+v technických listech a musí to vyplnit dílna. Do té doby se u žádné řady nic
+nenabízí. Totéž `parametry/lide.csv`: soubor je založený s vysvětlivkami,
+jména doplní dílna; bez nich se podpis píše ručně jako dřív.
+
+**Data dílny.** Proklikávání s běžícím mostem zapsalo do `evidence/zbytky.csv`
+dva zkušební kelímky a do `fronta.csv` jednu položku; `receptury_vlastni.csv`
+se přepsal jen pořadím řádků (tytéž tři receptury). Všechno vráceno ze zálohy
+a ověřeno `cmp` — šest souborů evidence i vlastní receptury jsou shodné
+s předtestovým stavem.
+
+## 224. Mluvený manuál dohnal aplikaci — 48 scén na 54, obě jazykové verze naráz
+
+**Problém.** Třináct funkcí ze seznamu konkurence bylo v aplikaci od rána,
+ale manuál o nich nevěděl. Zastaralý manuál je horší než žádný ze dvou
+důvodů, a oba se dají ukázat na jedné obrazovce: **slibuje míň, než aplikace
+umí** (kdo si pustí kapitolu o recepturách, nedozví se o hvězdičce ani o C/U),
+a **ukazuje rozvržení, které už neplatí** — v editoru receptury přibyly dva
+řádky polí, takže šipka na „uložit / zrušit" mířila o šedesát pixelů výš,
+doprostřed prázdna. Manuál je přitom to jediné, co v dílně vysvětluje, proč
+se věci dělají tak, jak se dělají: rozhraní je schválně tiché.
+
+**Co se změnilo.** Šest nových scén, osm přepsaných, 70 přefocených
+obrazovek ve dvou jazycích, 24 nových nahrávek.
+
+| scéna | co říká | proč nová |
+|---|---|---|
+| 23 · Jednotka dávky | g / kg / lb mění **jen zobrazení** | libra je 453,592 37 g, ne 454 |
+| 26 · Profil úpravy | přídavek **mimo** recepturu, dávka nenaroste | odpovídá na „proč se to nepřepíše do receptury" |
+| 31 · Vynucená složka a náhrada báze | údaj z technického listu; dražší za levnější | dvě věci, které se do receptury nepíšou |
+| 37 · Oblíbené · jen moje · jen nové · C a U | hvězdička patří člověku, „485 C" ≠ „485 U" | šest přepínačů, o kterých nikdo nic nevěděl |
+| 38 · Odkaz, e-mail, historie | historie **nic nepočítá znovu**, páruje názvem | „co se s touhle barvou stalo" |
+| 43 · Chybějící odstín | fronta k domíchání místo vzkazu přes dílnu | druhá míchačka o požadavku ví |
+
+Přepsané: nabídka (lidé dílny), hledání (napovídání i podle objednacího čísla),
+receptury (počet), editor (objednací číslo, papír C/U, druhý stupeň),
+schvalování (dvoustupňové), zbytky (vratka ze stroje).
+
+**Čtyři věci, které to málem rozbily:**
+
+1. **Vložení scény doprostřed rozhází nahrávky.** `scena-NN.mp3` jde podle
+   **pořadí**, ne podle nadpisu, takže vložením scény 23 se u scény 24
+   přehraje text scény 23 — a je to slyšet teprve při přehrání, na obrazovce
+   nic. Přejmenovalo se 26 souborů v každém jazyce, a **sestupně podle cíle**,
+   ne podle zdroje: scény se neposouvají všechny stejně (23 → 24, ale 33 → 36),
+   takže sestupně podle zdroje se nejdřív uvolní 36 a hned nato se do 35 sahá
+   na soubor, který tam ještě sedí. Zkušební běh musel obsazenost vést
+   v paměti, jinak hlásil kolizi tam, kde žádná není.
+2. **Nahrazení `zvyr` regulárním výrazem utne pole u prvního `]`.** Vzor
+   `\[.*?\]` skončí na konci prvního obdélníku a starý zbytek pole zůstane
+   viset za novým. Stránka spadne na „Unexpected token ,". **Chytil to
+   `node --check`**, ne pohled — v prohlížeči by to bylo prázdné jeviště bez
+   hlášky. Závorky se teď počítají.
+3. **Editor vlastní receptury se na snímek nikdy nedostal.** Scénář klikal na
+   Pantone custom na domovské stránce a hned hledal `/^(Nová|Odvodit)/`. Jenže
+   tlačítko „＋ Custom receptura pro tuto kombinaci" **není na kartě, ale v okně
+   Barva a poloha potisku**, a za ním jsou ještě dva kroky: vybrat výchozí
+   recepturu v `.pickbox` a teprve pak se odemkne „Odvodit a upravit →" (do té
+   chvíle `disabled`). Nenašlo se nic, chyba se nevypsala a na snímek šel výběr
+   bez editoru — scéna 19 tedy říkala „Odvodit a upravit otevře editor" nad
+   obrázkem bez editoru, v obou jazycích. Základ se musí zvolit **nativním
+   setterem** `<select>`, jinak si React změny nevšimne a tlačítko zůstane
+   zamčené. Scéna 19 dostala výřez a šest zvýraznění; do té doby žádné neměla,
+   takže si nikdo nevšiml, že ukazuje na nic.
+4. **Našeptávač zůstal rozbalený přes půl snímku.** Po výběru produktu zůstává
+   text v poli a seznam se překreslí; na `01-domov` překryl kartu Kolik
+   namíchat i s novým přepínačem jednotky. Vyprázdnit pole je horší — prázdné
+   hledání ukáže všech 1 320 produktů. Zavírá to jedině **Escape**
+   (`onKeyDown → setDropOpen(false)`), a to je teď poslední krok scénáře
+   ve `foto_manualu.py`.
+
+**Změřeno.** 54 scén v 10 kapitolách v obou jazycích, kapitoly souvislé,
+všechna zvýraznění i výřezy uvnitř snímků. Syntaxe skriptu obou stránek
+`node --check` v pořádku. 108 nahrávek (54 + 54), u všech sedí `cas` se
+skutečnou délkou mp3 — dřív se u deseti scén lišil až o 13 s a pruh pod
+jevištěm doběhl, než hlas domluvil. Manuál trvá **19 min 45 s** česky
+(1 185 s) a 21 min 6 s anglicky (1 266 s).
+
+**Popisky: 0 kolizí ze 432 vykreslení** — 54 scén × 4 šířky (1 600, 1 280,
+1 024, 768) × 2 jazyky, měřeno `getBoundingClientRect()` proti obdélníku
+`.platno`. Napoprvé jich bylo pět a tři z nich stály v cestě: dva popisky
+scény 19 na sebe sedly (osm popisků na jeden výřez editoru je moc — nakonec
+šest, oba nové řádky pod jedním rámečkem), a dvě kolize byly starší než tahle
+změna. Scéna 14 měla dlaždice 30 px od sebe, scéna 28 rámeček o 40 px širší,
+než blok doopravdy je; obojí opraveno, protože se to při měření stejně ukázalo.
+Měřit se musí obě stránky zvlášť: anglicky se scéna 28 nekřížila vůbec, česky
+na třech šířkách ze čtyř — český popisek je delší.
+
+Přefoceno 70 obrazovek (35 česky, 35 anglicky), rozmazání licencovaných dat
+sedí: 348 buněk v Recepturách, 4 v míchacím režimu, 10 u zbytků. Že rozmazání
+proběhlo, se **nekontroluje pohledem** — nástroj po každém snímku vypíše počet
+a porovná ho s očekávaným.
+
+**Jedna oprava dat scény.** Editor receptury přibral řádek *Objednavatel ·
+Objednací číslo · Papír C/U* a řádek *Ještě schvaluje*, takže se protáhl
+o 60 px a popisek „uložit / zrušit" vypadl z výřezu. Výřez 900 → 960.
+Našla to zkouška, ne oko: souřadnice se porovnávají proti `vyrez` i proti
+rozměru snímku.
+
+**Co se nechalo být.** Vynucená složka řady nemá na snímku co ukázat —
+sloupec `vynucene` v `parametry/databaze.csv` je prázdný, dokud ho dílna
+nevyplní z technických listů. Scéna 31 ji proto popisuje slovy a ukazuje
+místo, kde se objeví; to je poctivější než podstrčit vymyšlený lak. Totéž
+u lidí dílny (scéna 3) a u chybějících odstínů (scéna 43): obě fronty jsou
+v téhle dílně prázdné.
+
+**Data dílny.** Focení běželo s mostem, který zapisuje. Evidence i vlastní
+receptury byly zálohovány předem a po focení vráceny; ověřeno otiskem, ne
+pohledem.
+
+## 225. Karta produktu na telefonu už nemá tři sloupce vedle sebe
+
+**Problém.** Karta *Vybraný produkt* v Kalkulaci má tři dlaždice
+(Produkt, Poloha potisku, Zakázkový list) v mřížce `repeat(3, minmax(0,1fr))`
+bez mobilního zlomu. Na 391px telefonu tak třetí dlaždice — se štítkem
+*Načíst kód* a tlačítkem *Spočítat krycí plochu z náhledu* — dostala jen
+~114px šířky. Anglický text "Compute coverage from the preview" se v ní
+lámal uprostřed slova a obě tlačítka vypadala přes sebe. Pole hledání navíc
+neslo celou větu "Hledat produkt podle názvu nebo ref. čísla…", která vedle
+počítadla "{n} z {celkem}" v 391px řádku nemá kam se vejít.
+
+**Co se změnilo.** Pod 480px (týž zlom jako katalog produktů po jednom)
+jde `.produkt-dlazdice` na jeden sloupec — tlačítka ve třetí dlaždici tak
+dostanou celou šířku karty místo třetiny řádku (`060-produkty.css`).
+Pole hledání dostalo pod stejným zlomem kratší placeholder "Hledat…"
+místo celé věty — přepíná se novým hookem `useMediaQuery` (`100-uvod.js`,
+naslouchá `matchMedia`, ne `resize`, ať zareaguje i na otočení telefonu).
+Nad 480px se nezměnilo nic — grid karty produktu zůstává tříbuňkový,
+mřížka `.karta-produkt` z části 040 (zlom 960px) do toho nezasahuje.
+
+**Změřeno.** `snimek.py --sirka 391` s vybraným produktem: placeholder
+"Hledat…", `document.scrollWidth` = `window.innerWidth` = 391 (žádné
+vodorovné rolování), tlačítka *Read a code* / *Compute coverage from the
+preview* pod sebou na celou šířku karty, bez zalomení uprostřed slova.
+Kontrolní měření na širokém okně (>960px): placeholder zůstal celou větou,
+`getComputedStyle` na `.produkt-dlazdice` vrátil `repeat(3, minmax(0px,
+1fr))` — nezměněno. `kontrola_aplikace.py` a `prekryv.py` (čtyři šířky,
+oba režimy) bez chyby.

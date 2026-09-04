@@ -168,6 +168,101 @@ function sloucOpravy(mistni, ze_souboru) {
   return Array.from(mapa.values()).sort((a, b) => n(b.kdy) - n(a.kdy));
 }
 
+/* ================= ČÍM TO JE: RECEPTURA, MATERIÁL, NEBO POSTUP =================
+   Tisíc dvě stě devět oprav je číslo, se kterým se nedá nic dělat. Teprve
+   rozdělení podle příčiny řekne, kam sáhnout — a jsou jenom tři možnosti:
+
+     receptura  opravuje se u každého, kdo míchá, a ze všech konví
+                → chyba je ve složení, opraví se jednou v databázi
+     materiál   opravuje se jen z jedné konve, ostatní jsou v pořádku
+                → reklamace u dodavatele, konev z oběhu ven
+     postup     opravuje se jen u jednoho člověka, ostatním to sedne
+                → doučit, ne přepisovat recepturu
+
+   Rozhoduje se to POUZE tam, kde je z čeho: potřeba jsou aspoň dvě dávky téže
+   receptury a aspoň jedna oprava. Když všechny dávky namíchal jeden člověk
+   z jedné konve, nedá se poznat nic — a takový případ se hlásí jako
+   nerozhodnutý, ne jako „receptura". Odhad, který se tváří jako zjištění, by
+   posílal reklamace dodavateli za cizí chyby.
+
+   Práh je shoda 100 %: podezřelý je jen ten člověk nebo ta konev, u kterých se
+   opravovalo POKAŽDÉ, a zároveň musí existovat srovnání — aspoň jedna dávka
+   bez opravy odjinud. Slabší práh (třeba dvě třetiny) by při třech dávkách
+   ukázal na náhodu.
+
+   A opravy musejí být aspoň dvě — jak u receptury celkem, tak U TOHO
+   PODEZŘELÉHO SAMOTNÉHO. Jedna oprava sedí na jednoho člověka a na jednu konev
+   vždycky: je to jediný záznam, takže „pokaždé" o něm neříká nic. Obojí přišlo
+   z ověření a obojí je jiný případ. To první odhalila zkouška (jediná oprava
+   bez podpisu poslala reklamaci na konev, která za nic nemohla), to druhé až
+   obrazovka: dvě opravy rozdělené mezi dva lidi vyšly jako „pokaždé Eva (1×)",
+   protože Eva měla jednu dávku a v ní tu opravu. Osa musí stát na opakování
+   u jednoho, ne na součtu přes všechny. */
+const OSY_OPRAVY = {
+  receptura: { popis: "receptura", rada: "Opravit složení v databázi — týká se to všech." },
+  material: { popis: "materiál", rada: "Podezřelá je jedna konev. Ověřit šarži u dodavatele." },
+  postup: { popis: "postup", rada: "Opravuje se to jen u jednoho člověka. Projít s ním postup." },
+  nerozhodnuto: { popis: "zatím nerozhodnuto", rada: "Málo dávek na srovnání. Rozliší se to samo, až jich bude víc." },
+};
+
+/* Rozdělí hodnoty jednoho rozměru (kdo, nebo jedna konev) na ty, u kterých
+   se opravovalo, a na ty, u kterých ne. Vrací podezřelou hodnotu jen tehdy,
+   když je jediná, opakuje se u ní oprava aspoň dvakrát a existuje aspoň jedna
+   čistá — tedy když je co srovnávat a není to jednorázový úkaz. */
+function osaPodezrelaHodnota(polozky) {
+  const stat = new Map();
+  for (const x of polozky) {
+    if (!x.hodnota) continue;                       // bez podpisu se nerozhoduje
+    if (!stat.has(x.hodnota)) stat.set(x.hodnota, { davek: 0, oprav: 0 });
+    const z = stat.get(x.hodnota);
+    z.davek += 1;
+    if (x.opravena) z.oprav += 1;
+  }
+  if (stat.size < 2) return null;                   // není s čím srovnávat
+  let spatna = null, cistych = 0, spatnych = 0;
+  for (const [h, z] of stat) {
+    /* Aspoň dvě dávky u téhož člověka nebo z téže konve, a všechny opravené.
+       Při jediné dávce je „opravovalo se pokaždé" jen jiný způsob, jak říct
+       „opravila se jedna dávka" — a to o něm neplatí nic. */
+    if (z.oprav === z.davek && z.davek >= 2) { spatna = { hodnota: h, davek: z.davek }; spatnych += 1; }
+    else if (z.oprav === 0) cistych += 1;
+  }
+  return (spatnych === 1 && cistych >= 1) ? spatna : null;
+}
+
+/* Rozřazení oprav jedné receptury. Dávky nesou podpis a otisk konví, opravy
+   se na ně vážou kódem dávky — teprve spojením obojího vznikne odpověď. */
+function osaOpravy(davky, opravene) {
+  const seznam = (davky || []).filter((d) => d && d.kod);
+  if (seznam.length < 2) return { osa: "nerozhodnuto", proc: "málo dávek" };
+
+  /* Jedna oprava je náhoda bez ohledu na osu — viz komentář výš. Zjišťuje se
+     dřív než cokoli jiného, aby se nehledal viník tam, kde není z čeho. */
+  const opravenych = seznam.filter((d) => opravene.has(d.kod)).length;
+  if (opravenych < 2) return { osa: "nerozhodnuto", proc: "jedna oprava" };
+
+  const lidi = seznam.map((d) => ({ hodnota: String(d.kdo || "").trim(),
+    opravena: opravene.has(d.kod) }));
+  const clovek = osaPodezrelaHodnota(lidi);
+  if (clovek) return { osa: "postup", kdo: clovek.hodnota, davek: clovek.davek };
+
+  /* Konve se procházejí po materiálech: jedna dávka bere ze tří konví a
+     podezřelá může být kterákoli z nich. Materiál, který nemá otisk aspoň
+     u dvou dávek, se přeskočí — bez srovnání by vyšel podezřelý vždycky. */
+  const materialy = new Set();
+  for (const d of seznam) for (const m of Object.keys(poleNaSarze(d.sarze))) materialy.add(m);
+  for (const m of materialy) {
+    const konve = seznam.map((d) => ({ hodnota: String(poleNaSarze(d.sarze)[m] || ""),
+      opravena: opravene.has(d.kod) }));
+    const konev = osaPodezrelaHodnota(konve);
+    if (konev) return { osa: "material", material: m, sarze: konev.hodnota, davek: konev.davek };
+  }
+
+  /* Nikde se to nezúžilo: opravovalo se napříč lidmi i konvemi, a to je
+     vlastnost receptury samotné. */
+  return { osa: "receptura", davek: opravenych };
+}
+
 /* Kolik se opravovalo. Samo číslo nic nezlepší — smysl to má teprve tehdy,
    když jde vidět, U KTERÉ receptury se opravuje pořád dokola: tam se vyplatí
    opravit recepturu v databázi, ne pokaždé znovu nátisk.
@@ -196,11 +291,31 @@ function prehledOprav({ opravy, davky, odKdy, doKdy }) {
     z.gramu += n(o.pridanoG);
     z.duvody.set(dk, (z.duvody.get(dk) || 0) + 1);
   }
+  /* Dávky rozdělené podle receptury — do rozřazení příčiny vstupují VŠECHNY
+     dávky té receptury za období, ne jen opravené. Právě ty neopravené jsou
+     to srovnání, ze kterého se pozná, že selhal jeden člověk nebo jedna
+     konev, a ne receptura sama. */
+  const davkyReceptury = new Map();
+  for (const d of davekVObdobi) {
+    const rk = String(d.nazev || "").trim() || "—";
+    if (!davkyReceptury.has(rk)) davkyReceptury.set(rk, []);
+    davkyReceptury.get(rk).push(d);
+  }
+
   const receptury = Array.from(podleReceptury.values()).map((z) => {
     let nej = "", nejPocet = 0;
     for (const [k, v] of z.duvody) if (v > nejPocet) { nej = k; nejPocet = v; }
-    return { nazev: z.nazev, pocet: z.pocet, gramu: z.gramu, duvod: nej };
+    const rozbor = osaOpravy(davkyReceptury.get(z.nazev) || [], sDavkou);
+    return { nazev: z.nazev, pocet: z.pocet, gramu: z.gramu, duvod: nej,
+      osa: rozbor.osa, osaPopis: OSY_OPRAVY[rozbor.osa].popis,
+      osaRada: OSY_OPRAVY[rozbor.osa].rada, osaDetail: rozbor };
   }).sort((a, b) => b.pocet - a.pocet || b.gramu - a.gramu);
+
+  /* Kolik receptur padlo na kterou osu. Mistr se dívá nejdřív sem: tři
+     reklamace u dodavatele se řeší jinak než tři přepsané receptury. */
+  const podleOsy = {};
+  for (const k of Object.keys(OSY_OPRAVY)) podleOsy[k] = 0;
+  for (const r of receptury) podleOsy[r.osa] += 1;
 
   return {
     oprav: vObdobi.length,
@@ -216,6 +331,10 @@ function prehledOprav({ opravy, davky, odKdy, doKdy }) {
       .map(([popis, pocet]) => ({ popis: popis, pocet: pocet }))
       .sort((a, b) => b.pocet - a.pocet),
     receptury: receptury,
+    osy: podleOsy,
+    /* Kolik dávek za období vůbec ví, kdo je míchal. Bez toho by se osa
+       „postup" nikdy neurčila a nikdo by nevěděl proč — řekne se to nahlas. */
+    davekSPodpisem: davekVObdobi.filter((d) => String(d.kdo || "").trim()).length,
     zaznamy: vObdobi.slice().sort((a, b) => n(b.kdy) - n(a.kdy)),
   };
 }

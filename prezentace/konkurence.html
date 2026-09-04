@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>Co umí konkurence a co z toho stojí za převzetí</title>
 <style>
   /* Táž paleta jako aplikace a jako ukázka — tři dokumenty, jeden vzhled. */
@@ -240,7 +241,9 @@
             sloupec znamená schválená, aby se receptury z dřívějška chovaly jako dřív.</td></tr>
         <tr><td class="f">Napojení na podnikový systém</td><td class="k">X-Rite (MIS, CxF)</td>
           <td class="s"><span class="zn cast">částečně</span></td>
-          <td>SGPS je rozdělaný. X-Rite navíc přijímá zakázku <b>jako úkol do míchárny</b>
+          <td>SGPS je rozdělaný — seznam zakázek se už dá <b>zúžit na svou technologii</b>
+            (bere se z katalogu podle produktu, ne ze SGPS), takže míchač vidí jen to své.
+            Chybí ostré napojení. X-Rite navíc přijímá zakázku <b>jako úkol do míchárny</b>
             s cílovou barvou — to je model, který stojí za okopírování.</td></tr>
         <tr><td class="f">Odeslání receptury e-mailem</td><td class="k">IMS, ColorStar</td>
           <td class="s"><span class="zn cast">částečně</span></td>
@@ -376,7 +379,7 @@
   <p class="pozn">Kritérium bylo stejné jako u tabulky výš: každý bod musí stát na datech,
     která aplikace <b>už sbírá</b>, a mířit buď na 1 209 oprav, nebo na materiál.
     Žádný nepotřebuje nový přístroj.</p>
-  <div class="postup"><b>7</b> z 12 hotových &middot; stav k 19. 8. 2026 &middot;
+  <div class="postup"><b>8</b> z 12 hotových &middot; stav k 4. 9. 2026 &middot;
     tenhle dokument se aktualizuje s každou zavedenou funkcí</div>
 
   <h3 style="margin-top:6px">Aby oprava nevznikla</h3>
@@ -421,11 +424,20 @@
             u receptur z nakoupené databáze ji drží prohlížeč jako síto a kryvost.
             Fotka od nátisku dál čeká.</td></tr>
         <tr><td class="f">Kdo míchal a čím</td>
-          <td class="k">dávka jako samostatný záznam</td>
-          <td class="s"><span class="zn ceka">čeká</span></td>
+          <td class="k">dávka jako samostatný záznam, otisk otevřených konví</td>
+          <td class="s"><span class="zn hot">hotovo</span></td>
           <td>Ne kvůli viníkovi. Kvůli tomu, aby šlo rozlišit, jestli je oprava vlastnost
             <b>receptury, materiálu, nebo postupu</b> — bez toho se z 1 209 oprav nedá nic
-            vyčíst.</td></tr>
+            vyčíst.<br><b>Zavedeno 4. 9. 2026:</b> dávka si k otisku konví, který už měla,
+            přibrala podpis obsluhy (role počítače, jméno nepovinné — u váhy se nikdo
+            nepodepisuje ručně). Záložka <i>Opravy po nátisku</i> z toho u každé receptury
+            rozhodne, čím to je, a podle toho radí: opravit složení, reklamovat konev,
+            nebo projít postup s jedním člověkem. Rozhoduje se <b>jen tam, kde je z čeho</b>
+            — aspoň dvě dávky, dvě opravy a dvě u téhož podezřelého; jinak se řekne
+            „zatím nerozhodnuto“, protože jedna oprava sedí na jednoho člověka i na jednu
+            konev vždycky. Na modelu čtyř oprav vyšlo: PANTONE 485 C → postup (2× tentýž
+            tiskař ze tří dávek), PANTONE 200 C → materiál (2× z konve K1, dvě čisté
+            z K2), PANTONE 300 C → receptura (napříč lidmi i konvemi).</td></tr>
         <tr><td class="f">Nádoby a jejich objem</td>
           <td class="k">dávka v gramech i ml, hustota receptury</td>
           <td class="s"><span class="zn ceka">čeká</span></td>
@@ -520,9 +532,23 @@
             a neřekne to.</b> Nulová práce s daty, okamžitý efekt na cenu dávky.</td></tr>
         <tr><td class="f">Zdraví databáze</td>
           <td class="k">kontroly na chybějící odstín, cenu a technologii</td>
-          <td class="s"><span class="zn ceka">čeká</span></td>
+          <td class="s"><span class="zn hot">hotovo</span></td>
           <td>Dnes se hlásí u jedné receptury. Jeden přehled = plán, co doplnit —
-            a rovnou podklad pro oddíl <b>Zbývá doplnit</b> v A3.</td></tr>
+            a rovnou podklad pro oddíl <b>Zbývá doplnit</b> v A3.<br>
+            <b>Zavedeno 4. 9. 2026:</b> záložka <i>Zdraví databáze</i> ve skupině
+            Data. Osm kontrol úplnosti přes všechny databáze naráz, ke každé
+            stojí, co receptura kvůli té mezeře neumí a do kterého souboru se
+            údaj doplňuje. Nálezy počítají tytéž funkce jako kalkulace, aby
+            aplikace o jedné receptuře netvrdila dvě různé věci. Řadí se podle
+            naléhavosti: nahoře to, co výpočet zastaví, dole to, co jen snižuje
+            přesnost. Změřeno na 15 191 recepturách — 1 737 nemá součet složení
+            100 %, 2 398 je bez odstínu, 3 467 bez hustoty, jedna databáze nemá
+            přiřazenou technologii a nenabídne se tedy v kalkulaci vůbec.
+            Co se neví, se nehádá dvakrát: chybějící technologie u receptury
+            nález není (platí ve všech), a otestovanost se posuzuje jen tam,
+            kde ji databáze vede — čtyři z osmi ten sloupec nemají a mlčet
+            o nich je poctivější než hlásit mezeru u každé nakoupené
+            receptury.</td></tr>
       </tbody>
     </table>
   </div>
@@ -532,7 +558,7 @@
   <h2>Z průzkumu 3. 9. 2026 — co by šlo převzít</h2>
   <p class="pozn">Průzkum přes 40 programů (PRUZKUM_MICHACI_SOFTWARE.md): výrobci barev,
     textil a transfer, nezávislý software. Vyřazeno, co IRM už má, a co vyžaduje
-    spektrofotometr. Sloupec „u vás“ je stav k 3. 9. 2026.</p>
+    spektrofotometr. Sloupec „u vás“ je stav k 4. 9. 2026 — toho dne přibylo třináct funkcí z tohohle seznamu (jednotka dávky, C/U, krycí varianta, oblíbené a sdílení odkazem, hledání s napovídáním, profil úpravy, náhrada došlé složky, vynucená složka řady, vratka ze stroje, dvoustupňové schválení, lidé dílny a historie receptury, chybějící odstín na vyžádání).</p>
 
   <h3>Funkce</h3>
   <div class="tab">
@@ -543,29 +569,29 @@
           <td class="s"><span class="zn ne">nemáte</span></td>
           <td>Týž odstín z víc databází seřazený podle ceny dávky a počtu složek. Navazuje na „cenové dvojníky“ výš — data už v souborech jsou.</td></tr>
         <tr><td class="f">Profil úpravy receptury</td><td class="k">GSE Ink manager</td>
-          <td class="s"><span class="zn cast">částečně</span></td>
-          <td>Procentní úprava uložená <b>mimo</b> základní recepturu, tiskne se na štítek a při opakování zakázky se použije znovu. Opravy po nátisku máte zapsané, ale neuplatní se podruhé.</td></tr>
+          <td class="s"><span class="zn ano">máte</span></td>
+          <td>Procentní úprava uložená <b>mimo</b> základní recepturu, tiskne se na štítek a při opakování zakázky se použije znovu. <b>Zavedeno 4. 9. 2026:</b> profil vzniká jedním tlačítkem ze zapsané opravy nebo ručně, váže se na kombinaci produkt + barva + poloha a uplatní se sám.</td></tr>
         <tr><td class="f">Náhrada nedostupné báze</td><td class="k">Matsui ColorMixer</td>
-          <td class="s"><span class="zn cast">částečně</span></td>
-          <td>Když báze došla, přepočet na jinou. Zástupnost máte jen u zbytků; sklad už ví, co chybí.</td></tr>
+          <td class="s"><span class="zn ano">máte</span></td>
+          <td>Když báze došla, přepočet na jinou. <b>Zavedeno 4. 9. 2026:</b> pravidla zástupnosti se použijí i obráceně — u složky, kterou sklad hlásí jako došlou, nabídne kalkulace tlačítko s náhradou; jde na lístek i na štítek.</td></tr>
         <tr><td class="f">Receptura zvlášť pro bílý a tmavý podklad</td><td class="k">Virus Inks, Teca‑Print</td>
           <td class="s"><span class="zn cast">částečně</span></td>
           <td>Dvě varianty téhož odstínu podle podkladu. Podklad posuzujete, ale varianta se neukládá — custom receptura vázaná na barvu produktu je k tomu blízko.</td></tr>
         <tr><td class="f">Vynucená složka</td><td class="k">X‑Rite IFS 6.5</td>
-          <td class="s"><span class="zn ne">nemáte</span></td>
-          <td>Lak nebo aditivum s pevným podílem v každé receptuře řady (u 2K tužidlo máte, u ostatních aditiv ne).</td></tr>
+          <td class="s"><span class="zn ano">máte</span></td>
+          <td>Lak nebo aditivum s pevným podílem v každé receptuře řady. <b>Zavedeno 4. 9. 2026:</b> zapisuje se u řady v parametry/databaze.csv (sloupec vynucene), váží se za barvou a počítá do ceny i do skladu.</td></tr>
         <tr><td class="f">Hromadná formulace jedné zakázky</td><td class="k">X‑Rite IFS, Colibri</td>
           <td class="s"><span class="zn ne">nemáte</span></td>
           <td>Víc odstínů jedné zakázky ze společných bází naráz — dnes po jedné, fronta míchání to částečně nahrazuje.</td></tr>
         <tr><td class="f">Oblíbené a sdílení odkazem</td><td class="k">easyMEMO 2.0, IMS 3.0</td>
-          <td class="s"><span class="zn ne">nemáte</span></td>
-          <td>Hvězdička u receptury, odkaz, který ji rovnou otevře, odeslání e‑mailem.</td></tr>
+          <td class="s"><span class="zn ano">máte</span></td>
+          <td>Hvězdička u receptury, odkaz, který ji rovnou otevře, odeslání e‑mailem. <b>Zavedeno 4. 9. 2026:</b> hvězdička patří člověku, ne počítači; odkaz nese i databázi, e‑mail se skládá v poštovním programu.</td></tr>
         <tr><td class="f">Dávka v kg a lb, přednastavené dávky</td><td class="k">ICC UltraMix, Screen Print CMS</td>
           <td class="s"><span class="zn cast">částečně</span></td>
           <td>Máte g a ml; kilogramy a rychlá volba 100 g–20 kg chybí.</td></tr>
         <tr><td class="f">Chybějící odstín na vyžádání</td><td class="k">Monarch, UMX 4.0</td>
-          <td class="s"><span class="zn ne">nemáte</span></td>
-          <td>Odstín, který v databázi není, se zapíše jako požadavek technologovi — u vás by to byla fronta „k domíchání“, ne e‑mail výrobci.</td></tr>
+          <td class="s"><span class="zn ano">máte</span></td>
+          <td>Odstín, který v databázi není, se zapíše jako požadavek technologovi. <b>Zavedeno 4. 9. 2026:</b> fronta „k domíchání“ — tiskař požádá jedním tlačítkem, technolog to vidí v Ke schválení s odznakem a vyřídí založením receptury.</td></tr>
       </tbody>
     </table>
   </div>
@@ -579,8 +605,8 @@
           <td class="s"><span class="zn cast">částečně</span></td>
           <td>Síto, tloušťka vrstvy (20 / 30 µm), podklad, ředění, za kterých receptury vznikly — dnes jen síto u jedné receptury. Bez toho se receptura z cizího síta tváří stejně jistě jako ta správná.</td></tr>
         <tr><td class="f">Volba C / U</td><td class="k">ICC UltraMix, QMX, Avient</td>
-          <td class="s"><span class="zn ne">nemáte</span></td>
-          <td>Coated a uncoated jako vlastnost receptury a filtr; dnes jen v názvu.</td></tr>
+          <td class="s"><span class="zn ano">máte</span></td>
+          <td>Coated a uncoated jako vlastnost receptury a filtr. <b>Zavedeno 4. 9. 2026:</b> čte se z názvu (poslední samostatné C nebo U), dá se zapsat výslovně a filtruje se podle něj v kalkulaci i v seznamu.</td></tr>
         <tr><td class="f">Objednací číslo</td><td class="k">easyMEMO 2.0</td>
           <td class="s"><span class="zn ne">nemáte</span></td>
           <td>U složky i receptury; hledá se podle něj a objednávka do minima ho tiskne.</td></tr>
@@ -603,14 +629,14 @@
       <thead><tr><th>proces</th><th>kdo to má</th><th>u vás</th><th>co by to dalo</th></tr></thead>
       <tbody>
         <tr><td class="f">Účet na osobu a audit</td><td class="k">easyMEMO 2.0, IMS 3.0, Autura</td>
-          <td class="s"><span class="zn cast">částečně</span></td>
-          <td>Role po počítači máte; „kdo míchal a čím“ a historie změn receptury ne.</td></tr>
+          <td class="s"><span class="zn ano">máte</span></td>
+          <td><b>Zavedeno 4. 9. 2026:</b> lidé dílny v parametry/lide.csv — v nabídce se vybere jméno i role, takže se podpis píše pokaždé stejně. „Kdo míchal a čím“ i historie změn receptury jsou v okně Historie receptury.</td></tr>
         <tr><td class="f">Víceúrovňové schválení</td><td class="k">IMS 3.0, Autura</td>
-          <td class="s"><span class="zn cast">částečně</span></td>
-          <td>Dvě role máte; schválení odstínu zákazníkem nebo mistrem jako další krok ne.</td></tr>
+          <td class="s"><span class="zn ano">máte</span></td>
+          <td><b>Zavedeno 4. 9. 2026:</b> u odstínu se určí druhý stupeň — mistr, nebo zákazník (podpis na nátisku se zapíše jménem). Stupně jdou po sobě a receptura bez druhého stupně se chová jako dřív.</td></tr>
         <tr><td class="f">Vratky z tisku s vazbou na zakázku</td><td class="k">GSE Return ink, SunMatch</td>
-          <td class="s"><span class="zn cast">částečně</span></td>
-          <td>Zbytek u vás vzniká po zakázce; vratka ze stroje uprostřed zakázky (výměna barvy) se neeviduje zvlášť.</td></tr>
+          <td class="s"><span class="zn ano">máte</span></td>
+          <td><b>Zavedeno 4. 9. 2026:</b> vratka ze stroje uprostřed zakázky je samostatný kelímek s vlastním kódem a štítkem, ukazuje na dávku a nese důvod; původní dávka zůstává v tisku.</td></tr>
         <tr><td class="f">Zakázka jako úkol do míchárny</td><td class="k">GSE–CERM, X‑Rite MIS</td>
           <td class="s"><span class="zn cast">částečně</span></td>
           <td>MIS pošle požadavek na dávku, míchárna vrátí recepturu a kód. SGPS zatím jen čte zakázky.</td></tr>
@@ -633,14 +659,14 @@
           <td class="s"><span class="zn cast">částečně</span></td>
           <td>Filtr databáze máte; skládání víc filtrů a sortimentní skupina ne.</td></tr>
         <tr><td class="f">Jen oblíbené / jen moje / jen nové</td><td class="k">easyMEMO 2.0</td>
-          <td class="s"><span class="zn ne">nemáte</span></td>
-          <td>Tři přepínače nad seznamem receptur.</td></tr>
+          <td class="s"><span class="zn ano">máte</span></td>
+          <td>Tři přepínače nad seznamem receptur. <b>Zavedeno 4. 9. 2026:</b> „nové“ jsou receptury z posledních 30 dnů a datum dostávají jen při aktualizaci už známé databáze.</td></tr>
         <tr><td class="f">Hledání s napovídáním</td><td class="k">easyMEMO 2.0, ICC</td>
-          <td class="s"><span class="zn cast">částečně</span></td>
-          <td>Hledáte podle názvu; napovídání během psaní a hledání podle objednacího čísla ne.</td></tr>
+          <td class="s"><span class="zn ano">máte</span></td>
+          <td><b>Zavedeno 4. 9. 2026:</b> napovídání během psaní v kalkulaci i v seznamu; hledá se v názvu, řadě, objednacím čísle a ve jménech složek.</td></tr>
         <tr><td class="f">Jednotka dávky</td><td class="k">ICC UltraMix, Screen Print CMS</td>
-          <td class="s"><span class="zn ne">nemáte</span></td>
-          <td>Přepínač g / kg / lb u dávky.</td></tr>
+          <td class="s"><span class="zn ano">máte</span></td>
+          <td>Přepínač g / kg / lb u dávky. <b>Zavedeno 4. 9. 2026:</b> mění jen zobrazení hlavního čísla, uvnitř i na váze se počítá v gramech.</td></tr>
         <tr><td class="f">Podklad bílý / tmavý</td><td class="k">Virus Inks</td>
           <td class="s"><span class="zn cast">částečně</span></td>
           <td>Přepínač, který vybere variantu receptury; u vás jde podklad z barvy produktu, varianta chybí (viz Funkce).</td></tr>
@@ -648,8 +674,8 @@
           <td class="s"><span class="zn cast">částečně</span></td>
           <td>Síto máte jako parametr výpočtu; nabídnout jen receptury ověřené pro dané síto ne (souvisí s podmínkami platnosti u databáze).</td></tr>
         <tr><td class="f">Krycí / standardní varianta</td><td class="k">Coates (Standard HD)</td>
-          <td class="s"><span class="zn cast">částečně</span></td>
-          <td>Kryvost máte jako údaj; přepínač na krycí variantu téhož odstínu ne.</td></tr>
+          <td class="s"><span class="zn ano">máte</span></td>
+          <td>Kryvost máte jako údaj. <b>Zavedeno 4. 9. 2026:</b> mezi krycí a standardní verzí téhož odstínu se přepíná tlačítkem; protějšek se hledá jen v téže databázi.</td></tr>
       </tbody>
     </table>
   </div>

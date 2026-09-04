@@ -116,7 +116,12 @@ function vlastniDoCsv(recipes, links) {
     "schvaleni", "schvalil", "schvaleno_kdy", "duvod_zamitnuti", "zadal", "zadano_kdy",
     /* Poznámka technologa k receptuře — stojí na konci, aby starší soubor bez
        ní zůstal čitelný beze změny. */
-    "poznamka"];
+    "poznamka",
+    /* C / U, objednací číslo a druhý stupeň schválení (mistr / zákazník).
+       Za poznámkou ze stejného důvodu; prázdný druhý stupeň = receptura
+       je hotová prvním schválením, jako dřív. */
+    "cu", "objednaci_cislo", "druhy_stupen", "schvaleni2", "schvalil2", "schvaleno2_kdy",
+    "duvod_zamitnuti2"];
   const radky = [hlavicka];
   for (const r of recipes.filter(jeVlastni)) {
     const vazby = vazbyReceptury(links, r.id).join("~");
@@ -134,11 +139,20 @@ function vlastniDoCsv(recipes, links) {
         r.pomerRedidla == null ? "" : cislo(r.pomerRedidla, 4),
         r.mezRedidla == null ? "" : cislo(r.mezRedidla, 4),
         r.zaklad || "", vazby,
-        stavSchvaleni(r) === SCHV_OK ? "" : stavSchvaleni(r),
+        /* Do sloupce `schvaleni` jde jen PRVNÍ stupeň — celkový stav by po
+           schválení technologem a před mistrem zapsal „ceka" a po načtení by
+           technologovo razítko zmizelo. Druhý stupeň má sloupce své. */
+        stavPrvnihoStupne(r) === SCHV_OK ? "" : stavPrvnihoStupne(r),
         r.schvalil || "", n(r.schvalenoKdy) > 0 ? cislo(n(r.schvalenoKdy), 0) : "",
         r.duvodZamitnuti || "", r.zadal || "",
         n(r.zadanoKdy) > 0 ? cislo(n(r.zadanoKdy), 0) : "",
-        jedenRadek(r.poznamka)]);
+        jedenRadek(r.poznamka),
+        // jen výslovně zapsané C / U — co se čte z názvu, se do souboru neopisuje
+        /^[CU]$/.test(String(r.cu || "").trim().toUpperCase()) ? String(r.cu).trim().toUpperCase() : "",
+        r.objCislo || "", druhyStupen(r),
+        druhyStupen(r) ? (r.schvaleni2 || "") : "", r.schvalil2 || "",
+        n(r.schvaleno2Kdy) > 0 ? cislo(n(r.schvaleno2Kdy), 0) : "",
+        r.duvodZamitnuti2 || ""]);
     }
   }
   return radky.map((r) => r.map((c) => '"' + String(c == null ? "" : c).replace(/"/g, '""') + '"')

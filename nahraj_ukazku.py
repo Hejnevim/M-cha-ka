@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Nahrávky scén mluvené ukázky (prezentace/ukazka.html a ukazka_en.html).
+"""Nahrávky scén mluveného manuálu (prezentace/manual.html, manual_en.html).
 
 Scénář scény žije jen v poli `rec` v HTML — nahrávka se z něj čte přímo,
-aby se titulek a hlas nemohly rozejít. Hlasy a tempo jsou dané (irm-ukazka):
-česky cs-CZ-AntoninNeural, anglicky en-GB-RyanNeural, obojí −5 % přes
-edge-tts. Délka mp3 se měří ze snímků MPEG (žádná knihovna), aby šlo pole
-`cas` srovnat na skutečnou délku hlasu — jinak pruh pod jevištěm doběhne
-dřív, než hlas domluví.
+aby se titulek a hlas nemohly rozejít. Hlasy a tempo jsou dané (irm-manual):
+česky cs-CZ-AntoninNeural, anglicky en-GB-RyanNeural, obojí −5 % přes edge-tts. Délka mp3 se měří ze snímků MPEG
+(žádná knihovna), aby šlo pole `cas` srovnat na skutečnou délku hlasu —
+jinak pruh pod jevištěm doběhne dřív, než hlas domluví.
 
 Použití:
     python nahraj_ukazku.py --vypis                 scény: cas, délka mp3, délka rec
     python nahraj_ukazku.py --scena 19 --scena 20   nahraje scény (1-based) v obou jazycích
-    python nahraj_ukazku.py --scena 19 --jazyk cs   jen jednu verzi
+    python nahraj_ukazku.py --scena 19 --jazyk manual   jen českou verzi
     python nahraj_ukazku.py --zapis-cas             přepíše cas na zaokrouhlenou délku mp3 (jen kde se liší)
 
 Vyžaduje edge-tts (python -m pip install edge-tts) a internet — jen pro
@@ -32,9 +31,12 @@ import sys
 
 KOREN = os.path.dirname(os.path.abspath(__file__))
 PREZENTACE = os.path.join(KOREN, "prezentace")
+# Mluvená ukázka byla 4. 9. 2026 zrušena — místo ní se dělá mluvený manuál.
+# Obě jazykové verze manuálu mají totéž pole SCENY se stejnými klíči, takže se
+# čtou i nahrávají týmž kódem; bez --jazyk běží obě, aby se nemohly rozejít.
 VERZE = {
-    "cs": ("ukazka.html", "audio", "scena-%02d.mp3", "cs-CZ-AntoninNeural"),
-    "en": ("ukazka_en.html", "audio_en", "scene-%02d.mp3", "en-GB-RyanNeural"),
+    "manual": ("manual.html", "audio_manual", "scena-%02d.mp3", "cs-CZ-AntoninNeural"),
+    "manual_en": ("manual_en.html", "audio_manual_en", "scene-%02d.mp3", "en-GB-RyanNeural"),
 }
 TEMPO = "-5%"
 BITRATY = {1: [0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320],
@@ -87,6 +89,9 @@ def sceny(html):
 
 async def nahraj(text, hlas, cil):
     import edge_tts
+    # Složku si nahrávka založí sama — u nové jazykové verze ještě neexistuje
+    # a edge-tts by spadl na FileNotFoundError až po stažení celé nahrávky.
+    os.makedirs(os.path.dirname(cil), exist_ok=True)
     await edge_tts.Communicate(text, hlas, rate=TEMPO).save(cil)
 
 
@@ -98,7 +103,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--vypis", action="store_true")
     ap.add_argument("--scena", type=int, action="append", default=[])
-    ap.add_argument("--jazyk", choices=["cs", "en"], default="")
+    ap.add_argument("--jazyk", choices=["manual", "manual_en"], default="")
     ap.add_argument("--zapis-cas", action="store_true", dest="zapis_cas")
     a = ap.parse_args()
     if a.scena:
@@ -113,8 +118,12 @@ def main():
             continue
         cesta = os.path.join(PREZENTACE, html)
         if not os.path.exists(cesta):
-            print("NELZE: %s neexistuje." % cesta)
-            return 2
+            # Bez --jazyk se projíždějí obě verze; chybí-li jedna (anglická
+            # vzniká později), není to důvod shodit běh té druhé.
+            if a.jazyk:
+                print("NELZE: %s neexistuje." % cesta)
+                return 2
+            continue
         sc, text = sceny(cesta)
         print("== %s (%s): %d scén" % (jazyk, html, len(sc)))
         posuny = []

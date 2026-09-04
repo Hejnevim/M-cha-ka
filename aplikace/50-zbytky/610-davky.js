@@ -14,7 +14,17 @@
 
    Průběžný stav se NEUKLÁDÁ, počítá se z hodin: uložené „zpracovatelná" by
    po ránu tvrdilo, že včerejší směs pořád běží. Uloženo je jen to, co čas
-   nedopočítá — rozhodnutí člověka, že se dávka spotřebovala nebo vyhodila. */
+   nedopočítá — rozhodnutí člověka, že se dávka spotřebovala nebo vyhodila.
+
+   KDO A ČÍM. Dávka si vedle složení pamatuje i to, kdo ji míchal a z kterých
+   konví. Ne kvůli viníkovi — kvůli tomu, aby u opakované opravy šlo rozlišit,
+   jestli je chyba ve **receptuře** (opravuje se u každého, ze všech konví),
+   v **materiálu** (jen z jedné konve), nebo v **postupu** (jen u jednoho
+   člověka). Bez téhle trojice je z opravy jen počet a nedá se s ní nic dělat.
+
+   Podpis se bere z role tohohle počítače stejně jako u záznamu změn — nezadává
+   se u váhy znovu. Když jméno vyplněné není, zůstane v záznamu aspoň role;
+   vymyslet se nesmí, protože podle toho by se pak rozhodovalo. */
 const SOUBOR_DAVKY = "davky.csv";
 
 /* Stavy dávky. Čtyři průběžné plynou z času, dva koncové z rozhodnutí
@@ -58,7 +68,7 @@ const jeKodDavky = (s) => /^DAVKA-\d{8}-\d{3}$/.test(String(s || "").trim().toUp
    (tuzidloKdy = 0, lhůta neběží), nebo rovnou při jeho potvrzení na váze.
    Kdo míchá ze zvyku, klikne až potom — a dávka nesmí kvůli tomu chybět. */
 function novaDavka({ davky, cfg, recepturaId, nazev, zakazka, produkt, tech,
-                     bazeG, tuzidloKdy, kodKelimku, sarze, ted }) {
+                     bazeG, tuzidloKdy, kodKelimku, sarze, kdo, ted }) {
   const nyni = ted || Date.now();
   const baze = Math.max(0, n(bazeG));
   const tuz = davkaTuzidla(cfg, baze);
@@ -82,6 +92,10 @@ function novaDavka({ davky, cfg, recepturaId, nazev, zakazka, produkt, tech,
        uzavření dávky: než se dávka uzavře, může konev dojít a nastoupit
        další — a do tisku šla ta, ze které se vážilo. */
     sarze: sarze || "",
+    /* Kdo míchal. Zapisuje se při založení, ne při uzavření: dávku uzavírá
+       často někdo jiný — ranní směna dodělá to, co odpolední namíchala — a
+       hledá se ten, kdo vážil. */
+    kdo: String(kdo || "").trim(),
     zmeneno: nyni,
   };
 }
@@ -152,7 +166,7 @@ function davkyKHlidani(davky, ted) {
 const DAVKY_HLAVICKA = ["kod", "nazev", "receptura", "zakazka", "produkt", "technologie",
   "kelimek", "zalozeno", "tuzidlo_kdy", "vyprsi", "baze_g", "tuzidlo_g", "tuzidlo",
   "potlife_min", "mez_potlife", "pomer_tuzidla", "hustnuti", "uzavrena", "uzavrena_kdy",
-  "pozn", "zmeneno", "sarze"];
+  "pozn", "zmeneno", "sarze", "kdo"];
 
 function davkyDoCsv(davky) {
   const radky = [DAVKY_HLAVICKA];
@@ -162,7 +176,7 @@ function davkyDoCsv(davky) {
       cislo(d.bazeG, 2), cislo(d.tuzidloG, 2), d.tuzidlo ? "ano" : "",
       cislo(d.minut, 0), cislo(d.mez, 2), cislo(d.pomerTuzidla, 4), d.hustnuti || "",
       d.uzavrena || "", d.uzavrenaKdy || "", d.pozn || "", d.zmeneno || "",
-      d.sarze || ""]);
+      d.sarze || "", d.kdo || ""]);
   }
   return radky.map((r) => r.map((c) => '"' + String(c == null ? "" : c).replace(/"/g, '""') + '"')
     .join(";")).join("\r\n") + "\r\n";
@@ -197,6 +211,9 @@ function csvNaDavky(text) {
       zmeneno: n(r[ci.zmeneno]) || n(r[ci.zalozeno]) || 0,
       // starší soubor sloupec nemá — dávka se pak jen nedohledá, číst jde dál
       sarze: ci.sarze >= 0 ? String(r[ci.sarze] || "") : "",
+      /* Totéž u podpisu: dávka z dřívějška ho nemá a nesmí se domýšlet — do
+         rozřazení oprav podle člověka pak prostě nevstoupí. */
+      kdo: ci.kdo >= 0 ? String(r[ci.kdo] || "").trim() : "",
     });
   }
   return out;

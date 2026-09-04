@@ -477,3 +477,194 @@ Vysvětlivky pokrývaly jen to, u čeho stály. Návod bude potřebovat i:
   u receptury z nakoupené databáze ji drží **jen tenhle prohlížeč**, stejně
   jako síto, kryvost a nastavení tužidla — na druhém počítači ji nikdo neuvidí.
   Kdo má poznámku sdílet, odvodí z databázové receptury vlastní
+
+---
+
+## Třináct funkcí ze seznamu konkurence (4. 9. 2026)
+
+Žádná z nich nemá v aplikaci vysvětlivku — rozhraní je tiché. Tohle je to,
+co by v návodu stát mělo.
+
+### Jednotka dávky (g / kg / lb)
+
+**Stojí u:** hlavního čísla v kartě *Kolik namíchat*, tři drobné přepínače.
+**Vysvětluje:** že přepínač mění **jen zobrazení**. Uvnitř se počítá
+v gramech, tabulka navážek zůstává v gramech a na váhu jdou gramy — tak to
+ukazuje displej. Kilogramy jsou pro velké sítotiskové dávky, libry pro
+zahraniční zadání. Volbu si drží prohlížeč, takže se u téhle míchačky
+nastaví jednou. Libra je přesně 453,592 37 g, ne zaokrouhlených 454.
+
+### C / U — natíraný a nenatíraný papír
+
+**Stojí u:** filtru nad výběrem Pantone a jako štítek u názvu receptury.
+**Vysvětluje:** že „485 C" a „485 U" jsou **dva různé odstíny**, ne dva
+zápisy téhož. Písmeno se čte z názvu — bere se poslední samostatné C nebo U,
+takže „PANTONE Cool Gray 5 C" vyjde jako C a „485 CP" jako nic. U vlastní
+receptury se dá zapsat výslovně v editoru (*Papír C / U*) a zápis má přednost
+před názvem.
+
+### Krycí a standardní varianta
+
+**Stojí u:** tlačítek *Krycí varianta →* a *Standardní varianta →* pod
+vybranou recepturou.
+**Vysvětluje:** že protějšek se hledá **jen v téže databázi** a jen podle
+názvu očištěného o označení („(vysoce krycí)", HD, opaque). Z jiné databáze
+se nebere schválně: týž pantone je tam namíchaný z jiných barev a přepnutím
+by se tiše vyměnila celá řada. Není-li protějšek nahraný, tlačítko se
+neukáže — to není chyba, ta varianta prostě v souborech není.
+
+### Oblíbené, jen moje, jen nové
+
+**Stojí u:** tří přepínačů nad seznamem receptur a hvězdičky u každé.
+**Vysvětluje:** že hvězdička patří **člověku, ne počítači** — klíčem je
+podpis role (jméno, jinak role), takže co si označí technolog, tiskaři
+u váhy nepřekáží. „Jen moje" jsou receptury, které jsem zadal nebo schválil.
+„Jen nové" jsou receptury z posledních **30 dnů**, a datum dostávají jen
+tehdy, když přibyly **aktualizací už známé databáze**; při prvním načtení
+souboru by bylo nových všech patnáct tisíc a přepínač by neřekl nic.
+Přepínače se sčítají a **nedrží se po zavření** aplikace — kdo by je zapomněl
+zapnuté, hledal by zítra recepturu, která „v aplikaci není".
+
+### Hledání s napovídáním a objednací číslo
+
+**Stojí u:** vyhledávacího pole v kalkulaci i v záložce Receptury.
+**Vysvětluje:** že se hledá v **názvu, řadě, objednacím čísle a ve jménech
+složek** — dodavatel na faktuře uvádí jen objednací číslo a v dílně se často
+ví „něco s Warm Red", ne číslo pantonu. Shody od začátku názvu jdou první.
+Ukáže se nejvýš dvanáct položek; šipky posouvají, Enter vybere, Esc zavře.
+Objednací číslo se zapisuje v editoru receptury.
+
+### Profil úpravy receptury
+
+**Stojí u:** boxu *Profil úpravy* v kartě *Kolik namíchat* a u tlačítka
+*Uložit jako profil úpravy pro příště* v asistentu vážení.
+**Vysvětluje** čtyři věci:
+
+1. Profil je procentní přídavek uložený **mimo** základní recepturu.
+   Receptura z databáze je podklad dodavatele a na jiném produktu sedí —
+   proto se nepřepisuje.
+2. Váže se na kombinaci **produkt + barva + technologie + poloha**, kvůli
+   které vznikl. Profil bez kombinace platí u té barvy všude a v nabídce se
+   označí jako *obecný*.
+3. **Dávka se profilem nezvětší.** Složení se přepočítá na sto, takže dávka
+   zakázky zůstává dávkou zakázky; naroste jen navážka té složky.
+4. Vzniká **z opravy** (gramy korekce proti dávce před ní se přepočtou na
+   procenta) nebo ručně. Zrušený profil se **nemaže** — zůstane v souboru,
+   aby šlo dohledat, podle čeho se míchalo minulý měsíc.
+
+Profil jde na míchací lístek i na štítek kelímku: ze složení hotové barvy už
+nikdo nepozná, že je v ní o půl procenta modré víc.
+
+### Náhrada nedostupné složky
+
+**Stojí u:** hlášení skladu „složka došla" jako tlačítko *Nahradit za …*.
+**Vysvětluje:** že nabídnutá náhrada plyne z **pravidel zástupnosti**
+v `parametry/pigmenty.csv` (sloupec `zastupuje`) — týchž, podle kterých se
+nabízejí zbytky, jen použitých obráceně. Platí jen jedním směrem: **dražší
+složka smí zaskočit za levnější, opačně ne**. Bez pravidla aplikace náhradu
+nenavrhne; ruční výběr báze z ceníku jde, ale je to rozhodnutí obsluhy —
+aplikace za odstín neručí a říká to nahlas na obrazovce, na lístku i na
+štítku. **Odstín se má ověřit nátiskem.** Dvě složky, které se náhradou
+slily do jedné, se sečtou: v nádobě je to jedna barva a asistent má vést
+jedno vážení.
+
+### Vynucená složka řady
+
+**Stojí u:** řádku *Řada … předepisuje* v kartě *Kolik namíchat*.
+**Vysvětluje:** že některé řady se netisknou tak, jak vyjdou z receptury —
+výrobce předepisuje lak, katalyzátor nebo pevný podíl ředidla do **každé**
+směsi řady. Receptura je poměr pigmentů a bází; tohle je vlastnost celé řady,
+proto se zapisuje k řadě, ne k barvě: `parametry/databaze.csv`, sloupec
+`vynucene`, tvar `Lak PP=10|Verdünner=5`. Podíl je z **váhy barvy**, stejně
+jako u tužidla a ředidla, a 10 i 0,1 znamená totéž. Složka pak stojí na
+lístku jako řádek za barvou, vede ji asistent vážení a počítá se do ceny
+i do skladu. Do procent receptury se **nemíchá** a do rozboru ředění
+nevstupuje — není to ředidlo, takže strop ředění se jí netýká.
+
+### Vratka ze stroje uprostřed zakázky
+
+**Stojí u:** tlačítka *Vratka ze stroje* u dávky ve stavu „v tisku" a v okně,
+které se otevře po načtení štítku čtečkou.
+**Vysvětluje:** rozdíl mezi **vratkou** a **zbytkem po zakázce**. Zbytek se
+zapisuje, když zakázka skončila. Vratka je barva, která se vrátila
+uprostřed — přišla přednostní zakázka, mění se barva na stroji, končí směna
+— a **zakázka pokračuje**. Proto:
+
+- vratka dostane **vlastní kód a štítek** a je od té chvíle na skladě
+  k další zakázce (dřív stála u stroje bez záznamu a použít se nedala);
+- **původní dávka zůstává „v tisku"** a kolik z ní zbude na konci, se zapíše
+  až po zakázce — jinak by se zbytek zapsal dvakrát, nebo vůbec;
+- složení, stáří i pot life se dědí z dávky, protože je to táž barva
+  namíchaná v týž okamžik;
+- cena dávky se do vratky **nepřepisuje** — v sestavách by se započítala
+  podruhé.
+
+Aplikace hlídá, že se nevrátí víc, než se namíchalo (včetně dřívějších
+vratek z téže dávky) — to by byl překlep, ne vratka.
+
+### Dvoustupňové schválení a lidé dílny
+
+**Stojí u:** pole *Ještě schvaluje* v editoru receptury a u tlačítek
+v záložce *Ke schválení*.
+**Vysvětluje:** že u odstínu se dá určit **druhý stupeň** — mistr, nebo
+zákazník. Stupně jdou po sobě: dokud technolog neschválil, mistr nemá co
+odškrtávat. U zákazníka se zapisuje **jméno toho, kdo za zákazníka podepsal
+nátisk**, a v závorce kdo to zapsal — zákazník v aplikaci není. Receptura bez
+druhého stupně se chová přesně jako dřív, schválením od technologa je hotová.
+Do sloupce `schvaleni` v souboru jde jen **první** stupeň; druhý má sloupce
+vlastní, jinak by se po schválení technologem a před mistrem zapsalo „čeká"
+a jeho razítko by se po načtení ztratilo.
+
+**Lidé dílny** se vypisují v `parametry/lide.csv` (jméno, role, poznámka)
+a v nabídce vlevo nahoře se vybere jedním klikem — nastaví jméno i roli.
+Je to proto, aby se podpis do evidence psal **pokaždé stejně**: „Eva",
+„eva" a „Eva N." jsou pro rozřazení oprav podle postupu tři různí lidé.
+Není to přihlášení heslem; u váhy se nikdo nepřihlašuje a heslo by se tam
+psalo naslepo. Soubor je nepovinný — bez něj se jméno píše ručně v záložce
+*Ke schválení*, jako dřív.
+
+### Chybějící odstín na vyžádání
+
+**Stojí u:** tlačítka *Požádat technologa o odstín* u rozpracované barvy,
+která v databázi není.
+**Vysvětluje:** že požadavek nahrazuje vzkaz přes dílnu. Zapíše se do
+`evidence/pozadavky.csv`, takže o něm ví i **druhá míchačka**, a technolog ho
+vidí ve druhé půlce záložky *Ke schválení* s odznakem v nabídce. Vyřídí ho
+tím, že recepturu **založí** — editor se otevře s názvem a odstínem
+z požadavku a po uložení se u požadavku objeví, která receptura z něj
+vznikla. Zamítnutí si žádá důvod: tiskař, který na barvu čeká, se musí
+dozvědět proč. U téže barvy pak kalkulace rovnou říká, v jakém stavu
+požadavek je — čeká, hotovo (s tlačítkem *Použít*), nebo zamítnuto.
+
+### Historie receptury
+
+**Stojí u:** tlačítka *Historie* u receptury v kalkulaci i v seznamu.
+**Vysvětluje:** že okno neskládá nová data — sbírá dohromady to, co už
+evidence má, a páruje to **názvem** receptury (id se při každém načtení
+databáze mění). V jedné časové řadě: kdo recepturu založil a schválil, kdo
+a kdy do ní sáhl (záznam změn podkladů), kdo podle ní míchal a z kterých
+konví (dávky), kdy se opravovala a jaký profil úpravy z toho zůstal.
+Odpovídá na otázku „co se s touhle barvou stalo", na kterou se dosud muselo
+chodit do čtyř záložek.
+
+---
+
+## Kde už to řečené je
+
+Třináct funkcí výše popsaných je od 4. 9. 2026 i v **mluveném manuálu**
+(`prezentace/manual.html`, anglicky `manual_en.html`) — šest nových scén
+a sedm přepsaných, celkem 54 scén. Manuál je mluvený a stručný, tenhle
+soubor podrobný; když se funkce změní, mění se obojí.
+
+| funkce | scéna manuálu |
+|---|---|
+| jednotka dávky g / kg / lb | 23 |
+| profil úpravy | 26 |
+| vynucená složka řady · náhrada došlé báze | 31 |
+| oblíbené · jen moje · jen nové · C a U | 37 |
+| odkaz · e-mail · historie receptury | 38 |
+| dvoustupňové schválení · lidé dílny | 42 (a 3) |
+| chybějící odstín na vyžádání | 43 |
+| vratka ze stroje | 47 |
+| hledání s napovídáním | 10 |
+| objednací číslo · papír C/U v editoru | 39 |

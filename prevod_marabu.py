@@ -15,8 +15,11 @@ Tentýž pantone tam stojí dvakrát — jednou na standardní bázi, jednou
 v jedné databázi jménem, takže krycí verze dostane do názvu příponu
 „(vysoce krycí)"; kryvost jde zároveň do vlastního sloupce, ze kterého ji
 kalkulace čte. Když ani to nestačí (u řady PP je jeden pantone i na dvou
-sítech), rozliší se sítem a nakonec datem vzniku — a v CSV nesmí zůstat dva
-řádky téhož názvu s různým složením, to se na konci kontroluje.
+sítech), rozliší se sítem, pak datem poslední úpravy, pak datem vzniku
+z poznámky (u PP je poslední úprava 18.02.2026 u všech řádků — je to datum
+exportu, nerozliší nic; tři pantony tam mají vedle nové receptury i starší
+otestovanou z roku 2016) a nakonec slovem „otestovaná" — a v CSV nesmí zůstat
+dva řádky téhož názvu s různým složením, to se na konci kontroluje.
 
 „Pomocný prostředek" (910 Drucklack, tj. tiskový lak) je regulérní složka
 navážky: bez něj by součet receptury nedal 100 %, proto se bere jako
@@ -363,6 +366,23 @@ def main():
     for z in zaznamy:
         if pocty[z["nazev"]] > 1 and z["datum"]:
             z["nazev"] += " (%s)" % z["datum"]
+    # Datum, které nerozlišilo nic (obě receptury ho mají stejné), se z názvu
+    # zase sundá — na lístku by jen překáželo. Pak se zkusí datum vzniku
+    # z poznámky („vznik 15.08.2016"): u PP je poslední úprava datem exportu
+    # a stejná u všech řádků.
+    pocty = collections.Counter(z["nazev"] for z in zaznamy)
+    for z in zaznamy:
+        if pocty[z["nazev"]] > 1 and z["datum"] and z["nazev"].endswith(" (%s)" % z["datum"]):
+            z["nazev"] = z["nazev"][:-len(" (%s)" % z["datum"])]
+    pocty = collections.Counter(z["nazev"] for z in zaznamy)
+    for z in zaznamy:
+        m = re.search(r"vznik (\d{2}\.\d{2}\.\d{4})", z["poznamka"])
+        if pocty[z["nazev"]] > 1 and m:
+            z["nazev"] += " (vznik %s)" % m.group(1)
+    pocty = collections.Counter(z["nazev"] for z in zaznamy)
+    for z in zaznamy:
+        if pocty[z["nazev"]] > 1 and z["otestovany"] == "ano":
+            z["nazev"] += " (otestovaná)"
     pocty = collections.Counter(z["nazev"] for z in zaznamy)
     duplicity = sorted(n for n, c in pocty.items() if c > 1)
 

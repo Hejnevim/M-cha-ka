@@ -37,6 +37,25 @@ function poleNaSpec(pole) {
   return { raw: "PDF · " + (pole.zakazka || pole.ref || "zakázkový list"), fields: f, unknown: [] };
 }
 
+/* Poznámka z listu na obrazovku. poleNaSpec (a zakazkaNaSpec v části 150)
+   skládá poznámku do jednoho českého řetězce s předponami „stroj“, „materiál“,
+   „předúprava“, „termín“ — a pro míchací lístek je to tak správně, lístek
+   zůstává česky (část 127). Na obrazovce ale předpony patří aplikaci, ne
+   listu, a musí projít preloz(). Přeložit je už při čtení nejde: přepnutí
+   jazyka by je nedohnalo a lístek by je dostal cizí. Kusy se proto při
+   vykreslení zase rozeberou — předpona se přeloží se jmenovkou, text listu
+   samotný zůstane, jak ho napsal zákazník (poznámka je jeho, ne naše; jeden
+   list ji má anglicky, jiný do ní pustil patičku formuláře). */
+const POZNAMKA_PREDPONY = ["stroj", "materiál", "předúprava", "termín"];
+function poznamkaListuObr(note) {
+  return String(note || "").split(" · ").map((kus) => {
+    for (const p of POZNAMKA_PREDPONY) {
+      if (kus.startsWith(p + " ")) return preloz(p + " {v}", { v: kus.slice(p.length + 1) });
+    }
+    return kus;
+  }).join(" · ");
+}
+
 /* Odeslání PDF mostu — sdílené pro záložku i pro okno v kalkulaci. */
 async function precistPdf(f) {
   const adresa = sgpsBase() + "/pdf";

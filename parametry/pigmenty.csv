@@ -117,3 +117,64 @@ barva;Printcolor Yellow 012;;;;;CZK;kg;;;;Printcolor 390;
 barva;Schwarz 33 IR-reflektierend;;;;;CZK;kg;;;;Printcolor MS 660;
 barva;ST-43 Neonfeuerrot;;;;;CZK;kg;;;;Printcolor MS 660;
 barva;ST-47 Neonleuchtgrün;;;;;CZK;kg;;;;Printcolor MS 786;
+barva;TPR 122 Hellgelb hochdeckend;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,350
+barva;TPR 130 Zinnoberrot hochdeckend;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,110
+barva;TPR 152 Ultramarinblau hochdeckend;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,150
+barva;TPR 162 Grasgrün hochdeckend;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,230
+barva;TPR 170 Deckweiss;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,830
+barva;TPR 191 Silberfarbe;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,070
+barva;TPR 192 Reichbleichgoldfarbe;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,040
+barva;TPR 193 Reichgoldfarbe;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,040
+barva;TPR 910 Drucklack;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,010
+barva;TPR 920 Zitron;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,080
+barva;TPR 922 Hellgelb;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,080
+barva;TPR 924 Mittelgelb;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,080
+barva;TPR 926 Orange;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,050
+barva;TPR 930 Zinnoberrot;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,040
+barva;TPR 932 Scharlachrot;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,060
+barva;TPR 934 Karminrot;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,090
+barva;TPR 936 Magenta;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,050
+barva;TPR 940 Dunkelbraun;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,100
+barva;TPR 950 Violett;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,030
+barva;TPR 952 Ultramarin;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,030
+barva;TPR 954 Mittelblau;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,100
+barva;TPR 956 Brilliantblau;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,040
+barva;TPR 960 Blaugrün;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,120
+barva;TPR 962 Grasgrün;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,140
+barva;TPR 970 Weiss;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,620
+barva;TPR 980 Schwarz;;;;;CZK;kg;;;;Marabu TampaStar TPR;1,040
+barva;PP 020 Zitron;;;;;CZK;kg;;;;Marabu MaraProp PP;1,040
+barva;PP 021 Mittelgelb;;;;;CZK;kg;;;;Marabu MaraProp PP;1,020
+barva;PP 022 Orange;;;;;CZK;kg;;;;Marabu MaraProp PP;0,990
+barva;PP 033 Magenta;;;;;CZK;kg;;;;Marabu MaraProp PP;0,980
+barva;PP 035 Signalrot;;;;;CZK;kg;;;;Marabu MaraProp PP;0,990
+barva;PP 036 Zinnoberrot;;;;;CZK;kg;;;;Marabu MaraProp PP;0,990
+barva;PP 045 Dunkelbraun;;;;;CZK;kg;;;;Marabu MaraProp PP;1,040
+barva;PP 055 Ultramarin;;;;;CZK;kg;;;;Marabu MaraProp PP;0,970
+barva;PP 058 Tiefblau;;;;;CZK;kg;;;;Marabu MaraProp PP;0,990
+barva;PP 059 Königsblau;;;;;CZK;kg;;;;Marabu MaraProp PP;1,040
+barva;PP 067 Grasgrün;;;;;CZK;kg;;;;Marabu MaraProp PP;1,020
+barva;PP 068 Brillantgrün;;;;;CZK;kg;;;;Marabu MaraProp PP;1,080
+barva;PP 070 Weiss;;;;;CZK;kg;;;;Marabu MaraProp PP;1,230
+barva;PP 073 Schwarz;;;;;CZK;kg;;;;Marabu MaraProp PP;0,990
+barva;PP 170 Deckweiss;;;;;CZK;kg;;;;Marabu MaraProp PP;1,470
+barva;PP 180 Deckschwarz;;;;;CZK;kg;;;;Marabu MaraProp PP;1,009
+barva;PP S 190 Aluminium Paste;;;;;CZK;kg;;;;Marabu MaraProp PP;1,400
+barva;LIP 910 Drucklack;;;;;CZK;kg;;;;Marabu LibraPrint LIP;1,000
+barva;LIP 920 Zitron;;;;;CZK;kg;;;;Marabu LibraPrint LIP;1,110
+barva;LIP 922 Hellgelb;;;;;CZK;kg;;;;Marabu LibraPrint LIP;1,010
+barva;LIP 924 Mittelgelb;;;;;CZK;kg;;;;Marabu LibraPrint LIP;1,080
+barva;LIP 926 Orange;;;;;CZK;kg;;;;Marabu LibraPrint LIP;1,030
+barva;LIP 930 Zinnoberrot;;;;;CZK;kg;;;;Marabu LibraPrint LIP;1,000
+barva;LIP 932 Scharlachrot;;;;;CZK;kg;;;;Marabu LibraPrint LIP;1,010
+barva;LIP 934 Karminrot;;;;;CZK;kg;;;;Marabu LibraPrint LIP;1,060
+barva;LIP 936 Magenta;;;;;CZK;kg;;;;Marabu LibraPrint LIP;1,000
+barva;LIP 940 Dunkelbraun;;;;;CZK;kg;;;;Marabu LibraPrint LIP;1,040
+barva;LIP 950 Violett;;;;;CZK;kg;;;;Marabu LibraPrint LIP;1,000
+barva;LIP 952 Ultramarin;;;;;CZK;kg;;;;Marabu LibraPrint LIP;1,000
+barva;LIP 954 Mittelblau;;;;;CZK;kg;;;;Marabu LibraPrint LIP;1,030
+barva;LIP 956 Brilliantblau;;;;;CZK;kg;;;;Marabu LibraPrint LIP;1,000
+barva;LIP 960 Blaugrün;;;;;CZK;kg;;;;Marabu LibraPrint LIP;1,070
+barva;LIP 962 Grasgrün;;;;;CZK;kg;;;;Marabu LibraPrint LIP;1,060
+barva;LIP 970 Weiss;;;;;CZK;kg;;;;Marabu LibraPrint LIP;1,420
+barva;LIP 980 Schwarz;;;;;CZK;kg;;;;Marabu LibraPrint LIP;1,000

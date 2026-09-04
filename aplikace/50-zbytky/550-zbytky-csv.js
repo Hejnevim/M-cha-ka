@@ -22,6 +22,8 @@ function zbytkyDoCsv(zbytky) {
         z.stav || "sklad", z.davkaG == null ? "" : cislo(z.davkaG, 2),
         z.shluk ? "ano" : "", (z.slito || []).join(" "),
         z.zbytekG == null ? "" : cislo(z.zbytekG, 2), z.zbytekKod || "",
+        z.uprava || "", z.nahrada || "",
+        z.vratka ? "ano" : "", z.vratkaZ || "", z.vratkaDuvod || "", z.kdo || "",
         c.name || "", c.pct === "" ? "" : cislo(c.pct, 4)]);
     }
   }
@@ -88,6 +90,14 @@ function csvNaZbytky(text) {
         // starší soubor kód zdrojového kelímku nemá — pak se ze skladu odečte
         // celá navážka a řekne se nahlas, kolika kelímků se to týká
         zbytekKod: ci.zbytek_kod >= 0 ? String(r[ci.zbytek_kod] || "").trim() : "",
+        // starší soubor tyhle sloupce nemá — kelímek je pak bez úpravy,
+        // bez náhrady a není vratkou, přesně jako dřív
+        uprava: ci.uprava >= 0 ? String(r[ci.uprava] || "").trim() : "",
+        nahrada: ci.nahrada >= 0 ? String(r[ci.nahrada] || "").trim() : "",
+        vratka: ci.vratka >= 0 && /^(1|ano|yes|true|x)$/i.test(String(r[ci.vratka] || "").trim()),
+        vratkaZ: ci.vratka_z >= 0 ? String(r[ci.vratka_z] || "").trim() : "",
+        vratkaDuvod: ci.vratka_duvod >= 0 ? String(r[ci.vratka_duvod] || "").trim() : "",
+        kdo: ci.kdo >= 0 ? String(r[ci.kdo] || "").trim() : "",
         slozeni: [],
       });
     }

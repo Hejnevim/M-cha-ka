@@ -2,6 +2,24 @@
 const { useState, useEffect, useMemo, useRef, useCallback } = React;
 const html = htm.bind(React.createElement);
 
+/* Rozvržení pod zlomem se v CSS řeší samo (@media), ale text (placeholder,
+   krátká varianta věty) se v CSS vyměnit nedá — proto pár míst potřebuje
+   znát zlom i v JS. Naslouchá matchMedia, ne resize, aby reagovalo i na
+   otočení telefonu a zoom, ne jen na změnu šířky okna. */
+function useMediaQuery(dotaz) {
+  const [vyhovuje, setVyhovuje] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia ? window.matchMedia(dotaz).matches : false);
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia(dotaz);
+    const posluchac = () => setVyhovuje(mq.matches);
+    posluchac();
+    mq.addEventListener("change", posluchac);
+    return () => mq.removeEventListener("change", posluchac);
+  }, [dotaz]);
+  return vyhovuje;
+}
+
 /* ---------- technologie a výchozí spotřeby (g/m², editovatelné) ---------- */
 /* sito:false = technologie sítem netiskne (tampontisk jede přes leptané
    klišé), takže se u ní síto nevybírá ani netiskne na lístek.

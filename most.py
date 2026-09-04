@@ -479,6 +479,20 @@ class Most(SimpleHTTPRequestHandler):
     def __init__(self, *a, **kw):
         SimpleHTTPRequestHandler.__init__(self, *a, directory=SLOZKA, **kw)
 
+    def guess_type(self, path):
+        """HTML ze složky se posílá s charsetem — jinak si ho prohlížeč hádá.
+
+        Stránky v prezentace/ jsou psané pro Artifact, kde kódování dodává
+        hostitel, takže vlastní <meta charset> mít nemusely. Bez tohohle
+        doplnění je Chrome ze souboru přečte jako Windows-1250 a celá čeština
+        se rozsype (4. 9. 2026 tak vypadal mluvený manuál). Doplňuje se jen
+        tam, kde charset chybí, ať se nepřepíše, co si typ nese sám.
+        """
+        typ = SimpleHTTPRequestHandler.guess_type(self, path)
+        if typ and typ.startswith("text/") and "charset=" not in typ:
+            typ += "; charset=utf-8"
+        return typ
+
     def end_headers(self):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Private-Network", "true")

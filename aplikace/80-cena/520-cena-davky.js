@@ -54,7 +54,7 @@ function materialRole(materialy, role, jmeno) {
    dělilo všemi gramy, vyšla by u neúplného ceníku cena nižší, než jaká je,
    a úspora ze zbytku by se podhodnotila. */
 function cenaDavky({ comps, totalG, materialy, hustota, tuzidloG, tuzidloNazev,
-                     redidloG, redidloNazev, aditiva, mena }) {
+                     redidloG, redidloNazev, aditiva, vynucene, mena }) {
   const men = String(mena || menaDilny(materialy) || MENA_VYCHOZI).toUpperCase();
   const out = { mena: men, celkem: 0, gramCena: 0, kryto: 0, uplna: true,
     polozky: [], bezCeny: [], jinaMena: [], gramu: 0, gramuSCenou: 0 };
@@ -101,6 +101,13 @@ function cenaDavky({ comps, totalG, materialy, hustota, tuzidloG, tuzidloNazev,
   } else if (n(redidloG) > 0) {
     const mat = materialRole(materialy, "redidlo", redidloNazev);
     pridej(mat ? mat.nazev : (redidloNazev || "ředidlo"), redidloG, mat, "redidlo");
+  }
+  /* Vynucené složky řady (lak, katalyzátor — část 459) se nakupují jako
+     každá jiná složka a párují se jménem s ceníkem; bez ceny jdou mezi
+     „bez ceny", ne do odhadu. */
+  for (const v of (vynucene || [])) {
+    const mat = materialPodleJmena(materialy, v.nazev);
+    pridej(v.nazev, v.g, mat, mat ? mat.role : "vynucena");
   }
 
   out.gramCena = out.gramuSCenou > 0 ? out.celkem / out.gramuSCenou : 0;

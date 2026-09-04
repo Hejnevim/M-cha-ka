@@ -6,9 +6,14 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 sarze, setSarze, opravy, setOpravy,
                 onDoFronty,
                 technologie, dbTech, dbMat, typyPoloh, sita, koef, pigmenty, sklad, guardDelete,
+                upravy, setUpravy, pozadavky, onPozadavek, dbVynucene, oblibene, prepniOblibenou,
+                jednotka, setJednotka, zmenyPodkladu, onToast,
                 role, jmenoRole, skryta }) {
   const smiRecept = smiRole(role, "receptury");
   const [q, setQ] = useState("");
+  // pod 480px se do řádku s hledáním nevejde celá věta vedle počítadla
+  // „{n} z {celkem}" — lámala se uprostřed slova (viz irm-mobil)
+  const uzkeOkno = useMediaQuery("(max-width:480px)");
   // hodnoty ze načteného specu mají přednost před automatikami níže (reset barvy,
   // vázaná receptura, spotřeba dle technologie) — proto je propašujeme přes ref
   const pend = useRef({ color: null, rec: null, gm2: null });
@@ -130,6 +135,15 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
      se míchá jen zkušební dávka, po schválení se dováží zbytek do plné.
      Vlastní velikost si drží uživatel — smí ji přepsat, i když je pod mezí. */
   const [natisk, setNatisk] = useState(null);   // null | { davka, stav: "michat"|"schvaleno" }
+  /* Náhrada došlé složky (část 472) a profil úpravy (část 636). Obojí mění
+     to, co se doopravdy naváží, ne recepturu — proto stav kalkulace, ne
+     zásah do databáze. `profilVolba`: "auto" = profil na přesně tuhle
+     kombinaci se uplatní sám, "zadny" = tiskař ho vypnul, jinak kód profilu. */
+  const [nahrady, setNahrady] = useState({});
+  const [profilVolba, setProfilVolba] = useState("auto");
+  const [profilForm, setProfilForm] = useState(null);   // ruční profil: { name, pct, pozn }
+  const [cuFiltr, setCuFiltr] = useState("");            // C / U ve výběru Pantone
+  const [historieOtevrena, setHistorieOtevrena] = useState(false);
 
   /* Dvousložkovost je vlastnost receptury, ne rozhodnutí u kelímku — přepínač
      se proto nastaví podle vybrané barvy sám. Přebít se dá (výjimečné tužení
@@ -185,10 +199,18 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
   // vhodnost typu vybrané receptury: "" = nedá se říct, "ne" = výrobce ho
   // na materiál produktu neuvádí
   const recVhodnost = recipe ? vhodnostTypu(recipe.zdroj, dbMat, matProduktu) : "";
-  const pantoneAll = podleDatabaze(podleTypuPolohy(recepturyTech), dbFiltr).filter((r) => r.type !== "Custom");
-  const pantoneList = recQ.trim()
-    ? pantoneAll.filter((r) => (r.name + " " + (r.series || "")).toLowerCase().includes(recQ.trim().toLowerCase()))
-    : pantoneAll;
+  const pantoneAll = podleCu(podleDatabaze(podleTypuPolohy(recepturyTech), dbFiltr)
+    .filter((r) => r.type !== "Custom"), cuFiltr);
+  /* Hledá se i podle objednacího čísla a jmen složek (textHledaniReceptury);
+     oblíbené jdou v nabídce první a nesou hvězdičku. */
+  const pantoneList = (() => {
+    const q = recQ.trim().toLowerCase();
+    const seznam = q ? pantoneAll.filter((r) => textHledaniReceptury(r).includes(q)) : pantoneAll;
+    if (!oblibene || !oblibene.size) return seznam;
+    const ob = (r) => oblibene.has(klicOblibene(r)) ? 0 : 1;
+    return seznam.slice().sort((a, b) => ob(a) - ob(b));
+  })();
+  const jeOblibena = (r) => !!(r && oblibene && oblibene.has(klicOblibene(r)));
 
   /* ---- nástroj odvození receptury ----
      Custom receptura nevzniká z ničeho — vždycky se odvodí z formule, která
@@ -312,6 +334,28 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
   useEffect(() => { setViskoz(recipe && recipe.viskozita != null ? String(recipe.viskozita) : ""); },
     [recipe && recipe.id]);
 
+  /* ---- co se doopravdy naváží: receptura + profil úpravy + náhrady ----
+     Receptura z databáze zůstává, jak je. Nad ní leží dvě vrstvy stavu
+     kalkulace: profil úpravy (část 636 — procentní přídavek uložený mimo
+     recepturu, při opakování kombinace se uplatní sám) a náhrada došlé
+     složky (část 472). Všechno pod tímhle řádkem — dávka, rozbor složení,
+     lístek, vážení, kelímek — bere `slozeniAkt`, aby nikde nesvítilo jiné
+     složení než to, které jde na váhu. */
+  const profilyAkt = useMemo(() => recipe ? profilyPro(upravy, { nazev: recipe.name,
+    produkt: product ? String(product.ref || product.id) : "",
+    barva: colorSel ? (colorSel.code || colorSel.name || "") : "",
+    tech: tech, poloha: position ? position.name : "" }) : [],
+    [upravy, recipe, product, colorSel, tech, position]);
+  const profilAkt = profilVolba === "zadny" ? null
+    : (profilVolba === "auto" ? (profilyAkt.find((p) => p.presna) || null)
+      : (profilyAkt.find((p) => p.kod === profilVolba) || null));
+  const uplatneni = useMemo(() => uplatniProfil(recipe ? recipe.components : [], profilAkt),
+    [recipe, profilAkt]);
+  const nahradyPopis = useMemo(() => popisNahrad(nahrady, uplatneni.components), [nahrady, uplatneni]);
+  const slozeniAkt = useMemo(() => uplatniNahrady(uplatneni.components, nahrady), [uplatneni, nahrady]);
+  // krycí / standardní verze téhož odstínu z téže databáze (část 458)
+  const varianty = useMemo(() => variantyOdstinu(recipes, recipe), [recipes, recipe]);
+
   /* Hustota receptury na jednom místě: ze složek v tabulce materiálů, kde
      ji výrobce dal (Marabu), jinak z hodnoty u receptury nebo paušálu 1,20
      (hustotaReceptury v části 460). Berou ji spotřeba ze síta, rezerva
@@ -343,8 +387,8 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
   // Rozdělení složení na pigmenty a bázi — odstín dělá poměr pigmentů,
   // vlastnosti dělá báze.
   const slozeni = useMemo(
-    () => rozborSlozeni(recipe ? recipe.components : [], pigmenty),
-    [recipe, pigmenty]);
+    () => rozborSlozeni(recipe ? slozeniAkt : [], pigmenty),
+    [recipe, slozeniAkt, pigmenty]);
   // báze, které dílna má — pro nabídku výměny na jiný materiál
   const bazeVolby = useMemo(
     () => Object.values(pigmenty || {}).filter((p) => p.role === "baze"),
@@ -483,12 +527,12 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     const rezervaG = rezerva ? rezerva.g : 0;
     const potreba = withLoss + rezervaG;
     const totalG = Math.max(potreba, n(minBatch));
-    const pctSum = recipe.components.reduce((s, c) => s + n(c.pct), 0);
+    const pctSum = slozeniAkt.reduce((s, c) => s + n(c.pct), 0);
     /* Objem složky z její vlastní hustoty (tabulka materiálů), bez ní
        z hustoty receptury; objem dávky je součet objemů — u bílé báze
        a pigmentu se liší o desítky ml proti podílu z jednoho čísla. */
     const zakladHustoty = n(recipe.density, 1.2) || 1.2;
-    const comps = recipe.components.map((c) => {
+    const comps = slozeniAkt.map((c) => {
       const share = pctSum ? n(c.pct) / pctSum : 0;
       const g = totalG * share;
       return Object.assign({}, c, { g: g, ml: g / hustotaSlozky(c.name, pigmenty, zakladHustoty), norm: share * 100 });
@@ -497,7 +541,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     return { areaM2, netto, withLoss, rezerva, rezervaG, potreba,
       tahy: tahyZakazky({ kusu: qty, naTah: naTah }),
       totalG, totalMl, comps, pctSum, minApplied: totalG > potreba + 1e-9 };
-  }, [position, recipe, qty, gm2, loss, minBatch, sirka, vyska, pokryti, sterka, naTah, pigmenty, hustotaRec]);
+  }, [position, recipe, slozeniAkt, qty, gm2, loss, minBatch, sirka, vyska, pokryti, sterka, naTah, pigmenty, hustotaRec]);
 
   /* Pravidla zástupnosti z ceníku — která složka smí zaskočit za kterou.
      Počítají se jednou pro celou obrazovku; mění se jen s ceníkem. */
@@ -671,6 +715,13 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     }));
   }, [vyuzitiZbytku, calcAkt]);
 
+  /* ---- vynucená složka řady (část 459) ----
+     Počítá se z váhy barvy po zbytku i po kompenzaci — z toho, co bude
+     v nádobě. Jde na lístek, do asistenta, do ceny i do skladu. */
+  const vynuceneAkt = useMemo(() => (calcAkt && recipe)
+    ? vynuceneSlozky(dbVynucene, recipe.zdroj, calcAkt.totalG) : [], [calcAkt, recipe, dbVynucene]);
+  const vynuceneCelkem = vynuceneAkt.reduce((s, v) => s + v.g, 0);
+
   /* ---- co ta dávka stojí ----
      Ceník je tatáž tabulka materiálů, ze které se berou odstíny pigmentů —
      jeden seznam složek dílny, ne dva vedle sebe. Tužidlo se do ceny počítá
@@ -683,9 +734,9 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
       comps: calcAkt.comps, totalG: calcAkt.totalG, materialy: pigmenty,
       hustota: hustotaRec.hustota,
       tuzidloG: tuz, tuzidloNazev: recipe && recipe.tuzidloNazev,
-      aditiva: aditivaAkt,
+      aditiva: aditivaAkt, vynucene: vynuceneAkt,
     });
-  }, [calcAkt, pigmenty, recipe, dvouslozkova, potlifeAkt, aditivaAkt]);
+  }, [calcAkt, pigmenty, recipe, dvouslozkova, potlifeAkt, aditivaAkt, vynuceneAkt]);
 
   /* ---- těkavé látky a bezpečnostní listy ----
      Počítá se z téže navážky jako cena: gramy složky × podíl VOC z jejího
@@ -709,12 +760,12 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
      tohle upozornění za týden přestane všímat. */
   const skladAkt = useMemo(() => {
     if (!calcAkt) return null;
-    const comps = rozpisZbytku
+    const comps = (rozpisZbytku
       ? rozpisZbytku.map((r) => ({ name: r.name, g: r.pridat }))
-      : calcAkt.comps;
+      : calcAkt.comps).concat(vynuceneAkt.map((v) => ({ name: v.nazev, g: v.g })));
     const tuz = dvouslozkova ? davkaTuzidla(potlifeAkt, calcAkt.totalG).tuzidlo : 0;
     return skladProDavku(sklad, comps, tuz, recipe && recipe.tuzidloNazev, pigmenty);
-  }, [sklad, calcAkt, rozpisZbytku, dvouslozkova, potlifeAkt, recipe, pigmenty]);
+  }, [sklad, calcAkt, rozpisZbytku, dvouslozkova, potlifeAkt, recipe, pigmenty, vynuceneAkt]);
 
   /* Zbytek je už zaplacený: ušetří se čerstvá barva, kterou by jinak bylo
      nutné navážit místo něj. */
@@ -748,6 +799,10 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
       zakazka: (zak && zak.order) || "", produkt: (product && product.ref) || "",
       tech: tech || "", bazeG: calcAkt ? calcAkt.totalG : 0,
       sarze: sarzeDoPole(sarzeKeSlozkam(sarze, calcAkt ? calcAkt.comps : [])),
+      /* Kdo u váhy stojí, ví role tohohle počítače — u míchačky se nikdo
+         nepodepisuje ručně. Bez jména zůstane aspoň role a rozřazení oprav
+         to pak řekne nahlas místo toho, aby si někoho domyslelo. */
+      kdo: podpisRole(role, jmenoRole),
     }), zmeny || {});
     setDavky((prev) => [nova].concat(prev));
     setDavkaKod(nova.kod);
@@ -790,6 +845,45 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     }, udaje || {}));
     setOpravy((prev) => [o].concat(prev || []));
     return o.kod;
+  };
+
+  /* Profil úpravy (část 636). Z opravy: gramy korekce proti dávce před ní se
+     přepočtou na procenta a uloží ke kombinaci, kvůli které se opravovalo —
+     příště se přidají samy. Ručně: technolog zapíše složku a procento
+     rovnou v kalkulaci, bez váhy. Zrušený profil zůstává v souboru. */
+  const kombinaceProfilu = () => ({
+    upravy: upravy, nazev: recipe.name, zdroj: recipe.zdroj || "",
+    produkt: (product && String(product.ref || product.id)) || "",
+    barva: colorSel ? (colorSel.code || colorSel.name || "") : "",
+    tech: tech || "", poloha: position ? position.name : "", zakazka: (zak && zak.order) || "",
+    kdo: podpisRole(role, jmenoRole),
+  });
+  const ulozProfilZOpravy = (kodOpravy) => {
+    const o = (opravy || []).find((x) => x.kod === kodOpravy);
+    if (!o || !recipe) return;
+    const p = novyProfilUpravy(Object.assign(kombinaceProfilu(),
+      { slozky: profilZOpravy(o), zOpravy: o.kod, pozn: o.duvodPopis || "" }));
+    if (!p) {
+      if (onToast) onToast({ ok: false, text: preloz("Z opravy nejde udělat profil — nemá zapsané kroky nebo dávku před korekcí.") });
+      return;
+    }
+    setUpravy((prev) => [p].concat(prev || []));
+    setProfilVolba(p.kod);
+    if (onToast) onToast({ ok: true, text: preloz("Profil úpravy {kod} uložen: {co}", { kod: p.kod, co: textProfilu(p) }) });
+  };
+  const ulozProfilRucne = () => {
+    if (!profilForm || !recipe) return;
+    const p = novyProfilUpravy(Object.assign(kombinaceProfilu(),
+      { slozky: [{ name: profilForm.name, pct: profilForm.pct }], pozn: profilForm.pozn || "" }));
+    if (!p) return;
+    setUpravy((prev) => [p].concat(prev || []));
+    setProfilForm(null);
+    setProfilVolba(p.kod);
+  };
+  const zrusProfil = (p) => {
+    setUpravy((prev) => prev.map((x) => x.kod === p.kod
+      ? Object.assign({}, x, { stav: "zruseno", zmeneno: Date.now() }) : x));
+    setProfilVolba("auto");
   };
 
   /* Tužidlo je v bázi — od téhle vteřiny běží lhůta. Váha zná skutečnou
@@ -845,7 +939,9 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
   }, [davky, recipe && recipe.id, recipe && recipe.name, davkaKod]);
 
   // změní-li se receptura nebo dávka tak, že zbytek nesedí, volba se zruší sama
-  useEffect(() => { setPouzityZbytek(null); setKodDavky(""); }, [recipe && recipe.id]);
+  useEffect(() => { setPouzityZbytek(null); setKodDavky("");
+    // náhrady i volba profilu patřily k jiné barvě
+    setNahrady({}); setProfilVolba("auto"); setProfilForm(null); }, [recipe && recipe.id]);
 
   /* Míchalo-li se ze dvou kelímků, odepíší se oba — a jedním průchodem, aby se
      druhý zápis nepočítal ze stavu, který ještě neplatí. Ručně zadaný kelímek
@@ -901,7 +997,10 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
       zbytekKod: (vyuzitiZbytku && vyuzitiZbytku.zbytek) ? (vyuzitiZbytku.zbytek.kod || "") : "",
       cenaUplna: !!(naklady && naklady.uplna),
       pozn: "", zdroj: recipe.zdroj || "",
-      slozeni: recipe.components.map((c) => ({ name: c.name, pct: n(c.pct) / pct * 100 })),
+      // složení tak, jak se doopravdy míchalo — s profilem úpravy a náhradami
+      slozeni: slozeniAkt.map((c) => ({ name: c.name, pct: n(c.pct) / pct * 100 })),
+      uprava: textProfilu(profilAkt), nahrada: textNahrad(nahradyPopis),
+      kdo: podpisRole(role, jmenoRole),
     }].concat(prev));
     setKodDavky(kod);
     setStitekOtevren(true);
@@ -950,7 +1049,10 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
           ? "zástupnost: " + textZastoupeni(vyuzitiZbytku.zastoupeno) : ""]
         .filter(Boolean).join(" · "),
       zdroj: recipe.zdroj || "",
-      slozeni: recipe.components.map((c) => ({ name: c.name, pct: n(c.pct) / pct * 100 })),
+      // složení tak, jak se doopravdy míchalo — s profilem úpravy a náhradami
+      slozeni: slozeniAkt.map((c) => ({ name: c.name, pct: n(c.pct) / pct * 100 })),
+      uprava: textProfilu(profilAkt), nahrada: textNahrad(nahradyPopis),
+      kdo: podpisRole(role, jmenoRole),
     }].concat(prev));
     setUlozitZbytek(null);
     if (onZbytekUlozen) onZbytekUlozen(kod);
@@ -1000,6 +1102,24 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
         <td class="num b">${fmt(aditivaAkt[druh])}</td>
         <td class="num">${fmt(kum)}</td>
         ${rozpisZbytku ? `<td class="num">${fmt(aditivaAkt[druh])}</td>` : ""}
+        <td class="num">—</td>
+        <td class="chk"></td>
+      </tr>`;
+        }).join("")
+      : "";
+    /* Vynucené složky řady za aditivy — stejný tvar řádku, jiný popisek. */
+    const radkyVynucene = calcAkt.comps.length
+      ? vynuceneAkt.filter((v) => v.g > 0.005).map((v, j) => {
+          kum += v.g;
+          const poradi = calcAkt.comps.length + DRUHY_ADITIV.filter((d) => aditivaAkt[d] > 0.005).length + j + 1;
+          return `<tr>
+        <td class="num">${poradi}</td>
+        <td>${esc(v.nazev)} <span style="font-size:10px;color:#78766C">složka řady · ${fmt(v.podil * 100, 1)} % barvy</span></td>
+        <td class="num">—</td>
+        ${rozpisZbytku ? `<td class="num">—</td>` : ""}
+        <td class="num b">${fmt(v.g)}</td>
+        <td class="num">${fmt(kum)}</td>
+        ${rozpisZbytku ? `<td class="num">${fmt(v.g)}</td>` : ""}
         <td class="num">—</td>
         <td class="chk"></td>
       </tr>`;
@@ -1074,6 +1194,9 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
       ? `<div><div class="lbl">Požadavek z listu</div><div class="val">${esc([zak.mesh, zak.opacity, zak.surface].filter(Boolean).join(" · "))}</div></div>` : ""}
     <div><div class="lbl">Příznaky</div><div class="val">${[recipe.tested ? "otestovaný" : "", recipe.fade ? "odolný vůči vyblednutí" : ""].filter(Boolean).join(" · ") || "—"}</div></div>
     ${recipe.poznamka ? `<div><div class="lbl">Poznámka k receptuře</div><div class="val">${esc(recipe.poznamka)}</div></div>` : ""}
+    ${profilAkt ? `<div><div class="lbl">Profil úpravy</div><div class="val">${esc(textProfilu(profilAkt))} <span style="font-size:10px;color:#78766C;font-weight:400">${
+      esc(profilAkt.kod)}${profilAkt.zOpravy ? " · z opravy " + esc(profilAkt.zOpravy) : ""}</span></div></div>` : ""}
+    ${nahradyPopis.length ? `<div><div class="lbl">Náhrada složky</div><div class="val">${esc(textNahrad(nahradyPopis))} <span style="font-size:10px;color:#78766C;font-weight:400">odstín ověřte nátiskem</span></div></div>` : ""}
   </div>
   <div class="box">
     <div class="lbl">Celkem namíchat${calcAkt.minApplied ? " (uplatněna min. dávka)" : ""}</div>
@@ -1084,6 +1207,8 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
         .map((d) => fmt(aditivaAkt[d]) + " g " + esc(ADITIVA[d].popis)).join(" · ")}.</div>` : ""}
     ${kompenzujeSe ? `<div style="margin-top:4px">Dávka je o ${fmt(kompenzace.navic)} g větší
       kvůli naředění nad doporučení — pigment v gramu klesl o ${fmt(rozborRedeni.pokles * 100, 1)} %.</div>` : ""}
+    ${vynuceneCelkem > 0.005 ? `<div style="margin-top:4px">Řada ${esc(nazevDb(recipe.zdroj))} předepisuje
+      <b>${esc(textVynucenych(vynuceneAkt))}</b> — v nádobě pak bude ${fmt(calcAkt.totalG + aditivaCelkem + vynuceneCelkem)} g.</div>` : ""}
   </div>
   ${dvouslozkova ? (() => {
     // dvousložková barva: navážka tužidla a lhůta patří na papír u váhy,
@@ -1122,7 +1247,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
   })() : ""}
   <table>
     <thead><tr>${hlavicka}</tr></thead>
-    <tbody>${radky}${radkyAditiv}</tbody>
+    <tbody>${radky}${radkyAditiv}${radkyVynucene}</tbody>
     <tfoot><tr><td></td><td>Celkem</td><td class="num">${calcAkt.comps.length ? "100,0" : ""}</td>${
       rozpisZbytku ? `<td class="num">${fmt(vyuzitiZbytku.pouzit)}</td>` : ""}<td class="num">${
       fmt(rozpisZbytku ? vyuzitiZbytku.domichat : calcAkt.totalG)}</td><td class="num">${
@@ -1463,6 +1588,68 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 })()}
               </div>`}
           <//>` : null;
+  /* Náhrada došlé složky (část 472). Pravidlo zástupnosti dá tlačítko; bez
+     pravidla zbývá ruční výběr báze z ceníku — s výstrahou, protože za odstín
+     tam už aplikace neručí. */
+  const nahradaTlacitka = (x) => {
+    const podle = nahradyProSlozku(pigmenty, x.nazev);
+    const rucniVolby = bazeVolby.filter((b) => normKomp(b.nazev) !== normKomp(x.nazev));
+    if (!podle.length && !rucniVolby.length) return null;
+    const nahrad = (cim) => setNahrady(Object.assign({}, nahrady, { [normKomp(x.nazev)]: cim }));
+    return html`
+      <div className="rowline" style=${{ marginTop: 4, marginBottom: 0, gap: 6 }}>
+        ${podle.map((m) => html`<button key=${m.klic} className="btn sm"
+          title=${preloz("podle pravidla zástupnosti v ceníku — počítá se jako táž složka")}
+          onClick=${() => nahrad(m.nazev)}>${preloz("Nahradit za {m}", { m: m.nazev })}</button>`)}
+        ${rucniVolby.length > 0 && html`
+          <select value="" style=${{ width: "auto" }} onChange=${(e) => { if (e.target.value) nahrad(e.target.value); }}>
+            <option value="">${podle.length ? preloz("— jiná báze ručně —") : preloz("— nahradit bází ručně, bez pravidla —")}</option>
+            ${rucniVolby.map((b) => html`<option key=${b.nazev} value=${b.nazev}>${b.nazev}</option>`)}
+          </select>`}
+      </div>`;
+  };
+
+  /* Profil úpravy v kartě Kolik namíchat: co platí, co se nabízí, ruční zápis. */
+  const blokProfilu = (recipe && !jeAdHoc && (profilyAkt.length > 0 || profilForm)) ? html`
+            <div className=${profilAkt ? "okbox" : "specbar"} style=${{ marginTop: 10, display: "block" }}>
+              ${profilAkt ? html`
+                <div className="rowline" style=${{ marginTop: 0, marginBottom: 0 }}>
+                  <span><b>${preloz("Profil úpravy:")} ${textProfilu(profilAkt)}</b>
+                    <span className="note">${" "}${profilAkt.kod}${profilAkt.zOpravy ? preloz(" · z opravy {o}", { o: profilAkt.zOpravy }) : ""}${
+                      profilAkt.zakazka ? preloz(" · zakázka {z}", { z: profilAkt.zakazka }) : ""}${profilAkt.kdo ? " · " + profilAkt.kdo : ""}${
+                      profilAkt.presna ? "" : preloz(" · platí u téhle barvy všude")}</span>
+                    <br /><span className="note">${preloz("Přidává se nad recepturu; dávka zůstává dávkou zakázky a složení se přepočítá na sto. Jde na lístek i na štítek.")}</span></span>
+                  <span style=${{ marginLeft: "auto" }}></span>
+                  <button className="btn sec sm" onClick=${() => setProfilVolba("zadny")}>${preloz("Nepoužít")}</button>
+                  ${smiRecept && html`<button className="btn danger sm" onClick=${() => zrusProfil(profilAkt)}>${preloz("Zrušit profil")}</button>`}
+                </div>` : (profilyAkt.length > 0 && html`
+                <div className="rowline" style=${{ marginTop: 0, marginBottom: 0 }}>
+                  <span className="dot" style=${{ background: "var(--warn)" }}></span>
+                  <span>${preloz("K téhle barvě je profil úpravy:")}
+                    ${profilyAkt.slice(0, 3).map((p) => html`<span key=${p.kod}> <b>${textProfilu(p)}</b><span className="note">${
+                      p.presna ? preloz(" (tahle kombinace)") : preloz(" (obecný)")}</span>${" "}
+                      <button className="btn sm" onClick=${() => setProfilVolba(p.kod)}>${preloz("Použít")}</button></span>`)}
+                  </span>
+                </div>`)}
+              ${profilForm && html`
+                <div className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
+                  <input list="irm-slozky-profilu" value=${profilForm.name} placeholder=${preloz("složka")} style=${{ width: 220 }}
+                    onChange=${(e) => setProfilForm(Object.assign({}, profilForm, { name: e.target.value }))} />
+                  <datalist id="irm-slozky-profilu">
+                    ${slozeniAkt.map((c) => html`<option key=${c.name} value=${c.name} />`)}
+                    ${Object.keys(pigmenty || {}).map((k) => html`<option key=${"m-" + k} value=${pigmenty[k].nazev} />`)}
+                  </datalist>
+                  <input type="number" step="0.1" min="0" value=${profilForm.pct} placeholder="%" style=${{ width: 80 }}
+                    onChange=${(e) => setProfilForm(Object.assign({}, profilForm, { pct: e.target.value }))} />
+                  <span className="note">${preloz("% dávky")}</span>
+                  <input value=${profilForm.pozn} placeholder=${preloz("poznámka")} style=${{ width: 160 }}
+                    onChange=${(e) => setProfilForm(Object.assign({}, profilForm, { pozn: e.target.value }))} />
+                  <button className="btn sm" disabled=${!String(profilForm.name || "").trim() || !(n(profilForm.pct) > 0)}
+                    onClick=${ulozProfilRucne}>${preloz("Uložit profil")}</button>
+                  <button className="btn sec sm" onClick=${() => setProfilForm(null)}>${preloz("Zrušit")}</button>
+                </div>`}
+            </div>` : null;
+
   /* Nátisk z malé dávky. Nabízí se jen tam, kde má co ušetřit — u dávky, která
      je proti nejmenší rozumné zkoušce dost velká. */
   const blokNatisku = (calcPlna && rozborNatisku) ? html`
@@ -1700,7 +1887,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
             onFocus=${() => setDropOpen(true)}
             onBlur=${() => setTimeout(() => setDropOpen(false), 150)}
             onKeyDown=${(e) => { if (e.key === "Escape") { e.currentTarget.blur(); setDropOpen(false); } if (e.key === "Enter" && filtered[0]) pickProduct(filtered[0].id); }}
-            placeholder=${preloz("Hledat produkt podle názvu nebo ref. čísla…")} />
+            placeholder=${uzkeOkno ? preloz("Hledat…") : preloz("Hledat produkt podle názvu nebo ref. čísla…")} />
           <span className="count">${preloz("{n} z {celkem}", { n: filtered.length, celkem: products.length })}</span>
         </div>
         ${dropOpen && html`
@@ -1734,7 +1921,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
               </label>
               ${position && html`<span className="note">${preloz("katalog max.")} ${fmt(n(position.w), 0)}×${fmt(n(position.h), 0)} mm</span>`}
             <//>`}
-          ${zak.note && html`<span className="note">${zak.note}</span>`}
+          ${zak.note && html`<span className="note">${poznamkaListuObr(zak.note)}</span>`}
           ${(zak.mesh || zak.opacity || zak.surface) && html`
             <${React.Fragment}>
               <span className="note">${preloz("požadováno:")} ${[zak.mesh, zak.opacity, zak.surface].filter(Boolean).join(" · ")}</span>
@@ -1841,7 +2028,17 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                   popis=${typyPolohyAkt.length ? preloz("Poloha má přiřazené typy: {typy} — jiné typy barev se na ní nenabízejí (mění se v záložce Produkty).",
                       { typy: typyPolohyAkt.map(nazevDb).join(", ") })
                     : null} />
-                <input value=${recQ} onChange=${(e) => setRecQ(e.target.value)} placeholder=${preloz("Hledat: např. 485 nebo Reflex…")} style=${{ marginBottom: 6 }} />
+                ${/* C / U (část 458) — natíraný a nenatíraný papír jsou dva
+                      různé odstíny; dosud se to poznalo jen z písmene v názvu. */""}
+                <div className="chips" style=${{ marginBottom: 6 }}>
+                  <button className=${"chip mini" + (cuFiltr === "" ? " on" : "")} onClick=${() => setCuFiltr("")}>${preloz("C i U")}</button>
+                  <button className=${"chip mini" + (cuFiltr === "C" ? " on" : "")} onClick=${() => setCuFiltr(cuFiltr === "C" ? "" : "C")} title=${preloz(CU_POPIS.C)}>C</button>
+                  <button className=${"chip mini" + (cuFiltr === "U" ? " on" : "")} onClick=${() => setCuFiltr(cuFiltr === "U" ? "" : "U")} title=${preloz(CU_POPIS.U)}>U</button>
+                </div>
+                <${Naseptavac} hodnota=${recQ} onZmena=${setRecQ} style=${{ marginBottom: 6 }}
+                  polozky=${polozkyNaseptavace(pantoneAll, recQ, oblibene)}
+                  onVyber=${(p) => { setRecId(p.r.id); setRecQ(p.r.name); }}
+                  placeholder=${preloz("Hledat: např. 485, Reflex, objednací číslo…")} />
                 <!-- Výběr i to, co pod ním visí, musí být jedna buňka: obě půlky
                      sdílejí čtyři řádky mřížky a pátý prvek by se do nich vecpal
                      přes výběr. -->
@@ -1849,7 +2046,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                   <select value=${pantoneList.some((r) => r.id === recId) ? recId : ""}
                     onChange=${(e) => { if (e.target.value) setRecId(e.target.value); }}>
                     <option value="">${preloz("— vyberte Pantone recepturu —")}</option>
-                    ${pantoneList.slice(0, 400).map((r) => html`<option key=${r.id} value=${r.id}>${r.name} · ${r.series}</option>`)}
+                    ${pantoneList.slice(0, 400).map((r) => html`<option key=${r.id} value=${r.id}>${jeOblibena(r) ? "★ " : ""}${r.name} · ${r.series}</option>`)}
                   </select>
                 </div>
               </div>`}
@@ -1863,7 +2060,10 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                       ${z.nazev} (${fmt(z.pocet, 0)})</option>`)}
                   </select>
                 </div>
-                <input value=${custQ} onChange=${(e) => setCustQ(e.target.value)} placeholder=${preloz("Hledat mezi vlastními barvami…")} style=${{ marginBottom: 6 }} />
+                <${Naseptavac} hodnota=${custQ} onZmena=${setCustQ} style=${{ marginBottom: 6 }}
+                  polozky=${polozkyNaseptavace(customList.map((x) => x.r), custQ, oblibene)}
+                  onVyber=${(p) => { setRecId(p.r.id); setCustQ(p.r.name); }}
+                  placeholder=${preloz("Hledat mezi vlastními barvami…")} />
                 <div>
                   <select value=${customVidet.some((x) => x.r.id === recId) ? recId : ""}
                     onChange=${(e) => { if (e.target.value) setRecId(e.target.value); }}>
@@ -1943,13 +2143,45 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                   </button>
                   <span className="note">${preloz("uloží se jako Custom a naváže na")} ${(colorSel ? (colorSel.code || colorSel.name || "") : preloz("barvu"))}${position ? " · " + position.tech + " · " + position.name : ""}</span>
                 </div>
+                ${/* Odstín, který v databázi není, se zapíše jako požadavek technologovi
+                      (část 637) — fronta k domíchání místo vzkazu přes dílnu. */""}
+                ${(() => {
+                  const p = pozadavekProOdstin(pozadavky, recipe.name);
+                  const kdy = (x) => n(x) > 0 ? new Date(n(x)).toLocaleString("cs-CZ", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
+                  const tlacitko = html`<button className="btn sec sm" onClick=${() => onPozadavek && onPozadavek({
+                      odstin: recipe.name, hex: recipe.hex, rada: recipe.series,
+                      produkt: (product && String(product.ref || product.id)) || "",
+                      barva: colorSel ? (colorSel.code || colorSel.name || "") : "",
+                      tech: tech || "", poloha: position ? position.name : "",
+                      zakazka: (zak && zak.order) || "", ks: n(qty), davkaG: calc ? calc.totalG : 0 })}>
+                      ${preloz("Požádat technologa o odstín")}</button>`;
+                  if (p && p.stav === "ceka") return html`<div className="rowline" style=${{ marginTop: 6, marginBottom: 0 }}>
+                    <span className="dot" style=${{ background: "var(--warn)" }}></span>
+                    <span className="note">${preloz("Odstín je požádaný u technologa ({kod}, {kdy}) — čeká na recepturu.", { kod: p.kod, kdy: kdy(p.kdy) })}</span></div>`;
+                  if (p && p.stav === "hotovo") {
+                    const r2 = recipes.find((x) => String(x.name || "") === String(p.receptura || ""));
+                    return html`<div className="rowline" style=${{ marginTop: 6, marginBottom: 0 }}>
+                      <span className="dot" style=${{ background: "var(--ok)" }}></span>
+                      <span className="note">${preloz("Technolog založil recepturu {r} ({kdo}, {kdy}).", { r: p.receptura, kdo: p.vyridil || "?", kdy: kdy(p.vyrizenoKdy) })}</span>
+                      ${r2 && html`<button className="btn sm" onClick=${() => { setRecId(r2.id); setAdHoc(null); }}>${preloz("Použít")}</button>`}</div>`;
+                  }
+                  if (p && p.stav === "zamitnuto") return html`<div className="rowline" style=${{ marginTop: 6, marginBottom: 0 }}>
+                    <span className="note">${preloz("Požadavek {kod} zamítnut{d}.", { kod: p.kod, d: p.duvod ? " — " + p.duvod : "" })}</span>${tlacitko}</div>`;
+                  return html`<div className="rowline" style=${{ marginTop: 6, marginBottom: 0 }}>${tlacitko}
+                    <span className="note">${preloz("zapíše se do fronty k domíchání — technolog to uvidí v záložce Ke schválení")}</span></div>`;
+                })()}
               </div>`}
             <!-- Vybraná barva stejně velká jako v „Kolik namíchat". Je to hlavní
                  kontrola, že se míchá ta správná — a kontrola, kterou tiskař dělá
                  okem, musí být na obou místech stejná, jinak se nedají porovnat. -->
             <div style=${{ marginTop: 12 }}>
+              ${recipe && !jeAdHoc && html`<button className=${"hvezda" + (jeOblibena(recipe) ? " on" : "")}
+                title=${preloz("oblíbená — hvězdička patří tomu, kdo je přihlášený")}
+                onClick=${() => prepniOblibenou && prepniOblibenou(recipe)}>★</button>`}
               <b style=${{ fontSize: 17 }}>${recipe ? recipe.name : preloz("— bez receptury —")}</b>
               ${recipe && recipe.series ? html`<span className="note"> · ${recipe.series}</span>` : ""}
+              ${recipe && cuReceptury(recipe) && html`<span className="tag" style=${{ marginLeft: 6 }} title=${preloz(CU_POPIS[cuReceptury(recipe)])}>${cuReceptury(recipe)}</span>`}
+              ${recipe && jeKryci(recipe) && html`<span className="tag" style=${{ marginLeft: 6 }}>${preloz("krycí")}</span>`}
               ${/* Typ, hustota a počet komponent tu bývaly taky, ale tiskaře
                     při míchání nezajímají — hustotu a složení ukazuje karta
                     „Kolik namíchat", typ poznal už při výběru zdroje. Zůstává
@@ -1960,6 +2192,22 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                     + (vazbaSiroka ? preloz(" (všechny polohy)") : (position ? " · " + position.tech + " " + position.name : ""))}
                 </span>`}
               <${PruhSlozeni} recipe=${recipe} />
+              ${/* Krycí / standardní varianta téhož odstínu (část 458), odkaz,
+                    e-mail a historie — u receptury, ne u výsledku: tady se
+                    vybírá, tam se váží. */""}
+              ${recipe && !jeAdHoc && html`
+                <div className="rowline" style=${{ marginTop: 6, marginBottom: 0, gap: 6 }}>
+                  ${varianty.kryci && html`<button className="btn sec sm" onClick=${() => setRecId(varianty.kryci.id)}
+                    title=${preloz("týž odstín ve vysoce krycí verzi z téže databáze")}>${preloz("Krycí varianta →")}</button>`}
+                  ${varianty.standardni && html`<button className="btn sec sm" onClick=${() => setRecId(varianty.standardni.id)}
+                    title=${preloz("týž odstín ve standardní verzi z téže databáze")}>${preloz("Standardní varianta →")}</button>`}
+                  <button className="btn sec sm" title=${preloz("zkopírovat odkaz, který recepturu rovnou otevře")}
+                    onClick=${() => zkopirujOdkaz(recipe, onToast)}>${preloz("Odkaz")}</button>
+                  <button className="btn sec sm" title=${preloz("poslat e-mailem — otevře poštovní program")}
+                    onClick=${() => { window.location.href = mailtoReceptury(recipe); }}>${preloz("E-mail")}</button>
+                  <button className="btn sec sm" title=${preloz("kdo ji založil, měnil a míchal")}
+                    onClick=${() => setHistorieOtevrena(true)}>${preloz("Historie")}</button>
+                </div>`}
             </div>
             ${barvaPotisku && html`
               <div className="rowline" style=${{ marginTop: 2, marginBottom: 0 }}>
@@ -2144,9 +2392,18 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
               </span>
             </div>
 
-            <div className="result-big">${fmt(calcAkt.totalG)} g</div>
-            <div className="result-sub">≈ ${fmt(calcAkt.totalMl)} ml ${preloz("při hustotě")} ${fmt(hustotaRec.hustota, 2)} g/ml${
-              calcAkt.zvetseno ? preloz(" · zakázka potřebuje {g} g", { g: fmt(calcAkt.davkaZakazky) }) : ""}</div>
+            ${/* Jednotka jen pro čtení hlavního čísla (část 128): uvnitř se počítá
+                  v gramech a na váhu jdou gramy. Volba se drží v prohlížeči. */""}
+            <div className="rowline" style=${{ marginTop: 0, marginBottom: 0, alignItems: "baseline" }}>
+              <div className="result-big">${hmotnostText(calcAkt.totalG, jednotka)}</div>
+              <span style=${{ marginLeft: "auto" }}></span>
+              <div className="chips jednotka-davky">
+                ${JEDNOTKY_PORADI.map((j) => html`<button key=${j} className=${"chip mini" + (kodJednotky(jednotka) === j ? " on" : "")}
+                  onClick=${() => setJednotka && setJednotka(j)}>${JEDNOTKY_DAVKY[j].popis}</button>`)}
+              </div>
+            </div>
+            <div className="result-sub">${kodJednotky(jednotka) !== "g" ? fmt(calcAkt.totalG) + " g · " : ""}≈ ${fmt(calcAkt.totalMl)} ml ${preloz("při hustotě")} ${fmt(hustotaRec.hustota, 2)} g/ml${
+              calcAkt.zvetseno ? preloz(" · zakázka potřebuje {g}", { g: hmotnostText(calcAkt.davkaZakazky, jednotka) }) : ""}</div>
 
             ${/* Rozpis kroku, ze kterych davka vznikla. Technolog musi umet cislo
                   prepocitat rucne; bez nej je to jen udaj, kteremu se veri. */
@@ -2167,6 +2424,25 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
               </div>`}
 
             ${calcAkt.comps.length > 0 && html`<${PruhSlozeni} recipe=${recipe} comps=${calcAkt.comps} />`}
+            ${blokProfilu}
+            ${recipe && !jeAdHoc && !profilForm && !profilAkt && smiRecept && html`
+              <div className="rowline" style=${{ marginTop: 6, marginBottom: 0 }}>
+                <button className="btn sec sm" onClick=${() => setProfilForm({ name: "", pct: "", pozn: "" })}
+                  title=${preloz("procentní přídavek nad recepturu, který se u téhle kombinace příště přidá sám")}>${preloz("＋ Profil úpravy")}</button>
+              </div>`}
+            ${nahradyPopis.length > 0 && html`
+              <div className="specbar" style=${{ marginTop: 10 }}>
+                <span className="dot" style=${{ background: "var(--warn)", flex: "none" }}></span>
+                <span><b>${preloz("Náhrada:")}</b> ${textNahradObr(nahradyPopis)} ${preloz("— odstín ověřte nátiskem; jde na lístek i na štítek.")}</span>
+                <span style=${{ marginLeft: "auto" }}></span>
+                <button className="btn sec sm" onClick=${() => setNahrady({})}>${preloz("Zrušit náhradu")}</button>
+              </div>`}
+            ${vynuceneAkt.length > 0 && html`
+              <div className="specbar" style=${{ marginTop: 10 }}>
+                <span className="dot" style=${{ background: "var(--ok)", flex: "none" }}></span>
+                <span>${preloz("Řada {r} předepisuje:", { r: nazevDb(recipe.zdroj) })} <b>${textVynucenych(vynuceneAkt)}</b>
+                  ${" "}${preloz("— váží se za barvou, je na lístku i v asistentu.")}</span>
+              </div>`}
 
             ${calcAkt.minApplied && html`<div className="warnbox">${preloz("Uplatněna minimální dávka {g} g (výpočtová potřeba je nižší).", { g: fmt(n(minBatch), 0) })}</div>`}
             ${calcAkt.comps.length === 0
@@ -2177,11 +2453,13 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 <b>${preloz("Na tuhle dávku podle skladu nestačí zásoba.")}</b>
                 ${skladAkt.chybi.map((x) => html`<div key=${x.nazev} style=${{ marginTop: 4 }}>
                   ${(() => { const [pred, po] = preloz("— podle poslední inventury {v}.").split("{v}");
-                    return html`${x.nazev} ${pred}<b>${preloz("došla")}</b>${po}`; })()}</div>`)}
+                    return html`${x.nazev} ${pred}<b>${preloz("došla")}</b>${po}`; })()}
+                  ${nahradaTlacitka(x)}</div>`)}
                 ${skladAkt.nestaci.map((x) => html`<div key=${x.nazev} style=${{ marginTop: 4 }}>
                   ${(() => { const cely = preloz("— zbývá {z}, dávka potřebuje {p}.");
                     const [pred, zbytekTextu] = cely.split("{z}"); const [stred, po] = zbytekTextu.split("{p}");
-                    return html`${x.nazev} ${pred}<b>${fmt(x.zbyvaG, 0)} g</b>${stred}<b>${fmt(x.potreba, 0)} g</b>${po}`; })()}</div>`)}
+                    return html`${x.nazev} ${pred}<b>${fmt(x.zbyvaG, 0)} g</b>${stred}<b>${fmt(x.potreba, 0)} g</b>${po}`; })()}
+                  ${nahradaTlacitka(x)}</div>`)}
                 <div className="note" style=${{ marginTop: 6 }}>
                   ${preloz("Zůstatek je dopočet z inventury a zapsaných dávek — konev v regálu má poslední slovo. Nesedí-li to, přepočítejte zásobu v záložce Sklad surovin.")}
                 </div>
@@ -2265,7 +2543,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                 title=${preloz("Celá obrazovka jen pro míchání (zavřít klávesou Esc)")}>${preloz("⛶ Míchací režim")}</button>
               <button className="btn sec" onClick=${tiskLisku}>${preloz("🖨 Míchací lístek")}</button>
               <button className="btn sec" disabled=${!recipe || !calcAkt || !calcAkt.comps.length}
-                onClick=${() => onDoFronty && onDoFronty({ recipe: recipe,
+                onClick=${() => onDoFronty && onDoFronty({ recipe: Object.assign({}, recipe, { components: slozeniAkt }),
                   davkaG: calc ? calc.totalG : 0, ks: n(qty),
                   zakazka: (zak && zak.order) || "", produkt: (product && product.ref) || "",
                   barva: colorSel ? (colorSel.code || colorSel.name || "") : "",
@@ -2280,13 +2558,14 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
             modalNahore=${pickerOpen || !!odvod}
             recipe=${recipe} calcAkt=${calcAkt} rozpis=${rozpisZbytku} vyuziti=${vyuzitiZbytku}
             stav=${michStav} product=${product} colorSel=${colorSel} position=${position}
-            tech=${tech} zak=${zak} kodDavky=${kodDavky} potlife=${michRezim ? blokPotlife : null}
+            tech=${tech} zak=${zak} kodDavky=${kodDavky} jednotka=${jednotka} potlife=${michRezim ? blokPotlife : null}
             zbytky=${blokZbytku}
             stitekTlacitko=${blokStitkuTlacitko} rady=${blokRady}
             aditiva=${blokAditiv} riziko=${michRezim ? blokRizika : null}
             natisk=${michRezim ? blokNatisku : null} viskozita=${michRezim ? blokViskozita : null}>
             <${Vazeni} comps=${calcAkt.comps} totalG=${calcAkt.totalG} recipeName=${recipe ? recipe.name : ""}
-              aditiva=${DRUHY_ADITIV.map((d) => ({ druh: d, popis: ADITIVA[d].popis, g: aditivaAkt[d] }))}
+              aditiva=${DRUHY_ADITIV.map((d) => ({ druh: d, popis: ADITIVA[d].popis, g: aditivaAkt[d] }))
+                .concat(vynuceneAkt.map((v) => ({ druh: v.druh, popis: v.nazev, g: v.g, doRedeni: false })))}
               redeni=${redeniAkt}
               predem=${predemVse}
               predemPopis=${!vyuzitiZbytku ? ""
@@ -2295,6 +2574,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
               pigmenty=${pigmenty} barvaHex=${recipe ? recipe.hex : ""}
               sarze=${sarze} onNovaKonev=${novaKonev}
               onOprava=${zapisOpravu}
+              onProfil=${ulozProfilZOpravy}
               onStav=${setMichStav}
               potlife=${potlifeAkt} zacatekPotlife=${zacatekMichani}
               onSpustitPotlife=${(bazeG) => spustitPotlife(bazeG)}
@@ -2491,6 +2771,9 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
         ztraty=${n(loss)} sterka=${n(sterka)} recipes=${recipes}
         sitoVychozi=${recipe ? recipe.mesh : ""}
         odsazeniVychozi=${odsazeniJob} onPouzit=${ulozPokryti} onClose=${() => setPokrytiOkno(false)} />`}
+
+      ${historieOtevrena && recipe && html`<${HistorieReceptury} recipe=${recipe} zmeny=${zmenyPodkladu}
+        davky=${davky} opravy=${opravy} upravy=${upravy} onClose=${() => setHistorieOtevrena(false)} />`}
 
       ${odvod && odvod.mode === "edit" && html`
         <div className="modalbg" onClick=${(e) => { if (e.target === e.currentTarget) setOdvod(null); }}>

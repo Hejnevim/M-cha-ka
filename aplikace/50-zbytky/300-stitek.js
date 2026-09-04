@@ -29,6 +29,14 @@ function StitekZbytku({ zbytek, onClose }) {
                 { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" }) : "")
           : "")
       + "</div>"
+      /* Profil úpravy a náhrada složky patří na štítek: ze složení hotové
+         barvy se nepozná, že je v ní o půl procenta modré víc než v
+         receptuře, ani že se místo došlé báze navážila jiná. Vratka nese
+         kód dávky, ze které se vrátila. */
+      + (zbytek.uprava ? '<div class="m">úprava: ' + e(zbytek.uprava) + "</div>" : "")
+      + (zbytek.nahrada ? '<div class="m">náhrada: ' + e(zbytek.nahrada) + "</div>" : "")
+      + (zbytek.vratka ? '<div class="m">vratka ze stroje' + (zbytek.vratkaZ ? " z " + e(zbytek.vratkaZ) : "")
+          + (zbytek.vratkaDuvod ? " · " + e(popisDuvoduVratky(zbytek.vratkaDuvod)) : "") + "</div>" : "")
       + '<div class="p">'
       + (zbytek.zakazka ? "zakázka " + e(zbytek.zakazka) + " · " : "")
       + (zbytek.ulozeno ? new Date(zbytek.ulozeno).toLocaleDateString("cs-CZ") : "")
@@ -49,6 +57,9 @@ function StitekZbytku({ zbytek, onClose }) {
           <div style=${{ fontFamily: "var(--mono)", fontSize: 22, fontWeight: 800, letterSpacing: ".08em" }}>${zbytek.kod}</div>
           <div style=${{ fontWeight: 700, marginTop: 6 }}>${zbytek.nazev || "—"}</div>
           <div className="note">${fmt(n(zbytek.gramu))} g${zbytek.zakazka ? preloz(" · zakázka {z}", { z: zbytek.zakazka }) : ""}</div>
+          ${zbytek.uprava && html`<div className="note">${preloz("úprava: {u}", { u: zbytek.uprava })}</div>`}
+          ${zbytek.nahrada && html`<div className="note">${preloz("náhrada: {u}", { u: zbytek.nahrada })}</div>`}
+          ${zbytek.vratka && html`<div className="note">${preloz("vratka ze stroje z {kod}", { kod: zbytek.vratkaZ || "—" })}</div>`}
           <div className="rowline" style=${{ marginTop: 14, marginBottom: 0, justifyContent: "center" }}>
             <button className="btn" onClick=${vytiskni}>${preloz("Vytisknout štítek")}</button>
             <button className="btn sec" onClick=${onClose}>${preloz("Zavřít")}</button>

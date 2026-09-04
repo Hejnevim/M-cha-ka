@@ -1,5 +1,5 @@
 "use strict";
-function ZbytkyTab({ zbytky, setZbytky, recipes, materialy, guardDelete, otevrenyKod, onOtevreno, onDoplnit }) {
+function ZbytkyTab({ zbytky, setZbytky, recipes, materialy, guardDelete, otevrenyKod, onOtevreno, onDoplnit, onVratka }) {
   const [q, setQ] = useState("");
   const [baze, setBaze] = useState("");          // "" | "s" | "bez"
   const [lhuta, setLhuta] = useState("");        // "" | "brzy" | "prosle"
@@ -26,6 +26,7 @@ function ZbytkyTab({ zbytky, setZbytky, recipes, materialy, guardDelete, otevren
       if (baze === "s" && !maBazi(z)) return false;
       if (baze === "bez" && maBazi(z)) return false;
       if (lhuta === "vtisku") { if (z.stav !== "vtisku") return false; }
+      else if (lhuta === "vratka") { if (!z.vratka) return false; }
       else if (lhuta && stavZbytku(z).stav !== lhuta) return false;
       if (!s) return true;
       return (z.kod + " " + z.nazev + " " + (z.zakazka || "") + " " + (z.produkt || "")
@@ -54,6 +55,7 @@ function ZbytkyTab({ zbytky, setZbytky, recipes, materialy, guardDelete, otevren
     return m;
   }, [zbytky, ted, jazykAplikace]);
   const vTisku = (zbytky || []).filter((z) => z.stav === "vtisku");
+  const vratky = (zbytky || []).filter((z) => z.vratka);
   const hlidane = (zbytky || []).filter((z) => n(z.gramu) > 0 && z.stav !== "vtisku");
   const prosleKs = hlidane.filter((z) => stavy[z.kod] && stavy[z.kod].stav === "prosle");
   const brzyKs = hlidane.filter((z) => stavy[z.kod] && stavy[z.kod].stav === "brzy");
@@ -186,6 +188,9 @@ function ZbytkyTab({ zbytky, setZbytky, recipes, materialy, guardDelete, otevren
           ${vTisku.length > 0 && html`<button className=${"chip" + (lhuta === "vtisku" ? " on" : "")}
             onClick=${() => setLhuta(lhuta === "vtisku" ? "" : "vtisku")}
             title=${preloz("dávky označené při míchání, u kterých se ještě nezapsal zbytek")}>${preloz("v tisku")} (${vTisku.length})</button>`}
+          ${vratky.length > 0 && html`<button className=${"chip" + (lhuta === "vratka" ? " on" : "")}
+            onClick=${() => setLhuta(lhuta === "vratka" ? "" : "vratka")}
+            title=${preloz("barva vrácená ze stroje uprostřed zakázky")}>${preloz("vratky")} (${vratky.length})</button>`}
         </div>
         <input className="search" value=${q} onChange=${(e) => setQ(e.target.value)}
           placeholder=${preloz("Hledat podle kódu, barvy, zakázky nebo složky…")} style=${{ marginBottom: 12 }} />
@@ -216,6 +221,10 @@ function ZbytkyTab({ zbytky, setZbytky, recipes, materialy, guardDelete, otevren
                         ${z.stav === "vtisku" && html`<span className="tag" style=${{ marginLeft: 6, background: "var(--key)", color: "#fff", boxShadow: "none" }}
                           title=${preloz("označeno při míchání, zbytek se teprve zapíše")}>${preloz("v tisku")}</span>`}
                         ${z.tuzidlo && html`<span className="tag" style=${{ marginLeft: 6 }}>${preloz("s tužidlem")}</span>`}
+                        ${z.vratka && html`<span className="tag" style=${{ marginLeft: 6 }}
+                          title=${preloz("vrácena ze stroje z dávky {kod} — {d}", { kod: z.vratkaZ || "?", d: preloz(popisDuvoduVratky(z.vratkaDuvod)) })}>${preloz("vratka ze stroje")}</span>`}
+                        ${z.uprava && html`<span className="tag" style=${{ marginLeft: 6 }} title=${z.uprava}>${preloz("s úpravou")}</span>`}
+                        ${z.nahrada && html`<span className="tag" style=${{ marginLeft: 6 }} title=${z.nahrada}>${preloz("s náhradou")}</span>`}
                         ${z.shluk && html`<span className="tag" style=${{ marginLeft: 6 }}
                           title=${preloz("slito z {n} kelímků", { n: fmt((z.slito || []).length, 0) })}>${preloz("shluk")}</span>`}
                         ${kamSlito.has(z.kod) && html`<span className="tag" style=${{ marginLeft: 6 }}
@@ -271,7 +280,11 @@ function ZbytkyTab({ zbytky, setZbytky, recipes, materialy, guardDelete, otevren
                     <td style=${{ whiteSpace: "nowrap" }}>
                       ${z.stav === "vtisku" && html`<${React.Fragment}>
                         <button className="btn sm" onClick=${() => onDoplnit && onDoplnit(z.kod)}
-                          title=${preloz("zapsat, kolik z dávky zbylo")}>${preloz("Zadat zbytek")}</button>${" "}<//>`}
+                          title=${preloz("zapsat, kolik z dávky zbylo")}>${preloz("Zadat zbytek")}</button>${" "}
+                        ${/* Vratka uprostřed zakázky: barva se vrátila, ale zakázka
+                              pokračuje — dávka zůstává v tisku (část 638). */""}
+                        <button className="btn sec sm" onClick=${() => onVratka && onVratka(z)}
+                          title=${preloz("barva se vrátila ze stroje, ale zakázka pokračuje")}>${preloz("Vratka ze stroje")}</button>${" "}<//>`}
                       <button className="btn sec sm" onClick=${() => setStitek(z.kod)}>${preloz("Štítek")}</button>
                       ${" "}
                       <button className="btn danger sm" onClick=${() => smaz(z)}>${preloz("Smazat")}</button>

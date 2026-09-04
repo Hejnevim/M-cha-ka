@@ -120,6 +120,16 @@ function csvToRecipes(text, zdroj) {
     zadanoKdy: idx(/^(zadano.kdy|zad.no.kdy|requested_at)/),
     // poznámka technologa k receptuře; anglicky note/notes ze stejného důvodu jako u tužidla
     poznamka: idx(/^(pozn.mka|note)/),
+    // C / U (coated / uncoated) — výslovně zapsané; jinak se čte z názvu
+    cu: idx(/^(cu$|c.u$|coated|nat.ran)/),
+    // objednací číslo u dodavatele — hledá se podle něj
+    objCislo: idx(/^(objednac|obj.?c|order.?no|art.?no|artikl)/),
+    // druhý stupeň schválení (mistr / zákazník) a jeho razítko
+    druhyStupen: idx(/^(druhy.stupen|druh..stupe|second.approval|approval_level)/),
+    schvaleni2: idx(/^(schvaleni2|schv.len.2|approval2)/),
+    schvalil2: idx(/^(schvalil2|schv.lil2|approved_by2)/),
+    schvaleno2Kdy: idx(/^(schvaleno2.kdy|schv.leno2.kdy|approved_at2)/),
+    duvodZamitnuti2: idx(/^(duvod.zamitnuti2|d.vod.zam.tnut.2|rejected_reason2)/),
   };
   if (ci.name < 0 || ci.comp < 0 || ci.pct < 0)
     throw new Error(preloz("CSV musí obsahovat sloupce: nazev, komponenta, procento (volitelně typ, rada, hustota, hex)."));
@@ -168,6 +178,14 @@ function csvToRecipes(text, zdroj) {
         zadanoKdy: ci.zadanoKdy >= 0 ? n(r[ci.zadanoKdy]) : 0,
         // poznámka k receptuře („na tomhle materiálu dva průchody“) — jeden řádek textu
         poznamka: ci.poznamka >= 0 ? String(r[ci.poznamka] || "").trim() : "",
+        // C / U jen tam, kde to soubor výslovně říká; z názvu se dočte při čtení
+        cu: ci.cu >= 0 && /^[cu]$/i.test(String(r[ci.cu] || "").trim()) ? String(r[ci.cu]).trim().toUpperCase() : "",
+        objCislo: ci.objCislo >= 0 ? String(r[ci.objCislo] || "").trim() : "",
+        druhyStupen: ci.druhyStupen >= 0 ? String(r[ci.druhyStupen] || "").trim().toLowerCase() : "",
+        schvaleni2: ci.schvaleni2 >= 0 ? String(r[ci.schvaleni2] || "").trim() : "",
+        schvalil2: ci.schvalil2 >= 0 ? String(r[ci.schvalil2] || "").trim() : "",
+        schvaleno2Kdy: ci.schvaleno2Kdy >= 0 ? n(r[ci.schvaleno2Kdy]) : 0,
+        duvodZamitnuti2: ci.duvodZamitnuti2 >= 0 ? String(r[ci.duvodZamitnuti2] || "").trim() : "",
         // na které kombinace produkt+barva+technologie+poloha byla receptura použita
         vazby: ci.vazby >= 0
           ? String(r[ci.vazby] || "").split("~").map((s) => s.trim()).filter(Boolean) : [],
@@ -196,7 +214,11 @@ const klicReceptury = (r) => (r.zdroj ? r.zdroj + "|" : "") + String(r.name || "
 const klicSirotka = (r) => String(r.name || "").toLowerCase()
   + "|" + String(r.series || "").trim().toLowerCase();
 
-function sloucReceptury(prev, nove, adopce, zijiciSoubory) {
+/* `pridanoKdy` je čas, kdy se receptura v prohlížeči objevila — ale jen
+   u AKTUALIZACE už známé databáze (volající předá `ted`). První načtení
+   celého souboru datum nedává: patnáct tisíc „nových" receptur není
+   zjištění, to je šum. Podle data se pak nabízí přepínač „jen nové". */
+function sloucReceptury(prev, nove, adopce, zijiciSoubory, ted) {
   const mapa = new Map(prev.map((r) => [klicReceptury(r), r]));
   /* Přejmenovaný soubor databáze. Receptury z něj zůstaly v prohlížeči zapsané
      pod starým jménem souboru, jenže to jméno už nikde není — bez převzetí by
@@ -273,10 +295,21 @@ function sloucReceptury(prev, nove, adopce, zijiciSoubory) {
         zadanoKdy: n(r.zadanoKdy) || n(stary.zadanoKdy) || 0,
         // poznámka je znalost dílny, ne dodavatele — soubor bez sloupce ji nesmí smazat
         poznamka: r.poznamka || stary.poznamka || "",
+        /* C / U, objednací číslo a druhý stupeň schválení jsou taky údaje
+           dílny — databáze od dodavatele je nenese a nesmí je přepsat prázdnem. */
+        cu: r.cu || stary.cu || "",
+        objCislo: r.objCislo || stary.objCislo || "",
+        druhyStupen: r.druhyStupen || stary.druhyStupen || "",
+        schvaleni2: r.schvaleni2 || stary.schvaleni2 || "",
+        schvalil2: r.schvalil2 || stary.schvalil2 || "",
+        schvaleno2Kdy: n(r.schvaleno2Kdy) || n(stary.schvaleno2Kdy) || 0,
+        duvodZamitnuti2: r.duvodZamitnuti2 || stary.duvodZamitnuti2 || "",
+        // datum přidání si receptura nese z prvního výskytu, obnovou se nemění
+        pridanoKdy: n(stary.pridanoKdy) || 0,
       }));
     } else {
       pridano++;
-      mapa.set(klic, r);
+      mapa.set(klic, n(ted) > 0 ? Object.assign({}, r, { pridanoKdy: n(ted) }) : r);
     }
   }
   return { seznam: Array.from(mapa.values()), pridano: pridano, obnoveno: obnoveno,

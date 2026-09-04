@@ -80,6 +80,39 @@ function App() {
   useEffect(() => { saveLS("irm-role", role); }, [role]);
   const [jmenoRole, setJmenoRole] = useState(() => loadLS("irm-role-jmeno", ""));
   useEffect(() => { saveLS("irm-role-jmeno", jmenoRole); }, [jmenoRole]);
+  /* Lidé dílny z parametry/lide.csv (část 226). Bez souboru zůstává volné
+     pole na jméno; se souborem se v nabídce vybírá jedním klikem, aby se
+     podpis do evidence psal pokaždé stejně. */
+  const [lide, setLide] = useState([]);
+
+  /* Oblíbené receptury (část 458). Hvězdička patří ČLOVĚKU, ne počítači —
+     klíčem je podpis role, takže si u téže míchačky každý drží svoje. */
+  const podpisAkt = podpisRole(role, jmenoRole);
+  const [oblibene, setOblibene] = useState(() => nactiOblibene(podpisRole(ROLE_VYCHOZI, "")));
+  useEffect(() => { setOblibene(nactiOblibene(podpisAkt)); }, [podpisAkt]);
+  const prepniOblibenou = useCallback((r) => {
+    if (!r) return;
+    setOblibene((prev) => {
+      const nova = new Set(prev);
+      const k = klicOblibene(r);
+      if (nova.has(k)) nova.delete(k); else nova.add(k);
+      ulozOblibene(podpisRole(roleRef.current, jmenoRoleRef.current), nova);
+      return nova;
+    });
+  }, []);
+
+  /* Jednotka dávky (část 128) — jen jak se hlavní číslo ukáže; uvnitř se
+     počítá v gramech. Drží si ji prohlížeč jako motiv a jazyk. */
+  const [jednotka, setJednotka] = useState(() => kodJednotky(loadLS("irm-jednotka", JEDNOTKA_VYCHOZI)));
+  useEffect(() => { saveLS("irm-jednotka", jednotka); }, [jednotka]);
+
+  /* Podpis pod záznam změny se čte přes ref, ne přímo ze stavu: zapisZmenu
+     se předává hluboko do obrazovek a kdyby se měnil s každým přepsaným
+     písmenem ve jméně, překreslily by se s ním pokaždé i ony. */
+  const roleRef = useRef(role);
+  const jmenoRoleRef = useRef(jmenoRole);
+  roleRef.current = role;
+  jmenoRoleRef.current = jmenoRole;
 
   /* Ubrat si práva smí každý bez ptaní — zamknout se sám sobě není nebezpečné.
      Přidat si je jde přes heslo dílny, a když žádné nastavené není, přepne se
@@ -119,7 +152,14 @@ function App() {
       const d = await r.json();
       if (!d.ok) throw new Error(d.chyba || "zápis se nezdařil");
       setTechStavText(text);
-      setTechStav(csvNaTechStav(text));
+      const noveStavy = csvNaTechStav(text);
+      setTechStav(noveStavy);
+      /* Odemčení a zamčení technologie je zásah do podkladu celé dílny —
+         po něm se v aplikaci objeví (nebo zmizí) celé databáze receptur.
+         Bez záznamu se pak nedá dohledat, proč včera šlo namíchat něco,
+         co dnes nejde. */
+      zapisZmenu({ oblast: "technologie", polozka: tech, pole: "stav",
+        pred: (techStav || {})[tech] || "", po: noveStavy[tech] || "" });
       setTechZapis({ stav: "ulozeno", chyba: "" });
     } catch (e) {
       setTechZapis({ stav: "chyba", chyba: String((e && e.message) || e) });
@@ -149,6 +189,8 @@ function App() {
       setTypyPolohText(text);
       // soubor je pravda pro polohy, které nese; místní přiřazení zůstávají
       setTypyPoloh((prev) => Object.assign({}, prev, csvNaTypyPoloh(text)));
+      zapisZmenu({ oblast: "poloha", polozka: klic, pole: "typy",
+        pred: (typyPoloh || {})[klic] || "", po: typy });
       setTypyZapis({ stav: "ulozeno", chyba: "" });
     } catch (e) {
       // do souboru se to nezapsalo, ale v prohlížeči změna platí — hlášení
@@ -161,6 +203,8 @@ function App() {
      to tak správně: ceník je společný pro celou dílnu, ne pro jeden počítač. */
   const ulozCeny = async (zmeny) => {
     setCenyZapis({ stav: "uklada", chyba: "" });
+    // tvar položek PŘED zápisem — po setPigmenty už není odkud ho vzít
+    const pred = pigmenty;
     try {
       const zaklad = pigmentyText || "druh;nazev;hex;maxpodil;pozn;cena;mena;jednotka\r\n";
       const text = zapisCenyDoCsv(zaklad, zmeny);
@@ -170,7 +214,19 @@ function App() {
       const d = await r.json();
       if (!d.ok) throw new Error(d.chyba || "zápis se nezdařil");
       setPigmentyText(text);
-      setPigmenty(csvNaPigmenty(text));
+      const nove = csvNaPigmenty(text);
+      setPigmenty(nove);
+      /* Zápis do záznamu změn až TEĎ, po potvrzeném uložení do souboru.
+         Kdyby se zapisoval dopředu, zůstala by po neúspěšném zápisu v evidenci
+         změna, ke které v souboru nic neodpovídá — a podklad by se pak hledal
+         podle záznamu, který lže. */
+      for (const z of zmeny) {
+        const klic = String(z.nazev || "").toLowerCase();
+        zapisZmenu({ oblast: "cenik", polozka: z.nazev,
+          druh: pred[klic] ? "upraveno" : "zalozeno",
+          pred: pred[klic], po: nove[klic],
+          pole: ["cena", "mena", "jednotka", "voc", "bezplist", "hustota", "rada"] });
+      }
       setCenyZapis({ stav: "ulozeno", chyba: "" });
     } catch (e) {
       setCenyZapis({ stav: "chyba", chyba: String((e && e.message) || e) });
@@ -183,6 +239,7 @@ function App() {
      někdo opravil na druhém počítači. */
   const ulozZasoby = async (zmeny) => {
     setSkladZapis({ stav: "uklada", chyba: "" });
+    const pred = pigmenty;
     try {
       const zaklad = pigmentyText || "druh;nazev;hex;maxpodil;pozn;cena;mena;jednotka\r\n";
       const text = zapisSkladDoCsv(zaklad, zmeny);
@@ -192,7 +249,15 @@ function App() {
       const d = await r.json();
       if (!d.ok) throw new Error(d.chyba || "zápis se nezdařil");
       setPigmentyText(text);
-      setPigmenty(csvNaPigmenty(text));
+      const nove = csvNaPigmenty(text);
+      setPigmenty(nove);
+      for (const z of zmeny) {
+        const klic = String(z.nazev || "").toLowerCase();
+        zapisZmenu({ oblast: "sklad", polozka: z.nazev,
+          druh: pred[klic] ? "upraveno" : "zalozeno",
+          pred: pred[klic], po: nove[klic],
+          pole: ["zasoba", "minZasoba", "baleni"] });
+      }
       setSkladZapis({ stav: "ulozeno", chyba: "" });
     } catch (e) {
       setSkladZapis({ stav: "chyba", chyba: String((e && e.message) || e) });
@@ -313,14 +378,24 @@ function App() {
         novyTechStav = csvNaTechStav(d.text);
         novyTechText = d.text;
       } catch (e) { if (!/není/.test(String(e.message || e))) chyby.push(SOUBOR_TECHNOLOGIE + ": " + e.message); }
-      let noveDbTech = null, noveDbMat = null;
+      let noveDbTech = null, noveDbMat = null, noveVynucene = null;
       try {
         const d = await sgpsGet("/databaze?slozka=" + SLOZKA_PARAMETRY
           + "&soubor=" + encodeURIComponent(SOUBOR_DATABAZE));
         noveDbTech = csvNaDbTech(d.text);
         // z téhož souboru i materiály typů barev — sloupec je nepovinný
         noveDbMat = csvNaDbMaterialy(d.text);
+        // a vynucené složky řady (lak, katalyzátor) — sloupec taky nepovinný
+        noveVynucene = csvNaVynucene(d.text);
       } catch (e) { if (!/není/.test(String(e.message || e))) chyby.push(SOUBOR_DATABAZE + ": " + e.message); }
+      /* Lidé dílny (část 226). Soubor je nepovinný — dílna, která ho nevede,
+         píše jméno do pole ručně jako dřív. */
+      let noviLide = [];
+      try {
+        const d = await sgpsGet("/databaze?slozka=" + SLOZKA_PARAMETRY
+          + "&soubor=" + encodeURIComponent(SOUBOR_LIDE));
+        noviLide = csvNaLide(d.text);
+      } catch (e) { if (!/není/.test(String(e.message || e))) chyby.push(SOUBOR_LIDE + ": " + e.message); }
       let novyPlanDb = [];
       try {
         const d = await sgpsGet("/databaze?slozka=" + SLOZKA_PARAMETRY
@@ -341,6 +416,8 @@ function App() {
       // opravdu jsou — ručně nastavené databáze navíc zůstanou
       if (noveDbTech) setDbTech((prev) => Object.assign({}, prev, noveDbTech));
       if (noveDbMat) setDbMat(noveDbMat);
+      if (noveVynucene) setDbVynucene(noveVynucene);
+      setLide(noviLide);
       // soubor přebíjí prohlížeč, ale jen u poloh, které v něm opravdu jsou —
       // přiřazení udělaná bez mostu na tomhle počítači zůstanou
       if (noveTypyPoloh) { setTypyPoloh((prev) => Object.assign({}, prev, noveTypyPoloh)); setTypyPolohText(novyTypyText); }
@@ -362,6 +439,8 @@ function App() {
   useEffect(() => { saveLS("irm-zbytky", zbytky); }, [zbytky]);
   const [zbytekKod, setZbytekKod] = useState("");     // kód načtený čtečkou
   const [doplnitZbytek, setDoplnitZbytek] = useState(null);   // {kod, gramu} — po tisku
+  const [vratkaZ, setVratkaZ] = useState(null);       // dávka v tisku, ze které se vrací
+  const [stitekKod, setStitekKod] = useState("");     // kelímek, jehož štítek se otevřel
   // lhůty ubíhají i bez zásahu uživatele — jednou za minutu se přepočítají
   const [tikLhut, setTikLhut] = useState(0);
   useEffect(() => {
@@ -581,6 +660,83 @@ function App() {
     return () => clearTimeout(casovac);
   }, [opravy, sgps.stav.stav, opravyStav.stav]);
 
+  /* ---- záznam změn podkladů ----
+     Kdo kdy přepsal recepturu, cenu nebo parametr dílny. Do souboru to patří
+     ze stejného důvodu jako opravy, ale ještě naléhavěji: zásah do ceníku
+     udělá technolog v kanceláři a míchá se podle něj na obou míchačkách —
+     v prohlížeči by ten záznam viděl jen ten, kdo ho pořídil.
+
+     Na rozdíl od opravy tenhle záznam nikdo nepotvrzuje. Vzniká sám v místě
+     zápisu (viz zapisZmenu níž), protože „co bylo předtím" aplikace v tu
+     chvíli drží v ruce a hádat nemusí nic. */
+  const [zmenyPodkladu, setZmenyPodkladu] = useState(() => loadLS("irm-zmeny", []));
+  useEffect(() => { saveLS("irm-zmeny", zmenyPodkladu); }, [zmenyPodkladu]);
+  const [zmenyStav, setZmenyStav] = useState({ stav: "cekam", chyba: "", kdy: 0 });
+  const zmenyZapsano = useRef(null);
+
+  useEffect(() => {
+    if (sgps.stav.stav !== "ok") return;
+    let zrusen = false;
+    (async () => {
+      try {
+        const d = await sgpsGet("/databaze?slozka=" + SLOZKA_EVIDENCE
+          + "&soubor=" + encodeURIComponent(SOUBOR_ZMENY));
+        if (zrusen) return;
+        const ze_souboru = csvNaZmeny(d.text);
+        setZmenyPodkladu((prev) => {
+          const slouceno = sloucZmeny(prev, ze_souboru);
+          zmenyZapsano.current = zmenyDoCsv(slouceno);
+          return slouceno;
+        });
+        setZmenyStav({ stav: "nacteno", chyba: "", kdy: Date.now() });
+      } catch (e) {
+        // soubor ještě neexistuje — založí se první zapsanou změnou
+        const zprava = String((e && e.message) || e);
+        if (!zrusen) setZmenyStav({ stav: /není/.test(zprava) ? "prazdno" : "chyba",
+          chyba: /není/.test(zprava) ? "" : zprava, kdy: Date.now() });
+      }
+    })();
+    return () => { zrusen = true; };
+  }, [sgps.stav.stav]);
+
+  useEffect(() => {
+    if (sgps.stav.stav !== "ok" || zmenyStav.stav === "cekam") return;
+    const text = zmenyDoCsv(zmenyPodkladu);
+    if (text === zmenyZapsano.current) return;
+    const casovac = setTimeout(async () => {
+      try {
+        const r = await fetch(sgpsBase() + "/databaze/ulozit", { method: "POST",
+          body: new Blob([JSON.stringify({ slozka: SLOZKA_EVIDENCE, jmeno: SOUBOR_ZMENY, text: text })],
+            { type: "text/plain" }) });
+        const d = await r.json();
+        if (!d.ok) throw new Error(d.chyba || "zápis se nezdařil");
+        zmenyZapsano.current = text;
+        setZmenyStav({ stav: "ulozeno", chyba: "", kdy: Date.now() });
+      } catch (e) {
+        setZmenyStav({ stav: "chyba", chyba: String((e && e.message) || e), kdy: Date.now() });
+      }
+    }, 1200);
+    return () => clearTimeout(casovac);
+  }, [zmenyPodkladu, sgps.stav.stav, zmenyStav.stav]);
+
+  /* Jediné místo, kterým se změna zapisuje. Volá se ze všech ukládacích cest
+     a schválně bere „před" i „po" jako celé tvary položky: kdo to volá, nemusí
+     vědět, která pole se liší — porovná se to tady, jednou a stejně.
+
+     Podpis se skládá z role tohohle počítače. Když jméno vyplněné není,
+     zůstane v záznamu aspoň role a v přehledu se to řekne nahlas. */
+  const zapisZmenu = useCallback(({ oblast, druh, polozka, pred, po, pole, pozn }) => {
+    setZmenyPodkladu((prev) => {
+      const nove = zmenyZeSrovnani({ zmeny: prev, oblast: oblast, druh: druh || "upraveno",
+        polozka: polozka, pred: pred, po: po, pole: pole,
+        kdo: podpisRole(roleRef.current, jmenoRoleRef.current), pozn: pozn });
+      /* Zásah, po kterém se žádné pole neliší (uložení beze změny), se
+         nezapisuje — v žebříčku „co se přepisuje nejvíc" by dělal šum. */
+      return nove.length ? nove.concat(prev) : prev;
+    });
+  }, []);
+
+
   /* ---- fronta míchání ----
      Co se dnes má namíchat a v jakém pořadí. Drží se to tady, nad záložkami:
      do fronty se přidává z kalkulace, čte se ve vlastní záložce a soubor musí
@@ -637,9 +793,33 @@ function App() {
     return () => clearTimeout(casovac);
   }, [fronta, sgps.stav.stav, frontaStav.stav]);
 
+  /* ---- profily úprav, požadavky na odstín ----
+     Tři evidence z jednoho háku (část 126): dřív se pro každou opakoval
+     týž trojlístek načtení / sloučení / odložený zápis, a sedmá a osmá
+     kopie by se od těch šesti dřív nebo později lišila. */
+  const mostOk = sgps.stav.stav === "ok";
+  const [upravy, setUpravy, upravyStav] = useEvidenceSoubor({ mostOk: mostOk,
+    klicLS: "irm-upravy", jmeno: SOUBOR_UPRAVY,
+    naCsv: csvNaUpravy, doCsv: upravyDoCsv, slouc: sloucUpravy });
+  const [pozadavky, setPozadavky, pozadavkyStav] = useEvidenceSoubor({ mostOk: mostOk,
+    klicLS: "irm-pozadavky", jmeno: SOUBOR_POZADAVKY,
+    naCsv: csvNaPozadavky, doCsv: pozadavkyDoCsv, slouc: sloucPozadavky });
+
+  /* Požadavek na chybějící odstín z kalkulace (část 637). Zapisuje ho tiskař
+     u váhy; technolog ho vidí v Ke schválení s odznakem v nabídce. */
+  const zapisPozadavek = (co) => {
+    const p = novyPozadavek(Object.assign({ pozadavky: pozadavky,
+      kdo: podpisRole(roleRef.current, jmenoRoleRef.current) }, co));
+    if (!p) return;
+    setPozadavky((prev) => [p].concat(prev || []));
+    setToast({ ok: true, text: preloz("Požadavek {kod} zapsán — technolog uvidí odstín {o} v záložce Ke schválení.",
+      { kod: p.kod, o: p.odstin }) });
+  };
+
   const frontaPocet = useMemo(() => frontaKMichani(fronta).length, [fronta]);
   // odznak v nabídce — technolog nemá chodit kontrolovat prázdnou záložku
   const cekaSchvaleni = useMemo(() => pocetKeSchvaleni(recipes), [recipes]);
+  const cekaOdstinu = useMemo(() => pozadavkyCekajici(pozadavky).length, [pozadavky]);
 
   /* Přidání z kalkulace. Položka si opisuje složení, hustotu i pot life —
      plán se má spočítat i tehdy, když se receptura mezitím přepne nebo odejde
@@ -738,10 +918,25 @@ function App() {
   // které technologie patří ke kterému souboru databáze receptur
   const [dbTech, setDbTech] = useState(() => loadLS("irm-databaze-tech", {}));
   useEffect(() => { saveLS("irm-databaze-tech", dbTech); }, [dbTech]);
+
+  /* Zdraví databáze. Počítá se v App ze stejného důvodu jako sklad: číslo nese
+     odznak v nabídce, aby se na mezery přišlo dřív, než po nich někdo sáhne
+     u váhy — a ne teprve tehdy, když si záložku někdo otevře.
+
+     Na datech dílny (15 191 receptur, 56 670 složek) to trvá kolem 200 ms,
+     takže na závislostech záleží: jsou to právě ty čtyři vstupy, ze kterých
+     se nález odvozuje, a nic z toho se během běžné práce nemění. Zaplatí se
+     to jednou po načtení databází z mostu, ne při každém překreslení. */
+  const zdravi = useMemo(() => zdraviDatabazi({ recipes: recipes, materialy: pigmenty,
+    sita: sita, dbTech: dbTech }), [recipes, pigmenty, sita, dbTech]);
   // Na jaké materiály jde který typ barvy. Jen ze souboru parametrů, bez kopie
   // v prohlížeči: je to údaj od výrobce barvy, ne nastavení uživatele, a dvě
   // různě staré kopie na dvou počítačích by tiskaři tvrdily každá něco jiného.
   const [dbMat, setDbMat] = useState({});
+  /* Vynucené složky řady (část 459): lak nebo aditivum s pevným podílem
+     v každé receptuře té řady. Ze souboru parametrů, bez kopie v prohlížeči
+     — je to údaj z technického listu, ne nastavení uživatele. */
+  const [dbVynucene, setDbVynucene] = useState({});
   // Typy barev ručně přiřazené polohám produktů. Stejný model jako přiřazení
   // databází k technologiím (dbTech): prohlížeč si drží svou kopii, aby šlo
   // přiřazovat i bez mostu — jen na tomhle počítači je to pořád lepší než
@@ -787,8 +982,12 @@ function App() {
             const soubor = await sgpsGet("/databaze?soubor=" + encodeURIComponent(s.jmeno));
             if (zrusen) return;
             const nove = csvToRecipes(soubor.text, s.jmeno);
+            /* Datum přidání dostávají receptury jen při AKTUALIZACI databáze,
+               kterou prohlížeč už zná (viz sloucReceptury): u prvního načtení
+               by bylo „nové" všech patnáct tisíc a přepínač by neřekl nic. */
+            const zname = !!verze[s.jmeno];
             setRecipes((prev) => {
-              const v = sloucReceptury(prev, nove, adopce, zijici);
+              const v = sloucReceptury(prev, nove, adopce, zijici, zname ? Date.now() : 0);
               celkemNovych += v.pridano; celkemObnovenych += v.obnoveno;
               celkemPrevzatych += v.prevzato;
               // Vazby na produkty a barvy jsou uložené v samotné databázi.
@@ -910,6 +1109,7 @@ function App() {
         return;
       }
       // Dávka označená při míchání — teď je po tisku a je čas zapsat, co zbylo.
+      // (Vrací-li se barva uprostřed zakázky, je na to v okně tlačítko Vratka.)
       if (z.stav === "vtisku") { setDoplnitZbytek({ kod: kod, gramu: "" }); return; }
       setZbytekKod(kod);
       setTab("zbytky");
@@ -962,6 +1162,35 @@ function App() {
     }
   };
   const onCode = (raw) => handleCode.current(raw);
+
+  /* Odkaz na recepturu (#receptura=…, část 458). Přijde-li aplikace otevřená
+     odkazem, otevře se záložka Receptury s tou jedinou nahoře. Čte se i při
+     změně hashe, aby odkaz fungoval i v už otevřené aplikaci. */
+  const [otevritRecepturu, setOtevritRecepturu] = useState(() => recepturaZOdkazu(window.location.hash));
+  useEffect(() => {
+    const naHash = () => {
+      const r = recepturaZOdkazu(window.location.hash);
+      if (r) { setOtevritRecepturu(r); setTab("rec"); }
+    };
+    if (otevritRecepturu) setTab("rec");
+    window.addEventListener("hashchange", naHash);
+    return () => window.removeEventListener("hashchange", naHash);
+  }, []);
+
+  /* Vratka ze stroje (část 638): z dávky v tisku vznikne samostatný kelímek
+     se svým kódem a štítkem, původní dávka zůstává v tisku — zakázka jede dál
+     a kolik z ní zbude na konci, se pořád neví. */
+  const zapisVratku = ({ gramu, duvod, pozn }) => {
+    if (!vratkaZ) return;
+    const v = novaVratka({ zbytky: zbytky, zdroj: vratkaZ, gramu: gramu, duvod: duvod,
+      pozn: pozn, kdo: podpisRole(roleRef.current, jmenoRoleRef.current) });
+    if (!v) return;
+    setZbytky((prev) => [v].concat(prev));
+    setVratkaZ(null);
+    setStitekKod(v.kod);
+    setToast({ ok: true, text: preloz("Vratka {kod}: {g} g z dávky {z} je na skladě.",
+      { kod: v.kod, g: fmt(n(gramu)), z: vratkaZ.kod }) });
+  };
 
   // otevření zakázky vybrané ze seznamu SGPS
   const otevriZakazku = (z) => {
@@ -1031,7 +1260,7 @@ function App() {
           </button>
           ${menuOpen && html`
             <div className="navdrop">
-              <div className="note" style=${{ padding: "10.5px 24.5px 3.5px", letterSpacing: ".06em" }}>${preloz("ROLE")}</div>
+              <div className="note" style=${{ padding: "7.5px 17.5px 2.5px", letterSpacing: ".06em" }}>${preloz("ROLE")}</div>
               ${ROLE_PORADI.map((rl) => html`
                 <button key=${rl} className=${role === rl ? "on" : ""}
                   onClick=${() => prepniRoli(rl)} title=${preloz(ROLE[rl].popis)}>
@@ -1040,7 +1269,23 @@ function App() {
                     ${role === rl ? preloz("teď") : (smiRole(rl, "receptury") && deletePw ? preloz("na heslo") : "")}
                   </span>
                 </button>`)}
-              <div style=${{ borderTop: "1px solid var(--line)", margin: "10.5px 14px" }}></div>
+              ${/* Lidé dílny (parametry/lide.csv, část 226): jedním klikem se
+                    nastaví jméno i role, aby se podpis do evidence psal pokaždé
+                    stejně. Bez souboru se tenhle blok neukáže a jméno se píše
+                    v záložce Ke schválení jako dřív. */""}
+              ${lide.length > 0 && html`<${React.Fragment}>
+                <div className="note" style=${{ padding: "7.5px 17.5px 2.5px", letterSpacing: ".06em" }}>${preloz("KDO MÍCHÁ")}</div>
+                ${lide.map((c) => html`
+                  <button key=${c.jmeno} className=${String(jmenoRole || "").trim() === c.jmeno ? "on" : ""}
+                    title=${c.pozn || (c.role ? preloz(ROLE[c.role].popis) : "")}
+                    onClick=${() => { setJmenoRole(c.jmeno); if (c.role && c.role !== role) prepniRoli(c.role); else setMenuOpen(false); }}>
+                    ${c.jmeno}
+                    <span className="note" style=${{ float: "right" }}>
+                      ${String(jmenoRole || "").trim() === c.jmeno ? preloz("teď") : (c.role ? preloz(ROLE[c.role].nazev) : "")}
+                    </span>
+                  </button>`)}
+              <//>`}
+              <div style=${{ borderTop: "1px solid var(--line)", margin: "7.5px 10px" }}></div>
               <button onClick=${() => setTechRozbaleno((o) => !o)} aria-expanded=${techRozbaleno}
                 title=${techRozbaleno ? preloz("Sbalit výběr technologie") : preloz("Rozbalit výběr technologie")}>
                 <span className="note" style=${{ float: "right" }}>${technologie || preloz("vše")}</span>
@@ -1077,7 +1322,7 @@ function App() {
                     ${preloz("Co chybí k odemčení…")}
                   </button>`}
               <//>`}
-              <div style=${{ borderTop: "1px solid var(--line)", margin: "10.5px 14px" }}></div>
+              <div style=${{ borderTop: "1px solid var(--line)", margin: "7.5px 10px" }}></div>
               <!-- Načtení zakázky (PDF i čárový kód) je v kartě Vybraný produkt —
                    zakázka se načítá tam, kde se s ní hned počítá. Obě záložky
                    dál existují: PDF pro opravu rozpoznaných polí, Čárový kód
@@ -1096,22 +1341,25 @@ function App() {
               <button onClick=${() => setOtevreneSkupiny((p) => ({ ...p, michani: !p.michani }))}
                 aria-expanded=${!!otevreneSkupiny.michani}
                 className=${["schval", "fronta", "opravy"].includes(tab) ? "on" : ""}>
-                ${!otevreneSkupiny.michani && cekaSchvaleni + frontaPocet > 0 && html`<span className="tag"
+                ${!otevreneSkupiny.michani && cekaSchvaleni + frontaPocet + cekaOdstinu > 0 && html`<span className="tag"
                   style=${{ float: "right" }}
                   title=${[cekaSchvaleni ? preloz("čeká na schválení {n}", { n: cekaSchvaleni }) : "",
+                    cekaOdstinu ? preloz("chybějící odstíny {n}", { n: cekaOdstinu }) : "",
                     frontaPocet ? preloz("ve frontě čeká {n}", { n: frontaPocet }) : ""].filter(Boolean).join(", ")}>
-                  ${cekaSchvaleni + frontaPocet}</span>`}
+                  ${cekaSchvaleni + frontaPocet + cekaOdstinu}</span>`}
                 <span className="note" style=${{ letterSpacing: ".06em" }}>${otevreneSkupiny.michani ? "▾" : "▸"} ${preloz("MÍCHÁNÍ")}</span>
               </button>
               ${otevreneSkupiny.michani && html`<${React.Fragment}>
                 <button className=${tab === "schval" ? "on" : ""} onClick=${() => { setTab("schval"); setMenuOpen(false); }}>
                   ${preloz("Ke schválení")}
-                  ${cekaSchvaleni > 0 && html`<span className="tag" style=${{ marginLeft: 14 }}
-                    title=${preloz("čeká na schválení {n}", { n: cekaSchvaleni })}>${cekaSchvaleni}</span>`}
+                  ${cekaSchvaleni + cekaOdstinu > 0 && html`<span className="tag" style=${{ marginLeft: 10 }}
+                    title=${[cekaSchvaleni ? preloz("čeká na schválení {n}", { n: cekaSchvaleni }) : "",
+                      cekaOdstinu ? preloz("chybějící odstíny {n}", { n: cekaOdstinu }) : ""].filter(Boolean).join(", ")}>
+                    ${cekaSchvaleni + cekaOdstinu}</span>`}
                 </button>
                 <button className=${tab === "fronta" ? "on" : ""} onClick=${() => { setTab("fronta"); setMenuOpen(false); }}>
                   ${preloz("Fronta míchání")}
-                  ${frontaPocet > 0 && html`<span className="tag" style=${{ marginLeft: 14 }}
+                  ${frontaPocet > 0 && html`<span className="tag" style=${{ marginLeft: 10 }}
                     title=${preloz("ve frontě čeká {n}", { n: frontaPocet })}>${frontaPocet}</span>`}
                 </button>
                 <button className=${tab === "opravy" ? "on" : ""} onClick=${() => { setTab("opravy"); setMenuOpen(false); }}>${preloz("Opravy po nátisku")}</button>
@@ -1133,7 +1381,7 @@ function App() {
                 <button className=${tab === "sklad" ? "on" : ""} onClick=${() => { setTab("sklad"); setMenuOpen(false); }}>
                   ${preloz("Sklad surovin")}
                   ${skladPocet > 0 && html`<span className="tag"
-                    style=${{ marginLeft: 14, background: sklad.pocet.chybi ? "#B23B2A" : "var(--warn)",
+                    style=${{ marginLeft: 10, background: sklad.pocet.chybi ? "#B23B2A" : "var(--warn)",
                       color: "#fff", boxShadow: "none" }}
                     title=${[sklad.pocet.chybi ? preloz("{n} došlo", { n: sklad.pocet.chybi }) : "",
                       sklad.pocet.dochazi ? preloz("{n} pod minimem", { n: sklad.pocet.dochazi }) : ""].filter(Boolean).join(", ")}>
@@ -1142,7 +1390,7 @@ function App() {
                 <button className=${tab === "zbytky" ? "on" : ""} onClick=${() => { setTab("zbytky"); setMenuOpen(false); }}>
                   ${preloz("Zbytky barev")}
                   ${lhutyPocet.prosle + lhutyPocet.brzy > 0 && html`<span className="tag"
-                    style=${{ marginLeft: 14, background: lhutyPocet.prosle ? "#B23B2A" : "var(--warn)",
+                    style=${{ marginLeft: 10, background: lhutyPocet.prosle ? "#B23B2A" : "var(--warn)",
                       color: "#fff", boxShadow: "none" }}
                     title=${[lhutyPocet.prosle ? preloz("{n} po lhůtě", { n: lhutyPocet.prosle }) : "",
                       lhutyPocet.brzy ? preloz("{n} brzy končí", { n: lhutyPocet.brzy }) : ""].filter(Boolean).join(", ")}>
@@ -1154,15 +1402,25 @@ function App() {
               <button className=${tab === "sestavy" ? "on" : ""} onClick=${() => { setTab("sestavy"); setMenuOpen(false); }}>${preloz("Sestavy a trendy")}</button>
               <button onClick=${() => setOtevreneSkupiny((p) => ({ ...p, data: !p.data }))}
                 aria-expanded=${!!otevreneSkupiny.data}
-                className=${["most", "imp"].includes(tab) ? "on" : ""}>
+                className=${["most", "imp", "zmeny", "zdravi"].includes(tab) ? "on" : ""}>
                 <span className="note" style=${{ letterSpacing: ".06em" }}>${otevreneSkupiny.data ? "▾" : "▸"} ${preloz("DATA")}</span>
               </button>
               ${otevreneSkupiny.data && html`<${React.Fragment}>
                 <button className=${tab === "most" ? "on" : ""} onClick=${() => { setTab("most"); setMenuOpen(false); }}>${preloz("Připojení k mostu")}</button>
+                <button className=${tab === "zmeny" ? "on" : ""} onClick=${() => { setTab("zmeny"); setMenuOpen(false); }}>${preloz("Změny podkladů")}</button>
+                <button className=${tab === "zdravi" ? "on" : ""} onClick=${() => { setTab("zdravi"); setMenuOpen(false); }}>
+                  ${preloz("Zdraví databáze")}
+                  ${zdravi.sNalezem > 0 && html`<span className="tag"
+                    style=${{ marginLeft: 10, background: zdravi.nejhorsi === "vysoke" ? "#B23B2A"
+                      : (zdravi.nejhorsi === "pozor" ? "var(--warn)" : "var(--ink-2)"),
+                      color: "#fff", boxShadow: "none" }}
+                    title=${preloz("{n} receptur má mezeru v podkladech", { n: fmt(zdravi.sNalezem, 0) })}>
+                    ${fmt(zdravi.sNalezem, 0)}</span>`}
+                </button>
                 <button className=${tab === "imp" ? "on" : ""} onClick=${() => { setTab("imp"); setMenuOpen(false); }}>${preloz("Import / data")}</button>
               <//>`}
-              <div style=${{ borderTop: "1px solid var(--line)", margin: "10.5px 14px" }}></div>
-              <div className="note" style=${{ padding: "10.5px 24.5px 3.5px", letterSpacing: ".06em" }}>${preloz("JAZYK")}</div>
+              <div style=${{ borderTop: "1px solid var(--line)", margin: "7.5px 10px" }}></div>
+              <div className="note" style=${{ padding: "7.5px 17.5px 2.5px", letterSpacing: ".06em" }}>${preloz("JAZYK")}</div>
               ${JAZYKY_PORADI.map((j) => html`
                 <button key=${j} className=${jazyk === j ? "on" : ""} onClick=${() => prepniJazyk(j)}>
                   ${JAZYKY[j]}
@@ -1214,6 +1472,11 @@ function App() {
             onDoFronty=${doFronty}
             technologie=${technologie} dbTech=${dbTech} dbMat=${dbMat} typyPoloh=${typyPoloh}
             sita=${sita} koef=${koef} pigmenty=${pigmenty} sklad=${sklad} guardDelete=${guardDelete}
+            upravy=${upravy} setUpravy=${setUpravy}
+            pozadavky=${pozadavky} onPozadavek=${zapisPozadavek}
+            dbVynucene=${dbVynucene} oblibene=${oblibene} prepniOblibenou=${prepniOblibenou}
+            jednotka=${jednotka} setJednotka=${setJednotka}
+            zmenyPodkladu=${zmenyPodkladu} onToast=${setToast}
             role=${role} jmenoRole=${jmenoRole}
             onZbytekUlozen=${(kod) => { setZbytekKod(kod); setTab("zbytky"); }}
             skryta=${tab !== "calc"} />
@@ -1223,7 +1486,8 @@ function App() {
         ${tab === "pdf" && html`<${PdfTab} sgps=${sgps} products=${products} recipes=${recipes}
           ulozeny=${pdfSpec} setUlozeny=${setPdfSpec}
           onApply=${(res) => { setScanLog((l) => [{ ts: Date.now(), raw: res.parsed.raw, res: res }].concat(l).slice(0, 25)); pouzitSpec(res); }} />`}
-        ${tab === "zak" && html`<${ZakazkyTab} sgps=${sgps} onOtevri=${otevriZakazku} />`}
+        ${tab === "zak" && html`<${ZakazkyTab} sgps=${sgps} onOtevri=${otevriZakazku}
+          products=${products} techStav=${techStav} technologie=${technologie} />`}
         ${tab === "most" && html`<${PripojeniTab} sgps=${sgps} databaze=${databaze} recipes=${recipes}
           links=${links} vlastniStav=${vlastniStav} dbTech=${dbTech} setDbTech=${setDbTech}
           onOdebratZdroj=${(z) => guardDelete(() => {
@@ -1273,15 +1537,21 @@ function App() {
           technologie=${technologie} setTechnologie=${setTechnologie}
           prepniTech=${prepniTech} techZapis=${techZapis} guard=${guardDelete}
           mostOk=${sgps.stav.stav === "ok"} />`}
-        ${tab === "prod" && html`<${Products} products=${products} setProducts=${setProducts} guardDelete=${guardDelete}
+        ${tab === "prod" && html`<${Products} zapisZmenu=${zapisZmenu} products=${products} setProducts=${setProducts} guardDelete=${guardDelete}
           recipes=${recipes} dbTech=${dbTech} typyPoloh=${typyPoloh} ulozTypPolohy=${ulozTypPolohy}
           typyZapis=${typyZapis} mostOk=${sgps.stav.stav === "ok"} />`}
-        ${tab === "rec" && html`<${Recipes} recipes=${recipes} setRecipes=${setRecipes} guardDelete=${guardDelete} role=${role} jmenoRole=${jmenoRole}
+        ${tab === "rec" && html`<${Recipes} recipes=${recipes} setRecipes=${setRecipes} guardDelete=${guardDelete} role=${role} jmenoRole=${jmenoRole} zapisZmenu=${zapisZmenu}
           dbFiltr=${dbFiltr} setDbFiltr=${setDbFiltr} technologie=${technologie} dbTech=${dbTech} sita=${sita}
           materialy=${pigmenty} onUlozitCeny=${ulozCeny} cenyStav=${cenyZapis}
+          oblibene=${oblibene} prepniOblibenou=${prepniOblibenou}
+          zmeny=${zmenyPodkladu} davky=${davky} opravy=${opravy} upravy=${upravy}
+          otevritRecepturu=${otevritRecepturu} onOtevreno=${() => setOtevritRecepturu(null)}
+          onToast=${setToast}
           mostOk=${sgps.stav.stav === "ok"} />`}
         ${tab === "schval" && html`<${SchvaleniTab} recipes=${recipes} setRecipes=${setRecipes}
           links=${links} role=${role} jmenoRole=${jmenoRole} setJmenoRole=${setJmenoRole}
+          pozadavky=${pozadavky} setPozadavky=${setPozadavky}
+          sita=${sita} materialy=${pigmenty} zapisZmenu=${zapisZmenu}
           onToast=${setToast} />`}
         ${tab === "sito" && html`<${SitoTab} recipes=${recipes} sita=${sita}
           koef=${koef} materialy=${pigmenty} technologie=${technologie} dbTech=${dbTech}
@@ -1295,12 +1565,16 @@ function App() {
         ${tab === "zbytky" && html`<${ZbytkyTab} zbytky=${zbytky} setZbytky=${setZbytky} recipes=${recipes}
           materialy=${pigmenty}
           guardDelete=${guardDelete} otevrenyKod=${zbytekKod} onOtevreno=${() => setZbytekKod("")}
-          onDoplnit=${(kod) => setDoplnitZbytek({ kod: kod, gramu: "" })} />`}
+          onDoplnit=${(kod) => setDoplnitZbytek({ kod: kod, gramu: "" })}
+          onVratka=${(z) => setVratkaZ(z)} />`}
         ${tab === "fronta" && html`<${FrontaTab} fronta=${fronta} setFronta=${setFronta}
           zbytky=${zbytky} materialy=${pigmenty} />`}
         ${tab === "opravy" && html`<${OpravyTab} opravy=${opravy} davky=${davky} />`}
+        ${tab === "zmeny" && html`<${ZmenyTab} zmeny=${zmenyPodkladu} />`}
         ${tab === "sestavy" && html`<${SestavyTab} davky=${davky} zbytky=${zbytky}
           materialy=${pigmenty} />`}
+        ${tab === "zdravi" && html`<${ZdraviTab} recipes=${recipes} materialy=${pigmenty}
+          sita=${sita} dbTech=${dbTech} technologie=${technologie} setTab=${setTab} />`}
         ${tab === "sklad" && html`<${SkladTab} sklad=${sklad} sarze=${sarze}
           onUlozit=${ulozZasoby} stav=${skladZapis} mostOk=${sgps.stav.stav === "ok"}
           smiMenit=${smiRole(role, "cenik")} />`}
@@ -1352,10 +1626,25 @@ function App() {
                   <button className="btn sec" onClick=${() => zapis(false)}>${preloz("Nezbylo nic")}</button>
                   <button className="btn sec" onClick=${() => setDoplnitZbytek(null)}>${preloz("Později")}</button>
                 </div>
+                ${/* Vratka: zakázka ještě běží, jen se barva vrátila ze stroje.
+                      Dávka zůstává v tisku, vratka je samostatný kelímek. */""}
+                <div className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
+                  <button className="btn sec sm" onClick=${() => { setDoplnitZbytek(null); setVratkaZ(z); }}>
+                    ${preloz("Zakázka ještě běží — vratka ze stroje")}
+                  </button>
+                </div>
               </div>
             </div>
           </div>`;
       })()}
+
+      ${/* Vratka ze stroje a štítek k ní — otevírá se ze záložky Zbytky barev
+            i po načtení kódu čtečkou, proto stojí tady nad záložkami. */""}
+      ${vratkaZ && html`<${VratkaOkno} zdroj=${vratkaZ} zbytky=${zbytky}
+        onUlozit=${zapisVratku} onClose=${() => setVratkaZ(null)} />`}
+      ${stitekKod && (zbytky || []).some((z) => z.kod === stitekKod) && html`
+        <${StitekZbytku} zbytek=${(zbytky || []).find((z) => z.kod === stitekKod)}
+          onClose=${() => setStitekKod("")} />`}
 
       ${pwGate && html`<${PwGate} label=${pwGate.label} correctPw=${deletePw}
         potvrdText=${pwGate.potvrd}

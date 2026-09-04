@@ -1,0 +1,909 @@
+<meta charset="utf-8">
+<title>Ink Recipe Manager Manual</title>
+<style>
+  /* ---------------------------------------------------------------
+     Mluvený manuál k aplikaci — stránka po stránce, funkce po funkci.
+     Paleta je opsaná z 020-promenne.css (dřív přes zrušenou ukazka.html), aby manuál
+     vypadal jako aplikace, kterou popisuje. Na rozdíl od ukázky tu nejsou
+     kreslené scény, ale skutečné snímky obrazovky: každá scéna ukazuje
+     výřez snímku a postupně na něm rozsvěcuje očíslovaná zvýraznění,
+     o kterých hlas zrovna mluví. Snímky jsou v manual/ (1 600 px široké),
+     nahrávky v audio_manual/.
+     --------------------------------------------------------------- */
+  :root{
+    --bg:#c9c9c9; --paper:#ededed; --paper-2:#e4e4e4;
+    --ink:#2D2D2D; --ink-2:#757575; --line:#c6c6c6;
+    --inkoust:#DA291C;
+    --ok:#2f9e4f; --warn:#b8860b;
+    --neu:-11px -11px 24px rgba(255,255,255,0.39), 11px 11px 24px rgba(0,0,0,0.38);
+    --neu-sm:-5px -5px 15px rgba(255,255,255,0.371), 5px 5px 15px rgba(0,0,0,0.418);
+    --neu-in:inset 4px 4px 6px rgba(0,0,0,0.342), inset -4px -4px 6px rgba(255,255,255,0.371);
+    --radius:32px; --radius-btn:999px; --radius-pole:20px;
+    --sans:system-ui,"Segoe UI",sans-serif;
+    --prostrkani:.07em;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#373d43; --paper:#31383f; --paper-2:#2c3238;
+      --ink:#E2E8F0; --ink-2:#94A3B8; --line:#495057;
+      --inkoust:#F0523F;
+      --ok:#10B981; --warn:#F59E0B;
+      --neu:-10px -10px 20px rgba(255,255,255,0.08), 10px 10px 20px rgba(0,0,0,0.3);
+      --neu-sm:-5px -5px 12px rgba(255,255,255,0.076), 5px 5px 12px rgba(0,0,0,0.33);
+      --neu-in:inset 4px 4px 6px rgba(0,0,0,0.27), inset -4px -4px 6px rgba(255,255,255,0.076);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#373d43; --paper:#31383f; --paper-2:#2c3238;
+    --ink:#E2E8F0; --ink-2:#94A3B8; --line:#495057;
+    --inkoust:#F0523F;
+    --ok:#10B981; --warn:#F59E0B;
+    --neu:-10px -10px 20px rgba(255,255,255,0.08), 10px 10px 20px rgba(0,0,0,0.3);
+    --neu-sm:-5px -5px 12px rgba(255,255,255,0.076), 5px 5px 12px rgba(0,0,0,0.33);
+    --neu-in:inset 4px 4px 6px rgba(0,0,0,0.27), inset -4px -4px 6px rgba(255,255,255,0.076);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--sans); font-size:16px; line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+    display:flex; flex-direction:column; align-items:center;
+    gap:18px; padding:24px 16px 40px; min-height:100vh;
+  }
+  h1,h2,h3{margin:0; text-wrap:balance}
+
+  .hlavicka{width:min(1040px,100%); display:flex; align-items:baseline;
+    justify-content:space-between; gap:16px; flex-wrap:wrap}
+  .znacka{font-weight:900; letter-spacing:var(--prostrkani); text-transform:uppercase;
+    font-size:clamp(19px,3.4vw,26px)}
+  .podznacka{color:var(--ink-2); font-size:13.5px}
+
+  /* ---- jeviště ---- */
+  .jeviste{width:min(1040px,100%); background:var(--paper); border-radius:var(--radius);
+    box-shadow:var(--neu); padding:clamp(16px,3vw,26px); display:flex;
+    flex-direction:column; gap:14px}
+  .cislo{font-size:11.5px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--ink-2); font-variant-numeric:tabular-nums; display:flex; gap:14px; flex-wrap:wrap}
+  .cislo .kap{color:var(--inkoust); font-weight:700}
+  .nadpis{font-size:clamp(20px,3vw,27px); font-weight:900; letter-spacing:.02em; line-height:1.15}
+
+  /* Plátno drží výřez snímku. Výška plyne z poměru výřezu, ale strop je
+     výška okna, aby se pod snímek vešel titulek a ovládání i na notebooku. */
+  .platno{position:relative; background:var(--paper-2); border-radius:var(--radius-pole);
+    box-shadow:var(--neu-in); overflow:hidden; padding:10px; display:flex; justify-content:center}
+  .vyrez{position:relative; overflow:hidden; border-radius:12px; background:#d9d9d9;
+    width:100%; max-height:66vh}
+  .vyrez img{position:absolute; display:block; max-width:none; user-select:none; -webkit-user-drag:none}
+  /* Zvýraznění: rámeček, číslo v rohu, popisek. Barva je napevno, ne přes
+     --inkoust: rámečky leží na snímku aplikace, a ten je vždycky ve světlém
+     režimu. Tmavá varianta tokenu (#F0523F) na bílém snímku vybledla do
+     růžové (4. 9. 2026). */
+  .zvyr{position:absolute; border:3px solid #C8200F; border-radius:10px;
+    box-shadow:0 0 0 3px rgba(255,255,255,.55), 0 0 0 9999px rgba(0,0,0,0);
+    opacity:0; pointer-events:none}
+  .zvyr .c{position:absolute; left:-14px; top:-14px; width:26px; height:26px; border-radius:50%;
+    background:#C8200F; color:#fff; font-weight:900; font-size:14px; line-height:26px;
+    text-align:center; box-shadow:0 2px 6px rgba(0,0,0,.35)}
+  .zvyr .p{position:absolute; left:-3px; top:100%; margin-top:6px; white-space:nowrap;
+    background:#C8200F; color:#fff; font-size:12.5px; font-weight:700;
+    padding:3px 9px; border-radius:999px; box-shadow:0 2px 6px rgba(0,0,0,.35)}
+  .zvyr.nahoru .p{top:auto; bottom:100%; margin:0 0 6px}
+  .zvyr.vpravo .p{left:auto; right:-3px}
+  /* „bok“: popisek vedle rámečku vpravo — pro úzké vysoké výřezy (nabídka),
+     kde by se popisky pod sebou navzájem zakryly */
+  .zvyr.bok .p{left:100%; top:-3px; margin:0 0 0 8px}
+  .zvyr.bok.vlevo .p{left:auto; right:100%; margin:0 8px 0 0}
+  /* Zarovnání na spodní hranu rámečku: u dvou zvýraznění těsně nad sebou míří
+     „bok" obou popisků na tutéž výšku a jeden druhý překryje (scéna 3 —
+     „zakázky ze SGPS" a „KATALOG" dělí 6 px). Spodní hrana je rozestrčí. */
+  .zvyr.bok.dole .p{top:auto; bottom:-3px}
+  /* Popisek dovnitř rámečku: poslední možnost pro zvýraznění, kolem kterého
+     už není volné místo ani nad, ani pod, ani po stranách. Velké rámečky mají
+     uvnitř snímek aplikace, ale text na plné barvě je čitelný i na něm. */
+  .zvyr.uvnitr .p{top:0; left:0; margin:3px 0 0 3px}
+  .zvyr.uvnitr.vpravo .p{left:auto; right:0; margin:3px 3px 0 0}
+  /* Popisek dovnitř, ale u spodní hrany. Zvýraznění bývají vnořená (scéna 26 —
+     „note" leží uvnitř „shade and combination") a číslo toho vnitřního sedí
+     u horní hrany toho vnějšího; popisek zarovnaný nahoru na něj najede. */
+  .zvyr.uvnitr.dole .p{top:auto; bottom:0; margin:0 0 3px 3px}
+  .zvyr.uvnitr.dole.vpravo .p{margin:0 3px 3px 0}
+  /* Druhé patro nad a pod rámečkem. Tři tlačítka vedle sebe (scéna 5 —
+     mřížka, export, nový produkt) mají popisky širší než rámečky, takže se
+     musí rozestoupit do výšky; jedno patro nestačí, sousední patra dělilo
+     25 px a popisek vysoký 26 px do dalšího zajel. Krok je celý popisek. */
+  .zvyr.patro2 .p{margin-top:34px}
+  .zvyr.nahoru.patro2 .p{margin:0 0 34px}
+  .zvyr.patro3 .p{margin-top:62px}
+  .zvyr.nahoru.patro3 .p{margin:0 0 62px}
+  /* Popisek na střed rámečku. Dvě tlačítka vedle sebe (scéna 32 — uložit
+     a zrušit) mají mezi sebou 6 px, takže popisek zarovnaný vlevo i vpravo
+     dosáhne na číslo souseda; na střed se do mezery vejde. */
+  .zvyr.stred .p{left:50%; right:auto; transform:translateX(-50%)}
+  .scena.bezi .zvyr{animation:najed .45s ease forwards}
+  @keyframes najed{from{opacity:0; transform:scale(1.06)} to{opacity:1; transform:none}}
+  .scena.bezi .a1{animation-delay:.3s}
+  .scena.bezi .a2{animation-delay:1.6s}
+  .scena.bezi .a3{animation-delay:2.9s}
+  .scena.bezi .a4{animation-delay:4.2s}
+  .scena.bezi .a5{animation-delay:5.5s}
+  .scena.bezi .a6{animation-delay:6.8s}
+  .scena.bezi .a7{animation-delay:8.1s}
+  .scena.bezi .a8{animation-delay:9.4s}
+
+  /* ---- titulky ---- */
+  .titulek{min-height:4.4em; display:flex; align-items:flex-start}
+  .titulek p{margin:0; max-width:70ch; font-size:clamp(15px,1.8vw,17px)}
+  .titulek b{color:var(--inkoust)}
+
+  /* ---- ovládání ---- */
+  .ovladani{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+  button{font:inherit; color:var(--ink); background:var(--paper); border:none;
+    border-radius:var(--radius-btn); box-shadow:var(--neu-sm); cursor:pointer;
+    padding:10px 18px; transition:box-shadow .15s, transform .15s}
+  button:hover{box-shadow:var(--neu)}
+  button:active{box-shadow:var(--neu-in); transform:translateY(1px)}
+  button:focus-visible{outline:2px solid var(--ink); outline-offset:3px}
+  button[disabled]{opacity:.45; cursor:default}
+  .hlavni{font-weight:700; padding:12px 26px}
+  .drobne{padding:8px 14px; font-size:14px}
+  .pruh{flex:1; min-width:120px; height:8px; border-radius:99px; box-shadow:var(--neu-in); overflow:hidden}
+  .pruh span{display:block; height:100%; width:0%; background:var(--ink); border-radius:99px;
+    transition:width .25s linear}
+
+  /* kapitoly jako záložky, scény kapitoly jako tečky pod nimi */
+  .kapitoly{display:flex; gap:6px; flex-wrap:wrap}
+  .kapitoly button{padding:6px 12px; font-size:12.5px; color:var(--ink-2)}
+  .kapitoly button.on{color:var(--paper); background:var(--ink); box-shadow:none}
+  .rail{display:flex; gap:6px; flex-wrap:wrap}
+  .rail button{padding:5px 10px; font-size:12px; color:var(--ink-2); font-variant-numeric:tabular-nums}
+  .rail button.on{color:var(--paper); background:var(--inkoust); box-shadow:none}
+  .pozn{color:var(--ink-2); font-size:13px; max-width:70ch}
+  .pozn code{font-family:ui-monospace,Consolas,monospace; font-size:12.5px}
+
+  /* ---- obsah pod přehrávačem: čte se, neposlouchá ---- */
+  .obsah{width:min(1040px,100%); background:var(--paper); border-radius:var(--radius);
+    box-shadow:var(--neu); padding:clamp(16px,3vw,26px); display:flex; flex-direction:column; gap:14px}
+  .obsah h2{font-size:clamp(18px,2.6vw,23px); font-weight:900; letter-spacing:.02em}
+  .obsah p{margin:0; max-width:70ch; font-size:15px}
+  .obsah-mrizka{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px}
+  .obsah-kap{background:var(--paper-2); border-radius:var(--radius-pole); box-shadow:var(--neu-in); padding:14px 16px}
+  .obsah-kap h3{font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-2); margin-bottom:8px}
+  .obsah-kap ol{margin:0; padding-left:0; list-style:none; display:flex; flex-direction:column; gap:4px}
+  .obsah-kap li button{width:100%; text-align:left; padding:6px 12px; font-size:13.5px;
+    display:flex; gap:8px; align-items:baseline}
+  .obsah-kap li button .n{color:var(--ink-2); font-variant-numeric:tabular-nums; font-size:12px; min-width:2.2em}
+
+  @media (prefers-reduced-motion: reduce){
+    .scena .zvyr{opacity:1}
+    .scena.bezi .zvyr{animation:none}
+    .pruh span{transition:none}
+  }
+</style>
+
+<div class="hlavicka">
+  <div>
+    <div class="znacka">Ink Recipe Manager — manual</div>
+    <div class="podznacka" id="podznacka">Page by page, function by function — with spoken word and highlights right on the screen</div>
+  </div>
+  <button class="drobne" id="zvuk" aria-pressed="true">🔊 Spoken word</button>
+</div>
+
+<div class="jeviste">
+  <div>
+    <div class="cislo"><span class="kap" id="kapitola"></span><span id="cislo"></span></div>
+    <h2 class="nadpis" id="nadpis"></h2>
+  </div>
+
+  <div class="platno" id="platno">
+    <div class="vyrez scena" id="scena"></div>
+  </div>
+
+  <div class="titulek"><p id="titulek"></p></div>
+
+  <div class="ovladani">
+    <button class="hlavni" id="prehrat">▶ Start the manual</button>
+    <button class="drobne" id="zpet">‹ Previous</button>
+    <button class="drobne" id="dal">Next ›</button>
+    <div class="pruh" aria-hidden="true"><span id="pruh"></span></div>
+  </div>
+  <div class="kapitoly" id="kapitoly"></div>
+  <div class="rail" id="rail"></div>
+  <p class="pozn" id="pozn"></p>
+</div>
+
+<!-- Obsah: kdo nechce poslouchat, má tu celý manuál jako seznam kapitol
+     a scén. Tlačítko skočí na scénu. Staví se ze SCENY, aby nemohl zastarat. -->
+<section class="obsah">
+  <h2>Contents</h2>
+  <p>The manual follows the app's own menu: first getting your bearings, then the catalog,
+    the path of a job from choosing a product through the recipe and the batch calculation to
+    the scale, and finally stock, reports and data. Click a row to jump to that scene.</p>
+  <div class="obsah-mrizka" id="obsah"></div>
+</section>
+
+<script>
+(function(){
+  "use strict";
+
+  /* Scéna = výřez jednoho snímku a zvýraznění na něm.
+       obr    soubor v manual/ (bez přípony), snímky mají šířku 1 600 px
+       roz    rozměr snímku [šířka, výška]
+       vyrez  [x, y, šířka, výška] výřezu ve snímku; bez něj celý snímek
+       zvyr   [x, y, šířka, výška, popisek, poloha popisku]; rozsvěcují se po sobě
+       text   titulek; rec scénář pro hlas (čísla slovy); cas délka nahrávky v s
+     Scénář žije jen v rec — nahrávka se z něj čte (nahraj_ukazku.py --jazyk manual). */
+  var KAPITOLY = [
+    "Getting your bearings", "Product catalog", "Product and position", "Recipe and parameters",
+    "How much to mix", "Mixing mode", "Recipes and prices", "Mixing",
+    "Stock", "Reports and data"
+  ];
+
+  var SCENY = [
+    /* ===== 1. Getting your bearings ===== */
+    { nadpis:"What Ink Recipe Manager is", kap:0,
+      obr:"01-domov", roz:[1600,1400],
+      zvyr:[],
+      text:"Ink Recipe Manager answers one question: <b>how much of what to weigh out</b> to get the right shade in the right quantity. It is a single page in a browser — no installation, no server, no internet. This manual walks through it page by page.",
+      rec:"Ink Recipe Manager answers one question: how much of what to weigh out to get the right shade in the right quantity. It is a single page in a browser, with no installation, no server and no internet. This manual walks through it page by page, function by function.",
+      cas:18 },
+    { nadpis:"The header: menu, logo, search, theme", kap:0,
+      obr:"01-domov", roz:[1600,1400], vyrez:[0,0,1600,280],
+      zvyr:[[36,48,74,74,"menu"],[722,14,156,150,"logo = back to the calculation","nahoru"],[546,188,508,70,"product search"],[1492,48,74,74,"light / dark theme","vpravo"]],
+      text:"The top is always the same: the <b>menu button</b> on the left, in the middle the logo that takes you back to the home calculation at any time, below it <b>product search</b> by name or reference number, and on the right the light and dark theme switch.",
+      rec:"The top is always the same. On the left, the menu button. In the middle, the logo that takes you back to the home calculation at any time. Below it, product search by name or reference number. And on the right, the light and dark theme switch.",
+      cas:18 },
+    { nadpis:"The menu: role, technology, groups", kap:0,
+      obr:"02-nabidka", roz:[1600,1600], vyrez:[0, 100, 760, 1500],
+      zvyr:[[48, 136, 250, 124, "role", "bok"], [48, 292, 250, 362, "technology and product count", "bok"], [48, 684, 250, 44, "orders from SGPS", "bok"], [48, 734, 250, 190, "CATALOG", "bok"], [48, 930, 250, 200, "MIXING", "bok"], [48, 1136, 250, 440, "STOCK · REPORTS · DATA", "bok"]],
+      text:"At the top of the menu is the <b>role</b> — technologist, supervisor or printer — and below it <b>the workshop's people</b>, if the workshop has listed them: one click sets the name and the role together, so a signature into the records is written the same way every time. Then the <b>technology</b>: screen, textile, pad, transfer and firing; the number on the right says how many products support it. Then the groups <b>Catalog</b>, <b>Mixing</b>, <b>Stock</b>, a standalone Reports and the <b>Data</b> group. Right at the bottom, the language: Czech, English, Portuguese.",
+      rec:"At the top of the menu is the role: technologist, supervisor or printer. Below it, the workshop's people, if the workshop has listed them. One click sets the name and the role together, so a signature into the records is written the same way every time. Then the technology: screen printing, textile, pad printing, transfer and firing. The number on the right says how many products support that technology. Then come the groups Catalog, Mixing and Stock, a standalone Reports, and the Data group. Right at the bottom is the language: Czech, English and Portuguese.",
+      cas:40 },
+    { nadpis:"The back button", kap:0,
+      obr:"10-produkty", roz:[1600,1000], vyrez:[0, 0, 1600, 320],
+      zvyr:[[112, 60, 124, 50, "back to the calculation in progress", "bok"]],
+      text:"When you step away from a calculation in progress, a <b>back button</b> appears next to the menu. The calculation is not thrown away — it stays in memory and one click brings you back, or the Alt and left arrow keys.",
+      rec:"When you step away from a calculation in progress, a back button appears next to the menu. The calculation is not thrown away. It stays in memory and one click brings you back, or the Alt and left arrow keys.",
+      cas:14 },
+
+    /* ===== 2. Product catalog ===== */
+    { nadpis:"The product catalog", kap:1,
+      obr:"10-produkty", roz:[1600,1000],
+      zvyr:[[58,258,348,46,"search"],[1160,206,96,44,"table / grid","nahoru"],[1258,204,120,50,"export CSV","nahoru"],[1382,204,160,50,"new product","nahoru"],[954,316,390,26,"print positions"]],
+      text:"Menu → Catalog → Products. The whole catalog is here, <b>1,320 products</b>. You search by name or reference number, the table switches to a grid with photos, the catalog exports to CSV, or you create a new product. The Print positions column is what everything else revolves around.",
+      rec:"In the menu, Catalog, Products. The whole catalog is here, one thousand three hundred and twenty products. You search by name or reference number. The table can be switched to a grid with photos, the catalog exported to C S V, or a new product created. The Print positions column is what everything else revolves around.",
+      cas:24 },
+    { nadpis:"A product with several positions", kap:1,
+      obr:"11-produkt-11152", roz:[1600,1000], vyrez:[0,180,1600,360],
+      zvyr:[[128,356,380,60,"product 11152"],[682,358,600,34,"position 1 · screen printing"],[682,404,600,34,"position 2 · pad printing"],[682,450,600,34,"position 3 · pad printing"]],
+      text:"Take aluminium pen 11152. It has <b>three print positions</b> and each carries its own size, coverage and above all technology: the barrel is printed by both screen and pad printing, the clip by pad printing. So no setting decides the technology — <b>the position decides it</b>.",
+      rec:"Take aluminium pen one one one five two. It has three print positions and each carries its own size, coverage and above all technology. The barrel is printed by both screen and pad printing, the clip position by pad printing only. So no setting decides the technology. The position decides it.",
+      cas:22 },
+    { nadpis:"The color palette belongs to the position", kap:1,
+      obr:"11-produkt-11152", roz:[1600,1000], vyrez:[600, 330, 760, 190],
+      zvyr:[[688, 378, 452, 30, "palettes for screen printing", "bok"], [688, 424, 540, 30, "palettes for pad printing"], [1024, 356, 44, 26, "position technology", "nahoru"]],
+      text:"Each position carries labels of <b>ink types</b>, that is recipe palettes. Only palettes that belong to the position's technology are offered — a pad printing ink can never be assigned to a textile screen, not even by mistake. A click assigns or removes a palette, and the calculation then offers <b>only its recipes</b> for that position. Finding a color shrinks to a handful of entries.",
+      rec:"Each position carries labels of ink types, that is recipe palettes. Only palettes that belong to the technology of the position are offered. A pad printing ink can never be assigned to a textile screen, not even by mistake. A click assigns or removes a palette, and the calculation then offers only its recipes for that position. Finding a color shrinks to a handful of entries. With the bridge running the assignment is written to a file for the whole workshop; without it, it only applies in this browser.",
+      cas:33 },
+    { nadpis:"Editing a product", kap:1,
+      obr:"12-produkt-upravit", roz:[1600,1000], vyrez:[0,180,1600,620],
+      zvyr:[[58,286,1484,62,"ref. number · name · material"],[70,392,966,44,"position name"],[1040,392,306,44,"width × height mm · coverage %"],[1350,392,132,44,"technology","nahoru"],[70,436,540,32,"palettes — saved immediately"],[58,678,140,38,"add a position"],[58,726,240,50,"save / cancel"]],
+      text:"<b>Edit</b> opens the product card: reference number, name, material and a row for each position — name, width and height in millimetres, coverage in percent and technology. A position can be added or removed. Palettes are saved the moment you click; everything else only with <b>Save product</b>.",
+      rec:"The Edit button opens the product card: reference number, name, material and a row for each position. Name, width and height in millimetres, coverage in percent and technology. A position can be added or removed. Palettes are saved the moment you click, everything else only with the Save product button.",
+      cas:21 },
+    { nadpis:"The grid with photos", kap:1,
+      obr:"13-produkty-mrizka", roz:[1600,1000], vyrez:[0,180,1600,620],
+      zvyr:[[1160,206,96,44,"view switch","nahoru"],[70,646,80,24,"color variants"],[668,664,120,24,"number of positions"]],
+      text:"The grid shows photos, the product's <b>color variants</b> as dots, and the number of positions. At most 300 products are shown at once — if the one you want is missing, narrow the search.",
+      rec:"The grid shows photos, the color variants of the product as dots, and the number of positions. At most three hundred products are shown at once. If the one you want is missing, narrow the search.",
+      cas:14 },
+
+    /* ===== 3. Product and position in the calculation ===== */
+    { nadpis:"Searching for a product", kap:2,
+      obr:"20-hledani", roz:[1600,1000], vyrez:[300,150,1000,260],
+      zvyr:[[546,188,508,70,"type a name or reference"],[546,266,508,104,"suggestions — a click opens the position picker"]],
+      text:"On the home page every order starts by picking a product. Type the name or the reference number and the suggestions offer <b>the first twelve matches</b>. Clicking a product opens the Ink color and print position window straight away. The same suggestions sit on <b>recipe search</b> too — there it also searches the series, the order number and component names, because a supplier's invoice quotes only the order number, and in the workshop people often know “something with Warm Red”, not the Pantone number.",
+      rec:"On the home page every order starts by picking a product. Type the name or the reference number and the suggestions offer the first twelve matches. Clicking a product opens the Ink color and print position window straight away. The same suggestions sit on recipe search too. There it also searches the series, the order number and component names, because a supplier's invoice quotes only the order number, and in the workshop people often know “something with Warm Red”, not the Pantone number.",
+      cas:31 },
+    { nadpis:"Ink color and print position", kap:2,
+      obr:"21-picker", roz:[1600,1000], vyrez:[360,20,880,500],
+      zvyr:[[388,132,204,44,"product color variant"],[388,178,110,22,"in stock"],[388,258,500,178,"positions — preview, size, technology"],[1170,46,40,40,"close without changing","vpravo"]],
+      text:"In the window you first pick the <b>product color variant</b> — the stock quantity is shown with it. Below are cards for every position with a preview, size and technology. The chosen position determines the technology, the print size and the recipe palette you then choose from.",
+      rec:"In the Ink color and print position window you first pick the product color variant. The stock quantity is shown with it. Below are cards for every position with a preview, size and technology. The chosen position determines the technology, the print size and the recipe palette you then choose from.",
+      cas:19 },
+    { nadpis:"Confirming the selection", kap:2,
+      obr:"22-picker-poloha", roz:[1600,1000], vyrez:[360,20,880,500],
+      zvyr:[[552,258,168,178,"selected position"],[388,200,660,38,"where a custom recipe will be saved"],[388,442,150,48,"confirm"]],
+      text:"The selected position is highlighted. The line above the cards says which combination — <b>color · product · technology · position</b> — any custom recipe will be saved to. <b>Confirm selection</b> closes the window and the calculation is recomputed.",
+      rec:"The selected position is highlighted. The line above the cards says which combination, color, product, technology and position, any custom recipe will be saved to. The Confirm selection button closes the window and the calculation is recomputed.",
+      cas:17 },
+    { nadpis:"The Selected product card", kap:2,
+      obr:"01-domov", roz:[1600,1400], vyrez:[30,270,770,600],
+      zvyr:[[58,326,230,232,"product photo"],[294,326,230,232,"position with the print area marked"],[58,766,300,34,"technology · size · color"],[58,798,200,42,"change color and position"]],
+      text:"The <b>Selected product</b> card sums up the choice: a photo, a preview of the position with the print area marked, and labels for technology, size and product color. The Ink color and print position button reopens the picker.",
+      rec:"The Selected product card sums up the choice: a photo, a preview of the position with the print area marked, and labels for technology, size and product color. The Ink color and print position button reopens the picker.",
+      cas:14 },
+    { nadpis:"Order sheet and code reader", kap:2,
+      obr:"01-domov", roz:[1600,1400], vyrez:[30,270,770,600],
+      zvyr:[[534,326,226,200,"drag a PDF here"],[534,586,226,50,"read a barcode"]],
+      text:"This is also where a job is loaded. Drag an <b>order sheet</b> PDF onto the tile: the bridge parses it and the app pulls out the product, piece count, position, shade and size itself — nothing is retyped. <b>Read a code</b> accepts a barcode or QR code from a keyboard-mode reader, a serial port or the camera.",
+      rec:"This is also where a job is loaded. An order sheet in P D F is dragged onto the tile. The bridge parses it and the app pulls out the product, piece count, position, shade and size itself. Nothing is retyped. Read a code accepts a barcode or Q R code from a keyboard-mode reader, a serial port, or the camera.",
+      cas:23 },
+    { nadpis:"Coverage from the preview", kap:2,
+      obr:"25-pokryti", roz:[1600,1300], vyrez:[340,20,930,250],
+      zvyr:[[368,150,866,84,"drag in the artwork — PNG, JPG or a page of the order sheet"],[1192,48,40,40,"close","vpravo"]],
+      text:"<b>Compute coverage from the preview</b> opens the Actual artwork coverage window. You drag in the artwork — PNG, JPG or a page from the order sheet — and mark the crop in the preview. The app computes what share of the area the ink really covers: from the pixels where ink is, not from the rectangle around the artwork. On the job where this was measured, consumption fell from <b>3.1 to 0.4 g</b> per piece.",
+      rec:"Compute coverage from the preview opens the Actual artwork coverage window. You drag in the artwork, P N G, J P G or a page from the order sheet, and mark the crop in the preview. The app computes what share of the area the ink really covers. From the pixels where ink is, not from the rectangle around the artwork. On the job where this was measured, consumption fell from three point one to zero point four grams per piece.",
+      cas:29 },
+
+    /* ===== 4. Recipe and parameters ===== */
+    { nadpis:"Recipe and color — Pantone standard", kap:3,
+      obr:"01-domov", roz:[1600,1400], vyrez:[30, 860, 520, 540],
+      zvyr:[[62, 932, 220, 52, "Pantone standard"], [62, 996, 460, 40, "recipe and database"], [62, 1026, 452, 36, "composition"], [62, 1064, 380, 30, "shade — CMYK / hex"]],
+      text:"The <b>Recipe and color</b> card has two routes. <b>Pantone standard</b> is a recipe from a purchased database: you pick the database and the shade, because the same Pantone has a different composition in every database. Only databases assigned to the technology and the position's palette are offered. The list shows at most 400 recipes — if a color is missing, narrow the filter.",
+      rec:"The Recipe and color card has two routes. Pantone standard is a recipe from a purchased database. You pick the database and the shade, because the same Pantone has a different composition in every database. Only databases assigned to the technology and the palette of the position are offered. The list shows at most four hundred recipes. If a color is missing, narrow the database filter or search.",
+      cas:27 },
+    { nadpis:"Pantone custom — the workshop's own recipes", kap:3,
+      obr:"28-pantone-custom", roz:[1600,1400], vyrez:[30, 860, 520, 540],
+      zvyr:[[296, 930, 220, 54, "Pantone custom"], [62, 996, 230, 24, "own colors for this product"], [62, 1022, 452, 58, "ink type filter"], [62, 1086, 452, 52, "search"], [62, 1142, 452, 52, "pick a custom recipe"]],
+      text:"<b>Pantone custom</b> are the workshop's own recipes. They are offered only for the product, color, technology and position they were created on. The app remembers what was last used for a given combination and offers it by itself.",
+      rec:"Pantone custom are the workshop's own recipes. They are offered only for the product, color, technology and position they were created on. The app remembers what was last used for a given combination and offers it by itself.",
+      cas:16 },
+    { nadpis:"A new custom recipe", kap:3,
+      obr:"23-custom-pick", roz:[1600,1000], vyrez:[360,20,880,700],
+      zvyr:[],
+      text:"A custom recipe <b>never starts from nothing</b>. The Ink color and print position window has a Custom recipe for this combination button: you pick a starting recipe from the technology's database and the app shows the name it will be saved under — the name carries the whole address of the combination.",
+      rec:"A custom recipe never starts from nothing. The Ink color and print position window has a Custom recipe for this combination button. You pick a starting recipe from the database of the technology and the app shows the name it will be saved under. The name carries the whole address of the combination.",
+      cas:19 },
+    { nadpis:"Editing a custom recipe", kap:3,
+      obr:"24-custom-editor", roz:[1600,1500], vyrez:[360,20,880,940],
+      zvyr:[[392,120,392,36,"the name carries the whole combination"],[392,290,814,132,"customer · order number · C / U paper · also approved by"],[392,698,772,100,"components and percentages — sum 100"],[392,890,250,42,"save / cancel"]],
+      text:"<b>Derive and edit</b> opens the editor. Here you change the components and their percentages — the sum must be one hundred. A recipe also carries the screen or cliché, opacity, surface, a note, thinning, and for two-component inks the hardener with its pot life. Then the <b>customer</b> and the supplier's <b>order number</b>, the <b>C / U paper</b>, and <b>who else approves it</b>. It is saved with Save recipe. From a printer it is created as <b>pending</b> until a technologist approves it.",
+      rec:"Derive and edit opens the editor. Here you change the components and their percentages, and the sum must be one hundred. A recipe also carries the screen or cliché, opacity, surface, a note, thinning, and for two-component inks the hardener with its pot life. Then the customer and the supplier's order number, the C or U paper, and who else approves it. It is saved with the Save recipe button. From a printer it is created as pending until a technologist approves it.",
+      cas:32 },
+    { nadpis:"Print parameters", kap:3,
+      obr:"01-domov", roz:[1600,1400], vyrez:[540, 860, 520, 540],
+      zvyr:[[568, 940, 148, 260, "screen / cliché"], [728, 996, 148, 204, "opacity"], [886, 996, 148, 204, "surface"], [568, 1220, 460, 40, "tested · fade-resistant"], [568, 1270, 460, 90, "recipe note"]],
+      text:"<b>Print parameters</b>: the screen, for pad printing the cliché with its etch depth, opacity and surface. They are saved <b>with the recipe</b>, not with the job — next time the same color offers them by itself. For textiles the screen follows the product and there is no choice. The recipe note is one line for workshop knowledge: two passes and two minutes of drying, say.",
+      rec:"Print parameters: the screen, for pad printing the cliché with its etch depth, opacity and surface. They are saved with the recipe, not with the job. Next time the same color offers them by itself. For textiles the screen follows the product and there is no choice. The recipe note is one line for workshop knowledge, two passes and two minutes of drying, for example.",
+      cas:26 },
+    { nadpis:"The order — four numbers", kap:3,
+      obr:"01-domov", roz:[1600,1400], vyrez:[1050, 860, 520, 540],
+      zvyr:[[1086, 936, 216, 200, "number of pieces"], [1320, 936, 216, 200, "consumption g/m²"], [1086, 1154, 216, 200, "losses %"], [1320, 1154, 216, 200, "minimum batch"]],
+      text:"The <b>order</b> is four numbers: the piece count, consumption in grams per square metre, losses in percent and the minimum batch. Consumption is pre-filled with a flat rate per technology; the exact figure comes from the screen. <b>The app never overwrites a manually entered consumption.</b>",
+      rec:"The order is four numbers: the piece count, consumption in grams per square metre, losses in percent and the minimum batch. Consumption is pre-filled with a flat rate per technology, and the exact figure comes from the screen. The app never overwrites a manually entered consumption.",
+      cas:18 },
+
+    /* ===== 5. How much to mix ===== */
+    { nadpis:"The result: batch and the breakdown", kap:4,
+      obr:"01-domov", roz:[1600,1400], vyrez:[810,270,770,600],
+      zvyr:[[844,340,540,60,"recipe and combination"],[844,420,300,96,"batch"],[844,500,700,62,"calculation breakdown"],[844,568,690,32,"recipe composition"],[844,616,690,36,"minimum batch"]],
+      text:"<b>How much to mix</b> is the result: the batch in grams, the conversion to millilitres by density and the whole breakdown — area × covered area × pieces × consumption, plus losses. You cannot go below the minimum batch: a smaller amount cannot be mixed honestly. The bar shows the recipe composition.",
+      rec:"How much to mix is the result. The batch in grams, the conversion to millilitres by density and the whole calculation breakdown: area times covered area times pieces times consumption, plus losses. You cannot go below the minimum batch, as a smaller amount cannot be mixed honestly. The bar shows the recipe composition.",
+      cas:22 },
+    { nadpis:"Batch unit — grams, kilograms, pounds", kap:4,
+      obr:"01-domov", roz:[1600,1400], vyrez:[820,290,760,300],
+      zvyr:[[848,432,300,80,"batch in the chosen unit"],[1420,462,120,32,"g · kg · lb","vpravo"],[848,505,460,26,"volume and density"]],
+      text:"The headline figure can be switched to <b>kilograms or pounds</b>. The switch changes <b>the display only</b>: the arithmetic stays in grams, the table of weights stays in grams, and grams are what goes to the scale — that is what its display shows. Kilograms are for large screen-printing batches, pounds for orders from abroad. A pound is exactly <b>453.59237 g</b>, not a rounded 454. The browser remembers the choice, so it is set once at this mixing station.",
+      rec:"The headline figure can be switched to kilograms or pounds. The switch changes the display only. The arithmetic stays in grams, the table of weights stays in grams, and grams are what goes to the scale, because that is what its display shows. Kilograms are for large screen printing batches, pounds for orders from abroad. A pound is exactly four hundred fifty three point five nine two grams, not a rounded four hundred fifty four. The browser remembers the choice, so it is set once at this mixing station.",
+      cas:34 },
+    { nadpis:"Before you start mixing", kap:4,
+      obr:"26-nez-michat", roz:[1600,1000], vyrez:[370,20,860,250],
+      zvyr:[[396,100,800,140,"what could end in a correction"],[1154,52,44,44,"close","vpravo"]],
+      text:"The <b>Before you start mixing</b> button opens a list of risks: the recipe is not tested, a component is missing from the price list, the ink shows through the substrate. It is a warning, not a ban — the decision stays with you.",
+      rec:"The Before you start mixing button opens a list of risks. The recipe is not tested, a component is missing from the price list, the ink shows through the substrate. It is a warning, not a ban. The decision stays with you.",
+      cas:16 },
+    { nadpis:"Ink costs", kap:4,
+      obr:"01-domov", roz:[1600,1400], vyrez:[810,270,770,600],
+      zvyr:[[844,668,690,100,"costs and price per piece"],[1436,664,100,40,"hide prices at the scale","nahoru"]],
+      text:"Below the result are the <b>ink costs</b> and the price per piece. They come from the material price list; until prices are entered, the app says so. <b>Hide prices</b> hides them at the scale — and hidden, they are not printed on the mixing sheet either.",
+      rec:"Below the result are the ink costs and the price per piece. They are computed from the material price list. Until prices are entered, the app says so. Hide prices hides them at the scale, and hidden, they are not printed on the mixing sheet either.",
+      cas:16 },
+    { nadpis:"Adjustment profile — a correction that holds next time", kap:4,
+      obr:"01-domov", roz:[1600,1400], vyrez:[820,600,760,260],
+      zvyr:[[848,630,140,36,"create a profile"],[848,680,300,26,"ink costs"]],
+      text:"When a shade is tweaked the same way at every proof, that is an <b>adjustment profile</b>: a percentage addition stored <b>outside</b> the base recipe. The recipe from the database is the supplier's document and it is right on another product — which is why it is not overwritten. The profile is tied to the <b>product · color · technology · position</b> it was created for, and it applies itself when the same order comes round again. <b>The batch does not grow</b>: the composition is renormalised to a hundred, so only that one component's weight goes up.",
+      rec:"When a shade is tweaked the same way at every proof, that is an adjustment profile. A percentage addition stored outside the base recipe. The recipe from the database is the supplier's document and it is right on another product, which is why it is not overwritten. The profile is tied to the product, color, technology and position it was created for, and it applies itself when the same order comes round again. The batch does not grow. The composition is renormalised to a hundred, so only that one component's weight goes up.",
+      cas:34 },
+    { nadpis:"Mixing mode, sheet, queue", kap:4,
+      obr:"01-domov", roz:[1600,1400], vyrez:[810,270,770,600],
+      zvyr:[[844,776,182,58,"workstation at the scale"],[1030,776,184,58,"A4 printout"],[1218,776,150,58,"into the mixing plan"]],
+      text:"<b>Mixing mode</b> opens the workstation at the scale full screen. <b>Mixing sheet</b> prints an A4 with the weights, a cumulative column and tick boxes. <b>To queue</b> puts the batch into the mixing plan.",
+      rec:"Mixing mode opens the workstation at the scale full screen. Mixing sheet prints an A four with the weights, a cumulative column and tick boxes. To queue puts the batch into the mixing plan.",
+      cas:13 },
+
+    /* ===== 6. Mixing mode ===== */
+    { nadpis:"Mixing mode", kap:5,
+      obr:"30-mich", roz:[1600,1300], vyrez:[0, 0, 1600, 780],
+      zvyr:[[10, 10, 340, 90, "shade and combination", "bok"], [78, 70, 110, 36, "note"], [358, 30, 240, 54, "color and position without leaving mixing"], [1274, 26, 96, 64, "batch", "vpravo"], [1376, 30, 210, 54, "back · Esc", "vpravo"], [14, 124, 832, 330, "weights in large type"], [862, 124, 720, 200, "assistant and label"]],
+      text:"Mixing mode is only what is needed at the scale: the shade, the combination, the batch and the table of weights in large type. Top left you can add a <b>note</b> and open Ink color and print position without leaving mixing. It closes with Esc or the <b>Back to calculation</b> button.",
+      rec:"Mixing mode is only what is needed at the scale. The shade, the combination, the batch and the table of weights in large type. Top left you can add a note and open Ink color and print position without leaving mixing. It closes with the Escape key or the Back to calculation button.",
+      cas:19 },
+    { nadpis:"The table of weights", kap:5,
+      obr:"30-mich", roz:[1600,1300], vyrez:[0, 120, 860, 340],
+      zvyr:[[440, 128, 70, 26, "%"], [530, 128, 90, 26, "weigh out g"], [660, 128, 120, 26, "cumulative"], [800, 128, 44, 26, "ml", "vpravo"], [14, 154, 832, 60, "component being weighed"], [24, 280, 30, 100, "done"]],
+      text:"Every component has a percentage, grams to weigh out, a <b>cumulative total</b> and millilitres. You weigh into one vessel: after each component the scale display should show the number in the cumulative column. The component being weighed is highlighted, finished ones are ticked off.",
+      rec:"Every component has a percentage, grams to weigh out, a cumulative total and millilitres. You weigh into one vessel. After each component the scale display should show the number in the cumulative column. The component being weighed is highlighted, and finished ones are ticked off.",
+      cas:18 },
+    { nadpis:"Substrate, viscosity, additives", kap:5,
+      obr:"30-mich", roz:[1600,1300], vyrez:[0, 450, 860, 320],
+      zvyr:[[14, 462, 832, 96, "before you start mixing"], [14, 568, 832, 56, "viscosity — flow time"], [14, 636, 832, 56, "additives — recommendation and cap"]],
+      text:"Above the table is the same warning as in the calculation. When the product color has a shade recorded, <b>Ink on the substrate</b> is added too, warning about show-through or a needed white underprint. <b>Viscosity</b> is the flow time in seconds. <b>Additives</b> — thinner and retarder — are weighed like any other component: the app recommends an amount, watches the thinning cap and works out the drop in pigment.",
+      rec:"Above the table is the same warning as in the calculation, Before you start mixing. When the product color has a shade recorded, Ink on the substrate is added too, warning about show-through or a needed white underprint. Viscosity is the flow time in seconds. Additives, thinner and retarder, are weighed like any other component. The app recommends an amount, watches the thinning cap, and works out how much the pigment dropped by thinning.",
+      cas:29 },
+    { nadpis:"A series' forced component and substituting a base", kap:5,
+      obr:"30-mich", roz:[1600,1300], vyrez:[10,440,860,260],
+      zvyr:[[22,462,830,90,"Before you start mixing — what stands in the way"],[22,640,830,50,"additives: thinner and retarder"]],
+      text:"Two things that never go into the recipe. Some series are not printed as they come out of the recipe — the manufacturer prescribes a varnish, a catalyst or a fixed share of thinner into <b>every</b> mix in the series. That is a property of the whole series, not of a color, so it is recorded against the series and stands on the sheet as a line after the ink. And when stock reports that <b>a base has run out</b>, the app offers a substitute — but only where it has a rule for it: a dearer component may stand in for a cheaper one, never the other way round. The shade is then <b>checked with a proof</b>, and the app says so out loud on the screen, on the sheet and on the label.",
+      rec:"Two things that never go into the recipe. Some series are not printed as they come out of the recipe. The manufacturer prescribes a varnish, a catalyst or a fixed share of thinner into every mix in the series. That is a property of the whole series, not of a color, so it is recorded against the series and stands on the sheet as a line after the ink. And when stock reports that a base has run out, the app offers a substitute, but only where it has a rule for it. A dearer component may stand in for a cheaper one, never the other way round. The shade is then checked with a proof, and the app says so out loud on the screen, on the sheet and on the label.",
+      cas:41 },
+    { nadpis:"Leftovers from stock", kap:5,
+      obr:"31-mich-zbytek-rucne", roz:[1600,1500], vyrez:[0, 690, 860, 360],
+      zvyr:[[14, 704, 356, 54, "leftover entered by hand"], [380, 704, 216, 54, "I know the leftover already"], [24, 824, 540, 64, "what it is · how many grams"], [576, 824, 262, 64, "composition by recipe"], [24, 900, 816, 66, "components and percentages"]],
+      text:"Before mixing, the app offers <b>pots from the leftover records</b> that fit the batch. A leftover can only be added to, never taken from — so the app works out how much of it to use and what to add. A pot without a label is entered by hand with <b>Leftover not in records</b>; <b>I know the leftover</b> records it right at the scale.",
+      rec:"Before mixing, the app offers pots from the leftover records that fit the batch. A leftover can only be added to, never taken from. So the app works out how much of it to use and what to add. A pot without a label is entered by hand with the Leftover not in records button. I know the leftover records it right at the scale.",
+      cas:22 },
+    { nadpis:"The weighing assistant", kap:5,
+      obr:"32-mich-simulace", roz:[1600,1300], vyrez:[860, 120, 730, 860],
+      zvyr:[[876, 176, 106, 22, "simulation"], [876, 220, 150, 80, "read from the scale"], [1452, 146, 124, 90, "disconnect", "vpravo"], [1452, 262, 124, 100, "tare", "vpravo"], [876, 430, 700, 40, "component being weighed"], [876, 592, 160, 46, "next component"], [1110, 596, 90, 36, "tolerance"], [878, 650, 700, 220, "target · poured · remaining"]],
+      text:"The <b>weighing assistant</b> leads you component by component. The scale connects over USB in Chrome or Edge; without a scale you can walk through it in <b>simulation</b>. It shows the target, the current weight and the tolerance. If you overpour, it works out how much to scale the whole batch up by so the shade holds.",
+      rec:"The weighing assistant leads you component by component. The scale connects over U S B in Chrome or Edge. Without a scale you can walk through it in simulation. It shows the target, the current weight and the tolerance. If you overpour, it works out how much to scale the whole batch up by so the shade holds.",
+      cas:22 },
+    { nadpis:"The label for the pot", kap:5,
+      obr:"33-mich-stitek", roz:[1600,1300], vyrez:[560, 0, 1030, 380],
+      zvyr:[[1000, 268, 410, 48, "label for the pot"], [672, 90, 260, 110, "barcode"], [680, 296, 158, 44, "print"], [1436, 274, 136, 36, "with hardener → countdown", "vpravo"]],
+      text:"Once mixed, the <b>Label for the pot</b> button saves the batch to the records as “in print” and prints a label with a barcode. After the job the label is scanned and how much was left is filled in. The <b>with hardener</b> switch creates a two-component batch and a pot life countdown.",
+      rec:"Once mixed, the Label for the pot button saves the batch to the records in the in print state and prints a label with a barcode. After the job the label is scanned and how much was left is filled in. The with hardener switch creates a two-component batch and a pot life countdown.",
+      cas:17 },
+    { nadpis:"A note on the recipe", kap:5,
+      obr:"34-mich-poznamka", roz:[1600,1300], vyrez:[0, 0, 1100, 165],
+      zvyr:[[76, 68, 562, 44, "one line of note"], [648, 70, 66, 40, "save"], [720, 70, 66, 40, "cancel"]],
+      text:"The <b>Note</b> button opens a field for one line about the recipe. It is saved only with Save or with Enter; Esc here closes just the edit, not mixing.",
+      rec:"The Note button opens a field for one line about the recipe. It is saved only with the Save button or with Enter. Escape here closes just the edit, not mixing.",
+      cas:11 },
+
+    /* ===== 7. Recipes and price list ===== */
+    { nadpis:"Ink recipes", kap:6,
+      obr:"40-receptury", roz:[1600,1300], vyrez:[30, 180, 1540, 1120],
+      zvyr:[[58, 300, 1480, 84, "databases — chips with counts"], [1152, 208, 96, 44, "table / grid", "nahoru"], [1374, 206, 166, 46, "new recipe", "nahoru"], [1050, 570, 300, 26, "composition"], [1386, 562, 150, 30, "edit / delete"]],
+      text:"Menu → Catalog → <b>Recipes</b>: every recipe, <b>15,191</b> from seven purchased databases plus the workshop's own. The chips at the top filter the database. Each one carries its type, database, series, density and composition. The table shows the first 100 rows.",
+      rec:"In the menu, Catalog, Recipes. Every recipe is here, fifteen thousand one hundred and ninety one from seven purchased databases, plus the workshop's own. The chips at the top filter the database. Each one carries its type, database, series, density and composition. The table shows the first one hundred rows.",
+      cas:24 },
+    { nadpis:"Favourites, only mine, only new · C and U", kap:6,
+      obr:"40-receptury", roz:[1600,1300], vyrez:[30,390,1540,220],
+      zvyr:[[70,402,404,38,"only favourites · only mine · only new"],[486,402,182,38,"C and U · C · U","nahoru"],[58,450,1480,36,"search with suggestions"]],
+      text:"Above the list are three toggles and the paper choice. <b>The star belongs to a person, not to the computer</b> — the key is the role's signature, so what the technologist marks does not get in the printers' way at the scale. <b>Only mine</b> are the recipes I entered or approved, <b>only new</b> those from the last 30 days. And <b>C and U</b>: “485 C” and “485 U” are two different shades, not two spellings of one — coated and uncoated paper. The letter is read from the name; on the workshop's own recipe it can be stated outright. The toggles add up, and they are not kept once the app is closed.",
+      rec:"Above the list are three toggles and the paper choice. The star belongs to a person, not to the computer. The key is the role's signature, so what the technologist marks does not get in the printers' way at the scale. Only mine are the recipes I entered or approved, only new those from the last thirty days. And C and U: four eighty five C and four eighty five U are two different shades, not two spellings of one. Coated and uncoated paper. The letter is read from the name; on the workshop's own recipe it can be stated outright. The toggles add up, and they are not kept once the app is closed.",
+      cas:41 },
+    { nadpis:"Link, e-mail and the recipe's history", kap:6,
+      obr:"40-receptury", roz:[1600,1300], vyrez:[1140,530,420,320],
+      zvyr:[[1204,562,52,28,"link to the clipboard"],[1264,562,64,28,"e-mail"],[1336,562,70,28,"history"]],
+      text:"Every recipe carries three buttons. <b>Link</b> copies an address that opens the app narrowed straight down to this recipe — it can be sent to the other mixing station or pinned to an order. <b>E-mail</b> opens a message with the name, series and order number; the composition is not in it, it is licensed. <b>History</b> assembles no new data — it gathers what the records already hold and pairs it by name: who created and approved the recipe, who reached into it and when, who mixed by it and from which drums, when it was corrected and what adjustment profile came out of that.",
+      rec:"Every recipe carries three buttons. Link copies an address that opens the app narrowed straight down to this recipe. It can be sent to the other mixing station or pinned to an order. E-mail opens a message with the name, series and order number. The composition is not in it, it is licensed. History assembles no new data. It gathers what the records already hold and pairs it by name. Who created and approved the recipe, who reached into it and when, who mixed by it and from which drums, when it was corrected and what adjustment profile came out of that.",
+      cas:38 },
+    { nadpis:"Custom recipes and the editor", kap:6,
+      obr:"42-receptura-upravit", roz:[1600,1500], vyrez:[30, 180, 1540, 960],
+      zvyr:[[58, 278, 736, 40, "the name carries the combination"], [804, 274, 236, 42, "type"], [58, 362, 1480, 44, "screen · opacity · surface"], [58, 448, 990, 44, "customer and order number"], [1052, 448, 486, 44, "C / U paper", "vpravo"], [58, 534, 736, 44, "one more approval — second stage"], [806, 546, 580, 30, "tested · fade-resistant · two-component"], [58, 682, 1480, 44, "thinning and cap"], [58, 840, 1480, 150, "components and percentages — sum 100"], [58, 1046, 250, 44, "save / cancel"]],
+      text:"Custom recipes carry the product, color, technology and position in their name. <b>Edit</b> opens the same editor as in the calculation. Besides the components and percentages, this is where the supplier's <b>order number</b> goes, the <b>C / U paper</b>, and whether the recipe <b>needs one more approval</b> — the supervisor, or the customer. Deleting takes two steps and can be password-protected. A printer has recipes here read-only.",
+      rec:"Custom recipes carry the product, color, technology and position in their name. Edit opens the same editor as in the calculation. Besides the components and percentages, this is where the supplier's order number goes, the C or U paper, and whether the recipe needs one more approval: the supervisor, or the customer. Deleting takes two steps and can be protected by a password. A printer has recipes here read-only.",
+      cas:29 },
+    { nadpis:"Material prices", kap:6,
+      obr:"43-ceny", roz:[1600,1500], vyrez:[30, 900, 1540, 600],
+      zvyr:[[58, 922, 260, 30, "material prices"], [58, 988, 650, 40, "search · series · only without a price"], [880, 1050, 180, 30, "price and unit"], [1078, 1050, 80, 30, "currency"], [1214, 1050, 60, 30, "g/ml"], [1296, 1050, 60, 30, "VOC %"], [1356, 1050, 170, 30, "safety data sheet", "vpravo"]],
+      text:"Below the recipes is the <b>Material prices</b> card: purchase price per kilogram or litre, currency, density, the share of volatile compounds and a link to the safety data sheet. The component name must match the name in the recipe, otherwise the price will not pair up. There is also a <b>waste disposal</b> rate and rules for which component may stand in for which.",
+      rec:"Below the recipes is the Material prices card. Purchase price per kilogram or litre, currency, density, the share of volatile compounds and a link to the safety data sheet. The component name must match the name in the recipe, otherwise the price will not pair up. There is also a waste disposal rate and rules for which component may stand in for which.",
+      cas:24 },
+    { nadpis:"Recalculating for the screen", kap:6,
+      obr:"44-sito", roz:[1600,1500], vyrez:[30, 180, 1540, 1120],
+      zvyr:[[62, 270, 1476, 44, "database for the technology"], [62, 384, 484, 44, "screen — theoretical volume"], [558, 384, 980, 44, "material · substrate"], [62, 470, 1476, 44, "area · pieces · losses"], [62, 526, 1476, 36, "recalculated — consumption range"], [62, 730, 1476, 290, "from what to what"], [62, 1070, 1476, 220, "recipes for the chosen screen"]],
+      text:"<b>Recalculate for the screen</b> computes consumption from the geometry of the mesh: open area × thickness × transfer × density, and coefficients for opacity, material, substrate and viscosity. Screens without manufacturer data are worked out from the thread count and fibre diameter and marked <b>indicative</b>.",
+      rec:"Recalculate for the screen computes consumption from the geometry of the mesh. Open area times thickness times transfer times density, and coefficients for opacity, material, substrate and viscosity. Screens without manufacturer data are worked out from the thread count and fibre diameter and marked as indicative.",
+      cas:21 },
+
+    /* ===== 8. Mixing ===== */
+    { nadpis:"For approval", kap:7,
+      obr:"50-schval", roz:[1600,1300], vyrez:[30, 180, 1540, 540],
+      zvyr:[[62, 250, 1476, 36, "waiting · rejected · role"], [62, 322, 730, 40, "name for the signature"], [62, 452, 1476, 40, "this is where a printer's recipe lands"]],
+      text:"<b>For approval</b>: the recipes a printer derived. The technologist sees the source, the difference in components, who entered it and what it applies to. A shade can be given a <b>second stage</b> — the supervisor, or the customer; the stages run in order, and until the technologist has approved, the supervisor has nothing to tick off. For a customer, the name of whoever signed the proof on their behalf is recorded. A recipe with no second stage is finished by the technologist's approval, exactly as before. The number waiting is a badge in the menu.",
+      rec:"For approval are the recipes a printer derived. The technologist sees the source, the difference in components, who entered it and what it applies to. A shade can be given a second stage, the supervisor or the customer. The stages run in order: until the technologist has approved, the supervisor has nothing to tick off. For a customer, the name of whoever signed the proof on their behalf is recorded. A recipe with no second stage is finished by the technologist's approval, exactly as before. The number waiting is shown as a badge in the menu.",
+      cas:36 },
+    { nadpis:"A missing shade on request", kap:7,
+      obr:"50-schval", roz:[1600,1300], vyrez:[30,530,1540,150],
+      zvyr:[[58,556,300,36,"missing shades"],[62,606,1476,40,"who asked for the shade, and why"]],
+      text:"Below the approvals sits a second queue: <b>missing shades</b>. When a printer hits a color in the calculation that is not in any database, it used to be settled by word of mouth across the workshop. Now the request is written into the records, so <b>the other mixing station</b> knows about it too, and the technologist sees it here with a badge in the menu. They settle it by <b>creating</b> the recipe — the editor opens with the name and shade from the request. A rejection asks for a reason: the printer waiting for that ink has to learn why.",
+      rec:"Below the approvals sits a second queue, missing shades. When a printer hits a color in the calculation that is not in any database, it used to be settled by word of mouth across the workshop. Now the request is written into the records, so the other mixing station knows about it too, and the technologist sees it here, with a badge in the menu. They settle it by creating the recipe. The editor opens with the name and shade from the request. A rejection asks for a reason. The printer waiting for that ink has to learn why.",
+      cas:35 },
+    { nadpis:"The mixing queue", kap:7,
+      obr:"51-fronta", roz:[1600,1300], vyrez:[30, 180, 1540, 440],
+      zvyr:[[58, 282, 720, 36, "best order — all of them tried"], [60, 376, 660, 50, "item: color · code · position"], [880, 340, 150, 30, "starts from"], [1050, 340, 180, 30, "top up · saves"], [1230, 376, 220, 44, "order · mixed · remove", "vpravo"]],
+      text:"The <b>mixing queue</b> is what gets mixed today. The plan knows that a leftover only exists after the batch that made it, and finds the <b>order that uses the most from the pots</b>. Up to seven items it tries every possible order.",
+      rec:"The mixing queue is what gets mixed today. The plan knows that a leftover only exists after the batch that made it, and finds the order that uses the most from the pots. Up to seven items it tries every possible order, so no better plan exists.",
+      cas:16 },
+    { nadpis:"Corrections after the proof", kap:7,
+      obr:"52-opravy", roz:[1600,1300], vyrez:[30, 180, 1540, 240],
+      zvyr:[[1264, 206, 276, 40, "period", "vpravo"], [62, 256, 1476, 36, "summary: corrections · batches · added · time"], [62, 312, 1476, 54, "where a correction is recorded"]],
+      text:"<b>Corrections after the proof</b>: every correction recorded at the scale with the Record a correction button, with its reason and the components added. The tab shows how many corrections there were, which recipe they repeat on, and <b>what it comes down to</b>: a batch remembers who mixed it and from which cans, so it can tell whether the cause is the recipe, one can, or one person's procedure. The advice follows from that.",
+      rec:"Corrections after the proof. Every correction recorded at the scale with the Record a correction button, with its reason and the components added. The tab shows how many corrections there were, which recipe they repeat on, and what it comes down to. A batch remembers who mixed it and from which cans, so it can tell whether the cause is the recipe, one can, or one person's procedure. The advice follows from that.",
+      cas:27 },
+
+    /* ===== 9. Stock ===== */
+    { nadpis:"Raw material stock", kap:8,
+      obr:"60-sklad", roz:[1600,1500], vyrez:[30, 180, 1540, 700],
+      zvyr:[[1274, 206, 266, 40, "to deal with · all · no stocktake", "vpravo"], [62, 256, 1476, 36, "summary: out · below minimum · no stocktake"], [660, 364, 270, 26, "remaining · daily · lasts"], [992, 364, 240, 26, "minimum · packaging"], [1300, 364, 110, 26, "stocktake kg"], [1444, 364, 90, 26, "order", "vpravo"]],
+      text:"<b>Raw material stock</b>: you enter a stocktake in kilos and the balance then counts itself down from every recorded batch. The daily rate gives the reach in days, and the <b>What to order</b> card tops up to the minimum in whole packages. A component without a stocktake is “not counted”, not zero.",
+      rec:"Raw material stock. You enter a stocktake in kilos and the balance then counts itself down from every recorded batch. The daily rate gives the reach in days, and the What to order card tops up to the minimum in whole packages. A component without a stocktake is not counted, not zero.",
+      cas:19 },
+    { nadpis:"Ink leftovers", kap:8,
+      obr:"61-zbytky", roz:[1600,1500], vyrez:[30, 180, 1540, 720],
+      zvyr:[[1390, 206, 150, 46, "save a leftover by hand", "nahoru"], [58, 296, 1480, 38, "how many batches are in print"], [58, 370, 790, 36, "filter — incl. „in print“"], [108, 512, 600, 26, "code from the label · shade · composition"], [736, 512, 540, 26, "grams · base · deadline · viscosity · job"], [1076, 552, 462, 34, "enter leftover · RETURN FROM THE PRESS · label · delete", "vpravo"]],
+      text:"<b>Ink leftovers</b>: every pot with its code, composition, age and state. This is where a leftover is offered into the next order. A batch that is currently <b>on the press</b> carries a <b>Return from the press</b> button: the ink came back mid-order — a rush job arrived, the color on the press is changing, the shift is ending — and the order goes on. The return gets its own code and label and is in stock from that moment; <b>the original batch stays on the press</b> and how much is left of it is recorded only after the order. Otherwise the leftover would be recorded twice, or not at all.",
+      rec:"Ink leftovers. Every pot with its code, composition, age and state. This is where a leftover is offered into the next order. A batch that is currently on the press carries a Return from the press button. The ink came back mid-order, a rush job arrived, the color on the press is changing, the shift is ending, and the order goes on. The return gets its own code and label and is in stock from that moment. The original batch stays on the press and how much is left of it is recorded only after the order. Otherwise the leftover would be recorded twice, or not at all.",
+      cas:39 },
+    { nadpis:"What expires", kap:8,
+      obr:"62-propad", roz:[1600,1300], vyrez:[30, 180, 1540, 220],
+      zvyr:[[62, 254, 760, 30, "today · within 7 days · what fits the queue"], [1310, 212, 230, 24, "how much waits in the queue", "vpravo"], [62, 306, 1476, 56, "what is tracked"]],
+      text:"<b>What expires</b> looks seven days ahead, day by day. For each pot it suggests which queue item it still fits, and works out what letting it expire costs: the ink to the supplier and the waste collection.",
+      rec:"What expires looks seven days ahead, day by day. For each pot it suggests which queue item it still fits, and works out what letting it expire costs. The ink to the supplier and the waste collection.",
+      cas:14 },
+    { nadpis:"Batches", kap:8,
+      obr:"63-sarze", roz:[1600,1300], vyrez:[30, 180, 1540, 480],
+      zvyr:[[58, 244, 1480, 60, "tracing a batch from a pot"], [58, 420, 1480, 52, "open cans"], [58, 504, 1480, 58, "material · batch from the can · supplier"], [58, 574, 140, 44, "open a can"]],
+      text:"<b>Batches</b>: one open can stands for each material. Its batch number is copied once and stamps itself into every mix. In a complaint you can trace the can and every job that drew from it.",
+      rec:"Batches. One open can stands for each material. Its batch number is copied once and stamps itself into every mix. In a complaint you can trace the can and every job that drew from it.",
+      cas:14 },
+
+    /* ===== 10. Reports and data ===== */
+    { nadpis:"Reports and trends", kap:9,
+      obr:"70-sestavy", roz:[1600,1800], vyrez:[30, 180, 1540, 860],
+      zvyr:[[1296, 206, 244, 40, "period", "vpravo"], [62, 258, 1476, 32, "summary"], [62, 312, 1476, 160, "consumption by month"], [62, 546, 1476, 340, "most frequent shades"], [62, 920, 1476, 60, "leftovers — returned and expired"]],
+      text:"<b>Reports and trends</b> add up the records that already exist: consumption by month, the most frequent shades, what came back from leftovers into print in grams and in money, and what expired. A batch and its pot are the same mix — counted once.",
+      rec:"Reports and trends add up the records that already exist. Consumption by month, the most frequent shades, what came back from leftovers into print in grams and in money, and what expired. A batch and its pot are the same mix, counted once.",
+      cas:17 },
+    { nadpis:"Orders from SGPS", kap:9,
+      obr:"82-zakazky", roz:[1600,1300], vyrez:[30, 180, 1540, 730],
+      zvyr:[[1230, 208, 310, 36, "demo data · refresh", "vpravo"], [62, 251, 1476, 41, "bridge mode"], [62, 304, 1476, 34, "technology filter"], [62, 350, 1476, 39, "search"], [556, 401, 141, 284, "technology from catalogue"], [62, 435, 1476, 250, "orders: product · pcs · color · recipe · deadline"], [1364, 445, 86, 31, "open into the calculation", "vpravo"]],
+      text:"<b>Orders (SGPS)</b>: a list of open jobs from the company system, opened straight into the calculation. A tile narrows the list to one technology — taken from the catalogue by product, not from SGPS. For now it runs in demo mode — waiting on the interface from IT.",
+      rec:"Orders, S G P S. A list of open jobs from the company system, opened straight into the calculation. A mixer narrows the list to their own technology with one tile; it comes from the catalogue by product, because the company system need not carry it. For now it runs in demo mode, waiting on the interface from I T.",
+      cas:22 },
+    { nadpis:"Connecting to the bridge", kap:9,
+      obr:"80-most", roz:[1600,1300], vyrez:[30, 180, 1540, 1100],
+      zvyr:[[62, 278, 1476, 36, "bridge status"], [62, 348, 1086, 44, "bridge address"], [1160, 346, 380, 48, "connect · test · default", "vpravo"], [62, 496, 1476, 40, "databases from the folder — loaded by themselves"], [226, 600, 460, 480, "applies to technologies"], [62, 1094, 1476, 80, "custom recipes — saved by themselves"]],
+      text:"The <b>bridge</b> is a small program on this computer. It does what a browser is not allowed to: reads databases and parameters from disk, parses PDFs and writes the records. Without the bridge the app still runs, just within browser limits — and here you see whether the bridge is alive and what it can do.",
+      rec:"The bridge is a small program on this computer. It does what a browser is not allowed to. It reads databases and parameters from disk, parses P D Fs and writes the records. Without the bridge the app still runs, just within browser limits. Here you see whether the bridge is alive and what it can do.",
+      cas:22 },
+    { nadpis:"Import / data", kap:9,
+      obr:"81-import", roz:[1600,1500], vyrez:[30, 180, 1540, 1060],
+      zvyr:[[62, 274, 480, 44, "upload products / recipes"], [62, 322, 1476, 166, "or paste the file contents"], [62, 498, 460, 44, "analyse"], [62, 612, 1476, 200, "recipe CSV format"], [62, 890, 460, 46, "restore / clear the catalog"], [62, 1000, 980, 200, "password for deleting"]],
+      text:"<b>Import / data</b>: bulk upload of recipes from CSV, export, restoring the catalog and the password for deleting. Everything is CSV readable in Excel. Licensed databases stay in the workshop.",
+      rec:"Import and data. Bulk upload of recipes from C S V, export, restoring the catalog, and the password for deleting. Everything is C S V readable in Excel. Licensed databases stay in the workshop.",
+      cas:16 },
+    { nadpis:"The printer role", kap:9,
+      obr:"83-tiskar", roz:[1600,1000], vyrez:[30, 180, 1540, 440],
+      zvyr:[[62, 296, 1476, 40, "printer role — read only"], [1322, 206, 220, 46, "no New recipe", "vpravo"], [1180, 530, 360, 60, "no Edit / Delete", "vpravo"]],
+      text:"The computer holds the role: at the scale it is switched to <b>printer</b> once. A printer is missing nothing needed to send a job through — only the buttons that change the ground truth for the whole workshop disappear: Edit, Delete, New recipe, the price list, unlocking technologies. Going back to technologist takes the workshop password.",
+      rec:"The computer holds the role. At the scale it is switched to printer once. A printer is missing nothing needed to send a job through. Only the buttons that change the ground truth for the whole workshop disappear: Edit, Delete, New recipe, the price list and unlocking technologies. Going back to technologist takes the workshop password.",
+      cas:23 }
+  ];;
+
+  var elScena = document.getElementById("scena");
+  var elNadpis = document.getElementById("nadpis");
+  var elTitulek = document.getElementById("titulek");
+  var elCislo = document.getElementById("cislo");
+  var elKap = document.getElementById("kapitola");
+  var elPruh = document.getElementById("pruh");
+  var elRail = document.getElementById("rail");
+  var elKapitoly = document.getElementById("kapitoly");
+  var elPozn = document.getElementById("pozn");
+  var elObsah = document.getElementById("obsah");
+  var bPrehrat = document.getElementById("prehrat");
+  var bZpet = document.getElementById("zpet");
+  var bDal = document.getElementById("dal");
+  var bZvuk = document.getElementById("zvuk");
+
+  var i = 0, bezi = false, zvuk = true, casovac = null, tikac = null, hlas = null;
+  var prehravac = null;
+  var syn = window.speechSynthesis || null;
+  var obrazky = {};   // předem načtené snímky, ať přechod scény neblikne
+
+  /* Snímky: napřed z manual/ vedle stránky; publikovaná verze má místo
+     cesty vložená data (viz sestav_manual.py ve scratchpadu). */
+  function cestaObr(jm){ return (window.MANUAL_OBRAZKY && window.MANUAL_OBRAZKY[jm]) || ("manual/en/" + jm + ".png"); }
+
+  /* Výřez: obrázek se posune a zvětší tak, aby ve vyrezu byla jen
+     vybraná část snímku. Všechno v procentech, aby se to samo přepočítalo
+     při změně šířky okna. */
+  /* Strany, na které smí popisek jít, v pořadí od nejhezčí. Prohledávají se
+     všechny, dokud nějaká nesedne bez kolize. */
+  var POLOHY = ["", "nahoru", "vpravo", "nahoru vpravo",
+                "patro2", "nahoru patro2", "vpravo patro2", "nahoru vpravo patro2",
+                "patro3", "nahoru patro3", "vpravo patro3", "nahoru vpravo patro3",
+                "stred", "nahoru stred", "stred patro2", "nahoru stred patro2",
+                "bok", "bok dole", "bok vlevo", "bok vlevo dole",
+                "uvnitr", "uvnitr vpravo", "uvnitr dole", "uvnitr dole vpravo"];
+
+  function vykresliScenu(s){
+    var iw = s.roz[0], ih = s.roz[1];
+    var v = s.vyrez || [0, 0, iw, ih];
+    var vx = v[0], vy = v[1], vw = v[2], vh = v[3];
+    elScena.style.aspectRatio = vw + " / " + vh;
+    /* strop výšky: přepočítá se na šířku, aby poměr zůstal a plátno se nepřetáhlo */
+    elScena.style.width = "min(100%, calc(66vh * " + (vw / vh).toFixed(4) + "))";
+    elScena.innerHTML = "";
+    var img = document.createElement("img");
+    img.src = cestaObr(s.obr); img.alt = s.nadpis;
+    img.style.width = (iw / vw * 100) + "%";
+    img.style.left = (-vx / vw * 100) + "%";
+    img.style.top = (-vy / vh * 100) + "%";
+    elScena.appendChild(img);
+    /* Popisek si stranu vybere sám — a vybírá ji podle skutečně změřených
+       obdélníků, ne podle odhadu. Dřív se počítalo jen to, jestli se popisek
+       vejde nad nebo pod rámeček ve výřezu, a to na odhadnutou výšku 32 px.
+       Popisek tak sedl přesně na sousední rámeček nebo na cizí popisek — na
+       34 ze 48 scén (4. 9. 2026: „logo = zpět na kalkulaci" leželo přes
+       „hledání produktu" na scéně 2). Šířku popisku dopředu spočítat nejde,
+       ta závisí na písmu a délce textu, takže se zvýraznění nejdřív vloží,
+       pak změří a teprve potom se každému popisku vybere strana.
+
+       Pořadí je dané: přání zapsané u zvýraznění (šestý prvek), pak zbylé
+       strany. První varianta, která se vejde do výřezu a nekříží nic už
+       umístěného, vyhraje; nevejde-li se žádná, bere se ta s nejmenším
+       postihem — popisek se má posunout, ne zmizet. */
+    (s.zvyr || []).forEach(function(z, k){
+      var d = document.createElement("div");
+      d.className = "zvyr a" + Math.min(k + 1, 8);
+      d.style.left = ((z[0] - vx) / vw * 100) + "%";
+      d.style.top = ((z[1] - vy) / vh * 100) + "%";
+      d.style.width = (z[2] / vw * 100) + "%";
+      d.style.height = (z[3] / vh * 100) + "%";
+      d.innerHTML = '<span class="c">' + (k + 1) + '</span>' + (z[4] ? '<span class="p"></span>' : "");
+      if (z[4]) d.querySelector(".p").textContent = z[4];
+      /* Přání o poloze si nese prvek s sebou, aby se dalo rozmístění spustit
+         znovu při změně šířky okna, kdy scéna data scény už nevidí. */
+      if (z[5]) d.setAttribute("data-pozadi", z[5]);
+      elScena.appendChild(d);
+    });
+
+    rozmistiPopisky();
+  }
+
+  /* Rozmístění popisků je oddělené od stavby scény, protože se musí spustit
+     znovu při každé změně šířky okna: strany se vybírají podle změřených
+     obdélníků, a ty se změnou šířky mění. Dřív se počítalo jen v pixelech
+     snímku, takže na šířce okna nezáleželo. */
+  function rozmistiPopisky(){
+    var prvky = [].slice.call(elScena.querySelectorAll(".zvyr")).map(function(el){
+      return {el: el, popis: el.querySelector(".p"), cislo: el.querySelector(".c"),
+              pozadi: el.getAttribute("data-pozadi") || ""};
+    });
+    if (!prvky.length) return;
+    /* Měří se bez animace — ta mění měřítko, a změřilo by se zvětšené. */
+    prvky.forEach(function(p){ p.el.style.animation = "none"; p.el.style.opacity = "1"; });
+
+    /* Kolize se počítají v pixelech obrazovky proti výřezu — ten ořezává
+       (overflow:hidden), takže co z něj vyjede, není vidět vůbec. */
+    var vyrezR = elScena.getBoundingClientRect();
+    function prekryv(a, b){
+      var w = Math.min(a.right, b.right) - Math.max(a.left, b.left);
+      var h = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+      return (w > 0.5 && h > 0.5) ? w * h : 0;
+    }
+    function ven(r){
+      var w = Math.max(vyrezR.left - r.left, 0) + Math.max(r.right - vyrezR.right, 0);
+      var h = Math.max(vyrezR.top - r.top, 0) + Math.max(r.bottom - vyrezR.bottom, 0);
+      /* Vyjetí ven váží trojnásobně: uříznutý popisek se nepřečte vůbec. */
+      return (w * r.height + h * r.width) * 3;
+    }
+
+    /* Rámečky a čísla se nehýbou, ať popisek skončí kdekoli — dají se změřit
+       všechny naráz a každý popisek se pak vyhýbá i těm, které přijdou po něm. */
+    var ramecky = prvky.map(function(p){ return p.el.getBoundingClientRect(); });
+    var cisla = prvky.map(function(p){ return p.cislo.getBoundingClientRect(); });
+    var popisky = [];   // obdélníky už rozmístěných popisků
+
+    prvky.forEach(function(p, k){
+      var zaklad = "zvyr a" + Math.min(k + 1, 8);
+      if (!p.popis){ p.el.className = zaklad; return; }
+      /* Přání se zkouší první; zbytek pořadí zůstává, ať je výsledek stejný
+         při každém vykreslení téže scény. */
+      var poradi = [p.pozadi].concat(POLOHY.filter(function(x){ return x !== p.pozadi; }));
+      var nej = null;
+      for (var i = 0; i < poradi.length; i++){
+        p.el.className = zaklad + (poradi[i] ? " " + poradi[i] : "");
+        var r = p.popis.getBoundingClientRect();
+        var cena = ven(r);
+        /* Cizí popisek zakryje text — plná váha. Cizí číslo je malé kolečko,
+           takže i nepatrný překryv znamená, že z něj zbyla nečitelná výseč;
+           váží se proto pětinásobkem, jinak by prohrálo s velkým, ale
+           neškodným překryvem přes rámeček (scéna 5, „export CSV" ležel na
+           čtyřce). */
+        /* Popisek přes cizí popisek nebo číslo je vždycky horší než popisek
+           přes rámeček, ať je plocha jakákoli: text přes text se nepřečte,
+           text přes průhledný obrys ano. Váhy proto nesmí jít porovnávat jen
+           plochou — zakrytí textu dostane pevnou přirážku, aby i pár pixelů
+           přebilo velký, ale neškodný překryv rámečku (scéna 26, popisek
+           „shade and combination" seděl na dvojce 58 px²). */
+        for (var j = 0; j < popisky.length; j++)
+          if (prekryv(r, popisky[j]) > 0) cena += 10000 + prekryv(r, popisky[j]);
+        for (var j = 0; j < cisla.length; j++)
+          if (j !== k && prekryv(r, cisla[j]) > 0) cena += 10000 + prekryv(r, cisla[j]);
+        /* Cizí rámeček je jen průhledný obrys, text přes něj projde — vadí,
+           ale míň, jinak by se popisky uhýbaly velkým rámečkům přes celý snímek
+           a nezbylo by kam. */
+        for (var j = 0; j < ramecky.length; j++) if (j !== k) cena += prekryv(r, ramecky[j]) * 0.15;
+        if (nej === null || cena < nej.cena) nej = {poz: poradi[i], cena: cena};
+        if (cena === 0) break;
+      }
+      p.el.className = zaklad + (nej.poz ? " " + nej.poz : "");
+      popisky.push(p.popis.getBoundingClientRect());
+    });
+
+    /* Animace se vrací až po měření, ať se rozsvěcování chová jako dřív. */
+    prvky.forEach(function(p){ p.el.style.animation = ""; p.el.style.opacity = ""; });
+  }
+
+  KAPITOLY.forEach(function(n, k){
+    var b = document.createElement("button");
+    b.textContent = (k + 1) + " · " + n;
+    b.addEventListener("click", function(){ skoc(SCENY.findIndex(function(s){ return s.kap === k; })); });
+    elKapitoly.appendChild(b);
+  });
+  var kapBtn = [].slice.call(elKapitoly.children);
+
+  /* Obsah pod přehrávačem se staví z týchž dat */
+  KAPITOLY.forEach(function(n, k){
+    var box = document.createElement("div"); box.className = "obsah-kap";
+    var h = document.createElement("h3"); h.textContent = (k + 1) + ". " + n; box.appendChild(h);
+    var ol = document.createElement("ol");
+    SCENY.forEach(function(s, j){
+      if (s.kap !== k) return;
+      var li = document.createElement("li"), b = document.createElement("button");
+      b.innerHTML = '<span class="n">' + (j + 1) + '</span><span></span>';
+      b.lastChild.textContent = s.nadpis;
+      b.addEventListener("click", function(){ skoc(j); document.querySelector(".jeviste").scrollIntoView({ behavior: "smooth" }); });
+      li.appendChild(b); ol.appendChild(li);
+    });
+    box.appendChild(ol); elObsah.appendChild(box);
+  });
+
+  function stavRail(){
+    elRail.innerHTML = "";
+    var kap = SCENY[i].kap;
+    SCENY.forEach(function(s, k){
+      if (s.kap !== kap) return;
+      var b = document.createElement("button");
+      b.textContent = k + 1;
+      b.title = s.nadpis;
+      b.setAttribute("aria-label", "Scene " + (k + 1) + ": " + s.nadpis);
+      b.classList.toggle("on", k === i);
+      b.addEventListener("click", function(){ skoc(k); });
+      elRail.appendChild(b);
+    });
+    kapBtn.forEach(function(b, k){ b.classList.toggle("on", k === kap); });
+  }
+
+  function najdiHlas(){
+    if (!syn) return null;
+    var v = syn.getVoices() || [];
+    return v.filter(function(h){ return /^en/i.test(h.lang); })[0] || null;
+  }
+  function stavHlasu(){
+    if (!syn){ elPozn.textContent = "This browser cannot do spoken word — the manual runs with subtitles."; return; }
+    hlas = najdiHlas();
+    elPozn.textContent = (hlas
+      ? "Speaking with the system voice " + hlas.name + "."
+      : "There is no English voice in the system, so the manual runs with subtitles. You can add one in Windows: Settings → Time & language → Speech.")
+      + " If an audio_manual_en/ folder sits next to the manual with recordings scene-01.mp3 to scene-" + (SCENY.length < 10 ? "0" : "") + SCENY.length + ".mp3, it plays from there. Left and right arrows switch scenes, the space bar starts and stops.";
+  }
+  if (syn){ syn.addEventListener("voiceschanged", stavHlasu); }
+  stavHlasu();
+
+  function vykresli(){
+    var s = SCENY[i];
+    elKap.textContent = (s.kap + 1) + ". " + KAPITOLY[s.kap];
+    elCislo.textContent = "Scene " + (i + 1) + " / " + SCENY.length;
+    elNadpis.textContent = s.nadpis;
+    elTitulek.innerHTML = s.text;
+    elScena.classList.remove("bezi");
+    vykresliScenu(s);
+    void elScena.offsetWidth;
+    elScena.classList.add("bezi");
+    stavRail();
+    bZpet.disabled = i === 0;
+    bDal.disabled = i === SCENY.length - 1;
+    elPruh.style.width = "0%";
+    var dalsiS = SCENY[i + 1];
+    if (dalsiS && !obrazky[dalsiS.obr]){ obrazky[dalsiS.obr] = new Image(); obrazky[dalsiS.obr].src = cestaObr(dalsiS.obr); }
+  }
+
+  function stopni(){
+    if (casovac){ clearTimeout(casovac); casovac = null; }
+    if (tikac){ clearInterval(tikac); tikac = null; }
+    if (prehravac){ prehravac.onended = null; prehravac.onerror = null; prehravac.pause(); prehravac = null; }
+    if (syn){ syn.cancel(); }
+  }
+
+  function odpocet(ms, hotovo){
+    var zacatek = Date.now();
+    tikac = setInterval(function(){
+      var p = Math.min(100, (Date.now() - zacatek) / ms * 100);
+      elPruh.style.width = p + "%";
+      if (p >= 100){ clearInterval(tikac); tikac = null; }
+    }, 100);
+    casovac = setTimeout(hotovo, ms);
+  }
+
+  /* Tři stupně hlasu jako v ukázce: nahrávka → hlas prohlížeče → titulky. */
+  function mluv(){
+    var s = SCENY[i];
+    var ms = s.cas * 1000;
+    if (!zvuk){ odpocet(ms, dalsi); return; }
+    var cislo = (i + 1 < 10 ? "0" : "") + (i + 1);
+    var a = new Audio((window.MANUAL_AUDIO && window.MANUAL_AUDIO[cislo]) || ("audio_manual_en/scene-" + cislo + ".mp3"));
+    prehravac = a;
+    var ustup = function(){ if (prehravac !== a) return; prehravac = null; mluvSyntezou(s, ms); };
+    a.onended = function(){ if (prehravac === a && bezi) dalsi(); };
+    a.onerror = ustup;
+    a.play().then(function(){ if (prehravac === a){ odpocet(ms, function(){}); } }).catch(ustup);
+  }
+
+  function mluvSyntezou(s, ms){
+    if (!syn || !hlas){ odpocet(ms, dalsi); return; }
+    var u = new SpeechSynthesisUtterance(s.rec);
+    u.voice = hlas; u.lang = hlas.lang; u.rate = 0.98; u.pitch = 1;
+    var oziv = setInterval(function(){ if (syn.speaking) syn.resume(); else clearInterval(oziv); }, 8000);
+    u.onend = function(){ clearInterval(oziv); if (bezi) dalsi(); };
+    u.onerror = function(){ clearInterval(oziv); };
+    odpocet(ms, function(){});
+    syn.speak(u);
+  }
+
+  function dalsi(){
+    if (i < SCENY.length - 1){ i++; vykresli(); mluv(); }
+    else { pauza(); bPrehrat.textContent = "▶ Play again"; }
+  }
+  function spust(){
+    bezi = true; bPrehrat.textContent = "⏸ Pauza";
+    if (i === SCENY.length - 1) { i = 0; }
+    vykresli(); mluv();
+  }
+  function pauza(){
+    bezi = false; stopni(); bPrehrat.textContent = "▶ Continue"; elPruh.style.width = "0%";
+  }
+  function skoc(k){
+    var jelo = bezi;
+    stopni();
+    i = Math.max(0, Math.min(SCENY.length - 1, k));
+    vykresli();
+    if (jelo) mluv();
+  }
+
+  bPrehrat.addEventListener("click", function(){ bezi ? pauza() : spust(); });
+  bZpet.addEventListener("click", function(){ skoc(i - 1); });
+  bDal.addEventListener("click", function(){ skoc(i + 1); });
+  bZvuk.addEventListener("click", function(){
+    zvuk = !zvuk;
+    bZvuk.setAttribute("aria-pressed", String(zvuk));
+    bZvuk.textContent = zvuk ? "🔊 Spoken word" : "🔇 Subtitles only";
+    if (bezi){ stopni(); mluv(); }
+  });
+  document.addEventListener("keydown", function(e){
+    if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+    if (e.key === "ArrowRight"){ skoc(i + 1); }
+    else if (e.key === "ArrowLeft"){ skoc(i - 1); }
+    else if (e.key === " "){ e.preventDefault(); bezi ? pauza() : spust(); }
+  });
+  /* Změna šířky okna posune všechno v pixelech obrazovky, a s tím i to, které
+     strany jsou volné — popisky se proto rozmístí znovu. Scéna se nepřekresluje,
+     aby se rozsvěcování zvýraznění nerozjelo od začátku. */
+  var casovacSirky = null;
+  window.addEventListener("resize", function(){
+    clearTimeout(casovacSirky);
+    casovacSirky = setTimeout(rozmistiPopisky, 150);
+  });
+  window.addEventListener("beforeunload", stopni);
+
+  document.getElementById("podznacka").textContent = SCENY.length + " scenes in " + KAPITOLY.length
+    + " chapters — with spoken word and highlights right on the screen";
+  vykresli();
+})();
+</script>

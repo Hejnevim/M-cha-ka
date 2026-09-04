@@ -128,11 +128,15 @@ přiřazení databází k technologiím se nastavuje v parametry/databaze.csv.
           + Marabu TampaStar TPR             4 824 receptur   MÁME (3. 9. 2026,
                                                               z exportu XLSX
                                                               ColorManageru)
+          + Marabu MaraProp PP (PP new)      4 789 receptur   MÁME (3. 9. 2026,
+                                                              tampon i síto)
     TXP   Printcolor MS 660                    778 receptur   ověřit, zda
                                                               je to ta správná
                                                               řada na textil
     SCR   Printcolor MS 660                  1 554 receptur   RUCOLOR sedí,
           + RUCOLOR 10KK                                      MS 660 ověřit
+          + Marabu MaraProp PP (PP new)      4 789 receptur   MÁME (3. 9. 2026)
+          + Marabu LibraPrint LIP            2 110 receptur   MÁME (3. 9. 2026)
     TRS   žádná                                3 vlastní      CHYBÍ CELÁ
 
 CO SEHNAT:
@@ -151,10 +155,14 @@ CO SEHNAT:
       (Coates TP/PP třem; Himalaya, Union Ink, Debuit 470, Serilon
       a Texylon dvěma). Podklady se teprve sbírají; každá řada se
       převede a přiřadí zvlášť, jak bude přicházet.
-      HOTOVO: Marabu — TPR (PDP), receptury_Marabu_TPR.csv, 3. 9. 2026.
+      HOTOVO (3. 9. 2026): Marabu — TPR (PDP), receptury_Marabu_TPR.csv;
+      Marabu — PP new (PDP i SCR, export nese každý pantone na tampon
+      i na síto 120-34), receptury_Marabu_PP.csv; Marabu — LIP (SCR),
+      receptury_Marabu_LIP.csv. Zbývá 9 řad.
       Marabu neposílá PDF, ale export XLSX z ColorManageru — převádí ho
-      prevod_marabu.py; stejný tvar mají i podklady Marabu PP new a LIP,
-      které jsou stažené a čekají na převod.
+      prevod_marabu.py. Složky Marabu nesou v názvu kód řady (TPR 970
+      Weiss, LIP 970 Weiss) — jsou to jiné barvy s jinou hustotou, i když
+      je Marabu čísluje stejně; cena se v ceníku zapisuje ke každé zvlášť.
 
       Tenhle plán stojí i v souboru parametry/plan_databazi.csv a aplikace
       ho ukazuje v záložce Odemykání technologií — každá řada je tam bod
@@ -172,9 +180,12 @@ CO SEHNAT:
       parametry/databaze.csv.
 
 CO V PDF NENÍ a musí se doplnit jinak:
-    hustota barvy (g/ml)  - nechala ji prázdnou každá ze čtyř nakoupených
-                            databází, aplikace počítá s 1,20. Bývá
-                            v technickém listu barvy.
+    hustota barvy (g/ml)  - Printcolor, RUCOLOR ani Ferro ji v podkladu
+                            nemají, aplikace u nich počítá s 1,20; doplní
+                            se v ceníku (sloupec g/ml) z technického
+                            listu. Tři řady Marabu ji nesou u každé
+                            receptury i u každé báze a v CSV mají i ml
+                            každé složky na 100 g (sloupec ml).
     odstín (hex)          - HOTOVO, ale hlídejte si ho u nových databází.
                             Bere se z tabulky parametry/odstiny_pantone.csv,
                             kterou plní "python odstiny.py --stahni" ze tří

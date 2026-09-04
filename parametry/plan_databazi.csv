@@ -1,4 +1,4 @@
-technologie;dodavatel;rada;soubor;pozn
+﻿technologie;dodavatel;rada;soubor;pozn
 ;;;;"Plan barevnych rad (receptur): kterou radu od ktereho dodavatele ma ktera technologie dostat. Ukazuje se v zalozce Odemykani technologii."
 ;;;;"Az rada dorazi a prevede se (prevod_printcolor.py / prevod_rucolor.py), zapiste do sloupce soubor jmeno CSV ze slozky databaze barev. Bod se odskrtne sam, jakmile je ten soubor v parametry/databaze.csv prirazeny teze technologii."
 TRS;Tiflex;Himalaya;;
@@ -13,8 +13,8 @@ PDP;Marabu;TPR;receptury_Marabu_TPR.csv;
 PDP;Coates;TP 300;;
 PDP;Coates;TP 253;;
 PDP;Coates;TP/PP;;
-PDP;Marabu;PP new;;
-SCR;Marabu;LIP;;
+PDP;Marabu;PP new;receptury_Marabu_PP.csv;
+SCR;Marabu;LIP;receptury_Marabu_LIP.csv;
 SCR;Coates;TP/PP;;
 SCR;Engler;Serilon;;
 SCR;SK;serie 4700;;

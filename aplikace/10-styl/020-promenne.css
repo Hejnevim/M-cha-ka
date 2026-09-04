@@ -178,15 +178,18 @@
   --ok:#10B981; --warn:#F59E0B;
   --ikona-barva:#CBD5E1;
   /* Stíny v rgba kvůli barvy.html — viz poznámka u světlých stínů. Od
-     2. září (kap. 197): černá 40–50 %, bílá 15–16 % — dvojnásobek proti
+     2. září (kap. 197): černá 40–50 %, bílá 16–17 % — dvojnásobek proti
      dřívějším 7,6–8 %, protože slabší „osvícení" na zesvětlené ploše
-     zanikalo. Rozmazání karet je 12 px (dřív 20), stín sedí těsně u hrany
-     a karta se od plochy odděluje ostřeji než ve dne. */
-  --neu:-10px -10px 12px rgba(255,255,255,0.16), 10px 10px 12px rgba(0,0,0,0.45);
-  --neu-sm:-5px -5px 12px rgba(255,255,255,0.152), 5px 5px 12px rgba(0,0,0,0.495);
-  --neu-in:inset 4px 4px 6px rgba(0,0,0,0.405), inset -4px -4px 6px rgba(255,255,255,0.152);
-  --neu-in-lg:inset 6px 6px 9px rgba(0,0,0,0.45), inset -6px -6px 9px rgba(255,255,255,0.16);
-  --modal-shadow:0 14px 24px rgba(0,0,0,0.9);
+     zanikalo. Rozmazání karet je 12 px (dřív 20) a od 3. září je odsazení
+     stínu karty 6 px (dřív 10): při rozmazání 12 px se stín s odsazením
+     10 px táhl za kartou jako druhá hrana, s 6 px sedí těsně u ní a karta
+     se od plochy odděluje ostřeji než ve dne. Stín okna je z téhož
+     důvodu nižší (9 px místo 14). */
+  --neu:-6px -6px 12px rgba(255,255,255,0.17), 6px 6px 12px rgba(0,0,0,0.45);
+  --neu-sm:-5px -5px 12px rgba(255,255,255,0.162), 5px 5px 12px rgba(0,0,0,0.495);
+  --neu-in:inset 4px 4px 6px rgba(0,0,0,0.405), inset -4px -4px 6px rgba(255,255,255,0.162);
+  --neu-in-lg:inset 6px 6px 9px rgba(0,0,0,0.45), inset -6px -6px 9px rgba(255,255,255,0.17);
+  --modal-shadow:0 9px 24px rgba(0,0,0,0.9);
   --logo-stin:drop-shadow(0px 0px 8px rgba(255,255,255,1)) drop-shadow(0px 0px 8px rgba(0,0,0,1));
 }
 /* ZACATEK BAREV STRANEK */
