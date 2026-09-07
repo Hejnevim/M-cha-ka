@@ -66,6 +66,8 @@ function nastavJazyk(kod) {
 const SLOVNIK = {
   /* --- nabídka: sekce a přepínače --- */
   "JAZYK": { en: "LANGUAGE", pt: "IDIOMA" },
+  "Manuál": { en: "Manual", pt: "Manual" },
+  "Zavřít manuál": { en: "Close the manual", pt: "Fechar o manual" },
   "ROLE": { en: "ROLE", pt: "FUNÇÃO" },
   "TECHNOLOGIE": { en: "TECHNOLOGY", pt: "TECNOLOGIA" },
   "KATALOG": { en: "CATALOG", pt: "CATÁLOGO" },

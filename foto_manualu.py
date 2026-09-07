@@ -286,13 +286,27 @@ SNIMKY = [
     ("40-receptury", 1300, js(zalozka("KATALOG|CATALOG", "^(Receptury|Recipes)$"))),
     ("42-receptura-upravit", 1500, js(zalozka("KATALOG|CATALOG", "^(Receptury|Recipes)$"),
                                       "var u=tlac(/^(Upravit|Edit)/); if(u){u.click(); await cekej(1500);}")),
+    # Karta Ceny materiálů není tlačítko, ale karta pod celým seznamem receptur
+    # (380-receptury.js ji vykresluje až za tabulkou). Dřívější scénář hledal
+    # tlačítko, nenašel nic a na snímek šel jen začátek seznamu — scéna 40
+    # manuálu pak ukazovala popisky ceníku na řádcích receptur (7. 9. 2026).
+    # Karta se proto odroluje k hornímu okraji okna; snímek bere viditelnou
+    # část okna, takže začíná kartou.
     ("43-ceny", 1500, js(zalozka("KATALOG|CATALOG", "^(Receptury|Recipes)$"),
-                         "var c=tlac(/(Ceny materiálů|Material prices)/i); if(c){c.click(); await cekej(1500);}")),
+                         "var h=[...document.querySelectorAll('h2')].find(x=>/(Ceny materi|Material prices)/i.test(x.textContent));"
+                         "if(h){(h.closest('.card')||h).scrollIntoView({block:'start'}); await cekej(1200);}")),
     ("44-sito", 1500, js(zalozka("KATALOG|CATALOG", "^(P.epo.et na s.to|Mesh conversion)"))),
     ("50-schval", 1300, js(zalozka("M.CH.N.|MIXING", "^(Ke schv.len.|For approval)"))),
     ("51-fronta", 1300, js(zalozka("M.CH.N.|MIXING", "^(Fronta m.ch.n.|Mixing queue)"))),
     ("52-opravy", 1300, js(zalozka("M.CH.N.|MIXING", "^(Opravy po n.tisku|Corrections after)"))),
-    ("60-sklad", 1500, js(zalozka("SKLAD|STOCK", "^(Sklad surovin|Raw material stock)"))),
+    # Sklad se otevírá s filtrem „co řešit", a když nic nedochází, je tabulka
+    # prázdná — scéna 46 pak ukazovala sloupce (zbývá · denně · vydrží, minimum
+    # · balení, inventura, objednat) na větě „nic nedochází" (7. 9. 2026).
+    # Filtr „vše" tabulku se všemi složkami vypíše. Diakritika přes konzoli
+    # neprojde, proto v.e.
+    ("60-sklad", 1500, js(zalozka("SKLAD|STOCK", "^(Sklad surovin|Raw material stock)"),
+                          "var f=[...document.querySelectorAll('button.chip')].find(b=>/^(v.e|all)$/i.test(b.textContent.trim()));"
+                          "if(f){f.click(); await cekej(1200);}")),
     ("61-zbytky", 1500, js(zalozka("SKLAD|STOCK", "^(Zbytky barev|Leftover inks)"))),
     ("62-propad", 1300, js(zalozka("SKLAD|STOCK", "^(Co propadne|What will expire)"))),
     ("63-sarze", 1300, js(zalozka("SKLAD|STOCK", "^(.ar.e|Batches)"))),

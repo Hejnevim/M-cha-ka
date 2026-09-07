@@ -99,3 +99,11 @@
 .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:13px;margin-top:8px}
 .kv .k{color:var(--ink-2);font-size:11px;text-transform:uppercase;letter-spacing:.06em;align-self:center}
 .kv .v{font-weight:700}
+/* Manuál otevřený z nabídky: stránka manuálu v rámu přes celou obrazovku,
+   nad ní lišta s jazykem manuálu a zavřením v pravém horním rohu (215-manual.js).
+   Leží nad okny (.modalbg má 90), aby ho nepřekrylo nic z rozdělané práce. */
+.manualokno{position:fixed;inset:0;z-index:95;background:var(--bg);display:flex;flex-direction:column}
+.manualokno-lista{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px clamp(16px,3vw,40px);background:var(--paper);box-shadow:var(--neu-sm);position:relative;z-index:1}
+.manualokno-lista b{font-size:calc(var(--pismo) + 2px);letter-spacing:var(--prostrkani);text-transform:uppercase}
+.manualokno-zavrit{font-weight:800}
+.manualokno-ram{flex:1 1 auto;width:100%;min-height:0;border:none;background:var(--bg)}

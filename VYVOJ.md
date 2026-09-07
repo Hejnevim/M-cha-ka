@@ -377,6 +377,14 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 18:01 | Manuál katalogu produktů ukazoval jiný produkt kvůli špatnému selektoru — opraveno v obou jazycích |
 
 | 15:28 | Karta produktu na telefonu: dlaždice pod sebe pod 480px, kratší placeholder hledání |
+
+### 7. září — ukazatele manuálu zpátky na svých prvcích
+| čas | co |
+|---|---|
+| 12:28 | Zvýraznění manuálu sedí na přefocené snímky — 31 českých a 44 anglických obdélníků přeměřeno, ceník materiálů přefocen, nová prohlídka manuálu (prohlidka_manualu.py) |
+| 13:23 | Manuál v aplikaci — položka v nabídce pod jazyky, rám přes obrazovku, čeština/angličtina v rohu |
+
+| 12:52 | Druhé kolo ukazatelů manuálu — anglická tlačítka měřena zvlášť (36 obdélníků), sklad surovin přefocen s filtrem vše |
 ---
 
 ## Co aplikace je
@@ -10517,3 +10525,151 @@ unikátní na všech 70 souborech). Kolize popisků a přetečení textu změře
 přes všech 54 scén ve 4 šířkách (1600/1280/1024/768) v obou jazycích:
 0 nálezů. Rozmazání sedí na `CEKANE_ROZMAZANI` v obou jazycích (30-mich 5,
 32-mich-simulace 7, 40-receptury 348, 61-zbytky ≥50).
+
+## 228. Zvýraznění manuálu sedí na přefocené snímky, ne na ty z paměti
+
+**Problém.** V mluveném manuálu ukazovaly rámečky vedle: scéna 3 měla
+„role" na technologiích a „KATALOG" o položku níž, anglická scéna 13 rámovala
+„technologie · rozměr · barva" do prázdna pod fotkou a scéna 40 kreslila popisky
+ceníku (cena, měna, g/ml, VOC, bezpečnostní list) na řádky receptur PANTONE 104
+a 105 C. Vypadalo to jako chyba přepočtu podle velikosti okna — ukazatele se
+zdály řídit rozlišením.
+
+Změřeno to bylo jinak: při 1 600 × 1 000 i 1 000 × 700 px sedly rámečky scény 13
+na tytéž pixely snímku ([58, 326, 230, 232], [294, 326, 230, 232], …). Přepočet
+z procent je konzistentní. Špatně byla **data** — souřadnice `zvyr` zůstaly
+z dřívějších snímků, zatímco snímky se 4. 9. přefotily: nabídka přibrala roli
+Tiskař a položky *Co chybí k odemčení* a *Přepočet na síto* (posun 50–100 px),
+anglická karta *Kolik namíchat* je vyšší o upozornění na zbytek z minulých
+dávek, takže spodní řada karet leží o 120 px níž a štítky karty *Vybraný
+produkt* u jejího dna (766 → 896 px). Ceník materiálů na snímku nebyl vůbec:
+scénář hledal tlačítko „Ceny materiálů", které neexistuje — karta leží pod
+celým seznamem receptur — a snímek tiše ukázal seznam. Zkouška z kap. 224
+(„všechna zvýraznění uvnitř snímku") tohle projde: obdélník o řádek níž je
+pořád uvnitř.
+
+**Co se změnilo.**
+
+- Souřadnice odečtené z mřížky nad skutečným snímkem (krok 50 px, mřížka
+  v pixelech snímku): česky 11 scén a 31 obdélníků, anglicky 14 scén
+  a 44 obdélníků. Anglická domovská stránka má u scén 13, 16, 17, 20, 21, 22,
+  25, 26 a 27 vlastní `vyrez` (spodní řada karet 980–1400 px místo 860–1400)
+  i `zvyr`; jinde jsou obě verze shodné (nabídka, výběr polohy, mřížka,
+  receptury). Scéna 22 dostala „minimální dávku" na značku na konci pruhu,
+  scéna 36 „složení" na sloupec složení místo na tlačítka.
+- `foto_manualu.py`: obrazovka 43-ceny se odroluje ke kartě *Ceny materiálů*
+  (`scrollIntoView`), snímek začíná kartou. Přefoceno v obou jazycích, scéna 40
+  má nový výřez 1 540 × 640 px a sedm rámečků na hlavičce, hledání a sloupcích
+  cena·za, měna, g/ml, VOC %, bezpečnostní list.
+- Nový nástroj `prohlidka_manualu.py`: v jednom běhu prohlížeče vyfotí jeviště
+  všech 54 scén se všemi rozsvícenými zvýrazněními (rozsvěcování vypne stylem)
+  a slepí je do archů 2×3, ve dvou jazycích 18 archů. Vypíše i skutečnou
+  polohu rámečků v pixelech snímku — musí být rovna datům scény. Souřadnice
+  jeviště bere i s posunem stránky, protože klik v obsahu odroluje na jeviště
+  a bez `scrollY` byl na snímku nadpis místo spodku scény.
+- Skill `irm-manual`, `irm-nastroje` a `prezentace/README.md`: souřadnice
+  platí pro konkrétní snímek, po přefocení se pouští prohlídka; anglická verze
+  nemá vždy stejné souřadnice; ceník se musí odrolovat.
+
+**Změřeno.** 108 vyfocených scén (54 × 2 jazyky) na 18 arších po opravě:
+rámečky sedí na prvcích ve všech scénách, které byly vedle (3, 9, 12, 13, 16,
+17, 20, 21, 22, 25, 26, 27, 36, 40). Skutečná poloha rámečků vypsaná
+prohlídkou = data scény u všech 220 zvýraznění obou stránek. `node --check`
+skriptů obou stránek v pořádku, `kontrola_aplikace.py` v pořádku. Data dílny
+po focení s mostem beze změny: `receptury_vlastni.csv` a 8 souborů
+`evidence/` shodné se zálohou (`cmp`). Jediný vedlejší zápis udělala aplikace
+do `parametry/typy_poloh.csv` — řádek `11153;TRS;…` s prázdným seznamem palet,
+který podstrčený stav focení vyvolal; vrácen z gitu. Příště zálohovat
+i `parametry/`, ne jen receptury a evidenci.
+
+**Co se nechalo být.** Souřadnice jsou dál pixely v datech scény, ne
+selektory prvků — převod na selektory měřené při focení by přefocení a
+souřadnice svázal, ale je to přestavba obou stránek i `foto_manualu.py`
+(220 zvýraznění). Anglická scéna 20 rámuje u *Poznámky k receptuře* jen
+popisek: pole je na anglickém snímku pod spodní hranou (1 400 px).
+
+## 229. Druhé kolo ukazatelů manuálu: anglická tlačítka jsou širší a sklad byl prázdný
+
+**Problém.** Po prvním kole (kap. 228) zbyly scény, které na archu vypadaly
+snesitelně, ale při přehrávání ne: anglické tlačítko „The leftover is not in
+the records — enter it by hand" je 478 px široké proti českým 356, rámeček
+opsaný z češtiny ho utnul v půlce a druhé tlačítko rámoval o 120 px vedle.
+Totéž u „+ New recipe", „Next component", tolerance, sloupců fronty míchání
+(*STARTS FROM* leží jinde než *ZAČNE SE Z*) a u mostu a importu, kde anglické
+texty zalomí odstavce jinak a všechno pod nimi sjede o 15–20 px. Scéna 46
+(sklad surovin) rámovala sloupce zbývá · denně · vydrží na větě „nic
+nedochází": záložka se otevírá s filtrem „co řešit" a při 154 složkách bez
+inventury je tabulka prázdná — v obou jazycích.
+
+**Co se změnilo.**
+
+- `foto_manualu.py`: sklad se fotí s filtrem „vše" (klik na `button.chip`
+  s textem `v.e|all`); přefoceno v obou jazycích, tabulka má 154 řádků a
+  sloupce sedí na dosavadní souřadnice scény 46 bez úpravy.
+- Souřadnice z mřížky: společně pro oba jazyky scény 6 (řádky poloh 34 → 46 px,
+  aby pobraly i štítky palet), 7 (štítek SCR) a 33 (simulace); česky 44, 52,
+  54; anglicky 26, 32, 33, 36, 44, 52, 53, 54 — celkem 9 českých a 36
+  anglických obdélníků.
+- Skill `irm-manual` a README: sklad s filtrem „vše", anglická tlačítka širší,
+  které scény se měří v každém jazyce zvlášť.
+
+**Změřeno.** 22 vyfocených scén (11 × 2 jazyky) prohlídkou: rámečky sedí na
+tlačítkách, sloupcích a polích v obou jazycích. Skutečná poloha rámečků
+vypsaná prohlídkou = data scény. `node --check` obou stránek v pořádku.
+Data dílny po focení s mostem beze změny: receptury, 8 souborů `evidence/`
+a 9 souborů `parametry/` shodné se zálohou (`cmp`), `git status` v datech
+prázdný.
+
+**Falešný poplach.** Po druhém kole přišly tytéž scény znovu jako „stále
+špatně" — snímky ale ukazovaly sklad bez tabulky a rámečky z prvního kola,
+tedy stav záložky otevřené ve 12:28. Manuál je jedna stránka, scény přepíná
+skript, a záložka se sama nepřenačte. Co most doopravdy servíruje, ověřila
+`prohlidka_manualu.py --most --sceny 32 44 46 54`: nové souřadnice i nový
+snímek skladu. Stránky se po každé opravě otevírají znovu; nástroj dostal
+přepínač `--most`.
+
+## 230. Manuál v aplikaci: položka v nabídce pod jazyky, jazyk manuálu v rohu
+
+**Problém.** Mluvený manuál (`prezentace/manual.html`, anglicky
+`manual_en.html`) existoval jen jako samostatný soubor — tiskař u váhy by ho
+musel hledat ve složce. Aplikace na něj nikde neodkazovala a jazyk manuálu
+nešel přepnout jinak než otevřením druhého souboru.
+
+**Co se změnilo.**
+
+- Nová část `30-app/215-manual.js` (komponenta `ManualOkno`, tabulka
+  `MANUAL_JAZYKY`, `manualJazykVychozi`): nabídka má pod oddílem JAZYK
+  oddělovač a položku **Manuál**. Klik otevře stránku manuálu v rámu
+  (iframe) přes celou obrazovku; nad rámem je lišta s nadpisem a vpravo
+  nahoře čipy *Čeština* / *English* a ✕. Esc zavírá. Jazyk manuálu se při
+  každém otevření vezme z jazyka obrazovky (en → anglický, cs i pt → český,
+  portugalský manuál není) a čipy ho pak přepínají nezávisle.
+- Stránka manuálu se nepřepisuje do React: cesty ke snímkům a nahrávkám
+  zůstávají relativní k `prezentace/`, rám je načítá odtamtud.
+- Světlý a tmavý režim chodí do rámu v hash (`#tema=dark` / `light`) —
+  ze souboru (file://) prohlížeč do dokumentu v rámu nepustí. Obě stránky
+  manuálu dostaly na začátek skriptu `temaZHash()` a posluchač
+  `hashchange`; změna hash rám nenačítá znovu.
+- CSS `.manualokno*` v `080-ovladani.css` (z-index 95, nad `.modalbg` 90);
+  slovník: „Manuál“, „Zavřít manuál“ (en, pt); `poradi.txt` + `sestav.py`
+  (102 částí); skill `irm-manual` (oddíl 3b), `prezentace/README.md`,
+  tabulka vrstev v `ROZBOR_APLIKACE.md`, řádek *Nápověda a prohlídka*
+  v `konkurence.html` z „nemáte“ na „částečně“.
+
+**Změřeno** (`snimek.py`, klik `.navbtn` + klik na tlačítko nabídky
+`/^Manu/` v `--po`, okno 1 400 × 900):
+
+- lišta [0, 0, 1400, 54], rám [0, 54, 1400, 846], čipy Čeština [1153, 10,
+  76, 34], English [1237, 10, 75, 34], ✕ [1320, 10, 40, 34]; nabídka po
+  kliku zavřená, `z-index` 95.
+- jazyk obrazovky cs → `manual.html`, nadpis „Manuál“; en → `manual_en.html`,
+  „Manual“, „Close the manual“; pt → `manual.html`, „Fechar o manual“.
+- klik na čip English v tmavém režimu: `src` `manual_en.html#tema=dark`,
+  v rámu `data-theme=dark`, pozadí rgb(55, 61, 67), titulek „Ink Recipe
+  Manager Manual“; s uloženým světlým režimem `#tema=light`, pozadí
+  rgb(201, 201, 201), 54 tlačítek obsahu.
+- klik na ✕: `.manualokno` v DOM není.
+- šířka 420 px: čipy v jednom řádku [197–404], lišta 54 px, rám 746 px,
+  `scrollWidth` 420 — stránka se vodorovně neroluje.
+- `kontrola_aplikace.py` 0, `sestav.py --kontrola` 0, `mapa.py --kontrola`
+  aktuální, `node --check` nové části v pořádku.

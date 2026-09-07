@@ -31,6 +31,7 @@
 20-zaklad/195-ctecka.js
 30-app/200-zalozky.js
 30-app/210-app.js
+30-app/215-manual.js
 30-app/220-heslo.js
 30-app/225-role.js
 30-app/226-lide.js

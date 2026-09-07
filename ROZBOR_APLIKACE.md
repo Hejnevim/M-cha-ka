@@ -1,23 +1,23 @@
 # Ink Recipe Manager — strukturovaný rozbor aplikace
 
 <!-- AUTO:stav -->
-> **Stav k 4. září 2026.** Čísla v úsecích označených `AUTO` generuje
+> **Stav k 7. září 2026.** Čísla v úsecích označených `AUTO` generuje
 > `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — nepřepisují
 > se ručně a nemohou se rozejít se skutečností. Text mimo ně píše člověk.
 
-> Poslední zapsaná změna ve vývojovém deníku: **4. září 15:28 — Karta produktu na telefonu: dlaždice pod sebe pod 480px, kratší placeholder hledání**
+> Poslední zapsaná změna ve vývojovém deníku: **7. září 12:52 — Druhé kolo ukazatelů manuálu — anglická tlačítka měřena zvlášť (36 obdélníků), sklad surovin přefocen s filtrem vše**
 
 | soubor | řádků | velikost |
 |---|---:|---:|
-| `aplikace/ (101 souborů)` | 23 528 | 1 426 kB |
-| `index.html` | 129 | 7 kB |
+| `aplikace/ (102 souborů)` | 23 596 | 1 430 kB |
+| `index.html` | 130 | 7 kB |
 | `most.py` | 741 | 31 kB |
 | `pdf_spec.py` | 1 071 | 42 kB |
 | `odemkni.py` | 213 | 8 kB |
 | `prevod_printcolor.py` | 183 | 7 kB |
 | `kontrola_aplikace.py` | 169 | 7 kB |
 | `rozbor_aktualizuj.py` | 359 | 13 kB |
-| **celkem** | **26 393** | |
+| **celkem** | **26 462** | |
 <!-- /AUTO:stav -->
 
 ---
@@ -65,6 +65,7 @@ Systém má tři vrstvy a žádnou z nich nepotřebuje internet.
 | vrstva | soubor | co dělá |
 |---|---|---|
 | **Aplikace** | `index.html` | Celé UI i výpočty. React 18 + htm, **bez build kroku** — soubor se otevře a běží. |
+| **Manuál** | `prezentace/manual.html`, `manual_en.html` | Mluvený manuál se snímky obrazovky. Od 7. 9. 2026 se otevírá i z nabídky aplikace (položka *Manuál* pod jazyky, část `30-app/215-manual.js`): stránka běží v rámu přes celou obrazovku, lišta vpravo nahoře přepíná češtinu a angličtinu a zavírá; režim světlý/tmavý chodí do rámu v hash `#tema=…`. |
 | **Data katalogu** | `data.js` | Produkty, jejich barvy, tiskové polohy, rozměry, materiály. Statické, počty viz tabulka výše. |
 | **Obrázky** | `obrazky/` + `seznam_obrazku.json` | Náhledy produktů a poloh potisku, stažené předem kvůli běhu bez internetu. |
 | **Most** | `most.py` (Python, jen standardní knihovna) | Lokální server na `127.0.0.1:8765`. Dělá to, co prohlížeč sám nesmí: čte disk, rozebírá PDF, vykresluje stránky, volá firemní systém. |
@@ -791,6 +792,10 @@ Aplikace se neopírá o „vypadá to, že to funguje":
   Kontrola je zařazená před nahrání na GitHub a rozbitou verzi nepustí dál.
 - **Celé toky se proklikávají v prohlížeči bez okna** a porovnávají s ručním
   výpočtem — například navážky domíchání ze zbytku sedí do gramu.
+- **Mluvený manuál se prohlíží celý, ne po scéně** (`prohlidka_manualu.py`):
+  54 scén × 2 jazyky se vyfotí se všemi zvýrazněními a slepí do archů. Souřadnice
+  zvýraznění platí pro konkrétní snímek — po přefocení obrazovek je zkouška
+  „uvnitř snímku" nechytí (rámeček o řádek níž je pořád uvnitř), archy ano.
 
 ---
 

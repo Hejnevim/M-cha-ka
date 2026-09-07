@@ -106,8 +106,12 @@ titulky. Scénář žije jen v `rec`.
 
 ## Anglická verze
 
-`manual_en.html` je týž manuál anglicky — stejných 54 scén, stejné výřezy
-i souřadnice zvýraznění, jiné jen `nadpis`, `text`, `rec` a popisky. Snímky má
+`manual_en.html` je týž manuál anglicky — stejných 54 scén, jiné `nadpis`,
+`text`, `rec` a popisky. Výřezy a souřadnice zvýraznění jsou shodné jen tam,
+kde je shodné rozvržení; anglická domovská stránka má kartu *Kolik namíchat*
+vyšší (upozornění na zbytek z minulých dávek), takže scény 13, 16, 17, 20, 21,
+22, 25, 26 a 27 mají vlastní `vyrez` i `zvyr`. Souřadnice se odečítají ze snímku
+toho jazyka, ne opisem. Snímky má
 ve vlastní složce `manual/en/` (anglické rozhraní aplikace), nahrávky
 v `audio_manual_en/scene-NN.mp3` hlasem `en-GB-RyanNeural`; hlas prohlížeče
 si vybírá anglický (`/^en/`), ne český.
@@ -119,6 +123,17 @@ a slyšet: kód, klíče a komentáře zůstávají česky jako všude v projekt
 
 Anglické popisky jsou delší než české, takže se rozmisťují jinak — měřit se
 proto musí **obě stránky zvlášť**, ne jen jedna.
+
+## Manuál v aplikaci
+
+Nabídka aplikace má pod jazyky položku **Manuál** (`aplikace/30-app/215-manual.js`).
+Otevře `manual.html` nebo `manual_en.html` v rámu přes celou obrazovku; lišta
+vpravo nahoře přepíná jazyk manuálu (*Čeština* / *English*) a ✕ nebo Esc ho
+zavře. Výchozí jazyk se bere z jazyka obrazovky — anglicky anglický manuál,
+česky i portugalsky český. Světlý a tmavý režim posílá aplikace v hash
+(`#tema=dark`), obě stránky ho čtou funkcí `temaZHash()` a poslouchají
+`hashchange`; ze souboru (file://) se do dokumentu v rámu jinak nedostane.
+Cesty ke snímkům a nahrávkám zůstávají relativní k této složce.
 
 ## Focení snímků: `foto_manualu.py`
 
@@ -150,9 +165,29 @@ i nahrávky vložené do jednoho souboru (skript `sestav_manual.py` ve scratchpa
 sezení, není součást balíčku).
 
 **Kdy na manuál sáhnout:** když se změní obrazovka, o které mluví — přefotit
-snímek (`snimek.py --tema light`, stejná šířka 1 600), překontrolovat
-souřadnice `zvyr` a přepsat `rec` + nahrát. Zastaralý snímek s jiným
-rozvržením než v aplikaci je horší než žádný.
+snímek (`foto_manualu.py --jen NAZEV`, oba jazyky), pustit
+`prohlidka_manualu.py` a podle archů opravit `zvyr` a `vyrez`, přepsat `rec`
++ nahrát. Zastaralý snímek s jiným rozvržením než v aplikaci je horší než
+žádný — a souřadnice, které sedí na starý snímek, jsou totéž: 7. 9. 2026
+ukazovala scéna 3 „role" na technologiích a scéna 40 ceník na řádcích
+receptur, protože po přefocení nikdo scény nevykreslil.
+
+## Prohlídka: `prohlidka_manualu.py`
+
+    python prohlidka_manualu.py                 obě stránky, 54 scén, archy 2×3
+    python prohlidka_manualu.py --sceny 3 40    jen vybrané scény
+
+Vyfotí jeviště každé scény se všemi rozsvícenými zvýrazněními a slepí je do
+archů (`%TEMP%/irm-prohlidka/archy-cs`, `archy-en`). Vypíše i skutečnou polohu
+rámečků v pixelech snímku — ta musí být rovna datům scény; liší-li se, je
+rozbité přepočítávání procent ve `vykresliScenu`, ne data. Jeviště je na
+velikosti okna nezávislé (scéna 13 při 1 600 × 1 000 i 1 000 × 700 px: tytéž
+pixely snímku).
+
+Sklad surovin (60-sklad) se fotí s filtrem „vše", jinak je tabulka prázdná
+a scéna 46 nemá na co ukazovat. Karta *Ceny materiálů* (43-ceny) leží pod seznamem receptur a žádné tlačítko
+k ní nevede; scénář ji odroluje k hornímu okraji okna, takže snímek začíná
+kartou.
 
 ---
 

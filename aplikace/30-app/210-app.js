@@ -18,6 +18,13 @@ function App() {
      jazyka překreslilo celou aplikaci. */
   const [jazyk, setJazyk] = useState(jazykAplikace);
   const prepniJazyk = (kod) => { nastavJazyk(kod); setJazyk(kod); setMenuOpen(false); };
+  /* Manuál z nabídky (215-manual.js): otevřený rám přes celou obrazovku
+     a jazyk manuálu, který se při každém otevření vezme z jazyka obrazovky
+     a pak přepíná v liště manuálu. */
+  const [manualOtevren, setManualOtevren] = useState(false);
+  const [manualJazyk, setManualJazyk] = useState(manualJazykVychozi);
+  const otevriManual = () => { setManualJazyk(manualJazykVychozi()); setManualOtevren(true); setMenuOpen(false); };
+  const zavriManual = useCallback(() => setManualOtevren(false), []);
   /* Technologie se přepíná jednou za směnu; záložky pod ní se otvírají pořád.
      Výběr technologie je proto v menu sbalený a rozbaluje se šipkou — pět
      položek s počty jen natahovalo menu nad záložky. Při otevření menu se
@@ -1426,6 +1433,8 @@ function App() {
                   ${JAZYKY[j]}
                   <span className="note" style=${{ float: "right" }}>${jazyk === j ? preloz("teď") : ""}</span>
                 </button>`)}
+              <div style=${{ borderTop: "1px solid var(--line)", margin: "7.5px 10px" }}></div>
+              <button onClick=${otevriManual}>${preloz("Manuál")}</button>
             </div>`}
         </div>
         ${kamZpet && html`
@@ -1650,6 +1659,8 @@ function App() {
         potvrdText=${pwGate.potvrd}
         onConfirm=${() => { pwGate.onConfirm(); setPwGate(null); }}
         onCancel=${() => setPwGate(null)} />`}
+      ${manualOtevren && html`<${ManualOkno} jazyk=${manualJazyk} setJazyk=${setManualJazyk}
+        tema=${theme} onZavrit=${zavriManual} />`}
       ${toast && html`
         <div className=${"toast" + (toast.ok ? "" : " bad")} onClick=${() => setToast(null)}>
           <span>${toast.ok ? "▮▯▮" : "⚠"}</span><span>${toast.text}</span>
