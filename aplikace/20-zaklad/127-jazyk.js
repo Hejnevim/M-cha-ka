@@ -1294,6 +1294,10 @@ const SLOVNIK = {
   "Adresa mostu": { en: "Bridge address", pt: "Endereço da ponte" },
   "Zkouším…": { en: "Trying…", pt: "A tentar…" },
   "Připojit a uložit": { en: "Connect and save", pt: "Ligar e guardar" },
+  "Záloha dat do Stažené": { en: "Back up data to Downloads", pt: "Cópia de segurança para Transferências" },
+  "Jeden zip s databázemi, evidencí, parametry i rozdělanou prací.":
+    { en: "One zip with databases, records, parameters and work in progress.",
+      pt: "Um zip com bases de dados, registos, parâmetros e trabalho em curso." },
   "Jen vyzkoušet": { en: "Just try it", pt: "Só experimentar" },
   "Výchozí": { en: "Default", pt: "Predefinido" },
   "Obvykle": { en: "Usually", pt: "Normalmente" },

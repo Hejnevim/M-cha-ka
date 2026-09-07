@@ -9,7 +9,7 @@
 
 | soubor | řádků | velikost |
 |---|---:|---:|
-| `aplikace/ (102 souborů)` | 23 596 | 1 430 kB |
+| `aplikace/ (102 souborů)` | 23 610 | 1 431 kB |
 | `index.html` | 130 | 7 kB |
 | `most.py` | 741 | 31 kB |
 | `pdf_spec.py` | 1 071 | 42 kB |
@@ -17,7 +17,7 @@
 | `prevod_printcolor.py` | 183 | 7 kB |
 | `kontrola_aplikace.py` | 169 | 7 kB |
 | `rozbor_aktualizuj.py` | 359 | 13 kB |
-| **celkem** | **26 462** | |
+| **celkem** | **26 476** | |
 <!-- /AUTO:stav -->
 
 ---
@@ -778,6 +778,43 @@ nahrání na GitHub. Chybí-li obrázek, aplikace to řekne a funguje dál.
 | Bez spektrofotometru | odstín se neměří, jen počítá z receptury a hlásí odchylku v Lab | korekce po nátisku vychází z popisu obsluhy |
 
 ---
+
+## 3.8 Samostatné balíčky — Windows exe a Android APK
+
+Aplikace se dál otevírá dvojklikem na `index.html` a bez build kroku; balíčky
+jsou jen jiné obaly téhož kódu. Zdroje v `distribuce/`, výstup **mimo
+repozitář** v `../sestaveni/` (nese licencované databáze i evidenci).
+
+| balíček | co je uvnitř | jak běží |
+|---|---|---|
+| **`IRM-windows/IRM.exe`** (227 MB složka) | PyInstaller: `irm_okno.py` + `most.py` + `pdf_spec.py` + `pypdfium2`; vedle exe aplikace, `obrazky/`, `prezentace/` a datové složky jako obyčejné CSV | exe nastartuje most nad vlastní složkou a otevře aplikaci v okně Edge/Chrome (`--app`, profil v `okno/`); zavření okna most vypne. Umí všechno co most: PDF, výřezy, SGPS, zápis CSV s `.bak`. Je-li 8765 obsazený jiným mostem, otevře jen okno k němu; `--port=` jako u mostu |
+| **`IRM.apk`** (194 MB) | jedna Activity s WebView + `Most.java`: most přepsaný do Javy na `127.0.0.1:8765`, aplikace a data v assetech | při prvním spuštění se CSV zkopírují do složky aplikace (zapisovatelné; aktualizace APK je nepřepíše, jen doplní chybějící). Kamera na kódy, výběr souboru pro import, export přes MediaStore do *Stažené*. **PDF a SGPS na telefonu nejsou** — `/api/stav` vrací `pdf:false` a aplikace to ukazuje jako nedostupné |
+
+Sestavení: `python distribuce/sestav_exe.py`, `python distribuce/sestav_apk.py`
+(bez Gradlu: `aapt2` → `javac` → `d8` → `zipalign` → `apksigner`). Nástroje
+pro sestavení leží v `%LOCALAPPDATA%\IRM-nastroje-sestaveni\` (JDK 17,
+Android SDK, podpisový klíč `irm.keystore`). Co do balíčků patří, říká jediný
+seznam v `distribuce/balik.py`.
+
+**Aktualizace — data se jen dopisují.** Program a data jsou oddělené:
+aktualizace vyměňuje jen program (`PROGRAM_POLOZKY`), datové složky, profil
+okna a nastavení nechává. Pravidla pro data (`distribuce/aktualizace.py`,
+v Javě `Aktualizace.java`, obě verze stejné):
+
+| co | pravidlo |
+|---|---|
+| `evidence/` | nikdy se nemění; chybějící soubor se jen založí |
+| `receptury_vlastni.csv` | nepřepisuje se; z aktualizace se připíší jen receptury s dosud neznámým názvem |
+| nakoupené databáze | vymění se jen soubor, který dílna od minulé verze nezměnila (otisk v `manifest.json`); změněný zůstane, nová verze vedle jako `.novy` |
+| `parametry/*.csv` | sloučení podle klíče souboru: nové řádky a sloupce přibudou, prázdné buňky se doplní, vyplněná hodnota dílny (cena, zámek technologie) se nepřepíše |
+
+Před vším záloha (`zalohy/<datum>/`, na telefonu `zalohy/<datum>.zip`),
+každý zásah do `evidence/zmeny.csv` (kód `ZMENA-<den>-A001`, podpis
+„aktualizace“) a do `aktualizace.log`. Windows: zip přetáhnout na
+`Aktualizovat.bat`; program se vymění dávkou až po zavření exe. Android:
+nové APK přes staré (stejný klíč), data v telefonu zůstanou; tlačítko
+*Záloha dat do Stažené* v záložce Připojení zabalí data i úložiště WebView.
+Odinstalace APK data maže — nedělat.
 
 ## Příloha — ověřování
 

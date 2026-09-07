@@ -21,6 +21,7 @@
     --radius:32px; --radius-btn:999px; --radius-pole:20px;
     --sans:system-ui,"Segoe UI",sans-serif;
     --prostrkani:.07em;
+    --ikona-tah:1.5; --ikona-konec:round; --ikona-radek:1.2em;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
@@ -147,6 +148,19 @@
   button[disabled]{opacity:.45; cursor:default}
   .hlavni{font-weight:700; padding:12px 26px}
   .drobne{padding:8px 14px; font-size:14px}
+  /* Ikona reproduktoru je kreslená jako ikony v aplikaci (030-zaklad.css):
+     mřížka 24, jen obrys, barva z písma tlačítka, tah a zakončení z proměnných.
+     Emoji 🔊 se dřív vykreslovalo podle systému — na každém stroji jinak
+     a vždy jinak než zbytek rozhraní. */
+  svg[viewBox="0 0 24 24"].ikona-radek{width:var(--ikona-radek); height:var(--ikona-radek);
+    vertical-align:-.24em; margin-right:.3em; color:inherit}
+  svg[viewBox="0 0 24 24"] path{stroke-width:var(--ikona-tah); stroke-linecap:var(--ikona-konec);
+    stroke-linejoin:var(--ikona-konec)}
+  /* Stav ztlumeno se pozná ze stejné ikony: vlny se schovají a místo nich
+     stojí křížek — jako 🔇 proti 🔊, ale bez výměny kresby. */
+  #zvuk .skrt{display:none}
+  #zvuk[aria-pressed="false"] .vlny{display:none}
+  #zvuk[aria-pressed="false"] .skrt{display:inline}
   .pruh{flex:1; min-width:120px; height:8px; border-radius:99px; box-shadow:var(--neu-in); overflow:hidden}
   .pruh span{display:block; height:100%; width:0%; background:var(--ink); border-radius:99px;
     transition:width .25s linear}
@@ -186,7 +200,14 @@
     <div class="znacka">Ink Recipe Manager — manuál</div>
     <div class="podznacka" id="podznacka">Stránka po stránce, funkce po funkci — s mluveným slovem a zvýrazněním přímo na obrazovce</div>
   </div>
-  <button class="drobne" id="zvuk" aria-pressed="true">🔊 Mluvené slovo</button>
+  <button class="drobne" id="zvuk" aria-pressed="true">
+    <svg viewBox="0 0 24 24" class="ikona-radek" fill="none" aria-hidden="true">
+      <path d="M3 10v4h4l5 4V6L7 10H3Z" stroke="currentColor" />
+      <path class="vlny" d="M15.5 9.5a3.5 3.5 0 0 1 0 5M18.5 6.5a7.5 7.5 0 0 1 0 11" stroke="currentColor" />
+      <path class="skrt" d="M16 9.5l5 5M21 9.5l-5 5" stroke="currentColor" />
+    </svg>
+    <span id="zvuk-text">Mluvené slovo</span>
+  </button>
 </div>
 
 <div class="jeviste">
@@ -641,6 +662,7 @@
   var bZpet = document.getElementById("zpet");
   var bDal = document.getElementById("dal");
   var bZvuk = document.getElementById("zvuk");
+  var tZvuk = document.getElementById("zvuk-text");
 
   var i = 0, bezi = false, zvuk = true, casovac = null, tikac = null, hlas = null;
   var prehravac = null;
@@ -925,7 +947,7 @@
   bZvuk.addEventListener("click", function(){
     zvuk = !zvuk;
     bZvuk.setAttribute("aria-pressed", String(zvuk));
-    bZvuk.textContent = zvuk ? "🔊 Mluvené slovo" : "🔇 Jen titulky";
+    tZvuk.textContent = zvuk ? "Mluvené slovo" : "Jen titulky";
     if (bezi){ stopni(); mluv(); }
   });
   document.addEventListener("keydown", function(e){

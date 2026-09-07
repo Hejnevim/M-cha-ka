@@ -383,6 +383,9 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 |---|---|
 | 12:28 | Zvýraznění manuálu sedí na přefocené snímky — 31 českých a 44 anglických obdélníků přeměřeno, ceník materiálů přefocen, nová prohlídka manuálu (prohlidka_manualu.py) |
 | 13:23 | Manuál v aplikaci — položka v nabídce pod jazyky, rám přes obrazovku, čeština/angličtina v rohu |
+| 15:10 | Ikona zvuku v manuálu vektorová jako ostatní ikony aplikace; ztlumení přes aria-pressed, obě jazykové verze |
+| 15:42 | IRM.exe pro Windows a IRM.apk pro Android — celá aplikace s databázemi v jednom balíčku, most v Javě na telefonu |
+| 16:18 | Aktualizace exe i APK, která data jen dopisuje (záloha, manifest, Změny podkladů), tlačítko Záloha na telefonu, zástupci na ploše |
 
 | 12:52 | Druhé kolo ukazatelů manuálu — anglická tlačítka měřena zvlášť (36 obdélníků), sklad surovin přefocen s filtrem vše |
 ---
@@ -10673,3 +10676,169 @@ nešel přepnout jinak než otevřením druhého souboru.
   `scrollWidth` 420 — stránka se vodorovně neroluje.
 - `kontrola_aplikace.py` 0, `sestav.py --kontrola` 0, `mapa.py --kontrola`
   aktuální, `node --check` nové části v pořádku.
+
+## 231. Ikona zvuku v manuálu je kreslená jako ostatní ikony aplikace
+
+**Problém.** Tlačítko *Mluvené slovo* v hlavičce manuálu (`prezentace/manual.html`,
+`manual_en.html`) neslo emoji 🔊 / 🔇. Emoji kreslí systém, ne stránka: na každém
+stroji vypadá jinak (Windows barevně, Chrome na jiném stroji černobíle) a nikdy
+jako ikony aplikace, které jsou vektorové — mřížka 24, jen obrys, tah 1,5 px
+se zakulaceným zakončením, barva z písma kolem (zámek u technologie, nabídka,
+zpět, světlo/tma). V rámu aplikace (kap. 230) seděla emoji ikona přímo pod
+vektorovou lištou a rozdíl byl vidět.
+
+**Co se změnilo.**
+- Tlačítko má místo emoji `<svg viewBox="0 0 24 24" class="ikona-radek">`:
+  reproduktor, dvě vlny (`.vlny`) a křížek (`.skrt`). Text je ve `<span
+  id="zvuk-text">`; skript mění jen ten, ne `textContent` tlačítka — jinak by
+  s textem zmizela i ikona.
+- Ztlumení se pozná ze stejné kresby: `#zvuk[aria-pressed="false"]` schová
+  vlny a ukáže křížek. Kresba se nevyměňuje, přepíná se stav.
+- Do `:root` manuálu přibyly `--ikona-tah:1.5; --ikona-konec:round;
+  --ikona-radek:1.2em` opsané z `020-promenne.css`, a pravidla pro
+  `svg[viewBox="0 0 24 24"]` opsaná z `030-zaklad.css` — manuál nemá styly
+  aplikace načtené, palety si opisuje.
+- Obě jazykové verze v témže kroku, jedním skriptem s kontrolou počtu
+  výskytů (5 náhrad na soubor, každá 1×).
+
+**Změřeno** (`snimek.py --soubor prezentace/manual.html`, 1 280 px):
+- ikona 16,80 × 16,80 px při písmu 14 px (1,2 em), `stroke-width` 1,5 px,
+  `stroke-linecap` round; barva ikony = barva tlačítka (`rgb(226,232,240)`
+  ve tmavém, z `--ink`).
+- před klikem: text „Mluvené slovo“, `aria-pressed` true, `.vlny` inline,
+  `.skrt` none; po `--klik "#zvuk"`: „Jen titulky“, false, vlny none, křížek
+  inline. Anglicky totéž: „Subtitles only“, ikona 16,80 px.
+- tlačítko 142,27 × 36,30 px; snímky světlý i tmavý režim, obě stránky,
+  skript stránky projde `new Function` v Node.
+
+## 232. Samostatné balíčky: IRM.exe pro Windows a IRM.apk pro Android
+
+**Problém.** Aplikace se v dílně otevírá dvojklikem na `index.html` a most se
+spouští zvlášť. Pro počítač bez Pythonu a pro telefon u váhy to nestačí:
+tam má být jeden soubor, který se spustí a má v sobě všechno — aplikaci,
+obrázky, manuál i databáze receptur a evidenci. Zároveň nesmí vzniknout
+build krok pro samotnou aplikaci a balíčky nesmí do veřejného repozitáře
+(nesou licencované databáze a čísla zakázek).
+
+**Co se změnilo.**
+- Nová složka `distribuce/` se zdroji balíčků; výstup jde do `../sestaveni/`
+  mimo repozitář. Co do balíčků patří, říká jediný seznam v `balik.py`
+  (aplikace, `lib/`, `data.js`, `obrazky/`, `prezentace/`; datové složky jen
+  jako `*.csv`, zálohy `.bak` se neberou).
+- **Windows:** `irm_okno.py` nastartuje most nad složkou programu, otevře
+  aplikaci v okně Edge/Chrome (`--app`, vlastní profil v `okno/`) a po zavření
+  okna most vypne. Vlastní profil je proto, aby šlo poznat, kdy uživatel okno
+  zavřel — se sdíleným profilem Edge předá adresu už běžícímu procesu a hned
+  skončí. Je-li port obsazený mostem dílny, otevře jen okno k němu; `--port=`
+  jako u mostu. `sestav_exe.py` to zabalí PyInstallerem ve složkovém režimu
+  (jednosouborové exe by 200 MB obrázků rozbalovalo při každém startu) včetně
+  `pdf_spec.py` a `pypdfium2`, takže exe umí PDF i výřezy. Most se po
+  importu přesměruje ke složce s exe (`SLOZKA`, `CONFIG`, `SLOZKY`,
+  `PRAVIDLA_SOUBOR`), jinak by hledal data v `_internal/`.
+- **Android:** `HlavniObrazovka.java` (WebView, oprávnění kamery pro čtení
+  kódů, výběr souboru pro import, stažení exportu z `blob:` přes MediaStore
+  do *Stažené*) a `Most.java` — most přepsaný do Javy na `127.0.0.1:8765`.
+  Skutečný server, ne zachytávání adres: WebView neumí předat tělo POST.
+  Umí stav, seznam a čtení CSV (UTF-8 i windows-1250), zápis přes `.tmp`
+  a `.bak`, rozpoznání druhu souboru podle hlavičky stejně jako most.py.
+  PDF a SGPS na telefonu nejsou, `/api/stav` vrací `pdf:false`. Data se při
+  prvním spuštění kopírují z assetů do složky aplikace; aktualizace APK
+  doplní jen chybějící soubory, zápisy z telefonu nepřepíše.
+- `sestav_apk.py` staví bez Gradlu: `aapt2` → `javac` → `d8` → `zipalign`
+  → `apksigner`. Nástroje (JDK 17, Android SDK 34, emulátor) leží v
+  `%LOCALAPPDATA%\IRM-nastroje-sestaveni\`, tam vzniká i podpisový klíč
+  `irm.keystore` — bez něj telefon nepustí aktualizaci, takže se nemaže.
+- Pasti, na které se přišlo: `copy2` přenáší atribut *jen pro čtení*
+  (`lib/htm.js`), takže další sestavení spadlo při úklidu — kopie se odemyká
+  a úklid maže obsah složky, ne složku samu (shell stojící v ní ji drží).
+  `avdmanager` v tomhle prostředí visí na dotazu, AVD se zakládá zápisem
+  `config.ini`.
+- Řádky v `irm-nastroje`, oddíl 3.8 v `ROZBOR_APLIKACE.md`.
+
+**Změřeno.**
+- `sestaveni/IRM-windows/`: 227,2 MB, 5 891 souborů aplikace, 25 CSV,
+  `IRM.exe` 2,4 MB. Spuštěno `IRM.exe --port=8791` vedle běžícího mostu
+  dílny: `/api/stav` `ok:true, pdf:true`, `index.html` 200 (7 466 B,
+  `text/html; charset=utf-8`), `/api/databaze?slozka=evidence` seznam,
+  `obrazky/11003_set.jpg` 200 `image/jpeg`, `prezentace/manual.html` 200.
+  Zápis `_zkouska_exe.csv` do `evidence/`: soubor s BOM (13 B), druhý zápis
+  nechal `.bak`, zpětné čtení vrátilo nový obsah. Po zavření okna Edge
+  „most ukončen“ v `irm_okno.log`, 0 procesů `IRM.exe`.
+- `sestaveni/IRM.apk`: 193,7 MB, 5 927 položek, `classes.dex` 25 004 B,
+  8 databází v `assets/data/databaze_barev/`, 5 583 obrázků, 126 zvukových
+  souborů manuálu, ikona v 5 hustotách, podpis ověřen `apksigner verify`.
+- APK na emulátoru (Android 14, x86_64, 1 080 × 2 400, start systému 55 s):
+  instalace „Success“, proces běží, v logcat žádný FATAL. Přes `adb forward`
+  na most v telefonu: `/api/stav` `rezim:telefon, pdf:false`, `index.html`
+  200 (7 466 B), 8 databází, 56 670 řádků receptur, obrázek 200 (80 389 B),
+  `/api/pdf` 500 s hláškou, že PDF je jen na počítači. Zápis
+  `_zkouska_apk.csv` do evidence a zpětné čtení nového obsahu. Snímky:
+  domovská stránka s produktem a obrázkem („1320 z 1320“), nabídka se
+  skupinami Katalog · Míchání · Sklad · Data, karta *Připojení k mostu*
+  „Připojeno k http://127.0.0.1:8765 — čtení PDF nedostupné“, seznam
+  databází s technologiemi z `parametry/databaze.csv` a „Vlastní receptury
+  → receptury_vlastni.csv · uloženo 13:40:12“ — aplikace přes most v Javě
+  zapsala hned po startu.
+
+## 233. Aktualizace balíčků, která data jen dopisuje; zástupci na ploše
+
+**Problém.** Balíčky z kap. 232 se daly jen nahradit celé — a s nimi
+i databáze, evidence zbytků, šarže, sestavy a rozdělaná práce v profilu
+prohlížeče. Dílna potřebuje opak: program vyměnit, data nikdy nesmazat,
+nové receptury a parametry jen připsat, a mít jistotu, že se po aktualizaci
+nic z evidence ani z trendů neztratí.
+
+**Co se změnilo.**
+- Program a data jsou oddělené: aktualizace vyměňuje jen položky ze
+  seznamu `PROGRAM_POLOZKY` v `balik.py` (exe, `_internal`, aplikace, obrázky,
+  manuál); datové složky, `okno/` (localStorage, IndexedDB) a `sgps_config.json`
+  nechává.
+- `distribuce/aktualizace.py` — pravidla pro data: evidence beze změny,
+  `receptury_vlastni.csv` jen připsat receptury s neznámým názvem, nakoupené
+  databáze vyměnit jen když otisk souboru sedí s manifestem minulé verze
+  (jinak zůstat a novou verzi odložit jako `.novy`), parametry sloučit podle
+  klíče souboru (`KLICE_PARAMETRU`): nové řádky a sloupce přibudou, prázdné
+  buňky se doplní, vyplněná hodnota dílny se nepřepíše. Před vším záloha do
+  `zalohy/<datum>/`, každý zásah do `evidence/zmeny.csv` (kód `ZMENA-<den>-A001`
+  s písmenem, aby se řada nepotkala s číslováním aplikace) a do
+  `aktualizace.log`.
+- `IRM.exe --aktualizace balíček.zip [--tiche]` a `Aktualizovat.bat` (zip se
+  na něj přetáhne). Data se sloučí hned; program vymění dávka
+  `dokonci_aktualizaci.cmd` až po zavření exe — Windows nedovolí přepsat
+  běžící program a načtené DLL. Dávka běží ve skryté konzoli, ne jako
+  DETACHED: bez konzole se cmd s `find` a `timeout` neshodl a tiše zmizel;
+  a píše se s `newline=""`, jinak textový režim udělal `\r\r\n` a cmd se na
+  řádcích zadrhl.
+- `sestav_exe.py` vydává i `IRM-aktualizace-RRRR.MM.DD.zip` (`program/` +
+  `data/` + `manifest.json` s otisky dat); `--jen-program` bez dat, ten smí
+  na GitHub, data jdou jen po dílně.
+- Android: `Aktualizace.java` — tatáž pravidla v Javě, spouští se jen když se
+  verze v assetech liší od `dilna/manifest.json`; záloha do
+  `zalohy/<datum>.zip` (drží se tři). Nové APK jde přes staré (stejný klíč),
+  data v telefonu zůstávají. Tlačítko *Záloha dat do Stažené* v záložce
+  Připojení (jen v aplikaci pro Android, `window.IRMAndroid`) zabalí složku
+  dílny i úložiště WebView do jednoho zipu; texty v části 127 (en, pt).
+- Zástupci na ploše: „IRM“ → `IRM.exe`, „IRM pro Android (APK)“ → `IRM.apk`.
+- Řádky v `irm-nastroje`, oddíl 3.8 v `ROZBOR_APLIKACE.md`, `CTI_ME.txt`.
+
+**Změřeno.**
+- Slučování (Python, jednotky): vyplněná buňka dílny zůstala, prázdná se
+  doplnila, nový řádek i sloupec přibyly; receptura dílny nepřepsána, nová
+  připsána; beze změn vrací původní text beze změny.
+- Aktualizace exe na zkušební instalaci se zásahy dílny (změněné síto,
+  vlastní receptura, upravená PMS 660, soubor navíc v evidenci) balíčkem
+  verze 2026.12.31: exe skončil za 6,7 s, dávka vyměnila program 1 s po
+  jeho skončení; 16 kontrol z 16 v pořádku — záloha 28 souborů, PMS 660
+  ponechána + `.novy`, PMS 786 (nezměněná) vyměněna, `receptury_vlastni.csv`
+  +1 receptura a receptura dílny beze změny, `sita.csv` 32 doplnění, evidence
+  nedotčena, 37 záznamů v `zmeny.csv` (A001…), `CTI_ME.txt` nový,
+  `manifest.json` 2026.12.31, `_aktualizace` uklizeno.
+- APK 2026.09.07 nainstalované přes předchozí verzi v emulátoru: bez pádu,
+  zkušební soubor `_zkouska_apk.csv` v evidenci zachován s původním obsahem;
+  tlačítko *Záloha dat do Stažené* na kartě Připojení, po klepnutí
+  `IRM-zaloha-2026-09-07_1414.zip` (1 956 603 B, 74 položek: evidence,
+  parametry, databáze, `manifest.json`, 43 souborů úložiště WebView včetně
+  Local Storage).
+- `kontrola_aplikace.py` 0, `receptury_vlastni.csv` po testu shodné se
+  stavem před ním; slovník v Node: cs/en/pt překlady obou nových textů.
+- Balíček aktualizace s daty 188,5 MB; složka exe 227,3 MB; APK 194 MB.

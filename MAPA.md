@@ -1,7 +1,7 @@
 # Rejstřík kódu aplikace
 
 > Generuje `mapa.py` ze skutečných souborů — neupravovat ručně.
-> Kód není v `index.html`, leží v `aplikace/` v 102 částech (23596 řádků).
+> Kód není v `index.html`, leží v `aplikace/` v 102 částech (23610 řádků).
 > Čísla u položek jsou `část:řádek` — část podle tabulky níž.
 
 | # | část | řádků |
@@ -20,7 +20,7 @@
 | 12 | `20-zaklad/120-barva-potisku.js` | 93 |
 | 13 | `20-zaklad/125-ulozeni.js` | 53 |
 | 14 | `20-zaklad/126-evidence-soubor.js` | 69 |
-| 15 | `20-zaklad/127-jazyk.js` | 2708 |
+| 15 | `20-zaklad/127-jazyk.js` | 2712 |
 | 16 | `20-zaklad/128-jednotka.js` | 32 |
 | 17 | `20-zaklad/130-ikony.js` | 29 |
 | 18 | `20-zaklad/135-rolovani.js` | 79 |
@@ -30,7 +30,7 @@
 | 22 | `20-zaklad/170-pokryti.js` | 331 |
 | 23 | `20-zaklad/175-pokryti-okno.js` | 546 |
 | 24 | `20-zaklad/180-pdf-v-kalkulaci.js` | 102 |
-| 25 | `20-zaklad/185-pripojeni.js` | 223 |
+| 25 | `20-zaklad/185-pripojeni.js` | 233 |
 | 26 | `20-zaklad/190-zakazky.js` | 178 |
 | 27 | `20-zaklad/195-ctecka.js` | 272 |
 | 28 | `30-app/200-zalozky.js` | 62 |
@@ -316,7 +316,7 @@
 `rgbNaCmyk` 12:14 · `cmykText` 12:21 · `rgbNaLab` 12:25 · `t` 12:31 · `deltaE` 12:35 · `pantoneZNazvu` 12:38
 `nejblizsiPantone` 12:48 · `vzornikProHodnotu` 12:63 · `popisBarvyPotisku` 12:76 · `loadLS` 13:2
 `saveLS` 13:6 · `zapomenLS` 13:10 · `idbOtevri` 13:23 · `useEvidenceSoubor` 14:18 · `nastavJazyk` 15:53
-`jazykProstredi` 15:2689 · `preloz` 15:2699 · `kodJednotky` 16:19 · `hmotnostText` 16:23
+`jazykProstredi` 15:2693 · `preloz` 15:2703 · `kodJednotky` 16:19 · `hmotnostText` 16:23
 `hmotnostNaGramy` 16:30 · `fixTech` 17:26 · `posunJezdce` 18:21 · `srovnej` 18:26 · `dolu` 18:44
 `tahni` 18:55 · `pust` 18:58 · `bezDiakritiky` 19:54 · `rozborKoduPolohy` 19:60 · `polohaDleKodu` 19:66
 `posTokeny` 19:72 · `parseSpec` 19:76 · `put` 19:80 · `resolveSpec` 19:105 · `num` 19:110 · `vyber` 19:147

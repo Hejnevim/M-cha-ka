@@ -99,6 +99,16 @@ function PripojeniTab({ sgps, databaze, recipes, links, vlastniStav, onOdebratZd
           ? html`<div className="okbox">✓ ${preloz("Most na")} <b>${zkouska.adresa}</b> ${preloz("odpověděl za {ms} ms — čtení PDF", { ms: zkouska.ms })}
               ${zkouska.d.pdf ? preloz("připravené") : preloz("NEDOSTUPNÉ")}${preloz(", SGPS v režimu „{r}“.", { r: zkouska.d.rezim })}</div>`
           : html`<div className="warnbox">${preloz("Na")} <b>${zkouska.adresa}</b> ${preloz("se most neozval —")} ${zkouska.chyba}</div>`)}
+
+        ${/* Jen v aplikaci pro Android: telefon nemá složku, kterou by šlo
+             zkopírovat, takže zálohu (data dílny i úložiště WebView) balí
+             aplikace sama do Stažené. Na počítači se zálohuje kopií složky
+             a před aktualizací automaticky. */
+          typeof window !== "undefined" && window.IRMAndroid && html`
+          <div className="rowline" style=${{ marginTop: 14 }}>
+            <button className="btn sec" onClick=${() => window.IRMAndroid.zaloha()}>${preloz("Záloha dat do Stažené")}</button>
+            <span className="note">${preloz("Jeden zip s databázemi, evidencí, parametry i rozdělanou prací.")}</span>
+          </div>`}
       </div>
 
       <div className="card">

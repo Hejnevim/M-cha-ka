@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- IRM pro Android: jedna obrazovka s WebView, ve které běží tatáž aplikace
+     jako na počítači. Most (čtení a zápis CSV) je tu přepsaný do Javy a
+     poslouchá jen na 127.0.0.1, proto usesCleartextTraffic — jde o http
+     uvnitř telefonu, ven nic nechodí. INTERNET je nutné i pro localhost,
+     bez něj Android sokety vůbec nepovolí. CAMERA kvůli čtení čárových kódů. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="cz.irm.aplikace"
+    android:versionCode="VERSION_CODE"
+    android:versionName="VERSION_NAME">
+
+    <uses-sdk android:minSdkVersion="24" android:targetSdkVersion="34" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+
+    <application
+        android:label="@string/nazev"
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true"
+        android:allowBackup="true"
+        android:hardwareAccelerated="true"
+        android:theme="@android:style/Theme.DeviceDefault.Light.NoActionBar">
+        <activity
+            android:name=".HlavniObrazovka"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|keyboardHidden|keyboard|screenLayout|smallestScreenSize|uiMode">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
