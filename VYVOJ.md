@@ -386,8 +386,31 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 15:10 | Ikona zvuku v manuálu vektorová jako ostatní ikony aplikace; ztlumení přes aria-pressed, obě jazykové verze |
 | 15:42 | IRM.exe pro Windows a IRM.apk pro Android — celá aplikace s databázemi v jednom balíčku, most v Javě na telefonu |
 | 16:18 | Aktualizace exe i APK, která data jen dopisuje (záloha, manifest, Změny podkladů), tlačítko Záloha na telefonu, zástupci na ploše |
+| 20:00 | Logo dílny jako ikona — záložka prohlížeče, exe i APK; SVG v logo/, ikona.py zmenšuje vyfocený rastr |
+| 20:24 | Nové logo v exe i APK; zástupci na ploše s novou ikonou, irm.ico vedle APK |
+| 23:47 | Zástupce IRM bere ikonu z irm.ico místo z exe — mezipaměť ikon Windows starou kresbu nepustila |
 
 | 12:52 | Druhé kolo ukazatelů manuálu — anglická tlačítka měřena zvlášť (36 obdélníků), sklad surovin přefocen s filtrem vše |
+
+### 8. září — dlaždice, které drží řádek
+| čas | co |
+|---|---|
+| 08:49 | Dlaždice parametrů a zakázky drží řádek — popisky ve sdíleném pruhu, písmo v dlaždici neklesne pod základní |
+| 10:01 | Nářadí na síto je těrka, ne stěrka — 79 míst ve 12 souborech, identifikátory terka/terky, parser listu čte i starý klíč; snímek manuálu 01-domov přefocený na 1 520 px v obou jazycích |
+| 10:25 | Klepnutí na telefonu už nepodbarvuje dlaždice modře — tap-highlight vypnutý pro všechny prvky, user-select:none na tlačítkách a dlaždicích; do APK/exe s dalším sestavením |
+| 11:10 | Přepínač s tužidlem na telefonu vystoupil z tlačítka Štítek na kelímek pod něj — text tlačítka zpět na jednom řádku, pod zlomem 1000 px, nad ním beze změny |
+| 11:13 | Řady barev v Recepturách jsou sbalené do jednoho štítku — rozbalí se stiskem, na telefonu začíná tabulka hned pod hledáním |
+| 12:11 | Vzorník receptur na telefonu po dvou, mřížka minmax(0,1fr) nepřetéká, tlačítka karty 2×2 |
+| 12:14 | Odkaz na recepturu otevře i telefon — most po síti (--sit, po_siti v konfiguraci) hlásí adresu v síti a tlačítko Odkaz ji dává místo localhostu; bez ní hlášení řekne, že odkaz platí jen tady |
+| 12:18 | Rozpis výpočtu dávky zmizel z karty Kolik namíchat — vzorec přesunutý do NAVOD_PODKLADY.md |
+| 13:05 | Vícebarevná zakázka: seznam barev potisku z listu, rozpisu separací i ručně, kalkulace se přepíná po barvách, fronta dostane kelímek na barvu; most čte vzorníky kreslené cestou |
+| 13:23 | Barvy zakázky i u váhy: přepínání v míchacím režimu, namíchaná barva má zelenou konturu a fajfku (samo po dovážení nebo štítku, ručně fajfkou) |
+| 13:49 | Asistent váží barvy zakázky za sebou — potvrzení založí kelímek, vytáruje a přepne na další recepturu, štítky se tisknou naráz |
+| 14:32 | Manuál dohnal aplikaci podruhé — 57 scén na 37 snímcích: vícebarevná zakázka v kartě i u váhy, nabídka s položkou Manuál, domovská stránka bez rozpisu přefocená i s osmi okny nad ní |
+| 14:51 | Přepínač odolnosti vůči vyblednutí zrušen, papír C / U v editoru je jediná položka daná názvem |
+| 15:01 | Čipy filtru C i U · C · U zrušeny nad seznamem receptur i ve výběru Pantone — písmeno je v názvu a ve štítku |
+| 15:38 | Karta produktu na telefonu: produkt a poloha potisku vedle sebe, zakázkový list pod nimi na středu přes oba sloupce |
+| 16:27 | Poslední verze na dálku — vydání na GitHubu jen s programem (vydej.py), Aktualizovat.bat si zip stáhne sám, telefon odkazem na APK; otisky manifestu se při aktualizaci bez dat zachovají |
 ---
 
 ## Co aplikace je
@@ -10842,3 +10865,828 @@ nic z evidence ani z trendů neztratí.
 - `kontrola_aplikace.py` 0, `receptury_vlastni.csv` po testu shodné se
   stavem před ním; slovník v Node: cs/en/pt překlady obou nových textů.
 - Balíček aktualizace s daty 188,5 MB; složka exe 227,3 MB; APK 194 MB.
+
+## 234. Logo dílny jako ikona aplikace — záložka prohlížeče, exe i APK
+
+**Problém.** Ikona balíčků byla zástupná kapka kreslená procedurálně
+v `distribuce/ikona.py`, záložka prohlížeče neměla ikonu žádnou a firemní
+logo se čekalo „až ho dílna dodá jako soubor“. Dnes dodala: šedá zaoblená
+dlaždice, červená tečka a vtlačený dřík písmene „i“, ve světlé a tmavé
+variantě. Zatím se má použít jen jako ikona; jako logo v aplikaci přijde
+na řadu později, proto se ukládá tak, aby bylo po ruce.
+
+**Co se změnilo.**
+- Nová složka `logo/` s `irm-ikona.svg` (světlá, dlaždice `#949494`)
+  a `irm-ikona-dark.svg` (tmavá, `#545454`). Z dodaných souborů je vyňatý
+  blok `<metadata>` s podpisem původu (C2PA, přes 20 KB base64 na 2 KB
+  kresby) — do stránky ani do balíčků nepatří a kresbu nemění.
+- SVG má neumorfické stíny z filtrů (`feDropShadow`, `feGaussianBlur`),
+  které jen standardní knihovnou nevykreslíme. Proto vedle SVG leží
+  `irm-ikona-512.png` a `irm-ikona-dark-512.png` vyfocené headless Chromem
+  s průhledným pozadím (`--default-background-color=00000000`); příkaz je
+  v hlavičce `ikona.py`, po změně SVG se PNG přefotí.
+- `distribuce/ikona.py` už nekreslí kapku: přečte PNG předlohy (zlib
+  a čtyři filtry PNG) a zmenší je průměrem bloků s předváženou
+  průhledností — bez ní by zaoblené rohy dostaly tmavý lem z průhledných
+  černých bodů. Rozhraní `png(cesta, n)` a `ico(cesta)` zůstalo, přibyl
+  přepínač `tmava=True`. `sestav_exe.py` a `sestav_apk.py` se neměnily.
+- Část 010 (hlavička stránky): dva odkazy `<link rel="icon">` na SVG,
+  druhý s `media="(prefers-color-scheme: dark)"` — bere ho Firefox, Chrome
+  vezme první. Cesta je relativní, aby fungovala i ze souboru bez mostu.
+- `balik.py`: složka `logo` přibyla do `STATICKE_SLOZKY` i `PROGRAM_POLOZKY`,
+  takže ji nesou oba balíčky a aktualizace ji vyměňuje s programem.
+- Rozbor 3.8, skill `irm-nastroje` (řádek `ikona.py`) a paměť: logo je
+  v `logo/` a příště se nekreslí znovu.
+
+**Změřeno.**
+- Předloha 512 px: roh (2, 2) = (0, 0, 0, 0) průhledný; dlaždice (60, 400)
+  = (148, 148, 148, 255) = `#949494`; tečka (256, 150) = (255, 0, 28, 255);
+  dřík (256, 330) = (148, 148, 148, 255). Tmavá: dlaždice (84, 84, 84, 255)
+  = `#545454`. První pokus vrátil místo ikony chybovou stránku XML —
+  komentář v SVG obsahoval `--`, což XML v komentáři zakazuje; opraveno.
+- `ikona.py`: PNG 512/192/48/16 px + tmavá 192 + ICO za 1,1 s; ICO nese
+  4 položky (16, 32, 48, 256). Velikosti: 512 px 13 419 B, 192 px 4 334 B,
+  48 px 850 B, 16 px 259 B, ICO 7 680 B. Snímky 48 a 192 px prohlédnuty:
+  tečka i dřík čitelné, rohy průhledné.
+- `sestav.py`: index.html 136 řádků, 102 částí; odkazy na ikonu na řádcích
+  11–12. Most vrací `logo/irm-ikona.svg` s kódem 200 a `image/svg+xml`.
+- `kontrola_aplikace.py` 0: kořen 1 potomek, 10 244 znaků, chyby žádné.
+
+## 235. Nové logo v balíčcích a na zástupcích na ploše
+
+**Problém.** Po kap. 234 zůstal zástupce „IRM“ na ploše se starou kapkou:
+ikonu bere z `IRM.exe`, a ten se od rána nesestavoval. Zástupce „IRM pro
+Android (APK)“ neměl ikonu žádnou — soubor `.apk` pro Windows žádnou nenese,
+a tak ukazoval obecný list. Totéž logo mělo přijít i do APK na telefonu.
+
+**Co se změnilo.**
+- `sestav_apk.py` vedle `IRM.apk` píše i `sestaveni/irm.ico` (z `ikona.py`,
+  tedy z téhož rastru loga jako ikony spouštěče); zástupce APK na ploše na
+  něj ukazuje přes `IconLocation`.
+- Obě sestavení spuštěna znovu: `sestav_exe.py` (exe s novým ICO, ve složce
+  i `logo/`) a `sestav_apk.py` (spouštěč v pěti hustotách).
+- Zástupce „IRM“ znovu uložen s ikonou `IRM.exe,0` a mezipaměť ikon Windows
+  obnovena (`ie4uinit.exe -show`), jinak plocha drží starou kresbu i po
+  výměně exe.
+- Rozbor 3.8, řádek `sestav_apk.py` v `irm-nastroje`, paměť.
+
+**Změřeno.**
+- APK 193,7 MB, verze 2026.09.07; `ic_launcher.png` uvnitř v mdpi až
+  xxxhdpi (48, 72, 96, 144, 192 px; 850 až 4 334 B) bajt po bajtu shodné
+  s výstupem `ikona.py`.
+- Složka exe 227,3 MB, balíček aktualizace 188,5 MB; `IRM-windows/logo/`
+  nese oba SVG i obě PNG. Ikona vytažená z `IRM.exe` (32 px): dlaždice
+  (148, 148, 148), tečka (255, 0, 28) — nové logo, ne kapka.
+- `sestaveni/irm.ico` 7 680 B, 4 velikosti; zástupce APK po uložení hlásí
+  `IconLocation` na něj.
+
+## 236. Zástupce „IRM“ na ploše držel starou ikonu z mezipaměti Windows
+
+**Problém.** Po kap. 235 nesl `IRM.exe` nové logo (ikona vytažená z exe:
+dlaždice 148, 148, 148, tečka 255, 0, 28), ale plocha dál ukazovala kapku.
+Windows si ikonu exe drží v mezipaměti podle cesty a po výměně programu ji
+nepřekreslí; `ie4uinit.exe -show` nepomohl.
+
+**Co se změnilo.**
+- Zástupce „IRM“ ukazuje na `sestaveni/irm.ico` jako zástupce APK — nová
+  cesta mezipaměť obchází a soubor `.ico` se při změně překreslí.
+- `sestav_exe.py` píše `irm.ico` vedle balíčků stejně jako `sestav_apk.py`,
+  takže ikona zástupců sleduje logo po kterémkoli sestavení.
+- Plocha vyzvána k překreslení přes `SHChangeNotify(SHCNE_ASSOCCHANGED)`.
+- Rozbor 3.8 a paměť: zástupci berou ikonu z `.ico`, ne z exe.
+
+**Změřeno.**
+- Ikona zástupce, jak ji vrací Shell (`SHGetFileInfo`, 32 px): tečka
+  (255, 0, 28), v levém dolním rohu modrá šipka zástupce (134, 197, 237) —
+  nové logo, ne kapka.
+
+## 237. Dlaždice drží řádek: popisky ve sdíleném pruhu, písmo s dolní mezí
+
+**Problém.** Dlaždice Parametrů tisku a Zakázky měnily se šířkou okna velikost každá po svém. Popisek, který se zalomil na dva nebo tři řádky (KLIŠÉ (HLOUBKA LEPTU), SPOTŘEBA (G/M²)), ukrojil své dlaždici výšku: při 1 280 px stála dlaždice klišé 178 px vysoká vedle kryvosti a povrchu s 201 px, v Zakázce 184 px vedle 208 px — a s každou změnou šířky okna se zalomil jiný popisek, takže dlaždice poskakovaly. Písmo v dlaždici se měřilo jen z její šířky bez dolní meze: při třech kartách v řádku (okno 1 000 px, dlaždice 76 px) kleslo na 8,4 px, což se od stroje nepřečte. Jednořádkový popisek navíc seděl vlevo, ne nad středem dlaždice (KRYVOST 15 px vlevo od středu).
+
+**Co se změnilo.**
+
+| co | dřív | teď |
+|---|---|---|
+| popisky v řádku | každý sloupec vlastní flex, popisek podle svého textu | pruh popisků a pruh dlaždic; každé pole je `subgrid` přes oba řádky mřížky (`grid-auto-rows:auto 1fr`), popisky sdílejí výšku nejvyššího, text u dolní hrany na středu |
+| šest dlaždic se sítem | zvláštní dvouřádková mez popisku (2,6em) | totéž sdílení pruhu, zvláštní pravidlo zrušeno |
+| kontejner pro `cqw` | každé pole zvlášť | řádek dlaždic; šířka jedné dlaždice se dopočítá do `--dlazdice-sirka` z šířky řádku, mezery a počtu sloupců (tři, dva, na telefonu jeden) |
+| písmo v dlaždici | `min(strop, šířka × koeficient)` | `clamp(základní písmo, šířka × koeficient, strop)` — koeficienty i stropy beze změny (11 % a 2× písmo u textových dlaždic, 18,56 % a 3,375× u čísel) |
+| dlouhé slovo v úzké dlaždici | ořízlo se bez slova | zalomí se uvnitř slova (`overflow-wrap:anywhere` na textu výběru); na šířce, kde se vejde, se nezalomí nic |
+
+**Chyba po cestě.** První verze nechala `container-type:inline-size` na poli, které je zároveň `subgrid`. Chrome 152 pak pole za subgrid nebere a volné místo dělí rovným dílem mezi popisek a dlaždici — změřeno na zkušební stránce: popisek 59 px vedle 50 px v témže řádku, bez kontejneru 36 px vedle 36 px. Kontejner proto patří na rodičovskou mřížku a šířka dlaždice se počítá z počtu sloupců; past je zapsaná v `irm-zmena`.
+
+**Změřeno** (dlaždice šířka × výška, písmo; Parametry tisku / Zakázka):
+
+| okno | Parametry tisku | dřív | Zakázka | dřív |
+|---|---|---|---|---|
+| 1 000 px | 3× 76 × 178, 15,5 px | 8,4 px; 178 / 225 / 225 | 4× 121 × 206, 22,5 px | 211 / 211 / 234 / 211 |
+| 1 280 px | 3× 105 × 178, 15,5 px | 11,6 px; 178 / 201 / 201 | 4× 164 × 179, 30,5 px | 208 / 184 / 184 / 184 |
+| 1 600 px | 3× 140 × 178, 15,5 px | 15,4 px; 178 / 201 / 201 | 4× 216 × 163, 40,1 px | 168 |
+| 1 920 px | 3× 175 × 178, 19,3 px | beze změny | 4× 268 × 152, 49,8 px | 157 |
+
+- sítotisk při 1 280 px: šest dlaždic 106 × 144 px, písmo 19,6 px, popisky sdílené po řádcích 47 a 70 px, všech šest dlaždic začíná na 1 157 a 1 397 px
+- telefon 391 px: `scrollWidth` 391, dlaždice 315 × 88 px, písmo 15,5 (parametry) a 26,35 px (zakázka); 600 px: Zakázka ve dvou sloupcích 252 × 100 px, 46,8 px
+- dlouhá hodnota v dlaždici 76 px: „Transparentní“ při 15,5 px měla 88 px a přetékala o 12 px; se zalomením `scrollWidth` = `clientWidth`
+- `prekryv.py` 391, 600, 1 000, 1 280 a 1 920 px v obou režimech: nic; `kontrola_aplikace.py` 0
+- manuál: snímek domovské stránky přefocen v obou jazycích. Anglický sedí na data scén 20 a 21 (archy prohlédnuty) a zůstává nový. Český nový snímek se lišil stavem dat, ne rozvržením dlaždic: karta Kolik namíchat nesla upozornění z pěti minulých dávek v evidenci a spodní řada karet tím sjela o 120 px, tlačítko E-mail chybělo — proto zůstal původní český snímek, na kterém jsou dlaždice (SCR, jednořádkové popisky) stejné jako po změně
+
+## 238. Nářadí na síto je těrka, ne stěrka — slovo odešlo z obrazovky i z kódu
+
+**Problém.** Dlaždice v kartě Zakázka se jmenovala „Šířka stěrky (mm)“.
+Dílna to nářadí, kterým se barva protahuje sítem, nazývá **těrka**;
+„stěrka“ je pro tiskaře u váhy cizí slovo. Stejný tvar seděl v rozpisu
+dávky („šířka stěrky není zadaná“), v rozpisu separací, v Odemykání
+technologií, v komentářích částí 100, 240, 450, 495 a 496, v návodu
+`NAVOD_PODKLADY.md`, v `CO_SEHNAT.txt` a v názvech proměnných
+(`sterka`, `setSterka`, `sterkyTech`, `sirkaSterkyMm`, `TECHS.sterky`).
+
+**Co se změnilo.** Jednorázový skript ve scratchpadu nahradil všechny
+tvary slova (stěrka, stěrky, stěrku, stěrkou, stěrkování, stěrek, i velká
+písmena) za těrku a identifikátory `sterk…` za `terk…` — s ověřeným počtem
+výskytů v každém souboru. Klíče slovníku v části 127 se přejmenovaly s
+textem (`irm-jazyk`, bod 4); anglický a portugalský překlad zůstal
+(„Squeegee width“, „Largura do rodo“). Parser zakázkového listu (část 140)
+čte nový klíč `terka` a dál přijímá staré `sterka`, `st.rka` a
+`sirkasterky`, aby dřívější listy nepřestaly platit. Pojem je zapsaný ve
+skillu `irm-slovnik`. Deník před touto kapitolou starý tvar nese jako
+historii, nepřepisuje se.
+
+Snímek manuálu 01-domov ukazoval starý popisek, přefotil se v obou
+jazycích. Při tom se ukázalo, že karta Kolik namíchat nese od 6. 9. 2026
+upozornění na zbytek z minulých dávek (evidence má pro PANTONE 485 C na
+pero 11152 pět dávek), spodní řada karet leží o 117 px níž a při výšce
+1 400 px se dlaždice Min. dávka a pole poznámky utínaly — anglický snímek
+s tím už žil a měl oba rámečky zkrácené. `foto_manualu.py` fotí 01-domov
+na 1 520 px, `roz` všech 12 scén se snímkem je `[1600,1520]`, české
+rámečky pod y 660 se posunuly o 117 px a výřezy sahají ke spodku snímku;
+anglicky se prodloužily rámečky „minimum batch“ (134 → 190) a „recipe
+note“ (30 → 90).
+
+**Změřeno.**
+- náhrada: 79 výskytů ve 12 souborech (240-calc 36, 495-naplne-sita 15,
+  NAVOD_PODKLADY 10, 175-pokryti-okno 10, 140-spec-z-kodu 8, 127-jazyk 7,
+  450-zamek 6, CO_SEHNAT 5, 496-separace-vypocet 4, 100-uvod 3, 050-prvky
+  2, barvy.html 2, 510-aditiva 1); po náhradě `st[ěe]rk` mimo aliasy
+  parseru: 0 výskytů; `node --check` všech 9 částí: bez chyby
+- `kontrola_aplikace.py`: 0, kořen 1 potomek, chyby žádné
+- snímek s TXP: popisek dlaždice „Šířka těrky (mm)“, nabídka „—, 250,
+  420“, starý tvar v textu stránky 0×, `lang` cs; s `irm-jazyk` „en“:
+  „Squeegee width (mm)“, `lang` en
+- 01-domov: starý proti novému snímku shodný nad řádkem 677 (mimo pásek
+  fotky pera x 146–201), pod ním posun +117 px (94 řádků, 79 řádků +118);
+  nové snímky 1 600 × 1 520 px v obou jazycích
+- `prohlidka_manualu.py` cs+en, scény 1, 2, 13, 14, 16, 20, 21, 22, 23,
+  25, 26, 27: 0 chyb; české rámečky scén 20 a 21 dorovnané na dlaždice
+  (1 113/186 px a 1 062/190 px jako anglicky)
+
+## 239. Klepnutí na telefonu už nepodbarvuje dlaždice modře
+
+**Problém.** Na dotykové obrazovce a v mobilní aplikaci (WebView balíčku
+APK) se po stisknutí dlaždice nebo tlačítka objevil modrý průsvitný
+překryv — systémové zvýraznění klepnutí prohlížeče
+(`-webkit-tap-highlight-color`). Na neumorfních dlaždicích, které stav
+klepnutí ukazují stínem, to vypadalo jako cizí výběr. Přidržení navíc
+označovalo text tlačítka jako výběr a nabízelo kopírování.
+
+**Co se změnilo.** V `030-zaklad.css` hned pod `box-sizing` je překryv
+klepnutí vypnutý pro všechny prvky (`*{-webkit-tap-highlight-color:
+transparent}`) a `button,label,select,option` mají `user-select:none`;
+pole zůstávají vybíratelná, zaostření z klávesnice (`:focus`,
+`:focus-visible`) se nemění. Pravidlo je zapsané ve skillu `irm-mobil`.
+Do balíčku APK a exe se dostane až s dalším sestavením
+(`distribuce/sestav_apk.py`, `sestav_exe.py`).
+
+**Změřeno.**
+- `kontrola_aplikace.py`: 0, chyby žádné
+- vypočtený styl (1 600 px, TXP): `webkitTapHighlightColor` dlaždice,
+  tlačítko, popisek, pole i tělo = `rgba(0, 0, 0, 0)`; `userSelect`
+  dlaždice, tlačítko, popisek = `none`, pole = `auto`
+- 391 px: `scrollWidth` = šířka okna, překryv na dlaždici `rgba(0, 0, 0, 0)`
+
+## 240. Přepínač „s tužidlem" na telefonu vystoupil z tlačítka Štítek na kelímek
+
+**Problém.** Snímek ze skutečného telefonu z míchacího režimu ukázal, že
+přepínač „s tužidlem" leží přes popisek tlačítka „Štítek na kelímek →".
+Přepínač sedí absolutně u pravého okraje tlačítka a spoléhá na to, že
+tlačítko je široké: rezerva 4,2 × písma po obou stranách (193 px) mu
+stačí jen tehdy, když se text vejde do zbytku. Na telefonu je tlačítko
+361 px, pro text zbylo 168 px, popisek se zalomil do tří řádků (62 px
+vysoký), roztáhl se pod přepínač a ten ho vodorovně překryl o 22 px.
+
+**Co se změnilo.** V `070-michani.css` pod zlomem 1000 px, kde je
+míchací režim v jednom sloupci, přepínač z tlačítka vystupuje do toku
+pod něj: obal `.stitekobal` se stane sloupcem zarovnaným doprava, takže
+přepínač sedí u pravé hrany tlačítka, `.tgl` je `position:static`
+s odstupem 0,6 × míchací mezery a tlačítko dostává souměrnou rezervu
+1,47 × písma jako ostatní míchací tlačítka, aby se text vrátil na jeden
+řádek. Posun přepínače z `barvy.html` platí dál, jen bez usazení na
+střed. Nad zlomem se nemění nic. Vzor je zapsaný ve skillu `irm-mobil`
+u absolutně umístěných prvků.
+
+**Změřeno** (`snimek.py`, skutečná komponenta `MichaciRezim`, produkt
+11152, míchací režim otevřený klikem).
+- 391 px před opravou: tlačítko 361 × 69 px, text 110,61 × 62 px
+  (tři řádky), přepínač 128,8 × 24,59 px absolutně, vodorovný překryv
+  textu a přepínače 21,98 px.
+- 391 px po opravě: text 211,56 × 31 px (jeden řádek), přepínač
+  `static`, horní hrana 855,91 px pod spodní hranou tlačítka 846,91 px,
+  pravá hrana přepínače 376,0 px = pravá hrana tlačítka; `.michbg`
+  scrollWidth = clientWidth = 391.
+- 1600 px: tlačítko 723,25 px (jako v kap. 134), text 211,56 × 31 px,
+  přepínač `absolute` v tlačítku, překryv 0 px — nad zlomem beze změny.
+- `kontrola_aplikace.py` 0, chyby žádné; `prekryv.py --sirky
+  "391,420,700,1000,1100,1600" --zalozky` v pořádku v obou režimech;
+  `mapa.py --kontrola` 0, `rozbor_aktualizuj.py` bez změny.
+- Ladicí port 9333 mezitím držel Chrome druhého sezení (`snimek.py
+  --sirka 412` nad Recepturami) — měření 1600 px se napoprvé napojilo
+  na něj a vrátilo 412 px; zopakováno po uvolnění portu.
+
+## 241. Řady barev v Recepturách se rozbalují z jednoho štítku
+
+**Problém.** Nad seznamem receptur stálo deset štítků databází naráz — „vše",
+osm nakoupených řad a vlastní receptury. Na počítači zabraly dva řádky, na
+telefonu se s dlouhými názvy (`receptury_Ferro_Xpresssion (1 097)`) srovnaly
+pod sebe a zabraly celou obrazovku: hledání a tabulka receptur začínaly až
+pod nimi. Přitom se řada volí jednou a pak se v ní hledá — deset štítků
+překáželo pokaždé, kdy se na záložku přišlo.
+
+**Co se změnilo.** Štítková varianta filtru databází (`FiltrDatabaze`, část
+100) je sbalená jako výběr technologie v nabídce: jeden štítek se šipkou
+ukazuje zvolenou řadu s počtem („▸ vše (15 191)", „▸ receptury_PMS_660
+(778)"), stisk ho rozbalí na celou lištu řad a volba řady lištu zase sbalí.
+Stav se nedrží po zavření aplikace — je to pohled na chvíli, ne nastavení.
+Kalkulace a přepočet na síto se nemění, ty mají filtr jako rozbalovací
+nabídku už dřív. Ve slovníku (část 127) přibyly dva klíče pro nápovědu
+šipky (en, pt).
+
+Manuál: snímek `40-receptury` přefocen v obou jazycích, scény 36–38 dostaly
+souřadnice z měření nad novým snímkem, scéna 36 nový text i nahrávku
+(cs 26,0 s, en 28,5 s). Vysvětlivka do `NAVOD_PODKLADY.md` (Výběr databáze
+— jeden štítek, řady po stisku).
+
+**Změřeno:**
+
+- `kontrola_aplikace.py`: 0, chyby žádné
+- 412 px (snímek, tmavý režim): sbaleně jeden štítek 117 × 34 px na y 432,
+  pole hledání na y 562; po stisku 9 štítků řad + „vše"; po volbě PMS 660
+  štítek `▸ receptury_PMS_660 (778)`, řady 0, `aria-expanded=false`,
+  nadpis karty „(778 z 15 191)"
+- 1 600 px (světlý, technolog): štítek [62, 315, 117 × 34] cs
+  / [62, 315, 111 × 34] en; řádek přepínačů y 359; hledání y 403;
+  první řádek tabulky y 508 (cs) / 490 (en) — proti dřívějšku o 38 px výš
+- `prohlidka_manualu.py --sceny 36 37 38 --jazyk obe`: 6 scén, 0 chyb,
+  všechna zvýraznění uvnitř snímku
+- `receptury_vlastni.csv` shodný se zálohou (`cmp`)
+
+**Dvě vlastní chyby po cestě.** Úpravový skript se napoprvé nespustil vůbec:
+před heredokem zůstal `cat` bez vstupu a dvě minuty čekal na klávesnici.
+A ladicí port 9333 se srazil s druhým sezením ve stejné složce
+(`ConnectionResetError`) — první snímek se musel opakovat po uvolnění portu.
+
+## 242. Vzorník receptur na telefonu po dvou a mřížka, která nepřetéká
+
+**Problém.** Mřížka receptur (`.pgrid`, část 8) jela na telefonu po třech
+a řady vypadaly „mimo střed": levý okraj seděl, pravá karta byla uříznutá
+okrajem obrazovky. Příčina je z `irm-mobil`, bod 2 — sloupce `1fr` bez
+`minmax(0,…)` mají skrytou minimální šířku podle obsahu. Čtyři tlačítka
+Odkaz/Historie/Upravit/Smazat v jednom nezalomeném řádku držela minimální
+šířku karty 332,6 px, a pod 800 px, kde se tlačítka směla zalomit, pořád
+150 px. Na 391 px tak tři sloupce po 150,2 px měřily 470,6 px v mřížce
+široké 315 px a třetí karta končila na 508,6 px. V kartě široké 150 px se
+navíc tlačítka zalomila každé na vlastní řádek v jiné šířce (65,5 / 76,1 /
+132,2 / 72 px) a název odstínu se lámal po slovech. Totéž přetékání bylo
+i na počítači, jen ho nebylo vidět jako uříznutou kartu: na 1600 px pět
+sloupců po 332,6 px měřilo 1 727 px v mřížce široké 1 476 px.
+
+**Co se změnilo.** Všechny sloupce `.pgrid` jsou `minmax(0,1fr)`, na všech
+zlomech. Vzorník receptur jede pod 800 px po dvou místo po třech
+(`.pgrid:has(.pgcard.receptura)`); karta produktu s fotkou dál po jednom
+pod 480 px. Tlačítka karty receptury jsou na každé šířce v mřížce 2×2
+stejně širokých polí (Odkaz · Historie / Upravit · Smazat) — obyčejné
+zalomení dalo na 1300 a 1600 px tři plus jedno a Smazat roztažené přes
+254 px. Pod 800 px mají tlačítka užší vnitřní okraj (4 px) a `nowrap`,
+aby se „Historie" vešla do 64 px. Z tlačítka Upravit (část 380-receptury)
+zmizel inline `flex:1`, který v mřížce nemá co dělat. Skill `irm-mobil`
+(bod 2 a tabulka zlomů): vzorník po dvou.
+
+**Změřeno:**
+
+- `kontrola_aplikace.py`: 0, chyby žádné; `prekryv.py --sirky
+  391,560,800,1600 --zalozky`: 0, nic se nepřekrývá
+- 391 px před: sloupce 3 × 150,2 px, karty x 38 / 198,2 / 358,4, pravá
+  hrana třetí 508,6 px v okně 391 px; tlačítka první karty šířky 65,5 /
+  76,1 / 132,2 / 72 px pod sebou
+- 391 px po: sloupce 2 × 152,5 px, karty x 38 → 190,5 a 200,5 → 353,
+  pravá hrana = pravá hrana mřížky 353 px; tlačítka 4 × 64,3 × 31 px ve
+  dvou řádcích (x 47 a 117,3)
+- 800 px po: sloupce 2 × 349 px, tlačítka 4 × 162,5 px
+- 1300 px po: sloupce 4 × 282,5 px; 1600 px po: sloupce 5 × 282,4 px
+  v mřížce 1 476 px (před: 5 × 332,6 = 1 727 px), tlačítka 4 × 124,2 px,
+  pravá hrana Smazat 330,4 px v kartě končící na 344,4 px
+
+## 243. Odkaz na recepturu otevře i telefon — most po síti hlásí svou adresu
+
+**Problém.** Tlačítko *Odkaz* bralo adresu právě otevřené stránky:
+z dvojkliku `file:///C:/…/index.html#receptura=…`, z mostu
+`http://localhost:8765/…`. Obojí znamená na každém zařízení „tady“ —
+odkaz poslaný z počítače na telefon (nebo z telefonu na počítač) se
+neotevřel a chatové aplikace adresu s localhost ani nenabídly jako
+klikací. Komentář u skladače to měl za záměr; dílna ale odkazy mezi
+zařízeními posílá.
+
+**Co se změnilo.**
+- `most.py`: s `--sit` (nebo `"po_siti": true` v `sgps_config.json`)
+  zjistí IP počítače v síti (`adresa_v_siti` — „spojení“ UDP soketu, které
+  nic neposílá; `gethostbyname` na Windows vrací i 127.0.0.1) a hlásí ji
+  v `/api/stav` jako `adresa_site` s příznakem `po_siti`; při startu ji
+  vypíše. Bez `--sit` je prázdná. `sgps_config.json` má `po_siti: true`,
+  takže most spouštěný autostartem běží po síti bez přepínače.
+- část 150: poslední odpověď stavu mostu drží `MOST_STAV` mimo React.
+- část 458: `adresaProOdkaz()` — má-li most `adresa_site`, odkaz ji nese
+  (s cestou stránky, ze souboru `/index.html`); jinak vlastní adresu
+  stránky a příznak, že platí jen tady (`file:`, `localhost`, `127.0.0.1`,
+  `[::1]`). `zkopirujOdkaz` v tom případě k hlášení připojí „— platí jen
+  na tomto zařízení, most neběží po síti“, i ve větvi bez schránky
+  (stránka ze souboru schránku nedostane).
+- část 185: stav připojení ukáže „Po síti na http://…“.
+- slovník 127: dva klíče (en, pt). Vysvětlivka v `NAVOD_PODKLADY.md`
+  (oddíl *Odkaz na recepturu mezi zařízeními*), uživatelský `NAVOD.txt`
+  (oddíl *Most pro víc počítačů*), řádek mostu v `irm-nastroje`.
+- Mobilní aplikace (APK) má most jen v telefonu; aby z ní odcházely
+  odkazy pro ostatní, zadá se v ní adresa mostu dílny v *Připojení
+  k mostu* — pak bere `adresa_site` od něj. Balíčky se nesestavovaly.
+
+**Změřeno.**
+- zkouška v Node proti skutečným částem (15 kontrol, 0 chyb): most po
+  síti z localhostu i ze souboru → `http://192.168.1.50:8765/index.html#…`
+  (lomítko na konci pryč, disková cesta se nepoužije); most místní →
+  localhost/127.0.0.1/soubor = jen tady; stránka už ze sítě = všude;
+  `localhost.firma.cz` není místní; odkaz tam a zpět vrací název i zdroj;
+  cizí mřížka `#tema=dark` není receptura; nové klíče mají en i pt
+- most `--port=8766 --sit`: `/api/stav` → `po_siti: true`,
+  `adresa_site: http://10.0.0.26:8766`; `http://10.0.0.26:8766/index.html`
+  odpovídá 200; běžící most bez `--sit` klíče nemá (starší kód)
+- prohlížeč s mostem 8766: `MOST_STAV.adresa_site` = síťová adresa, klik
+  *Odkaz* v záložce Receptury → hlášení
+  `http://10.0.0.26:8766/index.html#receptura=PANTONE%20485%20C&zdroj=…`;
+  záložka Připojení: „Připojeno k http://localhost:8766 — čtení PDF
+  připravené. Po síti na http://10.0.0.26:8766.“
+- prohlížeč s mostem místním (stránka ze souboru): hlášení
+  `file:///…/index.html#receptura=… — platí jen na tomto zařízení, most
+  neběží po síti`
+- otevření s mřížkou `#receptura=PANTONE%20485%20C&zdroj=…`: záložka
+  Receptury, první řádek PANTONE 485 C · Ferro Xpression
+- `kontrola_aplikace.py`: 0, chyby žádné
+
+## 244. Rozpis výpočtu dávky zmizel z karty Kolik namíchat
+
+**Problém.** Pod dávkou v kartě *Kolik namíchat* stál drobný řádek
+`0,0158 m² × 100,0 % krycí plocha × 500 ks × 8,0 g/m² = 63,0 g · ztráty
+15,0 % → 72,4 g · rezerva síta se nepočítá — šířka těrky není zadaná`.
+Uživatel ho nechtěl: u váhy se čte dávka, ne vzorec, a rozhraní má být tiché.
+
+**Co se změnilo.**
+- `40-kalkulace/240-calc.js`: blok `Rozpis kroku` (poznámka `.note` pod
+  přepočtem na ml) odebraný celý — vzorec, ztráty, rezerva síta i počet
+  tahů. Výpočet sám (`calc.netto`, `withLoss`, `rezervaG`, `tahy`) zůstává,
+  jde na míchací lístek a do předpovědi zbytku.
+- `20-zaklad/127-jazyk.js`: pět osiřelých klíčů slovníku (vzorec, ztráty,
+  rezerva síta zadaná i nezadaná, tahy) odstraněno — cs, en, pt.
+- `NAVOD_PODKLADY.md`: nová kapitola *Kolik namíchat — rozpis, ze kterého
+  dávka vznikla* s celým řádkem a vysvětlením, kapitola o šířce těrky
+  už netvrdí, že „rozpis to řekne“.
+- `ROZBOR_APLIKACE.md`: odstavec o rozpisu a odrážka v souhrnu odkazují
+  na návod místo na obrazovku.
+
+**Změřeno.**
+- `kontrola_aplikace.py`: 0, chyby žádné
+- sonda po 3 000 ms: `innerText` neobsahuje „krycí plocha ×“ ani „rezerva
+  síta“, `.result-big` dál ukazuje `1,8 g`, poznámek `.note` na stránce 7
+- `node --check` části 127: bez chyby
+
+**Nedotaženo.** Mluvený manuál, scéna 4 *Výsledek: dávka a rozpis výpočtu*
+(`prezentace/manual.html`, `manual_en.html`): snímek, zvýraznění
+`rozpis výpočtu` a nahrávka mluví o rozpisu, který už není. Je to přefocení
+a nové nahrání, čeká na pokyn.
+
+## 245. Vícebarevná zakázka: seznam barev potisku, kalkulace se přepíná po barvách, fronta dostane kelímek na barvu
+
+**Problém.** Zakázka s dvoubarevným logem jsou dvě receptury, dvě dávky
+a dva kelímky, ale aplikace znala jednu barvu: zakázkový list s polem
+„Barva potisku: P. Black C P. 200 C" se přečetl jako jeden nenalezený
+název, druhá barva se počítala tak, že se celá kalkulace založila znovu,
+a rozpis separací z kapitoly 178 končil tabulkou — do fronty se z něj
+nedalo nic poslat. Tiskař držel druhou barvu v hlavě nebo na papírku.
+
+**Co se změnilo.** Zakázka nese **seznam barev potisku**; kalkulace
+počítá pořád jednu, tu aktivní, takže výběr receptury, Kolik namíchat,
+lístek, vážení i kelímek zůstaly, jak jsou. Nová část
+`70-pravidla/497-barvy-zakazky.js` drží, co je na barvách společné:
+
+| co | jak |
+|---|---|
+| rozdělení pole *Barva potisku* | `rozdelBarvyPotisku`: dělí se před každou další značkou `P.` / `PMS` / `PANTONE` a na `,` `;` `/` `+`; značka se sjednotí na `PANTONE`; `resolveSpec` (část 140) hledá každou barvu zvlášť a nenalezenou hlásí jejím jménem — platí i pro kód `rec=` a pro SGPS |
+| dávka barvy | `davkaBarvy`: vzorec z `calc` vytažený ven (plocha × kusy × g/m² × nános, ztráty, rezerva těrky, minimum) — kalkulace ho volá pro aktivní barvu, dlaždice pro ostatní, takže obě místa ukazují totéž číslo |
+| rozpis separací → barvy | `barvyZRozpisu`: plocha separace v mm² na kus → procento obdélníku potisku, odhad receptury podle odstínu, bílý podtisk jako další barva s nánosem ×1,8 |
+| označení | `oznaceniBarvy`: „2/3", jednobarevná zakázka nic |
+
+Na obrazovce: v kartě *Receptura a barva* pruh dlaždic (číslo, odstín,
+receptura, dávka, krycí plocha), klepnutím se kalkulace přepne; křížek
+barvu odebere; *＋ Další barva* v nadpisu karty. **Jednobarevná zakázka
+pruh nemá.** V okně krycí plochy pod rozpisem separací *Převzít N barev do
+zakázky →*. U tlačítek míchání *＋ Do fronty všechny barvy (N)* — jedním
+zápisem a jedním hlášením, kódy fronty postupně nad rostoucím seznamem
+(`doFronty` v App přijme i pole). Položka fronty nese `barvaZakazky`,
+v `evidence/fronta.csv` sloupec `barva_zakazky` na konci; starší soubor
+bez něj se čte jako dřív. Míchací lístek nese řádek *Barva zakázky 2/3*.
+Krycí plocha se k zakázce pamatuje po barvách (`irm-pokryti` → `barvy[]`,
+`pct` na první úrovni zůstal pro starší záznamy). Přepnutí barvy se pro
+efekty kalkulace chová jako přepnutí receptury: rozdělaná dávka, zbytek,
+nátisk a náhrady zůstávají u barvy, od které se odchází.
+
+**Most: vzorníky kreslené cestou.** Čtverečky u *Barva potisku* na listu
+pro tampontisk nejsou operátor `re`, ale úsečky `m l l l h` s výplní `f`
+a barvou v CMYK (`k`) — `vzorniky_z_pdf` je vůbec neviděl. `pdf_spec.py`
+teď sbírá i podúseky cest a při výplni bere ty, které tvoří obdélník
+rovnoběžný s osami (`_obdelniky_z_cest`); popisek prvního čtverečku končí
+tam, kde na téže řádce začíná druhý (jinak nesl „P. Black C P. 200 C").
+Barva nastavená přes `cs`/`sc`/`scn` (ICC, separace) je neznámá a vzorník
+se **vynechá** — dřív by vyšel černý a vypadal jako změřený.
+`vzornikProHodnotu` (část 120) srovnává obě strany na značku `PANTONE`,
+aby „P. 200 C" u čtverečku sedlo na hledané „PANTONE 200 C". Běžící most
+načte novou verzi až po restartu (`python most.py`).
+
+**Změřeno:**
+
+- zkouška v Node (části načtené jako v prohlížeči): rozdělení pole
+  12 případů („P. Black C P. 200 C" → 2, „PANTONE 485 C" → 1, „PMS 485 C,
+  PMS 2935 C" → 2, tři značky za sebou → 3, prázdné → 0); 54 kontrol:
+  `davkaBarvy` na 51,7×12 mm, 200 ks, 2,5 g/m², ztráty 15 % → 0,3102 g netto,
+  0,3567 g se ztrátami, minimum 50 g uplatněno, nános ×1,8 násobí netto
+  i dávku, těrka 300 mm přičte 108,00 g rezervy, pokrytí 0 % → 0 g;
+  `barvyZRozpisu` na plochách 8:4:1 při 55×20 mm → 23,909 % / 11,955 % /
+  2,991 %, součet = plocha motivu, podtisk 26,900 % s ×1,8, hex #DA291C
+  z RGB; fronta tam a zpět přes CSV „1/2", „2/2", starý soubor bez sloupce
+  → prázdné označení a dávka 120 g beze změny; `resolveSpec` 2 barvy, první
+  nalezená, druhá hlášená jménem; vzorník „P. 200 C" k „PANTONE 200 C";
+  8 nových klíčů slovníku s en i pt, každý právě jednou
+- prohlížeč, čtečka ze skriptu, 1 600 px: dvě dlaždice 221,89 × 62,39
+  a 221,91 × 62,39 px (rozdíl 0,02 px = zaokrouhlení mřížky); tlačítko
+  *＋ Do fronty všechny barvy (2)* vedle *Do fronty*; tmavý režim: aktivní
+  dlaždice `--key` #E2E8F0 s textem rgb(33, 37, 41), neaktivní `--paper`
+  #31383F se světlým textem; klepnutí na dlaždici 2 → Kolik namíchat
+  PANTONE 200 C; *Do fronty všechny barvy* → FRONTA-20260908-001 „1/2"
+  a -002 „2/2", pořadí 2 a 3, hlášení „Do fronty 2 barvy: … Čeká
+  3 položky", `fronta.csv` sloupec 22 `barva_zakazky` (po testu vrácen
+  ze zálohy, `cmp` shodné)
+- zakázkový list pro tampontisk (51,7 × 12 mm, 200 ks) přes most: pole
+  receptura „P. Black C P. 200 C" → 2 barvy, obě v databázi; okno krycí
+  plochy, logo označené tažením: 8 odstínů (dva skutečné + antialiasing),
+  *Převzít 8 barev* → 8 dlaždic, barva 1 = 0,80 cm² = 12,9 % z 620,4 mm²,
+  součet ploch 27,6 % = krycí plocha z okna; paměť zakázky po barvách;
+  celý proklik 3,8 s díky čekání na podmínku místo pevných prodlev
+- telefon 390 px: stránka 390/390 bez vodorovného rolování, dlaždice
+  153 × 62,39 px po dvou, tlačítko *Další barva* zalomené pod nadpis
+- vzorníky z mostu na třech listech: před 0 / 0 / 0, po 3 / 0 / 2
+  (108 #F3F12F, P. Black C #0E1817, P. 200 C #CB0325; list se `scn`
+  zůstal bez vzorníku schválně)
+- `prekryv.py` 0 (4 šířky × 2 režimy), `kontrola_aplikace.py` 0,
+  `sestav.py --kontrola` 0 (103 částí)
+
+**Vlastní chyby po cestě.** Zkouška napřed hlásila dvě chyby u dávky —
+špatně bylo očekávání, ne kód: 0,36 g je pod minimem 1 g, takže vyšel
+1 g. Terminál na Windows polykal v heredocu zpětná lomítka, takže
+`\\b` v regulárním výrazu nesedělo na soubor — úpravy jdou ze skriptu
+v souboru, ne ze stdin. Kód čtečky s `obj=` poslal zakázku do SGPS
+a v ukázkovém režimu skončil „nebyla nalezena" bez použití specu.
+`snimek.py --po` má 30 s; proklik s pevnými prodlevami vypršel, čekání na
+podmínku ho stáhlo na 4 s. Předloha *Obrázek 254×109* z PDF nenesla žádnou
+barvu — motiv je až na straně listu.
+
+**Co se nechalo být.** Rozpis převezme všechny vybrané odstíny včetně
+antialiasingu (8 místo 2) — nechat jen dvě je práce tiskaře křížkem,
+slučování blízkých odstínů se neřešilo. Receptura z listu se dál hledá ve
+všech databázích, ne jen v technologii polohy (jako dosud). Společný
+míchací lístek na celou zakázku není — míchá se po kelímku. Jak vícebarevné
+zakázky posílá SGPS, se ukáže až s ostrým přístupem; rozdělení pole je
+připravené na seznam i na jeden řetězec.
+
+## 246. Barvy zakázky i u váhy: přepínání v míchacím režimu, namíchaná barva má zelenou konturu
+
+**Problém.** Pruh barev vícebarevné zakázky (kap. 245) stál jen v kartě
+Receptura a barva. U váhy, kde se kelímky doopravdy střídají, ho tiskař
+neměl: na druhou barvu musel zpátky do kalkulace, a která barva už stojí
+namíchaná, si pamatoval z hlavy — u tří barev a dvou míchačů se to plete.
+
+**Co se změnilo.** Dlaždice barev jsou jedna komponenta
+(`40-kalkulace/238-barvy-zakazky-pruh.js`, `BarvyZakazkyPruh`) a stojí
+na obou místech: v kartě i v míchacím režimu nad tabulkou navážek, tam
+ve velikosti odvozené z `--mich-nazev` (část 070), bez křížku — skladba
+zakázky se u váhy nemění. Klepnutí u váhy přepne kalkulaci, tabulku
+navážek i asistenta (ten pro novou barvu začíná znovu, `zacniZnovu`
+v části 290); hlavička režimu nese „barva zakázky 2/2".
+
+**Namíchaná barva** (`namichano` u položky seznamu) má zelenou konturu
+`0 0 0 3px var(--ok)` přes stín dlaždice a rozsvícenou fajfku. Kontura,
+ne podbarvení: podbarvení už nese aktivní dlaždice a obojí se musí dát
+přečíst naráz. Označí se:
+
+| kdy | jak |
+|---|---|
+| asistent dováží poslední složku | přechod stavu vážení nehotovo → hotovo (`michStav.done`), ne stav sám — asistent hlásí „hotovo" i u receptury bez složení a hned po přepnutí barvy, obojí by označilo barvu, na kterou nikdo nesáhl |
+| štítek na kelímek | `oznacDavku` — štítek se lepí po namíchání |
+| ručně | fajfka v dlaždici, v kartě i u váhy; druhé klepnutí označení zruší |
+
+**Změřeno:**
+
+- prohlížeč 1 600 px, dvoubarevná zakázka ze čtečky, 20 000 ks: v míchacím
+  režimu 2 dlaždice 270,58 × 71,56 px (shodné na setinu), bez křížků;
+  hlavička „… · barva zakázky 1/2"; klepnutí na dlaždici 2 → hlavička
+  PANTONE 200 C, „barva zakázky 2/2", aktivní [false, true]
+- simulace váhy: kumulativně 43,5 / 44,7 / 44,8 g, po dvou krocích *Další*
+  třetí složka 0,1 g pod tolerancí 0,5 g → asistent hotov sám; dlaždice 1
+  dostala třídu `hotova`, stín končí `rgb(61, 199, 96) 0 0 0 3px` = `--ok`
+  #3DC760, fajfky [true, false]; ruční fajfka na dlaždici 2 → `hotova`,
+  druhé klepnutí → zpět; po zavření režimu drží karta [true, false]
+- tmavý režim: aktivní a hotová dlaždice pozadí #E2E8F0, text rgb(33, 37, 41),
+  kontura rgb(16, 185, 129) = `--ok` #10B981; neaktivní pozadí rgb(46, 46, 46)
+  se světlým textem; fajfka rgb(16, 185, 129)
+- zkouška v Node beze změny (54 kontrol), `prekryv.py` 0,
+  `kontrola_aplikace.py` 0, `sestav.py` 104 částí
+
+**Co se nechalo být.** Označení žije jen ve stavu kalkulace — po obnovení
+stránky zmizí, stejně jako celý seznam barev. Trvalý záznam, která barva
+zakázky je namíchaná, je dávka v evidenci (štítek); tady jde o pomůcku
+u váhy pro jednu směnu.
+
+## 247. Asistent váží barvy zakázky za sebou: potvrzení, tára, štítky naráz
+
+**Problém.** Vícebarevná zakázka má u váhy pruh dlaždic a asistent se dal
+přepnout na další barvu ručně, ale choval se pořád jako u jedné receptury:
+po dovážení poslední složky nabídl jen *Navážit znovu* a *Štítek na kelímek*.
+Tiskař tak po každé barvě tiskl štítek zvlášť, klepal na další dlaždici, sám
+táruje a hlídal, kterou barvu ještě nemá. Dvě barvy se stejnou recepturou
+a dávkou navíc asistenta vůbec nerozběhly znovu — druhý kelímek by se vážil
+od stavu prvního.
+
+**Co se změnilo.**
+
+| kdy | co asistent udělá |
+|---|---|
+| dovážená barva a zbývá další | tlačítko *Potvrdit → další barva*: založí kelímek téhle barvy do evidence (týž zápis jako štítek, `zalozKelimek` v části 240; kód si nese barva v `kodKelimku`, část 497), vytáruje váhu a přepne kalkulaci na další nenamíchanou barvu (v pořadí za aktivní, pak od začátku; barva odškrtnutá fajfkou se přeskočí) |
+| dovážená poslední barva | *Potvrdit navážení* — založí kelímek, zůstane u ní; pak se ukazuje jen kód kelímku |
+| po potvrzení | asistent začne novou recepturu od první složky i u stejné receptury a dávky — do závislostí restartu přibyl klíč barvy (`klic`, část 290) |
+| tára v simulaci | znamená nový prázdný kelímek: posuvník i nula se vrátí na 0 (část 250). Pouhé posunutí nuly by nechalo posuvník nad maximem další dávky a barva by šla do záporu |
+| plný kelímek sundaný po táře | váha pod nulou táry → asistent řekne „postavte nový kelímek a stiskněte Tára“ |
+| štítky | tlačítko *Štítky na kelímky →* (jen u víc barev) otevře přehled barev s kódy a gramy, *Vytisknout štítky (n)* je natiskne v jednom okně; barva bez kelímku má pomlčku a netiskne se. Tvar štítku je jeden pro obě cesty (`stitekHtml`, `tiskniStitky`, část 300) |
+
+Jednobarevná zakázka se nemění: štítek zakládá kelímek jako dřív.
+Aktivní barva bez kelímku ho dostane i tlačítkem štítků — kdo míchá bez
+asistenta, nemá kde potvrdit. Nové texty mají en i pt.
+
+**Změřeno** (snimek.py, PDP, zakázka se třemi barvami Pantone přes čtečku,
+simulace váhy, dávka 11,2 g na barvu):
+
+| krok | dlaždice (třídy) | váha | tlačítko | hlavička |
+|---|---|---|---|---|
+| barva 1 dovážená | `on hotova`, –, – | 11,2 g | Potvrdit → další barva | barva zakázky 1/3 |
+| po potvrzení | `hotova`, `on`, – | 0,0 g | – | barva zakázky 2/3, asistent na první složce |
+| barva 2 dovážená | `hotova`, `on hotova`, – | 11,2 g | Potvrdit → další barva | 2/3 |
+| po potvrzení | `hotova`, `hotova`, `on` | 0,0 g | – | 3/3, první složka |
+| barva 3 dovážená | `hotova`, `hotova`, `on hotova` | 11,1 g | Potvrdit navážení | 3/3 |
+| po potvrzení | beze změny | 11,1 g | jen „kelímek Z…“ | 3/3 · kelímek Z… |
+
+Okno *Štítky na kelímky*: 3 řádky s kódy a 11,2 g, tlačítko
+*Vytisknout štítky (3)*. `kontrola_aplikace.py` 0, `node --check` všech
+šesti částí bez chyby.
+
+**Vlastní chyba po cestě.** První průchod scénáře bral hodnotu pro posuvník
+z šestého sloupce tabulky — bez zbytku je to *ml*, ne *kumulativně*. U dávky
+1 g to díky toleranci 0,5 g prošlo dvěma barvami a třetí nedovážilo; vypadalo
+to jako chyba potvrzení. Sloupec se teď hledá podle hlavičky.
+
+**Data dílny.** Most běžel, potvrzení zapisuje: evidence zbytků narostla
+ze 77 na 94 řádků zkušebními kelímky a byla vrácena ze zálohy; všech osm
+souborů evidence i `receptury_vlastni.csv` jsou po testu shodné se zálohou.
+
+## 248. Manuál dohnal aplikaci podruhé: vícebarevná zakázka, nabídka s Manuálem, domovská stránka bez rozpisu
+
+**Problém.** Od poslední přestavby manuálu (kap. 224–231) přibylo v aplikaci
+šestnáct kapitol a manuál o nich mlčel nebo mluvil špatně. Scéna *Výsledek*
+ukazovala rozpis výpočtu zrušený v kap. 244 (kapitola ho výslovně nechala
+„nedotažené“), snímek nabídky končil za Připojením k mostu, takže jazyky ani
+položka Manuál (kap. 230) na něm nebyly a hlas přitom říkal „úplně dole je
+jazyk“. Vícebarevná zakázka (kap. 245–247) neměla scénu žádnou, odkaz po síti
+(kap. 243) ani balíčky pro Windows a Android (kap. 232) větu. A prohlídka
+ukázala, že osm oken otevřených nad domovskou stránkou nese její staré
+pozadí: ve výřezu scény s výběrem custom receptury byl čitelný starý rozpis
+i slovo „stěrky“, scéna Pantone custom ukazovala tlačítko E-mail zrušené
+v kap. 226.
+
+**Co se změnilo.**
+
+| co | jak |
+|---|---|
+| tři nové scény | *Nabídka: skupiny, jazyk a manuál* (nabídka rozdělená na dvě — Změny podkladů, Zdraví databáze, jazyky a Manuál by v jednom výřezu byly nečitelné), *Vícebarevná zakázka* (kap. 3: dlaždice barev, Další barva, Do fronty všechny barvy), *Barvy zakázky u váhy* (kap. 5: pruh nad navážkami, hlavička „barva zakázky 1/2“, Potvrdit → další barva, zelená kontura, Štítky na kelímky) |
+| přepsané scény | *Co je IRM* (program pro Windows, aplikace pro Android), *Výsledek: dávka* (bez rozpisu — u váhy se čte dávka, ne vzorec; vstupy nese míchací lístek), *Odkaz a historie* (most po síti → odkaz otevře i telefon) |
+| nové obrazovky | `29-barvy-zakazky` a `35-mich-barvy`: dvoubarevná zakázka se nezakládá klikáním, ale kódem do okna *Načíst kód* (`NACTI_KOD_2_BARVY` ve `foto_manualu.py`, pole `rec=PANTONE 485 C PANTONE 200 C`, které část 497 rozdělí na dvě barvy); nabídka se fotí na 2 100 px (strop výšky okna minus 140 px, při 2 000 px zůstal Manuál pod hranou) |
+| přefocené obrazovky | `01-domov`, `02-nabidka` a všech osm oken nad domovskou stránkou (`20-hledani` až `28-pantone-custom`), v obou jazycích |
+| souřadnice | 12 scén s domovskou stránkou: prvky pod odstraněným rozpisem o 54–55 px výš (tlačítko Míchací režim 903 → 849, spodní řada karet 977 → 922), levá karta jen u prvků kotvených dole; Pantone custom česky 930 a anglicky 1 050 → v obou 1 000 |
+| nahrávky | 7 scén × 2 jazyky nově nahraných, `cas` z délky mp3; soubory přečíslovány od nejvyššího čísla dolů včetně `.bak` (61 + 59 přejmenování), teprve pak nahrávání |
+| nástroje a dokumenty | `foto_manualu.py` (37 obrazovek, `CEKANE_ROZMAZANI["35-mich-barvy"] = 7`), `prohlidka_manualu.py` čte výstup PowerShellu jako UTF-8 s náhradou (s `PYTHONUTF8=1` padal `UnicodeDecodeError` na bajtu 0x85), `prezentace/README.md` (tabulka kapitol, past oken nad domovskou stránkou), skill `irm-manual` (57 scén, přečíslované odkazy, dvě nové pasti), `irm-nastroje`, rozbor |
+
+**Změřeno.**
+
+- `manual.html` i `manual_en.html`: 57 scén v 10 kapitolách, syntaxe skriptu v Node bez chyby; délka nahrávek cs 1 286 s (21,4 min), en 1 369 s (22,8 min)
+- `01-domov` (cs i en, 1 600 × 1 520): tmavé tlačítko Míchací režim řádky 851–901 (dřív 903–959), tlačítko Profil úpravy 560–565 → pod rozpisem posun −54 px; nadpis Receptura a barva 1 037 → 982 (−55); tlačítko Načíst kód beze změny (kotvené nahoře)
+- `02-nabidka` (1 600 × 2 100): Čeština 1 813–1 827, English 1 865–1 876, Português 1 915–1 921, Manuál 1 986–1 989 — při 2 000 px Manuál mimo snímek
+- `29-barvy-zakazky`: dlaždice barev 1 066–1 127, x 62–281 a 305–515; Další barva x 403–515 (cs) / 386–515 (en); Do fronty všechny barvy x 875–1 122 (cs) / 875–1 051 (en), y 908–960
+- `35-mich-barvy`: dlaždice x 15–566, y 124–194; Štítky na kelímky x 863–1 585, y 898–966; Další složka x 877–1 029 (cs) / 877–1 068 (en); rozmazáno 7 buněk = očekávání
+- `28-pantone-custom`: tmavé tlačítko Pantone custom řádky 1 004–1 052 v obou jazycích
+- `prohlidka_manualu.py`: 114 scén, 0 chyb, archy cs i en prohlédnuty — scény 3, 4, 14, 17, 18, 21–24, 27–29, 36 rámují správné prvky
+- nahrávky: cs 22,5 / 26,5 / 23,8 / 31,6 / 27,0 / 31,5 / 39,7 s, en 22,7 / 31,9 / 26,5 / 32,6 / 29,9 / 32,9 / 40,3 s (scény 1, 3, 4, 23, 24, 36, 41)
+- `kontrola_aplikace.py` 0, `mapa.py` přegenerován, `rozbor_aktualizuj.py` bez změny; `receptury_vlastni.csv` a všech osm souborů evidence shodné se zálohou před focením
+
+**Co se nechalo být.** Scéna *Připojení k mostu* nemluví o adrese po síti
+(most dílny běžel bez `--sit`, na snímku by nebyla) a portugalský manuál
+dál není. Rozpis výpočtu se do manuálu nevrací — je v `NAVOD_PODKLADY.md`.
+
+## 249. Přepínač odolnosti vůči vyblednutí zrušen, papír C / U v editoru není na výběr
+
+**Problém.** V kartě *Parametry tisku* a v editoru receptury stál vedle
+*Otestovaný* ještě přepínač *Vysoce odolný vůči vyblednutí*. Nikdo ho
+nezapínal: odolnost vůči vyblednutí je vlastnost barvy z katalogu výrobce,
+ne něco, co dílna měří — a přepínač, který se dá zapnout od oka, se tváří
+jako údaj. Vedle toho měl editor u *Papír C / U* nabídku se třemi
+položkami (z názvu, C, U). „485 C“ a „485 U“ jsou dva odstíny a písmeno
+dává název receptury (kap. 223, část 458); nabídka vypadala jako volba obsluhy a
+šla přepnout proti názvu — týž případ jako síto podle produktu v kap. 189:
+co dává pravidlo, není na výběr.
+
+**Co se změnilo.**
+
+| co | jak |
+|---|---|
+| přepínač *Vysoce odolný vůči vyblednutí* | odebrán z karty *Parametry tisku* (část 240) i z editoru receptury (část 400); v řádku zůstal *Otestovaný*, v editoru i *Dvousložková — s tužidlem* |
+| pole `fade` / sloupec `vyblednuti` | zůstává v CSV, importu i exportu (části 380, 410, 420) kvůli starším souborům; hodnota se jen nedá nastavit v aplikaci, na míchacím lístku se u starších receptur dál ukáže |
+| *Papír C / U* v editoru | jediná položka bez výběru: `cuReceptury(r)` — výslovný zápis ze staršího souboru má přednost, jinak písmeno z názvu, bez písmene „—“; `readOnly` místo `onChange`, jinak React hlásí pole bez obsluhy změny |
+| slovník (část 127) | smazány klíče *Vysoce odolný vůči vyblednutí* a *z názvu: {cu}* |
+| manuál | scény 21, 40 a 42 v obou jazycích: popisky *otestovaný* a *otestovaný · dvousložková*, věta „u vlastní receptury se dá zapsat výslovně“ → „není na výběr“, u editoru „papír C / U je daný názvem a jen se ukazuje“; nahrávky scén 40 a 42 (cs 38,1 s a 28,5 s, en 38,8 s a 31,3 s), `cas` z délky mp3; přefoceno `01-domov`, `24-custom-editor`, `25-pokryti`, `28-pantone-custom`, `42-receptura-upravit` v obou jazycích |
+| dokumenty | `NAVOD_PODKLADY.md` (vysvětlivka pod přepínači, oddíl C / U), `ROZBOR_APLIKACE.md` (C / U jako vlastnost receptury) |
+
+**Změřeno.**
+
+- `kontrola_aplikace.py` 0, chyby žádné; `node --check` částí 240, 400 a 127 bez chyby
+- editor receptury (záložka Receptury → Upravit, 1 600 px): řádek *Objednavatel · Objednací číslo · Papír C / U* — tři pole x 62 / 558 / 1 054 px, všechna y 450,05 px a 484 × 39 px; `<select>` má jedinou položku „C — natíraný“, hodnota C (receptura PANTONE 012 C), žádný `disabled`
+- řádek přepínačů v editoru: *Otestovaný* x 806, y 548,3, 111,05 × 20 px; *Dvousložková — s tužidlem* x 937,05, y 548,3, 204,19 × 20 px; popisků s textem „vyblednutí“ na stránce 0
+- karta *Parametry tisku* na domovské stránce: tři dlaždice síto / kryvost / povrch y 1 011,63, 140,1 × 258,3 px; pod nimi jediný přepínač *Otestovaný* x 565,84, y 1 295,91, 139,55 × 27 px (`label.tgl` na stránce 1)
+- `prohlidka_manualu.py --sceny 20 21 42 --jazyk obe`: 6 scén, 0 chyb; rámečky scén 21 a 42 sedí na nové snímky (řádek přepínačů 806/546 a 568/1 271 beze změny polohy, jen text popisku)
+- `receptury_vlastni.csv` a evidence po focení: osm souborů evidence shodných se zálohou (md5); `receptury_vlastni.csv` se lišil jen pořadím čtyř řádků po startu aplikace → vrácena záloha
+- `mapa.py` přegenerován, `rozbor_aktualizuj.py` bez změny mimo AUTO úseky
+
+**Co se nechalo být.** Sloupec `vyblednuti` v CSV a čtení `fade` z importu
+zůstávají — soubory z dřívějška by jinak přišly o údaj, který v nich stojí.
+Filtr C / U nad seznamem receptur a v kalkulaci se nemění: tam se vybírá,
+co hledat, ne co receptura je.
+
+## 250. Čipy filtru C i U · C · U zrušeny nad seznamem receptur i ve výběru Pantone
+
+**Problém.** Kapitola 249 zamkla *Papír C / U* v editoru, ale uživatel
+myslel jiný výběr: čipy *C i U · C · U* nad seznamem receptur a pod
+databázemi ve výběru Pantone v kalkulaci (kap. 223). Ty tam nemají být.
+Písmeno stojí v názvu receptury, podle kterého se hledá („485 C“ najde
+jen C), a jako štítek vedle názvu — filtr navíc byl další přepínač
+k pochopení a k zapomenutí v zapnutém stavu.
+
+**Co se změnilo.**
+
+| co | jak |
+|---|---|
+| seznam receptur (část 380) | čipy *C i U · C · U* a stav `cu` odebrány; `filtrReceptur` už nedostává `cu`, výběr z našeptávače ho nenuluje |
+| výběr Pantone v kalkulaci (část 240) | čipy pod filtrem databází a stav `cuFiltr` odebrány; `pantoneAll` se skládá jen z databáze a typu polohy |
+| část 458 | `podleCu` smazána, `filtrReceptur` bez parametru `cu`; úvodní komentář říká, proč čipy nejsou |
+| slovník (část 127) | smazán klíč *C i U* |
+| co zůstává | štítek C / U u názvu receptury (seznam i kalkulace), jediná položka *Papír C / U* v editoru z kap. 249, sloupec `cu` v CSV |
+| manuál | scéna 40 v obou jazycích: nadpis *Oblíbené, jen moje, jen nové*, rámeček čipů C / U odebrán, text o písmenu v názvu a štítku; nahrávka cs 33,1 s, en 34,3 s, `cas` z délky mp3; přefoceno `40-receptury` v obou jazycích |
+| dokumenty | `NAVOD_PODKLADY.md` (oddíl C / U), `ROZBOR_APLIKACE.md`, `prezentace/konkurence.html` (řádek *Volba C / U*) |
+
+**Změřeno.**
+
+- `kontrola_aplikace.py` 0, chyby žádné; `node --check` částí 380, 240, 458 a 127 bez chyby; v `aplikace/` žádný výskyt `cuFiltr`, `setCu`, `podleCu` ani klíče *C i U*
+- slovník v Node: 1 805 klíčů, žádný bez en/pt
+- záložka Receptury (1 600 px): řádek čipů má tři tlačítka — *★ jen oblíbené* x 62, *jen moje* x 217,36, *jen nové* x 332,06, všechna y 359,22 a výška 34 px; pole hledání x 62, y 403,22, 1 476 × 39 px (rámeček scény 40 [58, 401, 1480, 43] sedí); tlačítek s textem C i U / C / U na záložce 0, štítků C / U u názvů 101
+- výběr Pantone v kalkulaci: na domovské stránce tlačítek s textem C i U / C / U 0 (`.chip.mini` 3 — jednotky g / kg / lb)
+- `prohlidka_manualu.py --sceny 39 40 41 --jazyk obe`: 6 scén, 0 chyb; scéna 40 má po odebrání rámečku čipů dva rámečky (přepínače a hledání) v obou jazycích
+- data dílny po focení: osm souborů evidence i `receptury_vlastni.csv` shodné se zálohou (md5, cmp)
+- `mapa.py` přegenerován, `rozbor_aktualizuj.py` přepsal jen AUTO úseky
+
+**Co se nechalo být.** Štítek C / U vedle názvu zůstává — je to údaj
+o receptuře, ne volba. Kdo chce jen U, napíše do hledání „U“ s číslem.
+
+## 251. Karta produktu na telefonu: produkt a poloha vedle sebe, zakázkový list pod nimi
+
+**Problém.** Od kap. 225 jdou pod 480 px tři dlaždice karty *Vybraný
+produkt* pod sebe. Fotka produktu a náhled polohy potisku se ale kontrolují
+spolu — jestli vybraná poloha sedí k produktu —, a pod sebou na telefonu
+zabíraly dvě obrazovky, takže se neviděly naráz. Místo pro zakázkový list
+mezi nimi a tlačítky *Načíst kód* tuhle dvojici jen roztahovalo dál od sebe.
+
+**Co se změnilo.** Mřížka `.produkt-dlazdice` má pod 480 px dva sloupce
+`repeat(2, minmax(0,1fr))` místo jednoho; třetí dlaždice (zakázkový list,
+načtení kódu, krycí plocha) se táhne `grid-column:1/-1` přes oba. Fotky
+i dlaždice PDF drží 128 px a `margin:0 auto`, takže PDF stojí pod dvojicí
+na středu karty a tlačítka pod ním mají celou šířku karty jako dřív
+(`060-produkty.css`). Nad 480 px se nezměnilo nic — pravidlo je celé
+v témže bloku `@media(max-width:480px)`.
+
+**Změřeno.** `snimek.py --sirka 391` s produktem 11003 a polohou Víčko
+lahve přes čtečku: dlaždice Produkt a Poloha na stejné horní hraně
+y = 51,3 px, x = 38 a 203,5 px, obě 149,5 px široké, fotky 128 × 128 px;
+dlaždice PDF x = 131,5 px, šířka 128 px — střed 195,5 px = střed karty
+(16 + 359 / 2); tlačítka *Načíst kód* a *Spočítat krycí plochu z náhledu*
+315 px široké (celá vnitřní šířka karty). Totéž na 360 px: fotky x = 41
+a 191 px, PDF x = 116 px (střed 180 = 16 + 328 / 2), tlačítka 284 px.
+`documentElement.scrollWidth` = šířka okna na 360 i 1600 px. Kontrola na
+1600 px: tři dlaždice v jednom řádku, každá 221,3 px, zakázkový list ve
+třetím sloupci x = 536,7 px — beze změny. `kontrola_aplikace.py` 0.
+Snímek na 391 px prohlédnut: dvojice vedle sebe, PDF pod ní uprostřed.
+
+## 252. Poslední verze na dálku: vydání na GitHubu, Aktualizovat.bat si balíček stáhne sám, telefon odkazem na APK
+
+**Problém.** Balíčky z kap. 232–233 se do dílny dostávaly jen ručně —
+zip nebo APK na USB, po síti, z ruky do ruky. Dílna chce z telefonu i
+z počítače sáhnout na poslední verzi, ať sedí kdekoli. Repozitář je ale
+veřejný a balíčky nesou databáze receptur a evidenci zakázek, takže na
+GitHub nesmí, jak jsou.
+
+**Co se změnilo.**
+- Vydání nese jen program. `sestav_exe.py` vedle zipu s daty píše i
+  `IRM-aktualizace-program.zip` (manifest bez otisků, příznak
+  `jen_program`), `sestav_apk.py --jen-program` dělá `IRM-program.apk`
+  bez datových assetů. Názvy jsou bez data, aby GitHub držel stálé odkazy
+  `…/releases/latest/download/<název>` (`balik.ODKAZ_*`, totéž v části 185).
+- `distribuce/vydej.py`: oba balíčky prověří (`balik.stopy_dat` — složka
+  dat, názvy datových složek, jakékoli CSV nebo `.bak`; jediná stopa = nic
+  se neodešle), založí vydání `vRRRR.MM.DD` přes GitHub API (token ze správce
+  pověření Windows přes `git credential fill`, nebo `GITHUB_TOKEN`) a soubory
+  nahraje; poznámky k vydání jsou nadpisy kapitol deníku od poslední vydané.
+  `--kontrola` nic neodešle. Jen standardní knihovna, gh není potřeba.
+- Windows: `IRM.exe --stahnout-aktualizaci [--tiche] [--vynutit]` přečte
+  `releases/latest`, srovná verzi s `manifest.json` (text `RRRR.MM.DD`),
+  stáhne zip do `stazeno/` (po kusech, hlášení po 10 %) a předá ho stávající
+  aktualizaci. `Aktualizovat.bat` bez balíčku ho spustí sám; `CTI_ME.txt`
+  má odkazy. V aplikaci tlačítko *Stáhnout a nainstalovat novou verzi*
+  v záložce Připojení → `POST /api/aktualizace` → most volá `AKTUALIZACE`,
+  kterou dosadil `irm_okno.py` (most nad složkou vrací „umí jen IRM.exe“).
+  Hláška po aktualizaci říká, že se program vymění po zavření okna — dávka
+  čeká na konec IRM.exe, i když ji spustilo tlačítko z běžící aplikace.
+- Android: odkaz *Stáhnout novou verzi* tamtéž — WebView ho předá prohlížeči
+  a ten instalátoru; `Most.java` hlásí `balicek` z `dilna/manifest.json`.
+- Řádek *Verze balíčku* se ukazuje jen tam, kde most hlásí `balicek`
+  (`/api/stav`, verze z `manifest.json` vedle programu); aplikace otevřená
+  ze složky ho nemá. Čtyři nové texty v části 127 (en, pt).
+- Manifest po aktualizaci balíčkem bez dat přebírá otisky z minulého
+  (`aktualizace.manifest_sluc`, v Javě `manifestSluc`) — jinak by příští
+  balíček s daty považoval každý nakoupený soubor za změněný dílnou a odložil
+  ho jako `.novy`.
+- Balíčky už nenesou `.bak` a `.tmp` (v `prezentace/audio_manual*/` leželo
+  18 starých nahrávek `.mp3.bak`).
+- `balik.vyprazdni` před mazáním ověří, že `IRM.exe` ve výstupu neběží:
+  dnes mazání došlo abecedně k zamčenému exe až po smazání aplikace i kopií
+  dat před ním (Aktualizovat.bat … index.html) a nechalo instalaci půl.
+  `IRM_VYSTUP` přesměruje výstup sestavení jinam — tak vzniklo dnešní
+  vydání, protože v `sestaveni/IRM-windows/` běžel program s otevřeným oknem.
+  Smazané části byly obnoveny z nového sestavení (kopie dat v instalaci
+  nikdo nezapisoval — exe se oba dny připojoval k mostu dílny na 8765).
+- Oddíl 3.8 rozboru, řádky v `irm-nastroje`, oddíl 6 v `irm-github`, návod
+  v `NAVOD_PODKLADY.md`.
+
+**Změřeno.**
+- Balíčky ve `sestaveni/vydani/`: `IRM-aktualizace-program.zip` 187,7 MB,
+  `IRM-program.apk` 193,1 MB (0 datových CSV), zip s daty 188,3 MB, složka
+  exe 227,1 MB; `stopy_dat` na obou: 0 (na balíčcích s daty 43 a 43 —
+  25 CSV + 18 `.mp3.bak`). `vydej.py --kontrola`: verze 2026.09.08, token
+  ze správce pověření, přístup k repozitáři v pořádku, poznámky kap. 247–251.
+  **Samotné nahrání na GitHub tu neproběhlo** (odesílání ven zablokováno) —
+  spouští ho uživatel: `python distribuce/vydej.py --bez-sestaveni`.
+- Aktualizace kopie sestavení balíčkem jen s programem (`--tiche`, manifest
+  s verzí 2026.09.01 a 17 otisky): exe skončil za 5,2 s, log „balíček
+  nenese data — jen program“, dávka vyměnila 12 položek programu; manifest
+  poté 2026.09.08, 17 otisků shodných s původními, `jen_program: true`;
+  `evidence/_zkouska.csv` zachován, 1 záloha (28 souborů), `CTI_ME.txt`
+  s odkazem, `Aktualizovat.bat` se stažením.
+- `IRM.exe --stahnout-aktualizaci --tiche` bez vydání: kód 1 za 0,8 s,
+  „Na GitHubu zatím žádné vydání IRM není.“
+- Emulátor (APK 2026.09.07 s daty, 17 otisků, 12 souborů v evidenci
+  včetně `_zkouska_apk2.csv`): `IRM-program.apk` nainstalováno přes něj
+  (versionName 2026.09.08), po startu manifest 2026.09.08 se 17 otisky
+  a `jen_program`, evidence 12 souborů, databáze 9, záloha 32 souborů,
+  log „verze 2026.09.07 → 2026.09.08“; `/api/stav` v telefonu přes
+  `adb forward`: `balicek: "2026.09.08"`.
+- Snímek záložky Připojení proti mostu s manifestem na portu 8799: řádek
+  „Verze balíčku 2026.09.08“, tlačítko 298 × 41 px; po kliknutí hláška
+  mostu „Aktualizaci ze sítě umí jen program IRM.exe.“ barvou
+  `rgb(232, 197, 69)` (`--warn`). Most nad složkou bez manifestu řádek
+  neukazuje. `kontrola_aplikace.py` 0, `mapa.py --kontrola` 0, slovník
+  cs/en/pt čtyř nových textů.

@@ -26,12 +26,14 @@ nad balicek/. Sestavení exe dělá sestav_exe.py.
 
 import ctypes
 import io
+import json
 import os
 import shutil
 import subprocess
 import sys
 import threading
 import time
+import urllib.error
 import urllib.request
 import webbrowser
 
@@ -149,7 +151,12 @@ def _aktualizuj(zip_cesta):
         z.extractall(prace)
     novy_manifest = aktualizace.manifest_nacti(os.path.join(prace, "manifest.json"))
     stary_manifest = aktualizace.manifest_nacti(os.path.join(KOREN, "manifest.json"))
-    log("verze %s → %s" % (stary_manifest.get("verze") or "?", novy_manifest.get("verze") or "?"))
+    log("verze %s → %s%s" % (stary_manifest.get("verze") or "?", novy_manifest.get("verze") or "?",
+                              " (balíček jen s programem)" if novy_manifest.get("jen_program") else ""))
+    # manifest, který zůstane vedle programu (kopíruje ho dávka i větev bez
+    # výměny programu): otisky, které balíček nenesl, se přebírají z minulého
+    with io.open(os.path.join(prace, "manifest.json"), "w", encoding="utf-8") as f:
+        json.dump(aktualizace.manifest_sluc(stary_manifest, novy_manifest), f, ensure_ascii=False, indent=1)
 
     # 1. záloha — před čímkoli
     zaloha_slozka = os.path.join(KOREN, "zalohy", time.strftime("%Y-%m-%d_%H%M"))
@@ -211,14 +218,106 @@ def _aktualizuj(zip_cesta):
             log("nezabalený běh — program se nevyměňuje, jen data")
         shutil.copy2(os.path.join(prace, "manifest.json"), os.path.join(KOREN, "manifest.json"))
         shutil.rmtree(prace, ignore_errors=True)
+    # spuštěno z běžící aplikace (tlačítko v záložce Připojení) je okno ještě
+    # otevřené — dávka čeká, až ho uživatel zavře, teprve pak program vymění
     zprava = ("Aktualizace na verzi %s je hotová.\n\nZáloha: %s\nZáznam: aktualizace.log\n\n%s"
               % (novy_manifest.get("verze", "?"), zaloha_slozka,
-                 "Aplikace se za chvíli sama znovu spustí." if (ma_program and ZMRAZENO) else "Data jsou doplněná."))
+                 "Po zavření okna aplikace se program vymění a znovu spustí."
+                 if (ma_program and ZMRAZENO) else "Data jsou doplněná."))
     if tiche:
         log(zprava.replace("\n", " "))
     else:
         _hlaska(zprava)
     return 0
+
+
+def _stahni_aktualizaci():
+    """
+    --stahnout-aktualizaci [--tiche] [--vynutit]: poslední vydání z GitHubu
+    (jen program, bez dat) → stažení do stazeno/ → _aktualizuj.
+
+    Verze se srovnávají jako text RRRR.MM.DD — novější je vždy větší. Bez
+    --vynutit se stejná nebo starší verze neinstaluje; --vynutit je pro
+    zkoušky a pro opravu poškozeného programu. GitHub bez User-Agent odmítá
+    a vydání hledá podle názvu souboru bez data (balik.VYDANI_ZIP), takže
+    odkaz …/releases/latest/download/… je stálý.
+    """
+    try:
+        import aktualizace
+        import balik
+    except ImportError:
+        _hlaska("Chybí modul aktualizace.py nebo balik.py — tenhle balíček aktualizaci ze sítě neumí.")
+        return 1
+    tiche = "--tiche" in sys.argv[1:]
+    log_cesta = os.path.join(KOREN, "aktualizace.log")
+
+    def log(text):
+        print("  " + text)
+        with io.open(log_cesta, "a", encoding="utf-8") as f:
+            f.write(time.strftime("%Y-%m-%d %H:%M:%S") + "  " + text + "\n")
+
+    def hlas(text):
+        log(text.replace("\n", " "))
+        if not tiche:
+            _hlaska(text)
+
+    mistni = aktualizace.manifest_nacti(os.path.join(KOREN, "manifest.json")).get("verze") or ""
+    api = "https://api.github.com/repos/%s/releases/latest" % balik.GITHUB_REPO
+    log("=== hledám vydání: " + api + " (místní verze %s)" % (mistni or "?"))
+    try:
+        pozadavek = urllib.request.Request(api, headers={"User-Agent": "IRM", "Accept": "application/vnd.github+json"})
+        with urllib.request.urlopen(pozadavek, timeout=20) as r:
+            vydani = json.loads(r.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            hlas("Na GitHubu zatím žádné vydání IRM není.\n" + balik.ODKAZ_VYDANI)
+        else:
+            hlas("GitHub odpověděl chybou %s.\n%s" % (e.code, api))
+        return 1
+    except Exception as e:
+        hlas("Nepodařilo se spojit s GitHubem — je počítač připojený k internetu?\n\n" + str(e))
+        return 1
+    verze = str(vydani.get("tag_name", "")).lstrip("v")
+    soubor = None
+    for a in vydani.get("assets") or []:
+        if a.get("name") == balik.VYDANI_ZIP:
+            soubor = a
+    if soubor is None:
+        hlas("Vydání %s na GitHubu nemá soubor %s." % (verze, balik.VYDANI_ZIP))
+        return 1
+    if verze <= mistni and "--vynutit" not in sys.argv[1:]:
+        hlas("Máte nejnovější verzi (%s). Na GitHubu je vydání %s." % (mistni, verze))
+        return 0
+
+    cil_slozka = os.path.join(KOREN, "stazeno")
+    os.makedirs(cil_slozka, exist_ok=True)
+    cil = os.path.join(cil_slozka, "IRM-aktualizace-%s-program.zip" % verze)
+    velikost = int(soubor.get("size") or 0)
+    log("stahuji verzi %s (%s) → %s" % (verze, "%.1f MB" % (velikost / 1048576.0), cil))
+    zacatek = time.time()
+    try:
+        pozadavek = urllib.request.Request(soubor["browser_download_url"], headers={"User-Agent": "IRM"})
+        with urllib.request.urlopen(pozadavek, timeout=60) as r, io.open(cil + ".tmp", "wb") as f:
+            hotovo = 0
+            dalsi_hlaseni = 0.1
+            while True:
+                kus = r.read(1024 * 1024)
+                if not kus:
+                    break
+                f.write(kus)
+                hotovo += len(kus)
+                if velikost and hotovo >= velikost * dalsi_hlaseni:
+                    log("  %d %%" % round(100.0 * hotovo / velikost))
+                    dalsi_hlaseni += 0.1
+    except Exception as e:
+        hlas("Stažení se nepodařilo — %s\n\nZkuste to znovu, nebo balíček stáhněte ručně:\n%s" % (e, balik.ODKAZ_ZIP))
+        return 1
+    if velikost and hotovo != velikost:
+        hlas("Stažený soubor je neúplný (%d z %d B) — zkuste to znovu." % (hotovo, velikost))
+        return 1
+    os.replace(cil + ".tmp", cil)
+    log("staženo za %.0f s" % (time.time() - zacatek))
+    return _aktualizuj(cil)
 
 
 def main():
@@ -230,6 +329,8 @@ def main():
             return _aktualizuj(argv[i + 1])
         if arg.startswith("--aktualizace="):
             return _aktualizuj(arg.split("=", 1)[1])
+        if arg == "--stahnout-aktualizaci":
+            return _stahni_aktualizaci()
     try:
         import most
         try:
@@ -241,6 +342,10 @@ def main():
         _hlaska("Nepodařilo se načíst most: " + str(e))
         return 1
     _presmeruj_most(most, pdf_spec)
+    if ZMRAZENO:
+        # tlačítko v aplikaci (POST /api/aktualizace): stažení a sloučení dat
+        # běží v druhém IRM.exe, výměnu programu dokončí dávka po zavření okna
+        most.AKTUALIZACE = lambda: subprocess.Popen([sys.executable, "--stahnout-aktualizaci"], cwd=KOREN)
 
     cfg = most.nacti_config()
     port = int(cfg.get("port", 8765))

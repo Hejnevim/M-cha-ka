@@ -36,6 +36,7 @@
 30-app/225-role.js
 30-app/226-lide.js
 40-kalkulace/230-odemykani.js
+40-kalkulace/238-barvy-zakazky-pruh.js
 40-kalkulace/240-calc.js
 40-kalkulace/250-vaha.js
 40-kalkulace/260-financni-box.js
@@ -75,6 +76,7 @@
 70-pravidla/490-prepocet-sortimentu.js
 70-pravidla/495-naplne-sita.js
 70-pravidla/496-separace-vypocet.js
+70-pravidla/497-barvy-zakazky.js
 50-zbytky/500-evidence.js
 70-pravidla/510-aditiva.js
 80-cena/520-cena-davky.js

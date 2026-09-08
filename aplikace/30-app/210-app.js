@@ -832,11 +832,24 @@ function App() {
      plán se má spočítat i tehdy, když se receptura mezitím přepne nebo odejde
      s databází. Fronta má vydržet den, ne jednu obrazovku. */
   const doFronty = (co) => {
-    if (!co || !co.recipe) return;
-    const p = novaPolozkaFronty(Object.assign({ fronta: fronta }, co));
-    setFronta((prev) => (prev || []).concat([p]));
-    const kolik = frontaKMichani(fronta).length + 1;
-    setToast({ ok: true, text: "Do fronty: " + p.nazev + " — " + fmt(p.davkaG) + " g"
+    /* Vícebarevná zakázka posílá všechny barvy naráz — jedním zápisem
+       a jedním hlášením. Kódy a pořadí se přidělují postupně nad rostoucím
+       seznamem, jinak by dvě položky z téže dávky dostaly týž kód. */
+    const seznam = (Array.isArray(co) ? co : [co]).filter((x) => x && x.recipe);
+    if (!seznam.length) return;
+    let f = fronta || [];
+    const nove = [];
+    for (const x of seznam) {
+      const p = novaPolozkaFronty(Object.assign({ fronta: f }, x));
+      nove.push(p); f = f.concat([p]);
+    }
+    setFronta((prev) => (prev || []).concat(nove));
+    const kolik = frontaKMichani(fronta).length + nove.length;
+    const p = nove[0];
+    setToast({ ok: true, text: (nove.length > 1
+        ? "Do fronty " + fmt(nove.length, 0) + (nove.length < 5 ? " barvy: " : " barev: ")
+          + nove.map((x) => x.nazev + " " + fmt(x.davkaG) + " g").join(", ")
+        : "Do fronty: " + p.nazev + " — " + fmt(p.davkaG) + " g")
       + (p.zakazka ? " (zakázka " + p.zakazka + ")" : "") + ". Čeká " + fmt(kolik, 0)
       + (kolik === 1 ? " položka." : (kolik < 5 ? " položky." : " položek.")) });
   };

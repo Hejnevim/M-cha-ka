@@ -477,7 +477,12 @@ svg[viewBox="0 0 24 24"].ikona-radek{width:var(--ikona-radek);height:var(--ikona
    měří bez prostrkání, takže si myslí, že se vejde; `anywhere` zalomí
    doopravdy. Platí jen tady: popisky dlaždic nikde neurčují šířku sloupce,
    takže agresivnější zalamování nemá kde uškodit. */
-.karta-tisk label.f{font-size:calc(var(--pismo-popisek) * 1.5);margin-bottom:10px;text-align:center;overflow-wrap:anywhere}
+/* Popisek je buňka sdíleného řádku (subgrid níž): text sedí u dolní hrany
+   a na středu dlaždice — bez justify-content zůstával jednořádkový popisek
+   ve flexu vlevo (změřeno: KRYVOST 15 px vlevo od středu dlaždice). Mezeru
+   k dlaždici dělá row-gap obalu, ne margin — margin by se přičetl k ní. */
+.karta-tisk label.f{font-size:calc(var(--pismo-popisek) * 1.5);margin-bottom:0;text-align:center;overflow-wrap:anywhere;
+  display:flex;align-items:flex-end;justify-content:center}
 /* Dlaždice připomíná náhled produktu, hodnota uprostřed. Roztažené pole přes
    celou třetinu řádku se z odstupu čte hůř než blok, který má tvar — oko
    najde dřív dlaždici než dlouhý pruh. */
@@ -492,16 +497,35 @@ svg[viewBox="0 0 24 24"].ikona-radek{width:var(--ikona-radek);height:var(--ikona
    přes půl obrazovky. Dorovnání podle výšky řádku tímhle netrpí: do
    přirozené výšky karty se počítá jen dolní mez. */
 .karta-tisk{display:flex;flex-direction:column}
-.karta-tisk>.frow{flex:1}
-/* Kontejner je každé pole zvlášť, a nesmí se to vázat na počet sloupců:
-   u tampontisku bez zapsaného klišé zbudou v řádku jen dvě pole (`c2`).
-   Bez kontejneru se `cqw` nepočítá z dlaždice, ale z šířky okna — odsazení
-   vyšlo 95 px místo 14 a dlaždice se nafoukla na 271 x 561 px místo
-   271 x 271. Roztáhla tím celý druhý řádek karet, takže vedle ní stály
-   receptura i zakázka z poloviny prázdné. */
-.karta-tisk .frow>div{container-type:inline-size;display:flex;flex-direction:column}
-.karta-tisk select{font-size:min(calc(var(--pismo) * 2), 11cqw);font-weight:700;text-align:center;
-  width:100%;flex:1;min-height:178px;box-sizing:border-box;
+/* Řádek dlaždic má dva pruhy: popisky a dlaždice. Každé pole je subgrid
+   přes oba, takže si všechny popisky v řádku dělí jednu výšku — tu
+   nejvyšší — a dlaždice pod nimi začínají na stejné lince a jsou stejně
+   vysoké. Dřív měl každý sloupec vlastní flex a popisek, který se zalomil
+   na dva či tři řádky (KLIŠÉ (HLOUBKA LEPTU) při 1 280 px), ukrojil své
+   dlaždici výšku: 178 px vedle sousedek s 201 px. Výška pruhu popisků se
+   nezapisuje (2,5em by na tři řádky nestačilo) — subgrid ji změří. */
+/* Kontejner pro `cqw` je celý řádek dlaždic, ne každé pole zvlášť: pole
+   je subgrid a `container-type` na něm subgrid ruší (Chrome 152 pak
+   volné místo dělí rovným dílem mezi popisek a dlaždici — změřeno:
+   popisek 59 px vedle 50 px v témže řádku). Bez kontejneru vůbec by se
+   `cqw` bralo z šířky okna a dlaždice se nafoukla na 271 × 561 px.
+   Šířka jedné dlaždice se proto dopočítá z šířky řádku a počtu sloupců
+   do --dlazdice-sirka; počet sloupců není pevný (tampontisk bez klišé má
+   jen dvě pole, `c2`), takže má každá varianta vlastní výpočet. Mezera
+   je táž, jakou řádku dává `.bigform .frow` (050). */
+.karta-tisk>.frow{flex:1;grid-auto-rows:auto 1fr;container-type:inline-size;--dlazdice-sirka:100cqw}
+@media(min-width:640px){
+  .karta-tisk>.frow.c3{--dlazdice-sirka:calc((100cqw - 2 * var(--mezera-poli) * 1.33) / 3)}
+  .karta-tisk>.frow.c2{--dlazdice-sirka:calc((100cqw - var(--mezera-poli) * 1.33) / 2)}
+}
+.karta-tisk .frow>div{display:grid;grid-template-rows:subgrid;grid-row:span 2;row-gap:10px}
+/* Dolní mez písma: bez ní jelo písmo jen z šířky dlaždice a při třech
+   kartách v řádku (okno 1 000 px, dlaždice 76 px) kleslo na 8,4 px —
+   z odstupu nečitelné. Pod základní písmo aplikace se dlaždice nedostane;
+   dlouhá hodnota se v úzké dlaždici radši zalomí (viz pravidlo textu
+   tlačítka níž), než aby se zmenšila k nule. */
+.karta-tisk select{font-size:clamp(var(--pismo), calc(var(--dlazdice-sirka) * .11), calc(var(--pismo) * 2));font-weight:700;text-align:center;
+  width:100%;min-height:178px;box-sizing:border-box;
   display:flex;align-items:center;justify-content:center;
   /* Dlaždice ukazuje jen hodnotu na středu — má připomínat náhled produktu,
      ne formulářové pole. Šipka pozadím se tu nekreslí (`background-image:none`
@@ -509,7 +533,14 @@ svg[viewBox="0 0 24 24"].ikona-radek{width:var(--ikona-radek);height:var(--ikona
      nad středem) a šipka, kterou prohlížeč k výběru sám přidává, je schovaná
      přes `::picker-icon` níž. Že se dlaždicí dá vybírat, prozradí kliknutí;
      z odstupu se čte jen hodnota. */
-  flex-direction:column;padding:5cqw;background-image:none}
+  /* Dolní mez písma znamená, že se dlouhé slovo do úzké dlaždice nemusí
+     vejít (dlaždice 76 px při okně 1 000 px: „Transparentní“ 88 px). Výběr
+     přetok tiše ořízne; zalomení uvnitř slova je čitelnější než useknutý
+     konec. Musí to stát na výběru samém (white-space i overflow-wrap) —
+     na `::select-fallback-button-text` to Chrome 152 nebere (změřeno:
+     scrollWidth 88 px stále). Kde se slovo vejde, nezalomí se nic. */
+  white-space:normal;overflow-wrap:anywhere;
+  flex-direction:column;padding:calc(var(--dlazdice-sirka) * .05);background-image:none}
 .karta-tisk select::picker-icon{display:none}
 .karta-tisk select::select-fallback-button-text{flex:0 1 auto;text-align:center}
 .karta-tisk select::picker(select){font-size:calc(var(--pismo) * 1.5)}
@@ -519,7 +550,7 @@ svg[viewBox="0 0 24 24"].ikona-radek{width:var(--ikona-radek);height:var(--ikona
    `.zakazka-cisla` (viz tam), stejná oprava: na úzkém okně dolní mez
    dlaždice snížena přibližně o polovinu (178 → 88 px). */
 @media(max-width:640px){
-  .karta-tisk select{font-size:min(var(--pismo), 5.5cqw);min-height:88px}
+  .karta-tisk select{font-size:min(var(--pismo), calc(var(--dlazdice-sirka) * .055));min-height:88px}
 }
 .bigform select:focus,.bigform input:focus{box-shadow:var(--neu-sm),0 0 0 3px var(--focus)}
 .bigform .frow{gap:calc(var(--mezera-poli) * 1.33);margin-bottom:calc(var(--mezera-poli) * 1.33)}
@@ -661,17 +692,29 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
    přirozené výšky karty se počítá jen dolní mez dlaždice, ne čtverec —
    to byla chyba dřívějšího `aspect-ratio:1`, který kartu hnal na 595 px. */
 .karta-cisla{display:flex;flex-direction:column}
-.zakazka-cisla{display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1}
-.zakazka-cisla>div{container-type:inline-size;display:flex;flex-direction:column}
-.zakazka-cisla label.f{font-size:calc(var(--pismo-popisek) * 1.5);margin-bottom:10px;text-align:center}
+/* Stejná stavba jako dlaždice Parametrů tisku (.karta-tisk, 040): pruh
+   popisků a pruh dlaždic, každé pole subgrid přes oba, takže popisky
+   v řádku sdílejí výšku a dlaždice začínají na jedné lince. Dřív si každý
+   sloupec měřil popisek sám a zalomené SPOTŘEBA (G/M²) dalo dlaždici
+   184 px vedle 208 px (změřeno při 1 280 px). Řádky se střídají auto/1fr,
+   aby to platilo pro dva i tři sloupce a pro jeden sloupec na telefonu. */
+/* Kontejner pro `cqw` je mřížka, ne pole — pole je subgrid a kontejner by
+   ho zrušil (proč, viz .karta-tisk v 040). Šířka dlaždice se dopočítá
+   z šířky mřížky, mezery a počtu sloupců do --dlazdice-sirka. */
+.zakazka-cisla{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-auto-rows:auto 1fr;gap:16px;flex:1;
+  container-type:inline-size;--dlazdice-sirka:calc((100cqw - 16px) / 2)}
+.zakazka-cisla>div{display:grid;grid-template-rows:subgrid;grid-row:span 2;row-gap:10px}
+.zakazka-cisla label.f{font-size:calc(var(--pismo-popisek) * 1.5);margin-bottom:0;text-align:center;
+  display:flex;align-items:flex-end;justify-content:center}
 /* Dolní mez 100 px je změřená sondou: dva řádky dlaždic po 100 px dají
    kartě přirozenou výšku ~364 px, tedy touž, jakou má vedle stojící karta
    Parametry tisku s jedním řádkem dlaždic po 178 px (~363 px). Když tedy
    Zakázka stojí v řádku sama nebo je nejvyšší, drží stejnou výšku jako
    soused, a prázdné místo nevzniká ani v ní, ani kvůli ní. */
-.zakazka-cisla input,.zakazka-cisla select{font-size:min(calc(var(--pismo) * 3.375), 18.5625cqw);
-  font-weight:700;text-align:center;flex:1;min-height:100px;padding:5cqw;box-sizing:border-box}
-/* Šířka stěrky je výběr, ale musí vypadat jako sousední číselné dlaždice:
+/* Dolní mez písma jako u .karta-tisk: pod základní písmo dlaždice neklesne. */
+.zakazka-cisla input,.zakazka-cisla select{font-size:clamp(var(--pismo), calc(var(--dlazdice-sirka) * .185625), calc(var(--pismo) * 3.375));
+  font-weight:700;text-align:center;min-height:100px;padding:calc(var(--dlazdice-sirka) * .05);box-sizing:border-box}
+/* Šířka těrky je výběr, ale musí vypadat jako sousední číselné dlaždice:
    hodnota na středu, bez šipky — stejný idiom jako dlaždicové výběry
    v `.karta-tisk` (viz tam, proč se šipka nekreslí a hodnota centruje).
    Zavřená dlaždice ukazuje jen číslo (nebo „—“ = nezadáno), takže velké
@@ -682,28 +725,24 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
 .zakazka-cisla select::select-fallback-button-text{flex:0 1 auto;text-align:center}
 .zakazka-cisla select::picker(select){font-size:calc(var(--pismo) * 1.5)}
 .zakazka-cisla option{padding:calc(var(--pole-y) * 1.4) calc(var(--pole-x) * 1.4)}
-/* Se sítem přibudou dvě dlaždice navíc (šířka stěrky, potisků na tah).
+/* Se sítem přibudou dvě dlaždice navíc (šířka těrky, potisků na tah).
    Ve dvou sloupcích by z toho byly tři řádky, karta by povyrostla na 513 px
    a se sousední Parametry tisku by se roztáhly její výběry na 340 px vysoko —
    změřeno. Šest dlaždic proto jde do tří sloupců: dva řádky jako dosud,
    výška karty zpátky na ~364 px. */
-.zakazka-cisla.sest{grid-template-columns:1fr 1fr 1fr}
-/* Ve třech sloupcích se popisek „SPOTŘEBA (G/M²)" nevejde na řádek a zalomí
-   se — dlaždice pod ním pak začíná níž než sousedky (změřeno 100 px proti
-   123 px). Dvouřádková dolní mez popisku srovná začátky všech šesti. */
-.zakazka-cisla.sest label.f{min-height:2.6em;display:flex;align-items:flex-end;justify-content:center}
+.zakazka-cisla.sest{grid-template-columns:repeat(3,minmax(0,1fr));--dlazdice-sirka:calc((100cqw - 32px) / 3)}
 /* Pod 560px se sloupce skládají na jeden a dlaždice jedou přes celou šířku
    telefonu — čtyři po 178 px (+ popisky) nezvládne bez rolování žádný
    mobil, poslední zůstává mimo obrazovku. Na úzkém okně proto dolní mez
    dlaždice snížena na 88 px (písmo 3,375 → 1,7 násobku `--pismo`) — pořád
    čitelné z odstupu, ale čtyři se vejdou najednou. */
 @media(max-width:560px){
-  .zakazka-cisla{grid-template-columns:1fr}
+  .zakazka-cisla{grid-template-columns:minmax(0,1fr);--dlazdice-sirka:100cqw}
   /* Šest dlaždic pod sebou by na telefonu znamenalo šest obrazovek rolování.
      Ve dvou sloupcích jsou to tři řádky — méně, než kolik dnes zabírají
      čtyři dlaždice v jednom sloupci. */
-  .zakazka-cisla.sest{grid-template-columns:1fr 1fr}
-  .zakazka-cisla input,.zakazka-cisla select{font-size:min(calc(var(--pismo) * 1.7), 9.375cqw);min-height:88px}
+  .zakazka-cisla.sest{grid-template-columns:minmax(0,1fr) minmax(0,1fr);--dlazdice-sirka:calc((100cqw - 16px) / 2)}
+  .zakazka-cisla input,.zakazka-cisla select{font-size:min(calc(var(--pismo) * 1.7), calc(var(--dlazdice-sirka) * .09375));min-height:88px}
 }
 .produkt-dlazdice{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
 .produkt-dlazdice .dlazdice{min-width:0;display:flex;flex-direction:column}
@@ -716,6 +755,15 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
    zlomem stojí hned pod načtením kódu, na široké obrazovce ho část 040
    přišpendlí k pravému dolnímu rohu karty. */
 .blok-pokryti{margin-top:8px}
+/* Pod 480px (stejný zlom jako katalog produktů po jednom) jsou tři dlaždice
+   karty produktu ve sloupci 100 px široké — do třetí z nich se vejde jen
+   „Načíst kód" a „Spočítat krycí plochu z náhledu" se zalomí uprostřed
+   slova. Dlaždice jdou pod sebe, tlačítka uvnitř tak dostanou celou šířku
+   karty místo třetiny řádku. */
+@media(max-width:480px){
+  .produkt-dlazdice{grid-template-columns:1fr}
+  .produkt-dlazdice .prodphoto,.produkt-dlazdice .pdfdrop{width:128px;margin:0 auto}
+}
 .pdfdrop{min-width:0;cursor:pointer}
 .prodphoto{width:128px;height:128px;object-fit:contain;border-radius:var(--radius-dlazdice);background:var(--paper);flex:0 0 auto;box-shadow:var(--neu-sm)}
 .poscards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:8px 0 6px}
@@ -1047,6 +1095,23 @@ html:not([lang="cs"]) .michbg .card .btn.mich-tl-dalsi{width:auto;height:auto;
 .searchitem-img{width:60px;height:60px;flex:0 0 auto;object-fit:contain;border-radius:12px;background:var(--paper);box-shadow:var(--neu-sm)}
 .searchitem-nm{font-size:19.5px;font-weight:700;line-height:1.3}
 .searchitem-dm{font-family:var(--mono);font-size:16.5px;color:var(--ink-2);margin-top:3px}
+/* Našeptávač receptur (část 382) sdílí kresbu položek s hledáním katalogu,
+   ale stojí uvnitř karty u běžného pole — velikosti jsou proto v obyčejné
+   škále aplikace, ne v 1,5násobku katalogového hledání. */
+.naseptavac{position:relative}
+.naseptavac .searchdrop{max-height:380px;top:calc(100% + 4px)}
+.naseptavac .searchitem{gap:10px;padding:9px 13px}
+.naseptavac .searchitem-nm{font-size:var(--pismo);line-height:normal}
+.naseptavac .searchitem-dm{font-size:var(--pismo-poznamka);margin-top:1px}
+/* Hvězdička oblíbené receptury — tlačítko bez rámu, aby v řádku seznamu
+   i u výběru v kalkulaci stálo jako značka, ne jako další tlačítko. */
+/* line-height:normal, ne pevná 1: hvězdička je znak s dolním dotahem a při
+   utažené výšce řádku přetekla o 2 px přes vlastní rámeček (změřeno
+   prekryv.py ve všech čtyřech šířkách a obou režimech). Pevné číslo je
+   vždycky sázka na konkrétní písmo, které se v barvy.html může vyměnit. */
+.hvezda{border:none;background:none;cursor:pointer;font-size:19px;line-height:normal;padding:2px 4px;color:var(--ink-2);opacity:.55;transition:opacity .15s,color .15s}
+.hvezda:hover{opacity:1}
+.hvezda.on{color:var(--warn);opacity:1}
 .viewtoggle{display:flex;gap:2px;background:var(--paper);border-radius:999px;padding:4px;box-shadow:var(--neu-in)}
 .viewtoggle button{border:none;background:none;padding:7px 13px;border-radius:999px;cursor:pointer;color:var(--ink-2);font-size:15px;line-height:1;transition:background .15s,color .15s}
 .viewtoggle button.on{background:var(--key);color:var(--btn-ink)}
@@ -1095,6 +1160,14 @@ html:not([lang="cs"]) .michbg .card .btn.mich-tl-dalsi{width:auto;height:auto;
 .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:13px;margin-top:8px}
 .kv .k{color:var(--ink-2);font-size:11px;text-transform:uppercase;letter-spacing:.06em;align-self:center}
 .kv .v{font-weight:700}
+/* Manuál otevřený z nabídky: stránka manuálu v rámu přes celou obrazovku,
+   nad ní lišta s jazykem manuálu a zavřením v pravém horním rohu (215-manual.js).
+   Leží nad okny (.modalbg má 90), aby ho nepřekrylo nic z rozdělané práce. */
+.manualokno{position:fixed;inset:0;z-index:95;background:var(--bg);display:flex;flex-direction:column}
+.manualokno-lista{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px clamp(16px,3vw,40px);background:var(--paper);box-shadow:var(--neu-sm);position:relative;z-index:1}
+.manualokno-lista b{font-size:calc(var(--pismo) + 2px);letter-spacing:var(--prostrkani);text-transform:uppercase}
+.manualokno-zavrit{font-weight:800}
+.manualokno-ram{flex:1 1 auto;width:100%;min-height:0;border:none;background:var(--bg)}
 </style>
 <style>
 /* ---- jen pro tuhle stránku ----

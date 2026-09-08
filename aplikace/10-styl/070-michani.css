@@ -264,5 +264,33 @@ html:not([lang="cs"]) .michbg .card .btn.mich-tl-dalsi{width:auto;height:auto;
      složky se rozláme na čtyři řádky a řádek u váhy přestane být řádkem. */
   .michtab{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
   .michtab td,.michtab th{white-space:nowrap}
+  /* Přepínač „s tužidlem" sedí absolutně u pravého okraje tlačítka Štítek
+     na kelímek a spoléhá na to, že tlačítko je široké: rezerva 4,2 × písma
+     po obou stranách (193 px) mu stačí jen tehdy, když se text vejde do
+     zbytku. Na telefonu (změřeno: 391 px okna, tlačítko 361 px, pro text
+     zbylo 168 px) se „Štítek na kelímek →" zalomí do tří řádků, roztáhne
+     se pod přepínač a ten ho o 22 px překryje — na skutečném telefonu
+     se popisek s přepínačem křížil. Pod zlomem, kde je míchací režim
+     v jednom sloupci, proto přepínač z tlačítka vystoupí do toku pod něj
+     (obal se stane sloupcem zarovnaným doprava, ať sedí u pravé hrany
+     tlačítka) a tlačítko dostane souměrnou rezervu jako ostatní míchací
+     tlačítka, aby se text vrátil na jeden řádek. Posun z barvy.html
+     zůstává, jen bez usazení na střed, které v toku nemá co dělat. */
+  .michbg .stitekpruh .stitekobal{display:flex;flex-direction:column;align-items:flex-end}
+  .michbg .stitekpruh .tgl{position:static;
+    transform:translate(var(--mich-prepinac-posun-x),var(--mich-prepinac-posun-y));
+    margin-top:calc(var(--mich-mezera) * .6)}
+  .michbg .stitekpruh .btn{padding-left:calc(var(--mich-tl-stitek) * 1.47);
+    padding-right:calc(var(--mich-tl-stitek) * 1.47)}
 }
 @media print{.michbg{display:none}}
+
+/* Pruh barev zakázky v míchacím režimu (BarvyZakazkyPruh, část 238): táž
+   dlaždice jako v kartě Receptura a barva, jen ve velikosti pro čtení od
+   váhy — písmo se odvozuje z --mich-nazev, ne z obecné škály (irm-rozhrani,
+   bod 1), aby držel proporce s hlavičkou režimu. */
+.michbg .barvy-zakazky{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin:0 0 calc(var(--mich-mezera) * .6)}
+.michbg .barva-zakazky{padding:14px 16px}
+.michbg .barva-zakazky .bz-cislo,.michbg .barva-zakazky .bz-nazev{font-size:calc(var(--mich-nazev) * .62)}
+.michbg .barva-zakazky .bz-davka,.michbg .barva-zakazky .bz-hotovo{font-size:calc(var(--mich-nazev) * .5)}
+.michbg .barva-zakazky .cdot{width:18px;height:18px}

@@ -12,10 +12,13 @@
 /* Pod 480px (stejný zlom jako katalog produktů po jednom) jsou tři dlaždice
    karty produktu ve sloupci 100 px široké — do třetí z nich se vejde jen
    „Načíst kód" a „Spočítat krycí plochu z náhledu" se zalomí uprostřed
-   slova. Dlaždice jdou pod sebe, tlačítka uvnitř tak dostanou celou šířku
-   karty místo třetiny řádku. */
+   slova. Produkt a poloha potisku zůstávají vedle sebe (na telefonu se
+   kontroluje, že se k sobě hodí, a pod sebou se to porovnat nedalo),
+   zakázkový list jde pod ně přes oba sloupce: tlačítka v něm tak dostanou
+   celou šířku karty, samotná dlaždice PDF drží 128 px uprostřed. */
 @media(max-width:480px){
-  .produkt-dlazdice{grid-template-columns:1fr}
+  .produkt-dlazdice{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .produkt-dlazdice>.dlazdice:nth-child(3){grid-column:1/-1}
   .produkt-dlazdice .prodphoto,.produkt-dlazdice .pdfdrop{width:128px;margin:0 auto}
 }
 .pdfdrop{min-width:0;cursor:pointer}

@@ -18,7 +18,7 @@ const SPEC_ALIAS = {
   gm2:      /^(gm2|g_m2|spotreba|spot.eba)$/i,
   loss:     /^(ztraty|ztr.ty|loss|odpad)$/i,
   minBatch: /^(min|mindavka|min_davka|minbatch)$/i,
-  sterka:   /^(sterka|st.rka|sirkasterky|squeegee|racle)$/i,
+  terka:   /^(terka|t.rka|sirkaterky|sterka|st.rka|sirkasterky|squeegee|racle)$/i,
   naTah:    /^(natah|na_tah|potisku|potisk.|nup|n_up)$/i,
   order:    /^(obj|objednavka|objedn.vka|zakazka|zak.zka|order|po)$/i,
   customer: /^(zakaznik|z.kazn.k|customer|objednavatel|odberatel|odb.ratel)$/i,
@@ -32,7 +32,7 @@ const SPEC_LABEL = {
   recipe: "Receptura", series: "Řada barvy", tech: "Technologie",
   size: "Rozměr motivu", component: "Komponenta", poscode: "Kód potisku",
   gm2: "Spotřeba g/m²", loss: "Ztráty %", minBatch: "Min. dávka g",
-  sterka: "Šířka stěrky mm", naTah: "Potisků na tah",
+  terka: "Šířka těrky mm", naTah: "Potisků na tah",
   order: "Zakázka", customer: "Objednavatel", mesh: "Síto", opacity: "Kryvost",
   surface: "Povrch", note: "Poznámka",
 };
@@ -106,7 +106,7 @@ function resolveSpec(parsed, products, recipes) {
   const f = parsed.fields;
   const r = { parsed: parsed, fields: f, product: null, position: null, colorIdx: -1,
     recipe: null, qty: null, gm2: null, loss: null, minBatch: null,
-    sterka: null, naTah: null, warn: [], ok: [] };
+    terka: null, naTah: null, warn: [], ok: [] };
   const num = (key, min) => {
     if (f[key] == null || f[key] === "") return null;
     const v = n(f[key], NaN);
@@ -207,28 +207,44 @@ function resolveSpec(parsed, products, recipes) {
     }
   }
 
+  /* Barev potisku bývá víc než jedna (vícebarevný motiv): pole se rozdělí
+     na jednotlivé názvy (rozdelBarvyPotisku, část 497) a každý se hledá
+     zvlášť. r.recipe zůstává první nalezená, takže všechno, co pracuje
+     s jednou recepturou, se nemění; kalkulace si z r.recipes postaví
+     seznam barev zakázky. Nenalezená barva se hlásí každá svým jménem —
+     „P. Black C P. 200 C" jako jeden nenalezený název nikomu neřekne,
+     která z těch dvou chybí. */
+  r.recipes = [];
   if (f.recipe) {
-    const s = f.recipe.toLowerCase();
     // je-li známa řada barvy, hledá se nejdřív v ní — stejný Pantone kód
     // bývá v databázi vícekrát, pokaždé pro jinou řadu
     const rada = (f.series || "").trim().toLowerCase();
     const vRade = rada ? recipes.filter((x) => String(x.series || "").toLowerCase().includes(rada)) : [];
-    const najdi = (seznam) => seznam.find((x) => x.name.toLowerCase() === s)
-      || seznam.find((x) => x.name.toLowerCase().includes(s))
-      || (/^\d{2,4}\s*[a-z]?$/i.test(f.recipe.trim())
-          ? seznam.find((x) => new RegExp("\\b" + f.recipe.trim().replace(/\s+/g, "\\s*") + "\\b", "i").test(x.name))
-          : null)
-      || null;
-    r.recipe = (vRade.length ? najdi(vRade) : null) || najdi(recipes);
-    if (r.recipe) {
-      r.ok.push(preloz("Receptura: {r}", { r: r.recipe.name + (r.recipe.series ? " · " + r.recipe.series : "") }));
-      if (rada && !String(r.recipe.series || "").toLowerCase().includes(rada))
-        r.warn.push(preloz("Typ barvy „{a}“ se neshoduje s typem barvy receptury („{b}“) — ověřte.", { a: f.series, b: r.recipe.series || "—" }));
-    } else if (rada && recipes.length && !vRade.length) {
-      r.warn.push(preloz("Typ barvy „{t}“ není v databázi receptur — receptura nenalezena.", { t: f.series }));
-    } else {
-      r.warn.push(preloz("Receptura „{r}“ nebyla nalezena — nahrajte databázi v Import / data.", { r: f.recipe }));
+    const hledej = (nazev) => {
+      const s = nazev.toLowerCase();
+      const najdi = (seznam) => seznam.find((x) => x.name.toLowerCase() === s)
+        || seznam.find((x) => x.name.toLowerCase().includes(s))
+        || (/^\d{2,4}\s*[a-z]?$/i.test(nazev)
+            ? seznam.find((x) => new RegExp("\\b" + nazev.replace(/\s+/g, "\\s*") + "\\b", "i").test(x.name))
+            : null)
+        || null;
+      return (vRade.length ? najdi(vRade) : null) || najdi(recipes);
+    };
+    for (const nazev of rozdelBarvyPotisku(f.recipe)) {
+      const rec = hledej(nazev);
+      r.recipes.push({ nazev: nazev, recipe: rec });
+      if (rec) {
+        r.ok.push(preloz("Receptura: {r}", { r: rec.name + (rec.series ? " · " + rec.series : "") }));
+        if (rada && !String(rec.series || "").toLowerCase().includes(rada))
+          r.warn.push(preloz("Typ barvy „{a}“ se neshoduje s typem barvy receptury („{b}“) — ověřte.", { a: f.series, b: rec.series || "—" }));
+      } else if (!(rada && recipes.length && !vRade.length)) {
+        r.warn.push(preloz("Receptura „{r}“ nebyla nalezena — nahrajte databázi v Import / data.", { r: nazev }));
+      }
     }
+    if (rada && recipes.length && !vRade.length)
+      r.warn.push(preloz("Typ barvy „{t}“ není v databázi receptur — receptura nenalezena.", { t: f.series }));
+    r.recipe = (r.recipes.find((x) => x.recipe) || {}).recipe || null;
+    if (r.recipes.length > 1) r.ok.push(preloz("Barev potisku: {n}", { n: r.recipes.length }));
   }
 
   // Skutečný rozměr motivu ze zakázkového listu. Katalog nese jen největší
@@ -249,7 +265,7 @@ function resolveSpec(parsed, products, recipes) {
   r.gm2 = num("gm2", 0.01);
   r.loss = num("loss", 0);
   r.minBatch = num("minBatch", 0);
-  r.sterka = num("sterka", 0);
+  r.terka = num("terka", 0);
   r.naTah = num("naTah", 1);
   if (r.qty != null) r.ok.push(preloz("Počet kusů: {n}", { n: fmt(r.qty, 0) }));
   return r;

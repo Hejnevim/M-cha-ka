@@ -1,23 +1,23 @@
 # Ink Recipe Manager — strukturovaný rozbor aplikace
 
 <!-- AUTO:stav -->
-> **Stav k 7. září 2026.** Čísla v úsecích označených `AUTO` generuje
+> **Stav k 8. září 2026.** Čísla v úsecích označených `AUTO` generuje
 > `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — nepřepisují
 > se ručně a nemohou se rozejít se skutečností. Text mimo ně píše člověk.
 
-> Poslední zapsaná změna ve vývojovém deníku: **7. září 12:52 — Druhé kolo ukazatelů manuálu — anglická tlačítka měřena zvlášť (36 obdélníků), sklad surovin přefocen s filtrem vše**
+> Poslední zapsaná změna ve vývojovém deníku: **8. září 16:27 — Poslední verze na dálku — vydání na GitHubu jen s programem (vydej.py), Aktualizovat.bat si zip stáhne sám, telefon odkazem na APK; otisky manifestu se při aktualizaci bez dat zachovají**
 
 | soubor | řádků | velikost |
 |---|---:|---:|
-| `aplikace/ (102 souborů)` | 23 610 | 1 431 kB |
-| `index.html` | 130 | 7 kB |
-| `most.py` | 741 | 31 kB |
-| `pdf_spec.py` | 1 071 | 42 kB |
+| `aplikace/ (104 souborů)` | 24 293 | 1 479 kB |
+| `index.html` | 138 | 8 kB |
+| `most.py` | 805 | 34 kB |
+| `pdf_spec.py` | 1 135 | 45 kB |
 | `odemkni.py` | 213 | 8 kB |
 | `prevod_printcolor.py` | 183 | 7 kB |
 | `kontrola_aplikace.py` | 169 | 7 kB |
 | `rozbor_aktualizuj.py` | 359 | 13 kB |
-| **celkem** | **26 476** | |
+| **celkem** | **27 295** | |
 <!-- /AUTO:stav -->
 
 ---
@@ -65,7 +65,7 @@ Systém má tři vrstvy a žádnou z nich nepotřebuje internet.
 | vrstva | soubor | co dělá |
 |---|---|---|
 | **Aplikace** | `index.html` | Celé UI i výpočty. React 18 + htm, **bez build kroku** — soubor se otevře a běží. |
-| **Manuál** | `prezentace/manual.html`, `manual_en.html` | Mluvený manuál se snímky obrazovky. Od 7. 9. 2026 se otevírá i z nabídky aplikace (položka *Manuál* pod jazyky, část `30-app/215-manual.js`): stránka běží v rámu přes celou obrazovku, lišta vpravo nahoře přepíná češtinu a angličtinu a zavírá; režim světlý/tmavý chodí do rámu v hash `#tema=…`. |
+| **Manuál** | `prezentace/manual.html`, `manual_en.html` | Mluvený manuál se snímky obrazovky. Od 7. 9. 2026 se otevírá i z nabídky aplikace (položka *Manuál* pod jazyky, část `30-app/215-manual.js`): stránka běží v rámu přes celou obrazovku, lišta vpravo nahoře přepíná češtinu a angličtinu a zavírá; režim světlý/tmavý chodí do rámu v hash `#tema=…`. Od 8. 9. 2026 má 57 scén na 37 snímcích: přibyly scény pro vícebarevnou zakázku v kartě i u váhy a nabídka je ve dvou scénách (jazyk, položka Manuál); domovská stránka bez rozpisu výpočtu je přefocená i s osmi okny nad ní. |
 | **Data katalogu** | `data.js` | Produkty, jejich barvy, tiskové polohy, rozměry, materiály. Statické, počty viz tabulka výše. |
 | **Obrázky** | `obrazky/` + `seznam_obrazku.json` | Náhledy produktů a poloh potisku, stažené předem kvůli běhu bez internetu. |
 | **Most** | `most.py` (Python, jen standardní knihovna) | Lokální server na `127.0.0.1:8765`. Dělá to, co prohlížeč sám nesmí: čte disk, rozebírá PDF, vykresluje stránky, volá firemní systém. |
@@ -134,6 +134,16 @@ i pořadí polohy). Pravidla jsou v `pdf_pravidla.json` — dají se upravit bez
 zásahu do kódu. Na testovací zakázce se přečte 14 údajů automaticky; dřív jich
 technolog osm opisoval ručně.
 
+Pole **Barva potisku** nese u vícebarevného potisku všechny barvy bez
+oddělovače („P. Black C P. 200 C"). Rozdělí se před každou další značkou
+Pantone (`P.`, `PMS`, `PANTONE`) nebo na čárce, středníku, lomítku a plusu,
+značka se sjednotí na `PANTONE`, a každá barva se hledá v databázi zvlášť —
+nenalezená se hlásí svým jménem, ne celým polem. Totéž platí pro kód
+(`rec=`) a pro pole receptura ze SGPS. Čtverečky vzorníku vedle názvů umí
+most přečíst i tam, kde je list kreslí úsečkami místo obdélníkem; barvu
+nastavenou operátorem, kterému nerozumí (ICC profil, separace), nevydává
+za černou — vzorník bez známé barvy se raději vynechá.
+
 **Co bylo na čtení PDF těžké** (a proč to nešlo hotovou knihovnou): formuláře
 kreslí každé písmeno zvlášť a tučné písmo dvakrát přes sebe (bez ošetření vyjde
 `PPoozznnáámmkkyy`); stránka může být otočená, takže se musí sledovat
@@ -181,6 +191,50 @@ Tři cesty k receptuře:
 Aplikace si pamatuje, co se na danou kombinaci použilo posledně, a sama to
 nabídne. Modré tričko drží svou recepturu odděleně od stejného trička v jiné barvě.
 
+**Vícebarevná zakázka.** Zakázka nese seznam barev potisku; kalkulace
+počítá vždy jednu z nich, tu aktivní. Nad výběrem receptury je pruh
+dlaždic, jedna na barvu (číslo, odstín, receptura, dávka a krycí plocha
+té barvy), klepnutím se celá kalkulace přepne. Jednobarevná zakázka pruh
+nemá. Co má každá barva svoje: receptura (z databáze nebo rozpracovaná),
+krycí plocha své separace, násobek nánosu (dvojitý bílý podtisk ×1,8).
+Co je společné: produkt, poloha, kusy, ztráty, těrka. Barvy přicházejí
+třemi cestami: ze zakázkového listu, kódu nebo SGPS (pole s víc názvy),
+z **rozpisu separací** v okně krycí plochy (tlačítko *Převzít N barev do
+zakázky*: každá separace se stane barvou se svou plochou v procentech
+obdélníku potisku, odhad receptury podle odstínu, bílý podtisk jako
+další barva) a ručně (*＋ Další barva*). Dávka v dlaždici jde z téhož
+vzorce jako karta Kolik namíchat (`davkaBarvy`, část 497), takže obě
+místa ukazují totéž číslo. Míchá se dál po jednom kelímku: míchací
+lístek nese „Barva zakázky 2/3", *Do fronty všechny barvy* založí jednu
+položku fronty na barvu (sloupec `barva_zakazky` v `evidence/fronta.csv`,
+starší soubor bez sloupce se čte jako dřív). Krycí plocha se k číslu
+zakázky pamatuje po barvách. Přepnutí barvy se chová jako přepnutí
+receptury: rozdělaná dávka, zbytek a nátisk zůstávají u barvy, od které
+se odchází. Týž pruh dlaždic (jedna komponenta, `BarvyZakazkyPruh`
+v části 238) stojí i v **míchacím režimu** nad tabulkou navážek, jen
+větší: u váhy se přepíná, který kelímek se míchá, a asistent navážení
+začne pro novou barvu znovu. **Namíchaná barva** má zelenou konturu
+a rozsvícenou fajfku — označí se sama, když asistent dováží poslední
+složku nebo když se vytiskne štítek na kelímek, a fajfkou jde přepnout
+ručně (kdo míchá bez asistenta). Označení drží v kartě i u váhy.
+
+**Barvy za sebou v jednom průchodu.** Asistent ví, že zakázka má víc
+receptur: po dovážení poslední složky nabídne *Potvrdit → další barva*.
+Potvrzení založí kelímek téhle barvy do evidence (týž zápis jako štítek,
+kód si nese barva zakázky v `kodKelimku`), vytáruje váhu — u nového
+kelímku má další receptura začínat od nuly, v simulaci se posuvník
+vrátí na začátek — a přepne kalkulaci na další barvu, která ještě není
+namíchaná (v pořadí za aktivní, pak od začátku; barva odškrtnutá ručně
+se přeskočí). Asistent se pro ni rozběhne od první složky i tehdy, když
+má stejnou recepturu a dávku jako předchozí (klíčem restartu je barva,
+ne jméno receptury). U poslední barvy stojí *Potvrdit navážení* a po něm
+jen kód kelímku. Sundá-li se po táře plný kelímek dřív, než stojí nový,
+váha ukáže záporně a asistent řekne, že se má postavit nový kelímek
+a stisknout Tára. Tlačítko štítku se u vícebarevné zakázky jmenuje
+*Štítky na kelímky →* a otevře přehled všech barev s kódy kelímků;
+tisknou se **naráz** v jednom okně (`tiskniStitky`, část 300), barva
+bez kelímku ukazuje pomlčku a do tisku nejde.
+
 ### Krok 5 — Kolik barvy
 
 ```
@@ -209,8 +263,10 @@ Koeficient 1,6 není odhad — vyšel ze srovnání se čtyřmi skutečnými tka
 (43-80, 77-55, 120-34, 150-31), kde poměr tloušťky k průměru vlákna vychází
 1,61 až 1,64. Dopočtené hodnoty aplikace **označuje jako orientační**.
 
-Celý rozpis výpočtu je v aplikaci vidět, aby šlo číslo zkontrolovat. **Ručně
-zadanou spotřebu aplikace nikdy sama nepřepíše.**
+Rozpis výpočtu (plocha × krycí plocha × kusy × nános, ztráty, rezerva síta)
+se na obrazovce neukazuje — od kap. 244 je uložený jen v `NAVOD_PODKLADY.md`
+pro budoucí návod; kdo číslo potřebuje přepočítat ručně, má tam vzorec.
+**Ručně zadanou spotřebu aplikace nikdy sama nepřepíše.**
 
 **Síto se u textilu vybírá podle produktu.** Kalkulace ho doplní sama, jakmile
 je jasný produkt, technologie a receptura: řádek v `parametry/sita.csv` se
@@ -300,6 +356,16 @@ Dávka se do evidence založí rovnou celá ve stavu **„v tisku"**; kolik doop
 zbylo, se ví až po zakázce — štítek se načte čtečkou a doplní se zbytek. Kelímek
 pak hlídá lhůty (v pořádku / spotřebovat brzy / prošlé) a u další zakázky se
 sám nabídne.
+
+U vícebarevné zakázky se štítky netisknou po jednom: kelímky vznikají
+potvrzením každé barvy v asistentu a tlačítko *Štítky na kelímky →*
+je vytiskne všechny jedním stiskem (jeden tvar štítku pro obě cesty,
+`stitekHtml` v části 300).
+
+Přepínač **„s tužidlem"** je součást tlačítka Štítek na kelímek — na širokém
+míchacím režimu sedí přes jeho pravý okraj, na telefonu (jeden sloupec pod
+1000 px) vystupuje pod něj, aby nepřekrýval popisek, který se na úzkém
+tlačítku nevejde vedle něj.
 
 ### Krok 10 — Korekce po nátisku
 
@@ -400,12 +466,14 @@ podle dat, ne podle dojmu.
 
 **Kalkulace**
 - Skutečná krycí plocha motivu místo obdélníku
+- Vícebarevná zakázka: seznam barev potisku z listu, z rozpisu separací
+  nebo ručně, kalkulace se přepíná po barvách, fronta dostane kelímek na barvu
 - Spotřeba z geometrie síta (otevřená plocha × tloušťka × přenos × koeficienty),
   u tampontisku z hloubky leptu klišé
 - Koeficienty kryvosti, materiálu, barvy podkladu a viskozity
 - Viskozita: doporučený rozsah výtokového času k sítu, hlášení mimo rozsah
 - Ztráty v %, minimální dávka, přepočet g ↔ ml podle hustoty
-- Celý rozpis výpočtu k nahlédnutí; ruční hodnota se nikdy nepřepíše
+- Rozpis výpočtu není na obrazovce (vzorec v `NAVOD_PODKLADY.md`); ruční hodnota se nikdy nepřepíše
 - Těkavé látky (VOC): u složky se v ceníku vede podíl z bezpečnostního listu
   a odkaz na něj; kalkulace z navážky spočítá gramy VOC v dávce a listy
   nabídne u váhy. Co v ceníku není, se vyjmenuje a nedopočítává
@@ -415,6 +483,14 @@ podle dat, ne podle dojmu.
   ze složky (počty viz úvodní tabulka)
 - Přiřazení databází k technologiím souborem; nabízejí se jen ty, které k dané
   technologii patří
+- Filtr databáze v záložce Receptury je sbalený do jednoho štítku se zvolenou
+  řadou a počtem; řady se ukážou až po jeho stisku a volba lištu zase sbalí
+  (kap. 241). V kalkulaci a přepočtu na síto je totéž jako rozbalovací nabídka
+- Mřížkové zobrazení receptur je vzorník: hodnotu má počet odstínů vedle
+  sebe. Na počítači 5 → 4 → 3 sloupce podle šířky, pod 800 px po dvou (karta
+  produktu s fotkou pod 480 px po jednom). Sloupce jsou `minmax(0,1fr)`, aby
+  mřížka nepřetékala za okraj; tlačítka karty (Odkaz · Historie / Upravit ·
+  Smazat) stojí na každé šířce v mřížce 2×2 stejně širokých polí (kap. 242).
 - Custom receptury vždy odvozené z nahrané databáze, vázané na produkt + barvu
   + technologii + polohu, ukládané do sdíleného CSV včetně vazeb
 - Mazání vlastní receptury ve dvou krocích, pod stejným heslem jako ostatní mazání
@@ -427,10 +503,10 @@ podle dat, ne podle dojmu.
   jako síto a kryvost (obnova ze souboru ji nepřepíše prázdnem)
 - Odstín potisku jako Pantone nebo CMYK, vzdálenost v Lab, nejbližší shoda
 - Import/export CSV a JSON, obnova katalogu
-- **Coated / uncoated (C / U)** jako vlastnost receptury a filtr, ne jen
-  písmeno v názvu: čte se z názvu (poslední samostatné C nebo U, takže
-  „Cool Gray 5 C" se nesplete a „485 CP" se netrefí), technolog ho může
-  u vlastní barvy zapsat výslovně a to má přednost
+- **Coated / uncoated (C / U)** jako vlastnost receptury (štítek u názvu),
+  ne jen písmeno v názvu; čipy filtru zrušeny v kap. 250: čte se z názvu (poslední samostatné C nebo U, takže
+  „Cool Gray 5 C" se nesplete a „485 CP" se netrefí); v editoru je jediná
+  položka bez výběru (kap. 249), výslovný zápis ze staršího CSV má přednost
 - **Krycí a standardní varianta téhož odstínu**: dvě receptury z téže
   databáze se poznají podle názvu („(vysoce krycí)", HD, opaque) nebo podle
   kryvosti a v kalkulaci se mezi nimi přepíná jedním tlačítkem. Z cizí
@@ -506,7 +582,10 @@ podle dat, ne podle dojmu.
 - Kalkulace stojí na dvou stejně velkých oknech, která se potkávají uprostřed
   stránky: vlevo vybraný produkt (fotka, poloha potisku, místo pro zakázkový
   list), vpravo kolik namíchat. Rozbalené zadání se roztáhne přes obě poloviny,
-  čísla zakázky drží samostatný sloupec u pravého okraje
+  čísla zakázky drží samostatný sloupec u pravého okraje. Na telefonu (pod
+  480 px) zůstávají produkt a poloha potisku vedle sebe — porovnávají se
+  spolu — a zakázkový list jde pod ně na střed přes oba sloupce, tlačítka
+  Načíst kód a krycí plochy v něm mají celou šířku karty
 - Asistent navážení s živým čtením z váhy, tolerancí a tárou
 - Simulace váhy pro nácvik a pro pracoviště bez váhy
 - Přepočet dávky při přelití se zachováním odstínu
@@ -667,7 +746,7 @@ je fyzika tkaniny, druhé zkušenost dílny.
 | **Most** | Python 3, **jen standardní knihovna**. Volitelně `pypdfium2` pro hezčí náhled stránky PDF; bez něj se použije vlastní vykreslování |
 | **Formát dat** | CSV (středníkem, UTF-8 s BOM) a JSON. Vše čitelné v Excelu i v textovém editoru |
 | **Distribuce** | jeden soubor; volitelně GitHub Pages, aby šla aplikace otevřít odkudkoli |
-| **Vzhled** | měkký: karty vystupují z plochy stínem, ne rámečkem. Paleta, stíny, tvary, kresba ikon, písmo i rozestupy jsou v proměnných na jednom místě a ladí se v `barvy.html`. V hlavičce je logo jako maska z SVG (ve dne Reda, v noci Stricker) s přechodem dvou barev a stínem `drop-shadow`, laditelné v `barvy.html`; za ním leží kruh, který pole hledání ukazuje jako matné sklo (rozostřuje pozadí `backdrop-filter`). Rozbalovací nabídky kreslí stránka (`appearance:base-select`), ne prohlížeč — v Chrome od verze 135; jinde se použije nabídka prohlížeče |
+| **Vzhled** | měkký: karty vystupují z plochy stínem, ne rámečkem. Paleta, stíny, tvary, kresba ikon, písmo i rozestupy jsou v proměnných na jednom místě a ladí se v `barvy.html`. V hlavičce je logo jako maska z SVG (ve dne Reda, v noci Stricker) s přechodem dvou barev a stínem `drop-shadow`, laditelné v `barvy.html`; za ním leží kruh, který pole hledání ukazuje jako matné sklo (rozostřuje pozadí `backdrop-filter`). Rozbalovací nabídky kreslí stránka (`appearance:base-select`), ne prohlížeč — v Chrome od verze 135; jinde se použije nabídka prohlížeče. Dlaždice Parametrů tisku a Zakázky mají popisky v jednom sdíleném pruhu (`subgrid`), takže zalomený popisek nezkracuje svou dlaždici proti sousedkám; písmo v dlaždici se měří z její šířky (`cqw` řádku dlaždic děleno počtem sloupců) a nikdy neklesne pod základní písmo |
 
 **Platformy**
 
@@ -714,6 +793,7 @@ Lokální HTTP server na `127.0.0.1:8765`, přístupný jen z tohoto počítače
 <!-- AUTO:most -->
 | metoda | cesta |
 |---|---|
+| GET | `/api/aktualizace` |
 | GET | `/api/databaze` |
 | GET | `/api/stav` |
 | GET | `/api/zakazky` |
@@ -791,10 +871,27 @@ repozitář** v `../sestaveni/` (nese licencované databáze i evidenci).
 | **`IRM.apk`** (194 MB) | jedna Activity s WebView + `Most.java`: most přepsaný do Javy na `127.0.0.1:8765`, aplikace a data v assetech | při prvním spuštění se CSV zkopírují do složky aplikace (zapisovatelné; aktualizace APK je nepřepíše, jen doplní chybějící). Kamera na kódy, výběr souboru pro import, export přes MediaStore do *Stažené*. **PDF a SGPS na telefonu nejsou** — `/api/stav` vrací `pdf:false` a aplikace to ukazuje jako nedostupné |
 
 Sestavení: `python distribuce/sestav_exe.py`, `python distribuce/sestav_apk.py`
-(bez Gradlu: `aapt2` → `javac` → `d8` → `zipalign` → `apksigner`). Nástroje
+(bez Gradlu: `aapt2` → `javac` → `d8` → `zipalign` → `apksigner`); vydání
+na GitHub `python distribuce/vydej.py` (níže). Nástroje
 pro sestavení leží v `%LOCALAPPDATA%\IRM-nastroje-sestaveni\` (JDK 17,
 Android SDK, podpisový klíč `irm.keystore`). Co do balíčků patří, říká jediný
 seznam v `distribuce/balik.py`.
+
+**Ikona a logo.** Dílna dodala 7. 9. 2026 vlastní logo: šedá zaoblená dlaždice,
+červená tečka a vtlačený dřík písmene „i“. Leží v `logo/` jako
+`irm-ikona.svg` (světlá) a `irm-ikona-dark.svg` (tmavá) a je zatím jen ikonou —
+v záložce prohlížeče (`<link rel="icon">` v části 010, tmavá varianta přes
+`media` tam, kde ji prohlížeč u ikony bere) a v balíčcích. SVG má neumorfické
+stíny z filtrů, které se jen standardní knihovnou nevykreslí, proto vedle SVG
+leží i PNG 512 px vyfocené headless Chromem s průhledným pozadím;
+`distribuce/ikona.py` z něj zmenšuje PNG pro Android (48–192 px) a ICO pro exe
+průměrem bloků s předváženou průhledností (jinak by zaoblené rohy dostaly
+tmavý lem). Po změně SVG se PNG přefotí příkazem z hlavičky modulu. Oba zástupci
+na ploše („IRM“ i „IRM pro Android (APK)“) berou ikonu z `../sestaveni/irm.ico`,
+které vedle balíčků píší obě sestavení: ikonu z exe si Windows drží
+v mezipaměti a po výměně programu ji nepřekreslí, změna souboru `.ico` se
+projeví; soubor `.apk` sám ikonu pro Windows nenese. Totéž
+logo se později použije i v aplikaci.
 
 **Aktualizace — data se jen dopisují.** Program a data jsou oddělené:
 aktualizace vyměňuje jen program (`PROGRAM_POLOZKY`), datové složky, profil
@@ -816,6 +913,40 @@ nové APK přes staré (stejný klíč), data v telefonu zůstanou; tlačítko
 *Záloha dat do Stažené* v záložce Připojení zabalí data i úložiště WebView.
 Odinstalace APK data maže — nedělat.
 
+**Poslední verze na dálku — vydání na GitHubu.** Repozitář je veřejný, proto
+tam jde jen balíček **jen s programem**: `sestav_exe.py` vedle zipu s daty
+píše i `IRM-aktualizace-program.zip` (manifest bez otisků, `jen_program`),
+`sestav_apk.py --jen-program` dělá `IRM-program.apk` bez datových assetů.
+`distribuce/vydej.py` oba prověří (`balik.stopy_dat` — složka dat, názvy
+datových složek, jakékoli CSV či `.bak`; jediná stopa = nic se neodešle),
+založí vydání `vRRRR.MM.DD` přes GitHub API (token ze správce pověření
+Windows přes `git credential fill`, nebo `GITHUB_TOKEN`) a nahraje oba
+soubory pod stálými názvy, takže odkazy
+`…/releases/latest/download/IRM-aktualizace-program.zip` a
+`…/IRM-program.apk` ukazují vždy na poslední vydání (`balik.ODKAZ_*`,
+totéž v části 185). Poznámky k vydání jsou nadpisy kapitol deníku od
+poslední vydané (`<!-- kapitola:N -->` v těle vydání).
+
+Cesta zpět do dílny: **Windows** `IRM.exe --stahnout-aktualizaci [--tiche]
+[--vynutit]` — `Aktualizovat.bat` bez balíčku ho spustí sám: přečte
+`releases/latest`, srovná verzi s `manifest.json` (text `RRRR.MM.DD`),
+stáhne zip do `stazeno/` a předá ho `_aktualizuj`. V aplikaci totéž
+tlačítko *Stáhnout a nainstalovat novou verzi* v záložce Připojení
+(`POST /api/aktualizace` → most volá `AKTUALIZACE`, kterou v exe dosadil
+`irm_okno.py`; most nad složkou vrací „umí jen IRM.exe“). **Android** —
+odkaz *Stáhnout novou verzi* na APK, WebView ho předá prohlížeči a ten
+instalátoru. Řádek s verzí balíčku se ukazuje jen tam, kde most hlásí
+`balicek` (verze z `manifest.json` vedle programu); aplikace otevřená ze
+složky se aktualizuje z repozitáře a řádek nemá.
+
+Manifest po aktualizaci balíčkem bez dat přebírá otisky z minulého
+(`aktualizace.manifest_sluc`, v Javě `manifestSluc`) — jinak by příští
+balíček s daty považoval každý nakoupený soubor za změněný dílnou. První
+instalace na nové zařízení i nové databáze od výrobců jdou jen balíčkem
+s daty z počítače dílny. `IRM_VYSTUP` přesměruje výstup sestavení jinam;
+`balik.vyprazdni` před mazáním ověří, že `IRM.exe` ve výstupu neběží
+(8. 9. 2026 mazání došlo k zamčenému exe až po smazání všeho před ním).
+
 ## Příloha — ověřování
 
 Aplikace se neopírá o „vypadá to, že to funguje":
@@ -830,7 +961,7 @@ Aplikace se neopírá o „vypadá to, že to funguje":
 - **Celé toky se proklikávají v prohlížeči bez okna** a porovnávají s ručním
   výpočtem — například navážky domíchání ze zbytku sedí do gramu.
 - **Mluvený manuál se prohlíží celý, ne po scéně** (`prohlidka_manualu.py`):
-  54 scén × 2 jazyky se vyfotí se všemi zvýrazněními a slepí do archů. Souřadnice
+  57 scén × 2 jazyky se vyfotí se všemi zvýrazněními a slepí do archů. Souřadnice
   zvýraznění platí pro konkrétní snímek — po přefocení obrazovek je zkouška
   „uvnitř snímku" nechytí (rámeček o řádek níž je pořád uvnitř), archy ano.
 

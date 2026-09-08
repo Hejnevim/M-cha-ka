@@ -4,7 +4,10 @@
 
      · C / U      — natíraný a nenatíraný papír (coated / uncoated). Pantone
                     vede obojí jako dva různé odstíny a v databázích to stojí
-                    jen jako písmeno na konci názvu; nešlo podle toho filtrovat.
+                    jen jako písmeno na konci názvu; tady se z něj dělá štítek
+                    u názvu. Čipy C / U nad seznamem a ve výběru Pantone byly
+                    zrušeny 8. 9. 2026 (kap. 250) — hledá se podle názvu, kde
+                    písmeno stojí, a další přepínač jen přibýval.
      · krycí      — týž odstín ve standardní a vysoce krycí verzi (Marabu
                     „(vysoce krycí)", Coates HD). Byly to dvě receptury vedle
                     sebe bez vazby; teď se mezi nimi přepíná.
@@ -37,8 +40,6 @@ const cuReceptury = (r) => {
   const v = String((r && r.cu) || "").trim().toUpperCase();
   return (v === "C" || v === "U") ? v : cuZNazvu(r && r.name);
 };
-const podleCu = (recipes, cu) => !cu ? (recipes || [])
-  : (recipes || []).filter((r) => cuReceptury(r) === cu);
 
 /* ---- krycí varianta ----
    Krycí verze se pozná dvojím způsobem a stačí jeden: kryvost zapsaná
@@ -119,13 +120,12 @@ const jeMoje = (r, podpis) => {
 };
 
 /* Jeden průchod pro všechny přepínače nad seznamem. Přepínače se sčítají
-   (oblíbené A nové), C/U je zúžení jako každé jiné. */
-function filtrReceptur(recipes, { oblibene, jenOblibene, jenMoje, jenNove, cu, podpis, ted }) {
+   (oblíbené A nové). */
+function filtrReceptur(recipes, { oblibene, jenOblibene, jenMoje, jenNove, podpis, ted }) {
   return (recipes || []).filter((r) => {
     if (jenOblibene && !(oblibene && oblibene.has(klicOblibene(r)))) return false;
     if (jenMoje && !jeMoje(r, podpis)) return false;
     if (jenNove && !jeNovaReceptura(r, ted)) return false;
-    if (cu && cuReceptury(r) !== cu) return false;
     return true;
   });
 }
@@ -150,14 +150,32 @@ function napovedaReceptur(recipes, dotaz, strop) {
 }
 
 /* ---- odkaz na recepturu ----
-   Odkaz je adresa téže stránky s recepturou za mřížkou: otevře aplikaci na
-   záložce Receptury s tou jedinou recepturou nahoře. Databáze je v odkazu
-   taky — týž pantone je v každé databázi jiný. Nic se nikam neposílá, odkaz
-   funguje jen tam, kde je aplikace i databáze; to je záměr. */
+   Odkaz je adresa aplikace s recepturou za mřížkou: otevře ji na záložce
+   Receptury s tou jedinou recepturou nahoře. Databáze je v odkazu taky —
+   týž pantone je v každé databázi jiný. Nic se nikam neposílá: odkaz vede na
+   most dílny a otevře ho jen zařízení, které na něj dosáhne.
+
+   Adresa se nebere slepě z řádku prohlížeče. Odkaz poslaný z počítače na
+   telefon (a naopak) se neotevřel, protože „localhost“ znamená na každém
+   zařízení to zařízení samo a soubor na disku leží jen tady. Most spuštěný
+   po síti (--sit) proto ve stavu hlásí adresu, pod kterou ho vidí ostatní
+   (`adresa_site`), a ta má přednost. Bez ní se odkaz skládá z vlastní adresy
+   stránky a hlášení řekne, že platí jen na tomhle zařízení. */
+function adresaProOdkaz() {
+  const vlastni = String(window.location.href || "").replace(/#.*$/, "");
+  const stav = typeof MOST_STAV !== "undefined" ? MOST_STAV : null;
+  const site = String((stav && stav.adresa_site) || "").trim().replace(/\/+$/, "");
+  if (site) {
+    // běží-li stránka z mostu, drží se její cesta; ze souboru je cesta disková
+    const cesta = /^https?:/i.test(vlastni) ? String(window.location.pathname || "/index.html") : "/index.html";
+    return { adresa: site + cesta, vsude: true };
+  }
+  const mistni = /^file:|^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])([:/]|$)/i.test(vlastni);
+  return { adresa: vlastni, vsude: !mistni };
+}
 function odkazNaRecepturu(r) {
   if (!r) return "";
-  const zaklad = String(window.location.href || "").replace(/#.*$/, "");
-  return zaklad + "#receptura=" + encodeURIComponent(String(r.name || ""))
+  return adresaProOdkaz().adresa + "#receptura=" + encodeURIComponent(String(r.name || ""))
     + (r.zdroj ? "&zdroj=" + encodeURIComponent(r.zdroj) : "");
 }
 function recepturaZOdkazu(hash) {
@@ -178,8 +196,11 @@ function recepturaZOdkazu(hash) {
    pro kalkulaci i záložku Receptury. */
 function zkopirujOdkaz(r, onToast) {
   const odkaz = odkazNaRecepturu(r);
-  const hotovo = () => onToast && onToast({ ok: true, text: preloz("Odkaz na recepturu je ve schránce: {o}", { o: odkaz }) });
+  const jenTady = adresaProOdkaz().vsude ? "" : preloz(" — platí jen na tomto zařízení, most neběží po síti");
+  const hotovo = () => onToast && onToast({ ok: true, text: preloz("Odkaz na recepturu je ve schránce: {o}", { o: odkaz }) + jenTady });
+  // schránka zamčená (stránka ze souboru): odkaz se ukáže k opsání, i s dodatkem
+  const opsat = () => onToast && onToast({ ok: false, text: odkaz + jenTady });
   if (navigator.clipboard && navigator.clipboard.writeText)
-    navigator.clipboard.writeText(odkaz).then(hotovo, () => onToast && onToast({ ok: false, text: odkaz }));
-  else if (onToast) onToast({ ok: false, text: odkaz });
+    navigator.clipboard.writeText(odkaz).then(hotovo, opsat);
+  else opsat();
 }

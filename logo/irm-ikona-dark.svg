@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<!-- Ikona a logo IRM, tmavá varianta (dodala dílna 7. 9. 2026). Světlá je v irm-ikona.svg. -->
+<defs>
+<filter id="tile" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="-14" dy="-14" stdDeviation="16" flood-color="#fff" flood-opacity="0.08"></feDropShadow><feDropShadow dx="14" dy="14" stdDeviation="16" flood-color="#000" flood-opacity="0.51"></feDropShadow></filter>
+<filter id="dot" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="-5" dy="-5" stdDeviation="6" flood-color="#fff" flood-opacity="0.08"></feDropShadow><feDropShadow dx="7" dy="8" stdDeviation="8" flood-color="#000" flood-opacity=".45"></feDropShadow></filter>
+<filter id="in" x="-30%" y="-30%" width="160%" height="160%">
+<feOffset dx="8" dy="8"></feOffset><feGaussianBlur stdDeviation="7" result="b"></feGaussianBlur><feComposite operator="out" in="SourceGraphic" in2="b" result="s1"></feComposite><feFlood flood-color="#000" flood-opacity="0.51"></feFlood><feComposite operator="in" in2="s1" result="d"></feComposite>
+<feOffset in="SourceGraphic" dx="-8" dy="-8"></feOffset><feGaussianBlur stdDeviation="7" result="b2"></feGaussianBlur><feComposite operator="out" in="SourceGraphic" in2="b2" result="s2"></feComposite><feFlood flood-color="#fff" flood-opacity="0.08"></feFlood><feComposite operator="in" in2="s2" result="l"></feComposite>
+<feMerge><feMergeNode in="SourceGraphic"></feMergeNode><feMergeNode in="d"></feMergeNode><feMergeNode in="l"></feMergeNode></feMerge></filter>
+</defs>
+<rect width="512" height="512" rx="120" fill="#545454"></rect>
+<circle cx="256" cy="150" r="42" fill="#FF001A" filter="url(#dot)"></circle>
+<rect x="214" y="216" width="84" height="226" rx="42" fill="#545454" filter="url(#in)"></rect>
+</svg>

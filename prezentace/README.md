@@ -53,29 +53,32 @@ pro ilustraci postupu. Ven patří **3,1 → 0,4 g**.
 # Mluvený manuál
 
 `manual.html` je třetí věc v téhle složce: **mluvený manuál k aplikaci**,
-stránka po stránce, funkce po funkci — 54 scén v 10 kapitolách, zhruba
-devatenáct minut. Nekreslí scény, ale ukazuje **skutečné snímky obrazovky** ze složky `manual/` (1 600 px široké, `snimek.py` ve
+stránka po stránce, funkce po funkci — 57 scén v 10 kapitolách, zhruba
+jednadvacet minut. Nekreslí scény, ale ukazuje **skutečné snímky obrazovky** ze složky `manual/` (1 600 px široké, `snimek.py` ve
 světlém režimu) a na nich postupně rozsvěcuje očíslovaná zvýraznění, o kterých
 hlas zrovna mluví. Pod přehrávačem je obsah — kdo nechce poslouchat, čte.
 
 | kapitola | scény | co v ní je |
 |---|---|---|
-| Orientace | 1–4 | hlavička, nabídka, role, lidé dílny, technologie, tlačítko zpět |
-| Katalog produktů | 5–9 | tabulka a mřížka, produkt s více polohami, palety u poloh, editor produktu |
-| Produkt a poloha | 10–15 | hledání s napovídáním, okno Barva a poloha potisku, zakázkový list, čtečka, krycí plocha |
-| Receptura a parametry | 16–21 | Pantone standard / custom, odvození a editor custom receptury, parametry tisku, zakázka |
-| Kolik namíchat | 22–27 | výsledek a rozpis, **jednotka dávky**, Než začnete míchat, náklady, **profil úpravy**, tři tlačítka |
-| Míchací režim | 28–35 | navážky, podklad, aditiva, **vynucená složka a náhrada báze**, zbytky, asistent, štítek, poznámka |
-| Receptury a ceník | 36–41 | záložka Receptury, **oblíbené a C/U**, **odkaz, e-mail, historie**, editor, ceny, přepočet na síto |
-| Míchání | 42–45 | ke schválení (dvoustupňové), **chybějící odstín**, fronta, opravy |
-| Sklad | 46–49 | sklad surovin, zbytky a **vratka ze stroje**, co propadne, šarže |
-| Sestavy a data | 50–54 | sestavy, SGPS, most, import, role tiskař |
+| Orientace | 1–5 | hlavička, nabídka ve dvou scénách (role a technologie · skupiny, jazyk a **manuál**), tlačítko zpět |
+| Katalog produktů | 6–10 | tabulka a mřížka, produkt s více polohami, palety u poloh, editor produktu |
+| Produkt a poloha | 11–16 | hledání s napovídáním, okno Barva a poloha potisku, zakázkový list, čtečka, krycí plocha |
+| Receptura a parametry | 17–23 | Pantone standard / custom, odvození a editor custom receptury, parametry tisku, zakázka, **vícebarevná zakázka** |
+| Kolik namíchat | 24–29 | výsledek (bez rozpisu, ten odešel 8. 9. 2026), jednotka dávky, Než začnete míchat, náklady, profil úpravy, tři tlačítka |
+| Míchací režim | 30–38 | navážky, podklad, aditiva, vynucená složka a náhrada báze, zbytky, asistent, **barvy zakázky u váhy**, štítek, poznámka |
+| Receptury a ceník | 39–44 | záložka Receptury, oblíbené a C/U, odkaz (i po síti) a historie, editor, ceny, přepočet na síto |
+| Míchání | 45–48 | ke schválení (dvoustupňové), chybějící odstín, fronta, opravy |
+| Sklad | 49–52 | sklad surovin, zbytky a vratka ze stroje, co propadne, šarže |
+| Sestavy a data | 53–57 | sestavy, SGPS, most, import, role tiskař |
 
-Šest scén přibylo 4. 9. 2026 se třinácti funkcemi ze seznamu konkurence;
-tučně jsou místa, kterých se to dotklo. Vložením scény doprostřed se
+Šest scén přibylo 4. 9. 2026 se třinácti funkcemi ze seznamu konkurence,
+tři 8. 9. 2026 (tučně): nabídka rozdělená na dvě, protože přibraly Změny
+podkladů, Zdraví databáze, jazyky a položka Manuál a jeden výřez by byl
+nečitelně vysoký; vícebarevná zakázka (kap. 245) a barvy zakázky u váhy
+(kap. 246–247). Vložením scény doprostřed se
 **posunou názvy nahrávek** (`scena-NN.mp3` jde podle pořadí, ne podle
-nadpisu) — přejmenovat se musí dřív, než se nahrává, jinak se u scény
-přehraje text té předchozí.
+nadpisu) — přejmenovat se musí dřív, než se nahrává, od nejvyššího čísla
+dolů a včetně `.bak`, jinak se u scény přehraje text té předchozí.
 
 Scéna je záznam v poli `SCENY`: `obr` (snímek), `roz` (jeho rozměr),
 `vyrez` (jaká část snímku je vidět) a `zvyr` (obdélníky zvýraznění v pixelech
@@ -92,7 +95,7 @@ text přes něj projde). Rozmístění se opakuje při změně šířky okna.
 
 Do dat scény se proto sahá jen tehdy, když **není kam** — proužek nižší než
 zhruba 200 px snímku nemá na popisky místo žádnou stranou a musí se zvětšit
-`vyrez` (scéna 32: 130 → 165). Že se nic nekříží, se měří přes všech 54 scén
+`vyrez` (dnešní scéna 34: 130 → 165). Že se nic nekříží, se měří přes všech 57 scén
 ve víc šířkách, ne pohledem na jednu.
 
 **Licencovaná data na snímcích nejsou.** Složení receptur, kódy kelímků
@@ -106,11 +109,11 @@ titulky. Scénář žije jen v `rec`.
 
 ## Anglická verze
 
-`manual_en.html` je týž manuál anglicky — stejných 54 scén, jiné `nadpis`,
+`manual_en.html` je týž manuál anglicky — stejných 57 scén, jiné `nadpis`,
 `text`, `rec` a popisky. Výřezy a souřadnice zvýraznění jsou shodné jen tam,
-kde je shodné rozvržení; anglická domovská stránka má kartu *Kolik namíchat*
-vyšší (upozornění na zbytek z minulých dávek), takže scény 13, 16, 17, 20, 21,
-22, 25, 26 a 27 mají vlastní `vyrez` i `zvyr`. Souřadnice se odečítají ze snímku
+kde je shodné rozvržení; anglická tlačítka a popisky jsou širší, takže scény
+nad domovskou stránkou (14, 17, 18, 21, 22, 24, 27, 28, 29) a scény s novými
+obrazovkami (23, 36) mají vlastní `vyrez` nebo `zvyr`. Souřadnice se odečítají ze snímku
 toho jazyka, ne opisem. Snímky má
 ve vlastní složce `manual/en/` (anglické rozhraní aplikace), nahrávky
 v `audio_manual_en/scene-NN.mp3` hlasem `en-GB-RyanNeural`; hlas prohlížeče
@@ -137,9 +140,22 @@ Cesty ke snímkům a nahrávkám zůstávají relativní k této složce.
 
 ## Focení snímků: `foto_manualu.py`
 
-Cestu ke každé z 35 obrazovek zná `balicek/foto_manualu.py` — jinou záložkou,
+Cestu ke každé z 37 obrazovek zná `balicek/foto_manualu.py` — jinou záložkou,
 po jiných kliknutích, s jiným podstrčeným stavem. Dřív to byl jednorázový
 řidič ve scratchpadu a při každém přefocení se skládal znovu.
+
+Dvě obrazovky s dvoubarevnou zakázkou (`29-barvy-zakazky`, `35-mich-barvy`)
+se nezakládají klikáním, ale kódem podaným do okna *Načíst kód*
+(`NACTI_KOD_2_BARVY`): pole receptury nese dvě značky PANTONE a aplikace je
+rozdělí na dvě barvy zakázky. Nabídka (`02-nabidka`) se fotí na 2 100 px —
+má strop výšky okna minus 140 px a při 1 600 px končila za Připojením
+k mostu, takže jazyky ani položka Manuál na snímku nebyly.
+
+**Okna nad domovskou stránkou nesou její pozadí.** Když se domovská stránka
+změní (8. 9. 2026 odešel rozpis výpočtu a slovo stěrka), zastará nejen
+`01-domov`, ale i všech osm snímků s otevřeným oknem nad ní — `20-hledani`
+až `28-pantone-custom`; ve výřezu scény 19 byl starý rozpis čitelný a scéna
+18 ukazovala tlačítko E-mail zrušené o dva dny dřív. Přefocují se spolu.
 
     python foto_manualu.py                 česky do manual/
     python foto_manualu.py --jazyk en      anglicky do manual/en/
@@ -174,18 +190,18 @@ receptur, protože po přefocení nikdo scény nevykreslil.
 
 ## Prohlídka: `prohlidka_manualu.py`
 
-    python prohlidka_manualu.py                 obě stránky, 54 scén, archy 2×3
+    python prohlidka_manualu.py                 obě stránky, 57 scén, archy 2×3
     python prohlidka_manualu.py --sceny 3 40    jen vybrané scény
 
 Vyfotí jeviště každé scény se všemi rozsvícenými zvýrazněními a slepí je do
 archů (`%TEMP%/irm-prohlidka/archy-cs`, `archy-en`). Vypíše i skutečnou polohu
 rámečků v pixelech snímku — ta musí být rovna datům scény; liší-li se, je
 rozbité přepočítávání procent ve `vykresliScenu`, ne data. Jeviště je na
-velikosti okna nezávislé (scéna 13 při 1 600 × 1 000 i 1 000 × 700 px: tytéž
+velikosti okna nezávislé (scéna 14 při 1 600 × 1 000 i 1 000 × 700 px: tytéž
 pixely snímku).
 
 Sklad surovin (60-sklad) se fotí s filtrem „vše", jinak je tabulka prázdná
-a scéna 46 nemá na co ukazovat. Karta *Ceny materiálů* (43-ceny) leží pod seznamem receptur a žádné tlačítko
+a scéna 49 nemá na co ukazovat. Karta *Ceny materiálů* (43-ceny) leží pod seznamem receptur a žádné tlačítko
 k ní nevede; scénář ji odroluje k hornímu okraji okna, takže snímek začíná
 kartou.
 

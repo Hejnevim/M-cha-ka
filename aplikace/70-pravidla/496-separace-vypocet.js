@@ -35,13 +35,13 @@ function jeCernaBarva(b) {
    na kus je změřená plocha děleno tímhle číslem, spotřeba zakázky se
    tím nemění (násobí se kusy, ne tahy — viz 495-naplne-sita.js). */
 function rozborSeparaci({ separace, kusu, ztraty, sita, tech, koef, material, podkladHex,
-                          sirkaSterkyMm, motivu, podtisk }) {
+                          sirkaTerkyMm, motivu, podtisk }) {
   const ks = Math.max(0, Math.round(n(kusu)));
   const nasobitel = 1 + Math.max(0, n(ztraty)) / 100;
   const deleno = Math.max(1, Math.round(n(motivu, 1)));
-  /* Rezerva je objem housky před stěrkou — na hustotě nezávisí, proto se
+  /* Rezerva je objem housky před těrkou — na hustotě nezávisí, proto se
      počítá jednou v ml a gram dostane až barva, která zná svou hustotu. */
-  const rez = rezervaSita({ sirkaSterkyMm: sirkaSterkyMm, hustota: 1 });
+  const rez = rezervaSita({ sirkaTerkyMm: sirkaTerkyMm, hustota: 1 });
   const rezervaMl = rez ? rez.ml : 0;
 
   const radek = (vstup, mm2, sito, nanosKrat) => {

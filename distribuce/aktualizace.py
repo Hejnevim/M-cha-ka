@@ -144,6 +144,21 @@ def manifest_nacti(cesta):
         return {"verze": "", "soubory": {}}
 
 
+def manifest_sluc(stary, novy):
+    """
+    Manifest, který se po aktualizaci zapíše vedle programu: otisky souborů,
+    které balíček nenesl, se přebírají z minulého manifestu. Balíček „jen
+    program“ (z GitHubu) nemá otisky vůbec — kdyby minulé přepsal prázdnem,
+    příští balíček s daty by žádný nakoupený soubor dílny nepoznal jako
+    nezměněný a všechny by odložil jako .novy. Totéž dělá Aktualizace.java.
+    """
+    soubory = dict((stary or {}).get("soubory") or {})
+    soubory.update((novy or {}).get("soubory") or {})
+    vysledek = dict(novy or {})
+    vysledek["soubory"] = soubory
+    return vysledek
+
+
 # ----------------------------------------------------------------- slučování
 def sluc_parametry(stary_text, novy_text, klic_sloupce):
     """

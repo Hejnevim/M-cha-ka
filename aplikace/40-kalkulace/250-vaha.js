@@ -63,7 +63,12 @@ function useScale() {
   return {
     mode, err, raw, setRaw,
     weight: raw - zero,
-    tare: () => setZero(raw),
+    /* V simulaci tára znamená „nový prázdný kelímek": posuvník je celý
+       obsah nádoby, a kdyby se jen posunula nula, zůstal by stát na staré
+       hodnotě nad maximem další dávky a další barva by šla do záporu.
+       U skutečné váhy je tára softwarová — nula se přepíše na to, co
+       váha právě čte. */
+    tare: () => { if (mode === "sim") { setRaw(0); setZero(0); } else setZero(raw); },
     connect, disconnect,
     startSim: () => { setMode("sim"); setRaw(0); setZero(0); setErr(""); },
   };

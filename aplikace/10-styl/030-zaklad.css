@@ -1,4 +1,13 @@
 *{box-sizing:border-box}
+/* Dotyk: Android, iOS i WebView balíčku APK podbarví klepnutý prvek modrým
+   průsvitným překryvem (-webkit-tap-highlight-color). Na dlaždicích a
+   tlačítkách to vypadá jako cizí výběr, který drží, dokud prst nepustí;
+   stav klepnutí ukazuje stín dlaždice sám, překryv je proto vypnutý všude
+   (8. 9. 2026). Zaostření z klávesnice tím netrpí — to řídí :focus níž. */
+*{-webkit-tap-highlight-color:transparent}
+/* Přidržení tlačítka, popisku nebo dlaždice na telefonu jinak označí jejich
+   text jako výběr (modře) a nabídne kopírování; vybírat se má jen v polích. */
+button,label,select,option{-webkit-user-select:none;user-select:none}
 body{margin:0;font-family:var(--sans);line-height:var(--radek);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
 /* Čára v ploše leží pod celou aplikací: je to plocha, ne prvek, takže
    nechytá myš a neroluje s obsahem. Kreslí ji gradient, ne obrázek —

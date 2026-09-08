@@ -91,7 +91,12 @@
    měří bez prostrkání, takže si myslí, že se vejde; `anywhere` zalomí
    doopravdy. Platí jen tady: popisky dlaždic nikde neurčují šířku sloupce,
    takže agresivnější zalamování nemá kde uškodit. */
-.karta-tisk label.f{font-size:calc(var(--pismo-popisek) * 1.5);margin-bottom:10px;text-align:center;overflow-wrap:anywhere}
+/* Popisek je buňka sdíleného řádku (subgrid níž): text sedí u dolní hrany
+   a na středu dlaždice — bez justify-content zůstával jednořádkový popisek
+   ve flexu vlevo (změřeno: KRYVOST 15 px vlevo od středu dlaždice). Mezeru
+   k dlaždici dělá row-gap obalu, ne margin — margin by se přičetl k ní. */
+.karta-tisk label.f{font-size:calc(var(--pismo-popisek) * 1.5);margin-bottom:0;text-align:center;overflow-wrap:anywhere;
+  display:flex;align-items:flex-end;justify-content:center}
 /* Dlaždice připomíná náhled produktu, hodnota uprostřed. Roztažené pole přes
    celou třetinu řádku se z odstupu čte hůř než blok, který má tvar — oko
    najde dřív dlaždici než dlouhý pruh. */
@@ -106,16 +111,35 @@
    přes půl obrazovky. Dorovnání podle výšky řádku tímhle netrpí: do
    přirozené výšky karty se počítá jen dolní mez. */
 .karta-tisk{display:flex;flex-direction:column}
-.karta-tisk>.frow{flex:1}
-/* Kontejner je každé pole zvlášť, a nesmí se to vázat na počet sloupců:
-   u tampontisku bez zapsaného klišé zbudou v řádku jen dvě pole (`c2`).
-   Bez kontejneru se `cqw` nepočítá z dlaždice, ale z šířky okna — odsazení
-   vyšlo 95 px místo 14 a dlaždice se nafoukla na 271 x 561 px místo
-   271 x 271. Roztáhla tím celý druhý řádek karet, takže vedle ní stály
-   receptura i zakázka z poloviny prázdné. */
-.karta-tisk .frow>div{container-type:inline-size;display:flex;flex-direction:column}
-.karta-tisk select{font-size:min(calc(var(--pismo) * 2), 11cqw);font-weight:700;text-align:center;
-  width:100%;flex:1;min-height:178px;box-sizing:border-box;
+/* Řádek dlaždic má dva pruhy: popisky a dlaždice. Každé pole je subgrid
+   přes oba, takže si všechny popisky v řádku dělí jednu výšku — tu
+   nejvyšší — a dlaždice pod nimi začínají na stejné lince a jsou stejně
+   vysoké. Dřív měl každý sloupec vlastní flex a popisek, který se zalomil
+   na dva či tři řádky (KLIŠÉ (HLOUBKA LEPTU) při 1 280 px), ukrojil své
+   dlaždici výšku: 178 px vedle sousedek s 201 px. Výška pruhu popisků se
+   nezapisuje (2,5em by na tři řádky nestačilo) — subgrid ji změří. */
+/* Kontejner pro `cqw` je celý řádek dlaždic, ne každé pole zvlášť: pole
+   je subgrid a `container-type` na něm subgrid ruší (Chrome 152 pak
+   volné místo dělí rovným dílem mezi popisek a dlaždici — změřeno:
+   popisek 59 px vedle 50 px v témže řádku). Bez kontejneru vůbec by se
+   `cqw` bralo z šířky okna a dlaždice se nafoukla na 271 × 561 px.
+   Šířka jedné dlaždice se proto dopočítá z šířky řádku a počtu sloupců
+   do --dlazdice-sirka; počet sloupců není pevný (tampontisk bez klišé má
+   jen dvě pole, `c2`), takže má každá varianta vlastní výpočet. Mezera
+   je táž, jakou řádku dává `.bigform .frow` (050). */
+.karta-tisk>.frow{flex:1;grid-auto-rows:auto 1fr;container-type:inline-size;--dlazdice-sirka:100cqw}
+@media(min-width:640px){
+  .karta-tisk>.frow.c3{--dlazdice-sirka:calc((100cqw - 2 * var(--mezera-poli) * 1.33) / 3)}
+  .karta-tisk>.frow.c2{--dlazdice-sirka:calc((100cqw - var(--mezera-poli) * 1.33) / 2)}
+}
+.karta-tisk .frow>div{display:grid;grid-template-rows:subgrid;grid-row:span 2;row-gap:10px}
+/* Dolní mez písma: bez ní jelo písmo jen z šířky dlaždice a při třech
+   kartách v řádku (okno 1 000 px, dlaždice 76 px) kleslo na 8,4 px —
+   z odstupu nečitelné. Pod základní písmo aplikace se dlaždice nedostane;
+   dlouhá hodnota se v úzké dlaždici radši zalomí (viz pravidlo textu
+   tlačítka níž), než aby se zmenšila k nule. */
+.karta-tisk select{font-size:clamp(var(--pismo), calc(var(--dlazdice-sirka) * .11), calc(var(--pismo) * 2));font-weight:700;text-align:center;
+  width:100%;min-height:178px;box-sizing:border-box;
   display:flex;align-items:center;justify-content:center;
   /* Dlaždice ukazuje jen hodnotu na středu — má připomínat náhled produktu,
      ne formulářové pole. Šipka pozadím se tu nekreslí (`background-image:none`
@@ -123,7 +147,14 @@
      nad středem) a šipka, kterou prohlížeč k výběru sám přidává, je schovaná
      přes `::picker-icon` níž. Že se dlaždicí dá vybírat, prozradí kliknutí;
      z odstupu se čte jen hodnota. */
-  flex-direction:column;padding:5cqw;background-image:none}
+  /* Dolní mez písma znamená, že se dlouhé slovo do úzké dlaždice nemusí
+     vejít (dlaždice 76 px při okně 1 000 px: „Transparentní“ 88 px). Výběr
+     přetok tiše ořízne; zalomení uvnitř slova je čitelnější než useknutý
+     konec. Musí to stát na výběru samém (white-space i overflow-wrap) —
+     na `::select-fallback-button-text` to Chrome 152 nebere (změřeno:
+     scrollWidth 88 px stále). Kde se slovo vejde, nezalomí se nic. */
+  white-space:normal;overflow-wrap:anywhere;
+  flex-direction:column;padding:calc(var(--dlazdice-sirka) * .05);background-image:none}
 .karta-tisk select::picker-icon{display:none}
 .karta-tisk select::select-fallback-button-text{flex:0 1 auto;text-align:center}
 .karta-tisk select::picker(select){font-size:calc(var(--pismo) * 1.5)}
@@ -133,7 +164,7 @@
    `.zakazka-cisla` (viz tam), stejná oprava: na úzkém okně dolní mez
    dlaždice snížena přibližně o polovinu (178 → 88 px). */
 @media(max-width:640px){
-  .karta-tisk select{font-size:min(var(--pismo), 5.5cqw);min-height:88px}
+  .karta-tisk select{font-size:min(var(--pismo), calc(var(--dlazdice-sirka) * .055));min-height:88px}
 }
 .bigform select:focus,.bigform input:focus{box-shadow:var(--neu-sm),0 0 0 3px var(--focus)}
 .bigform .frow{gap:calc(var(--mezera-poli) * 1.33);margin-bottom:calc(var(--mezera-poli) * 1.33)}

@@ -894,6 +894,11 @@ MOST PRO VÍC POČÍTAČŮ
   a na ostatních zadejte v "Připojení k mostu" jeho adresu, například
   http://192.168.1.50:8765. Zapínejte jen ve firemní síti, které
   důvěřujete — kdokoli v ní pak mostu může poslat PDF ke zpracování.
+  Most po síti při startu vypíše svou adresu a tlačítko "Odkaz"
+  u receptury ji od té chvíle dává do odkazu místo localhostu —
+  odkaz pak otevře i telefon nebo jiný počítač v téže síti. Bez
+  mostu po síti platí odkaz jen na zařízení, kde vznikl, a hlášení
+  po zkopírování to řekne.
 
 CO OMEZUJE PROHLÍŽEČ
   Stránka nesmí spustit program na počítači — most proto musí běžet

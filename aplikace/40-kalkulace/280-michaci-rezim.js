@@ -2,7 +2,7 @@
 function MichaciRezim({ aktivni, onZavrit, onKombinace, onPoznamka, modalNahore, recipe, calcAkt, rozpis, vyuziti, stav,
                         product, colorSel, position, tech, zak, kodDavky, jednotka,
                         zbytky, stitekTlacitko, rady, potlife, aditiva, riziko, natisk, viskozita,
-                        children }) {
+                        barvyPruh, barvaZakazky, children }) {
   /* Poznámka k receptuře se dopisuje i tady — právě u váhy se zjistí, že
      „na tomhle materiálu dva průchody". Rozepsaný text žije v tomhle stavu
      (null = neupravuje se) a do receptury jde až tlačítkem Uložit: sahá se
@@ -33,6 +33,7 @@ function MichaciRezim({ aktivni, onZavrit, onKombinace, onPoznamka, modalNahore,
     colorSel ? (colorSel.code || colorSel.name || "") : "",
     position ? (position.tech || tech) + " " + position.name : (tech || ""),
     zak && zak.order ? preloz("zakázka {c}", { c: zak.order }) : "",
+    barvaZakazky ? preloz("barva zakázky {b}", { b: barvaZakazky }) : "",
     kodDavky ? preloz("kelímek {kod}", { kod: kodDavky }) : "",
   ].filter(Boolean).join(" · ");
   // kumulativní součet se počítá z toho, co se doopravdy navažuje — je-li
@@ -105,6 +106,10 @@ function MichaciRezim({ aktivni, onZavrit, onKombinace, onPoznamka, modalNahore,
 
       <div className="michtelo">
         <div>
+          ${/* Barvy vícebarevné zakázky nad tabulkou navážek: u váhy se
+                střídá, který kelímek se míchá, a zelená kontura říká, které
+                už stojí hotové (BarvyZakazkyPruh, část 238). */""}
+          ${barvyPruh}
           ${potlife}
           ${rady}
           ${vyuziti && html`

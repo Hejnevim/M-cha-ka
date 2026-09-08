@@ -173,11 +173,14 @@ def vyfot(jazyk, sirka, vyska, cil, sceny, most=False):
 
 
 def archy(slozka, cil):
+    # Výstup PowerShellu je v OEM kódové stránce 852 (ů = 0x85), ne v UTF-8 ani
+    # cp1250 — s PYTHONUTF8=1 padalo čtení na UnicodeDecodeError (8. 9. 2026).
     skript = os.path.join(os.environ.get("TEMP", "."), "irm-archy.ps1")
     open(skript, "w", encoding="utf-8-sig").write(ARCH)
     try:
         r = subprocess.run(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", skript,
-                            "-Slozka", slozka, "-Cil", cil], capture_output=True, text=True, timeout=300)
+                            "-Slozka", slozka, "-Cil", cil], capture_output=True, text=True,
+                           encoding="cp852", errors="replace", timeout=300)
         return (r.stdout or "").strip() or (r.stderr or "").strip()[:200]
     except Exception as e:
         return "archy se neslepily: %s" % e

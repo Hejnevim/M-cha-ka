@@ -1,6 +1,6 @@
 """Nafotí všechny obrazovky pro mluvený manuál — česky nebo anglicky.
 
-Proč to existuje: manuál v `prezentace/manual.html` stojí na 35 skutečných
+Proč to existuje: manuál v `prezentace/manual.html` stojí na 37 skutečných
 snímcích aplikace a ke každému vede jiná cesta — jinou záložkou, po jiných
 kliknutích, s jiným podstrčeným stavem. Když se ta cesta nikam nezapíše,
 musí se při každém přefocení hádat znovu; poprvé (kap. 214) zůstal řidič
@@ -99,7 +99,7 @@ VZORY_ROZMAZANI = [
 # netrefí.
 CEKANE_ROZMAZANI = {
     "30-mich": 5, "31-mich-zbytek-rucne": 5, "32-mich-simulace": 7,
-    "33-mich-stitek": 5, "34-mich-poznamka": 5,
+    "33-mich-stitek": 5, "34-mich-poznamka": 5, "35-mich-barvy": 7,
     "40-receptury": 348, "42-receptura-upravit": 3,
     # 50, ne 55: počet buněk roste s počtem kelímků v evidenci a ta se v dílně
     # mění. Číslo je spodní mez — nesmí být vyšší, než kolik jich je při nejmenším
@@ -186,18 +186,40 @@ POTVRD_POLOHU = (
     "if(p[1]){p[1].click(); await cekej(800);}"
     "var ok=tlac(/^(Potvrdit|Confirm)/); if(ok){ok.click(); await cekej(1800);}"
 )
+# Dvoubarevná zakázka (kap. 245): zadá se čtečkou, ne klikáním — kód nese
+# produkt, polohu, barvu, kusy a pole receptury se dvěma značkami PANTONE,
+# které `rozdelBarvyPotisku` (část 497) rozdělí na dvě barvy zakázky.
+# Tlačítko Načíst kód otevře okno s polem pro ruční zápis; Enter kód podá.
+# Kalkulace pak stojí na PANTONE 485 C a druhou barvou je PANTONE 200 C —
+# obojí názvy odstínů z veřejného vzorníku, ne složení, takže se nerozmazává.
+NACTI_KOD_2_BARVY = (
+    "var k=tlac(/^(Načíst kód|Read a code)/); if(k){k.click(); await cekej(1200);}"
+    "var h=document.querySelector('.modalbox input');"
+    "var nat=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set;"
+    "nat.call(h,'IRM1|ref=11152|ks=500|poz=2|barva=127|rec=PANTONE 485 C PANTONE 200 C');"
+    "h.dispatchEvent(new Event('input',{bubbles:true})); await cekej(400);"
+    "h.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));"
+    "await cekej(2500);"
+)
 
 # ---------------------------------------------------------------------------
 # Snímky: název souboru → (výška okna, co se má stát před vyfocením)
 # Výška je vysoká schválně — výřezy v manuálu sahají až k 1 800 px snímku.
 # ---------------------------------------------------------------------------
 SNIMKY = [
-    ("01-domov", 1400, js(VYBER_11152, POTVRD_POLOHU)),
+    # 1 520, ne 1 400: karta Kolik namíchat nese upozornění na zbytek z minulých
+    # dávek (evidence od 6. 9. 2026), spodní řada karet je o 117 px níž a při
+    # 1 400 px se utínaly dlaždice Min. dávka a pole poznámky (8. 9. 2026).
+    ("01-domov", 1520, js(VYBER_11152, POTVRD_POLOHU)),
     # Nabídka se skupinami rozbalenými, ale bez odskoku na záložku: skupina má
     # v textu odznak a šipku (▸), záložka ne. Filtrovat podle velkých písmen
     # nešlo — názvy záložek jsou taky velkými a klik na ně nabídku zavřel
     # a odešel na SGPS (4. 9. 2026).
-    ("02-nabidka", 1600, js("document.querySelector('.navbtn').click(); await cekej(900);"
+    # 2 100, ne 1 600: nabídka končí jazyky a položkou Manuál (od 7. 9. 2026),
+    # při 1 600 px se utínala za Připojením k mostu a scéna 3 mluvila o jazyku,
+    # který na snímku nebyl. Nabídka má strop výšky okna minus 140 px a roluje —
+    # při 2 000 px zůstal Manuál pod hranou (8. 9. 2026), 2 100 px ho ukáže celý.
+    ("02-nabidka", 2100, js("document.querySelector('.navbtn').click(); await cekej(900);"
                             "for (const b of [...document.querySelectorAll('.menuwrap button')]"
                             ".filter(b=>/[▸▾]/.test(b.textContent))) "
                             "{ b.click(); await cekej(350); }")),
@@ -269,6 +291,9 @@ SNIMKY = [
                                "var b=tlac(/(Než začnete|Before you start)/i); if(b){b.click(); await cekej(1200);}")),
     ("28-pantone-custom", 1400, js(VYBER_11152, POTVRD_POLOHU,
                                    "var c=tlac(/Pantone custom/i); if(c){c.click(); await cekej(1500);}")),
+    # Vícebarevná zakázka: pruh dlaždic barev v kartě Receptura a barva
+    # a tlačítko „Do fronty všechny barvy" — obojí je vidět jen u dvou a víc barev.
+    ("29-barvy-zakazky", 1700, js(NACTI_KOD_2_BARVY)),
     ("30-mich", 1300, js(VYBER_11152, POTVRD_POLOHU,
                          "var m=tlac(/(Míchací režim|Mixing mode)/i); if(m){m.click(); await cekej(2000);}")),
     ("31-mich-zbytek-rucne", 1500, js(VYBER_11152, POTVRD_POLOHU,
@@ -283,6 +308,11 @@ SNIMKY = [
     ("34-mich-poznamka", 1300, js(VYBER_11152, POTVRD_POLOHU,
                                   "var m=tlac(/(Míchací režim|Mixing mode)/i); if(m){m.click(); await cekej(2000);}"
                                   "var p=tlac(/(Poznámka|Note)/i); if(p){p.click(); await cekej(1000);}")),
+    # Táž zakázka u váhy: pruh barev nad tabulkou navážek, hlavička „barva
+    # zakázky 1/2", asistent v simulaci a tlačítko Štítky na kelímky (kap. 246–247).
+    ("35-mich-barvy", 1300, js(NACTI_KOD_2_BARVY,
+                               "var m=tlac(/(Míchací režim|Mixing mode)/i); if(m){m.click(); await cekej(2000);}"
+                               "var s=tlac(/(simulaci|simulation)/i); if(s){s.click(); await cekej(1500);}")),
     ("40-receptury", 1300, js(zalozka("KATALOG|CATALOG", "^(Receptury|Recipes)$"))),
     ("42-receptura-upravit", 1500, js(zalozka("KATALOG|CATALOG", "^(Receptury|Recipes)$"),
                                       "var u=tlac(/^(Upravit|Edit)/); if(u){u.click(); await cekej(1500);}")),

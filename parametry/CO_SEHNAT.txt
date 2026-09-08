@@ -65,9 +65,9 @@ POZOR: dokud pro PDP žádné klišé není, aplikace u tampontisku spotřebu
 nepočítá a nenabízí — sítotiskovou tkaninu si nepůjčí.
 
 
-3) SÍTO A STĚRKA KE KAŽDÉMU PRODUKTU  →  sita.csv (sloupce vychozi, produkty)
+3) SÍTO A TĚRKA KE KAŽDÉMU PRODUKTU  →  sita.csv (sloupce vychozi, produkty)
 --------------------------------------------------------------------------------
-Každý produkt má v dílně podle technologie svoje síto a svoji šířku stěrky
+Každý produkt má v dílně podle technologie svoje síto a svoji šířku těrky
 (těrky). Dokud to není zapsané, vybírá je tiskař v kalkulaci ručně a spočtená
 spotřeba stojí na tom, co zrovna zvolil.
 
@@ -80,16 +80,16 @@ SÍTO — kam to zapsat už existuje, zbývá to naplnit:
     zapsané je (výchozí 54-64, jemnější 90-48 pro vyjmenované produkty);
     projít zbývá produkty SCR, PDP (klišé) a TRS.
 
-ŠÍŘKA STĚRKY — kam to zapsat zatím NENÍ:
+ŠÍŘKA TĚRKY — kam to zapsat zatím NENÍ:
     dnes je to ruční pole v kalkulaci (s rychlou volbou stěrek, které pro
     technologii v dílně visí) a umí ji přinést i naskenovaný kód zakázky.
     K produktu ji ale aplikace uložit neumí — místo pro ni se musí nejdřív
-    postavit. Mezitím sepište seznam produkt → šířka stěrky v mm; přepíše
+    postavit. Mezitím sepište seznam produkt → šířka těrky v mm; přepíše
     se tam, jakmile bude kam.
 
 JAK SE TO HLÍDÁ: obojí je vidět v aplikaci v záložce Odemykání technologií —
     každá technologie tam má body „síto přiřazené k produktům" a „šířka
-    stěrky k produktům" a odškrtávají se samy podle sita.csv.
+    těrky k produktům" a odškrtávají se samy podle sita.csv.
 
 
 4) KOEFICIENTY  →  koeficienty.csv

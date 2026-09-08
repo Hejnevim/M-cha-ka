@@ -26,10 +26,12 @@ import stat
 KOREN = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # balicek/
 # Výstupy leží MIMO repozitář (balicek/.git): balíčky nesou licencované
 # databáze a evidence s čísly zakázek, takže do veřejného repozitáře nesmí.
-VYSTUP = os.path.join(os.path.dirname(KOREN), "sestaveni")
+# IRM_VYSTUP přesměruje výstup jinam — třeba když v sestaveni/ zrovna běží
+# nainstalované IRM.exe s otevřeným oknem (zamčený exe i profil okno/).
+VYSTUP = os.environ.get("IRM_VYSTUP") or os.path.join(os.path.dirname(KOREN), "sestaveni")
 
 STATICKE_SOUBORY = ["index.html", "data.js"]
-STATICKE_SLOZKY = ["aplikace", "lib", "obrazky", "prezentace"]
+STATICKE_SLOZKY = ["aplikace", "lib", "logo", "obrazky", "prezentace"]
 # Co se z aplikace vynechává: otisk sestavení je stav tohoto počítače,
 # README prezentace je pro čtenáře repozitáře, ne pro tiskaře.
 VYNECHAT = {".sestaveno", "README.md", "__pycache__"}
@@ -40,7 +42,10 @@ DATOVE_SLOZKY = ["databaze barev", "evidence", "parametry"]
 # Všechno ostatní ve složce (datové složky, okno/, sgps_config.json, zálohy,
 # log) aktualizace nechává být.
 PROGRAM_POLOZKY = ["IRM.exe", "_internal", "index.html", "data.js", "aplikace", "lib",
-                   "obrazky", "prezentace", "pdf_pravidla.json", "Aktualizovat.bat", "CTI_ME.txt"]
+                   "logo", "obrazky", "prezentace", "pdf_pravidla.json", "Aktualizovat.bat", "CTI_ME.txt"]
+
+# Balíček „jen program“ vzniká z téhož seznamu bez datových složek —
+# co se do něj zabalí, se před vydáním ještě prověří (stopy_dat níže).
 
 
 def verze():
@@ -60,6 +65,10 @@ def _kopiruj_slozku(zdroj, cil, jen_pripony=None):
         os.makedirs(cil_slozka, exist_ok=True)
         for jmeno in soubory:
             if jmeno in VYNECHAT:
+                continue
+            # zálohy a dočasné soubory jsou stav tohoto počítače (staré
+            # nahrávky manuálu, .bak z mostu) — v balíčku nemají co dělat
+            if jmeno.lower().endswith((".bak", ".tmp")):
                 continue
             if jen_pripony is not None and os.path.splitext(jmeno)[1].lower() not in jen_pripony:
                 continue
@@ -88,13 +97,38 @@ def smaz_strom(cesta):
     shutil.rmtree(cesta, onerror=_odemkni)
 
 
+def zamcene(cesta, jmena):
+    """Které z daných souborů ve složce drží jiný proces (běžící IRM.exe).
+    Zkouší se otevření pro zápis — na Windows na zamčeném exe selže."""
+    drzene = []
+    for jmeno in jmena:
+        p = os.path.join(cesta, jmeno)
+        if not os.path.isfile(p):
+            continue
+        try:
+            with open(p, "ab"):
+                pass
+        except OSError:
+            drzene.append(jmeno)
+    return drzene
+
+
 def vyprazdni(cesta):
     """Smaže obsah složky, ale složku samu nechá. Otevřené okno průzkumníka
     nebo shell stojící v cílové složce drží její popisovač a rmtree by na
-    něm spadl — obsah ale uvolněný je, takže výstup lze přepsat i tak."""
+    něm spadl — obsah ale uvolněný je, takže výstup lze přepsat i tak.
+
+    Nejdřív se ověří, že program neběží: 8. 9. 2026 mazání došlo abecedně
+    k zamčenému IRM.exe až poté, co smazalo aplikaci i kopie dat před ním,
+    a nechalo instalaci půl. Když je exe zamčený, nesmaže se nic."""
     if not os.path.isdir(cesta):
         os.makedirs(cesta)
         return
+    drzene = zamcene(cesta, ["IRM.exe"])
+    if drzene:
+        raise SystemExit("Ve složce %s běží %s — zavřete program (i jeho okno) a spusťte "
+                         "sestavení znovu, nebo výstup přesměrujte proměnnou IRM_VYSTUP. "
+                         "Nic nebylo smazáno." % (cesta, ", ".join(drzene)))
     for jmeno in os.listdir(cesta):
         p = os.path.join(cesta, jmeno)
         if os.path.isdir(p) and not os.path.islink(p):
@@ -142,3 +176,53 @@ def velikost_slozky(cesta):
 
 def mb(bajty):
     return ("%.1f" % (bajty / 1048576.0)).replace(".", ",") + " MB"
+
+
+# ------------------------------------------------------------ vydání ze sítě
+# Odkud si dílna stáhne poslední verzi na dálku. Repozitář je veřejný, proto
+# tam smí jen balíček „jen program“ — aplikace, obrázky, manuál a spouštěč,
+# bez databází, evidence a parametrů. Data má každé zařízení svoje a
+# aktualizace je jen dopisuje (aktualizace.py); první instalace na nové
+# zařízení proto potřebuje balíček s daty z počítače dílny.
+#
+# Názvy souborů vydání jsou bez data: GitHub pak drží stálý odkaz
+# …/releases/latest/download/<název>, který ukazuje vždy na poslední vydání,
+# takže se dá vytisknout do CTI_ME.txt i zapsat do aplikace a nemění se.
+# Verze je uvnitř (manifest.json, versionName APK). Tytéž odkazy zná
+# aplikace (část 185) — při změně tady se mění i tam.
+GITHUB_REPO = "Hejnevim/M-cha-ka"
+VYDANI_ZIP = "IRM-aktualizace-program.zip"
+VYDANI_APK = "IRM-program.apk"
+ODKAZ_VYDANI = "https://github.com/" + GITHUB_REPO + "/releases/latest"
+ODKAZ_ZIP = ODKAZ_VYDANI + "/download/" + VYDANI_ZIP
+ODKAZ_APK = ODKAZ_VYDANI + "/download/" + VYDANI_APK
+
+
+def manifest_programu(verze):
+    """Manifest balíčku bez dat: žádné otisky. Aktualizace při zápisu
+    nového manifestu přebírá otisky, které balíček nenesl, z minulého
+    (aktualizace.manifest_sluc) — kdyby je přepsala prázdnem, příští balíček
+    s daty by žádný soubor dílny nepoznal jako nezměněný."""
+    import time
+    return {"verze": verze, "sestaveno": time.strftime("%Y-%m-%d %H:%M"),
+            "soubory": {}, "jen_program": True}
+
+
+def stopy_dat(cesta_zip):
+    """
+    Položky balíčku (zip i APK je zip), které by prozradily data dílny.
+    Prázdný seznam = balíček smí ven. Hledá se složka s daty (data/ v zipu,
+    assets/data/ v APK), názvy datových složek a jakékoli CSV nebo .bak —
+    v programu žádné CSV není, takže každé je chyba sestavení.
+    """
+    import zipfile
+    nalezy = []
+    with zipfile.ZipFile(cesta_zip) as z:
+        for jmeno in z.namelist():
+            j = jmeno.lower().replace("\\", "/")
+            if (j.startswith("data/") or j.startswith("assets/data/")
+                    or "databaze barev" in j or "databaze_barev" in j or "/evidence/" in j
+                    or j.startswith("evidence/") or "/parametry/" in j
+                    or j.endswith(".csv") or j.endswith(".bak")):
+                nalezy.append(jmeno)
+    return nalezy

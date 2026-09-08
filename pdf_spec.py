@@ -297,6 +297,37 @@ def _nasob(m, n):
             e1 * a2 + f1 * c2 + e2, e1 * b2 + f1 * d2 + f2]
 
 
+def _bod_ctm(ctm, x, y):
+    """Bod cesty v souřadnicích stránky (po transformaci ctm)."""
+    a, b_, cc, d, e, f = ctm
+    return (a * x + cc * y + e, b_ * x + d * y + f)
+
+
+def _obdelniky_z_cest(podcesty):
+    """
+    Z podúseků cesty vybere ty, které jsou obdélník rovnoběžný s osami:
+    čtyři body (pátý smí opakovat první), dvě různé x a dvě různé y a každý
+    bod v rohu. Vrací (x, y, w, h) jako u operátoru re.
+    """
+    out = []
+    for body in podcesty:
+        if not body or any(b is None for b in body):
+            continue
+        b = list(body)
+        if len(b) == 5 and abs(b[0][0] - b[4][0]) < 0.01 and abs(b[0][1] - b[4][1]) < 0.01:
+            b = b[:4]
+        if len(b) != 4:
+            continue
+        xs = sorted(set(round(p[0], 1) for p in b))
+        ys = sorted(set(round(p[1], 1) for p in b))
+        if len(xs) != 2 or len(ys) != 2:
+            continue
+        if any(round(p[0], 1) not in xs or round(p[1], 1) not in ys for p in b):
+            continue
+        out.append((xs[0], ys[0], xs[1] - xs[0], ys[1] - ys[0]))
+    return out
+
+
 def _text_ze_stranky(obsah, fonty, sbirej=None):
     """
     sbirej: nepovinný slovník. Vyplní se do něj syrové kusy textu s polohou
@@ -307,6 +338,12 @@ def _text_ze_stranky(obsah, fonty, sbirej=None):
     obdelniky = []
     vypln = [(0.0, 0.0, 0.0)]      # aktuální barva výplně v RGB
     cekajici = []                  # obdélníky nakreslené, ale ještě nevyplněné
+    # Čtvereček vzorníku nemusí být operátor re: list z CCO (září 2026) ho kreslí
+    # úsečkami (m l l l h) a vyplní až operátorem f. Proto se sbírají i podúseky
+    # cest a při výplni se z nich vezmou ty, které tvoří obdélník rovnoběžný
+    # s osami. Křivka (c, v, y) podúsek zneplatní — kolečko obdélník není.
+    cesta = [[]]                   # rozpracovaný podúsek cesty (body po převodu ctm)
+    podcesty = []                  # uzavřené podúseky, ještě nevyplněné
     cmap = None
     velikost = [10.0]
     zasobnik = []
@@ -456,10 +493,26 @@ def _text_ze_stranky(obsah, fonty, sbirej=None):
         elif op == b"BT":
             tm[0] = [1.0, 0.0, 0.0, 1.0, 0.0, 0.0]
         elif op in (b"rg", b"g", b"k", b"re", b"f", b"F", b"f*",
-                    b"b", b"b*", b"B", b"B*", b"n", b"W", b"W*") and sbirej is not None:
+                    b"b", b"b*", b"B", b"B*", b"n", b"W", b"W*",
+                    b"m", b"l", b"h", b"c", b"v", b"y",
+                    b"cs", b"sc", b"scn") and sbirej is not None:
             c = cisla()
             try:
-                if op == b"rg" and len(c) >= 3:
+                if op in (b"cs", b"sc", b"scn"):
+                    # barva z ICC profilu nebo separace — převod neznáme; vzorník s hádanou
+                    # (dřív černou) barvou by vypadal jako změřený, proto se raději nezapíše
+                    vypln[0] = None
+                elif op == b"m" and len(c) >= 2:
+                    if cesta[0]:
+                        podcesty.append(cesta[0])
+                    cesta[0] = [_bod_ctm(ctm[0], float(c[-2]), float(c[-1]))]
+                elif op == b"l" and len(c) >= 2:
+                    cesta[0].append(_bod_ctm(ctm[0], float(c[-2]), float(c[-1])))
+                elif op in (b"c", b"v", b"y"):
+                    cesta[0].append(None)
+                elif op == b"h":
+                    pass
+                elif op == b"rg" and len(c) >= 3:
                     vypln[0] = tuple(float(x) for x in c[-3:])
                 elif op == b"g" and len(c) >= 1:
                     s = float(c[-1])
@@ -476,12 +529,16 @@ def _text_ze_stranky(obsah, fonty, sbirej=None):
                     ys = [p[1] for p in body]
                     cekajici.append((min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)))
                 elif op in (b"f", b"F", b"f*", b"b", b"b*", b"B", b"B*"):
-                    for r in cekajici:
+                    for r in (cekajici + _obdelniky_z_cest(podcesty + [cesta[0]])) if vypln[0] else []:
                         obdelniky.append({"x": r[0], "y": r[1], "w": r[2], "h": r[3],
                                           "rgb": [max(0, min(255, int(round(v * 255)))) for v in vypln[0]]})
                     cekajici = []
+                    podcesty = []
+                    cesta[0] = []
                 elif op in (b"n", b"W", b"W*"):       # ořez nebo zahození cesty
                     cekajici = []
+                    podcesty = []
+                    cesta[0] = []
             except ValueError:
                 pass
         if op not in (b"BT",):
@@ -586,12 +643,19 @@ def vzorniky_z_pdf(data, limit_stran=4):
             if not (0.4 <= (r["w"] / r["h"]) <= 2.5):
                 continue
             stred = r["y"] + r["h"] / 2.0
+            # Dva vzorníky na jedné řádce („■ P. Black C  ■ P. 200 C") — popisek
+            # prvního končí tam, kde začíná druhý čtvereček, jinak by nesl oba názvy.
+            dalsi = [q["x"] for q in obdelniky if q is not r and q["x"] > r["x"]
+                     and abs((q["y"] + q["h"] / 2.0) - stred) <= r["h"]
+                     and 4 <= q["w"] <= 60 and 4 <= q["h"] <= 60]
+            hranice = min(dalsi) if dalsi else None
             # popisek stojí v téže výšce hned vpravo od vzorníku
             nej, nejd = None, None
             for y, prvky, _cely in radky:
                 if abs(y - stred) > r["h"]:
                     continue
-                vpravo = "".join(t for x, t in prvky if x >= r["x"] + r["w"] * 0.5).strip()
+                vpravo = "".join(t for x, t in prvky if x >= r["x"] + r["w"] * 0.5
+                                 and (hranice is None or x < hranice)).strip()
                 if not vpravo:
                     continue
                 d = abs(y - stred)

@@ -114,6 +114,29 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
    o ni tiskař řekne. Vzhled popisku pole (verzálky s prostrkáním), ale
    hmota dlaždice, ať se z odstupu čte jako blok, ne jako pruh. */
 .volba-zdroje{text-transform:uppercase;letter-spacing:var(--prostrkani);padding:14px 10px}
+/* Barvy zakázky (vícebarevný potisk, karta-recept v 240-calc.js): pruh
+   dlaždic nad výběrem receptury, jedna na barvu, klepnutím se kalkulace
+   přepne. Dlaždice, ne štítek — z odstupu se čte název i dávka jako blok,
+   stejně jako dlaždice parametrů. Tlačítko „Další barva" sedí v nadpisu
+   karty, aby jednobarevná zakázka neměla pruh vůbec; nadpis je proto flex
+   a tlačítko v něm nedědí verzálky s prostrkáním. */
+.karta-recept>h2{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.karta-recept>h2 .btn{text-transform:none;letter-spacing:normal;font-weight:600}
+.barvy-zakazky{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:10px 0 12px}
+.barva-zakazky{min-width:0;background:var(--paper);color:var(--ink);border-radius:var(--radius-dlazdice);box-shadow:var(--neu-sm);padding:10px 12px;cursor:pointer;transition:box-shadow .15s,background .15s,color .15s}
+.barva-zakazky.on{background:var(--key);color:var(--btn-ink)}
+.barva-zakazky .bz-hlava{display:flex;align-items:center;gap:6px;min-width:0}
+.barva-zakazky .bz-cislo{font-family:var(--mono);font-weight:800}
+.barva-zakazky .bz-nazev{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:calc(var(--pismo) - 1px)}
+.barva-zakazky .bz-smaz{border:none;background:transparent;color:inherit;cursor:pointer;padding:0 2px;font-size:var(--pismo-popisek);opacity:.7;line-height:normal}
+.barva-zakazky .bz-davka{font-family:var(--mono);font-size:var(--pismo-popisek);margin-top:4px;opacity:.85;line-height:normal}
+/* Namíchaná barva: zelená kontura kolem dlaždice a rozsvícená fajfka —
+   u váhy je vidět, co už je v kelímku a co teprve přijde. Kontura, ne
+   podbarvení: podbarvení už nese aktivní dlaždice a obojí se musí dát
+   přečíst naráz (aktivní i hotová). */
+.barva-zakazky.hotova{box-shadow:var(--neu-sm),0 0 0 3px var(--ok)}
+.barva-zakazky .bz-hotovo{border:none;background:transparent;color:inherit;cursor:pointer;padding:0 2px;font-weight:800;font-size:var(--pismo-popisek);opacity:.35;line-height:normal}
+.barva-zakazky .bz-hotovo.on{opacity:1;color:var(--ok)}
 /* Čísla zakázky jako čtyři velké dlaždice vyplňující celou kartu — stejný
    vzor jako síto/kryvost/povrch v Parametrech tisku (`.karta-tisk`), aby se
    tentýž typ pole choval na obou kartách stejně. Bez viskozity pod nimi
@@ -127,17 +150,29 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
    přirozené výšky karty se počítá jen dolní mez dlaždice, ne čtverec —
    to byla chyba dřívějšího `aspect-ratio:1`, který kartu hnal na 595 px. */
 .karta-cisla{display:flex;flex-direction:column}
-.zakazka-cisla{display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1}
-.zakazka-cisla>div{container-type:inline-size;display:flex;flex-direction:column}
-.zakazka-cisla label.f{font-size:calc(var(--pismo-popisek) * 1.5);margin-bottom:10px;text-align:center}
+/* Stejná stavba jako dlaždice Parametrů tisku (.karta-tisk, 040): pruh
+   popisků a pruh dlaždic, každé pole subgrid přes oba, takže popisky
+   v řádku sdílejí výšku a dlaždice začínají na jedné lince. Dřív si každý
+   sloupec měřil popisek sám a zalomené SPOTŘEBA (G/M²) dalo dlaždici
+   184 px vedle 208 px (změřeno při 1 280 px). Řádky se střídají auto/1fr,
+   aby to platilo pro dva i tři sloupce a pro jeden sloupec na telefonu. */
+/* Kontejner pro `cqw` je mřížka, ne pole — pole je subgrid a kontejner by
+   ho zrušil (proč, viz .karta-tisk v 040). Šířka dlaždice se dopočítá
+   z šířky mřížky, mezery a počtu sloupců do --dlazdice-sirka. */
+.zakazka-cisla{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-auto-rows:auto 1fr;gap:16px;flex:1;
+  container-type:inline-size;--dlazdice-sirka:calc((100cqw - 16px) / 2)}
+.zakazka-cisla>div{display:grid;grid-template-rows:subgrid;grid-row:span 2;row-gap:10px}
+.zakazka-cisla label.f{font-size:calc(var(--pismo-popisek) * 1.5);margin-bottom:0;text-align:center;
+  display:flex;align-items:flex-end;justify-content:center}
 /* Dolní mez 100 px je změřená sondou: dva řádky dlaždic po 100 px dají
    kartě přirozenou výšku ~364 px, tedy touž, jakou má vedle stojící karta
    Parametry tisku s jedním řádkem dlaždic po 178 px (~363 px). Když tedy
    Zakázka stojí v řádku sama nebo je nejvyšší, drží stejnou výšku jako
    soused, a prázdné místo nevzniká ani v ní, ani kvůli ní. */
-.zakazka-cisla input,.zakazka-cisla select{font-size:min(calc(var(--pismo) * 3.375), 18.5625cqw);
-  font-weight:700;text-align:center;flex:1;min-height:100px;padding:5cqw;box-sizing:border-box}
-/* Šířka stěrky je výběr, ale musí vypadat jako sousední číselné dlaždice:
+/* Dolní mez písma jako u .karta-tisk: pod základní písmo dlaždice neklesne. */
+.zakazka-cisla input,.zakazka-cisla select{font-size:clamp(var(--pismo), calc(var(--dlazdice-sirka) * .185625), calc(var(--pismo) * 3.375));
+  font-weight:700;text-align:center;min-height:100px;padding:calc(var(--dlazdice-sirka) * .05);box-sizing:border-box}
+/* Šířka těrky je výběr, ale musí vypadat jako sousední číselné dlaždice:
    hodnota na středu, bez šipky — stejný idiom jako dlaždicové výběry
    v `.karta-tisk` (viz tam, proč se šipka nekreslí a hodnota centruje).
    Zavřená dlaždice ukazuje jen číslo (nebo „—“ = nezadáno), takže velké
@@ -148,26 +183,22 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
 .zakazka-cisla select::select-fallback-button-text{flex:0 1 auto;text-align:center}
 .zakazka-cisla select::picker(select){font-size:calc(var(--pismo) * 1.5)}
 .zakazka-cisla option{padding:calc(var(--pole-y) * 1.4) calc(var(--pole-x) * 1.4)}
-/* Se sítem přibudou dvě dlaždice navíc (šířka stěrky, potisků na tah).
+/* Se sítem přibudou dvě dlaždice navíc (šířka těrky, potisků na tah).
    Ve dvou sloupcích by z toho byly tři řádky, karta by povyrostla na 513 px
    a se sousední Parametry tisku by se roztáhly její výběry na 340 px vysoko —
    změřeno. Šest dlaždic proto jde do tří sloupců: dva řádky jako dosud,
    výška karty zpátky na ~364 px. */
-.zakazka-cisla.sest{grid-template-columns:1fr 1fr 1fr}
-/* Ve třech sloupcích se popisek „SPOTŘEBA (G/M²)" nevejde na řádek a zalomí
-   se — dlaždice pod ním pak začíná níž než sousedky (změřeno 100 px proti
-   123 px). Dvouřádková dolní mez popisku srovná začátky všech šesti. */
-.zakazka-cisla.sest label.f{min-height:2.6em;display:flex;align-items:flex-end;justify-content:center}
+.zakazka-cisla.sest{grid-template-columns:repeat(3,minmax(0,1fr));--dlazdice-sirka:calc((100cqw - 32px) / 3)}
 /* Pod 560px se sloupce skládají na jeden a dlaždice jedou přes celou šířku
    telefonu — čtyři po 178 px (+ popisky) nezvládne bez rolování žádný
    mobil, poslední zůstává mimo obrazovku. Na úzkém okně proto dolní mez
    dlaždice snížena na 88 px (písmo 3,375 → 1,7 násobku `--pismo`) — pořád
    čitelné z odstupu, ale čtyři se vejdou najednou. */
 @media(max-width:560px){
-  .zakazka-cisla{grid-template-columns:1fr}
+  .zakazka-cisla{grid-template-columns:minmax(0,1fr);--dlazdice-sirka:100cqw}
   /* Šest dlaždic pod sebou by na telefonu znamenalo šest obrazovek rolování.
      Ve dvou sloupcích jsou to tři řádky — méně, než kolik dnes zabírají
      čtyři dlaždice v jednom sloupci. */
-  .zakazka-cisla.sest{grid-template-columns:1fr 1fr}
-  .zakazka-cisla input,.zakazka-cisla select{font-size:min(calc(var(--pismo) * 1.7), 9.375cqw);min-height:88px}
+  .zakazka-cisla.sest{grid-template-columns:minmax(0,1fr) minmax(0,1fr);--dlazdice-sirka:calc((100cqw - 16px) / 2)}
+  .zakazka-cisla input,.zakazka-cisla select{font-size:min(calc(var(--pismo) * 1.7), calc(var(--dlazdice-sirka) * .09375));min-height:88px}
 }

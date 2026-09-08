@@ -9,6 +9,10 @@
    míříme na localhost — jinak bychom API hledali na cizím serveru. */
 const MOST_VYCHOZI = "http://localhost:8765";
 let MOST_NALEZENY = "";     // adresa, na které se most naposledy ozval
+/* Poslední odpověď stavu mostu. Odkaz na recepturu z ní bere `adresa_site`
+   — adresu, pod kterou most vidí ostatní zařízení (jen s `--sit`). Drží se
+   mimo React, aby na ni dosáhl i skladač odkazu v části 458. */
+let MOST_STAV = null;
 
 /* Adresy, na kterých se most zkusí najít. Ručně zadaná má přednost; jinak
    nejdřív vlastní původ (aplikace může běžet přímo z mostu) a pak tenhle
@@ -70,12 +74,14 @@ function useSgps() {
       try {
         const s = await zkusMost(adresa);
         MOST_NALEZENY = adresa;
+        MOST_STAV = s;
         pokusu.current = 0;
         setStav(Object.assign({ stav: s.chyba ? "chyba" : "ok", adresa: adresa }, s));
         return;
       } catch (e) { posledni = String((e && e.message) || e); }
     }
     MOST_NALEZENY = "";
+    MOST_STAV = null;
     setStav({ stav: "chyba", chyba: posledni || preloz("most se neozval"), most: false });
   };
   useEffect(() => { zjisti(); }, []);

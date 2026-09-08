@@ -97,6 +97,10 @@ const SLOVNIK = {
     { en: "Expand the technology choice", pt: "Expandir a escolha de tecnologia" },
   "Sbalit výběr technologie":
     { en: "Collapse the technology choice", pt: "Recolher a escolha de tecnologia" },
+  "Rozbalit výběr databáze":
+    { en: "Expand the database choice", pt: "Expandir a escolha da base de dados" },
+  "Sbalit výběr databáze":
+    { en: "Collapse the database choice", pt: "Recolher a escolha da base de dados" },
   "vše": { en: "all", pt: "tudo" },
   "Všechny technologie": { en: "All technologies", pt: "Todas as tecnologias" },
   "Sítotisk (plast, papír) / rotační":
@@ -254,6 +258,22 @@ const SLOVNIK = {
 
   /* --- karta Receptura a barva --- */
   "Receptura a barva": { en: "Recipe and color", pt: "Receita e cor" },
+  /* barvy zakázky — vícebarevný potisk */
+  "＋ Další barva": { en: "＋ Another color", pt: "＋ Outra cor" },
+  "Další barva potisku téže zakázky — vlastní receptura, plocha a kelímek":
+    { en: "Another print color of the same job — its own recipe, area and cup",
+      pt: "Outra cor de impressão do mesmo pedido — receita, área e copo próprios" },
+  "Odebrat barvu ze zakázky": { en: "Remove the color from the job", pt: "Remover a cor do pedido" },
+  "＋ Do fronty všechny barvy ({n})": { en: "＋ Queue all colors ({n})", pt: "＋ Para a fila todas as cores ({n})" },
+  "Každá barva zakázky jako vlastní položka fronty — jeden kelímek na barvu":
+    { en: "Each job color as its own queue item — one cup per color",
+      pt: "Cada cor do pedido como item próprio da fila — um copo por cor" },
+  "Převzít {n} barev do zakázky →": { en: "Take {n} colors into the job →", pt: "Levar {n} cores para o pedido →" },
+  "Barev potisku: {n}": { en: "Print colors: {n}", pt: "Cores de impressão: {n}" },
+  "barva zakázky": { en: "job color", pt: "cor do pedido" },
+  "barva zakázky {b}": { en: "job color {b}", pt: "cor do pedido {b}" },
+  "Namícháno — klepnutím označení zrušíte": { en: "Mixed — click to clear the mark", pt: "Misturada — clique para retirar a marca" },
+  "Označit jako namíchané": { en: "Mark as mixed", pt: "Marcar como misturada" },
   "Pantone standard — {n} z {celkem}": { en: "Pantone standard — {n} of {celkem}", pt: "Padrão Pantone — {n} de {celkem}" },
   "Poloha má přiřazené typy: {typy} — jiné typy barev se na ní nenabízejí (mění se v záložce Produkty).":
     { en: "The position has assigned ink types: {typy} — other ink types are not offered on it (changed under the Products tab).",
@@ -328,20 +348,8 @@ const SLOVNIK = {
   "Spotřeba (g/m²)": { en: "Consumption (g/m²)", pt: "Consumo (g/m²)" },
   "Ztráty (%)": { en: "Losses (%)", pt: "Perdas (%)" },
   "Min. dávka (g)": { en: "Min. batch (g)", pt: "Lote mín. (g)" },
-  "Šířka stěrky (mm)": { en: "Squeegee width (mm)", pt: "Largura do rodo (mm)" },
+  "Šířka těrky (mm)": { en: "Squeegee width (mm)", pt: "Largura do rodo (mm)" },
   "Potisků na tah": { en: "Prints per stroke", pt: "Impressões por passagem" },
-  "{a} m² × {k} % krycí plocha × {n} ks × {g} g/m² = {netto} g":
-    { en: "{a} m² × {k} % covered area × {n} pcs × {g} g/m² = {netto} g",
-      pt: "{a} m² × {k} % área coberta × {n} pçs × {g} g/m² = {netto} g" },
-  " · ztráty {z} % → {s} g": { en: " · losses {z} % → {s} g", pt: " · perdas {z} % → {s} g" },
-  " · rezerva síta {r} g (stěrka {w} mm) → {c} g":
-    { en: " · screen reserve {r} g (squeegee {w} mm) → {c} g",
-      pt: " · reserva na malha {r} g (rodo {w} mm) → {c} g" },
-  " · rezerva síta se nepočítá — šířka stěrky není zadaná":
-    { en: " · screen reserve not counted — squeegee width not entered",
-      pt: " · reserva na malha não calculada — largura do rodo não indicada" },
-  " · {t} tahů po {p} potiscích":
-    { en: " · {t} strokes of {p} prints", pt: " · {t} passagens de {p} impressões" },
   "Ze síta {mesh} vychází {g} g/m²": { en: "Mesh {mesh} yields {g} g/m²", pt: "Da malha {mesh} resultam {g} g/m²" },
   "Z klišé {mesh} vychází {g} g/m²": { en: "Cliché {mesh} yields {g} g/m²", pt: "Do clichê {mesh} resultam {g} g/m²" },
   " — teď je nastaveno {g} g/m².": { en: " — currently set to {g} g/m².", pt: " — agora está definido {g} g/m²." },
@@ -363,7 +371,6 @@ const SLOVNIK = {
   "Kryvost": { en: "Opacity", pt: "Opacidade" },
   "Povrch": { en: "Surface", pt: "Superfície" },
   "Otestovaný": { en: "Tested", pt: "Testada" },
-  "Vysoce odolný vůči vyblednutí": { en: "Highly fade-resistant", pt: "Altamente resistente ao desbotamento" },
 
   /* --- karta Kolik namíchat --- */
   "Kolik namíchat": { en: "How much to mix", pt: "Quanto misturar" },
@@ -996,6 +1003,14 @@ const SLOVNIK = {
   ", dávka přepočtena z {p} g": { en: ", batch recalculated from {p} g", pt: ", lote recalculado de {p} g" },
   "Navážit znovu": { en: "Weigh again", pt: "Pesar de novo" },
   "Odepsat zbytek ze skladu": { en: "Deduct the leftover from the stock", pt: "Abater o resto do armazém" },
+  "Potvrdit → další barva": { en: "Confirm → next colour", pt: "Confirmar → próxima cor" },
+  "Potvrdit navážení": { en: "Confirm weighing", pt: "Confirmar pesagem" },
+  "Váha je pod nulou táry — postavte nový kelímek a stiskněte Tára.":
+    { en: "The scale reads below the tare zero — put the new cup on and press Tare.",
+      pt: "A balança está abaixo do zero da tara — coloque o novo copo e prima Tara." },
+  "Štítky na kelímky →": { en: "Cup labels →", pt: "Etiquetas dos copos →" },
+  "Štítky na kelímky": { en: "Cup labels", pt: "Etiquetas dos copos" },
+  "Vytisknout štítky ({n})": { en: "Print labels ({n})", pt: "Imprimir etiquetas ({n})" },
   "Zbývá tužidlo — {t} g": { en: "Hardener remains — {t} g", pt: "Falta o endurecedor — {t} g" },
   " ({p} % z {b} g báze{ad}).": { en: " ({p} % of {b} g of base{ad}).", pt: " ({p} % de {b} g de base{ad})." },
   ", aditiva se do základu nepočítají":
@@ -1299,6 +1314,12 @@ const SLOVNIK = {
     { en: "One zip with databases, records, parameters and work in progress.",
       pt: "Um zip com bases de dados, registos, parâmetros e trabalho em curso." },
   "Jen vyzkoušet": { en: "Just try it", pt: "Só experimentar" },
+  "Verze balíčku": { en: "Package version", pt: "Versão do pacote" },
+  "Stáhnout novou verzi": { en: "Download the new version", pt: "Transferir a nova versão" },
+  "Stáhnout a nainstalovat novou verzi": { en: "Download and install the new version", pt: "Transferir e instalar a nova versão" },
+  "Stahování běží na pozadí — výsledek ohlásí okno programu.":
+    { en: "The download runs in the background — the program window will report the result.",
+      pt: "A transferência corre em segundo plano — a janela do programa dará o resultado." },
   "Výchozí": { en: "Default", pt: "Predefinido" },
   "Obvykle": { en: "Usually", pt: "Normalmente" },
   "Běží-li most na jiném počítači v dílně, zadejte jeho adresu, například":
@@ -2091,7 +2112,7 @@ const SLOVNIK = {
   "vybírá se ručně": { en: "picked by hand", pt: "escolhe-se à mão" },
   "výchozí pro všechny": { en: "a default for all", pt: "padrão para todos" },
   "výchozí + {n} produktů zvlášť": { en: "a default + {n} products set apart", pt: "padrão + {n} produtos à parte" },
-  "šířka stěrky k produktům": { en: "a squeegee width for the products", pt: "largura do rodo para os produtos" },
+  "šířka těrky k produktům": { en: "a squeegee width for the products", pt: "largura do rodo para os produtos" },
   "zatím jen rychlé volby {v} mm": { en: "so far only the quick choices {v} mm", pt: "por enquanto só as escolhas rápidas {v} mm" },
   "zatím ruční pole v kalkulaci": { en: "so far a manual field in the calculation", pt: "por enquanto um campo manual no cálculo" },
   "koeficienty spotřeby": { en: "consumption coefficients", pt: "coeficientes de consumo" },
@@ -2175,7 +2196,7 @@ const SLOVNIK = {
   "Spotřeba g/m²": { en: "Consumption g/m²", pt: "Consumo g/m²" },
   "Ztráty %": { en: "Losses %", pt: "Perdas %" },
   "Min. dávka g": { en: "Min. batch g", pt: "Lote mín. g" },
-  "Šířka stěrky mm": { en: "Squeegee width mm", pt: "Largura do rodo mm" },
+  "Šířka těrky mm": { en: "Squeegee width mm", pt: "Largura do rodo mm" },
 
   /* --- rozpis po barvách (separace) v okně krycí plochy --- */
   "Bez rozměru potisku chybí měřítko — plochy po barvách se v cm² spočítat nedají.":
@@ -2195,10 +2216,10 @@ const SLOVNIK = {
   "Bílý podtisk": { en: "White underbase", pt: "Base branca" },
   "{n} sít · celkem {ml} ml na zakázku":
     { en: "{n} screens · {ml} ml total for the job", pt: "{n} telas · {ml} ml no total da encomenda" },
-  " — v tom rezerva {r} ml na každé síto (stěrka {w} mm)":
+  " — v tom rezerva {r} ml na každé síto (těrka {w} mm)":
     { en: " — including a reserve of {r} ml per screen (squeegee {w} mm)",
       pt: " — incluindo reserva de {r} ml por tela (rodo {w} mm)" },
-  " — rezerva síta se nepočítá, šířka stěrky není v kalkulaci zadaná":
+  " — rezerva síta se nepočítá, šířka těrky není v kalkulaci zadaná":
     { en: " — screen reserve not counted, squeegee width not entered in the calculation",
       pt: " — reserva na tela não calculada, largura do rodo não indicada no cálculo" },
   "U {n} vrstev není vybrané síto — bez něj se nános nepočítá a v součtu chybí.":
@@ -2545,7 +2566,6 @@ const SLOVNIK = {
      schválení, chybějící odstín na vyžádání) --- */
   "zakázka potřebuje {g}": { en: "job needs {g}", pt: "a encomenda precisa de {g}" },
   " · zakázka potřebuje {g}": { en: " · job needs {g}", pt: " · a encomenda precisa de {g}" },
-  "C i U": { en: "C and U", pt: "C e U" },
   "C — natíraný": { en: "C — coated", pt: "C — couché" },
   "U — nenatíraný": { en: "U — uncoated", pt: "U — não couché" },
   "krycí": { en: "opaque", pt: "opaco" },
@@ -2567,10 +2587,11 @@ const SLOVNIK = {
   "Objednací číslo": { en: "Order number", pt: "Número de encomenda" },
   "u dodavatele (nepovinné)": { en: "at the supplier (optional)", pt: "no fornecedor (opcional)" },
   "Papír C / U": { en: "Paper C / U", pt: "Papel C / U" },
-  "z názvu: {cu}": { en: "from the name: {cu}", pt: "do nome: {cu}" },
   "Odkaz": { en: "Link", pt: "Ligação" },
   "zkopírovat odkaz, který recepturu rovnou otevře": { en: "copy a link that opens the recipe directly", pt: "copiar uma ligação que abre a receita diretamente" },
   "Odkaz na recepturu je ve schránce: {o}": { en: "The recipe link is on the clipboard: {o}", pt: "A ligação da receita está na área de transferência: {o}" },
+  " — platí jen na tomto zařízení, most neběží po síti": { en: " — works only on this device, the bridge is not on the network", pt: " — vale só neste dispositivo, a ponte não está na rede" },
+  "Po síti na": { en: "On the network at", pt: "Na rede em" },
   "Historie": { en: "History", pt: "Histórico" },
   "Historie receptury": { en: "Recipe history", pt: "Histórico da receita" },
   "kdo ji založil, měnil a míchal": { en: "who created it, changed it and mixed by it", pt: "quem a criou, alterou e misturou segundo ela" },

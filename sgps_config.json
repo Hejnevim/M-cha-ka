@@ -2,6 +2,8 @@
   "_napoveda": "rezim: demo | soubor | rest. V mapovani jsou vlevo pole aplikace, vpravo seznam možných názvů ve SGPS (bere se první nalezené; lze psát i cestu typu 'objednavka.cislo').",
   "rezim": "demo",
   "port": 8765,
+  "po_siti": true,
+  "_po_siti": "true = most naslouchá pro celou síť dílny a odkazy na receptury nesou jeho síťovou adresu (jinak platí jen na tomto počítači). Jen v síti, které důvěřujete.",
   "soubor": {
     "cesta": "zakazky_sgps.json",
     "_pozn": "JSON (pole záznamů nebo {\"orders\": [...]}), CSV (; nebo ,) či XML."

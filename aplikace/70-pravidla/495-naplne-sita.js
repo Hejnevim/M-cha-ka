@@ -5,33 +5,33 @@
    kartách a okrajích. To je správně a nic z toho se tu nemění.
 
    Chybělo jedno číslo, které u váhy rozhoduje. Než se udělá první tah, musí
-   před stěrkou ležet souvislá houska barvy; kdyby tam nebyla, stěrka nabírá
+   před těrkou ležet souvislá houska barvy; kdyby tam nebyla, těrka nabírá
    vzduch a tisk vynechává. Ta houska se nespotřebuje — protahuje se sítem sem
    a tam po celou zakázku a na konci se seškrábne zpátky do kelímku —, ale
    namíchaná být musí. Proto se k dávce přičítá a v předpovědi zbytku se pak
    objeví jako to, co zbude.
 
-   Kolik jí je, určuje ŠÍŘKA STĚRKY, ne velikost potisku. Právě proto sítem,
+   Kolik jí je, určuje ŠÍŘKA TĚRKY, ne velikost potisku. Právě proto sítem,
    na kterém je logo čtyřikrát vedle sebe, projde za směnu stejné množství barvy
    jako sítem s jedním logem — barva se přenáší na kusy, ne na tahy —, ale
-   v sítě jí musí neustále ležet víc, protože stěrka je širší.
+   v sítě jí musí neustále ležet víc, protože těrka je širší.
 
-       objem housky = šířka stěrky × průřez housky
+       objem housky = šířka těrky × průřez housky
        rezerva [g]  = objem [ml] × hustota barvy [g/ml]
 
    Průřez housky je jediné, co ze zakázky odečíst nejde. Bere se z tvaru, který
-   houska u stěrky drží: pás asi 20 mm široký a 15 mm vysoký, tedy 300 mm².
-   Kontrola proti pravidlu palce z dílny (100 až 200 g na síto): stěrka 300 mm
-   dá 90 ml, při hustotě 1,2 g/ml 108 g; stěrka 500 mm dá 150 ml, tedy 180 g.
+   houska u těrky drží: pás asi 20 mm široký a 15 mm vysoký, tedy 300 mm².
+   Kontrola proti pravidlu palce z dílny (100 až 200 g na síto): těrka 300 mm
+   dá 90 ml, při hustotě 1,2 g/ml 108 g; těrka 500 mm dá 150 ml, tedy 180 g.
    Obojí padne dovnitř rozsahu, takže se tou konstantou dá počítat.
 
-   Bez zadané šířky stěrky se rezerva NEPOČÍTÁ. Dosadit sem průměrnou stěrku
+   Bez zadané šířky těrky se rezerva NEPOČÍTÁ. Dosadit sem průměrnou těrku
    dílny by znamenalo přidat do dávky sto gramů, které nikdo nezadal a které by
    v rozpisu nikdo nehledal — a přesně to je odhad vydávaný za měření. */
 const HOUSKA_PRUREZ_MM2 = 300;
 
-function rezervaSita({ sirkaSterkyMm, hustota, prurezMm2 }) {
-  const sirka = n(sirkaSterkyMm);
+function rezervaSita({ sirkaTerkyMm, hustota, prurezMm2 }) {
+  const sirka = n(sirkaTerkyMm);
   if (!(sirka > 0)) return null;
   const prurez = n(prurezMm2) > 0 ? n(prurezMm2) : HOUSKA_PRUREZ_MM2;
   // mm × mm² = mm³; tisíc mm³ je jeden mililitr
@@ -39,10 +39,10 @@ function rezervaSita({ sirkaSterkyMm, hustota, prurezMm2 }) {
   return { ml: ml, g: ml * n(hustota, 1.2), sirka: sirka, prurez: prurez };
 }
 
-/* Kolik tahů stěrkou zakázka obnáší. Na spotřebu barvy to vliv nemá a mít
-   nesmí: násobí se počtem hotových výrobků, ne počtem stěrkování. Je to ale
+/* Kolik tahů těrkou zakázka obnáší. Na spotřebu barvy to vliv nemá a mít
+   nesmí: násobí se počtem hotových výrobků, ne počtem těrkování. Je to ale
    jediné číslo, kterým se čtyři potisky na sítě od jednoho liší — a podle něj
-   se pozná, jestli zadaná šířka stěrky k té zakázce vůbec sedí. */
+   se pozná, jestli zadaná šířka těrky k té zakázce vůbec sedí. */
 function tahyZakazky({ kusu, naTah }) {
   const ks = Math.max(0, Math.round(n(kusu)));
   const k = Math.max(1, Math.round(n(naTah, 1)));

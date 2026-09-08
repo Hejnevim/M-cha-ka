@@ -75,7 +75,7 @@ const frontaKMichani = (fronta) => (fronta || []).filter(polozkaCeka)
    obnovení stránky ukazovalo na jinou barvu a plán by tiše počítal s cizím
    složením. Vydrží název — a v dílně je to stejně to, čemu kelímku říkají. */
 function novaPolozkaFronty({ fronta, recipe, davkaG, ks, zakazka, produkt, barva,
-                             tech, poloha, pozn, ted }) {
+                             tech, poloha, pozn, ted, barvaZakazky }) {
   const nyni = ted || Date.now();
   const slozky = (recipe && recipe.components) || [];
   const pct = slozky.reduce((s, c) => s + n(c.pct), 0);
@@ -87,6 +87,8 @@ function novaPolozkaFronty({ fronta, recipe, davkaG, ks, zakazka, produkt, barva
     nazev: (recipe && recipe.name) || "", recepturaId: (recipe && recipe.id) || "",
     zakazka: zakazka || "", produkt: produkt || "", barva: barva || "",
     tech: tech || "", poloha: poloha || "",
+    // „2/3" = druhá ze tří barev vícebarevné zakázky; jednobarevná má prázdno
+    barvaZakazky: barvaZakazky || "",
     davkaG: Math.max(0, n(davkaG)), ks: n(ks) > 0 ? n(ks) : null,
     hustota: n(recipe && recipe.density, 1.2), hex: (recipe && recipe.hex) || "#888888",
     tuzidlo: !!cfg.tuzidlo, potlifeH: potlifeHodin(cfg),
@@ -314,7 +316,9 @@ function nejlepsiPoradiFronty({ polozky, zbytky, materialy, ted }) {
 
 const FRONTA_HLAVICKA = ["kod", "nazev", "receptura", "zakazka", "produkt", "barva",
   "technologie", "poloha", "davka_g", "ks", "hustota", "hex", "tuzidlo", "potlife_h",
-  "poradi", "stav", "pridano", "zmeneno", "pozn", "komponenta", "procento"];
+  "poradi", "stav", "pridano", "zmeneno", "pozn", "komponenta", "procento",
+  // na konci, aby starší čtenáře souboru (most, tabulkový editor) nic neposunulo
+  "barva_zakazky"];
 
 function frontaDoCsv(fronta) {
   const radky = [FRONTA_HLAVICKA];
@@ -327,7 +331,7 @@ function frontaDoCsv(fronta) {
         p.hustota == null ? "" : cislo(p.hustota, 3), (p.hex || "").replace(/^#/, ""),
         p.tuzidlo ? "ano" : "", p.potlifeH == null ? "" : cislo(p.potlifeH, 1),
         cislo(p.poradi, 0), p.stav || "ceka", p.pridano || "", p.zmeneno || "",
-        p.pozn || "", c.name || "", c.pct === "" ? "" : cislo(c.pct, 4)]);
+        p.pozn || "", c.name || "", c.pct === "" ? "" : cislo(c.pct, 4), p.barvaZakazky || ""]);
     }
   }
   return radky.map((r) => r.map((c) => '"' + String(c == null ? "" : c).replace(/"/g, '""') + '"')
@@ -364,6 +368,8 @@ function csvNaFrontu(text) {
         pridano: n(r[ci.pridano]) || 0,
         zmeneno: n(r[ci.zmeneno]) || n(r[ci.pridano]) || 0,
         pozn: r[ci.pozn] || "", slozeni: [],
+        // starší soubor sloupec nemá — položka pak není součást vícebarevné zakázky
+        barvaZakazky: ci.barva_zakazky >= 0 ? String(r[ci.barva_zakazky] || "").trim() : "",
       });
     }
     const jmenoK = String(r[ci.komponenta] || "").trim();

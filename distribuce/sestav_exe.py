@@ -4,12 +4,16 @@
 Sestaví IRM pro Windows: složku sestaveni/IRM-windows/ s IRM.exe, aplikací
 a všemi daty dílny.
 
-    python distribuce/sestav_exe.py                 složka + balíček aktualizace s daty
-    python distribuce/sestav_exe.py --jen-program   balíček aktualizace bez dat (smí na GitHub)
+    python distribuce/sestav_exe.py
 
-Vedle složky vznikne i IRM-aktualizace-RRRR.MM.DD.zip (program/ + data/ +
-manifest.json) — ten se v dílně přetáhne na Aktualizovat.bat; pravidla
-slučování dat jsou v aktualizace.py.
+Vedle složky vzniknou dva balíčky aktualizace (pravidla slučování dat jsou
+v aktualizace.py):
+    IRM-aktualizace-RRRR.MM.DD.zip   program/ + data/ + manifest.json — s daty,
+                                     jde jen po dílně (USB, síť), na GitHub nikdy
+    IRM-aktualizace-program.zip      jen program/ + manifest bez otisků — tenhle
+                                     vydává vydej.py na GitHub a stahuje si ho
+                                     Aktualizovat.bat bez parametru
+Oba se v dílně přetáhnou na Aktualizovat.bat.
 
 Co vznikne (mimo repozitář, v TEST/sestaveni/IRM-windows/):
     IRM.exe            spouštěč (irm_okno.py + most.py + pdf_spec.py + pypdfium2)
@@ -65,6 +69,10 @@ def main():
 
     ico = os.path.join(PRACE, "irm.ico")
     ikona.ico(ico)
+    # Zástupci na ploše ukazují na sestaveni/irm.ico, ne na ikonu v exe: Windows
+    # si ikonu exe drží v mezipaměti a po výměně programu ji nepřekreslí,
+    # zatímco změna souboru .ico se projeví. Píší ho obě sestavení.
+    ikona.ico(os.path.join(balik.VYSTUP, "irm.ico"))
 
     prikaz = [sys.executable, "-m", "PyInstaller", "--noconfirm", "--clean",
               "--noconsole", "--name", "IRM", "--icon", ico,
@@ -102,16 +110,20 @@ def main():
     manifest = aktualizace.manifest_vytvor(CIL, verze)
     with open(os.path.join(CIL, "manifest.json"), "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=1)
-    # dávka pro přetažení balíčku aktualizace — bez diakritiky, cmd ji jinak rozsype
+    # dávka pro přetažení balíčku aktualizace — bez diakritiky, cmd ji jinak
+    # rozsype. Bez zipu (ani vedle exe žádný neleží) si dávka nechá poslední
+    # vydání stáhnout z GitHubu — exe nemá konzoli, proto hlášku o čekání
+    # vypisuje dávka a výsledek řekne až okno programu.
     with open(os.path.join(CIL, "Aktualizovat.bat"), "w", encoding="ascii", newline="\r\n") as f:
         f.write("@echo off\n"
                 "set ZIP=%~1\n"
                 "if \"%ZIP%\"==\"\" for %%f in (\"%~dp0IRM-aktualizace-*.zip\") do set ZIP=%%~ff\n"
                 "if \"%ZIP%\"==\"\" (\n"
-                "  echo Pretahnete na tento soubor balicek IRM-aktualizace-RRRR.MM.DD.zip,\n"
-                "  echo nebo ho zkopirujte vedle IRM.exe a spustte znovu.\n"
-                "  pause\n"
-                "  exit /b 1\n"
+                "  echo Zadny balicek vedle IRM.exe neni - stahuji posledni vydani z GitHubu.\n"
+                "  echo Balicek ma pres 200 MB, pockejte prosim; vysledek ohlasi okno programu.\n"
+                "  echo   " + balik.ODKAZ_VYDANI + "\n"
+                "  \"%~dp0IRM.exe\" --stahnout-aktualizaci\n"
+                "  exit /b %ERRORLEVEL%\n"
                 ")\n"
                 "\"%~dp0IRM.exe\" --aktualizace \"%ZIP%\"\n")
     with open(os.path.join(CIL, "CTI_ME.txt"), "w", encoding="utf-8") as f:
@@ -127,36 +139,60 @@ def main():
                 "Aktualizovat.bat (nebo ho dejte vedle IRM.exe a dávku spusťte). Program\n"
                 "se vymění, data se jen doplní — nic z evidence ani z vlastních receptur\n"
                 "se nemaže. Před aktualizací vznikne záloha v zalohy/<datum>/, průběh je\n"
-                "v aktualizace.log a v záložce Změny podkladů.\n")
+                "v aktualizace.log a v záložce Změny podkladů.\n\n"
+                "AKTUALIZACE ZE SÍTĚ: spusťte Aktualizovat.bat bez balíčku (nebo v aplikaci\n"
+                "v záložce Připojení k mostu tlačítko „Stáhnout a nainstalovat novou verzi“).\n"
+                "Stáhne se poslední vydání z GitHubu a nainstaluje se stejně jako z balíčku.\n"
+                "Vydání nese jen program (bez databází a evidence) — data zůstávají ta,\n"
+                "která v této složce jsou.\n"
+                "  " + balik.ODKAZ_VYDANI + "\n"
+                "  Windows: " + balik.ODKAZ_ZIP + "\n"
+                "  Android: " + balik.ODKAZ_APK + "\n"
+                "Nové databáze od výrobců chodí jen balíčkem s daty z počítače dílny.\n")
 
-    # balíček aktualizace: program/ + data/ + manifest.json
-    jen_program = "--jen-program" in sys.argv[1:]
-    zip_cesta = os.path.join(balik.VYSTUP, "IRM-aktualizace-%s%s.zip" % (verze, "-program" if jen_program else ""))
-    if os.path.isfile(zip_cesta):
-        os.remove(zip_cesta)
-    with zipfile.ZipFile(zip_cesta, "w", compression=zipfile.ZIP_DEFLATED) as z:
-        z.write(os.path.join(CIL, "manifest.json"), "manifest.json")
-        for p in balik.PROGRAM_POLOZKY:
-            cesta = os.path.join(CIL, p)
-            if os.path.isfile(cesta):
-                z.write(cesta, "program/" + p)
-            elif os.path.isdir(cesta):
-                for k, _, soubory in os.walk(cesta):
-                    for s in soubory:
-                        cely = os.path.join(k, s)
-                        z.write(cely, "program/" + os.path.relpath(cely, CIL).replace(os.sep, "/"))
-        if not jen_program:
-            for slozka in balik.DATOVE_SLOZKY:
-                cesta = os.path.join(CIL, slozka)
-                for k, _, soubory in os.walk(cesta):
-                    for s in soubory:
-                        if s.lower().endswith(".csv"):
+    # balíčky aktualizace: s daty (jen po dílně) a jen program (na GitHub).
+    # Balíček jen s programem nese manifest bez otisků — kdyby v něm byly
+    # otisky dat z tohoto počítače, aktualizace v dílně by je zapsala jako
+    # „co minulá verze přinesla“, a příští balíček s daty by pak soubory
+    # dílny považoval za změněné a odložil je jako .novy.
+    zip_data = os.path.join(balik.VYSTUP, "IRM-aktualizace-%s.zip" % verze)
+    zip_program = os.path.join(balik.VYSTUP, balik.VYDANI_ZIP)
+    for zip_cesta, s_daty in ((zip_data, True), (zip_program, False)):
+        if os.path.isfile(zip_cesta):
+            os.remove(zip_cesta)
+        with zipfile.ZipFile(zip_cesta, "w", compression=zipfile.ZIP_DEFLATED) as z:
+            if s_daty:
+                z.write(os.path.join(CIL, "manifest.json"), "manifest.json")
+            else:
+                z.writestr("manifest.json", json.dumps(balik.manifest_programu(verze), ensure_ascii=False, indent=1))
+            for p in balik.PROGRAM_POLOZKY:
+                cesta = os.path.join(CIL, p)
+                if os.path.isfile(cesta):
+                    z.write(cesta, "program/" + p)
+                elif os.path.isdir(cesta):
+                    for k, _, soubory in os.walk(cesta):
+                        for s in soubory:
                             cely = os.path.join(k, s)
-                            z.write(cely, "data/" + os.path.relpath(cely, CIL).replace(os.sep, "/"))
+                            z.write(cely, "program/" + os.path.relpath(cely, CIL).replace(os.sep, "/"))
+            if s_daty:
+                for slozka in balik.DATOVE_SLOZKY:
+                    cesta = os.path.join(CIL, slozka)
+                    for k, _, soubory in os.walk(cesta):
+                        for s in soubory:
+                            if s.lower().endswith(".csv"):
+                                cely = os.path.join(k, s)
+                                z.write(cely, "data/" + os.path.relpath(cely, CIL).replace(os.sep, "/"))
+    stopy = balik.stopy_dat(zip_program)
+    if stopy:
+        # radši spadnout než nechat ležet balíček, který by vydej.py mohl poslat ven
+        os.remove(zip_program)
+        print("CHYBA: balíček jen s programem nese data dílny — smazán: " + ", ".join(stopy[:5]))
+        return 1
 
     print("")
     print("hotovo: " + CIL)
-    print("  balíček aktualizace: " + zip_cesta + " (" + balik.mb(os.path.getsize(zip_cesta)) + ")")
+    print("  balíček aktualizace s daty: " + zip_data + " (" + balik.mb(os.path.getsize(zip_data)) + ")")
+    print("  balíček jen program (na GitHub): " + zip_program + " (" + balik.mb(os.path.getsize(zip_program)) + ")")
     print("  souborů aplikace: %d, datových CSV: %d" % (staticke, data))
     print("  velikost: " + balik.mb(balik.velikost_slozky(CIL)))
     balik.smaz_strom(PRACE)

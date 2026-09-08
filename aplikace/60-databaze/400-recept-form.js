@@ -85,15 +85,18 @@ function RecipeForm({ initial, onSave, onCancel, sita, materialy, sitaTech, sito
       <div className="frow c3" style=${{ marginTop: 4 }}>
         <div><label className="f">${preloz("Objednavatel")}</label><input value=${r.customer || ""} onChange=${(e) => setR(Object.assign({}, r, { customer: e.target.value }))} placeholder=${preloz("Název zákazníka (nepovinné)")} /></div>
         ${/* Objednací číslo u dodavatele — na faktuře stojí jen to, hledá
-              se podle něj. C / U se výslovně zapisuje jen tam, kde to název
-              nenese; jinak stačí to, co se z názvu čte samo. */""}
+              se podle něj. */""}
         <div><label className="f">${preloz("Objednací číslo")}</label><input value=${r.objCislo || ""} onChange=${(e) => setR(Object.assign({}, r, { objCislo: e.target.value }))} placeholder=${preloz("u dodavatele (nepovinné)")} /></div>
+        ${/* C / U není na výběr: „485 C" a „485 U" jsou dva odstíny a písmeno
+              dává název (cuReceptury v části 458), ne obsluha — nabídka s C, U
+              a „z názvu" vypadala jako volba a šla přepnout proti názvu. Ukáže
+              se jediná položka, bez písmene v názvu „—"; výslovný zápis ze
+              staršího souboru se dál čte a má přednost. readOnly místo
+              onChange: React jinak hlásí pole bez obsluhy změny. */""}
         <div>
           <label className="f">${preloz("Papír C / U")}</label>
-          <select value=${r.cu || ""} onChange=${(e) => setR(Object.assign({}, r, { cu: e.target.value }))}>
-            <option value="">${cuZNazvu(r.name) ? preloz("z názvu: {cu}", { cu: cuZNazvu(r.name) }) : "—"}</option>
-            <option value="C">${preloz(CU_POPIS.C)}</option>
-            <option value="U">${preloz(CU_POPIS.U)}</option>
+          <select value=${cuReceptury(r)} readOnly>
+            <option value=${cuReceptury(r)}>${cuReceptury(r) ? preloz(CU_POPIS[cuReceptury(r)]) : "—"}</option>
           </select>
         </div>
       </div>
@@ -109,7 +112,6 @@ function RecipeForm({ initial, onSave, onCancel, sita, materialy, sitaTech, sito
         </div>
         <div className="flags">
           <label className="tgl"><input type="checkbox" checked=${!!r.tested} onChange=${(e) => setR(Object.assign({}, r, { tested: e.target.checked }))} /><span className="tglt"></span>${preloz("Otestovaný")}</label>
-          <label className="tgl"><input type="checkbox" checked=${!!r.fade} onChange=${(e) => setR(Object.assign({}, r, { fade: e.target.checked }))} /><span className="tglt"></span>${preloz("Vysoce odolný vůči vyblednutí")}</label>
           <label className="tgl" title=${preloz("Barva se tuží — od smíchání běží doba zpracovatelnosti")}>
             <input type="checkbox" checked=${!!r.tuzidlo} onChange=${(e) => zapniTuzidlo(e.target.checked)} />
             <span className="tglt"></span>${preloz("Dvousložková — s tužidlem")}</label>

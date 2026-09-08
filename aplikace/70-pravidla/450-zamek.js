@@ -380,14 +380,14 @@ function pripravenostTech(tech, { sita, koef, pigmenty, recipes, dbTech, techSta
         ? (maVychozi ? (refuSitem > 0 ? preloz("výchozí + {n} produktů zvlášť", { n: refuSitem })
           : preloz("výchozí pro všechny")) : refuSitem + " " + preloz("produktů"))
         : preloz("vybírá se ručně") },
-    // šířka stěrky k produktu se zatím nemá kam zapsat — v kalkulaci je to
-    // u TXP výběr z TECHS.sterky, jinde ruční pole. Bod je schválně
+    // šířka těrky k produktu se zatím nemá kam zapsat — v kalkulaci je to
+    // u TXP výběr z TECHS.terky, jinde ruční pole. Bod je schválně
     // trvale neodškrtnutý: říká, že tohle přiřazení dílně pořád chybí,
     // a odškrtávat se začne, až pro něj v datech vznikne místo.
-    ...(maSito ? [{ klic: "sterka", popis: preloz("šířka stěrky k produktům"),
+    ...(maSito ? [{ klic: "terka", popis: preloz("šířka těrky k produktům"),
       hotovo: false,
-      detail: (TECHS[tech].sterky || []).length
-        ? preloz("zatím jen rychlé volby {v} mm", { v: TECHS[tech].sterky.join(" a ") })
+      detail: (TECHS[tech].terky || []).length
+        ? preloz("zatím jen rychlé volby {v} mm", { v: TECHS[tech].terky.join(" a ") })
         : preloz("zatím ruční pole v kalkulaci") }] : []),
     { klic: "koeficienty", popis: preloz("koeficienty spotřeby"),
       hotovo: koefu > 0, detail: koefu > 0 ? koefu + " " + preloz("hodnot") : preloz("nejsou") },

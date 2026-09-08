@@ -1,4 +1,8 @@
 "use strict";
+// Poslední vydání APK na GitHubu — stálý odkaz (název souboru bez data),
+// tentýž jako ODKAZ_APK v distribuce/balik.py; mění se na obou místech.
+const ODKAZ_VYDANI_APK = "https://github.com/Hejnevim/M-cha-ka/releases/latest/download/IRM-program.apk";
+
 function PripojeniTab({ sgps, databaze, recipes, links, vlastniStav, onOdebratZdroj,
                         onSloucitKopie, dbTech, setDbTech }) {
   // kolik receptur je v aplikaci z kterého souboru
@@ -63,6 +67,19 @@ function PripojeniTab({ sgps, databaze, recipes, links, vlastniStav, onOdebratZd
     sgps.zjisti();
   };
 
+  // "" nic, "bezi" stažení spuštěné, jinak text chyby z mostu
+  const [stahovani, setStahovani] = useState("");
+  const stahniNovou = async () => {
+    setStahovani("bezi");
+    try {
+      const r = await fetch(sgpsBase() + "/aktualizace", { method: "POST" });
+      const d = await r.json().catch(() => null);
+      if (!r.ok || !d || !d.ok) setStahovani((d && d.chyba) || preloz("most odpověděl {n}", { n: r.status }));
+    } catch (e) {
+      setStahovani(String(e));
+    }
+  };
+
   return html`
     <${React.Fragment}>
       <div className="card">
@@ -74,7 +91,8 @@ function PripojeniTab({ sgps, databaze, recipes, links, vlastniStav, onOdebratZd
         <div className="specbar" style=${{ marginTop: 4 }}>
           <span className="dot" style=${{ background: ok ? "var(--ok)" : "var(--warn)" }}></span>
           ${ok
-            ? html`<span>${preloz("Připojeno k")} <b>${sgpsAdresa()}</b>${preloz(" — čtení PDF")} ${sgps.stav.pdf ? preloz("připravené") : preloz("nedostupné")}.</span>`
+            ? html`<span>${preloz("Připojeno k")} <b>${sgpsAdresa()}</b>${preloz(" — čtení PDF")} ${sgps.stav.pdf ? preloz("připravené") : preloz("nedostupné")}.${
+                sgps.stav.adresa_site ? html` ${preloz("Po síti na")} <b>${sgps.stav.adresa_site}</b>.` : ""}</span>`
             : html`<span>${preloz("Nepřipojeno. Aplikace to zkouší dál sama; jakmile most naskočí, rozjede se bez načítání znovu.")}</span>`}
         </div>
 
@@ -99,6 +117,23 @@ function PripojeniTab({ sgps, databaze, recipes, links, vlastniStav, onOdebratZd
           ? html`<div className="okbox">✓ ${preloz("Most na")} <b>${zkouska.adresa}</b> ${preloz("odpověděl za {ms} ms — čtení PDF", { ms: zkouska.ms })}
               ${zkouska.d.pdf ? preloz("připravené") : preloz("NEDOSTUPNÉ")}${preloz(", SGPS v režimu „{r}“.", { r: zkouska.d.rezim })}</div>`
           : html`<div className="warnbox">${preloz("Na")} <b>${zkouska.adresa}</b> ${preloz("se most neozval —")} ${zkouska.chyba}</div>`)}
+
+        ${/* Jen v zabaleném programu (IRM.exe, APK) — most tam hlásí verzi
+             balíčku. Aplikace otevřená ze složky se aktualizuje z repozitáře,
+             u ní se řádek neukazuje. Android stahuje APK odkazem (WebView ho
+             předá prohlížeči a ten instalátoru), Windows si zip stáhne a
+             nainstaluje samo přes most (POST /api/aktualizace) — výsledek
+             ohlásí okno programu, ne aplikace. Odkazy jsou tytéž jako
+             v distribuce/balik.py. */
+          ok && sgps.stav.balicek && html`
+          <div className="rowline" style=${{ marginTop: 14 }}>
+            <span className="note">${preloz("Verze balíčku")} <b>${sgps.stav.balicek}</b></span>
+            ${typeof window !== "undefined" && window.IRMAndroid
+              ? html`<a className="btn sec" href=${ODKAZ_VYDANI_APK}>${preloz("Stáhnout novou verzi")}</a>`
+              : html`<button className="btn sec" onClick=${stahniNovou} disabled=${stahovani === "bezi"}>${preloz("Stáhnout a nainstalovat novou verzi")}</button>`}
+            ${stahovani === "bezi" && html`<span className="note">${preloz("Stahování běží na pozadí — výsledek ohlásí okno programu.")}</span>`}
+            ${stahovani && stahovani !== "bezi" && html`<span className="note" style=${{ color: "var(--warn)" }}>${stahovani}</span>`}
+          </div>`}
 
         ${/* Jen v aplikaci pro Android: telefon nemá složku, kterou by šlo
              zkopírovat, takže zálohu (data dílny i úložiště WebView) balí

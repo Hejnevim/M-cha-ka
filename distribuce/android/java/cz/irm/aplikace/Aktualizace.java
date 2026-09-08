@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -100,7 +101,11 @@ public class Aktualizace {
             if (!prvni) zalohuj();
             for (String[] d : SLOZKY) projdi(d[0], d[1], novy, stary);
             zapisZmeny(verzeNova);
-            zapis(new File(koren, "manifest.json"), novy.toString(1).getBytes(StandardCharsets.UTF_8), false);
+            // otisky, které balíček nenesl (APK „jen program“ z GitHubu nemá
+            // žádné), se přebírají z minulého manifestu — jako manifest_sluc
+            // v aktualizace.py; jinak by příští APK s daty považoval každý
+            // nakoupený soubor za změněný dílnou
+            zapis(new File(koren, "manifest.json"), manifestSluc(stary, novy).toString(1).getBytes(StandardCharsets.UTF_8), false);
             log.add("verze " + (verzeStara.isEmpty() ? "?" : verzeStara) + " → " + verzeNova);
         } catch (Exception e) {
             log.add("CHYBA: " + e);
@@ -475,6 +480,20 @@ public class Aktualizace {
         } catch (IOException e) {
             // log není důležitější než data
         }
+    }
+
+    static JSONObject manifestSluc(JSONObject stary, JSONObject novy) throws Exception {
+        JSONObject soubory = new JSONObject();
+        for (JSONObject zdroj : new JSONObject[]{stary.optJSONObject("soubory"), novy.optJSONObject("soubory")}) {
+            if (zdroj == null) continue;
+            for (Iterator<String> it = zdroj.keys(); it.hasNext();) {
+                String k = it.next();
+                soubory.put(k, zdroj.get(k));
+            }
+        }
+        JSONObject vysledek = new JSONObject(novy.toString());
+        vysledek.put("soubory", soubory);
+        return vysledek;
     }
 
     private static JSONObject manifest(byte[] b) {

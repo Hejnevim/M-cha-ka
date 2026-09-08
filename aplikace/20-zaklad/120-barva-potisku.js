@@ -61,11 +61,17 @@ function nejblizsiPantone(rgb, recipes) {
 /* Najde vzorník, u kterého v listu stojí zrovna tahle hodnota
    (název tiskové barvy nebo kód barvy zboží). */
 function vzornikProHodnotu(vzorniky, hodnota) {
-  const h = String(hodnota || "").trim().toLowerCase();
+  /* Popisek u vzorníku na listu bývá zkrácený („P. 200 C"), kdežto hledaný
+     název je po rozdělení barev sjednocený na „PANTONE 200 C" (část 497) —
+     obě strany se proto srovnají na tutéž značku, jinak by odstín ze
+     vzorníku k rozpracované barvě nedoputoval. */
+  const norm = (t) => String(t || "").trim().toLowerCase().replace(/\s+/g, " ")
+    .replace(/^(?:pms|p\.)\s*/, "pantone ");
+  const h = norm(hodnota);
   if (!h || !vzorniky || !vzorniky.length) return null;
   let volny = null;
   for (const v of vzorniky) {
-    const p = String(v.popisek || "").trim().toLowerCase();
+    const p = norm(v.popisek);
     if (p === h) return v;
     if (!volny && p && (p.indexOf(h) === 0 || h.indexOf(p) === 0)) volny = v;
   }

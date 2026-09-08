@@ -124,7 +124,8 @@ function FrontaTab({ fronta, setFronta, zbytky, materialy }) {
                   </td>
                   <td className="num"><b>${fmt(n(p.davkaG))} g</b>
                     ${p.ks ? html`<div className="note">${fmt(n(p.ks), 0)} ks</div>` : ""}</td>
-                  <td>${p.zakazka || html`<span className="note">—</span>`}
+                  <td>${p.zakazka || html`<span className="note">—</span>`}${p.barvaZakazky && html`
+                    <span className="tag" style=${{ marginLeft: 6 }} title=${preloz("barva zakázky")}>${p.barvaZakazky}</span>`}
                     ${p.produkt && html`<div className="note">${p.produkt}</div>`}</td>
                   <td>${k && k.zdroj
                     ? html`<div>${zdrojText(k)}</div>

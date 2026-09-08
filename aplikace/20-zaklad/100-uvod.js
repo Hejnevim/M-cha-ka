@@ -23,15 +23,15 @@ function useMediaQuery(dotaz) {
 /* ---------- technologie a výchozí spotřeby (g/m², editovatelné) ---------- */
 /* sito:false = technologie sítem netiskne (tampontisk jede přes leptané
    klišé), takže se u ní síto nevybírá ani netiskne na lístek.
-   sterky = šířky stěrek (mm), které pro technologii v dílně skutečně visí.
-   Kalkulace z pole šířky stěrky udělá výběr s těmito šířkami v nabídce —
+   terky = šířky stěrek (mm), které pro technologii v dílně skutečně visí.
+   Kalkulace z pole šířky těrky udělá výběr s těmito šířkami v nabídce —
    tiskař nemá co vymýšlet, vybírá z toho, co drží v ruce, a nic nepíše.
    Technologie bez seznamu žádnou nabídku nedostane a zůstává jí ruční
    číselné pole. */
 const TECHS = {
   SCR: { name: "Sítotisk (plast, papír) / rotační", gm2: 6.0 },
   PDP: { name: "Tampontisk", gm2: 2.5, sito: false },
-  TXP: { name: "Sítotisk (textil)", gm2: 14.0, sterky: [250, 420] },
+  TXP: { name: "Sítotisk (textil)", gm2: 14.0, terky: [250, 420] },
   TRS: { name: "Transfer", gm2: 18.0 },
   FIR: { name: "Firing — Low Temperature", gm2: 8.0 },
 };

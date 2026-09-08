@@ -42,8 +42,8 @@ function ZoomLista({ zoom, setZoom, popis }) {
 const klicBarvy = (b) => b.r + "," + b.g + "," + b.b;
 
 function PokrytiModal({ obrazky, stranky, pdfId, sirka, vyska, gm2, qty, hustota,
-                        odsazeniVychozi, onPouzit, onClose,
-                        sitaTech, tech, koef, material, podkladHex, ztraty, sterka,
+                        odsazeniVychozi, onPouzit, onPrevzitBarvy, onClose,
+                        sitaTech, tech, koef, material, podkladHex, ztraty, terka,
                         recipes, sitoVychozi }) {
   const [zdroj, setZdroj] = useState(null);     // {url, popis, vyrezat}
   const [prah, setPrah] = useState(28);
@@ -395,9 +395,11 @@ function PokrytiModal({ obrazky, stranky, pdfId, sirka, vyska, gm2, qty, hustota
               </div>
               ${vybrane.length > 0 && vysl.poBarvach && html`
                 <${RozpisSeparaci} vybrane=${vybrane} poBarvach=${vysl.poBarvach}
-                  pxNaMm=${vysl.pxNaMm} qty=${qty} ztraty=${ztraty} sterka=${sterka}
+                  pxNaMm=${vysl.pxNaMm} qty=${qty} ztraty=${ztraty} terka=${terka}
                   sitaTech=${sitaTech} tech=${tech} koef=${koef} material=${material}
-                  podkladHex=${podkladHex} recipes=${recipes} sitoVychozi=${sitoVychozi} />`}
+                  podkladHex=${podkladHex} recipes=${recipes} sitoVychozi=${sitoVychozi}
+                  sirka=${sirka} vyska=${vyska}
+                  onPrevzit=${onPrevzitBarvy ? (seznam) => onPrevzitBarvy(seznam, n(odsazeni, 0)) : null} />`}
               <div className="rowline" style=${{ marginTop: 16, marginBottom: 0 }}>
                 <button className="btn" onClick=${() => { onPouzit(vysl.pct, n(odsazeni, 0)); onClose(); }}>
                   ${preloz("Použít krycí plochu {p} % →", { p: fmt(vysl.pct, 1) })}
@@ -417,8 +419,9 @@ function PokrytiModal({ obrazky, stranky, pdfId, sirka, vyska, gm2, qty, hustota
    barva potisku dostane řádek se svou plochou, sítem a spotřebou, k tomu
    volitelný bílý podtisk pro tmavý textil. Síta se nabízejí z parametrů
    technologie — táž nabídka jako v kalkulaci, žádný druhý seznam. */
-function RozpisSeparaci({ vybrane, poBarvach, pxNaMm, qty, ztraty, sterka, sitaTech,
-                          tech, koef, material, podkladHex, recipes, sitoVychozi }) {
+function RozpisSeparaci({ vybrane, poBarvach, pxNaMm, qty, ztraty, terka, sitaTech,
+                          tech, koef, material, podkladHex, recipes, sitoVychozi,
+                          sirka, vyska, onPrevzit }) {
   const nabidka = useMemo(() => (sitaTech || []).filter((x) => x.vth > 0), [sitaTech]);
   /* Ke každé barvě se zkusí přiřadit receptura podle odstínu — stejná mez
      ΔE 25 jako u barvy potisku ze vzorníku. Z receptury se bere hustota
@@ -461,10 +464,10 @@ function RozpisSeparaci({ vybrane, poBarvach, pxNaMm, qty, ztraty, sterka, sitaT
       hustota: shody[i] ? n(shody[i].recipe.density, 0) : null,
     })),
     kusu: qty, ztraty: ztraty, sita: sitaTech, tech: tech, koef: koef,
-    material: material, podkladHex: podkladHex, sirkaSterkyMm: sterka, motivu: motivu,
+    material: material, podkladHex: podkladHex, sirkaTerkyMm: terka, motivu: motivu,
     podtisk: { zapnut: podtiskZap, sito: podtiskSito || hrube, dvojity: podtiskDvojity },
   }), [vybrane, poBarvach, sitaBarev, motivu, podtiskZap, podtiskSito, podtiskDvojity,
-       qty, ztraty, sterka, sitaTech, tech, koef, material, podkladHex, shody, hrube, sitoVychozi]);
+       qty, ztraty, terka, sitaTech, tech, koef, material, podkladHex, shody, hrube, sitoVychozi]);
 
   if (!(pxNaMm > 0)) return html`
     <div className="note" style=${{ marginTop: 14 }}>
@@ -532,9 +535,9 @@ function RozpisSeparaci({ vybrane, poBarvach, pxNaMm, qty, ztraty, sterka, sitaT
         <span className="dot" style=${{ background: rozbor.bezSita ? "var(--warn)" : "var(--ok)" }}></span>
         <span>${preloz("{n} sít · celkem {ml} ml na zakázku", { n: fmt(rozbor.pocetSit, 0), ml: fmt(rozbor.mlCelkem, 0) })}
           ${rozbor.rezervaMl > 0
-            ? preloz(" — v tom rezerva {r} ml na každé síto (stěrka {w} mm)",
-                { r: fmt(rozbor.rezervaMl, 0), w: fmt(n(sterka), 0) })
-            : preloz(" — rezerva síta se nepočítá, šířka stěrky není v kalkulaci zadaná")}</span>
+            ? preloz(" — v tom rezerva {r} ml na každé síto (těrka {w} mm)",
+                { r: fmt(rozbor.rezervaMl, 0), w: fmt(n(terka), 0) })
+            : preloz(" — rezerva síta se nepočítá, šířka těrky není v kalkulaci zadaná")}</span>
       </div>
       ${rozbor.bezSita > 0 && html`
         <p className="note" style=${{ marginTop: 6 }}>
@@ -542,5 +545,15 @@ function RozpisSeparaci({ vybrane, poBarvach, pxNaMm, qty, ztraty, sterka, sitaT
       <p className="note" style=${{ marginTop: 6 }}>
         ${preloz("Na zakázku = nános × {k} ks × (1 + ztráty {z} %) + rezerva síta. Gramy jen u barev s přiřazenou recepturou — bez hustoty se ml na gramy nepřevádí.",
           { k: fmt(n(qty), 0), z: fmt(n(ztraty), 0) })}</p>
+      ${/* Rozpis končil tabulkou a každá barva se pak míchala přes kalkulaci
+            od začátku. Tudy se stane seznamem barev zakázky (barvyZRozpisu,
+            část 497): každá barva svou krycí plochu, síto a odhad receptury,
+            kalkulace se přepne na barvu 1. */""}
+      ${onPrevzit && html`
+        <div className="rowline" style=${{ marginTop: 10, marginBottom: 0 }}>
+          <button className="btn" onClick=${() => onPrevzit(barvyZRozpisu({ polozky: rozbor.polozky,
+              podklad: rozbor.podklad, shody: shody, sirka: sirka, vyska: vyska, dvojity: podtiskDvojity }))}>
+            ${preloz("Převzít {n} barev do zakázky →", { n: fmt(rozbor.pocetSit, 0) })}</button>
+        </div>`}
     </div>`;
 }

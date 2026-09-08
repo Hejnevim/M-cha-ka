@@ -19,16 +19,62 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
   const pend = useRef({ color: null, rec: null, gm2: null });
   const [zak, setZak] = useState(null);   // hlavička zakázky ze specu (číslo, zákazník, rozměr…)
   const [pouzitRozmer, setPouzitRozmer] = useState(true);
-  const [pokrytiJob, setPokrytiJob] = useState(null);   // % z rozboru náhledu
-  const [odsazeniJob, setOdsazeniJob] = useState(null); // mm použité při rozboru
+  /* ---- barvy zakázky (vícebarevný potisk, část 497) ----
+     Zakázka nese seznam barev potisku; kalkulace počítá vždy jednu z nich,
+     tu aktivní. Co má každá barva svoje (receptura, rozpracovaná barva,
+     krycí plocha své separace, násobek nánosu), leží v seznamu; recId,
+     adHoc, zListu, pokrytiJob a odsazeniJob níže jsou jen průhledy na
+     aktivní položku, aby zbytek obrazovky (výběr receptury, dávka, lístek,
+     vážení, kelímek) zůstal jednobarevný tak, jak je. Přepnutí barvy se
+     pro efekty níže chová jako přepnutí receptury: rozdělaná dávka, zbytek,
+     nátisk a náhrady patří k barvě, od které se odchází. Index aktivní
+     barvy jde přes ref, protože setry se volají i z uzávěr starších
+     vykreslení (setTimeout po načtení specu). */
+  const [barvy, setBarvy] = useState(() => [novaBarvaZakazky({ recId: recipes[0] ? recipes[0].id : "" })]);
+  const [aktBarva, setAktBarva] = useState(0);
+  const aktBarvaRef = useRef(0);
+  aktBarvaRef.current = Math.max(0, Math.min(aktBarva, barvy.length - 1));
+  const barvaAkt = barvy[aktBarvaRef.current] || barvy[0];
+  const upravBarvu = (patch) => setBarvy((prev) => prev.map((b, i) => i === aktBarvaRef.current
+    ? Object.assign({}, b, typeof patch === "function" ? patch(b) : patch) : b));
+  const pridejBarvu = () => {
+    setBarvy((prev) => prev.concat([novaBarvaZakazky({ recId: recipes[0] ? recipes[0].id : "" })]));
+    setAktBarva(barvy.length);
+  };
+  const odeberBarvu = (i) => {
+    if (barvy.length < 2) return;
+    setBarvy((prev) => prev.filter((b, k) => k !== i));
+    setAktBarva((a) => a > i ? a - 1 : Math.min(a, barvy.length - 2));
+  };
+  // namíchaná barva — nastavuje se samo (dovážení, štítek) i ručně fajfkou v dlaždici
+  const oznacNamichano = (i, v) => setBarvy((prev) => prev.map((b, k) => k === i ? Object.assign({}, b, { namichano: !!v }) : b));
+  const pokrytiJob = barvaAkt.pokrytiJob;      // % z rozboru náhledu (null = z katalogu)
+  const odsazeniJob = barvaAkt.odsazeniJob;    // mm použité při rozboru
+  const setPokrytiJob = (v) => upravBarvu({ pokrytiJob: v });
+  const setOdsazeniJob = (v) => upravBarvu({ odsazeniJob: v });
   const [pokrytiOkno, setPokrytiOkno] = useState(false);
-  // krycí plocha se pamatuje ke každé zakázce zvlášť
+  /* Krycí plocha se pamatuje ke každé zakázce zvlášť a v ní ke každé barvě
+     (pole `barvy` podle pořadí; pct/odsazeni na první úrovni je první
+     barva — starší záznamy mají jen tu a čtou se dál). */
   const [pokrytiZakazek, setPokrytiZakazek] = useState(() => loadLS("irm-pokryti", {}));
   useEffect(() => { saveLS("irm-pokryti", pokrytiZakazek); }, [pokrytiZakazek]);
+  const zapisPokrytiZakazky = (seznam) => {   // [{pct, odsazeni, nazev, nanosKrat}] po barvách, díra = beze změny
+    const cislo = zak && zak.order ? String(zak.order) : "";
+    if (!cislo) return;
+    setPokrytiZakazek((prev) => {
+      const stary = prev[cislo] || {};
+      const poBarvach = (stary.barvy || []).slice();
+      seznam.forEach((z, i) => { if (z) poBarvach[i] = z; });
+      const prvni = poBarvach[0] || stary;
+      return Object.assign({}, prev, { [cislo]: { pct: prvni.pct != null ? prvni.pct : null,
+        odsazeni: prvni.odsazeni != null ? prvni.odsazeni : null, ts: Date.now(), barvy: poBarvach } });
+    });
+  };
   const ulozPokryti = (pct, mm) => {
     setPokrytiJob(pct); setOdsazeniJob(mm);
-    const cislo = zak && zak.order ? String(zak.order) : "";
-    if (cislo) setPokrytiZakazek((prev) => Object.assign({}, prev, { [cislo]: { pct: pct, odsazeni: mm, ts: Date.now() } }));
+    const z = [];
+    z[aktBarvaRef.current] = { pct: pct, odsazeni: mm, nazev: recipe ? recipe.name : "", nanosKrat: barvaAkt.nanosKrat };
+    zapisPokrytiZakazky(z);
   };
   // katalog zúžený na zvolenou technologii — sítotiskaři nemá co nabízet
   // produkty, které se sítotiskem netisknou
@@ -92,11 +138,14 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
   const klisePro = useMemo(() => sitaPro(sita, tech, true), [sita, tech]);
   // síta té technologie; bez vlastních dat padne na standardní řadu
   const sitaProTech = useMemo(() => sitaPro(sita, tech, false), [sita, tech]);
-  const [recId, setRecId] = useState(recipes[0] ? recipes[0].id : "");
+  // průhled na aktivní barvu zakázky (seznam `barvy` výš); setr bere i funkci jako useState
+  const recId = barvaAkt.recId;
+  const setRecId = (v) => upravBarvu((b) => ({ recId: typeof v === "function" ? v(b.recId) : v }));
   // Receptura ze zakázkového listu nemusí být v databázi (nebo databáze ještě
-  // není). Rozpracovaná receptura pak žije tady, aby šlo dojít až k míchacímu
-  // lístku; teprve tlačítkem se uloží natrvalo a naváže na kombinaci.
-  const [adHoc, setAdHoc] = useState(null);
+  // není). Rozpracovaná receptura pak žije u své barvy zakázky, aby šlo dojít
+  // až k míchacímu lístku; teprve tlačítkem se uloží natrvalo a naváže na kombinaci.
+  const adHoc = barvaAkt.adHoc;
+  const setAdHoc = (v) => upravBarvu((b) => ({ adHoc: typeof v === "function" ? v(b.adHoc) : v }));
   const recipeDb = recipes.find((r) => r.id === recId) || null;
   const recipe = recipeDb || adHoc || recipes[0] || null;
   const jeAdHoc = !!(recipe && adHoc && recipe.id === adHoc.id);
@@ -105,7 +154,8 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     series: (rada || "").trim(), density: 1.2, hex: "#888888", components: [],
   });
   // Barva potisku pro výpis a pro lístek: pantone z názvu, jinak CMYK z odstínu.
-  const [zListu, setZListu] = useState(false);   // odstín přišel ze vzorníku v PDF
+  const zListu = barvaAkt.zListu;                // odstín přišel ze vzorníku v PDF
+  const setZListu = (v) => upravBarvu({ zListu: !!v });
   const barvaPotisku = useMemo(() => {
     if (!recipe) return null;
     const p = popisBarvyPotisku(recipe.name, recipe.hex, recipes);
@@ -120,6 +170,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
   const [ulozitZbytek, setUlozitZbytek] = useState(null);     // dialog uložení
   const [kodDavky, setKodDavky] = useState("");               // kód dávky — drží se i po zavření štítku
   const [stitekOtevren, setStitekOtevren] = useState(false);
+  const [stitkyOtevreny, setStitkyOtevreny] = useState(false);    // štítky všech barev zakázky naráz
   const [dvouslozkova, setDvouslozkova] = useState(false);    // barva s tužidlem — hlídat pot life
   const [davkaKod, setDavkaKod] = useState("");               // dávka, kterou tahle kalkulace míchá
   // ceny vidí mistr, ne tiskař u váhy — volba se drží i po zavření aplikace
@@ -142,7 +193,6 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
   const [nahrady, setNahrady] = useState({});
   const [profilVolba, setProfilVolba] = useState("auto");
   const [profilForm, setProfilForm] = useState(null);   // ruční profil: { name, pct, pozn }
-  const [cuFiltr, setCuFiltr] = useState("");            // C / U ve výběru Pantone
   const [historieOtevrena, setHistorieOtevrena] = useState(false);
 
   /* Dvousložkovost je vlastnost receptury, ne rozhodnutí u kelímku — přepínač
@@ -199,8 +249,8 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
   // vhodnost typu vybrané receptury: "" = nedá se říct, "ne" = výrobce ho
   // na materiál produktu neuvádí
   const recVhodnost = recipe ? vhodnostTypu(recipe.zdroj, dbMat, matProduktu) : "";
-  const pantoneAll = podleCu(podleDatabaze(podleTypuPolohy(recepturyTech), dbFiltr)
-    .filter((r) => r.type !== "Custom"), cuFiltr);
+  const pantoneAll = podleDatabaze(podleTypuPolohy(recepturyTech), dbFiltr)
+    .filter((r) => r.type !== "Custom");
   /* Hledá se i podle objednacího čísla a jmen složek (textHledaniReceptury);
      oblíbené jdou v nabídce první a nesou hvězdičku. */
   const pantoneList = (() => {
@@ -359,7 +409,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
   /* Hustota receptury na jednom místě: ze složek v tabulce materiálů, kde
      ji výrobce dal (Marabu), jinak z hodnoty u receptury nebo paušálu 1,20
      (hustotaReceptury v části 460). Berou ji spotřeba ze síta, rezerva
-     stěrky, objem dávky, cena litru i kelímek do skladu — kdyby si každý
+     těrky, objem dávky, cena litru i kelímek do skladu — kdyby si každý
      sáhl na recipe.density sám, lístek a sklad by se rozešly. */
   const hustotaRec = useMemo(() => hustotaReceptury(recipe, pigmenty), [recipe, pigmenty]);
 
@@ -401,16 +451,16 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
      ze zakázkového listu nebo obsluha, ne aby každá drobná zakázka mlčky
      narostla na dřívějších výchozích 50 g. */
   const [minBatch, setMinBatch] = useState(1);
-  /* Šířka stěrky je vlastnost tisku, ne receptury: totéž síto se stejnou barvou
+  /* Šířka těrky je vlastnost tisku, ne receptury: totéž síto se stejnou barvou
      jede jednou v malém rámu a podruhé v širokém. Prázdné pole znamená
      „nevím“ a rezerva se nepočítá — viz 495-naplne-sita.js. */
-  const [sterka, setSterka] = useState("");
-  /* Stěrky, které pro technologii v dílně skutečně visí (TECHS.sterky) —
+  const [terka, setTerka] = useState("");
+  /* Těrky, které pro technologii v dílně skutečně visí (TECHS.terky) —
      dlaždice je pak výběr s těmito šířkami v nabídce, ať se nic nepíše
      z hlavy; technologie bez seznamu má dál ruční pole. */
-  const sterkyTech = (TECHS[tech] && TECHS[tech].sterky) || [];
+  const terkyTech = (TECHS[tech] && TECHS[tech].terky) || [];
   const [naTah, setNaTah] = useState(1);
-  useEffect(() => { if (!maSito) { setSterka(""); setNaTah(1); } }, [maSito]);
+  useEffect(() => { if (!maSito) { setTerka(""); setNaTah(1); } }, [maSito]);
   useEffect(() => {
     if (pend.current.gm2 != null) { setGm2(pend.current.gm2); pend.current.gm2 = null; return; }
     setGm2(TECHS[tech] ? TECHS[tech].gm2 : 6);
@@ -427,26 +477,42 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     setProdId(spec.product.id);
     if (spec.position) setPosId(spec.position.id);
     if (spec.colorIdx >= 0) setColorIdx(spec.colorIdx);
-    if (spec.recipe) {
-      setRecId(spec.recipe.id);
-      setAdHoc(null);
-    } else if (spec.fields.recipe) {
-      // barva z listu není v databázi — založíme rozpracovanou recepturu,
-      // ať jde dojít k míchacímu lístku a složení doplnit až u míchačky
-      setRecId("");
-      const vz = vzornikProHodnotu(spec.vzorniky, spec.fields.recipe);
-      const nova = novaAdHoc(spec.fields.recipe, spec.fields.series);
-      // barvu vezmeme ze vzorníku vedle názvu v listu, ať odstín sedí
-      setAdHoc(vz ? Object.assign(nova, { hex: vz.hex }) : nova);
-      setZListu(!!vz);
+    /* Barvy zakázky ze specu: každá přečtená barva potisku je jedna položka
+       (resolveSpec, část 140). Nalezená ukazuje na recepturu z databáze;
+       nenalezená se založí jako rozpracovaná — jde s ní dojít k míchacímu
+       lístku a složení doplnit až u míchačky; odstín se bere ze vzorníku
+       vedle názvu na listu, ať sedí. Krycí plocha se každé barvě vrátí
+       z paměti zakázky (podle pořadí). Bez barvy na listu zůstává vybraná
+       receptura, jen se zakázka zúží na jednu barvu. */
+    const cisloZ = spec.fields.order ? String(spec.fields.order) : "";
+    const ulozene = cisloZ ? pokrytiZakazek[cisloZ] : null;
+    const pokrytiBarvy = (i) => {
+      const z = ulozene ? ((ulozene.barvy || [])[i] || (i === 0 ? ulozene : null)) : null;
+      return z ? { pokrytiJob: z.pct != null ? z.pct : null, odsazeniJob: z.odsazeni != null ? z.odsazeni : null,
+        nanosKrat: n(z.nanosKrat, 1) || 1 } : {};
+    };
+    const seznam = (spec.recipes && spec.recipes.length) ? spec.recipes
+      : (spec.recipe ? [{ nazev: spec.recipe.name, recipe: spec.recipe }] : []);
+    if (seznam.length) {
+      setBarvy(seznam.map((polozka, i) => {
+        if (polozka.recipe) return novaBarvaZakazky(Object.assign({ recId: polozka.recipe.id }, pokrytiBarvy(i)));
+        const vz = vzornikProHodnotu(spec.vzorniky, polozka.nazev);
+        const nova = novaAdHoc(polozka.nazev, spec.fields.series);
+        return novaBarvaZakazky(Object.assign({ recId: "", adHoc: vz ? Object.assign(nova, { hex: vz.hex }) : nova,
+          zListu: !!vz }, pokrytiBarvy(i)));
+      }));
     } else {
-      setZListu(false);
+      setBarvy((prev) => {
+        const b = prev[aktBarvaRef.current] || prev[0] || {};
+        return [novaBarvaZakazky(Object.assign({ recId: b.recId || "", adHoc: b.adHoc || null, zListu: false }, pokrytiBarvy(0)))];
+      });
     }
+    setAktBarva(0);
     if (spec.qty != null) setQty(spec.qty);
     if (spec.gm2 != null) setGm2(spec.gm2);
     if (spec.loss != null) setLoss(spec.loss);
     if (spec.minBatch != null) setMinBatch(spec.minBatch);
-    if (spec.sterka != null) setSterka(spec.sterka);
+    if (spec.terka != null) setTerka(spec.terka);
     if (spec.naTah != null) setNaTah(spec.naTah);
     const f = spec.fields;
     setZak((f.order || f.customer || f.note || f.mesh || f.opacity || f.surface || spec.w)
@@ -455,10 +521,6 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
           w: spec.w || 0, h: spec.h || 0, warn: spec.warn, ts: spec.ts }
       : null);
     setPouzitRozmer(true);
-    const cisloZ = spec.fields.order ? String(spec.fields.order) : "";
-    const ulozene = cisloZ ? pokrytiZakazek[cisloZ] : null;
-    setPokrytiJob(ulozene ? ulozene.pct : null);
-    setOdsazeniJob(ulozene ? ulozene.odsazeni : null);
     setPickerOpen(false);
     // po doběhnutí navazujících efektů příznaky zahodíme, ať neovlivní další ruční změny
     setTimeout(() => { pend.current = { color: null, rec: null, gm2: null }; }, 0);
@@ -514,19 +576,14 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
 
   const calc = useMemo(() => {
     if (!position || !recipe) return null;
-    const areaM2 = (sirka * vyska / 1000000) * (pokryti / 100);
-    const netto = areaM2 * n(qty) * n(gm2);
-    const withLoss = netto * (1 + n(loss) / 100);
-    /* Rezerva se přičítá, nezapočítává se do ztrát: ztráty jsou barva, která
-       se z dílny už nevrátí (stěrka, karty, okraje síta), houska před stěrkou
-       se na konci seškrábne zpátky do kelímku. Kdyby se schovala do procenta
-       ztrát, rostla by s velikostí zakázky — a ona je pořád stejná, protože
-       závisí jen na šířce stěrky. */
-    const rezerva = rezervaSita({ sirkaSterkyMm: sterka,
-      hustota: hustotaRec.hustota });
-    const rezervaG = rezerva ? rezerva.g : 0;
-    const potreba = withLoss + rezervaG;
-    const totalG = Math.max(potreba, n(minBatch));
+    /* Vzorec dávky (plocha, nános, ztráty, rezerva síta, minimum) je
+       v davkaBarvy (část 497) — týž volají dlaždice barev zakázky pro
+       neaktivní barvy, aby nikde nesvítilo jiné číslo než tady. Proč se
+       rezerva přičítá a nezapočítává do ztrát, stojí u něj. */
+    const d = davkaBarvy({ sirka: sirka, vyska: vyska, pokryti: pokryti, qty: qty, gm2: gm2, loss: loss,
+      terka: terka, hustota: hustotaRec.hustota, minBatch: minBatch, nanosKrat: barvaAkt.nanosKrat });
+    const areaM2 = d.areaM2, netto = d.netto, withLoss = d.withLoss, rezerva = d.rezerva,
+      rezervaG = d.rezervaG, potreba = d.potreba, totalG = d.totalG;
     const pctSum = slozeniAkt.reduce((s, c) => s + n(c.pct), 0);
     /* Objem složky z její vlastní hustoty (tabulka materiálů), bez ní
        z hustoty receptury; objem dávky je součet objemů — u bílé báze
@@ -540,8 +597,45 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
     const totalMl = comps.reduce((s, c) => s + c.ml, 0) || totalG / (hustotaRec.hustota || 1);
     return { areaM2, netto, withLoss, rezerva, rezervaG, potreba,
       tahy: tahyZakazky({ kusu: qty, naTah: naTah }),
-      totalG, totalMl, comps, pctSum, minApplied: totalG > potreba + 1e-9 };
-  }, [position, recipe, slozeniAkt, qty, gm2, loss, minBatch, sirka, vyska, pokryti, sterka, naTah, pigmenty, hustotaRec]);
+      totalG, totalMl, comps, pctSum, minApplied: d.minApplied, nanosKrat: d.nanosKrat };
+  }, [position, recipe, slozeniAkt, qty, gm2, loss, minBatch, sirka, vyska, pokryti, terka, naTah, pigmenty, hustotaRec, barvaAkt.nanosKrat]);
+
+  /* Dávka každé barvy zakázky — pro dlaždice barev a pro „Do fronty všechny
+     barvy". Počítá se ze společných údajů zakázky a z receptury té barvy,
+     bez vrstev, které patří k rozdělané práci u váhy (zbytek, náhrady,
+     nátisk, kompenzace) — ty má jen aktivní barva. U aktivní barvy vychází
+     totéž číslo jako calc.totalG, protože jde o týž vzorec (davkaBarvy). */
+  const recepturaBarvy = (b) => recipes.find((r) => r.id === b.recId) || b.adHoc || recipes[0] || null;
+  const davkyBarev = useMemo(() => barvy.map((b) => {
+    const rec = recepturaBarvy(b);
+    if (!position || !rec) return null;
+    const pokr = b.pokrytiJob != null ? b.pokrytiJob : n(position.cover, 100);
+    return Object.assign({ recipe: rec, pokryti: pokr }, davkaBarvy({ sirka: sirka, vyska: vyska, pokryti: pokr,
+      qty: qty, gm2: gm2, loss: loss, terka: terka, hustota: hustotaReceptury(rec, pigmenty).hustota,
+      minBatch: minBatch, nanosKrat: b.nanosKrat }));
+  }), [barvy, recipes, position, sirka, vyska, qty, gm2, loss, terka, minBatch, pigmenty]);
+
+  /* Rozpis separací → barvy zakázky (barvyZRozpisu, část 497): každá
+     separace se stane barvou se svou krycí plochou, bílý podtisk taky.
+     Receptura přijde z odhadu podle odstínu; kde odhad není, vznikne
+     rozpracovaná barva se skutečným odstínem z náhledu a sítem z rozpisu —
+     jméno „Barva N" jí obsluha přepíše výběrem receptury. Krycí plocha
+     zakázky se do paměti zapíše po barvách. */
+  const prevezmiBarvy = (seznam, odsazeni) => {
+    if (!seznam || !seznam.length) return;
+    const nove = seznam.map((z, i) => {
+      const zDb = z.recipeId && recipes.some((r) => r.id === z.recipeId);
+      return novaBarvaZakazky({
+        recId: zDb ? z.recipeId : "",
+        adHoc: zDb ? null : Object.assign(novaAdHoc(z.podtisk ? "Bílý podtisk" : "Barva " + (i + 1), ""),
+          { hex: z.hex, mesh: z.sito || "" }),
+        pokrytiJob: z.pokryti, odsazeniJob: odsazeni != null ? odsazeni : null, nanosKrat: z.nanosKrat || 1 });
+    });
+    setBarvy(nove); setAktBarva(0);
+    zapisPokrytiZakazky(nove.map((b, i) => ({ pct: b.pokrytiJob, odsazeni: b.odsazeniJob,
+      nazev: seznam[i].nazev || "", nanosKrat: b.nanosKrat })));
+    setPokrytiOkno(false);
+  };
 
   /* Pravidla zástupnosti z ceníku — která složka smí zaskočit za kterou.
      Počítají se jednou pro celou obrazovku; mění se jen s ceníkem. */
@@ -962,8 +1056,15 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
   /* Štítek se lepí na kelímek hned po namíchání — kolik z barvy zbude, se
      ví až po tisku. Proto se dávka do evidence založí rovnou celá a ve stavu
      "v tisku"; po zakázce se štítek načte čtečkou a doplní se zbytek. */
-  const oznacDavku = () => {
-    if (!recipe || !calc) return;
+  /* Kelímek se do evidence zakládá dvěma cestami: štítkem (jednobarevná
+     zakázka, jako dřív) a potvrzením navážení v asistentu (vícebarevná
+     zakázka, kde se štítky tisknou až za všechny barvy naráz). Obojí je
+     týž zápis. Kód si nese barva zakázky (kodKelimku, část 497), aby se
+     hromadný tisk dostal od barvy k jejímu kelímku. */
+  const zalozKelimek = () => {
+    if (!recipe || !calc) return "";
+    // štítek se lepí po namíchání — barva zakázky je od téhle chvíle hotová
+    oznacNamichano(aktBarvaRef.current, true);
     const kod = novyKodZbytku(zbytky);
     const pct = calc.pctSum || 100;
     setZbytky((prev) => [{
@@ -1003,11 +1104,41 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
       kdo: podpisRole(role, jmenoRole),
     }].concat(prev));
     setKodDavky(kod);
-    setStitekOtevren(true);
+    upravBarvu({ kodKelimku: kod });
     /* Štítkem míchání končí — dávka odsud dál existuje i tehdy, když se
        tužidlo teprve přidá. Kelímek se do ní zapíše, aby se z evidence dalo
        dojít od nádoby k času, kdy začala tuhnout. */
     if (dvouslozkova) zalozDavku({ kodKelimku: kod });
+    return kod;
+  };
+  const oznacDavku = () => { if (zalozKelimek()) setStitekOtevren(true); };
+
+  /* Potvrzení navážení v asistentu (část 290) u vícebarevné zakázky:
+     kelímek téhle barvy se založí hned — štítek přijde za všechny naráz —
+     a kalkulace se přepne na další barvu, která ještě namíchaná není
+     (v pořadí za aktivní, pak od začátku; barva odškrtnutá ručně fajfkou
+     se přeskočí, ta už v kelímku je). Asistent se pro ni rozběhne znovu
+     (klic v části 290). Barva s kelímkem druhý nedostane — opakované
+     stisknutí nesmí založit druhou dávku. Když už žádná nezbývá, zůstane
+     se u poslední: tam se tisknou štítky. */
+  const dalsiNenamichana = () => {
+    for (let k = 1; k < barvy.length; k++) {
+      const i = (aktBarvaRef.current + k) % barvy.length;
+      if (!barvy[i].namichano && !barvy[i].kodKelimku) return i;
+    }
+    return -1;
+  };
+  const potvrdNavazeni = () => {
+    if (!barvaAkt.kodKelimku) zalozKelimek();
+    const dalsi = dalsiNenamichana();
+    if (dalsi >= 0) setAktBarva(dalsi);
+  };
+  /* U vícebarevné zakázky tlačítko štítku otevře přehled kelímků všech
+     barev a tiskne je naráz. Aktivní barva bez kelímku ho dostane teď —
+     kdo míchá bez asistenta, nemá kde navážení potvrdit. */
+  const otevriStitkyZakazky = () => {
+    if (!barvaAkt.kodKelimku) zalozKelimek();
+    setStitkyOtevreny(true);
   };
 
   const ulozZbytekZKalkulace = () => {
@@ -1167,7 +1298,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
       ? " (z náhledu motivu" + (odsazeniJob ? ", odsazení " + fmt(odsazeniJob, 1) + " mm" : "") + ")" : ""}</div></div>
     <div><div class="lbl">Technologie</div><div class="val">${esc(tech)} — ${esc(TECHS[tech] ? TECHS[tech].name : "")}</div></div>
     <div><div class="lbl">Zakázka</div><div class="val">${fmt(n(qty), 0)} ks · ${fmt(n(gm2), 1)} g/m² · ztráty ${fmt(n(loss), 0)} %${
-      calc && calc.rezerva ? " · rezerva síta " + fmt(calc.rezervaG) + " g (stěrka " + fmt(calc.rezerva.sirka, 0) + " mm)" : ""}${
+      calc && calc.rezerva ? " · rezerva síta " + fmt(calc.rezervaG) + " g (těrka " + fmt(calc.rezerva.sirka, 0) + " mm)" : ""}${
       calc && calc.tahy && calc.tahy.naTah > 1 ? " · " + fmt(calc.tahy.tahu, 0) + " tahů po " + fmt(calc.tahy.naTah, 0) : ""}</div></div>
     ${kodDavky ? `<div><div class="lbl">Kód kelímku</div><div class="val" style="font-family:Consolas,monospace;font-weight:800">${esc(kodDavky)}
       <img src="${code128Url(kodDavky, 34, 1)}" alt="${esc(kodDavky)}" style="display:block;margin-top:2px">
@@ -1189,6 +1320,7 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
       maSito ? esc(recipe.mesh || "—") + " · " : ""}${esc(recipe.opacity || "—")} · ${esc(recipe.surface || "—")}</div></div>
     <div><div class="lbl">Objednavatel</div><div class="val">${esc((zak && zak.customer) || recipe.customer || "—")}</div></div>
     ${zak && zak.order ? `<div><div class="lbl">Zakázka</div><div class="val">${esc(zak.order)}</div></div>` : ""}
+    ${barvy.length > 1 ? `<div><div class="lbl">Barva zakázky</div><div class="val">${esc(oznaceniBarvy(aktBarvaRef.current, barvy.length))}</div></div>` : ""}
     ${zak && zak.note ? `<div><div class="lbl">Poznámka k zakázce</div><div class="val">${esc(zak.note)}</div></div>` : ""}
     ${zak && (zak.mesh || zak.opacity || zak.surface)
       ? `<div><div class="lbl">Požadavek z listu</div><div class="val">${esc([zak.mesh, zak.opacity, zak.surface].filter(Boolean).join(" · "))}</div></div>` : ""}
@@ -1847,6 +1979,25 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
   /* Odpočet doby zpracovatelnosti. Vykresluje se dvakrát — v kalkulaci
      drobně, v míchacím režimu velkým písmem — proto je to jeden blok
      předávaný dál, ne dvě různé komponenty. */
+  /* Pruh barev zakázky u váhy: táž komponenta jako v kartě, jen bez
+     odebírání — skladba zakázky se u váhy nemění. Přepnutí barvy tu dělá
+     totéž co v kartě: kalkulace, tabulka navážek i asistent se přepnou na
+     tu barvu (asistent začne znovu, viz zacniZnovu v části 290). */
+  const blokBarev = barvy.length > 1 ? html`
+          <${BarvyZakazkyPruh} barvy=${barvy} davky=${davkyBarev} aktivni=${aktBarvaRef.current}
+            onVyber=${setAktBarva} onNamichano=${oznacNamichano} />` : null;
+
+  /* Dovážená poslední složka = barva namíchaná. Bere se přechod
+     nehotovo → hotovo, ne stav sám: asistent hlásí „hotovo" i u receptury
+     bez složení (není co vážit) a hned po přepnutí barvy se stav teprve
+     zakládá — obojí by označilo barvu, na kterou nikdo nesáhl. */
+  const vazeniHotovoDrive = useRef(false);
+  useEffect(() => {
+    const hotovo = !!(michStav && michStav.done && calcAkt && calcAkt.comps.length > 0);
+    if (hotovo && !vazeniHotovoDrive.current && michRezim) oznacNamichano(aktBarvaRef.current, true);
+    vazeniHotovoDrive.current = hotovo;
+  }, [michStav && michStav.done, michRezim, calcAkt && calcAkt.comps.length]);
+
   const blokPotlife = calcAkt ? html`
           <${PotlifePruh} cfg=${potlifeAkt} bazeG=${calcAkt.totalG} zacatek=${zacatekMichani}
             velky=${true} davka=${davkaAkt}
@@ -1865,8 +2016,9 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                     neplatné HTML a zákaz tlačítka (bez receptury) by vypnul
                     i jeho. Takhle jde tužidlo přepnout vždycky. */ ""}
               <div className="stitekobal">
-                <button className="btn sec" onClick=${oznacDavku} disabled=${!recipe || !calc}>
-                  ${preloz("Štítek na kelímek →")}
+                <button className="btn sec" onClick=${barvy.length > 1 ? otevriStitkyZakazky : oznacDavku}
+                  disabled=${(!recipe || !calc) && !(barvy.length > 1 && barvy.some((b) => b.kodKelimku))}>
+                  ${barvy.length > 1 ? preloz("Štítky na kelímky →") : preloz("Štítek na kelímek →")}
                 </button>
                 <label className="tgl" title=${preloz("pot life se pak hlídá od přidání tužidla")}>
                   <input type="checkbox" checked=${dvouslozkova} onChange=${(e) => setDvouslozkova(e.target.checked)} />
@@ -2004,7 +2156,18 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
           </div>
 
             <div className="card bigform karta-recept" style=${{ margin: 0 }}>
-            <h2>${preloz("Receptura a barva")}</h2>
+            <h2>${preloz("Receptura a barva")}
+              <button className="btn sec sm" onClick=${pridejBarvu} disabled=${!product}
+                title=${preloz("Další barva potisku téže zakázky — vlastní receptura, plocha a kelímek")}>${preloz("＋ Další barva")}</button>
+            </h2>
+            <!-- Barvy zakázky (vícebarevný potisk): jedna dlaždice na barvu,
+                 klepnutím se celá kalkulace přepne na tu barvu (komponenta
+                 BarvyZakazkyPruh, část 238 — táž stojí v míchacím režimu).
+                 Jednobarevná zakázka pruh nemá — běžný případ se nemění.
+                 Dávka v dlaždici je z davkyBarev, tedy z téhož vzorce jako
+                 Kolik namíchat. -->
+            <${BarvyZakazkyPruh} barvy=${barvy} davky=${davkyBarev} aktivni=${aktBarvaRef.current}
+              onVyber=${setAktBarva} onOdebrat=${odeberBarvu} onNamichano=${oznacNamichano} />
             <!-- Výběr receptury je schovaný za dvěma tlačítky: napřed volba
                  Pantone standard (nakoupené databáze) nebo Pantone custom
                  (vlastní odstíny), teprve po rozkliknutí se ukáže filtr →
@@ -2028,13 +2191,6 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                   popis=${typyPolohyAkt.length ? preloz("Poloha má přiřazené typy: {typy} — jiné typy barev se na ní nenabízejí (mění se v záložce Produkty).",
                       { typy: typyPolohyAkt.map(nazevDb).join(", ") })
                     : null} />
-                ${/* C / U (část 458) — natíraný a nenatíraný papír jsou dva
-                      různé odstíny; dosud se to poznalo jen z písmene v názvu. */""}
-                <div className="chips" style=${{ marginBottom: 6 }}>
-                  <button className=${"chip mini" + (cuFiltr === "" ? " on" : "")} onClick=${() => setCuFiltr("")}>${preloz("C i U")}</button>
-                  <button className=${"chip mini" + (cuFiltr === "C" ? " on" : "")} onClick=${() => setCuFiltr(cuFiltr === "C" ? "" : "C")} title=${preloz(CU_POPIS.C)}>C</button>
-                  <button className=${"chip mini" + (cuFiltr === "U" ? " on" : "")} onClick=${() => setCuFiltr(cuFiltr === "U" ? "" : "U")} title=${preloz(CU_POPIS.U)}>U</button>
-                </div>
                 <${Naseptavac} hodnota=${recQ} onZmena=${setRecQ} style=${{ marginBottom: 6 }}
                   polozky=${polozkyNaseptavace(pantoneAll, recQ, oblibene)}
                   onVyber=${(p) => { setRecId(p.r.id); setRecQ(p.r.name); }}
@@ -2248,8 +2404,8 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
               ${maSito && html`
                 <${React.Fragment}>
                   <div>
-                    <label className="f">${preloz("Šířka stěrky (mm)")}</label>
-                    ${/* Kde má technologie seznam stěrek (TECHS.sterky), je
+                    <label className="f">${preloz("Šířka těrky (mm)")}</label>
+                    ${/* Kde má technologie seznam stěrek (TECHS.terky), je
                         dlaždice výběr a šířky jsou rovnou v nabídce — čipy pod
                         polem se do dlaždice (≈140 px na 1600 px okna) nevešly
                         a lámaly se pod ni, a psát se sem stejně nemá co: vybírá
@@ -2258,16 +2414,16 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                         pak nepočítá (viz 495-naplne-sita.js). Šířka mimo
                         seznam (ze čtečky zakázkového listu) dostane vlastní
                         položku, ať se neztratí. */""}
-                    ${sterkyTech.length > 0 ? html`
-                      <select value=${String(sterka)} onChange=${(e) => setSterka(e.target.value)}>
+                    ${terkyTech.length > 0 ? html`
+                      <select value=${String(terka)} onChange=${(e) => setTerka(e.target.value)}>
                         <option value="">—</option>
-                        ${sterkyTech.map((s) => html`<option key=${s} value=${s}>${s}</option>`)}
-                        ${sterka !== "" && !sterkyTech.some((s) => s === n(sterka))
-                          && html`<option value=${String(sterka)}>${n(sterka)}</option>`}
+                        ${terkyTech.map((s) => html`<option key=${s} value=${s}>${s}</option>`)}
+                        ${terka !== "" && !terkyTech.some((s) => s === n(terka))
+                          && html`<option value=${String(terka)}>${n(terka)}</option>`}
                       </select>`
                     : html`
-                      <input type="number" min="0" step="10" value=${sterka}
-                        onChange=${(e) => setSterka(e.target.value)} />`}
+                      <input type="number" min="0" step="10" value=${terka}
+                        onChange=${(e) => setTerka(e.target.value)} />`}
                   </div>
                   <div>
                     <label className="f">${preloz("Potisků na tah")}</label>
@@ -2349,11 +2505,10 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
               </div>
               <div className="flags">
                 <label className="tgl"><input type="checkbox" checked=${!!recipe.tested} onChange=${(e) => upravRecepturu({ tested: e.target.checked })} /><span className="tglt"></span>${preloz("Otestovaný")}</label>
-                <label className="tgl"><input type="checkbox" checked=${!!recipe.fade} onChange=${(e) => upravRecepturu({ fade: e.target.checked })} /><span className="tglt"></span>${preloz("Vysoce odolný vůči vyblednutí")}</label>
               </div>
               ${/* Poznámka k receptuře („na tomhle materiálu dva průchody“) — znalost,
                     která jinak odchází s člověkem. Stojí schválně mimo .frow: pole
-                    v .frow jsou dlaždice s dolní mezí 178 px a flex:1 (.karta-tisk),
+                    v .frow jsou dlaždice v pruhu, který dorovná zbytek karty (.karta-tisk),
                     poznámka je řádek textu. Jeden řádek i v souboru, viz jedenRadek. */""}
               <div className="pozn-receptury">
                 <label className="f">${preloz("Poznámka k receptuře")}</label>
@@ -2402,24 +2557,6 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
             </div>
             <div className="result-sub">${kodJednotky(jednotka) !== "g" ? fmt(calcAkt.totalG) + " g · " : ""}≈ ${fmt(calcAkt.totalMl)} ml ${preloz("při hustotě")} ${fmt(hustotaRec.hustota, 2)} g/ml${
               calcAkt.zvetseno ? preloz(" · zakázka potřebuje {g}", { g: hmotnostText(calcAkt.davkaZakazky, jednotka) }) : ""}</div>
-
-            ${/* Rozpis kroku, ze kterych davka vznikla. Technolog musi umet cislo
-                  prepocitat rucne; bez nej je to jen udaj, kteremu se veri. */
-              calc && html`
-              <div className="note" style=${{ marginTop: 6 }}>
-                ${preloz("{a} m² × {k} % krycí plocha × {n} ks × {g} g/m² = {netto} g",
-                  { a: fmt(sirka * vyska / 1000000, 4), k: fmt(pokryti, 1), n: fmt(n(qty), 0),
-                    g: fmt(n(gm2), 1), netto: fmt(calc.netto) })}
-                ${preloz(" · ztráty {z} % → {s} g", { z: fmt(n(loss), 1), s: fmt(calc.withLoss) })}
-                ${!maSito ? ""
-                  : (calc.rezerva
-                    ? preloz(" · rezerva síta {r} g (stěrka {w} mm) → {c} g",
-                        { r: fmt(calc.rezervaG), w: fmt(calc.rezerva.sirka, 0), c: fmt(calc.potreba) })
-                    : preloz(" · rezerva síta se nepočítá — šířka stěrky není zadaná"))}
-                ${calc.tahy && calc.tahy.naTah > 1
-                  ? preloz(" · {t} tahů po {p} potiscích", { t: fmt(calc.tahy.tahu, 0), p: fmt(calc.tahy.naTah, 0) })
-                  : ""}
-              </div>`}
 
             ${calcAkt.comps.length > 0 && html`<${PruhSlozeni} recipe=${recipe} comps=${calcAkt.comps} />`}
             ${blokProfilu}
@@ -2545,9 +2682,29 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
                   davkaG: calc ? calc.totalG : 0, ks: n(qty),
                   zakazka: (zak && zak.order) || "", produkt: (product && product.ref) || "",
                   barva: colorSel ? (colorSel.code || colorSel.name || "") : "",
-                  tech: tech || "", poloha: position ? position.name : "" })}
+                  tech: tech || "", poloha: position ? position.name : "",
+                  barvaZakazky: oznaceniBarvy(aktBarvaRef.current, barvy.length) })}
                 title=${preloz("Přidat do fronty míchání — pořadí se pak dá zvolit tak, aby zbytek z jedné zakázky sedl na další")}>
                 ${preloz("＋ Do fronty")}</button>
+              ${/* Vícebarevná zakázka: každá barva svou položku fronty, jeden
+                    kelímek na barvu. Aktivní barva jde se složením, které se
+                    doopravdy naváží (profil, náhrady), ostatní s recepturou
+                    tak, jak je — zbytky a náhrady se řeší až u té barvy. Barva
+                    bez složení do fronty nejde: bez receptury není co plánovat. */""}
+              ${barvy.length > 1 && html`
+                <button className="btn sec" disabled=${!davkyBarev.some((d) => d && d.recipe && d.recipe.components.length)}
+                  onClick=${() => onDoFronty && onDoFronty(barvy.map((b, i) => {
+                    const d = davkyBarev[i];
+                    if (!d || !d.recipe || !d.recipe.components.length) return null;
+                    const rec = i === aktBarvaRef.current && recipe ? Object.assign({}, recipe, { components: slozeniAkt }) : d.recipe;
+                    return { recipe: rec, davkaG: d.totalG, ks: n(qty),
+                      zakazka: (zak && zak.order) || "", produkt: (product && product.ref) || "",
+                      barva: colorSel ? (colorSel.code || colorSel.name || "") : "",
+                      tech: tech || "", poloha: position ? position.name : "",
+                      barvaZakazky: oznaceniBarvy(i, barvy.length) };
+                  }).filter(Boolean))}
+                  title=${preloz("Každá barva zakázky jako vlastní položka fronty — jeden kelímek na barvu")}>
+                  ${preloz("＋ Do fronty všechny barvy ({n})", { n: barvy.length })}</button>`}
             </div>
           </div>
           <${MichaciRezim} aktivni=${michRezim} onZavrit=${zavriMichani}
@@ -2556,7 +2713,9 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
             modalNahore=${pickerOpen || !!odvod}
             recipe=${recipe} calcAkt=${calcAkt} rozpis=${rozpisZbytku} vyuziti=${vyuzitiZbytku}
             stav=${michStav} product=${product} colorSel=${colorSel} position=${position}
-            tech=${tech} zak=${zak} kodDavky=${kodDavky} jednotka=${jednotka} potlife=${michRezim ? blokPotlife : null}
+            barvyPruh=${blokBarev} barvaZakazky=${oznaceniBarvy(aktBarvaRef.current, barvy.length)}
+            tech=${tech} zak=${zak} kodDavky=${barvy.length > 1 ? (barvaAkt.kodKelimku || "") : kodDavky}
+            jednotka=${jednotka} potlife=${michRezim ? blokPotlife : null}
             zbytky=${blokZbytku}
             stitekTlacitko=${blokStitkuTlacitko} rady=${blokRady}
             aditiva=${blokAditiv} riziko=${michRezim ? blokRizika : null}
@@ -2574,6 +2733,11 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
               onOprava=${zapisOpravu}
               onProfil=${ulozProfilZOpravy}
               onStav=${setMichStav}
+              klic=${barvaAkt.id}
+              zakazka=${barvy.length > 1 ? { celkem: barvy.length, potvrzeno: !!barvaAkt.kodKelimku,
+                kod: barvaAkt.kodKelimku || "",
+                zbyva: barvy.filter((b, i) => i !== aktBarvaRef.current && !b.namichano && !b.kodKelimku).length } : null}
+              onPotvrdit=${barvy.length > 1 ? potvrdNavazeni : null}
               potlife=${potlifeAkt} zacatekPotlife=${zacatekMichani}
               onSpustitPotlife=${(bazeG) => spustitPotlife(bazeG)}
               onHotovo=${vyuzitiZbytku ? odepisZbytku : null} />
@@ -2698,6 +2862,13 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
       ${stitekOtevren && (zbytky || []).some((z) => z.kod === kodDavky) && html`
         <${StitekZbytku} zbytek=${(zbytky || []).find((z) => z.kod === kodDavky)}
           onClose=${() => setStitekOtevren(false)} />`}
+      ${stitkyOtevreny && barvy.length > 1 && html`
+        <${StitkyKelimku} onClose=${() => setStitkyOtevreny(false)}
+          polozky=${barvy.map((b, i) => {
+            const rec = davkyBarev[i] ? davkyBarev[i].recipe : null;
+            return { nazev: rec ? rec.name : "", hex: rec ? rec.hex : "",
+              zbytek: b.kodKelimku ? ((zbytky || []).find((z) => z.kod === b.kodKelimku) || null) : null };
+          })} />`}
 
       ${ulozitZbytek && recipe && html`
         <div className="modalbg" onClick=${(e) => { if (e.target === e.currentTarget) setUlozitZbytek(null); }}>
@@ -2766,9 +2937,10 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
         sirka=${sirka} vyska=${vyska} gm2=${n(gm2)} qty=${n(qty)}
         sitaTech=${sitaProTech} tech=${tech} koef=${koef}
         material=${product ? product.material : ""} podkladHex=${colorSel ? colorSel.hex : ""}
-        ztraty=${n(loss)} sterka=${n(sterka)} recipes=${recipes}
+        ztraty=${n(loss)} terka=${n(terka)} recipes=${recipes}
         sitoVychozi=${recipe ? recipe.mesh : ""}
-        odsazeniVychozi=${odsazeniJob} onPouzit=${ulozPokryti} onClose=${() => setPokrytiOkno(false)} />`}
+        odsazeniVychozi=${odsazeniJob} onPouzit=${ulozPokryti} onPrevzitBarvy=${prevezmiBarvy}
+        onClose=${() => setPokrytiOkno(false)} />`}
 
       ${historieOtevrena && recipe && html`<${HistorieReceptury} recipe=${recipe} zmeny=${zmenyPodkladu}
         davky=${davky} opravy=${opravy} upravy=${upravy} onClose=${() => setHistorieOtevrena(false)} />`}

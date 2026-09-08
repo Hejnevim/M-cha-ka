@@ -62,6 +62,18 @@ if hasattr(sys.stdout, "reconfigure"):
         pass
 
 SLOZKA = os.path.dirname(os.path.abspath(__file__))
+# Dosazuje irm_okno.py v zabaleném programu: bez parametrů spustí stažení
+# poslední verze z GitHubu (POST /api/aktualizace). None = umí jen exe.
+AKTUALIZACE = None
+
+
+def _verze_balicku():
+    """Verze z manifest.json vedle programu (píše ho sestavení a aktualizace)."""
+    try:
+        with io.open(os.path.join(SLOZKA, "manifest.json"), encoding="utf-8-sig") as f:
+            return str(json.load(f).get("verze") or "")
+    except (OSError, ValueError):
+        return ""
 CONFIG = os.path.join(SLOZKA, "sgps_config.json")
 DATABAZE = os.path.join(SLOZKA, "databaze barev")
 # Složky, se kterými most pracuje. Nic mimo tenhle seznam číst ani zapisovat
@@ -507,6 +519,17 @@ class Most(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         u = urlparse(self.path)
+        if u.path == "/api/aktualizace":
+            # stažení poslední verze ze sítě umí jen zabalený program — tam
+            # irm_okno.py dosadí AKTUALIZACE; most nad složkou se aktualizuje
+            # z repozitáře a tlačítko v aplikaci se u něj vůbec neukáže
+            if AKTUALIZACE is None:
+                return self._odpoved({"ok": False, "chyba": "Aktualizaci ze sítě umí jen program IRM.exe."}, 400)
+            try:
+                AKTUALIZACE()
+            except Exception as e:
+                return self._odpoved({"ok": False, "chyba": str(e)}, 500)
+            return self._odpoved({"ok": True})
         if u.path not in ("/api/pdf", "/api/vyrez", "/api/databaze/ulozit"):
             return self._odpoved({"ok": False, "chyba": "Neznámý požadavek."}, 404)
         if pdf_spec is None and u.path != "/api/databaze/ulozit":
@@ -610,6 +633,11 @@ class Most(SimpleHTTPRequestHandler):
                 return self._odpoved({
                     "ok": not chyba, "rezim": cfg.get("rezim"), "pocet": pocet,
                     "chyba": chyba, "verze": "1.1", "pdf": pdf_spec is not None,
+                    # verze balíčku (IRM.exe, APK) z manifest.json vedle programu;
+                    # prázdná = aplikace otevřená ze složky, ta se aktualizuje z repozitáře
+                    "balicek": _verze_balicku(),
+                    # adresa pro odkazy mezi zařízeními; prázdná = most jen místní
+                    "po_siti": bool(ADRESA_SITE), "adresa_site": ADRESA_SITE,
                     "popis": {"demo": "ukázková data (SGPS není připojeno)",
                               "soubor": "export ze SGPS ze souboru",
                               "rest": "HTTP API systému SGPS"}.get(cfg.get("rezim"), "")})
@@ -670,6 +698,36 @@ class Most(SimpleHTTPRequestHandler):
             self.close_connection = True
 
 
+ADRESA_SITE = ""   # http://IP:port, pod kterou most vidí ostatní zařízení; jen s --sit
+
+
+def adresa_v_siti(port):
+    """IP tohoto počítače v místní síti. Zjišťuje se „spojením“ UDP soketu,
+    které nic neposílá, ale donutí systém vybrat rozhraní s cestou ven —
+    gethostbyname na Windows často vrátí 127.0.0.1 nebo adresu virtuálního
+    adaptéru. Odkazy na receptury (#receptura=…) nesou tuhle adresu, aby
+    je otevřel i telefon nebo druhý počítač v dílně."""
+    import socket
+    ip = ""
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            s.connect(("10.255.255.255", 1))
+            ip = s.getsockname()[0]
+        finally:
+            s.close()
+    except OSError:
+        pass
+    if not ip or ip.startswith("127."):
+        try:
+            ip = socket.gethostbyname(socket.gethostname())
+        except OSError:
+            ip = ""
+    if not ip or ip.startswith("127."):
+        return ""
+    return "http://%s:%d" % (ip, port)
+
+
 class Server(ThreadingHTTPServer):
     daemon_threads = True
     # Windows jinak dovolí, aby se na týž port pověsil druhý most vedle prvního.
@@ -718,8 +776,14 @@ def main():
     print("")
     rozhrani = "0.0.0.0" if po_siti else "127.0.0.1"
     if po_siti:
+        global ADRESA_SITE
+        ADRESA_SITE = adresa_v_siti(port)
         print("  POZOR:    most je zpřístupněn ostatním počítačům v síti (--sit).")
         print("            Zapínejte jen ve firemní síti, které důvěřujete.")
+        if ADRESA_SITE:
+            print("  po síti:  %s/index.html — tuhle adresu nesou odkazy na receptury" % ADRESA_SITE)
+        else:
+            print("  po síti:  adresa v síti se nezjistila — odkazy na receptury zůstanou místní")
     try:
         server = Server((rozhrani, port), Most)
     except OSError:

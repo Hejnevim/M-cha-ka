@@ -1,7 +1,7 @@
 "use strict";
 function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopis, onHotovo,
                   pigmenty, barvaHex, onStav, potlife, zacatekPotlife, onSpustitPotlife,
-                  sarze, onNovaKonev, onOprava, onProfil }) {
+                  sarze, onNovaKonev, onOprava, onProfil, klic, zakazka, onPotvrdit }) {
   const sc = useScale();
   const [baud, setBaud] = useState("9600");
   const [tol, setTol] = useState(0.5);
@@ -61,7 +61,10 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
     const prvni = podil0.findIndex((p, i) => davkaCela * p - z[i] > Math.max(0.05, n(tol, 0.5)) / 2);
     setKrok(prvni >= 0 ? prvni : -1);
   };
-  useEffect(zacniZnovu, [totalG, comps.length, recipeName, (predem || []).join(","),
+  /* klic je barva zakázky (část 497): dvě barvy se stejnou recepturou
+     a stejnou dávkou by jinak asistenta po přepnutí nerozběhly znovu —
+     druhý kelímek by se vážil od stavu prvního. */
+  useEffect(zacniZnovu, [totalG, comps.length, recipeName, klic, (predem || []).join(","),
     aditivaRadky.map((a) => a.druh + ":" + fmt(a.g, 2)).join(",")]);
 
   const podil = korPodil || slozky.map((c) => (davkaCela > 0 ? c.g / davkaCela : 0));
@@ -243,6 +246,14 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
                 ${over ? preloz("přelito o {g} g", { g: fmt(-rem, 1) })
                   : (inTol ? preloz("✓ v toleranci") : preloz("zbývá {g} g", { g: fmt(rem, 1) }))}
               </div>
+              ${/* Po potvrzení barvy se táruje s plným kelímkem ještě na váze;
+                    jakmile se sundá, váha ukáže záporně a „zbývá" by lhalo o
+                    hmotnost starého kelímku. Nový kelímek se postaví a tára
+                    se stiskne znovu — to je jediné, co se má udělat. */ ""}
+              ${w < -tolerance && html`
+                <div className="note" style=${{ marginTop: 6 }}>
+                  ${preloz("Váha je pod nulou táry — postavte nový kelímek a stiskněte Tára.")}
+                </div>`}
               ${cur.aditivum && !cur.doRedeni && html`
                 <div className="note" style=${{ marginTop: 6 }}>
                   ${preloz("Složka předepsaná řadou barvy — přidává se do každé směsi téhle řady.")}
@@ -305,6 +316,20 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
                 g: fmt(vPotu),
                 prep: naviceni > 0.05 ? preloz(", dávka přepočtena z {p} g", { p: fmt(davkaCela) }) : "" })}
               <div className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
+                ${/* Vícebarevná zakázka: potvrzení založí kelímek téhle barvy
+                      (Calc, potvrdNavazeni) a přepne asistenta na další barvu,
+                      která ještě není namíchaná. Táruje se tady, ne v Calc —
+                      váha bydlí v téhle komponentě — a jen když další barva
+                      přijde: pro ni má váha začínat od nuly jako u nového
+                      kelímku. Štítky se pak tisknou naráz za celou zakázku,
+                      proto se tu po potvrzení jen ukáže kód kelímku. */ ""}
+                ${onPotvrdit && zakazka && !zakazka.potvrzeno && html`
+                  <button className="btn sm mich-tl-potvrdit" onClick=${() => {
+                    if (zakazka.zbyva > 0) sc.tare();
+                    onPotvrdit();
+                  }}>${zakazka.zbyva > 0 ? preloz("Potvrdit → další barva") : preloz("Potvrdit navážení")}</button>`}
+                ${zakazka && zakazka.potvrzeno && html`
+                  <span className="note">${preloz("kelímek {kod}", { kod: zakazka.kod })}</span>`}
                 <button className="btn sec sm" onClick=${zacniZnovu}>${preloz("Navážit znovu")}</button>
                 ${onHotovo && html`<button className="btn sm" onClick=${onHotovo}>${preloz("Odepsat zbytek ze skladu")}</button>`}
               </div>

@@ -50,7 +50,9 @@ function PruhSlozeni({ recipe, comps }) {
    je databáze jediná: v rozdělené kartě má mít každá půlka svůj filtr, i kdyby
    měl jen říct, že se není z čeho vybírat. `vyber` udělá z přepínače rozbalovací
    nabídku — u dlouhých názvů databází zabírají štítky celé dva řádky a rozpadají
-   se, kdežto nabídka je vždycky jeden řádek a řady se ukážou až po rozkliknutí. */
+   se, kdežto nabídka je vždycky jeden řádek a řady se ukážou až po rozkliknutí.
+   Štítková varianta je také sbalená: jeden štítek se zvolenou řadou a šipkou,
+   řady se ukážou až po jeho stisku. */
 /* `dbMat` + `matProduktu` přidají k řadám vhodnost na materiál produktu.
    Nevhodný typ barvy se NEskrývá, jen označí: skrytý by vypadal jako chybějící
    databáze a tiskař by ji hledal v souborech. Označení se ukáže, jen když je
@@ -58,6 +60,14 @@ function PruhSlozeni({ recipe, comps }) {
 function FiltrDatabaze({ recipes, hodnota, setHodnota, popis, tech, skryto, nadpis, vzdy, vyber,
                          dbMat, matProduktu, aktivni }) {
   const zdroje = useMemo(() => zdrojeReceptur(recipes), [recipes]);
+  /* Štítky řad jsou sbalené a rozbalují se šipkou jako výběr technologie
+     v nabídce. S osmi databázemi zabíraly štítky na telefonu celou obrazovku
+     a tabulka receptur začínala až pod nimi — přitom řada se volí jednou
+     a pak se v ní hledá. Sbalený stav ukazuje jen zvolenou řadu s počtem;
+     po volbě se lišta zase sbalí. Nedrží se po zavření: je to pohled na
+     chvíli, ne nastavení. */
+  const [rozbaleno, setRozbaleno] = useState(false);
+  const vybrana = zdroje.find((z) => (z.zdroj || "@vlastni") === hodnota);
   // "✓ na kov" / "× není na kov, bavlnu" za názvem typu barvy v nabídce
   const znackaMat = (zdroj) => {
     if (!zdroj) return "";
@@ -92,16 +102,26 @@ function FiltrDatabaze({ recipes, hodnota, setHodnota, popis, tech, skryto, nadp
             ${nazevDb(z.zdroj) || preloz(z.nazev)} (${fmt(z.pocet, 0)})${znackaMat(z.zdroj)}</option>`)}
         </select>` : html`
       <div className="chips">
-        <button className=${"chip" + (hodnota ? "" : " on")} onClick=${() => setHodnota("")}>
+        <button className="chip on filtr-db-hlava" aria-expanded=${rozbaleno}
+          title=${rozbaleno ? preloz("Sbalit výběr databáze") : preloz("Rozbalit výběr databáze")}
+          onClick=${() => setRozbaleno((o) => !o)}>
+          ${rozbaleno ? "▾" : "▸"}${" "}
+          ${vybrana ? preloz(vybrana.nazev) + " (" + fmt(vybrana.pocet, 0) + ")"
+            : preloz("vše") + " (" + fmt(recipes.length, 0) + ")"}
+        </button>
+      </div>
+      ${rozbaleno && html`
+      <div className="chips filtr-db-rady" style=${{ marginTop: 8 }}>
+        <button className=${"chip" + (hodnota ? "" : " on")} onClick=${() => { setHodnota(""); setRozbaleno(false); }}>
           ${preloz("vše")} (${fmt(recipes.length, 0)})
         </button>
         ${zdroje.map((z) => html`
           <button key=${z.zdroj || "-"} className=${"chip" + (hodnota === (z.zdroj || "@vlastni") ? " on" : "")}
             title=${z.zdroj || preloz("receptury zadané ručně v aplikaci")}
-            onClick=${() => setHodnota(z.zdroj || "@vlastni")}>
+            onClick=${() => { setHodnota(z.zdroj || "@vlastni"); setRozbaleno(false); }}>
             ${preloz(z.nazev)} (${fmt(z.pocet, 0)})${znackaMat(z.zdroj)}
           </button>`)}
-      </div>`}
+      </div>`}`}
       ${skryto > 0 && html`<p className="note" style=${{ marginTop: 6 }}>
         ${preloz("Skryto {n} receptur z databází, které k technologii{t} nepatří.",
           { n: fmt(skryto, 0), t: tech ? " " + tech : "" })}

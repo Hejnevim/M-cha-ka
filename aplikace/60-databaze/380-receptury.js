@@ -14,13 +14,12 @@ function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr, techno
      i po zavření aplikace, stejně jako u katalogu produktů. */
   const [view, setView] = useState(() => loadLS("irm-rec-view", "table"));
   useEffect(() => { saveLS("irm-rec-view", view); }, [view]);
-  /* Tři přepínače nad seznamem a zúžení na C / U. Nedrží se po zavření:
+  /* Tři přepínače nad seznamem. Nedrží se po zavření:
      „jen oblíbené" je pohled na chvíli, ne nastavení — kdo by je zapomněl
      zapnuté, hledal by zítra recepturu, která „v aplikaci není". */
   const [jenOblibene, setJenOblibene] = useState(false);
   const [jenMoje, setJenMoje] = useState(false);
   const [jenNove, setJenNove] = useState(false);
-  const [cu, setCu] = useState("");
   const [historie, setHistorie] = useState(null);
   const [zvyraznena, setZvyraznena] = useState("");
   /* Vybraná databáze má přednost před zúžením na technologii — ale jen tehdy,
@@ -37,8 +36,8 @@ function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr, techno
   const cizi = !!dbFiltr && !!technologie && !zuzene.length;
   const zaklad = useMemo(() => filtrReceptur(cizi ? podleDatabaze(recipes, dbFiltr) : zuzene,
     { oblibene: oblibene, jenOblibene: jenOblibene, jenMoje: jenMoje, jenNove: jenNove,
-      cu: cu, podpis: podpis }),
-    [recipes, dbFiltr, zuzene, cizi, oblibene, jenOblibene, jenMoje, jenNove, cu, podpis]);
+      podpis: podpis }),
+    [recipes, dbFiltr, zuzene, cizi, oblibene, jenOblibene, jenMoje, jenNove, podpis]);
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
     if (!s) return zaklad;
@@ -63,7 +62,7 @@ function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr, techno
       && (!otevritRecepturu.zdroj || x.zdroj === otevritRecepturu.zdroj));
     if (!r) return;
     if (r.zdroj) setDbFiltr(r.zdroj);
-    setQ(r.name); setJenOblibene(false); setJenMoje(false); setJenNove(false); setCu("");
+    setQ(r.name); setJenOblibene(false); setJenMoje(false); setJenNove(false);
     setZvyraznena(klicOblibene(r));
     if (onOtevreno) onOtevreno();
     const t = setTimeout(() => setZvyraznena(""), 6000);
@@ -171,7 +170,9 @@ function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr, techno
       <${FiltrDatabaze} recipes=${recipes} hodnota=${dbFiltr} setHodnota=${setDbFiltr}
         popis=${cizi ? preloz("Databáze {db} k technologii {t} nepatří. Ukazuje se celá, aby šel vzorník prohlédnout — v kalkulaci se v této technologii nenabídne.",
           { db: nazevDb(dbFiltr) || dbFiltr.replace(/\.csv$/i, ""), t: technologie }) : ""} />
-      ${/* Tři přepínače nad seznamem a C / U. Sčítají se: oblíbené A nové. */""}
+      ${/* Tři přepínače nad seznamem. Sčítají se: oblíbené A nové. Čipy C / U
+            tu byly do 8. 9. 2026 (kap. 250): písmeno je v názvu, podle kterého se
+            hledá, a filtr navíc byl další věc k přepínání. */""}
       <div className="chips" style=${{ marginBottom: 10 }}>
         <button className=${"chip" + (jenOblibene ? " on" : "")} onClick=${() => setJenOblibene((v) => !v)}
           title=${preloz("jen receptury s hvězdičkou")}>★ ${preloz("jen oblíbené")} (${fmt(pocty.oblibene, 0)})</button>
@@ -179,12 +180,6 @@ function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr, techno
           title=${preloz("jen receptury, které jsem zadal nebo schválil ({p})", { p: podpis })}>${preloz("jen moje")} (${fmt(pocty.moje, 0)})</button>
         <button className=${"chip" + (jenNove ? " on" : "")} onClick=${() => setJenNove((v) => !v)}
           title=${preloz("receptury, které přibyly v posledních {n} dnech", { n: NOVA_DNU })}>${preloz("jen nové")} (${fmt(pocty.nove, 0)})</button>
-        <span style=${{ width: 12 }}></span>
-        <button className=${"chip" + (cu === "" ? " on" : "")} onClick=${() => setCu("")}>${preloz("C i U")}</button>
-        <button className=${"chip" + (cu === "C" ? " on" : "")} onClick=${() => setCu(cu === "C" ? "" : "C")}
-          title=${preloz(CU_POPIS.C)}>C</button>
-        <button className=${"chip" + (cu === "U" ? " on" : "")} onClick=${() => setCu(cu === "U" ? "" : "U")}
-          title=${preloz(CU_POPIS.U)}>U</button>
       </div>
       <${Naseptavac} hodnota=${q} onZmena=${setQ} style=${{ marginBottom: 14 }}
         polozky=${polozkyNaseptavace(zaklad, q, oblibene)}
@@ -225,7 +220,7 @@ function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr, techno
                 <div className="pgcard-actions">
                   ${akce(r)}
                   ${smiRecept && html`
-                    <button className="btn sec sm" style=${{ flex: 1 }}
+                    <button className="btn sec sm"
                       onClick=${() => setEdit(JSON.parse(JSON.stringify(r)))}>${preloz("Upravit")}</button>
                     <button className="btn danger sm" onClick=${() => smaz(r)}>${preloz("Smazat")}</button>`}
                 </div>

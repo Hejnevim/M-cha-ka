@@ -21,6 +21,26 @@ na tutéž tabulku, ale celé pracoviště u váhy.
 
 ---
 
+## Kolik namíchat — rozpis, ze kterého dávka vznikla
+
+> 0,0158 m² × 100,0 % krycí plocha × 500 ks × 8,0 g/m² = 63,0 g · ztráty
+> 15,0 % → 72,4 g · rezerva síta 108 g (těrka 300 mm) → 180,4 g · 250 tahů
+> po 4 potiscích
+>
+> Bez zadané šířky těrky končil řádek slovy *rezerva síta se nepočítá —
+> šířka těrky není zadaná*.
+
+**Stálo pod:** dávkou v kartě *Kolik namíchat*, jako drobný řádek pod
+přepočtem na mililitry. Odstraněno v kap. 244 (8. 9. 2026).
+**Vysvětluje:** z čeho dávka vznikla, aby ji technolog uměl přepočítat
+ručně — plocha potisku v m² × krycí plocha × počet kusů × nános ze síta
+(g/m²) dá čistou spotřebu; ztráty v procentech se přičtou; rezerva síta
+(houska před těrkou, viz kapitola o šířce těrky) se přičte, je-li zadaná
+šířka těrky; počet tahů se ukáže jen při více potiscích na tah. Do návodu
+patří jako jediné místo, kde je vzorec dávky vypsaný celý.
+
+---
+
 ## Receptura a barva
 
 > Vyberte recepturu — technologie a rozměry se doplní z vybrané polohy potisku.
@@ -105,7 +125,9 @@ spotřebu na kartě vedle.
 
 > Parametry se ukládají přímo k receptuře (i k Pantone standardu).
 
-**Stálo pod:** přepínači *Otestovaný* a *Vysoce odolný vůči vyblednutí*.
+**Stálo pod:** přepínačem *Otestovaný* (do 8. 9. 2026 vedle něj stál ještě
+přepínač *Vysoce odolný vůči vyblednutí*; zrušen, hodnota se v CSV dál čte
+jen kvůli starším souborům).
 **Vysvětluje** něco, co jinak není vidět: síto, kryvost, povrch i přepínače
 se **nezapisují k zakázce, ale k receptuře** — příště se u téže barvy nabídnou
 samy. Platí to i pro nakoupené Pantone standardy, ne jen pro vlastní barvy.
@@ -316,6 +338,27 @@ který se dá vysvětlit jednou a pak už se jen dělá.
 
 ---
 
+## Vícebarevná zakázka u váhy — potvrzení, tára, štítky naráz
+
+> Po dovážení barvy stiskněte *Potvrdit → další barva*: kelímek se zapíše
+> do evidence, váha se vytáruje a asistent začne další recepturu od první
+> složky. Postavte nový kelímek; ukáže-li váha záporně, stiskněte Tára.
+> U poslední barvy je *Potvrdit navážení*. Štítky všech kelímků se pak
+> tisknou jedním tlačítkem *Štítky na kelímky →*.
+
+**Stojí u:** tlačítka pod hlášením „Všechny komponenty navaženy“ v asistentu
+a u tlačítka štítku pod ním — v aplikaci beze slov, jen názvy tlačítek.
+**Vysvětluje:** proč se u vícebarevné zakázky nelepí štítek po každé barvě
+(kelímek vzniká už potvrzením, štítky se tisknou až nakonec naráz), že se
+tára dělá sama v okamžiku potvrzení — tedy ještě s plným kelímkem na váze,
+takže po jeho sundání váha ukáže záporně a pomůže jen nový kelímek a Tára
+(asistent to v tu chvíli říká sám) —, a že barva odškrtnutá ručně fajfkou
+se v pořadí přeskočí, protože už v kelímku je. Kdo míchá bez asistenta,
+kelímek aktivní barvy dostane až tlačítkem štítků; barva bez kelímku má
+v přehledu pomlčku a nevytiskne se.
+
+---
+
 ## Barva na podkladu
 
 > Podtisk znamená průchod navíc: bílá se počítá jako samostatná dávka
@@ -358,24 +401,24 @@ zdůvodnění dál vrací (pole `duvod` v rozboru nátisku), jen se nezobrazuje.
 
 ---
 
-## Zakázka — šířka stěrky a potisků na tah
+## Zakázka — šířka těrky a potisků na tah
 
-> Než se udělá první tah, musí před stěrkou ležet souvislá houska barvy —
-> jinak stěrka nabírá vzduch a tisk vynechává. Ta barva se nespotřebuje:
+> Než se udělá první tah, musí před těrkou ležet souvislá houska barvy —
+> jinak těrka nabírá vzduch a tisk vynechává. Ta barva se nespotřebuje:
 > protahuje se sítem celou zakázku a na konci se seškrábne zpátky do kelímku.
 > Namíchaná ale být musí, proto se přičítá k dávce jako **rezerva síta**
 > a v předpovědi zbytku se pak objeví jako to, co zbude. Počítá se ze šířky
-> stěrky (houska ~20 × 15 mm na každý milimetr stěrky, tedy 300 mm²·mm);
-> stěrka 300 mm dá při hustotě 1,2 g/ml 108 g, stěrka 500 mm 180 g. Bez
-> zadané šířky stěrky se rezerva nepočítá a rozpis to řekne.
+> těrky (houska ~20 × 15 mm na každý milimetr těrky, tedy 300 mm²·mm);
+> těrka 300 mm dá při hustotě 1,2 g/ml 108 g, těrka 500 mm 180 g. Bez
+> zadané šířky těrky se rezerva nepočítá.
 
 > **Potisků na tah:** je-li na sítě motiv vícekrát (např. 4×), spotřeba barvy
 > se NEMĚNÍ — barva se přenáší na kusy, ne na tahy. Změní se jen počet tahů
-> (1 000 ks po 4 = 250 tahů) a to, že širší síto chce širší stěrku, tedy
-> větší rezervu. Přesně proto se zadává šířka stěrky, ne velikost síta.
+> (1 000 ks po 4 = 250 tahů) a to, že širší síto chce širší těrku, tedy
+> větší rezervu. Přesně proto se zadává šířka těrky, ne velikost síta.
 
-**Nikdy nestálo na obrazovce** — obě pole vznikla rovnou tichá (kap. rozpis
-dávky v Kolik namíchat ukazuje jen čísla). Vysvětluje, proč rezerva není
+**Nikdy nestálo na obrazovce** — obě pole vznikla rovnou tichá (rozpis dávky
+v Kolik namíchat byl do kap. 244 jen řádek čísel, teď není ani ten). Vysvětluje, proč rezerva není
 totéž co ztráty (ztráty se nevrátí, rezerva ano) a proč vícenásobný motiv
 na sítě nezvyšuje spotřebu.
 
@@ -406,6 +449,35 @@ na sítě nezvyšuje spotřebu.
 **Nikdy nestálo na obrazovce** — tabulka ukazuje jen čísla a vzorec v jedné
 poznámce. Vysvětluje, proč součet po barvách sedí na plochu motivu, kdy jsou
 gramy a kdy jen ml, a proč podtisk nevzniká pod černou.
+
+---
+
+## Odkaz na recepturu mezi zařízeními
+
+> Odkaz na recepturu je ve schránce: … — platí jen na tomto zařízení, most
+> neběží po síti
+
+**Stojí v:** hlášení po stisku *Odkaz* (kalkulace i záložka Receptury), jen
+když most neběží po síti.
+**Vysvětluje:** proč se odkaz poslaný z počítače na telefon (nebo naopak)
+neotevřel. Odkaz je adresa aplikace s recepturou za mřížkou
+(`#receptura=…&zdroj=…`). Aplikace otevřená dvojklikem má adresu souboru na
+disku a aplikace z mostu adresu `localhost` — obojí znamená na každém
+zařízení „tady“, takže jiné zařízení nemá co otevřít.
+
+**Jak to má být:** most na jednom počítači dílny se spustí po síti
+(`python most.py --sit`, nebo `"po_siti": true` v `sgps_config.json`).
+Takový most ve stavu hlásí adresu, pod kterou ho vidí ostatní (v záložce
+*Připojení k mostu* stojí „Po síti na http://192.168.…:8765“), a tlačítko
+*Odkaz* ji od té chvíle dává do odkazu místo localhostu. Telefon nebo druhý
+počítač na dílenské Wi-Fi odkaz otevře v prohlížeči — aplikace se načte
+z mostu dílny i s jeho databázemi. Mobilní aplikace (APK) má vlastní most
+jen v telefonu; aby i z ní odcházely odkazy pro ostatní, zadá se v ní
+v *Připojení k mostu* adresa mostu dílny.
+
+**Kdy to nejde:** mimo dílenskou síť (z domova, přes mobilní data) most
+dílny vidět není — odkaz je jen pro zařízení v téže síti. Adresu určuje
+síť (DHCP); změní-li se, most po startu vypíše novou a odkazy ji převezmou.
 
 ---
 
@@ -496,12 +568,15 @@ nastaví jednou. Libra je přesně 453,592 37 g, ne zaokrouhlených 454.
 
 ### C / U — natíraný a nenatíraný papír
 
-**Stojí u:** filtru nad výběrem Pantone a jako štítek u názvu receptury.
+**Stojí u:** štítku C / U vedle názvu receptury (čipy filtru nad seznamem
+receptur a ve výběru Pantone zrušeny 8. 9. 2026 — hledá se podle názvu).
 **Vysvětluje:** že „485 C" a „485 U" jsou **dva různé odstíny**, ne dva
 zápisy téhož. Písmeno se čte z názvu — bere se poslední samostatné C nebo U,
-takže „PANTONE Cool Gray 5 C" vyjde jako C a „485 CP" jako nic. U vlastní
-receptury se dá zapsat výslovně v editoru (*Papír C / U*) a zápis má přednost
-před názvem.
+takže „PANTONE Cool Gray 5 C" vyjde jako C a „485 CP" jako nic. V editoru
+receptury je *Papír C / U* jediná položka bez výběru — písmeno dává název,
+ne obsluha (do 8. 9. 2026 tam byla nabídka C / U / z názvu, která šla
+přepnout proti názvu). Výslovný zápis ze staršího souboru se dál čte a má
+před názvem přednost.
 
 ### Krycí a standardní varianta
 
@@ -512,6 +587,18 @@ názvu očištěného o označení („(vysoce krycí)", HD, opaque). Z jiné da
 se nebere schválně: týž pantone je tam namíchaný z jiných barev a přepnutím
 by se tiše vyměnila celá řada. Není-li protějšek nahraný, tlačítko se
 neukáže — to není chyba, ta varianta prostě v souborech není.
+
+### Výběr databáze — jeden štítek, řady po stisku
+
+**Stojí u:** štítku pod popiskem „Databáze receptur" v záložce Receptury
+(od 8. 9. 2026).
+**Vysvětluje:** že štítek ukazuje **zvolenou databázi s počtem receptur**
+(„vše" = všech sedm databází a vlastní receptury) a že se **po stisku
+rozbalí řady**, ze kterých se vybírá; po volbě se lišta zase sbalí. Řady
+byly dřív rozložené všechny naráz — s osmi databázemi zabíraly na telefonu
+celou obrazovku a tabulka receptur začínala až pod nimi. Rozbalení se
+nedrží po zavření aplikace: řada se volí jednou a pak se v ní hledá.
+V kalkulaci a v přepočtu na síto je totéž jako rozbalovací nabídka.
 
 ### Oblíbené, jen moje, jen nové
 
@@ -648,6 +735,71 @@ Odpovídá na otázku „co se s touhle barvou stalo", na kterou se dosud muselo
 chodit do čtyř záložek.
 
 ---
+
+## Barvy zakázky — vícebarevný potisk
+
+> Zakázka může mít víc barev potisku než jednu. V kartě *Receptura a barva*
+> je pak nad výběrem receptury pruh dlaždic, jedna na barvu: číslo, odstín,
+> název receptury, dávka a krycí plocha té barvy. Klepnutím na dlaždici se
+> celá kalkulace (výběr receptury, Kolik namíchat, lístek, vážení, kelímek)
+> přepne na tu barvu — míchá se pořád jeden kelímek, jen se střídá, který.
+> Jednobarevná zakázka pruh nemá. Barva se přidá tlačítkem *＋ Další barva*
+> v nadpisu karty, odebere křížkem v dlaždici.
+
+> **Odkud barvy přijdou:** ze zakázkového listu (pole *Barva potisku* se
+> dvěma a víc názvy, např. „P. Black C P. 200 C"), z kódu (`rec=` se dvěma
+> názvy) nebo ze SGPS; z okna krycí plochy tlačítkem *Převzít N barev do
+> zakázky* pod rozpisem separací — každá separace se stane barvou se svou
+> plochou, receptura se předvyplní odhadem podle odstínu (mez ΔE 25), bílý
+> podtisk je další barva; nebo ručně.
+
+> **Nenalezená barva** z listu se založí jako rozpracovaná (stejně jako
+> dřív u jedné barvy) — jde s ní dojít k míchacímu lístku a složení doplnit
+> u míchačky. Odhad z rozpisu, který nesedí, se přepíše výběrem receptury
+> jako u kterékoli jiné barvy.
+
+> **Fronta a lístek:** *＋ Do fronty všechny barvy (N)* založí jednu položku
+> fronty na barvu, každá se svou dávkou a označením „2/3" (druhá ze tří).
+> Aktivní barva jde do fronty se složením, které se doopravdy naváží
+> (profil úpravy, náhrady), ostatní s recepturou tak, jak je — zbytky a
+> náhrady se řeší až u té barvy. Míchací lístek nese řádek *Barva zakázky
+> 2/3*. Přepnutí barvy odpojí rozdělanou dávku, zbytek a nátisk stejně jako
+> přepnutí receptury — patří k barvě, od které se odchází.
+
+> **U váhy:** tentýž pruh dlaždic je v míchacím režimu nad tabulkou navážek,
+> větší. Klepnutím se přepne kelímek, který se míchá — tabulka, dávka
+> i asistent navážení se přepnou s ním (asistent začíná pro novou barvu
+> znovu). **Zelená kontura a fajfka** znamenají namícháno: označí se samo,
+> když asistent dováží poslední složku nebo když se vytiskne štítek na
+> kelímek; fajfkou v dlaždici se dá označit i zrušit ručně, třeba když se
+> váží bez asistenta. Hlavička režimu nese „barva zakázky 2/3".
+
+**Nikdy nestálo na obrazovce** — dlaždice nesou jen čísla a názvy. Vysvětluje,
+proč je pruh vidět jen u dvou a víc barev, kudy barvy přicházejí a že se
+míchá dál po jednom kelímku.
+
+---
+
+## Nová verze na dálku — Windows i telefon (8. 9. 2026)
+
+Poslední verze programu je na GitHubu jako *vydání*:
+`https://github.com/Hejnevim/M-cha-ka/releases/latest`. Nese jen program —
+databáze, evidence a parametry zůstávají ty, které zařízení má; aktualizace
+je nikdy nemaže, jen dopisuje.
+
+- **Počítač:** ve složce programu spustit `Aktualizovat.bat` bez balíčku.
+  Dávka si poslední vydání stáhne (přes 200 MB, chvíli to trvá) a
+  nainstaluje; okno programu na konci řekne, na jakou verzi. Totéž tlačítko
+  *Stáhnout a nainstalovat novou verzi* v záložce *Připojení k mostu* —
+  stahování běží na pozadí, program se vymění po zavření okna. Když je
+  verze stejná, program to řekne a nic nemění.
+- **Telefon:** v záložce *Připojení k mostu* odkaz *Stáhnout novou verzi* —
+  otevře se prohlížeč, stáhne APK, Android se zeptá na instalaci přes
+  stávající aplikaci. Data v telefonu zůstanou (stejný podpis).
+- **Verze balíčku** stojí vedle tlačítka; v aplikaci otevřené ze složky
+  (bez exe) řádek není — ta se aktualizuje z repozitáře.
+- **Co na dálku nejde:** první instalace na nové zařízení a nové databáze
+  od výrobců — to chodí jen balíčkem s daty z počítače dílny.
 
 ## Kde už to řečené je
 

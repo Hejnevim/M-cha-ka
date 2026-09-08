@@ -3,7 +3,7 @@
    Barva se z kelímku nikdy netiskne tak, jak se namíchala. Podle síta, teploty
    v dílně a toho, jak dlouho už stojí, se do ní přilévá ředidlo; na jemná síta
    a velké formáty ještě zpomalovač, aby nezasychala v okách dřív, než projede
-   stěrka.
+   těrka.
 
    Doteď o tom aplikace věděla jedinou věc: kolik ředidla se nalilo, aby se to
    dalo připočítat k ceně. Do hmotnosti dávky se to nezapočítávalo, na štítku

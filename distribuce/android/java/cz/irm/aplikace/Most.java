@@ -269,6 +269,17 @@ public class Most implements Runnable {
         return null;
     }
 
+    /** Verze balíčku z dilna/manifest.json (píše ho Aktualizace); prázdná, když chybí. */
+    private String verzeBalicku() {
+        try {
+            File f = new File(koren, "manifest.json");
+            if (!f.isFile()) return "";
+            return new JSONObject(ctiCsv(f)).optString("verze", "");
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
     private void api(String metoda, String cesta, Map<String, String> p, byte[] telo, OutputStream out) throws Exception {
         if ("POST".equals(metoda)) {
             if (cesta.equals("/api/databaze/ulozit")) {
@@ -284,6 +295,8 @@ public class Most implements Runnable {
             json(out, 200, new JSONObject()
                     .put("ok", true).put("rezim", "telefon").put("pocet", 0).put("chyba", "")
                     .put("verze", "1.1").put("pdf", false)
+                    // verze balíčku z dilna/manifest.json — aplikace ji ukáže v Připojení
+                    .put("balicek", verzeBalicku())
                     .put("popis", "telefon — SGPS a čtení PDF jsou jen na počítači"));
         } else if (cesta.equals("/api/databaze")) {
             String nazev = p.containsKey("slozka") ? p.get("slozka") : "databaze barev";

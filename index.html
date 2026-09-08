@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ink Recipe Manager — Printcolor</title>
+<!-- Ikona v záložce prohlížeče je totéž logo, které nesou balíčky exe a APK
+     (logo/irm-ikona.svg, tmavá varianta irm-ikona-dark.svg). Cesta je relativní,
+     aby fungovala i ze souboru bez mostu. Tmavou variantu nabízí druhý odkaz
+     jen prohlížečům, které u ikony berou media (Firefox); Chrome bere první. -->
+<link rel="icon" type="image/svg+xml" href="logo/irm-ikona.svg">
+<link rel="icon" type="image/svg+xml" href="logo/irm-ikona-dark.svg" media="(prefers-color-scheme: dark)">
 <link rel="stylesheet" href="aplikace/10-styl/020-promenne.css">
 <link rel="stylesheet" href="aplikace/10-styl/030-zaklad.css">
 <link rel="stylesheet" href="aplikace/10-styl/040-rozvrzeni.css">
@@ -58,6 +64,7 @@ if (!window.React || !window.ReactDOM || !window.htm)
 <script src="aplikace/30-app/225-role.js"></script>
 <script src="aplikace/30-app/226-lide.js"></script>
 <script src="aplikace/40-kalkulace/230-odemykani.js"></script>
+<script src="aplikace/40-kalkulace/238-barvy-zakazky-pruh.js"></script>
 <script src="aplikace/40-kalkulace/240-calc.js"></script>
 <script src="aplikace/40-kalkulace/250-vaha.js"></script>
 <script src="aplikace/40-kalkulace/260-financni-box.js"></script>
@@ -97,6 +104,7 @@ if (!window.React || !window.ReactDOM || !window.htm)
 <script src="aplikace/70-pravidla/490-prepocet-sortimentu.js"></script>
 <script src="aplikace/70-pravidla/495-naplne-sita.js"></script>
 <script src="aplikace/70-pravidla/496-separace-vypocet.js"></script>
+<script src="aplikace/70-pravidla/497-barvy-zakazky.js"></script>
 <script src="aplikace/50-zbytky/500-evidence.js"></script>
 <script src="aplikace/70-pravidla/510-aditiva.js"></script>
 <script src="aplikace/80-cena/520-cena-davky.js"></script>

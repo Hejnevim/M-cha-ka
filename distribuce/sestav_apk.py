@@ -4,7 +4,10 @@
 Sestaví IRM pro Android: sestaveni/IRM.apk s aplikací, mostem v Javě
 a všemi daty dílny.
 
-    python distribuce/sestav_apk.py
+    python distribuce/sestav_apk.py                 IRM.apk s daty dílny (jen po dílně)
+    python distribuce/sestav_apk.py --jen-program   IRM-program.apk bez dat — vydává se na
+                                                    GitHub (vydej.py); instaluje se přes
+                                                    stávající aplikaci, data v telefonu zůstanou
 
 Bez Gradlu a bez Android Studia — jen nástroje z Android SDK volané
 přímo: aapt2 (prostředky a manifest), javac (Java), d8 (dex), zipalign,
@@ -49,7 +52,10 @@ ANDROID_JAR = os.path.join(SDK, "platforms", "android-34", "android.jar")
 KLIC = os.path.join(NASTROJE, "irm.keystore")
 HESLO = "irm-dilna"
 PRACE = os.path.join(balik.VYSTUP, "_prace_apk")
-CIL = os.path.join(balik.VYSTUP, "IRM.apk")
+# --jen-program: bez datových assetů a s manifestem bez otisků (viz
+# balik.manifest_programu); jinak stejný APK, stejný klíč, stejná verze
+JEN_PROGRAM = "--jen-program" in sys.argv[1:]
+CIL = os.path.join(balik.VYSTUP, balik.VYDANI_APK if JEN_PROGRAM else "IRM.apk")
 
 
 def _jdk():
@@ -91,11 +97,16 @@ def main():
     print("skládám assety…")
     assets = os.path.join(PRACE, "assets")
     staticke = balik.zkopiruj_staticke(os.path.join(assets, "www"))
-    data = balik.zkopiruj_data(os.path.join(assets, "data"), prejmenuj={"databaze barev": "databaze_barev"})
+    data = 0
+    if not JEN_PROGRAM:
+        data = balik.zkopiruj_data(os.path.join(assets, "data"), prejmenuj={"databaze barev": "databaze_barev"})
     # manifest s otisky dat — Aktualizace.java podle něj při startu pozná, co
     # se od minulé verze změnilo a co smí vyměnit (tatáž pravidla jako na Windows)
     verze_nazev = balik.verze()
-    manifest = aktualizace.manifest_vytvor(balik.KOREN, verze_nazev)
+    if JEN_PROGRAM:
+        manifest = balik.manifest_programu(verze_nazev)
+    else:
+        manifest = aktualizace.manifest_vytvor(balik.KOREN, verze_nazev)
     with open(os.path.join(assets, "manifest.json"), "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=1)
 
@@ -106,6 +117,9 @@ def main():
                        ("mipmap-xxhdpi", 144), ("mipmap-xxxhdpi", 192)):
         os.makedirs(os.path.join(res, slozka))
         ikona.png(os.path.join(res, slozka, "ic_launcher.png"), px)
+    # Zástupce APK na ploše Windows nemá odkud vzít ikonu (soubor .apk žádnou
+    # nenese), proto se vedle balíčku píše i irm.ico a zástupce ukazuje na něj.
+    ikona.ico(os.path.join(balik.VYSTUP, "irm.ico"))
 
     # ---- manifest s verzí podle data sestavení
     verze_kod = time.strftime("%Y%m%d")
@@ -170,6 +184,12 @@ def main():
         raise SystemExit("ověření podpisu selhalo.")
 
     balik.smaz_strom(PRACE)
+    if JEN_PROGRAM:
+        stopy = balik.stopy_dat(CIL)
+        if stopy:
+            os.remove(CIL)
+            print("CHYBA: APK jen s programem nese data dílny — smazán: " + ", ".join(stopy[:5]))
+            return 1
     print("")
     print("hotovo: " + CIL)
     print("  verze %s (versionCode %s), souborů aplikace: %d, datových CSV: %d" % (verze_nazev, verze_kod, staticke, data))
