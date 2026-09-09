@@ -411,6 +411,8 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 15:01 | Čipy filtru C i U · C · U zrušeny nad seznamem receptur i ve výběru Pantone — písmeno je v názvu a ve štítku |
 | 15:38 | Karta produktu na telefonu: produkt a poloha potisku vedle sebe, zakázkový list pod nimi na středu přes oba sloupce |
 | 16:27 | Poslední verze na dálku — vydání na GitHubu jen s programem (vydej.py), Aktualizovat.bat si zip stáhne sám, telefon odkazem na APK; otisky manifestu se při aktualizaci bez dat zachovají |
+| 17:13 | Vydání v2026.09.08 na GitHubu — zip a APK jen s programem; stažení přes IRM.exe z kopie sestavení 188 MB za 17 s |
+| 17:29 | Úloha v 16:50 vydává balíčky sama — jen když se otisk programu liší od posledního vydání; stejná verze se nenahrává |
 ---
 
 ## Co aplikace je
@@ -11668,8 +11670,12 @@ GitHub nesmí, jak jsou.
   exe 227,1 MB; `stopy_dat` na obou: 0 (na balíčcích s daty 43 a 43 —
   25 CSV + 18 `.mp3.bak`). `vydej.py --kontrola`: verze 2026.09.08, token
   ze správce pověření, přístup k repozitáři v pořádku, poznámky kap. 247–251.
-  **Samotné nahrání na GitHub tu neproběhlo** (odesílání ven zablokováno) —
-  spouští ho uživatel: `python distribuce/vydej.py --bez-sestaveni`.
+  Vydáno v 17:08 na pokyn uživatele: `v2026.09.08`, zip 196 794 076 B,
+  APK 202 475 537 B, oba odkazy `releases/latest/download/…` odpovídají 200
+  se správnou délkou. `IRM.exe --stahnout-aktualizaci --tiche` na kopii
+  sestavení: bez `--vynutit` „máte nejnovější verzi“, s ním stažení 188 MB
+  za 17 s do `stazeno/`, aktualizace hotová 23 s od startu, manifest
+  2026.09.08 se 17 otisky.
 - Aktualizace kopie sestavení balíčkem jen s programem (`--tiche`, manifest
   s verzí 2026.09.01 a 17 otisky): exe skončil za 5,2 s, log „balíček
   nenese data — jen program“, dávka vyměnila 12 položek programu; manifest
@@ -11690,3 +11696,42 @@ GitHub nesmí, jak jsou.
   `rgb(232, 197, 69)` (`--warn`). Most nad složkou bez manifestu řádek
   neukazuje. `kontrola_aplikace.py` 0, `mapa.py --kontrola` 0, slovník
   cs/en/pt čtyř nových textů.
+
+## 253. Vydání balíčků s úlohou v 16:50 — jen když se program změnil
+
+**Problém.** Vydání z kap. 252 se spouštělo ručně. Dílna chce, aby s
+každodenní automatikou (16:50 push, 17:00 prezentace) odešla na GitHub i
+nová verze programu — ale nikdy stejná verze podruhé: balíčky mají po
+200 MB a verze je jen datum, takže by se stejný program vydával každý den
+znovu pod novým číslem.
+
+**Co se změnilo.**
+- `balik.otisk_programu()` — SHA-256 přes všechno, z čeho balíček jen
+  s programem vzniká: `index.html`, `data.js`, `aplikace/`, `lib/`,
+  `logo/`, `obrazky/`, `prezentace/`, `pdf_pravidla.json`, `most.py`,
+  `pdf_spec.py` a zdroje v `distribuce/` (bez `.bak`, `.tmp`, `.pyc`,
+  `__pycache__`). Cesty i obsah v pevném pořadí, takže je otisk stejný
+  napříč běhy.
+- `vydej.py` zapisuje otisk do těla vydání (`<!-- otisk:… -->`) a před
+  vším ho srovná s posledním vydáním: stejný otisk = „beze změny“, nic se
+  nesestavuje ani nenahrává. `--automaticky` k tomu staví do
+  `sestaveni/vydani/` (není-li `IRM_VYSTUP`), aby úloha nesahala na
+  nainstalovaný program v `sestaveni/IRM-windows/`, který v dílně může
+  běžet; `--automaticky --kontrola` jen řekne, jestli by vydával.
+- `nahraj_na_github.ps1` volá po pushi (i ve větvi „beze změny, nic
+  k nahrání“) funkci `Vydej` → `vydej.py --automaticky`, výstup jde do
+  `nahravani.log`; neúspěch vydání push neruší.
+- Řádky v `irm-nastroje`, oddíl 6 v `irm-github`, oddíl 3.8 rozboru.
+
+**Změřeno.**
+- Otisk programu: 3,1 s, dva běhy po sobě shodné (`c1de779542331c54…`).
+- `vydej.py --automaticky --kontrola` před zápisem otisku: „program se od
+  vydání v2026.09.08 změnil (otisk žádný → c1de7795…)“. Ostrý běh
+  `--automaticky` v 17:20: sestavení obou balíčků a výměna souborů
+  v existujícím vydání v2026.09.08 (zip 196 794 762 B, APK 202 475 537 B,
+  na GitHubu 15:26 a 15:28 UTC), návrat 0; v těle vydání
+  `<!-- kapitola:252 -->` a `<!-- otisk:c1de7795… -->`.
+- Tentýž příkaz z PowerShellu jako z úlohy: „beze změny: program je stejný
+  jako ve vydání v2026.09.08 — nic se nevydává“, `LASTEXITCODE 0`, 4,4 s.
+- `nahraj_na_github.ps1`: 123 řádků CRLF s BOM, parser PowerShellu
+  0 chyb, `Vydej` volaná na obou koncích skriptu (řádky 86 a 121).

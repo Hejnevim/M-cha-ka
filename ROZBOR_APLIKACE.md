@@ -1,11 +1,11 @@
 # Ink Recipe Manager — strukturovaný rozbor aplikace
 
 <!-- AUTO:stav -->
-> **Stav k 8. září 2026.** Čísla v úsecích označených `AUTO` generuje
+> **Stav k 9. září 2026.** Čísla v úsecích označených `AUTO` generuje
 > `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — nepřepisují
 > se ručně a nemohou se rozejít se skutečností. Text mimo ně píše člověk.
 
-> Poslední zapsaná změna ve vývojovém deníku: **8. září 16:27 — Poslední verze na dálku — vydání na GitHubu jen s programem (vydej.py), Aktualizovat.bat si zip stáhne sám, telefon odkazem na APK; otisky manifestu se při aktualizaci bez dat zachovají**
+> Poslední zapsaná změna ve vývojovém deníku: **8. září 17:29 — Úloha v 16:50 vydává balíčky sama — jen když se otisk programu liší od posledního vydání; stejná verze se nenahrává**
 
 | soubor | řádků | velikost |
 |---|---:|---:|
@@ -925,7 +925,12 @@ soubory pod stálými názvy, takže odkazy
 `…/releases/latest/download/IRM-aktualizace-program.zip` a
 `…/IRM-program.apk` ukazují vždy na poslední vydání (`balik.ODKAZ_*`,
 totéž v části 185). Poznámky k vydání jsou nadpisy kapitol deníku od
-poslední vydané (`<!-- kapitola:N -->` v těle vydání).
+poslední vydané (`<!-- kapitola:N -->` v těle vydání). Vydává i úloha
+v 16:50 (`nahraj_na_github.ps1` → `vydej.py --automaticky`): nová verze se
+nepozná podle data, ale podle otisku obsahu programu
+(`balik.otisk_programu` — aplikace, knihovny, obrázky, manuál, most, zdroje
+spouštěče a APK; `<!-- otisk:… -->` v těle vydání). Stejný otisk = nic se
+nesestavuje ani nenahrává; automatický běh staví do `sestaveni/vydani/`.
 
 Cesta zpět do dílny: **Windows** `IRM.exe --stahnout-aktualizaci [--tiche]
 [--vynutit]` — `Aktualizovat.bat` bez balíčku ho spustí sám: přečte

@@ -198,6 +198,43 @@ ODKAZ_ZIP = ODKAZ_VYDANI + "/download/" + VYDANI_ZIP
 ODKAZ_APK = ODKAZ_VYDANI + "/download/" + VYDANI_APK
 
 
+def otisk_programu():
+    """
+    Otisk všeho, z čeho vzniká balíček jen s programem: aplikace, knihovny,
+    obrázky, manuál, most a zdroje spouštěče i APK. Verze balíčku je jen
+    datum, takže by dvě sestavení z různých dnů vypadala jako různé verze
+    i s totožným obsahem — a naopak dvě sestavení téhož dne po změně jako
+    stejné. Otisk říká, jestli se program doopravdy změnil; vydej.py ho
+    zapisuje do těla vydání a před dalším vydáním srovnává, aby se totéž
+    nenahrávalo znovu (200 MB na každé straně).
+    """
+    import hashlib
+    h = hashlib.sha256()
+    zde = os.path.dirname(os.path.abspath(__file__))
+    zdroje = [os.path.join(KOREN, s) for s in STATICKE_SOUBORY]
+    zdroje += [os.path.join(KOREN, s) for s in ("pdf_pravidla.json", "most.py", "pdf_spec.py")]
+    slozky = [os.path.join(KOREN, s) for s in STATICKE_SLOZKY] + [zde]
+    soubory = []
+    for z in zdroje:
+        if os.path.isfile(z):
+            soubory.append(z)
+    for slozka in slozky:
+        for koren, podslozky, jmena in os.walk(slozka):
+            podslozky[:] = sorted(s for s in podslozky if s not in VYNECHAT)
+            for jmeno in sorted(jmena):
+                if jmeno in VYNECHAT or jmeno.lower().endswith((".bak", ".tmp", ".pyc")):
+                    continue
+                soubory.append(os.path.join(koren, jmeno))
+    for cesta in sorted(soubory):
+        h.update(os.path.relpath(cesta, KOREN).replace(os.sep, "/").encode("utf-8"))
+        h.update(b"\0")
+        with open(cesta, "rb") as f:
+            for kus in iter(lambda: f.read(1 << 20), b""):
+                h.update(kus)
+        h.update(b"\0")
+    return h.hexdigest()
+
+
 def manifest_programu(verze):
     """Manifest balíčku bez dat: žádné otisky. Aktualizace při zápisu
     nového manifestu přebírá otisky, které balíček nenesl, z minulého

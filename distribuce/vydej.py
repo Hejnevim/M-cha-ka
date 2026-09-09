@@ -7,6 +7,16 @@ z telefonu i z počítače.
     python distribuce/vydej.py                  sestaví balíčky jen s programem a vydá je
     python distribuce/vydej.py --bez-sestaveni  vydá, co už v sestaveni/ leží
     python distribuce/vydej.py --kontrola       jen prověří balíčky a přístup, nic neodešle
+    python distribuce/vydej.py --automaticky    z naplánované úlohy (nahraj_na_github.ps1,
+                                                16:50): vydá jen tehdy, když se program od
+                                                posledního vydání změnil; s --kontrola jen
+                                                řekne, jestli by vydával
+
+Kdy je verze nová: ne podle data, ale podle otisku obsahu programu
+(balik.otisk_programu) zapsaného v těle vydání jako <!-- otisk:… -->. Stejný
+otisk = nic se nenahrává, ani se nesestavuje. V automatickém běhu jde výstup
+do sestaveni/vydani/ (IRM_VYSTUP, není-li nastaveno), aby se nesahalo na
+nainstalovaný program v sestaveni/IRM-windows/, který v dílně může běžet.
 
 Co vzniká na GitHubu (repozitář balik.GITHUB_REPO, vydání „vRRRR.MM.DD“):
     IRM-aktualizace-program.zip   Windows — Aktualizovat.bat si ho stáhne sám
@@ -40,6 +50,11 @@ import sys
 import urllib.error
 import urllib.request
 import zipfile
+
+# musí být před importem balik — VYSTUP se počítá při importu
+if "--automaticky" in sys.argv[1:] and not os.environ.get("IRM_VYSTUP"):
+    os.environ["IRM_VYSTUP"] = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+                                            "sestaveni", "vydani")
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import balik    # noqa: E402
@@ -139,7 +154,7 @@ def kapitoly_deniku():
     return vysledek
 
 
-def poznamky(verze, od_kapitoly):
+def poznamky(verze, od_kapitoly, otisk):
     kapitoly = [k for k in kapitoly_deniku() if k[0] > od_kapitoly]
     if od_kapitoly == 0:
         kapitoly = kapitoly[-5:]
@@ -157,21 +172,25 @@ def poznamky(verze, od_kapitoly):
         radky.extend("- %d. %s" % k for k in kapitoly)
         radky.append("")
     radky.append("<!-- kapitola:%d -->" % posledni)
+    radky.append("<!-- otisk:%s -->" % otisk)
     return "\n".join(radky)
 
 
-def posledni_vydana_kapitola(tok):
+def posledni_vydani(tok):
+    """(číslo poslední vydané kapitoly, otisk programu v posledním vydání, značka)."""
     kod, v = api("/releases/latest", tok)
     if kod != 200:
-        return 0
-    m = re.search(r"<!-- kapitola:(\d+) -->", v.get("body") or "")
-    return int(m.group(1)) if m else 0
+        return 0, "", ""
+    telo = v.get("body") or ""
+    k = re.search(r"<!-- kapitola:(\d+) -->", telo)
+    o = re.search(r"<!-- otisk:([0-9a-f]+) -->", telo)
+    return (int(k.group(1)) if k else 0), (o.group(1) if o else ""), v.get("tag_name", "")
 
 
 # -------------------------------------------------------------------- vydání
-def vydej(verze, tok):
+def vydej(verze, tok, otisk):
     znacka = "v" + verze
-    telo = poznamky(verze, posledni_vydana_kapitola(tok))
+    telo = poznamky(verze, posledni_vydani(tok)[0], otisk)
     kod, vydani = api("/releases/tags/" + znacka, tok)
     if kod == 200:
         print("vydání %s už existuje — vyměňuji soubory a poznámky" % znacka)
@@ -211,6 +230,30 @@ def vydej(verze, tok):
 def main():
     argv = sys.argv[1:]
     kontrola = "--kontrola" in argv
+    automaticky = "--automaticky" in argv
+
+    tok = token()
+    if not tok:
+        print("CHYBA: žádný token GitHubu — nastavte GITHUB_TOKEN, nebo se jednou přihlaste přes git push.")
+        return 1
+    kod, kdo = api("", tok)
+    if kod != 200:
+        print("CHYBA: GitHub nepustil k repozitáři %s (%s): %s" % (balik.GITHUB_REPO, kod, kdo.get("message", "")))
+        return 1
+    print("přístup k %s v pořádku (%s)" % (balik.GITHUB_REPO, "soukromý" if kdo.get("private") else "veřejný"))
+
+    # otisk se počítá ze zdrojů před sestavením — když se program nezměnil,
+    # není co sestavovat ani nahrávat
+    otisk = balik.otisk_programu()
+    _, otisk_vydany, znacka_vydana = posledni_vydani(tok)
+    if otisk == otisk_vydany:
+        print("beze změny: program je stejný jako ve vydání %s (otisk %s…) — nic se nevydává" % (znacka_vydana, otisk[:12]))
+        return 0
+    print("program se od vydání %s změnil (otisk %s… → %s…)" % (znacka_vydana or "—", otisk_vydany[:12] or "žádný", otisk[:12]))
+    if automaticky and kontrola:
+        print("--kontrola: vydávalo by se, výstup do " + balik.VYSTUP)
+        return 0
+
     if not kontrola and "--bez-sestaveni" not in argv:
         for skript, args in (("sestav_exe.py", []), ("sestav_apk.py", ["--jen-program"])):
             print("== " + skript)
@@ -226,20 +269,10 @@ def main():
         return 1
     print("balíčky v pořádku: verze %s, %s %s, %s %s" % (
         verze, balik.VYDANI_ZIP, balik.mb(os.path.getsize(ZIP)), balik.VYDANI_APK, balik.mb(os.path.getsize(APK))))
-
-    tok = token()
-    if not tok:
-        print("CHYBA: žádný token GitHubu — nastavte GITHUB_TOKEN, nebo se jednou přihlaste přes git push.")
-        return 1
-    kod, kdo = api("", tok)
-    if kod != 200:
-        print("CHYBA: GitHub nepustil k repozitáři %s (%s): %s" % (balik.GITHUB_REPO, kod, kdo.get("message", "")))
-        return 1
-    print("přístup k %s v pořádku (%s)" % (balik.GITHUB_REPO, "soukromý" if kdo.get("private") else "veřejný"))
     if kontrola:
-        print("--kontrola: nic se neodesílá; poznámky by byly:\n" + poznamky(verze, posledni_vydana_kapitola(tok)))
+        print("--kontrola: nic se neodesílá; poznámky by byly:\n" + poznamky(verze, posledni_vydani(tok)[0], otisk))
         return 0
-    return vydej(verze, tok)
+    return vydej(verze, tok, otisk)
 
 
 if __name__ == "__main__":
