@@ -62,7 +62,7 @@ function typyProPolohu(typyPoloh, product, position) {
 function vychoziTypyPolohCsv() {
   return ['ref;technologie;poloha;typy;pozn',
     ';;;;"Ktere typy barev (databaze receptur) jde pouzit na konkretni polohu produktu."',
-    ';;;;"typy = nazvy souboru databazi oddelene carkou, napr. receptury_PMS_786.csv."',
+    ';;;;"typy = nazvy souboru databazi oddelene carkou, napr. receptury_PRINTCOLOR_786.csv."',
     ';;;;"Radek se zapisuje ze zalozky Produkty; prazdny seznam typu = poloha bez omezeni."',
   ].join("\r\n") + "\r\n";
 }

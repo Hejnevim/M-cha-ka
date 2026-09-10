@@ -3,7 +3,7 @@
 function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr, technologie, dbTech, sita,
                    materialy, onUlozitCeny, cenyStav, mostOk, role, jmenoRole, zapisZmenu,
                    oblibene, prepniOblibenou, zmeny, davky, opravy, upravy,
-                   otevritRecepturu, onOtevreno, onToast }) {
+                   otevritRecepturu, onOtevreno, onToast, onNamichat }) {
   const smiRecept = smiRole(role, "receptury");
   const podpis = podpisRole(role, jmenoRole);
   const [edit, setEdit] = useState(null);
@@ -22,6 +22,13 @@ function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr, techno
   const [jenNove, setJenNove] = useState(false);
   const [historie, setHistorie] = useState(null);
   const [zvyraznena, setZvyraznena] = useState("");
+  /* Namíchání mimo zakázku (volná dávka, část 498). Ptá se jen na množství —
+     všechno ostatní (důvod, zbytky, aditiva, váha) se řeší až v kalkulaci,
+     kam se odtud přejde. Kdyby se tu ptalo na víc, byl by to druhý míchací
+     formulář vedle toho v kalkulaci a oba by se rozešly.
+
+     null = zavřeno; jinak { r, gramu } */
+  const [namichat, setNamichat] = useState(null);
   /* Vybraná databáze má přednost před zúžením na technologii — ale jen tehdy,
      když by po zúžení nezbylo vůbec nic. Receptury jsou tabulka na čtení:
      technolog si smí prohlédnout i vzorník řady, ve které se zrovna nepracuje,
@@ -135,6 +142,15 @@ function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr, techno
       onClick=${() => prepniOblibenou && prepniOblibenou(r)}>★</button>`;
   const akce = (r) => html`
     <${React.Fragment}>
+      ${/* Namíchat mimo zakázku. Stojí první a je zvýrazněné, protože je to
+            jediná akce, po které se u téhle tabulky sáhne u váhy — Odkaz
+            a Historie jsou práce technologa u stolu. Receptura bez složení
+            se namíchat nedá: nebylo by co vážit. */""}
+      ${onNamichat && r.components.length > 0 && html`
+        <${React.Fragment}>
+          <button className="btn sm" title=${preloz("namíchat vlastní množství mimo zakázku")}
+            onClick=${() => setNamichat({ r: r, gramu: VOLNA_DAVKA_VYCHOZI })}>${preloz("Namíchat")}</button>${" "}
+        <//>`}
       <button className="btn sec sm" title=${preloz("zkopírovat odkaz, který recepturu rovnou otevře")}
         onClick=${() => kopirujOdkaz(r)}>${preloz("Odkaz")}</button>${" "}
       <button className="btn sec sm" title=${preloz("kdo ji založil, měnil a míchal")}
@@ -272,6 +288,57 @@ function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr, techno
       smiMenit=${smiRole(role, "cenik")} />
     ${historie && html`<${HistorieReceptury} recipe=${historie} zmeny=${zmeny} davky=${davky}
       opravy=${opravy} upravy=${upravy} onClose=${() => setHistorie(null)} />`}
+    ${namichat && html`<${NamichatOkno} zdroj=${namichat.r} gramu=${namichat.gramu}
+      setGramu=${(g) => setNamichat((v) => Object.assign({}, v, { gramu: g }))}
+      onMichat=${() => { onNamichat(namichat.r, n(namichat.gramu)); setNamichat(null); }}
+      onClose=${() => setNamichat(null)} />`}
+    </div>`;
+}
+
+/* Okno „Namíchat mimo zakázku". Ptá se na jedinou věc — kolik toho má být.
+
+   Proč se tu neptá na nic dalšího: míchání má v aplikaci jedno místo, a to je
+   kalkulace. Ta umí zbytky z kelímků, aditiva, náhrady složek, asistenta
+   vážení a zápis do evidence. Druhý míchací formulář vedle ní by se dřív nebo
+   později rozešel s tím prvním a dvě obrazovky by u téže receptury ukazovaly
+   jinou navážku. Tohle okno tedy jen řekne, kolik a čeho, a pošle to dál.
+
+   Množství se ukazuje rovnou i v mililitrech: databáze některých výrobců
+   udávají receptury objemově a míchač si podle toho sáhne po správné nádobě
+   dřív, než začne vážit. */
+function NamichatOkno({ zdroj, gramu, setGramu, onMichat, onClose }) {
+  if (!zdroj) return null;
+  const g = n(gramu);
+  const hust = hustotaReceptury(zdroj, null).hustota;
+  return html`
+    <div className="modalbg" onClick=${(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="modalbox" style=${{ width: "min(480px,100%)" }}>
+        <div className="card" style=${{ margin: 0 }}>
+          <h2 style=${{ margin: 0 }}>${preloz("Namíchat mimo zakázku")}</h2>
+          <div className="rowline" style=${{ marginTop: 8 }}>
+            <span className="swatch" style=${{ background: zdroj.hex }} />
+            <span className="note"><b>${zdroj.name}</b>${zdroj.series ? " · " + zdroj.series : ""}
+              ${" · "}${zdroj.components.length} ${preloz("složek")}</span>
+          </div>
+          <label className="f" style=${{ marginTop: 10 }}>${preloz("Kolik namíchat (g)")}</label>
+          <input type="number" step="1" min="1" autoFocus value=${gramu}
+            onChange=${(e) => setGramu(e.target.value)}
+            onKeyDown=${(e) => { if (e.key === "Enter" && g > 0) onMichat(); }} />
+          <div className="chips" style=${{ marginTop: 8 }}>
+            ${VOLNA_DAVKA_RADA.map((x) => html`
+              <button key=${x} className=${"chip mini" + (g === x ? " on" : "")}
+                onClick=${() => setGramu(x)}>${fmt(x, 0)} g</button>`)}
+          </div>
+          ${g > 0 && hust > 0 && html`<p className="note" style=${{ marginTop: 8 }}>
+            ${preloz("≈ {ml} ml při hustotě {h} g/ml", { ml: fmt(g / hust), h: fmt(hust, 2) })}</p>`}
+          <div className="rowline" style=${{ marginTop: 12, marginBottom: 0 }}>
+            <button className="btn" disabled=${!(g > 0)} onClick=${onMichat}>
+              ${preloz("Namíchat →")}
+            </button>
+            <button className="btn sec" onClick=${onClose}>${preloz("Zrušit")}</button>
+          </div>
+        </div>
+      </div>
     </div>`;
 }
 

@@ -120,6 +120,10 @@ function csvToRecipes(text, zdroj) {
     zadanoKdy: idx(/^(zadano.kdy|zad.no.kdy|requested_at)/),
     // poznámka technologa k receptuře; anglicky note/notes ze stejného důvodu jako u tužidla
     poznamka: idx(/^(pozn.mka|note)/),
+    /* Značka loga, které se na produkt tiskne. Není to objednatel (customer):
+       jedna agentura objedná potisk pro tři značky a míchač hledá vlastní
+       odstín podle toho, co je na tričku vidět. */
+    znackaLoga: idx(/^(znacka.loga|zna.ka.loga|logo_brand|brand)/),
     // C / U (coated / uncoated) — výslovně zapsané; jinak se čte z názvu
     cu: idx(/^(cu$|c.u$|coated|nat.ran)/),
     // objednací číslo u dodavatele — hledá se podle něj
@@ -164,11 +168,13 @@ function csvToRecipes(text, zdroj) {
           ? kodHustnuti(r[ci.hustnuti]) : null,
         // které tužidlo do receptury patří — kvůli spárování s ceníkem
         tuzidloNazev: ci.tuzidloNazev >= 0 ? String(r[ci.tuzidloNazev] || "").trim() : "",
-        // doporučené a mezní ředění; prázdné = platí výchozí hodnoty dílny
+        // doporučené a mezní ředění ze staršího souboru se jen přenášejí, aby
+        // se při zápisu neztratily; aplikace je od 10. 9. 2026 nepoužívá —
+        // ředí se až při tisku, ne do kelímku
         pomerRedidla: ci.pomerRed >= 0 && r[ci.pomerRed] !== ""
-          ? naPodil(r[ci.pomerRed], POMER_REDIDLA_VYCHOZI) : null,
+          ? naPodil(r[ci.pomerRed], null) : null,
         mezRedidla: ci.mezRed >= 0 && r[ci.mezRed] !== ""
-          ? naPodil(r[ci.mezRed], MEZ_REDIDLA_VYCHOZI) : null,
+          ? naPodil(r[ci.mezRed], null) : null,
         // kdo za odstín ručí; prázdno se nedomýšlí ani nepřepisuje
         schvaleni: ci.schvaleni >= 0 ? String(r[ci.schvaleni] || "").trim() : "",
         schvalil: ci.schvalil >= 0 ? String(r[ci.schvalil] || "").trim() : "",
@@ -178,6 +184,7 @@ function csvToRecipes(text, zdroj) {
         zadanoKdy: ci.zadanoKdy >= 0 ? n(r[ci.zadanoKdy]) : 0,
         // poznámka k receptuře („na tomhle materiálu dva průchody“) — jeden řádek textu
         poznamka: ci.poznamka >= 0 ? String(r[ci.poznamka] || "").trim() : "",
+        znackaLoga: ci.znackaLoga >= 0 ? String(r[ci.znackaLoga] || "").trim() : "",
         // C / U jen tam, kde to soubor výslovně říká; z názvu se dočte při čtení
         cu: ci.cu >= 0 && /^[cu]$/i.test(String(r[ci.cu] || "").trim()) ? String(r[ci.cu]).trim().toUpperCase() : "",
         objCislo: ci.objCislo >= 0 ? String(r[ci.objCislo] || "").trim() : "",
@@ -295,6 +302,8 @@ function sloucReceptury(prev, nove, adopce, zijiciSoubory, ted) {
         zadanoKdy: n(r.zadanoKdy) || n(stary.zadanoKdy) || 0,
         // poznámka je znalost dílny, ne dodavatele — soubor bez sloupce ji nesmí smazat
         poznamka: r.poznamka || stary.poznamka || "",
+        // značka loga je taky znalost dílny — obnova ze souboru bez sloupce ji nesmí smazat
+        znackaLoga: r.znackaLoga || stary.znackaLoga || "",
         /* C / U, objednací číslo a druhý stupeň schválení jsou taky údaje
            dílny — databáze od dodavatele je nenese a nesmí je přepsat prázdnem. */
         cu: r.cu || stary.cu || "",

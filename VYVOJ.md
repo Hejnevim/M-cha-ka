@@ -413,6 +413,24 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 16:27 | Poslední verze na dálku — vydání na GitHubu jen s programem (vydej.py), Aktualizovat.bat si zip stáhne sám, telefon odkazem na APK; otisky manifestu se při aktualizaci bez dat zachovají |
 | 17:13 | Vydání v2026.09.08 na GitHubu — zip a APK jen s programem; stažení přes IRM.exe z kopie sestavení 188 MB za 17 s |
 | 17:29 | Úloha v 16:50 vydává balíčky sama — jen když se otisk programu liší od posledního vydání; stejná verze se nenahrává |
+
+### 10. září — vypalovací dílna (Firing) dostala vlastní parametry tisku
+| čas | co |
+|---|---|
+| 09:13 | Firing: min. dávka 50/100/150 g na výběr, těrka pevně 350 mm, síto 100-40 nebo 130-34 |
+| 11:12 | Odstín ze zakázky jen z řad technologie polohy; u víc řad otázka Z jaké řady vzít odstín?, odpověď i první ruční výběr se zapíší k poloze |
+| 12:34 | Tužidlo a ředidlo odešly z míchací cesty — přidávají se až při tisku, kalkulace vede jen zpomalovač |
+| 12:42 | Produkt ze zakázkového listu se v kalkulaci přepne hned po načtení PDF, ne až po potvrzení |
+| 14:06 | Rámečky manuálu sedí na snímcích: 14 scén přeměřeno z DOM, nástroj kontrola_manualu.py s otisky pod rámečky, hooky po úpravě a při Stop, dvě relace na jednom portu |
+| 14:30 | Odstín doladěný rukou v kelímku se dá zapsat jako receptura — 40 g + 2 g + 3 g → 45,0 g, složení dopočteno, skupiny podle značky loga |
+| 14:42 | Pět nových skillů — zakázkový list, parametry technologie, balíčky, most, evidence — a oddíly Logo a ikona v irm-token a konkurence v irm-uzavreni; rozbor bere metodu koncového bodu mostu z obsluhy (/api/aktualizace je POST, /api/zakazka/ přibylo); devět položek paměti nahradily skilly |
+| 15:07 | Do kelímku se dolévají barvy, ne báze — nabídka přílitků z řady základu, 48 položek místo 5 |
+| 15:39 | Databáze se jmenují jako v dílně — PRINTCOLOR 660/786 a RUCO 10KK, řada přepsaná i v pigmenty.csv |
+| 16:08 | Řada uvnitř CSV se s názvem souboru nepřejmenovává — jinak se receptury zdvojí; přibyla zkouska_prejmenovani.js |
+| 16:09 | Namíchat recepturu i bez zakázky — dávku zadá člověk, ne plocha potisku |
+| 16:41 | Řady přejmenovány na PRINTCOLOR 660/786 a RUCO 10KK — druhý krok po souborech, aby se receptury převzaly |
+
+| 09:51 | Krycí plocha z náhledu dávku snižuje lineárně (6,5 % → 10,6 g na 0,7 g); u drobného potisku je z dávky 126 z 127,7 g rezerva síta |
 ---
 
 ## Co aplikace je
@@ -11735,3 +11753,789 @@ znovu pod novým číslem.
   jako ve vydání v2026.09.08 — nic se nevydává“, `LASTEXITCODE 0`, 4,4 s.
 - `nahraj_na_github.ps1`: 123 řádků CRLF s BOM, parser PowerShellu
   0 chyb, `Vydej` volaná na obou koncích skriptu (řádky 86 a 121).
+
+## 254. Firing má vlastní řadu dávek, pevnou těrku a dvě síta
+
+**Problém.** Vypalovací dílna míchá vždy po 50, 100 nebo 150 g a jede vždy
+na těrce 350 mm — ruční číselné pole u obojího nutilo tiskaře psát pokaždé
+totéž z hlavy, a u těrky navíc šlo napsat cokoli, přestože v dílně visí
+jen jedna šířka. Síto pro FIR se nabízelo z celé standardní řady 26 sít,
+místo aby ukázalo jen ty dvě, které dílna pro výpal skutečně používá.
+
+**Co se změnilo.** `TECHS.FIR` (část 100) dostal `terky: [350]` a nový
+seznam `minDavky: [50, 100, 150]`. Dlaždice Min. dávka je teď u technologie
+s vlastní řadou výběr místo ručního pole — stejný vzor jako už měla šířka
+těrky u TXP. Má-li technologie v `terky` jedinou hodnotu, přestává to být
+volba: dlaždice ukáže jen tohle číslo (`<select readOnly>` s jednou
+položkou, bez „—", bez `onChange`), stejný vzor jako pole *Papír C/U*
+v editoru receptury. Pravidlová těrka platí i po přepnutí technologie a
+drží i proti staršímu zápisu ze zakázkového listu. Do `parametry/sita.csv`
+přibyly dva řádky `FIR;100-40` a `FIR;130-34` — `sitaPro` (část 430) bez
+obecného řádku (technologie bez uvedení) vrátí pro FIR jen tato dvě.
+
+**Změřeno:** `snimek.py` s technologií FIR a zakázkou 93805/poz. 2 (hrnek,
+FIR) — dlaždice Min. dávka: `<select>` s hodnotami 50, 100, 150, výchozí
+50. Dlaždice Šířka těrky: `<select readOnly>` s jedinou položkou 350.
+Dlaždice Síto: `<select>` s hodnotami „—", 100-40, 130-34. Bez zásahu do
+`TECHS` měla dlaždice Min. dávka výchozí 1 g jako pátou položku navíc v
+nabídce 50/100/150 — opraveno tak, že u technologie s vlastní řadou
+dávka startuje i po přepnutí technologie na nejmenší hodnotě řady.
+
+## 255. Krycí plocha z náhledu dávku snižuje — u drobného potisku ji přebíjí rezerva síta
+
+**Problém.** Z dílny přišlo, že krycí plocha spočítaná z náhledu zakázkového
+listu se do dávky nepromítá: po výběru loga ve výřezu vyšlo 56,2 %, ale
+gramáž klesla ze 127,7 g jen asi o gram. K tomu druhá pochybnost — jestli
+pole *Potisků na tah* něco počítá, když se po jeho změně nikdy nic nestane.
+
+**Co se změnilo.** V kódu nic. Obojí je správně a měření to ukázalo:
+
+- Krycí plocha se do dávky promítá lineárně. `davkaBarvy` (část 497) násobí
+  plochu podílem `pokryti / 100` dřív, než se počítají gramy, takže se změna
+  přenese celá.
+- Rezerva síta na velikosti loga nezávisí, a u drobného potisku je z dávky
+  skoro celá. Těrka 350 mm dá při hustotě 1,20 g/ml **126,0 g** housky;
+  zakázka, kde na kusy připadá 1,70 g, míchá 127,7 g. Krycí plocha 56,2 %
+  ubere z těch 1,70 g → 0,96 g, tedy pokles o **0,74 g**. Přesně to, co
+  dílna viděla.
+- *Potisků na tah* do spotřeby nesahá záměrně (barva se přenáší na kusy, ne
+  na tahy) a do rezervy taky ne: šířka těrky se zadává pro celý záběr přes
+  všechny motivy, které jdou jedním tahem. Kdyby ji pole násobilo, houska by
+  se započítala dvakrát.
+
+Do `NAVOD_PODKLADY.md` (kapitola *Zakázka — šířka těrky a potisků na tah*)
+přibyly dva odstavce: že se šířka těrky zadává pro celý záběr, a proč u
+drobného potisku dávkou krycí plocha skoro nehne.
+
+**Změřeno.**
+
+| co | jak | výsledek |
+|---|---|---|
+| lineárnost vzorce | `davkaBarvy` v Node, těrka 0, min. dávka 0 | 100 % → 33,6 g · 56,2 % → 18,9 g = **56,20 %** |
+| celá cesta v prohlížeči | `snimek.py`, motiv vložený do okna krycí plochy | rozbor 6,5 % → dávka **10,6 g → 0,7 g** (10,6 × 0,065 = 0,69) |
+| popiska po použití | tamtéž | „krycí plocha 6,5 % · z náhledu“ |
+| *Potisků na tah* 1 → 8 | `snimek.py`, technologie FIR | **261,8 g → 261,8 g**, beze změny |
+| rozklad 127,7 g | `rezervaSita`, těrka 350, hustota 1,20 | rezerva **126,0 g** + motiv **1,70 g** |
+| vykreslení | `kontrola_aplikace.py` | 0, kořen 1 potomek, bez chyb |
+
+Past, na kterou se přišlo: rozbor náhledu měří procento vůči **ohraničení
+motivu**, ne vůči ploše nahraného souboru (`analyzujPokryti`, část 170, volba
+*Měřit jen uvnitř ohraničení motivu*). Plný obdélník proto vyjde na 100 %
+i tehdy, když v souboru zabírá polovinu — zkouška krycí plochy musí mít
+motiv s mezerami, jinak neměří nic.
+
+## 256. Odstín ze zakázky jen z řad technologie — a řada se k poloze pamatuje sama
+
+**Problém.** Po nahrání zakázkového listu se vybrala receptura z řady, která
+k technologii polohy vůbec nepatří: vypalovací zakázka (FIR, jediná řada
+Ferro Xpression) dostala PANTONE 485 C z tampontiskové databáze. Stejný kód
+Pantone je v každé nakoupené řadě, hledalo se ve všech a vyhrál první
+nalezený — v abecedě databází Ferro, jinak co bylo dřív. Totéž dělala
+i náhradní receptura kalkulace, když žádná nebyla vybraná: `recipes[0]`,
+tedy Ferro na tampontiskové poloze, a na TRS bez databáze cizí vlastní
+receptura. A u technologie s víc řadami (PDP jich má pět) se řada dřív
+vypisovala ručně v záložce Produkty, na což se zapomínalo.
+
+**Co se změnilo.**
+
+- `resolveSpec` (část 140) dostal čtvrtý parametr `omezeni` — přiřazení
+  databází k technologiím, typy poloh, pracovní režim a případně zvolenou
+  řadu. Odstín se hledá jen v recepturách, které na polohu smějí: technologie
+  polohy (bez polohy technologie z kódu nebo pracovní režim) a řada poloze
+  přiřazená. Vlastní receptury zůstávají v hledání vždy. Odstín, který
+  v povolených řadách není, ale jinde ano, hlásí *„není v řadách pro PDP —
+  v databázi je jen jako … · PMS 660“*. Výsledek nese i seznam řad
+  technologie a u každé, kolik barev z listu v ní je.
+- Nová část `20-zaklad/182-volba-rady.js`: okno *Z jaké řady vzít odstín?*
+  s dlaždicí na řadu. Otevře se před převzetím zakázky (list, kód čtečky,
+  zakázka ze SGPS — všechny cesty jdou přes `prevzitSpec` v App), jen když
+  má technologie víc řad a poloha žádnou přiřazenou. Klik odstín vybere
+  z té řady a řadu zapíše k poloze přes stávající `ulozTypPolohy`
+  (`parametry/typy_poloh.csv`); *Bez volby* hledá ve všech řadách
+  technologie a nezapisuje nic. Podruhé se u téže polohy neptá.
+- Kalkulace: první ruční výběr Pantone standardu (nabídka i našeptávač,
+  `vyberPantone`) na poloze bez přiřazené řady zapíše databázi receptury
+  k poloze — hlášení *„Řada PMS 786 je od teď přiřazená poloze …“*.
+  Přiřazenou polohu ruční výběr nemění: nabídka je na ní už zúžená.
+- Náhradní receptura kalkulace (`nahradniReceptura`) je první nakoupená
+  receptura, která na polohu smí; na technologii bez databáze žádná
+  („— bez receptury —“). Nový seznam barev zakázky začíná bez receptury,
+  náhradní se dosadí až podle polohy.
+- Kód čtečky s polohou jiné technologie přepne pracovní režim stejně jako
+  zakázkový list (`prepniTechPodleSpecu` v App). Dřív to dělal jen list:
+  po kódu s tampontiskovou polohou v sítotiskovém režimu sjela poloha na
+  první sítotiskovou a receptura z tampontisku u ní zůstala — vidět to bylo
+  na snímku scény 29 manuálu (SCR poloha, Printcolor MS 786).
+- Šest nových textů ve slovníku (cs/en/pt); vysvětlení okna
+  v `NAVOD_PODKLADY.md`; rozbor kroků 1 a 4 doplněn.
+- Fotoskript manuálu podstrkuje tampontiskové poloze pera řadu PMS 786,
+  jinak by scény 29 a 35 fotily okno místo barev zakázky; všech 37 snímků
+  v obou jazycích přefoceno, protože domovské scény ukazovaly náhradní
+  recepturu z Ferro. Spodní meze rozmazání u scén míchacího režimu sjely
+  z 5 na 4 (simulace 7 → 6): náhradní receptura na sítotiskové poloze pera
+  má 3 složky místo 4, rozmazané jsou všechny řádky včetně součtu.
+
+**Změřeno.**
+
+| co | výsledek |
+|---|---|
+| zkouška v Node (`resolveSpec`, `specSVolbouRady`, slovník) | 46 kontrol, 0 chyb: FIR → Ferro, SCR → 660, PDP bez přiřazení → otázka se 3 řadami a počty 1/2/1, s přiřazenou 786 → 485 z 786 a 300 hlášeno jako „jen v PMS 660“, volba TPR → 300 z TPR a řádek ze SGPS předsazený zůstal, staré volání bez omezení → jako dřív a bez otázky |
+| kód čtečky `ref=11003 · poz=1 · PANTONE 485 C`, režim PDP | okno *Z jaké řady vzít odstín?* s 5 dlaždicemi (Marabu PP, Marabu TPR, PMS 660, PMS 786, RUCOLOR 10KK), u každé „1 z 1 barev“ |
+| klik na PMS 786 | hlášení „Řada PMS 786 je od teď přiřazená poloze PDP Sportovní Láhev / Víčko lahve“, vybraná receptura PANTONE 485 C · Printcolor MS 786, v `typy_poloh.csv` řádek `11003;PDP;"Sportovní Láhev / Víčko lahve";receptury_PMS_786.csv;` |
+| týž kód podruhé | bez okna, receptura z MS 786 |
+| kód `ref=93839 · poz=2` (FIR), režim FIR | bez okna, PANTONE 485 C · Ferro Xpression |
+| náhradní receptura před kódem, poloha PDP | dřív PANTONE 485 C · Ferro Xpression, teď PANTONE 100 C · Marabu MaraProp PP |
+| režim TRS (bez databáze) | „— bez receptury —“, stránka bez chyby |
+| kód `ref=11152 · poz=2` (PDP) v režimu SCR | hlášení „Přepnuto na technologii PDP podle zakázky“, poloha PDP Propiska / Kulovité těleso |
+| `kontrola_aplikace.py`, `sestav.py --kontrola` | 0, 105 částí |
+
+Data dílny po testu vrácena ze zálohy (`typy_poloh.csv`); `receptury_vlastni.csv`
+a evidence shodné se zálohou.
+
+## 257. Tužidlo a ředidlo se nemíchají do kelímku — z míchací cesty odešly
+
+**Problém.** Kalkulace nabízela přepínač *s tužidlem* na tlačítku Štítek na
+kelímek a pole *ředidlo* v aditivech, kolem toho odpočet pot life u váhy, krok
+„Zbývá tužidlo", doporučené a mezní ředění s kompenzací pigmentace a tužidlo
+v ceně, výkazu VOC a skladu. V dílně se ale ani jedno do namíchané barvy
+nemíchá: tužidlo i ředidlo se přidávají podle potřeby až při tisku, u stroje.
+Obrazovka tak nabízela rozhodnutí, které u míchačky nikdo nedělá, a lístek
+i cena počítaly s něčím, co v kelímku není.
+
+**Co se změnilo.**
+
+| kde | dřív | teď |
+|---|---|---|
+| Štítek na kelímek | tlačítko + přepínač *s tužidlem* položený přes něj | jen tlačítko, souměrná rezerva |
+| Aditiva v míchacím režimu | ředidlo + zpomalovač, doporučeno / strop / kompenzace pigmentace | jen zpomalovač schnutí v gramech |
+| Asistent vážení | krok „Zbývá tužidlo — spustit odpočet", hlášení o stropu ředění | nic z toho; složka řady se dál označuje (`slozkaRady` místo `doRedeni`) |
+| Míchací lístek | rámeček Tužidlo — přidat po navážení báze, řádek o kompenzaci | bez nich |
+| Cena, VOC, sklad dávky | tužidlo podle receptury, ředidlo od obsluhy | jen složky, zpomalovač a složky řady |
+| Kelímek od váhy (štítek i *Znám zbytek rovnou*) | pot life, `tuzidlo`, hranice varování z receptury | bez tužidla; dialog ztratil *Čas použitelnosti* a *Dvousložková* |
+| Dávky v evidenci | zakládala kalkulace u barvy s tužidlem | nezakládají se; existující se dál čtou, ukazují a uzavírají |
+| Editor receptury | doporučené a strop ředění | pole odešla; sloupce ze souboru se jen přenášejí |
+| Riziko oprav | pravidlo „aditiv nad stropem" | odebráno, nemělo odkud přijít |
+
+Odebráno celé, ne jen tlačítko: stav `dvouslozkova`, `potlifeCfg`/`potlifeAkt`,
+`davkaKod`, `zalozDavku`, `spustitPotlife`, `uzavritDavku`, `odpojDavku`,
+`rozborRedeni`, `kompenzace`, `calcPlna`; část `270-potlife-pruh.js`
+(`PotlifePruh`, `useTikot`) zrušena, hlavičkový komentář míchacího režimu
+přesunut do části 280; v části 510 zbyl jen zpomalovač, `redeniReceptury`,
+`rozborNaredeni` a `kompenzaceNaredeni` pryč; `novaDavka` a `davkaSTuzidlem`
+z části 610 pryč (nikdo je nevolá); `skladProDavku(sklad, comps)`; CSS
+`.stitekobal`, `.stitekpruh .tgl` a proměnné `--mich-prepinac*` pryč, ladicí
+stránka `barvy.html` přegenerována bez skupiny *Přepínač s tužidlem*.
+
+Co zůstává schválně: receptura dál nese, že je dvousložková (poměr tužidla,
+pot life, houstnutí, které tužidlo) — je to údaj o barvě z technického listu,
+ukazuje se u receptury, ve frontě a počítá se v přepočtu sortimentu;
+kelímky, které tužidlo už mají (vrácené od stroje, zapsané ručně v evidenci
+zbytků), si pot life hlídají dál; sloupce `tuzidlo`, `pomer_redidla`,
+`mez_redidla` v souborech se čtou i zapisují, aby starší soubory nic
+neztratily.
+
+**Slovník.** 37 klíčů smazáno, 2 přejmenovány (poznámka v dialogu *Znám
+zbytek rovnou* bez věty o pot life; poznámka u tužidla v editoru říká
+„kelímek s tužidlem začne varovat", ne „míchací režim"). 1 815 → 1 778 klíčů,
+každý má en i pt se shodnými jmenovkami.
+
+**Rozbor, návod, konkurence, skilly, manuál.** Krok 9 rozboru a seznam
+Míchání říkají, co odešlo a proč; v návodu je oddíl *Aditiva — zpomalovač
+schnutí* s pravidlem, že se tužidlo počítá z váhy barvy, ne z obsahu nádoby;
+konkurence.html bez „pot life" u štítku a bez „tužidla" u ceny;
+`irm-vypocet` a `irm-mobil` s poznámkou, že tužidlo z kalkulace odešlo.
+Manuál: scény 20, 32, 33 a 37 v obou jazycích přepsány (text, rec, zvýraznění),
+snímky 24, 30–35 a 42 přefoceny v obou jazycích, nahrávky scén nahrány znovu.
+
+**Změřeno:**
+
+- `kontrola_aplikace.py` po sestavení: kořen 1 potomek, chyby žádné, návrat 0;
+  `sestav.py --kontrola` 104 částí (bylo 105), návrat 0
+- zkouška v Node (95 javascriptových částí načteno jako v prohlížeči, 16 kontrol,
+  všechny prošly): `DRUHY_ADITIV = ["zpomalovac"]`; 1 000 g báze + 50 g
+  zpomalovače při 1 000 a 400 Kč/kg → 1 020 Kč, položky báze + zpomalovač;
+  zadané ředidlo ze starého stavu prohlížeče → 1 000 Kč; přepočet sortimentu
+  s `tuzidloG: 100` při 2 000 Kč/kg → 1 200 Kč; VOC 1 000 g × 10 % + 50 g × 90 %
+  → 145 g; `skladProDavku` bere 2 hodnoty, 700 g ze 500 g → nestačí; riziko
+  oprav bez pravidla o stropu; `redeniReceptury`, `rozborNaredeni`,
+  `PotlifePruh`, `novaDavka` nedefinované, `stavPotlife` funkce
+- snímek `30-mich.png` (1 600 px): řádek Aditiva má jen *zpomalovač schnutí*,
+  pole a „g"; `33-mich-stitek.png`: tlačítko Štítek na kelímek bez přepínače,
+  text na středu
+- manuál, přeměřeno hranovým skenem PNG: bloky míchacího režimu sedí
+  o 60 px výš než na starých snímcích (Než začnete míchat y 402–498,
+  Viskozita 508–566, Aditiva 576–634), editor receptury bez řádku ředění
+  o 84 px výš (Uložit y 963–997); `prohlidka_manualu.py` scén 20, 32, 33, 34,
+  37, 42 v obou jazycích: 0 chyb, rámečky na prvcích. Nahrávky: cs 20 = 29,9 s,
+  32 = 25,9 s, 37 = 20,4 s; en 20 = 31,6 s, 32 = 28,4 s, 37 = 20,4 s;
+  `--zapis-cas` srovnal 3 hodnoty
+- ve složce pracovalo druhé sezení (scény 14–34, scénář snímku 31,
+  `kontrola_manualu.py`); souběh na portu 9333 shodil 8 běhů focení
+  a prohlídky, každý se opakoval po uvolnění portu
+
+**Co zůstává k rozhodnutí.** Kalkulace teď nezakládá žádnou dávku do
+evidence, takže záložka *Opravy po nátisku* nemá u nových oprav podpis
+obsluhy ani otisk konví (dřív jen u barev s tužidlem). Chce-li dílna
+rozřazení oprav podle člověka a konve i bez tužidla, dávka se musí zakládat
+u každého štítku — to je změna významu evidence dávek, ne oprava.
+
+## 258. Produkt ze zakázkového listu se přepne hned po načtení PDF
+
+**Problém.** Okno *Zakázkový list — rozpoznané údaje* je průhledné a za ním
+je vidět karta *Vybraný produkt*. Dokud se neklikne na *Použít v kalkulaci →*,
+stojí v ní ale produkt z minulé zakázky: obsluha čte v okně „taška 92734,
+poloha Taška / Přední" a za oknem se přitom dívá na kuličkové pero z předchozí
+zakázky. Nejvíc to mate u otázky *Z jaké řady vzít odstín?*, protože ta se
+rozhoduje podle toho, co je na obrazovce vidět — a v tu chvíli je vidět cizí
+produkt.
+
+**Co se změnilo.** Jakmile most PDF rozebere a okno se otevře, kalkulace za
+ním už ukazuje produkt, polohu a barvu zboží z listu. Nová cesta jde mimo
+převzetí zakázky:
+
+| krok | co se stane |
+|---|---|
+| `PdfVKalkulaci` (část 180) | po přečtení PDF ohlásí `onNahled(res)` |
+| `nahlednoutSpec` (část 210) | přepne technologii a nastaví spec s příznakem `jenNahled` |
+| efekt specu (část 240) | nastaví produkt, polohu a barvu zboží a skončí |
+
+Náhled dotáhne jen to, co je za oknem vidět. Čísla dávky (kusy, spotřeba,
+ztráty, min. dávka) a receptura se berou až po potvrzení tlačítkem, aby se
+kalkulace nepřepočítala dřív, než člověk rozpoznané údaje odsouhlasí a
+případně opraví pole v okně. Otázka na řadu zůstává u potvrzení: patří
+k převzetí zakázky, ne k pohledu na produkt, a přes otevřené okno by stála
+dvě okna přes sebe. Zrušením se náhled nevrací — produkt z listu je pořád
+bližší pravdě než ten předchozí.
+
+**Změřeno.** Skutečný zakázkový list (taška 92734, poloha Taška / Přední,
+200 ks) načtený do kalkulace, ve které byl vybraný jiný produkt:
+
+| okamžik | produkt v kartě | počet kusů |
+|---|---|---|
+| před načtením | 11003 · vodotěsná nádoba | 500 |
+| okno otevřené (náhled) | **92734 · MOORE. Víceúčelová taška** | 500 — beze změny |
+| po *Použít v kalkulaci →* | 92734 · MOORE. Víceúčelová taška | **200** — z listu |
+
+Poloha se přepnula z 25,0×45,0 mm na 100,0×80,0 mm, barva zboží ze 127 na 103.
+Otázka *Z jaké řady vzít odstín?* vyskočila až po potvrzení. Celý průchod
+skončil na dávce 3,5 g pro PANTONE Black 0961 C.
+
+**Falešný poplach.** Po první verzi padala záložka do ~3 s od otevření okna
+(`ConnectionResetError` ve `snimek.py`) a vypadalo to na smyčku, kterou jsem
+zavedl: náhled přepne technologii → změní se `omezeni` → `useMemo` vydá nový
+objekt `res` → efekt znovu. Ochranu proti tomu má smysl mít a zůstala (klíč
+z hodnot `produkt|poloha|barva` v `useRef`, ne z totožnosti objektu), ale
+příčina pádů to nebyla. Počítadla to vyvrátila: **6 renderů `Calc`, efekt
+specu 1×, `onNahled` 1×, 25 MB haldy — stabilně po celé dvě sekundy** s
+otevřeným oknem. Pády byly souběh dvou relací nad jedním ladicím portem
+Chromu; druhé sezení mělo ve stejné chvíli rozdělané snímky manuálu. Poučení:
+než se pád v prohlížeči přisoudí vlastní změně, změří se, jestli aplikace
+opravdu cykluje — a ověří se, kdo ještě sahá na port.
+
+**Chyba, kterou to nejdřív mělo.** První verze vyskakovala z efektu specu
+dřív, než se `pend.current` (co si spec vyžádal navíc proti automatikám —
+barva, receptura, spotřeba) stihlo vynulovat. Příznaky by zůstaly viset a
+přepisovaly by stav v navazujících efektech. Náhled si teď recepturu ani
+spotřebu do `pend` nepředsazuje a příznaky uklidí sám.
+
+## 259. Rámečky manuálu sedí na snímcích a hlídá to nástroj s otisky
+
+**Problém.** Scéna 17 manuálu (*Receptura a barva — Pantone standard*)
+ukazovala popisky na prázdné ploše: dlaždice Pantone standard byla o 108 px
+níž, než kde v aplikaci je od zrušení rozpisu výpočtu (kap. 244), stejně
+scény 18, 21 a 22 na spodní řadě karet, 14 (čipy a tlačítko *Barva a poloha*),
+23 (vícebarevná zakázka), 27–29 (karta *Kolik namíchat*) a 32–34 (míchací
+režim). Snímky byly přefocené dvakrát („manuál dohnal aplikaci", kap. 248
+a 256), souřadnice zůstaly a zkouška „rámeček uvnitř snímku" prošla — rámeček
+o řádek níž je pořád uvnitř. Uživatel: takové chyby se nesmějí dít; po každé
+změně manuálu, každé grafické změně a přidání či odebrání funkce se manuál
+kontroluje a opravuje automaticky, v obou jazycích.
+
+**Co se změnilo.**
+
+- Souřadnice scén 14, 17, 18, 21, 22, 23, 27, 28, 29 přepsané v `manual.html`
+  i `manual_en.html` podle obdélníků změřených z DOM (`getBoundingClientRect`
+  ve stavu scénáře `foto_manualu.py`), ne od oka; výřezy posunuté na začátek
+  karet. Scény 32–34 opravila souběžná relace (kap. 257). Popisek *složení*
+  (scéna 17) dostal přání polohy `uvnitr vpravo`, aby neležel přes tlačítko
+  Odkaz — umisťování popisků nezná text snímku, jen ostatní rámečky.
+- Scénář snímku `31-mich-zbytek-rucne` klikal na *Znám zbytek rovnou* a fotil
+  okno *Uložit zbytek do evidence*; scéna 34 ale rámuje formulář ručně
+  zadaného zbytku (`.mich-tl-rucne`). Opraveno, přefoceno v obou jazycích.
+- Nový nástroj `kontrola_manualu.py` (jen stdlib, bez prohlížeče, obě řeči do
+  dvou minut): snímek existuje a má rozměr `roz`; rámeček leží ve výřezu;
+  pod rámečkem bez otisku není jednolitá plocha; a hlavně **otisk** — průměry
+  jasu ve čtvercích 4 × 4 px pod rámečkem uložené v `prezentace/manual/otisky.json`
+  po prohlídce (`--zapis`). Změní-li se snímek pod rámečkem, hledá otisk
+  ±400 px svisle a ±60 px vodorovně a hlásí posun; `--oprav` přepíše rámeček
+  i výřez (výřez jen když se posunuly všechny rámečky scény stejně).
+  Prázdná plocha sama posun neodhalí (změřeno: pod posunutým rámečkem bývá
+  jiný prvek s odchylkou 26–77, prázdná plocha má 0–5), proto stojí kontrola
+  na otiscích.
+- Scéna 19 (*Nová custom receptura*) neměla rámečky a výřez mířil na horní
+  část domovské stránky; scénář snímku `23-custom-pick` teď otevírá okno
+  Barva a poloha s volbou výchozí receptury a scéna má čtyři rámečky
+  (tlačítko, výchozí receptura, Odvodit a upravit, náhled názvu). Scéna 20
+  přeměřena po zkrácení editoru (kap. 257) a po změně okna zakázkového listu
+  (kap. 258) — oba snímky přefoceny v obou jazycích.
+- `foto_manualu.py` a `prohlidka_manualu.py` po pádu spojení s Chromem běh
+  opakují (asi jeden ze tří běhů padal na `ConnectionResetError`, prohlídka
+  pokračuje od první scény bez snímku z tohoto běhu).
+- Hooky v `.claude/settings.json`: `manual_po_uprave.py` po úpravě
+  `aplikace/`, `index.html`, stránek manuálu nebo snímků vrátí připomínku
+  postupu; `manual_pri_stop.py` při ukončení relace pustí kontrolu, jsou-li
+  snímky nebo stránky novější než otisky, a s nálezy relaci nepustí skončit —
+  ale jen relaci, která podle svého přepisu sahala do aplikace, manuálu nebo
+  focení; ostatním jen oznámí stav (hook držel relaci, která měnila jen
+  načítání PDF, kvůli otiskům rozdělaným jinde).
+- Skilly `irm-manual` (bod 7 — postup, měření z DOM, dvě relace na jednom
+  portu), `irm-uzavreni`, `irm-nastroje`; `prezentace/README.md`, rozbor.
+
+**Změřeno.**
+
+| co | výsledek |
+|---|---|
+| domovská stránka, prvky scény 17 (DOM, 1 600 × 1 520) | dlaždice Pantone standard [62, 886, 218, 49], řádek receptury [62, 951, 351, 31], pruh složení [62, 991, 452, 30], řádek CMYK [62, 1060, 452, 24]; v manuálu bylo 994 / 1066 / 1106 / 1176 |
+| scény 21 a 22 | dlaždice síto/kryvost/povrch y 951 (v manuálu 1058), přepínač Otestovaný y 1182, počet kusů y 886 (v manuálu 1007) |
+| scéna 18 (Pantone custom) | dlaždice [296, 886], filtr y 979, hledání 1040, výběr 1097 (v manuálu 1000 / 1092 / 1156 / 1212) |
+| scéna 14 | čipy technologie · rozměr · barva y 726 (v manuálu 838), tlačítko *Barva a poloha potisku* [62, 758, 192, 31] cs / 220 široké en (v manuálu 870) |
+| scéna 23 (29-barvy-zakazky) | *Další barva* [402, 956, 112, 31] cs / [384, 956, 130, 31] en, pruh dlaždic barev [62, 1000, 452, 62], *Do fronty všechny barvy* [848, 844, 298, 48] cs / 228 široké en (v manuálu 1016 / 1058 / 906) |
+| scény 27–29 (*Kolik namíchat*) | blok Náklady na barvu [848, 622, 684, 95], *Skrýt ceny* [1439, 622, 93, 31] cs / [1434, 622, 98, 31] en, *Profil úpravy* [848, 577, 127, 31] cs / 166 en, tlačítka Míchací režim · lístek · Do fronty y 733–735, šířky 174 / 179 / 147 cs a 170 / 174 / 142 en (v manuálu y 731–849) |
+| stav při měření = stav snímku | rozdíl snímku z měření proti snímku manuálu 4 723 px (jen obrázek produktu) cs, 4 728 px en, 1 px u vícebarevné zakázky; s kelímky navíc v evidenci ležela domovská stránka o 117 px níž a rozdíl byl 821 763 px |
+| prohlídka opravených scén, obě řeči | rámečky na prvcích, popisky mimo cizí text (snímky 17, 18, 21, 22 při 1 600 i 1 024 px) |
+| scéna 19 (nově s rámečky, snímek 23-custom-pick přefocen scénářem okna Barva a poloha) | tlačítko *Custom receptura pro tuto kombinaci* [392, 202, 290, 31] cs / 274 en, filtr a výběr výchozí receptury y 276–360, *Odvodit a upravit* [404, 393, 156, 31] cs / 141 en, náhled názvu y 432; dřív výřez [360, 20, 880, 700] bez rámečků ukazoval horní část domovské stránky |
+| scéna 20 (editor po zkrácení, snímek 24-custom-editor přefocen) | blok složek y 591–783, tlačítka Uložit / Zrušit [392, 801, 154 + 78, 41]; v manuálu 698 / 890; okno editoru [370, 30, 860, 832] |
+| `kontrola_manualu.py --zapis`, obě řeči | 458 rámečků s otiskem, `otisky.json` 1,6 MB; následná kontrola 0 nálezů, 88 s |
+| zkouška hledání posunu (rámeček Pantone standard posunutý o +108, −60 a (+12, +40) px) | nalezeno (0, −108), (0, +60), (−12, −40), rozdíl 0,0; na starém místě 36–48; 0,1–0,2 s |
+| syntaxe obou stránek v Node (`new Function`) | 1 skript, 57 scén, bez chyby |
+| hooky (pipe-test) | úprava `240-calc.js` → připomínka; `VYVOJ.md` → mlčí; Stop bez otisků → `decision: block` s výpisem |
+| přefocení `01-domov` cs proti ránu | 0 lišících se pixelů; en jen obrázek produktu (x 146–201, y 341–538) |
+
+Dvě relace na jednom portu 9333: měření probíhalo v cizí kartě (anglický
+míchací režim místo domovské stránky, okno zakázkového listu druhé relace)
+a scénář *Štítek na kelímek* zapsal ve 12:17 přes most kelímky PANTONE 012 C
+do `evidence/zbytky.csv` — karta *Kolik namíchat* pak nesla upozornění na
+zbytek a domovská stránka ležela o 117 px níž. Evidence vrácena ze zálohy,
+`receptury_vlastni.csv` shodné (jen pořadí řádků, které aplikace přepisuje).
+
+## 260. Odstín doladěný rukou v kelímku se dá zapsat jako receptura
+
+**Problém.** Míchač namíchá zkušební kelímek, vytiskne nátisk a odstín nesedí.
+Přilije 2 g krycí bílé, 3 g transparentní báze, znovu natiskne — a teď to sedí.
+V kelímku je 45 g odstínu, který přesně vyhovuje zákazníkovi, jenže **žádná
+receptura pro něj neexistuje**: ví se jen, z čeho se vyšlo a co se do toho
+přililo. Aplikace uměla počítat jen opačným směrem — domíchání ze zbytku
+(kap. 6) potřebuje cíl známý dopředu a řekne, co přilít. Tady cíl nikdo
+nezadává, cíl je to, co míchači vyšlo pod rukou.
+
+Důsledek byl vždycky stejný: papírek u váhy, nebo se to za měsíc dolaďovalo
+znovu od začátku. U zákazníka, který si objednává potisk pravidelně, se tím
+platila táž práce pokaždé znovu.
+
+**Co se změnilo.** V kalkulaci je tlačítko *Doladit odstín v kelímku*. Zapíše
+se, kolik základu v kelímku je, a co se do něj přililo — přílitek je **složka
+z ceníku** (báze, pigment), ne hotová receptura, protože u váhy se sahá po
+kelímku s bází. Aplikace z gramů zpětně dopočítá složení:
+
+```
+základ 40 g PANTONE 100 C
++ 2 g Krycí bílá báze
++ 3 g Transparentní báze
+─────────────────────────────────────────────
+45,0 g:  PP 070 Weiss 70,46 %, PP 020 Zitron 17,18 %,
+         Transparentní báze 6,67 %, Krycí bílá báze 4,44 %, …
+```
+
+Nová část `50-zbytky/639-doladeni-odstinu.js` počítá dvě různé otázky zvlášť:
+`doladeniSlozeni` říká, co je teď v kelímku, `prepocetPoDoladeni` kolik
+dovážit do plné dávky. Zbytek dávky se váží **už podle nového složení** —
+doplnit původním pantonem by odstín rozředilo zpátky k tomu, co předtím
+nesedělo.
+
+Uložení založí custom recepturu: nese složení, z čeho se vyšlo (`zaklad`,
+`zakladZdroj`), poznámku s tím, co se doopravdy přililo, a váže se na
+kombinaci produkt + barva + technologie + poloha. Příště u téže zakázky
+si ji aplikace nabídne sama.
+
+Přibylo pole **značka loga** (`znackaLoga`, sloupec `znacka_loga` na konci
+CSV). Není to objednavatel — jedna agentura objedná potisk pro tři značky.
+Podle ní se vlastní receptury v nabídce sdružují do skupin `optgroup`; míchač
+je hledá podle toho, čí logo se tiskne, ne podle názvu pantonu. Pole má
+našeptávač z už použitých značek, aby překlep nerozdělil skupinu na dvě.
+
+**Změřeno.** Proklikáno v prohlížeči na skutečné zakázce (98505, PDP,
+Sportovní Láhev / Víčko lahve):
+
+- základ 40 g + 2 g + 3 g → v kelímku **45,0 g**, přilito 5,0 g
+- složení dopočteno: transparentní báze **6,67 %**, krycí bílá **4,44 %**,
+  součet procent 100
+- složka, která v základu nebyla, dostane štítek *nová* (`margin-left: 6px`)
+- poznámka receptury se vyplnila sama: „Doladěno z 40,0 g: přidáno 2,0 g
+  Krycí bílá báze"
+- formulář receptury nese popisek *Značka loga*, zapsáno „Škoda Auto"
+- 68 kontrol modelu na částech načtených z `aplikace/` prošlo, 0 selhalo;
+  na zaneseném překlepu (`celkem = zakl` místo `zakl + prilito`) hlásila
+  zkouška 9 nálezů — tedy neprochází naslepo
+- protočení přes CSV: 13 kontrol, sloupec `znacka_loga` je poslední, starší
+  soubor bez něj má prázdnou buňku a stejný počet sloupců
+- otisky `receptury_vlastni.csv`, `evidence/zbytky.csv` a
+  `parametry/typy_poloh.csv` po testech beze změny
+
+**Past, na kterou se přišlo.** Přílitek pod 0,1 g se spočítá, ale aplikace
+nahlas řekne, že ho váha pořádně nerozliší. Složka, které je v kelímku 0,05 g,
+ve výsledku sedí jen náhodou — při vážení od nuly se netrefí a odstín uhne
+podruhé. Mez je stejná jako `ROZLISENI_VAHY` u nátisku (kap. 590).
+
+**Chyba, kterou to nejdřív mělo v testu, ne v kódu.** První proklik zapisoval
+gramy přílitků hned po přidání řádku a výsledek vycházel „přilito 0,0 g" —
+vypadalo to jako rozbitý výpočet. Ve skutečnosti React ještě nepřekreslil
+a zápis šel do řádku, který v tu chvíli neexistoval. Průkazné je počkat na
+podmínku (hodnota v poli), ne na pevný `setTimeout`.
+
+## 261. Pět nových zapsaných postupů — zakázkový list, parametry technologie, balíčky, most, evidence
+
+**Problém.** Od kapitoly 145, kdy naposledy přibyly skilly, vzniklo 114
+kapitol a s nimi pět oblastí, jejichž pravidla ležela jen v deníku a
+v paměti sezení: čtení zakázkového listu (osm kapitol od separací po
+náhled produktu za oknem), síta, těrky a řady dávek podle technologie
+(tři vrácené kapitoly, než se ustálilo „pravidlo není volba“), balíčky
+exe a APK s aktualizací psanou dvakrát, most se svým protějškem v Javě,
+a evidence, u které rozhoduje, jestli záznam vzniká sám nebo tlačítkem.
+Kdo tu práci nepamatoval, hledal ji ve dvanácti tisících řádcích deníku —
+nebo v paměti, kterou projekt nenese.
+
+**Co se změnilo.** Pět nových postupů v `.claude/skills/`:
+
+| postup | co drží |
+|---|---|
+| `irm-zakazkovy-list` | tři cesty do jedné branky `prevzitSpec`, náhled × převzetí, `pdf_pravidla.json` a pasti čtečky PDF, odstín jen z řad technologie a otázka na řadu, rozdělení pole *Barva potisku*, krycí plocha vůči ohraničení motivu a rezerva síta |
+| `irm-parametry-technologie` | kde bydlí které pravidlo (`TECHS`, `sita.csv`, `typy_poloh.csv`, `plan_databazi.csv`), pravidlo = jediná položka bez „—“, přednost síta podle produktu, řada k poloze jen při první volbě, odemykací seznam odškrtávaný z dat, postup pro novou technologii |
+| `irm-balicky` | kdy a kam sestavovat, co doplnit při nové složce (`balik.py`), pravidla aktualizace v Pythonu i Javě, zkouška aktualizace na kopii, podpisový klíč, vydání jen bez dat s otiskem programu, devět pastí od mezipaměti ikon po `copy2` |
+| `irm-most` | tabulka koncových bodů Python × Java, tři rozhodnutí u nového bodu, zápis `.tmp` → `.bak`, klíče `/api/stav`, hledání mostu z aplikace, most nad složkou × exe × autostart × telefon, po síti, charset |
+| `irm-evidence` | který záznam vzniká sám a který potvrzuje člověk a proč, osm oblastí změn, podpis z role při založení dávky, prahy osy oprav, kódy a písmeno A z aktualizace, slučování ze dvou míchaček |
+
+Dva stávající skilly dostaly oddíl místo nového skillu: `irm-token`
+oddíl 9 *Logo a ikona* (dvě kresby, dvě místa; logo jen z předlohy, maska
+místo obrázku, data URI mimo `:root`, PNG přefotit po změně SVG) a řádek
+o konkurenci v `irm-uzavreni` (sloupec „u vás“, štítek, počitadlo,
+*Zavedeno*, publikace na tutéž adresu). Rozcestník `pravidla-projektu`
+vede na všech pět.
+
+Po cestě se ukázalo, že úsek `AUTO:most` v rozboru hlásil
+`/api/aktualizace` jako GET a `/api/zakazka/` neměl vůbec:
+`rozbor_aktualizuj.py` bral metodu z pevného seznamu POST cest a regex
+chtěl mezeru za `u.path`, kterou `u.path.startswith(…)` nemá. Metoda se
+teď určuje podle obsluhy (`do_GET` / `do_POST`), ve které cesta stojí,
+a čtou se i n-tice (`u.path not in ("/api/pdf", …)`).
+
+Z paměti sezení odešlo devět položek, které teď nese projekt (pravidlo
+není volba, pomlčka, balíčky, tři o logu, záznam změn, dvě o krycí
+ploše); zůstala jen ta o tom, co uživatel slovem „výběr“ myslí.
+
+**Změřeno:** 27 složek v `.claude/skills/` (bylo 22), u všech `name`
+v hlavičce shodné s názvem složky; nové mají 103–147 řádků. Tabulka
+mostu v `ROZBOR_APLIKACE.md` 3.4 má 8 řádků (bylo 7), `/api/aktualizace`
+POST; `python -W error -c "import rozbor_aktualizuj"` bez varování;
+`mapa.py --kontrola` 0. `aplikace/` ani `index.html` se změna nedotkla,
+kontrola vykreslení ani manuál se nespouštěly.
+
+## 262. Do kelímku se dolévají barvy, ne báze
+
+**Problém.** Nabídka u *Doladění odstínu v kelímku* dávala na výběr pět
+bází — standardní, transparentní, krycí bílou, discharge, strečovou. Jenže
+takhle se odstín nedolaďuje. Tentýž Pantone sedne na růžovém plastu jinak
+než na žluté látce a míchač ho posouvá tím, že přilije trochu žluté nebo
+modré z téže řady, ze které je základ namíchaný. Barev, kterými se koriguje,
+je v ceníku 137, pigmentů 12 — a ani jedna z nich v nabídce nebyla. Míchač
+tak našeptávač obešel a psal názvy z hlavy, což je přesně cesta k překlepovým
+dvojníkům v custom recepturách.
+
+**Co se změnilo.** Nová funkce `volbyPrilitku` (část 639) staví nabídku
+z ceníku v pořadí, v jakém se u váhy sahá po kelímku:
+
+| pořadí | co | zúžení |
+|---|---|---|
+| 1. | barvy řady, ze které je základ | jen táž řada |
+| 2. | pigmenty | všechny |
+| 3. | báze | všechny bez řady + řada základu |
+
+Řada se čte ze **složek základu**, ne z pole `series` receptury: to je volný
+text („odvozeno z…", „doladěno z…") a u odvozeného odstínu o řadě neříká nic,
+kdežto složky sedí v ceníku i tam. Složka smí patřit do víc řad naráz
+(svislítko v ceníku) a otevře pak obě.
+
+Barva z **cizí** řady se nenabízí — přilít Marabu do Printcoloru je rozhodnutí
+technologa o snášenlivosti pojiv, ne položka v seznamu. Napsat ji ručně jde
+dál: pole zůstává textové, nabídka je našeptávač, ne zámek.
+
+Popisek u položky říká, odkud je (řada z ceníku, nebo `pigment` / `báze`).
+Datalist `optgroup` nekreslí, tohle je jediný předěl, který Chrome u
+našeptávače ukáže — ověřeno měřením, ne odhadem.
+
+**Chyba, kterou to nejdřív mělo.** První verze zúžení podle řady vyhodila
+i báze — čtyři z pěti jich totiž v ceníku řadu nemají, protože jsou
+univerzální. Z nabídky by tak zmizelo právě to, čím se stahuje sytost.
+Našla to zkouška v Node, ne obrazovka: filtr teď materiál **bez řady** bere
+jako univerzální a nechává ho všude.
+
+**Změřeno.**
+
+- Nabídka u základu z řady Printcolor MS 660: **48 položek** — 32 barev té
+  řady, 12 pigmentů, 4 báze. Dřív 5 položek (jen báze).
+- Proklik skutečné aplikace, základ z řady Marabu MaraProp PP: **33 položek**
+  — 17 barev řady, 12 pigmentů, 4 báze; první tři `PP 020 Zitron`,
+  `PP 021 Mittelgelb`, `PP 022 Orange`, všechny s popiskem řady. Cizí řada
+  v nabídce žádná.
+- Zkouška v Node, 11 kontrol: cizí řada se nenabízí · tužidlo, ředidlo ani
+  likvidace nikdy (nejsou to složky odstínu) · složka ve dvou řadách otevře
+  obě · neznámá složka → všechny barvy, ne prázdno · starší ceník bez sloupce
+  `rada` → jako dřív · prázdný ceník → prázdno. Na verzi před změnou hlásí
+  a vrací kód 1, po změně 0.
+- Překlad popisků: cs `pigment` / `báze` → en `pigment` / `base` → pt
+  `pigmento` / `base`; řada `Printcolor MS 660` se nepřekládá v žádném
+  jazyce (jsou to data dílny).
+- `kontrola_aplikace.py` 0, DOM 19 001 znaků, žádná hláška.
+- Data dílny po proklikání beze změny; `receptury_vlastni.csv` se lišil jen
+  pořadím řádků (14 = 14, shodná množina) a byl vrácen ze zálohy.
+
+## 263. Databáze se jmenují jako v dílně: PRINTCOLOR 660/786 a RUCO 10KK
+
+**Problém.** Tři databáze nesly v nabídce jména, kterými je v dílně nikdo
+nenazývá. `PMS 660` a `PMS 786` jsou zkratky z hlavičky PDF (Colour selector:
+PMS), ne jméno výrobce — míchač u váhy hledá Printcolor. `RUCOLOR 10KK` je
+zase delší, než jak se řadě říká: RUCO.
+
+Jméno v nabídce vzniká odříznutím předpony `receptury_` z názvu souboru, takže
+přejmenování je změna dat, ne kódu. Táhne se ale přes víc míst, než je vidět:
+vedle názvu souboru je řada zapsaná v každém řádku databáze a **podruhé**
+v `parametry/pigmenty.csv`, kde podle ní aplikace páruje bázím ceny a hustoty.
+Kdyby se přepsala jen jedna strana, bázím by se ceny mlčky rozpojily — a to
+je přesně ta chyba, kterou u váhy nikdo nepozná, protože kalkulace dál počítá,
+jen bez cen.
+
+**Co se změnilo.**
+
+- `receptury_PMS_660.csv` → `receptury_PRINTCOLOR_660.csv`, řada
+  `Printcolor MS 660` → `PRINTCOLOR 660`
+- `receptury_PMS_786.csv` → `receptury_PRINTCOLOR_786.csv`, řada
+  `Printcolor MS 786` → `PRINTCOLOR 786`
+- `receptury_RUCOLOR_10KK.csv` → `receptury_RUCO_10KK.csv`, řada
+  `RUCOLOR 10KK` → `RUCO 10KK`
+- `parametry/databaze.csv` — přiřazení k technologiím i poznámky; oficiální
+  označení míchacího systému zůstalo v závorce (`PRINTCOLOR 660 (Mischsystem
+  MS 660)`), aby šlo dohledat, o kterou řadu od výrobce jde
+- `parametry/pigmenty.csv` — sloupec `rada` u 62 bází včetně sedmi, které
+  sdílejí obě řady Printcolor (`PRINTCOLOR 660|PRINTCOLOR 786`)
+- `prevod_printcolor.py` a `prevod_rucolor.py` — odvozování názvu bez
+  `--vystup`, jinak by příští převod vyrobil zase staré jméno
+- `foto_manualu.py` — podstrkávaná řada k poloze ukazovala na soubor, který
+  po přejmenování neexistuje
+
+Sloupec `pozn` v RUCO databázi zůstal u `RUCOLOR 10KK str. N` — odkazuje na
+stránku tištěného bookletu od RUCOINX, který se pořád jmenuje RUCOLOR.
+V převodníku proto řada a poznámka nově vznikají zvlášť.
+
+Historické odkazy se nepřepisovaly: `evidence/zbytky.csv` u 16 řádků drží
+starý název souboru jako záznam, odkud se kelímek tehdy namíchal — stejně
+jako tam od dřívějška leží `receptury_PMS_Xpression.csv`.
+
+**Změřeno.** Most vydává `receptury_PRINTCOLOR_660.csv` (3 617 řádků),
+`receptury_PRINTCOLOR_786.csv` (3 092) a `receptury_RUCO_10KK.csv` (3 313) —
+tedy tolik, kolik měly soubory před přejmenováním. V aplikaci po 20 s stojí
+v nabídce typů barev `Ferro Xpression`, `Marabu LibraPrint LIP`,
+`Marabu MaraProp PP`, `Marabu TampaStar TPR`, `PRINTCOLOR 660`,
+`PRINTCOLOR 786`, `RUCO 10KK` — starý název nikde.
+
+Sirotčí mechanismus nebylo potřeba: v IndexedDB je 15 191 receptur, tolik jako
+před změnou, a všech 778 + 814 + 776 sedí pod novým zdrojem, žádný duplikát.
+Řady v `pigmenty.csv` a v databázích si po změně odpovídají na obou stranách
+(25 + 18 + 12 bází + 7 sdílených). `kontrola_aplikace.py` 0 chyb,
+`kontrola_manualu.py` 0 nálezů, `receptury_vlastni.csv` po testech shodný
+se zálohou.
+
+## 264. Přejmenování databáze: řada uvnitř CSV zůstává, jinak se receptury zdvojí
+
+**Problém.** Po přejmenování PMS → PRINTCOLOR a RUCOLOR → RUCO stály v nabídce
+typů barev dvojice: `PMS 660 (778)` vedle `PRINTCOLOR 660 (778)`, totéž u 786.
+Míchač si vybíral ze dvou položek, které jsou tatáž databáze.
+
+Na disku ani v mostu žádný starý soubor nebyl — staré položky visely
+v prohlížeči. Aplikace na to má sirotčí mechanismus: receptura, jejíž soubor
+už na disku není, přejde pod databázi se shodným názvem **i řadou** z CSV,
+i s `id`, na kterém visí vazby na produkt a polohu, síto a kryvost. Jenže
+při přejmenování se spolu s názvem souboru přepsal i sloupec `rada` — a tím
+se klíč rozešel. Sirotek se nenašel, receptura se založila znovu a v nabídce
+zůstaly obě.
+
+Zbytek už jen odváděl pozornost: `zdrojeReceptur` staví seznam s počty
+výhradně z názvu souboru, takže „PMS 660 (778)" opravdu byl sirotek, ne řada.
+
+**Co se změnilo.**
+
+- sloupec `rada` je zpátky na označení od výrobce — `Printcolor MS 660`,
+  `Printcolor MS 786`, `RUCOLOR 10KK` — ve všech řádcích databází i
+  v `parametry/pigmenty.csv` u 62 bází včetně sedmi sdílených
+- názvy souborů a jména v nabídce zůstávají `PRINTCOLOR 660`,
+  `PRINTCOLOR 786`, `RUCO 10KK`
+- `prevod_rucolor.py` odvozuje řadu zase jako RUCOLOR; proč se rozchází
+  s názvem souboru, stojí v docstringu funkce
+- přibyl `zkouska_prejmenovani.js` — projede skutečná CSV a ověří, že se
+  receptury převezmou; hlídá i tu past, kvůli které vznikl
+- `ROZBOR_APLIKACE.md` a skilly `irm-databaze-nova`, `irm-nastroje` říkají,
+  že název souboru a řada nejsou totéž a proč se řada nepřejmenovává
+
+**Změřeno.** `zkouska_prejmenovani.js` na skutečných databázích: 778 + 814 +
+776 receptur se převezme, výsledek má tolik receptur, kolik má soubor —
+žádný duplikát, žádný zdroj se starým názvem, `id` i síto (150-31) a kryvost
+zůstávají. Protichůdně: s přejmenovanou řadou zkouška duplikáty najde ve
+všech třech případech. Návratové kódy 0 čisté / 1 nález / 2 nelze změřit
+ověřeny všechny tři.
+
+V prohlížeči: 778 receptur podstrčených pod `receptury_PMS_660.csv` se po
+načtení sloučilo pod `receptury_PRINTCOLOR_660.csv`, zdrojů se starým názvem
+zůstalo 0. `kontrola_aplikace.py` 0 chyb, `kontrola_manualu.py` 0 nálezů,
+`receptury_vlastni.csv` shodný se zálohou.
+
+## 265. Namíchat recepturu i bez zakázky — dávku zadá člověk, ne plocha potisku
+
+**Problém.** Dílna míchá i mimo objednávku: vzorek odstínu do vzorníku, než se
+zakázka vůbec potvrdí; dolití zásoby barvy, která se tiskne pořád dokola;
+zkušební kelímek na nový materiál; nátisk pro zákazníka, který se teprve
+rozhoduje. Aplikace to ale neuměla — dávka se vždycky počítala ze zakázky
+(plocha potisku × kusy × nános + ztráty + rezerva síta + minimální dávka), a to
+předpokládá produkt a polohu. Ze záložky Receptury šla receptura jen prohlédnout;
+v kódu u toho stálo výslovně „odkaz otevírá, nevybírá do kalkulace, tam by
+chyběl produkt a poloha".
+
+V provozu se to obcházelo tak, že se vybral libovolný produkt a dopočítaly se
+kusy tak, aby dávka vyšla. Číslo pak sedělo, jenže míchací lístek i zápis dávky
+nesly produkt, se kterým ta barva neměla nic společného — a v evidenci po nich
+zůstal nepravdivý řádek: vzorek odstínu vypadal jako zakázka na 200 kusů.
+
+**Co se změnilo.** U každé receptury se složením stojí v záložce Receptury
+tlačítko *Namíchat*. Okno se zeptá na jedinou věc — kolik toho má být (zkratky
+50 / 100 / 250 / 500 / 1 000 g, zadat jde cokoli, rovnou se ukazuje i objem
+v ml) — a přepne do Kalkulace. Ta se tím přepne z počítání ze zakázky na
+**zadané množství**: dávka je vstup, ne výsledek (`volnaDavka`, nová část 498).
+Poměr složek zůstává z receptury, mění se jen měřítko.
+
+Míchá se přes totéž jediné místo jako zakázka, ne přes druhý formulář vedle:
+asistent vážení, váha, zbytky z kelímků, aditiva, štítek, fronta i zápis do
+evidence. Dva míchací formuláře by se dřív nebo později rozešly a u téže
+receptury by každý ukazoval jinou navážku.
+
+Co volná dávka schválně **nemá**:
+
+| co | proč ne |
+|---|---|
+| rezerva síta | nemíchá se pro konkrétní těrku |
+| minimální dávka | množství určuje člověk a ví proč |
+| ztráty a nános | počítají se z plochy, která neexistuje |
+| předpověď zbytku | je to úvaha o tom, co zbude po vytištění — volná dávka se netiskne |
+
+Kdyby se cokoli z toho tiše přičetlo, na váze by stálo jiné číslo, než obsluha
+zadala — a tomu číslu by pak nevěřila.
+
+Místo karty *Vybraný produkt* stojí karta **Míchání mimo zakázku**; produkt,
+poloha, krycí plocha ani *＋ Další barva* se neukazují, protože k téhle dávce
+nepatří. Zůstává technologie: ta určuje, z jakých řad se receptura smí vzít,
+a platí i tady. U váhy je z téhož důvodu skryté tlačítko *Barva a poloha
+potisku* — custom receptura se váže na kombinaci produkt + barva + poloha,
+a ta tu žádná není.
+
+K dávce se zapisuje **proč se míchá** (vzorek odstínu, dolití zásoby, zkouška
+na materiál, nátisk pro zákazníka, jiný důvod s vlastním popisem). Jde na
+míchací lístek i do poznámky kelímku: kelímek bez zakázky a bez produktu je za
+měsíc ve skladu k nerozeznání od zbytku, který se má vrátit do tisku. Kusy se
+u takové dávky zapisují jako nula a cena na kus nevzniká — sestavy tak neuvidí
+vzorek odstínu jako zakázku na 200 kusů.
+
+**Změřeno:**
+
+- PANTONE Cool Gray 1 C, zadáno 250 g → navážky 248,5 + 1,3 + 0,2 + 0,0 g,
+  součet **250,0 g ≈ 208,3 ml** při hustotě 1,20 g/ml
+- PANTONE 485 C, zadáno 250 g → 62 % = 155,0 g, 28 % = 70,0 g, 10 % = 25,0 g,
+  součet **250,0 g ≈ 200,0 ml** při hustotě 1,25 g/ml
+- vážení v simulaci došlo až do „Všechny komponenty naváženy (99,9 g celkem)",
+  všechny čtyři složky odškrtnuté
+- u váhy stojí „PDP · mimo zakázku · vzorek odstínu", ne produkt z minulé
+  zakázky; tlačítko *Barva a poloha potisku* není v DOM
+- běžná cesta přes zakázku beze změny: karta *Vybraný produkt*, dávka spočítaná
+  z plochy (kód `IRM1|ref=98505|ks=200` → 1,0 g ≈ 0,8 ml)
+- telefon 390 px: `scrollWidth` 390 = `innerWidth` 390, stránka nepřetéká
+- 19 nových klíčů slovníku (en i pt), přepnutí ověřeno kliky: „Mix outside an
+  order" / „Misturar fora de encomenda", `lang` na kořeni `en` / `pt`
+
+**Chyba, kterou to nejdřív mělo.** První verze nechala kartu *Vybraný produkt*
+svítit tak, jak byla — u vzorku odstínu tedy stála láhev 11003 se Sportovní
+Láhví, se kterou ta barva nemá nic společného. Ukázal to až snímek; z kódu to
+vypadalo neškodně, protože karta „jenom zůstala". Podobně předpověď zbytku
+u volné dávky tvrdila „zbude asi 250,0 g — 100 % dávky, ztráty už níž nemají
+kam": pravda o zakázce, která neexistuje.
+
+**Falešný poplach.** Po testech nesouhlasil `receptury_vlastni.csv` se zálohou —
+soubor měl místo 13 řádků jediný. Nebyl to zásah téhle změny: aplikace ten soubor
+přepisuje při každém startu z IndexedDB a test běží na čistém profilu prohlížeče,
+takže ho přepsala prázdnou databází (známé chování, `irm-uloziste-prohlizece`).
+Záloha vrácena, evidence i parametry byly netknuté.
+
+**Co se rozhodlo nechat být.** Zakládání nové směsi přímo v tomhle okně
+(vypsat složky a procenta ručně) — custom receptura v IRM vzniká vždycky
+odvozením z receptury, která v databázích už je, a míchat „od nuly" mimo
+zakázku by tohle pravidlo obcházelo zadními vrátky. Kdo potřebuje vlastní
+odstín, odvodí ho jako dosud a namíchá ho pak týmž tlačítkem.
+
+## 266. Řady se jmenují jako v dílně: PRINTCOLOR 660/786 a RUCO 10KK
+
+**Problém.** Po kapitole 264 zmizel starý název z nabídky databází, ale
+u každé receptury zůstal viset dál: „PANTONE 485 C · RUCOLOR 10KK". Je to
+sloupec `rada`, který se v 264 schválně vrátil na původní hodnotu, aby se
+receptury po přejmenování souboru vůbec převzaly. Dílna tak četla v nabídce
+RUCO 10KK a o řádek níž RUCOLOR 10KK — dvě jména pro touž věc.
+
+Řada se ukazuje na pěti místech: v nabídce Pantone standardů, v hlavičce
+*Kolik namíchat*, v kartě *Receptura a barva*, v tabulce Receptur a ve výběru
+zbytku. Nešlo ji tedy nechat být jako vnitřní údaj.
+
+**Co se změnilo.** Ukázalo se, že sirotčí párování je potřeba **jen jednou** —
+při prvním načtení po přejmenování souboru. Jakmile receptury pod novým
+souborem jsou, páruje se podle zdroje a názvu (`klicReceptury`) a na řadě
+nezáleží. Přejmenování řady je proto bezpečné, když se udělá jako druhý krok.
+
+- `rada` přepsána ve všech třech databázích: `Printcolor MS 660` →
+  `PRINTCOLOR 660` (3 617 řádků), `Printcolor MS 786` → `PRINTCOLOR 786`
+  (3 092), `RUCOLOR 10KK` → `RUCO 10KK` (3 313)
+- `parametry/pigmenty.csv` se stejnými hodnotami: 25 + 18 + 12 bází a
+  7 sdílených (`PRINTCOLOR 660|PRINTCOLOR 786`); obě strany musí sedět,
+  jinak se bázím rozpojí ceny a hustoty
+- přefoceny scény 23 (*Vícebarevná zakázka*, obr. `29-barvy-zakazky`) a
+  *Barvy zakázky v míchacím režimu* (`35-mich-barvy`) v obou jazycích
+- `ROZBOR_APLIKACE.md` a skill `irm-databaze-nova` popisují postup jako
+  dvoukrokový, ne jako zákaz
+- oba převodníky odvozují řadu podle dílny: `prevod_printcolor.py`
+  `PRINTCOLOR <systém>`, `prevod_rucolor.py` `RUCO <řada>` — jinak by
+  příští převod z PDF vyrobil zase staré jméno; u obou stojí v komentáři,
+  že do existující databáze se řada nemění zároveň se souborem
+
+Sloupec `pozn` v RUCO databázi zůstává u `RUCOLOR 10KK str. N` — odkazuje na
+stránku tištěného bookletu od RUCOINX, který se pořád jmenuje RUCOLOR.
+
+**Změřeno.** V prohlížeči 0 receptur se starou řadou; nové řady nesou
+778 (PRINTCOLOR 660), 814 (PRINTCOLOR 786) a 776 (RUCO 10KK) receptur.
+Součet podle zdrojů 15 191 jako před změnou — žádný duplikát.
+`zkouska_prejmenovani.js` prochází i po změně řad (kód 0).
+
+Při přefocení scény 23 vyšel najevo nález, který tam ležel od kapitoly 260:
+tlačítko *Doladit odstín v kelímku* a warnbox *Uplatněna minimální dávka 1 g*
+posunuly obsah karty o 41 px dolů, ale otisky pocházely z focení před tou
+změnou, takže je neměla s čím porovnat. Tři rámečky opraveny `--oprav`
+v obou jazycích, prohlídkou archů ověřeno, že sedí na svých prvcích
+(`+ Do fronty všechny barvy (2)`, dlaždice barev, `+ Další barva`).
+`kontrola_manualu.py --zapis`: 460 rámečků, 0 nálezů.
+`kontrola_aplikace.py` 0 chyb; evidence i `receptury_vlastni.csv` po focení
+shodné se zálohou.
+
+**Zbývá.** Prohlížeč, který přejmenování souboru zmeškal celé (počítač dlouho
+vypnutý), dostane nový soubor i novou řadu naráz a receptury si zdvojí —
+sirotčí větev v takovém případě nepomůže. U strojů mimo denní provoz je proto
+potřeba dodržet pořadí, ne udělat obojí najednou.

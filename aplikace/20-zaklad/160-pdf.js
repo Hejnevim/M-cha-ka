@@ -140,7 +140,7 @@ function SpecVysledek({ res }) {
     <//>`;
 }
 
-function PdfTab({ sgps, products, recipes, onApply, ulozeny, setUlozeny }) {
+function PdfTab({ sgps, products, recipes, omezeni, onApply, ulozeny, setUlozeny }) {
   // rozpracovaný spec drží aplikace, aby se dal kdykoli otevřít a upravit znovu
   const stav = ulozeny.stav, pole = ulozeny.pole, zdroj = ulozeny.zdroj;
   const text = ulozeny.text, jmeno = ulozeny.jmeno, chyba = ulozeny.chyba;
@@ -171,7 +171,7 @@ function PdfTab({ sgps, products, recipes, onApply, ulozeny, setUlozeny }) {
   };
 
   const res = useMemo(() => (stav === "hotovo" && Object.keys(pole).length)
-    ? resolveSpec(poleNaSpec(pole), products, recipes) : null, [pole, stav, products, recipes]);
+    ? resolveSpec(poleNaSpec(pole), products, recipes, omezeni) : null, [pole, stav, products, recipes, omezeni]);
 
   if (sgps.stav.stav !== "ok") return html`
     <div className="card">

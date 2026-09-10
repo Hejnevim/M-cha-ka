@@ -26,6 +26,9 @@ SCR;150-31;150;31;;;;;;;;;;;
 SCR;150-34;150;34;;;;;;;;;;;
 SCR;165-31;165;31;;;;;;;;;;;
 SCR;180-31;180;31;;;;;;;;;;;
+;;;;;;;;;;;;"FIR - vypalovaci dilna drzi jen tyto dve site (zadani dilny 2026-09-10).";;
+FIR;100-40;100;40;;;;;;;;;;;
+FIR;130-34;130;34;;;;;;;;;;;
 ;;;;;;;;;;;;"SITO PODLE PRODUKTU: vychozi = ano oznaci sito, ktere technologie pouziva u vsech produktu bez vlastniho radku. produkty = ref produktu oddelene carkou, ktere jedou na tomto situ. Kalkulace sito doplni sama, jakmile je vybrany produkt.";;
 TXP;54-64;54;64;;;;;;;;;"textil - vychozi sito pro vsechny produkty";ano;
 TXP;90-48;90;48;;;;;;;;;"textil - jemnejsi sito pro vyjmenovane produkty";;92850,92833,92931,92874,92871,92925,92906,92930,92910

@@ -27,13 +27,20 @@ function useMediaQuery(dotaz) {
    Kalkulace z pole šířky těrky udělá výběr s těmito šířkami v nabídce —
    tiskař nemá co vymýšlet, vybírá z toho, co drží v ruce, a nic nepíše.
    Technologie bez seznamu žádnou nabídku nedostane a zůstává jí ruční
-   číselné pole. */
+   číselné pole. Jediná hodnota v seznamu (dílna drží jen jednu šířku těrky)
+   není volba, ale pravidlo — dlaždice pak číslo jen ukáže, bez pole a bez
+   „—" (irm-pravidlo-neni-volba).
+   minDavky = dávky (g), mezi kterými se u technologie vybírá „Min. dávka" —
+   totéž jako terky, jen pro minimální dávku. Technologie bez seznamu má dál
+   ruční číselné pole. */
 const TECHS = {
   SCR: { name: "Sítotisk (plast, papír) / rotační", gm2: 6.0 },
   PDP: { name: "Tampontisk", gm2: 2.5, sito: false },
   TXP: { name: "Sítotisk (textil)", gm2: 14.0, terky: [250, 420] },
   TRS: { name: "Transfer", gm2: 18.0 },
-  FIR: { name: "Firing — Low Temperature", gm2: 8.0 },
+  // vypalovací dílna drží těrky jen v 350 mm a míchá po 50 / 100 / 150 g —
+  // obě čísla dané provozem, ne k vymýšlení (zadání dílny 2026-09-10)
+  FIR: { name: "Firing — Low Temperature", gm2: 8.0, terky: [350], minDavky: [50, 100, 150] },
 };
 const techMaSito = (t) => !(TECHS[t] && TECHS[t].sito === false);
 /* Standardní sítotisková síta (nití/cm – průměr vlákna µm), řada Sefar/Saati

@@ -1,6 +1,6 @@
 "use strict";
 /* ================== TYP BARVY PROTI MATERIÁLU ==================
-   Řada barev (Printcolor MS 660, MS 786, Ferro Xpression) JE typ barvy — a ne
+   Řada barev (PRINTCOLOR 660, PRINTCOLOR 786, Ferro Xpression) JE typ barvy — a ne
    každý typ drží na každém povrchu: co je určené na plast, se z kovu sedře,
    na sklo je potřeba vypalovací. Tiskaři to aplikace dosud říct neuměla,
    protože nabídku zužovala jen technologií, a ta o materiálu nevypovídá:

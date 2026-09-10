@@ -101,10 +101,12 @@ Write-Output "archů: $arch"
 """
 
 
-def vyfot(jazyk, sirka, vyska, cil, sceny, most=False):
+def vyfot(jazyk, sirka, vyska, cil, sceny, most=False, od_casu=0):
     """Jeden běh prohlížeče pro jednu stránku; vrací (počet scén, počet chyb).
     `most`: stránka se načte přes běžící most (http://localhost:8765), tedy
-    přesně to, co vidí dílna v prohlížeči — ne soubor z disku."""
+    přesně to, co vidí dílna v prohlížeči — ne soubor z disku.
+    `od_casu`: scény, jejichž snímek ve složce vznikl po tomhle čase, se
+    přeskočí — tak pokračuje běh po pádu spojení tam, kde skončil."""
     soubor = os.path.join(SLOZKA, "prezentace", STRANKY[jazyk])
     if most:
         adresa_stranky = "http://localhost:8765/prezentace/" + STRANKY[jazyk]
@@ -155,6 +157,9 @@ def vyfot(jazyk, sirka, vyska, cil, sceny, most=False):
         vybrane = sceny or range(1, pocet + 1)
         print("%s: %d scén" % (STRANKY[jazyk], pocet))
         for n in vybrane:
+            soubor_sceny = os.path.join(cil, "%02d.png" % n)
+            if od_casu and os.path.exists(soubor_sceny) and os.path.getmtime(soubor_sceny) >= od_casu:
+                continue
             info = w.js(VYBER % n)
             try:
                 d = json.loads(info)
@@ -204,7 +209,21 @@ def main():
     celkem, chyb = 0, 0
     for jazyk in (["cs", "en"] if a.jazyk == "obe" else [a.jazyk]):
         slozka = os.path.join(a.cil, jazyk)
-        n, ch = vyfot(jazyk, a.sirka, a.vyska, slozka, a.sceny, a.most)
+        # Spojení s bezhlavým Chromem občas spadne uprostřed běhu (10. 9. 2026:
+        # „Inspected target navigated or closed" u anglické scény 15, celý běh
+        # skončil bez archů). Není to chyba scény — nový běh pokračuje od
+        # první scény, která v téhle složce ještě z tohoto běhu není.
+        start = time.time()
+        n, ch = 0, -1
+        for pokus in range(3):
+            try:
+                n1, ch1 = vyfot(jazyk, a.sirka, a.vyska, slozka, a.sceny, a.most, od_casu=start)
+                n += n1
+                ch = (0 if ch < 0 else ch) + ch1 if ch1 >= 0 else ch1
+                break
+            except (OSError, ConnectionResetError) as e:
+                print("  spojení s prohlížečem spadlo (%s) — nový běh pro zbylé scény (%d/3)" % (e, pokus + 2))
+                time.sleep(3)
         if ch < 0:
             return 2
         celkem += n

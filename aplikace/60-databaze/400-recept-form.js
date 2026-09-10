@@ -22,14 +22,13 @@ function sPredvyplnenymSitem(initial, sitoVychozi) {
   return Object.assign({}, initial, { mesh: sitoVychozi });
 }
 
-function RecipeForm({ initial, onSave, onCancel, sita, materialy, sitaTech, sitoVychozi }) {
+function RecipeForm({ initial, onSave, onCancel, sita, materialy, sitaTech, sitoVychozi, znacky }) {
   const nabidkaSit = useMemo(() => nabidkaSitEditoru(sita, sitaTech, sitoVychozi), [sita, sitaTech, sitoVychozi]);
   const [r, setR] = useState(() => sPredvyplnenymSitem(initial, sitoVychozi));
   const setC = (id, k, v) => setR(Object.assign({}, r, { components: r.components.map((x) => x.id === id ? Object.assign({}, x, { [k]: v }) : x) }));
   const sum = r.components.reduce((s, c) => s + n(c.pct), 0);
   const valid = r.name.trim() && r.components.length && r.components.every((c) => c.name.trim());
   const pl = potlifeReceptury(r);
-  const red = redeniReceptury(r);
   // Tužidel může mít dílna víc (každý systém svoje) — pak musí receptura říct,
   // které do ní patří, jinak se nespočítá jeho cena.
   const tuzidlaVCeniku = useMemo(() => Object.keys(materialy || {})
@@ -117,21 +116,24 @@ function RecipeForm({ initial, onSave, onCancel, sita, materialy, sitaTech, sito
             <span className="tglt"></span>${preloz("Dvousložková — s tužidlem")}</label>
         </div>
       </div>
+      ${/* Značka loga, které se na produkt tiskne. Míchač vlastní odstín hledá
+            podle ní („ta modrá na Škodovku“), a podle ní se custom receptury
+            v nabídce sdružují do skupin. Není to objednavatel o pár řádků výš:
+            jedna agentura objedná potisk pro tři značky.
+            Našeptávač z už použitých značek je tu proti překlepovým dvojníkům —
+            „Škoda“ a „Skoda“ by nabídku rozdělily na dvě skupiny. */""}
+      <div className="frow" style=${{ marginTop: 4 }}>
+        <div><label className="f">${preloz("Značka loga")}</label>
+          <input value=${r.znackaLoga || ""} list="znacky-loga"
+            onChange=${(e) => setR(Object.assign({}, r, { znackaLoga: e.target.value }))}
+            placeholder=${preloz("čí logo se tiskne (nepovinné)")} />
+          <datalist id="znacky-loga">
+            ${(znacky || []).map((z) => html`<option key=${z} value=${z}></option>`)}
+          </datalist></div>
+      </div>
       <div className="frow" style=${{ marginTop: 4 }}>
         <div><label className="f">${preloz("Poznámka k receptuře")}</label>
           <input value=${r.poznamka || ""} onChange=${(e) => setR(Object.assign({}, r, { poznamka: e.target.value }))} /></div>
-      </div>
-      <div className="frow c2" style=${{ marginTop: 4 }}>
-        <div>
-          <label className="f">${preloz("Doporučené ředění (% váhy barvy)")}</label>
-          <input type="number" step="0.5" min="0" value=${Math.round(red.pomer * 1000) / 10}
-            onChange=${(e) => setR(Object.assign({}, r, { pomerRedidla: n(e.target.value) / 100 }))} />
-        </div>
-        <div>
-          <label className="f">${preloz("Strop ředění (% váhy barvy)")}</label>
-          <input type="number" step="0.5" min="0" value=${Math.round(red.mez * 1000) / 10}
-            onChange=${(e) => setR(Object.assign({}, r, { mezRedidla: n(e.target.value) / 100 }))} />
-        </div>
       </div>
       ${r.tuzidlo && html`
         <div className="frow c4" style=${{ marginTop: 4 }}>
@@ -172,7 +174,7 @@ function RecipeForm({ initial, onSave, onCancel, sita, materialy, sitaTech, sito
               ${preloz("V ceníku je víc tužidel — bez určení se cena tužidla nedostane do nákladů dávky.")}</p></div>
           </div>`}
         <p className="note">
-          ${preloz("Na 100 g báze přijde {t} g tužidla; směs je použitelná {d} od smíchání a míchací režim začne varovat po {p} % lhůty, tedy {v} po namíchání — {rada}.",
+          ${preloz("Na 100 g báze přijde {t} g tužidla; směs je použitelná {d} od smíchání a kelímek s tužidlem začne varovat po {p} % lhůty, tedy {v} po smíchání — {rada}.",
             { t: fmt(pl.pomer * 100, 1), d: dobaText(pl.minut * MINUTA),
               p: fmt(pl.mez * 100, 0), v: dobaText(pl.minut * pl.mez * MINUTA),
               rada: preloz(HUSTNUTI[pl.hustnuti].rada) })}

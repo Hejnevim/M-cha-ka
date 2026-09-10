@@ -11,9 +11,9 @@ PDF z Printcolor easyMEMO má pevnou stavbu, jeden záznam vypadá takhle:
 
 Použití:
     python prevod_printcolor.py "C:/Users/ahmik/Downloads/PMS 786.pdf"
-    python prevod_printcolor.py "...PMS 786.pdf" --vystup receptury_PMS_786.csv
+    python prevod_printcolor.py "...PMS 786.pdf" --vystup receptury_PRINTCOLOR_786.csv
 
-Bez --vystup se jméno odvodí z míchacího systému (MS 786 → receptury_PMS_786.csv)
+Bez --vystup se jméno odvodí z míchacího systému (MS 786 → receptury_PRINTCOLOR_786.csv)
 a soubor se uloží do složky "databaze barev".
 
 Odstíny (hex) v PDF nejsou, berou se z tabulky parametry/odstiny_pantone.csv.
@@ -122,7 +122,11 @@ def main():
         return 1
 
     system = collections.Counter(z["system"] for z in zaznamy).most_common(1)[0][0]
-    rada = "Printcolor MS " + system
+    # Dílna říká řadě PRINTCOLOR 660 / 786, ne "Printcolor MS 660" z hlavičky
+    # PDF (kap. 266). Pozor při převodu do EXISTUJÍCÍ databáze: měnit řadu
+    # zároveň s názvem souboru rozbije převzetí receptur v prohlížeči
+    # (irm-databaze-nova, bod 5).
+    rada = "PRINTCOLOR " + system
 
     # Týž pantone bývá v databázi víckrát, v různých letech — obojí je platné
     # a rozliší se rokem v názvu. Bez toho by se v aplikaci tvářily jako táž
@@ -147,7 +151,7 @@ def main():
                 "pozn": z["zahlavi"],
             })
 
-    vystup = a.vystup or ("receptury_PMS_%s.csv" % system)
+    vystup = a.vystup or ("receptury_PRINTCOLOR_%s.csv" % system)
     cesta = vystup if os.path.isabs(vystup) else os.path.join(CIL, vystup)
     os.makedirs(os.path.dirname(cesta), exist_ok=True)
     with open(cesta, "w", encoding="utf-8-sig", newline="") as f:

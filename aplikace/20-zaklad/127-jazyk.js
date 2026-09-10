@@ -183,6 +183,19 @@ const SLOVNIK = {
   "Přepnuto na technologii {tech} podle zakázky.":
     { en: "Switched to technology {tech} according to the order.",
       pt: "Mudado para a tecnologia {tech} segundo a encomenda." },
+  "Řada podle polohy: {r}":
+    { en: "Ink range by position: {r}", pt: "Gama segundo a posição: {r}" },
+  "Receptura „{r}“ není v řadách pro {tech} — v databázi je jen jako {j}.":
+    { en: "Recipe “{r}” is not in the ranges for {tech} — the database has it only as {j}.",
+      pt: "A receita «{r}» não está nas gamas para {tech} — a base de dados só a tem como {j}." },
+  "Z jaké řady vzít odstín?":
+    { en: "Which ink range should the shade come from?", pt: "De que gama tirar a tonalidade?" },
+  "{n} z {celkem} barev":
+    { en: "{n} of {celkem} colours", pt: "{n} de {celkem} cores" },
+  "Bez volby — hledat ve všech řadách":
+    { en: "No choice — search all ranges", pt: "Sem escolha — procurar em todas as gamas" },
+  "Řada {r} je od teď přiřazená poloze {p}.":
+    { en: "Range {r} is now assigned to position {p}.", pt: "A gama {r} fica atribuída à posição {p}." },
   "Kelímek {kod} v evidenci není.":
     { en: "Cup {kod} is not in the records.", pt: "O copo {kod} não está no registo." },
   "Kód se nepodařilo přiřadit.":
@@ -457,6 +470,50 @@ const SLOVNIK = {
     { en: "if the shade comes out wrong, {g} g is thrown away instead of {c} g",
       pt: "se o tom sair errado, deitam-se fora {g} g em vez de {c} g" },
   "Nátisk": { en: "Proof print", pt: "Prova" },
+  /* Doladění odstínu v kelímku (část 639) — kap. 260 */
+  "Doladit odstín v kelímku": { en: "Adjust the shade in the cup", pt: "Acertar o tom no copo" },
+  "Nátisk nesedí — doladit přilitím":
+    { en: "Proof is off — adjust by adding", pt: "A prova não bate — acertar adicionando" },
+  "z přilitých gramů vznikne vlastní receptura":
+    { en: "the grams you add become a custom recipe",
+      pt: "os gramas adicionados formam uma receita própria" },
+  "Doladění odstínu v kelímku": { en: "Shade adjustment in the cup", pt: "Acerto do tom no copo" },
+  "základ: {z}": { en: "base: {z}", pt: "base: {z}" },
+  "nátisk {g} g": { en: "proof {g} g", pt: "prova {g} g" },
+  "Kolik základu v kelímku (g)": { en: "How much base in the cup (g)", pt: "Quanto de base no copo (g)" },
+  "Co jsem přilil (složka a gramy)":
+    { en: "What I added (component and grams)", pt: "O que adicionei (componente e gramas)" },
+  "název složky": { en: "component name", pt: "nome do componente" },
+  "+ přílitek": { en: "+ addition", pt: "+ adição" },
+  "nová": { en: "new", pt: "novo" },
+  "složka": { en: "component", pt: "componente" },
+  "Napište, kolik základu v kelímku máte — z toho se dopočítá složení.":
+    { en: "Enter how much base is in the cup — the composition is calculated from it.",
+      pt: "Escreva quanta base tem no copo — daí calcula-se a composição." },
+  "V kelímku je {c} g — základ {z} g, přilito {p} g.":
+    { en: "The cup holds {c} g — base {z} g, added {p} g.",
+      pt: "No copo estão {c} g — base {z} g, adicionado {p} g." },
+  "Přílitek pod 0,1 g ({s}) váha pořádně nerozliší — při vážení od nuly se to netrefí.":
+    { en: "An addition under 0.1 g ({s}) is below what the scale resolves — weighing from zero will miss it.",
+      pt: "Uma adição abaixo de 0,1 g ({s}) a balança não distingue — ao pesar do zero não se acerta." },
+  "Na dávku {d} g to stačí; zbude {p} g.":
+    { en: "Enough for a {d} g batch; {p} g will be left.",
+      pt: "Chega para o lote de {d} g; sobram {p} g." },
+  "Do dávky {d} g zbývá dovážit {g} g — už podle nového složení.":
+    { en: "{g} g still to weigh out for the {d} g batch — by the new composition.",
+      pt: "Faltam pesar {g} g para o lote de {d} g — já pela nova composição." },
+  "Uložit jako custom recepturu": { en: "Save as a custom recipe", pt: "Guardar como receita própria" },
+  "zakládá technolog": { en: "the technologist creates it", pt: "é o tecnólogo que a cria" },
+  "připojí se k tomuto produktu a poloze":
+    { en: "it will be linked to this product and position",
+      pt: "fica ligada a este produto e posição" },
+  "Doladěno z {z} g: přidáno {p}":
+    { en: "Adjusted from {z} g: added {p}", pt: "Acertado a partir de {z} g: adicionado {p}" },
+  /* Značka loga u receptury a skupiny v nabídce */
+  "Značka loga": { en: "Logo brand", pt: "Marca do logótipo" },
+  "čí logo se tiskne (nepovinné)":
+    { en: "whose logo is printed (optional)", pt: "de quem é o logótipo (opcional)" },
+  "bez značky loga": { en: "no logo brand", pt: "sem marca de logótipo" },
   "g z {c} g — doporučeno {d} g": { en: "g of {c} g — recommended {d} g", pt: "g de {c} g — recomendado {d} g" },
   "Takhle malý nátisk neukáže odstín receptury.":
     { en: "A proof this small will not show the recipe's shade.", pt: "Uma prova tão pequena não mostrará o tom da receita." },
@@ -476,9 +533,6 @@ const SLOVNIK = {
 
   /* --- štítek a krycí plocha --- */
   "Štítek na kelímek →": { en: "Cup label →", pt: "Etiqueta do copo →" },
-  "pot life se pak hlídá od přidání tužidla":
-    { en: "pot life is then tracked from when the hardener is added",
-      pt: "o pot life passa a contar desde a adição do endurecedor" },
   "s tužidlem": { en: "with hardener", pt: "com endurecedor" },
   "Podíl plochy, který barva doopravdy pokryje":
     { en: "The share of the area the ink actually covers", pt: "A parte da área que a tinta realmente cobre" },
@@ -536,12 +590,10 @@ const SLOVNIK = {
   "Poznámka": { en: "Note", pt: "Nota" },
   "např. kelímek u míchačky": { en: "e.g. the cup by the mixer", pt: "p. ex. o copo junto à misturadora" },
   "Spotřebovat do": { en: "Use by", pt: "Consumir até" },
-  "Čas použitelnosti (h)": { en: "Usable time (h)", pt: "Tempo de uso (h)" },
-  "jen dvousložkové": { en: "two-component only", pt: "só bicomponentes" },
   "Dvousložková": { en: "Two-component", pt: "Bicomponente" },
-  "Pot life se počítá od teď — barva se právě namíchala. Zapíše se i zakázka{z}, produkt{p} a poloha, ať je pak jasné, odkud zbytek je.":
-    { en: "Pot life counts from now — the ink was just mixed. The order{z}, product{p} and position get recorded too, so it is clear where the leftover came from.",
-      pt: "O pot life conta a partir de agora — a tinta acabou de ser misturada. Também se registam a encomenda{z}, o produto{p} e a posição, para ficar claro de onde vem o resto." },
+  "Zapíše se i zakázka{z}, produkt{p} a poloha, ať je pak jasné, odkud zbytek je.":
+    { en: "The order{z}, product{p} and position get recorded too, so it is clear where the leftover came from.",
+      pt: "Também se registam a encomenda{z}, o produto{p} e a posição, para ficar claro de onde vem o resto." },
   "Uložit a otevřít štítek": { en: "Save and open the label", pt: "Guardar e abrir a etiqueta" },
 
   /* --- finanční box --- */
@@ -602,26 +654,7 @@ const SLOVNIK = {
     { en: " The price list is incomplete; the real saving is higher.",
       pt: " A tabela de preços está incompleta; a poupança real é maior." },
 
-  /* --- pruh pot life --- */
-  "Dvousložková barva — po navážení přidejte {t} ({p} % z {b} g báze), směsi bude {c} g. Zpracovat ji jde {d} od přidání tužidla.":
-    { en: "Two-component ink — after weighing add {t} ({p} % of {b} g of base); the mix will be {c} g. It stays workable for {d} from when the hardener is added.",
-      pt: "Tinta bicomponente — depois de pesar adicione {t} ({p} % de {b} g de base); a mistura terá {c} g. Pode trabalhar-se {d} desde a adição do endurecedor." },
   "{t} g tužidla": { en: "{t} g of hardener", pt: "{t} g de endurecedor" },
-  "Tužidlo přidáno — spustit odpočet": { en: "Hardener added — start the countdown", pt: "Endurecedor adicionado — iniciar a contagem" },
-  "Pot life vypršel — směs už tuhne ({d} po lhůtě)":
-    { en: "Pot life expired — the mix is already setting ({d} past the limit)",
-      pt: "O pot life expirou — a mistura já endurece ({d} além do prazo)" },
-  "Pot life končí — zbývá {d}": { en: "Pot life ending — {d} left", pt: "O pot life está a acabar — restam {d}" },
-  "Pot life běží — zbývá {d}": { en: "Pot life running — {d} left", pt: "Pot life em curso — restam {d}" },
-  "z {l} · uplynulo {p} %": { en: "of {l} · {p} % elapsed", pt: "de {l} · decorridos {p} %" },
-  "Nová směs": { en: "New mix", pt: "Nova mistura" },
-  "Vytvrzenou barvu nejde naředit zpátky — namíchejte novou dávku.":
-    { en: "Cured ink cannot be thinned back — mix a new batch.",
-      pt: "Tinta curada não se dilui de volta — misture um novo lote." },
-  "Houstne {jak} — {rada}.": { en: "Thickens {jak} — {rada}.", pt: "Engrossa {jak} — {rada}." },
-  " V kelímku je {c} g ({b} g báze + {t} g tužidla).":
-    { en: " The cup holds {c} g ({b} g base + {t} g hardener).", pt: " No copo há {c} g ({b} g de base + {t} g de endurecedor)." },
-  "Spotřebováno": { en: "Used up", pt: "Consumido" },
   "Vyhozeno": { en: "Thrown away", pt: "Deitado fora" },
   " ani ": { en: " nor ", pt: " nem " },
   "barvu": { en: "the color", pt: "a cor" },
@@ -827,36 +860,9 @@ const SLOVNIK = {
   /* --- míchací režim: aditiva a viskozita --- */
   "Aditiva": { en: "Additives", pt: "Aditivos" },
   "zpomalovač schnutí": { en: "drying retarder", pt: "retardador de secagem" },
-  "ředí se podle naměřené viskozity, ne od oka":
-    { en: "thin according to the measured viscosity, not by eye",
-      pt: "dilui-se segundo a viscosidade medida, não a olho" },
   "na jemná síta a velké formáty — barva pak nezasychá v okách":
     { en: "for fine meshes and large formats — the ink then does not dry up in the mesh openings",
       pt: "para malhas finas e grandes formatos — a tinta não seca então nas malhas" },
-  "g · doporučeno {d} g ({p} % barvy), strop {s} g":
-    { en: "g · recommended {d} g ({p} % of the ink), ceiling {s} g",
-      pt: "g · recomendado {d} g ({p} % da tinta), teto {s} g" },
-  "V kelímku bude {c} — barva {b} g + aditiva {a} g, tedy {p} % směsi.{zbyva}":
-    { en: "The cup will hold {c} — ink {b} g + additives {a} g, i.e. {p} % of the mix.{zbyva}",
-      pt: "No copo ficarão {c} — tinta {b} g + aditivos {a} g, ou seja, {p} % da mistura.{zbyva}" },
-  " Do stropu zbývá {g} g.": { en: " {g} g left before the ceiling.", pt: " Faltam {g} g para o teto." },
-  "Aditiv je {a} g, strop receptury je {s} g — o {n} g víc.":
-    { en: "Additives come to {a} g, the recipe's ceiling is {s} g — {n} g over.",
-      pt: "Os aditivos são {a} g, o teto da receita é {s} g — mais {n} g." },
-  "Nad doporučení je {n} g aditiv — v gramu barvy je pak o {p} % míň pigmentu.":
-    { en: "There are {n} g of additives over the recommendation — each gram of ink then carries {p} % less pigment.",
-      pt: "Há {n} g de aditivos acima do recomendado — cada grama de tinta leva então menos {p} % de pigmento." },
-  " na sítu {s}": { en: " on mesh {s}", pt: " na malha {s}" },
-  "Na stejné krytí{sito} jí padne o {n} g víc: barva {b1} → {b2} g, aditiva {a1} → {a2} g. Změřte viskozitu a zapište ji — spotřebu ze síta počítá až ona.":
-    { en: "For the same coverage{sito} it takes {n} g more: ink {b1} → {b2} g, additives {a1} → {a2} g. Measure the viscosity and record it — the mesh consumption is computed from it.",
-      pt: "Para a mesma cobertura{sito} gastam-se mais {n} g: tinta {b1} → {b2} g, aditivos {a1} → {a2} g. Meça a viscosidade e registe-a — o consumo da malha calcula-se a partir dela." },
-  "Kompenzovat pigmentaci": { en: "Compensate the pigmentation", pt: "Compensar a pigmentação" },
-  "Dávka zvětšena o {g} g kvůli naředění.":
-    { en: "Batch enlarged by {g} g because of thinning.", pt: "Lote aumentado em {g} g por causa da diluição." },
-  " Poměr ředění i viskozita zůstávají; přidá se {b} g barvy a {a} g aditiv.":
-    { en: " The thinning ratio and the viscosity stay; {b} g of ink and {a} g of additives get added.",
-      pt: " A proporção de diluição e a viscosidade mantêm-se; adicionam-se {b} g de tinta e {a} g de aditivos." },
-  "Zpět na dávku zakázky": { en: "Back to the order batch", pt: "Voltar ao lote da encomenda" },
   "Viskozita — výtokový čas": { en: "Viscosity — flow-out time", pt: "Viscosidade — tempo de escoamento" },
   "uložit jako referenční hodnotu receptury":
     { en: "save as the recipe's reference value", pt: "guardar como valor de referência da receita" },
@@ -932,11 +938,6 @@ const SLOVNIK = {
   "Dopočet je přesný, ale oba kelímky mohly mezitím zhoustnout — a každý jinak.":
     { en: "The calculation is exact, but both cups may have thickened in the meantime — each differently.",
       pt: "O cálculo é exato, mas ambos os copos podem ter engrossado entretanto — e cada um de maneira diferente." },
-  "Aditiv je {a} g, strop receptury je {s} g.":
-    { en: "Additives come to {a} g, the recipe's ceiling is {s} g.",
-      pt: "Os aditivos são {a} g, o teto da receita é {s} g." },
-  "Nad stropem barva neteče, ale stéká.":
-    { en: "Over the ceiling the ink does not flow, it runs.", pt: "Acima do teto a tinta não corre, escorre." },
 
   /* --- míchací režim: asistent navážení --- */
   "Asistent navážení": { en: "Weighing assistant", pt: "Assistente de pesagem" },
@@ -972,12 +973,6 @@ const SLOVNIK = {
   "přelito o {g} g": { en: "overpoured by {g} g", pt: "excedido em {g} g" },
   "✓ v toleranci": { en: "✓ within tolerance", pt: "✓ dentro da tolerância" },
   "zbývá {g} g": { en: "{g} g to go", pt: "faltam {g} g" },
-  ". V nádobě je barvy {b} g, doporučené ředění {d} g, strop {s} g.":
-    { en: ". The container holds {b} g of ink; recommended thinning {d} g, ceiling {s} g.",
-      pt: ". No recipiente há {b} g de tinta; diluição recomendada {d} g, teto {s} g." },
-  "Aditiv je v nádobě {a} g, strop receptury je {s} g — o {n} g víc.":
-    { en: "The container holds {a} g of additives, the recipe's ceiling is {s} g — {n} g over.",
-      pt: "No recipiente há {a} g de aditivos, o teto da receita é {s} g — mais {n} g." },
   "Další složka →": { en: "Next component →", pt: "Componente seguinte →" },
   "Dokončit": { en: "Finish", pt: "Concluir" },
   "tolerance ±": { en: "tolerance ±", pt: "tolerância ±" },
@@ -1011,14 +1006,6 @@ const SLOVNIK = {
   "Štítky na kelímky →": { en: "Cup labels →", pt: "Etiquetas dos copos →" },
   "Štítky na kelímky": { en: "Cup labels", pt: "Etiquetas dos copos" },
   "Vytisknout štítky ({n})": { en: "Print labels ({n})", pt: "Imprimir etiquetas ({n})" },
-  "Zbývá tužidlo — {t} g": { en: "Hardener remains — {t} g", pt: "Falta o endurecedor — {t} g" },
-  " ({p} % z {b} g báze{ad}).": { en: " ({p} % of {b} g of base{ad}).", pt: " ({p} % de {b} g de base{ad})." },
-  ", aditiva se do základu nepočítají":
-    { en: ", additives do not count into the base", pt: ", os aditivos não contam para a base" },
-  "Na váze {v} g.": { en: "On the scale {v} g.", pt: "Na balança {v} g." },
-  "Přidávejte až do promíchané báze. Od té chvíle běží doba zpracovatelnosti {d} — pak už se směs nedá zachránit ředěním.":
-    { en: "Add it only into the mixed base. From that moment the workable time of {d} runs — after that the mix cannot be saved by thinning.",
-      pt: "Adicione só à base já misturada. A partir desse momento corre o tempo de trabalho de {d} — depois a mistura já não se salva com diluição." },
 
   /* --- míchací režim: korekce po nátisku --- */
   "Korekce po nátisku": { en: "Correction after proofing", pt: "Correção após a prova" },
@@ -2016,8 +2003,6 @@ const SLOVNIK = {
   "Název zákazníka (nepovinné)": { en: "Customer name (optional)", pt: "Nome do cliente (opcional)" },
   "Barva se tuží — od smíchání běží doba zpracovatelnosti": { en: "The ink takes hardener — the workable time runs from mixing", pt: "A tinta leva endurecedor — o tempo de trabalho corre desde a mistura" },
   "Dvousložková — s tužidlem": { en: "Two-component — with hardener", pt: "De duas componentes — com endurecedor" },
-  "Doporučené ředění (% váhy barvy)": { en: "Recommended thinning (% of ink weight)", pt: "Diluição recomendada (% do peso da tinta)" },
-  "Strop ředění (% váhy barvy)": { en: "Thinning ceiling (% of ink weight)", pt: "Teto de diluição (% do peso da tinta)" },
   "Tužidlo (% váhy báze)": { en: "Hardener (% of base weight)", pt: "Endurecedor (% do peso da base)" },
   "Doba zpracovatelnosti (min)": { en: "Workable time (min)", pt: "Tempo de trabalho (min)" },
   "Varovat po (% lhůty)": { en: "Warn after (% of the limit)", pt: "Avisar após (% do prazo)" },
@@ -2027,9 +2012,9 @@ const SLOVNIK = {
   "V ceníku je víc tužidel — bez určení se cena tužidla nedostane do nákladů dávky.":
     { en: "The price list has several hardeners — without picking one, the hardener's price never enters the batch cost.",
       pt: "O preçário tem vários endurecedores — sem escolher um, o preço do endurecedor não entra no custo do lote." },
-  "Na 100 g báze přijde {t} g tužidla; směs je použitelná {d} od smíchání a míchací režim začne varovat po {p} % lhůty, tedy {v} po namíchání — {rada}.":
-    { en: "Per 100 g of base comes {t} g of hardener; the mix is usable for {d} from mixing and the mixing mode starts warning after {p} % of the limit, i.e. {v} after mixing — {rada}.",
-      pt: "Por 100 g de base vão {t} g de endurecedor; a mistura é utilizável {d} desde a mistura e o modo de mistura avisa após {p} % do prazo, ou seja {v} depois de misturar — {rada}." },
+  "Na 100 g báze přijde {t} g tužidla; směs je použitelná {d} od smíchání a kelímek s tužidlem začne varovat po {p} % lhůty, tedy {v} po smíchání — {rada}.":
+    { en: "Per 100 g of base comes {t} g of hardener; the mix is usable for {d} from mixing and a cup with hardener starts warning after {p} % of the limit, i.e. {v} after mixing — {rada}.",
+      pt: "Por 100 g de base vão {t} g de endurecedor; a mistura é utilizável {d} desde a mistura e um copo com endurecedor avisa após {p} % do prazo, ou seja {v} depois de misturar — {rada}." },
   "Řada barvy (Printcolor)": { en: "Ink series (Printcolor)", pt: "Série da tinta (Printcolor)" },
   "Např. Printcolor 390": { en: "E.g. Printcolor 390", pt: "P. ex. Printcolor 390" },
   "Hustota (g/ml)": { en: "Density (g/ml)", pt: "Densidade (g/ml)" },
@@ -2655,6 +2640,27 @@ const SLOVNIK = {
   "přerušení zakázky": { en: "job interrupted", pt: "encomenda interrompida" },
   "konec směny": { en: "end of shift", pt: "fim de turno" },
   "jiný důvod": { en: "another reason", pt: "outro motivo" },
+  /* Míchání mimo zakázku — volná dávka (část 498): receptura se
+     namíchá v zadaném množství bez produktu a polohy. */
+  "Namíchat": { en: "Mix", pt: "Misturar" },
+  "Namíchat →": { en: "Mix →", pt: "Misturar →" },
+  "Namíchat mimo zakázku": { en: "Mix outside an order", pt: "Misturar fora de encomenda" },
+  "Míchání mimo zakázku": { en: "Mixing outside an order", pt: "Mistura fora de encomenda" },
+  "mimo zakázku": { en: "outside an order", pt: "fora de encomenda" },
+  "Kolik namíchat (g)": { en: "How much to mix (g)", pt: "Quanto misturar (g)" },
+  "Proč se míchá": { en: "Why it is mixed", pt: "Porquê a mistura" },
+  "Jaký": { en: "Which", pt: "Qual" },
+  "Zpět na zakázku": { en: "Back to the order", pt: "Voltar à encomenda" },
+  "složek": { en: "components", pt: "componentes" },
+  "≈ {ml} ml při hustotě {h} g/ml": { en: "≈ {ml} ml at a density of {h} g/ml", pt: "≈ {ml} ml com densidade de {h} g/ml" },
+  "Dávka je zadaná ručně, ne spočítaná z potisku. Produkt, poloha ani krycí plocha se do ní nepočítají.": { en: "The batch is entered by hand, not calculated from the print. Product, position and coverage are not part of it.", pt: "A dose é introduzida manualmente, não calculada a partir da impressão. Produto, posição e área de cobertura não entram no cálculo." },
+  "namíchat vlastní množství mimo zakázku": { en: "mix your own amount outside an order", pt: "misturar a sua própria quantidade fora de encomenda" },
+  "zpět k dávce počítané ze zakázky": { en: "back to the batch calculated from the order", pt: "voltar à dose calculada a partir da encomenda" },
+  "vrátit se k dávce počítané z produktu a zakázky": { en: "return to the batch calculated from the product and the order", pt: "voltar à dose calculada a partir do produto e da encomenda" },
+  "vzorek odstínu": { en: "shade sample", pt: "amostra de tom" },
+  "dolití zásoby": { en: "topping up stock", pt: "reposição de stock" },
+  "zkouška na materiál": { en: "material test", pt: "ensaio em material" },
+  "nátisk pro zákazníka": { en: "proof for the customer", pt: "prova para o cliente" },
   " · už vráceno {g} g": { en: " · {g} g already returned", pt: " · já devolvidos {g} g" },
   "Vrátilo by se víc, než se namíchalo — zkontrolujte číslo.": { en: "That would return more than was mixed — check the number.", pt: "Isso devolveria mais do que foi misturado — verifique o número." },
   "Vratka dostane vlastní kód a štítek a od teď je na skladě k další zakázce. Dávka {kod} zůstává v tisku — zakázka pokračuje a co z ní zbude na konci, se zapíše až po ní.": { en: "The return gets its own code and label and is in stock for the next job from now on. Batch {kod} stays on press — the job continues and whatever is left at the end is recorded afterwards.", pt: "A devolução recebe o seu próprio código e etiqueta e fica em stock para a próxima encomenda. O lote {kod} continua em impressão — a encomenda prossegue e o que sobrar no fim é registado depois." },

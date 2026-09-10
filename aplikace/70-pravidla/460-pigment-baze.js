@@ -102,10 +102,10 @@ function hustotaReceptury(recipe, materialy) {
    je součet spočítaný. Nula je přitom platný údaj (vodou ředitelné barvy
    těkavé látky nemají), proto se od prázdna rozlišuje.
 
-   Ředidlo a zpomalovač bývají těkavé skoro celé, proto se do výkazu
-   berou stejně jako do ceny — všechno, co se do kelímku doopravdy nalije. */
-function vocDavky({ comps, materialy, tuzidloG, tuzidloNazev,
-                    redidloG, redidloNazev, aditiva }) {
+   Zpomalovač bývá těkavý skoro celý, proto se do výkazu bere stejně jako
+   do ceny — všechno, co se do kelímku doopravdy nalije. Ředidlo se do
+   kelímku nelije (ředí se až při tisku), ve výkazu dávky tedy není. */
+function vocDavky({ comps, materialy, tuzidloG, tuzidloNazev, aditiva }) {
   const out = { vocG: 0, gramu: 0, gramuZnamo: 0, kryto: 0, uplna: true,
     bezUdaje: [], listy: [], znama: false };
   const sListem = new Set();
@@ -133,19 +133,12 @@ function vocDavky({ comps, materialy, tuzidloG, tuzidloNazev,
     const mat = materialRole(materialy, "tuzidlo", tuzidloNazev);
     pridej(mat ? mat.nazev : (tuzidloNazev || "tužidlo"), tuzidloG, mat);
   }
-  /* Aditiva mají přednost před `redidloG` — stejné pravidlo jako u ceny,
-     jinak by se nalité ředidlo započítalo dvakrát. */
-  if (aditiva) {
-    for (const druh of DRUHY_ADITIV) {
-      const g = n(aditiva[druh]);
-      if (!(g > 0)) continue;
-      const mat = materialRole(materialy, ADITIVA[druh].role,
-        druh === "redidlo" ? redidloNazev : "");
-      pridej(mat ? mat.nazev : ADITIVA[druh].popis, g, mat);
-    }
-  } else if (n(redidloG) > 0) {
-    const mat = materialRole(materialy, "redidlo", redidloNazev);
-    pridej(mat ? mat.nazev : (redidloNazev || "ředidlo"), redidloG, mat);
+  // aditiva (zpomalovač) po druzích, stejně jako v ceně dávky
+  for (const druh of DRUHY_ADITIV) {
+    const g = n(aditiva && aditiva[druh]);
+    if (!(g > 0)) continue;
+    const mat = materialRole(materialy, ADITIVA[druh].role, "");
+    pridej(mat ? mat.nazev : ADITIVA[druh].popis, g, mat);
   }
 
   out.kryto = out.gramu > 0 ? out.gramuZnamo / out.gramu : 0;

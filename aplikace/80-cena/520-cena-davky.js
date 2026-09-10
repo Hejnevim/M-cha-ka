@@ -54,7 +54,7 @@ function materialRole(materialy, role, jmeno) {
    dělilo všemi gramy, vyšla by u neúplného ceníku cena nižší, než jaká je,
    a úspora ze zbytku by se podhodnotila. */
 function cenaDavky({ comps, totalG, materialy, hustota, tuzidloG, tuzidloNazev,
-                     redidloG, redidloNazev, aditiva, vynucene, mena }) {
+                     aditiva, vynucene, mena }) {
   const men = String(mena || menaDilny(materialy) || MENA_VYCHOZI).toUpperCase();
   const out = { mena: men, celkem: 0, gramCena: 0, kryto: 0, uplna: true,
     polozky: [], bezCeny: [], jinaMena: [], gramu: 0, gramuSCenou: 0 };
@@ -87,20 +87,14 @@ function cenaDavky({ comps, totalG, materialy, hustota, tuzidloG, tuzidloNazev,
     const mat = materialRole(materialy, "tuzidlo", tuzidloNazev);
     pridej(mat ? mat.nazev : (tuzidloNazev || "tužidlo"), tuzidloG, mat, "tuzidlo");
   }
-  /* Aditiva: ředidlo si kvůli zpětné kompatibilitě drží vlastní parametr —
-     volá se to i odjinud než z kalkulace. Přijde-li `aditiva`, platí ono
-     a `redidloG` se ignoruje, aby se ředidlo nezapočítalo dvakrát. */
-  if (aditiva) {
-    for (const druh of DRUHY_ADITIV) {
-      const g = n(aditiva[druh]);
-      if (!(g > 0)) continue;
-      const mat = materialRole(materialy, ADITIVA[druh].role,
-        druh === "redidlo" ? redidloNazev : "");
-      pridej(mat ? mat.nazev : ADITIVA[druh].popis, g, mat, ADITIVA[druh].role);
-    }
-  } else if (n(redidloG) > 0) {
-    const mat = materialRole(materialy, "redidlo", redidloNazev);
-    pridej(mat ? mat.nazev : (redidloNazev || "ředidlo"), redidloG, mat, "redidlo");
+  /* Aditiva (zpomalovač) po druzích — v gramech, jak je obsluha zadala
+     u míchačky. Tužidlo výš zůstává kvůli přepočtu sortimentu a sestavám
+     z evidence (dávky z dřívějška ho nesou); kalkulace ho neposílá. */
+  for (const druh of DRUHY_ADITIV) {
+    const g = n(aditiva && aditiva[druh]);
+    if (!(g > 0)) continue;
+    const mat = materialRole(materialy, ADITIVA[druh].role, "");
+    pridej(mat ? mat.nazev : ADITIVA[druh].popis, g, mat, ADITIVA[druh].role);
   }
   /* Vynucené složky řady (lak, katalyzátor — část 459) se nakupují jako
      každá jiná složka a párují se jménem s ceníkem; bez ceny jdou mezi

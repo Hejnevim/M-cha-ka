@@ -1,23 +1,23 @@
 # Ink Recipe Manager — strukturovaný rozbor aplikace
 
 <!-- AUTO:stav -->
-> **Stav k 9. září 2026.** Čísla v úsecích označených `AUTO` generuje
+> **Stav k 10. září 2026.** Čísla v úsecích označených `AUTO` generuje
 > `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — nepřepisují
 > se ručně a nemohou se rozejít se skutečností. Text mimo ně píše člověk.
 
-> Poslední zapsaná změna ve vývojovém deníku: **8. září 17:29 — Úloha v 16:50 vydává balíčky sama — jen když se otisk programu liší od posledního vydání; stejná verze se nenahrává**
+> Poslední zapsaná změna ve vývojovém deníku: **10. září 09:51 — Krycí plocha z náhledu dávku snižuje lineárně (6,5 % → 10,6 g na 0,7 g); u drobného potisku je z dávky 126 z 127,7 g rezerva síta**
 
 | soubor | řádků | velikost |
 |---|---:|---:|
-| `aplikace/ (104 souborů)` | 24 293 | 1 479 kB |
-| `index.html` | 138 | 8 kB |
+| `aplikace/ (106 souborů)` | 24 842 | 1 509 kB |
+| `index.html` | 140 | 8 kB |
 | `most.py` | 805 | 34 kB |
 | `pdf_spec.py` | 1 135 | 45 kB |
 | `odemkni.py` | 213 | 8 kB |
-| `prevod_printcolor.py` | 183 | 7 kB |
+| `prevod_printcolor.py` | 187 | 7 kB |
 | `kontrola_aplikace.py` | 169 | 7 kB |
-| `rozbor_aktualizuj.py` | 359 | 13 kB |
-| **celkem** | **27 295** | |
+| `rozbor_aktualizuj.py` | 372 | 13 kB |
+| **celkem** | **27 863** | |
 <!-- /AUTO:stav -->
 
 ---
@@ -44,15 +44,29 @@ v dílně.
 | — `receptury_Marabu_LIP.csv` (SCR) | 2 110 receptur / 7 685 řádků složení, 246 bez odstínu |
 | — `receptury_Marabu_PP.csv` (PDP,SCR) | 4 789 receptur / 17 355 řádků složení, 1 073 bez odstínu |
 | — `receptury_Marabu_TPR.csv` (PDP) | 4 824 receptur / 17 610 řádků složení, 1 077 bez odstínu |
-| — `receptury_PMS_660.csv` (TXP,PDP,SCR) | 778 receptur / 3 617 řádků složení, 2 bez odstínu |
-| — `receptury_PMS_786.csv` (PDP) | 814 receptur / 3 092 řádků složení |
-| — `receptury_RUCOLOR_10KK.csv` (PDP,SCR) | 776 receptur / 3 313 řádků složení |
+| — `receptury_PRINTCOLOR_660.csv` (TXP,PDP,SCR) | 778 receptur / 3 617 řádků složení, 2 bez odstínu |
+| — `receptury_PRINTCOLOR_786.csv` (PDP) | 814 receptur / 3 092 řádků složení |
+| — `receptury_RUCO_10KK.csv` (PDP,SCR) | 776 receptur / 3 313 řádků složení |
 | — `receptury_vlastni.csv` (platí všude) | 3 receptur / 12 řádků složení |
 | obrázků produktů a poloh | 5 583 stažených z 9 209 v seznamu |
-| sít a klišé v parametrech | 30 zapsaných, z toho 2 s údaji výrobce |
+| sít a klišé v parametrech | 32 zapsaných, z toho 2 s údaji výrobce |
 | koeficientů spotřeby | 14 zapsaných, 1 nastavených mimo 1,00 |
 | pigmentů a bází | 12 pigmentů, 5 bází |
 <!-- /AUTO:data -->
+
+**Řada se přejmenovává až po souboru, nikdy zároveň s ním.** Podle řady
+páruje část 410 receptury uložené v prohlížeči, jejichž soubor osiřel
+(`klicSirotka` = název receptury + řada). Kdyby se přejmenovalo obojí
+naráz, převzetí by se nepovedlo a v nabídce typů barev by stály dvě
+databáze vedle sebe — stará se starým jménem a nová ze souboru; to se
+10. 9. 2026 stalo (kap. 264). Jakmile jsou receptury pod novým souborem,
+páruje se podle zdroje a názvu a na řadě už nezáleží — pak jde přejmenovat
+i ji, a to spolu se sloupcem `rada` v `parametry/pigmenty.csv`, odkud se
+bázím párují ceny a hustoty. Průkaz dá `node zkouska_prejmenovani.js`.
+
+Cenou za to je jeden mezikrok navíc: prohlížeč, který přejmenování souboru
+zmeškal celé (počítač dlouho vypnutý), dostane novou řadu i nový soubor
+naráz a receptury si zdvojí. Sirotčí větev v takovém případě nepomůže.
 
 ---
 
@@ -76,7 +90,7 @@ Systém má tři vrstvy a žádnou z nich nepotřebuje internet.
 | **Profily úprav** | `evidence/upravy.csv` | Procentní přídavky uložené mimo recepturu — při opakování zakázky se uplatní samy. |
 | **Požadavky na odstín** | `evidence/pozadavky.csv` | Barvy, které tiskař potřeboval a v databázi nejsou; technolog je vyřizuje založením receptury. |
 | **Lidé dílny** | `parametry/lide.csv` | Kdo v dílně míchá — jméno a role do podpisu. Nepovinné. |
-| **Namíchané dávky** | `evidence/davky.csv` | Dvousložkové směsi od přidání tužidla: čas, kdy začaly tuhnout, kdy vyprší, a jak skončily (spotřebovaná / vyhozená). |
+| **Namíchané dávky** | `evidence/davky.csv` | Dvousložkové směsi z dřívějška (do 10. 9. 2026): čas přidání tužidla, kdy vypršely a jak skončily (spotřebovaná / vyhozená). Nové se nezakládají — tužidlo se přidává až při tisku. |
 
 **Záložky aplikace**
 
@@ -138,7 +152,15 @@ Pole **Barva potisku** nese u vícebarevného potisku všechny barvy bez
 oddělovače („P. Black C P. 200 C"). Rozdělí se před každou další značkou
 Pantone (`P.`, `PMS`, `PANTONE`) nebo na čárce, středníku, lomítku a plusu,
 značka se sjednotí na `PANTONE`, a každá barva se hledá v databázi zvlášť —
-nenalezená se hlásí svým jménem, ne celým polem. Totéž platí pro kód
+nenalezená se hlásí svým jménem, ne celým polem. **Hledá se jen v řadách
+technologie polohy** a v řadě poloze přiřazené (od 10. 9. 2026, `omezeni`
+v `resolveSpec`): stejný kód Pantone je v každé nakoupené databázi a dřív
+vyhrál první nalezený, takže vypalovací zakázka dostala tampontiskovou
+formuli. Má-li technologie víc řad a poloha žádnou přiřazenou, aplikace se
+před převzetím zakázky zeptá *Z jaké řady vzít odstín?* (část 182) — dlaždice
+na řadu, u každé kolik barev z listu v ní je; odpověď se zapíše k poloze do
+`parametry/typy_poloh.csv` a podruhé se už neptá. Odstín, který v povolených
+řadách není, ale jinde ano, se hlásí i s tím, kde je. Totéž platí pro kód
 (`rec=`) a pro pole receptura ze SGPS. Čtverečky vzorníku vedle názvů umí
 most přečíst i tam, kde je list kreslí úsečkami místo obdélníkem; barvu
 nastavenou operátorem, kterému nerozumí (ICC profil, separace), nevydává
@@ -176,7 +198,30 @@ na rozlišení náhledu.
 
 Nabízejí se **jen receptury přiřazené k technologii vybrané polohy** — na
 textilní síto se nenabídne barva pro tampontisk ani pro vypalování. Kolik
-receptur zbude na kterou technologii, je v tabulce v kapitole 1.4.
+receptur zbude na kterou technologii, je v tabulce v kapitole 1.4. Totéž
+zúžení platí pro náhradní recepturu, když žádná není vybraná: první, která
+na polohu smí (`nahradniReceptura`), a na technologii bez databáze žádná —
+dřív to byla první receptura v abecedě databází, tedy Ferro na tampontisku.
+
+**Řada se k poloze pamatuje sama.** První ruční výběr Pantone standardu na
+poloze bez přiřazené řady zapíše databázi té receptury do
+`parametry/typy_poloh.csv` (stejně jako odpověď v okně *Z jaké řady vzít
+odstín?*). Od té chvíle se na poloze nabízí jen ta řada a zakázkový list
+z ní bere odstín bez ptaní; jinou řadu přidá nebo odebere technolog
+v záložce Produkty.
+
+**Produkt se z listu přepne hned, ne až po potvrzení.** Jakmile most PDF
+rozebere, kalkulace za otevřeným oknem *Zakázkový list — rozpoznané údaje*
+už ukazuje produkt, polohu a barvu zboží z listu. Okno je průhledné a do
+té doby za ním stál produkt z minulé zakázky; nejvíc to mátlo právě
+u otázky na řadu, kde se obsluha rozhoduje podle toho, co je na obrazovce
+vidět. Náhled dotáhne jen to, co je za oknem vidět — čísla dávky (kusy,
+spotřeba, ztráty, min. dávka) a receptura se berou až po *Použít
+v kalkulaci →*, aby se nepřepočítala dřív, než člověk rozpoznané údaje
+odsouhlasí a případně opraví. Otázka *Z jaké řady vzít odstín?* zůstává
+u potvrzení: patří k převzetí zakázky, ne k pohledu na produkt, a přes
+otevřené okno by stála dvě okna přes sebe. Zrušením se náhled nevrací —
+produkt z listu je pořád bližší pravdě než ten předchozí.
 
 Tři cesty k receptuře:
 1. **Pantone standard** z nakoupené databáze.
@@ -184,7 +229,7 @@ Tři cesty k receptuře:
    která v nahraných databázích už je** (nikdy „od nuly"), a váže se na
    kombinaci *produkt + barva produktu + technologie + poloha*. Nabízí se jen
    u produktu, na kterém vznikla. Název nese celou adresu:
-   `PANTONE 1235 C (PMS 660) · 11003 · 124 · PDP Sportovní Láhev / Víčko lahve`.
+   `PANTONE 1235 C (PRINTCOLOR 660) · 11003 · 124 · PDP Sportovní Láhev / Víčko lahve`.
 3. **Rozpracovaná barva** — odstín ze zakázkového listu, který v databázi není.
    Dá se s ní dojít až k míchacímu lístku a teprve pak ji uložit natrvalo.
 
@@ -235,6 +280,43 @@ a stisknout Tára. Tlačítko štítku se u vícebarevné zakázky jmenuje
 tisknou se **naráz** v jednom okně (`tiskniStitky`, část 300), barva
 bez kelímku ukazuje pomlčku a do tisku nejde.
 
+**Míchání mimo zakázku (volná dávka).** Dílna míchá i bez objednávky:
+vzorek odstínu do vzorníku, dolití zásoby barvy, zkušební kelímek na nový
+materiál, nátisk pro zákazníka, který se teprve rozhoduje. Do 10. 9. 2026
+se to obcházelo tak, že se vybral libovolný produkt a dopočítaly se kusy
+tak, aby dávka vyšla — číslo pak sedělo, ale míchací lístek i zápis dávky
+nesly produkt, se kterým ta barva neměla nic společného.
+
+Ze záložky **Receptury** vede u každé receptury se složením tlačítko
+*Namíchat*: okno se zeptá jen na množství (řada zkratek 50 / 100 / 250 /
+500 / 1 000 g, zadat jde cokoli) a přepne do Kalkulace. Ta se tím přepne
+z počítání ze zakázky na **zadané množství** — dávka je vstup, ne výsledek
+(`volnaDavka`, část 498). Poměr složek zůstává z receptury, mění se jen
+měřítko. Míchá se přes totéž jediné místo jako zakázka: asistent vážení,
+váha, zbytky z kelímků, aditiva, štítek, fronta i zápis do evidence.
+
+Co volná dávka schválně **nemá**: rezervu síta (nemíchá se pro konkrétní
+těrku), minimální dávku (množství určuje člověk a ví proč), ztráty a nános
+(počítají se z plochy, která neexistuje). Kdyby se cokoli z toho tiše
+přičetlo, na váze by stálo jiné číslo, než obsluha zadala. Mlčí i předpověď
+zbytku — je to úvaha o tom, co zbude po vytištění zakázky, jenže volná dávka
+se netiskne.
+
+Místo karty *Vybraný produkt* stojí karta **Míchání mimo zakázku**; produkt,
+poloha, krycí plocha ani *＋ Další barva* se neukazují. Zůstává technologie:
+ta určuje, z jakých řad se receptura smí vzít, a platí i tady. K dávce se
+zapisuje **proč se míchá** (vzorek odstínu, dolití zásoby, zkouška na
+materiál, nátisk pro zákazníka, jiný důvod s vlastním popisem) — jde na
+míchací lístek i do poznámky kelímku, protože kelímek bez zakázky a bez
+produktu je za měsíc ve skladu k nerozeznání od zbytku, který se má vrátit
+do tisku. Kusy se u takové dávky zapisují jako nula a cena na kus nevzniká:
+sestavy tak neuvidí vzorek odstínu jako zakázku na 200 kusů.
+
+> Změřeno 10. 9. 2026: PANTONE Cool Gray 1 C na 250 g → 248,5 + 1,3 + 0,2 g
+> (součet 250,0 g); vážení v simulaci došlo do „Všechny komponenty naváženy".
+> Běžná cesta přes zakázku beze změny — karta *Vybraný produkt*, dávka
+> z plochy.
+
 ### Krok 5 — Kolik barvy
 
 ```
@@ -281,6 +363,21 @@ ustoupí produktu. Totéž pravidlo předvyplní síto i v editoru receptury
 otevřeném z kalkulace (odvození custom barvy, uložení rozpracované, úprava
 vázané) a editor tam nabízí tutéž jedinou položku; bez pravidla síta
 technologie. Ze záložky Receptury, kde produkt není, se nic nedoplňuje.
+
+**Šířka těrky a minimální dávka mají u některých technologií pevnou řadu**
+(`TECHS.terky`, `TECHS.minDavky` v části 100). Kde je v řadě víc hodnot
+(TXP: 250 a 420 mm), je dlaždice výběr s těmito čísly v nabídce místo
+ručního pole — tiskař nemá co vymýšlet, vybírá z toho, co v dílně visí.
+**Kde je v řadě jen jedna hodnota** (FIR: těrka vždy 350 mm), není to volba,
+ale pravidlo: dlaždice ukáže jen tohle číslo, bez pole a bez „—", a drží ho
+i proti zakázkovému listu — stejné pravidlo jako u síta podle produktu výš.
+FIR navíc drží minimální dávku jen ve třech krocích (50 / 100 / 150 g); to
+je skutečná volba (tiskař mezi nimi vybírá), takže dlaždice zůstává výběr,
+ne pravidlo — na rozdíl od těrky. Technologie bez vlastní řady (SCR, PDP,
+TRS) mají u obou dál ruční číselné pole. Síta pro FIR jsou v
+`parametry/sita.csv` omezená na dvě, která dílna skutečně používá
+(100-40 a 130-34) — technologie bez takového zápisu nabízí celou
+standardní řadu.
 
 ### Krok 6 — Zbytek ze skladu má přednost
 
@@ -350,7 +447,8 @@ dávka zvětšila.
 
 Po namíchání se vytiskne štítek s **čárovým kódem Code 128** (kreslí se přímo
 v aplikaci, takže funguje i bez internetu), s kódem dávky, odstínem, expirací
-a časem použitelnosti (pot life, u dvousložkových barev výchozích 8 hodin).
+a datem spotřeby. Pot life na štítek od váhy nejde: tužidlo se do kelímku
+nemíchá, přidává se až při tisku (10. 9. 2026).
 
 Dávka se do evidence založí rovnou celá ve stavu **„v tisku"**; kolik doopravdy
 zbylo, se ví až po zakázce — štítek se načte čtečkou a doplní se zbytek. Kelímek
@@ -362,10 +460,13 @@ potvrzením každé barvy v asistentu a tlačítko *Štítky na kelímky →*
 je vytiskne všechny jedním stiskem (jeden tvar štítku pro obě cesty,
 `stitekHtml` v části 300).
 
-Přepínač **„s tužidlem"** je součást tlačítka Štítek na kelímek — na širokém
-míchacím režimu sedí přes jeho pravý okraj, na telefonu (jeden sloupec pod
-1000 px) vystupuje pod něj, aby nepřekrýval popisek, který se na úzkém
-tlačítku nevejde vedle něj.
+Přepínač **„s tužidlem"** na tlačítku Štítek na kelímek od 10. 9. 2026 není:
+tužidlo ani ředidlo se do namíchané barvy nemíchají, přidávají se podle potřeby
+až při tisku. Kalkulace proto tužidlo nepočítá do dávky, ceny, výkazu VOC ani
+skladu, neodpočítává pot life, nezakládá dávky do evidence a z aditiv vede jen
+zpomalovač schnutí (bez doporučení, stropu a kompenzace, které patřily
+ředidlu). Kelímky, které tužidlo už mají — vrácené od stroje nebo zapsané
+ručně v evidenci —, si lhůtu hlídají dál.
 
 ### Krok 10 — Korekce po nátisku
 
@@ -377,6 +478,60 @@ kolik ho přidat. Síla korekce je ve třech stupních (mírně 0,5 % · znateln
 Zapsaná oprava se váže na dávku, a ta si nese, **kdo ji míchal a z kterých
 konví**. Teprve z toho se dá u opakované opravy poznat, jestli je příčina
 v receptuře, v materiálu, nebo v postupu — viz níže.
+
+### Krok 11 — Doladění odstínu v kelímku a vlastní receptura
+
+Korekce o krok výš počítá doporučení z popisu vady. Tenhle krok je pro
+případ, kdy míchač už odstín **trefil rukou** — přilil do zkušebního kelímku,
+znovu natískl a teď to sedí. Dosud takový odstín nebylo kam zapsat: příště se
+dolaďoval znovu od začátku.
+
+Směr výpočtu je opačný než u domíchání ze zbytku (krok 6). Tam je cíl známý
+a aplikace říká, co přilít. Tady cíl **nikdo nezadává** — cíl je to, co
+míchači vyšlo pod rukou, a aplikace z gramů zpětně dopočítá složení:
+
+```
+základ 40 g PANTONE 100 C  (PP 070 Weiss 79,3 %, PP 020 Zitron 19,3 %, …)
++ 2 g Krycí bílá báze
++ 3 g Transparentní báze
+───────────────────────────────────────────────
+45,0 g vlastního odstínu:  PP 070 Weiss 70,46 %, PP 020 Zitron 17,18 %,
+                            Transparentní báze 6,67 %, Krycí bílá báze 4,44 %, …
+```
+
+Přílitek je **složka z ceníku**, ne hotová receptura — u váhy se sahá po
+kelímku s barvou. Nabízejí se proto **barvy řady, ze které je základ**
+(`volbyPrilitku`, část 639): tentýž Pantone sedne na růžovém plastu jinak než
+na žluté látce a míchač ho posouvá přilitím žluté nebo modré z téže řady.
+Za barvami jsou pigmenty a báze — ředí a mění vlastnosti, odstín posouvají až
+druhotně. Řada se čte ze **složek základu**, ne z pole `series` receptury: to
+je volný text („odvozeno z…"), kdežto složky sedí v ceníku i u odvozeného
+odstínu; složka smí patřit do víc řad naráz (`PRINTCOLOR 660|PRINTCOLOR 786`)
+a otevře pak obě. Barva z **cizí** řady se nenabízí — přilít Marabu do
+Printcoloru je rozhodnutí technologa o snášenlivosti pojiv; napsat ji ručně
+jde dál, pole je textové a nabídka je našeptávač, ne zámek. Materiál bez řady
+(čtyři z pěti bází) je univerzální a zůstává v nabídce vždy; nezná-li se řada
+základu vůbec, nabídnou se všechny barvy, aby prázdné pole nevypadalo jako
+zákaz. Popisek u položky říká, odkud je (řada z ceníku se nepřekládá, role
+`pigment` / `báze` ano).
+
+Složka, která v základu nebyla, se označí štítkem *nová*: právě kvůli ní odstín
+uhnul nejvíc. Přílitek pod 0,1 g se spočítá, ale řekne se nahlas, že ho váha
+pořádně nerozliší a při vážení od nuly se netrefí.
+
+Zbytek dávky se dováží už podle **nového** složení. Doplnit původním pantonem
+by odstín rozředilo zpátky k tomu, co předtím nesedělo.
+
+Uložení založí custom recepturu: nese složení, z čeho se vyšlo (`zaklad`,
+`zakladZdroj`), poznámku s tím, co se doopravdy přililo, a váže se na kombinaci
+**produkt + barva produktu + technologie + poloha**, na které vznikla. Příště
+u téže zakázky si ji aplikace nabídne sama.
+
+**Značka loga** je vlastní pole receptury a není to objednavatel: jedna agentura
+objedná potisk pro tři značky. Podle ní se vlastní receptury v nabídce sdružují
+do skupin (`optgroup`), protože míchač je hledá podle toho, čí logo se tiskne —
+„ta modrá na Škodovku“. Pole má našeptávač z už použitých značek, aby
+překlep nerozdělil skupinu na dvě.
 
 ## 1.3 Kde která data bydlí
 
@@ -443,9 +598,9 @@ podle dat, ne podle dojmu.
 <!-- AUTO:technologie -->
 | kód | technologie | výchozí g/m² | stav | databáze receptur |
 |---|---|---:|---|---|
-| `SCR` | Sítotisk (plast, papír) / rotační | 6,0 | ostrá | Marabu_LIP (2 110), Marabu_PP (4 789), PMS_660 (778), RUCOLOR_10KK (776), vlastni (3) |
-| `PDP` | Tampontisk | 2,5 | ostrá | Marabu_PP (4 789), Marabu_TPR (4 824), PMS_660 (778), PMS_786 (814), RUCOLOR_10KK (776), vlastni (3) |
-| `TXP` | Sítotisk (textil) | 14,0 | ostrá | PMS_660 (778), vlastni (3) |
+| `SCR` | Sítotisk (plast, papír) / rotační | 6,0 | ostrá | Marabu_LIP (2 110), Marabu_PP (4 789), PRINTCOLOR_660 (778), RUCO_10KK (776), vlastni (3) |
+| `PDP` | Tampontisk | 2,5 | ostrá | Marabu_PP (4 789), Marabu_TPR (4 824), PRINTCOLOR_660 (778), PRINTCOLOR_786 (814), RUCO_10KK (776), vlastni (3) |
+| `TXP` | Sítotisk (textil) | 14,0 | ostrá | PRINTCOLOR_660 (778), vlastni (3) |
 | `TRS` | Transfer | 18,0 | ostrá | vlastni (3) |
 | `FIR` | Firing — Low Temperature | 8,0 | ostrá | Ferro_Xpresssion (1 097), vlastni (3) |
 <!-- /AUTO:technologie -->
@@ -526,7 +681,8 @@ podle dat, ne podle dojmu.
 
 **Zbytky barev**
 - Evidence kelímků: kód, odstín, složení, množství, zakázka, stav
-- Štítek s čárovým kódem Code 128, expirace, pot life
+- Štítek s čárovým kódem Code 128, expirace; pot life jen u kelímků, které
+  tužidlo už mají (vrácené od stroje, zapsané ručně)
 - Stavy „v tisku" / „na skladě" / „spotřebovat brzy" / „prošlé"
 - Viskozita kelímku s historií měření (barva časem houstne)
 - Přepočet dávky tak, aby se zbytek využil přednostně — z evidence i zadaný ručně
@@ -571,6 +727,9 @@ podle dat, ne podle dojmu.
 
 **Míchání**
 - Míchací lístek A4 s kumulativním vážením a zaškrtávacími políčky
+- Aditiva u míchačky: jen zpomalovač schnutí, v gramech od obsluhy. Tužidlo
+  a ředidlo se do dávky nemíchají — přidávají se až při tisku (od 10. 9. 2026),
+  takže v kalkulaci, na lístku, u váhy, v ceně ani ve výkazu VOC nejsou
 - Míchací režim na celou obrazovku: jen receptura, dávka a navážky velkým
   písmem, se zvýrazněnou právě váženou složkou; asistent se do něj přenáší
   portálem, takže se nepřeruší vážení ani spojení s váhou
@@ -610,9 +769,9 @@ podle dat, ne podle dojmu.
 - **Vynucená složka řady**: lak, katalyzátor nebo pevný podíl ředidla, který
   výrobce předepisuje do každé směsi řady, se zapíše do `parametry/databaze.csv`
   (sloupec `vynucene`, tvar `Lak PP=10|Verdünner=5`). Podíl je z váhy barvy
-  jako u tužidla. Složka pak stojí na lístku jako řádek za barvou, vede ji
-  asistent vážení, počítá se do ceny i do skladu — a do procent receptury
-  se nemíchá, ta patří odstínu. Do rozboru ředění nevstupuje: není to ředidlo
+  (10 i 0,1 znamená totéž). Složka pak stojí na lístku jako řádek za barvou,
+  vede ji asistent vážení, počítá se do ceny i do skladu — a do procent
+  receptury se nemíchá, ta patří odstínu
 - **Jednotka dávky (g / kg / lb)**: přepínač mění jen to, jak se hlavní číslo
   ukáže v kalkulaci a v míchacím režimu. Uvnitř se počítá v gramech a tabulka
   navážek zůstává v gramech — tak to ukazuje váha. Libra je 453,592 37 g
@@ -793,10 +952,11 @@ Lokální HTTP server na `127.0.0.1:8765`, přístupný jen z tohoto počítače
 <!-- AUTO:most -->
 | metoda | cesta |
 |---|---|
-| GET | `/api/aktualizace` |
 | GET | `/api/databaze` |
 | GET | `/api/stav` |
+| GET | `/api/zakazka/` |
 | GET | `/api/zakazky` |
+| POST | `/api/aktualizace` |
 | POST | `/api/databaze/ulozit` |
 | POST | `/api/pdf` |
 | POST | `/api/vyrez` |
@@ -969,6 +1129,12 @@ Aplikace se neopírá o „vypadá to, že to funguje":
   57 scén × 2 jazyky se vyfotí se všemi zvýrazněními a slepí do archů. Souřadnice
   zvýraznění platí pro konkrétní snímek — po přefocení obrazovek je zkouška
   „uvnitř snímku" nechytí (rámeček o řádek níž je pořád uvnitř), archy ano.
+- **Rámečky manuálu mají otisky** (`kontrola_manualu.py`, od 10. 9. 2026):
+  pod každým rámečkem je uložený otisk pixelů snímku; po přefocení nástroj bez
+  prohlížeče pozná, že pod rámečkem je něco jiného, najde posun a `--oprav` ho
+  přepíše. Pouští se po každé grafické změně a při ukončení relace (hook),
+  protože 10. 9. 2026 rámovalo dvanáct scén prázdnou plochu dva dny po dvou
+  kapitolách „manuál dohnal aplikaci".
 
 ---
 

@@ -1,8 +1,17 @@
 "use strict";
+/* Míchací režim — celá obrazovka jen pro míchání.
+   U váhy je všechno ostatní na obtíž: katalog, filtry, rozměry potisku. Tiskař
+   potřebuje vědět jedinou věc — co míchá, kolik toho má být a co navážit teď.
+   Proto se to na jedno tlačítko přepne přes celou obrazovku a velkým písmem.
+
+   Asistent vážení se sem NEPŘESOUVÁ, jen se překreslí jinam: kdyby se odpojil
+   od stromu a znovu připojil, React by ho zahodil i s rozpracovaným vážením
+   a s otevřeným portem váhy. Přenos přes portál nechává komponentu na místě,
+   mění se jen to, kam se vykreslí. */
 function MichaciRezim({ aktivni, onZavrit, onKombinace, onPoznamka, modalNahore, recipe, calcAkt, rozpis, vyuziti, stav,
                         product, colorSel, position, tech, zak, kodDavky, jednotka,
-                        zbytky, stitekTlacitko, rady, potlife, aditiva, riziko, natisk, viskozita,
-                        barvyPruh, barvaZakazky, children }) {
+                        zbytky, stitekTlacitko, rady, aditiva, riziko, natisk, viskozita,
+                        barvyPruh, barvaZakazky, volna, children }) {
   /* Poznámka k receptuře se dopisuje i tady — právě u váhy se zjistí, že
      „na tomhle materiálu dva průchody". Rozepsaný text žije v tomhle stavu
      (null = neupravuje se) a do receptury jde až tlačítkem Uložit: sahá se
@@ -28,14 +37,24 @@ function MichaciRezim({ aktivni, onZavrit, onKombinace, onPoznamka, modalNahore,
   const krok = stav ? stav.krok : -1;
   const hotovo = stav ? stav.done : false;
   const davka = stav && stav.davka > 0 ? stav.davka : calcAkt.totalG;
-  const kdo = [
+  /* Co se u váhy míchá. Mimo zakázku (volná dávka, část 498) se produkt,
+     barva produktu ani poloha nevypisují — nejsou to údaje téhle dávky, ale
+     poslední otevřené zakázky, a míchač u váhy by podle nich soudil, pro co
+     kelímek je. Zůstává technologie a důvod míchání. */
+  const kdo = (volna ? [
+    tech || "",
+    preloz("mimo zakázku"),
+    popisVolnehoDuvodu(volna.duvod, volna.vlastni)
+      ? preloz(popisVolnehoDuvodu(volna.duvod, volna.vlastni)) : "",
+    kodDavky ? preloz("kelímek {kod}", { kod: kodDavky }) : "",
+  ] : [
     product ? (product.ref || product.name) : "",
     colorSel ? (colorSel.code || colorSel.name || "") : "",
     position ? (position.tech || tech) + " " + position.name : (tech || ""),
     zak && zak.order ? preloz("zakázka {c}", { c: zak.order }) : "",
     barvaZakazky ? preloz("barva zakázky {b}", { b: barvaZakazky }) : "",
     kodDavky ? preloz("kelímek {kod}", { kod: kodDavky }) : "",
-  ].filter(Boolean).join(" · ");
+  ]).filter(Boolean).join(" · ");
   // kumulativní součet se počítá z toho, co se doopravdy navažuje — je-li
   // v nádobě zbytek, přibývá jen zbývající část
   let kum = 0;
@@ -85,7 +104,10 @@ function MichaciRezim({ aktivni, onZavrit, onKombinace, onPoznamka, modalNahore,
               režimem (modalbg 90 > michbg 80), a nemíchá se naslepo přes
               přepínání do kalkulace a zpátky. Tlačítko stojí u textu
               kombinace, které se týká, ne u Zpět. */ ""}
-        ${onKombinace && html`
+        ${/* Mimo zakázku (volná dávka) se kombinace nevybírá: custom receptura
+              se váže na produkt + barvu + polohu, a ty tu žádné nejsou.
+              Tlačítko by otevřelo dialog, ve kterém by výběr neměl kam sednout. */""}
+        ${onKombinace && !volna && html`
           <button className="btn sec mich-tl-kombinace" onClick=${onKombinace}
             title=${preloz("Založit custom recepturu nebo změnit kombinaci — bez opuštění míchání")}>
             ${preloz("Barva a poloha potisku →")}
@@ -110,7 +132,6 @@ function MichaciRezim({ aktivni, onZavrit, onKombinace, onPoznamka, modalNahore,
                 střídá, který kelímek se míchá, a zelená kontura říká, které
                 už stojí hotové (BarvyZakazkyPruh, část 238). */""}
           ${barvyPruh}
-          ${potlife}
           ${rady}
           ${vyuziti && html`
             <div className="okbox" style=${{ marginTop: 0, marginBottom: 12, fontSize: 15 }}>

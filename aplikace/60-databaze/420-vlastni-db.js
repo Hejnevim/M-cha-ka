@@ -18,7 +18,7 @@ function vazbyReceptury(links, id) {
   return out.sort();
 }
 
-/* Ze souboru databáze udělá čitelný název: receptury_PMS_660.csv → PMS 660 */
+/* Ze souboru databáze udělá čitelný název: receptury_PRINTCOLOR_660.csv → PRINTCOLOR 660 */
 function nazevDb(zdroj) {
   return String(zdroj || "").replace(/\.csv$/i, "").replace(/^receptury[_ -]*/i, "")
     .replace(/_/g, " ").trim();
@@ -121,7 +121,11 @@ function vlastniDoCsv(recipes, links) {
        Za poznámkou ze stejného důvodu; prázdný druhý stupeň = receptura
        je hotová prvním schválením, jako dřív. */
     "cu", "objednaci_cislo", "druhy_stupen", "schvaleni2", "schvalil2", "schvaleno2_kdy",
-    "duvod_zamitnuti2"];
+    "duvod_zamitnuti2",
+    /* Značka loga, podle které se vlastní receptury sdružují do skupin.
+       Na konci ze stejného důvodu jako poznámka: soubor z dřívějška ji nemá
+       a musí zůstat čitelný beze změny. */
+    "znacka_loga"];
   const radky = [hlavicka];
   for (const r of recipes.filter(jeVlastni)) {
     const vazby = vazbyReceptury(links, r.id).join("~");
@@ -152,7 +156,7 @@ function vlastniDoCsv(recipes, links) {
         r.objCislo || "", druhyStupen(r),
         druhyStupen(r) ? (r.schvaleni2 || "") : "", r.schvalil2 || "",
         n(r.schvaleno2Kdy) > 0 ? cislo(n(r.schvaleno2Kdy), 0) : "",
-        r.duvodZamitnuti2 || ""]);
+        r.duvodZamitnuti2 || "", r.znackaLoga || ""]);
     }
   }
   return radky.map((r) => r.map((c) => '"' + String(c == null ? "" : c).replace(/"/g, '""') + '"')

@@ -86,7 +86,6 @@
   --mich-radek:11px; --mich-vysledek:64px; --mich-wbar:19px;
   --mich-tlacitko:14px; --mich-mezera:15px;
   --mich-pole:17px; --mich-hlaseni:14px; --mich-stitek:14px;
-  --mich-prepinac:16px;
   /* Každé stálé tlačítko míchacího režimu zvlášť: hodnota je velikost písma,
      odsazení se z ní dopočítává, takže tvar tlačítka drží a mění se jen
      velikost. Ladí se na stránce Míchací režim v barvy.html. Tlačítka, která
@@ -116,7 +115,6 @@
   --mich-tl-hlaseni-sirka:auto; --mich-tl-hlaseni-vyska:auto; --mich-tl-hlaseni-posun-x:0px; --mich-tl-hlaseni-posun-y:0px;
   --mich-tl-pomocna-sirka:auto; --mich-tl-pomocna-vyska:auto; --mich-tl-pomocna-posun-x:0px; --mich-tl-pomocna-posun-y:0px;
   --mich-tl-stitek-posun-x:0px; --mich-tl-stitek-posun-y:0px;
-  --mich-prepinac-posun-x:0px; --mich-prepinac-posun-y:0px;
   --mezera-karta-y:20px; --mezera-karta-x:22px; --mezera-karet:16px;
   --mezera-poli:12px; --pole-y:9px; --pole-x:12px;
   --tlacitko-y:10px; --tlacitko-x:18px; --okraj-stranky:20px;

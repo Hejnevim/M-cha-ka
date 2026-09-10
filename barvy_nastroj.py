@@ -327,7 +327,6 @@ VYCHOZI_TVARY = {"--radius": "32px", "--radius-btn": "999px", "--radius-pole": "
                  "--mich-radek": "11px", "--mich-vysledek": "52px", "--mich-wbar": "20px",
                  "--mich-tlacitko": "15px", "--mich-mezera": "22px",
                  "--mich-pole": "20px", "--mich-hlaseni": "15px", "--mich-stitek": "14px",
-                 "--mich-prepinac": "13px",
                  "--mich-tl-zpet": "15px", "--mich-tl-kombinace": "16px",
                  "--mich-tl-rucne": "13.5px", "--mich-tl-znam": "13.5px",
                  "--mich-tl-viskozita": "13.5px", "--mich-tl-pripojit": "15px",
@@ -345,8 +344,7 @@ VYCHOZI_TVARY = {"--radius": "32px", "--radius-btn": "999px", "--radius-pole": "
 for _k, _n in MICH_TLACITKA:
     VYCHOZI_TVARY.update({_k + "-sirka": "auto", _k + "-vyska": "auto",
                           _k + "-posun-x": "0px", _k + "-posun-y": "0px"})
-VYCHOZI_TVARY.update({"--mich-tl-stitek-posun-x": "0px", "--mich-tl-stitek-posun-y": "0px",
-                      "--mich-prepinac-posun-x": "0px", "--mich-prepinac-posun-y": "0px"})
+VYCHOZI_TVARY.update({"--mich-tl-stitek-posun-x": "0px", "--mich-tl-stitek-posun-y": "0px"})
 
 # Poloha a velikost každé karty. Drží se v téže mapě jako tvary a písmo, takže
 # se čtou z aplikace a vracejí do ní stejnou cestou — žádný druhý mechanismus.
@@ -578,11 +576,6 @@ def main():
         posuvnik("--mich-tl-stitek-posun-x", "Posun vodorovně", -400, 400, 2, "px", atr="data-tvar"),
         posuvnik("--mich-tl-stitek-posun-y", "Posun svisle", -400, 400, 2, "px", atr="data-tvar"),
     ], False))
-    mich_pravy.append(skupina("Přepínač s tužidlem", [
-        posuvnik("--mich-prepinac", "Velikost přepínače", 10, 60, 1, "px", atr="data-tvar"),
-        posuvnik("--mich-prepinac-posun-x", "Posun vodorovně", -400, 400, 2, "px", atr="data-tvar"),
-        posuvnik("--mich-prepinac-posun-y", "Posun svisle", -400, 400, 2, "px", atr="data-tvar"),
-    ], False))
 
     # ---- stránka Rozvržení: vlevo stránka a sloupce, vpravo jednotlivé karty
     stranka_html = [vyber("--sirka-stranky", "Největší šířka stránky", SIRKY_STRANKY),
@@ -737,7 +730,7 @@ SABLONA = r"""<!doctype html>
 .platno iframe{position:absolute;top:0;left:0;border:0;display:block;
   transform-origin:top left;background:var(--bg)}
 .kolize{color:var(--danger);font-weight:700}
-#strana-michani .michukazka button,#strana-michani .michukazka .tgl{cursor:grab}
+#strana-michani .michukazka button{cursor:grab}
 </style></head>
 <body>
 <div class="hdr"><div class="navleft"></div><div class="logo"></div>
@@ -902,12 +895,6 @@ SABLONA = r"""<!doctype html>
                   <tr><td><b>Navážit celkem</b></td><td class="num g">72,4</td><td class="num g">72,4</td></tr>
                 </tbody>
               </table>
-              <div class="specbar" style="margin-top:10px">
-                <span class="dot" style="background:var(--cyan)"></span>
-                <span>Dvousložková barva — po navážení přidejte <b>3,6 g tužidla</b>.</span>
-                <span style="margin-left:auto"></span>
-                <button class="btn sm">Tužidlo přidáno — spustit odpočet</button>
-              </div>
               <div class="okbox">
                 <b>Na tuto zakázku můžete využít zbytek.</b>
                 <div class="rowline" style="margin-top:8px;margin-bottom:0">
@@ -957,10 +944,7 @@ SABLONA = r"""<!doctype html>
                 <div class="okbox">V pořádku — navážka je v toleranci.</div>
               </div>
               <div class="rowline stitekpruh" style="margin-top:12px">
-                <div class="stitekobal">
-                  <button class="btn sec">Štítek na kelímek →</button>
-                  <label class="tgl"><input type="checkbox"><span class="tglt"></span>s tužidlem</label>
-                </div>
+                <button class="btn sec">Štítek na kelímek →</button>
               </div>
             </div>
           </div>
@@ -1642,18 +1626,17 @@ document.getElementById("zpet-barvy").addEventListener("click", function(){
   });
 });
 
-/* Tažení tlačítek v ukázce míchacího režimu. Chytne se tlačítko (nebo
-   přepínač s tužidlem) a posun se zapisuje do proměnných --…-posun-x/-y —
+/* Tažení tlačítek v ukázce míchacího režimu. Chytne se tlačítko
+   a posun se zapisuje do proměnných --…-posun-x/-y —
    týchž, které mají posuvníky v pravém panelu; myš je jen rychlejší cesta
    k nim. Členové rodin (hlášení, pomocná v kartě) nesou posun celé rodiny,
    takže se rodina táhne jako celek. */
 var ukazkaMich = document.querySelector("#strana-michani .michukazka");
 function klicTlacitka(el){
-  var b = el.closest ? el.closest(".michukazka button, .michukazka .tgl") : null;
+  var b = el.closest ? el.closest(".michukazka button") : null;
   if (!b) return null;
   var m = (b.className || "").match(/mich-tl-[a-z]+/);
   if (m) return "--" + m[0];
-  if (b.classList.contains("tgl")) return "--mich-prepinac";
   if (b.closest(".stitekpruh")) return "--mich-tl-stitek";
   if (b.closest(".okbox") || b.closest(".warnbox") || b.closest(".specbar")) return "--mich-tl-hlaseni";
   if (b.closest(".card") && b.classList.contains("sm")) return "--mich-tl-pomocna";

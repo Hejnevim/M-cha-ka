@@ -228,7 +228,7 @@ function stavSkladu({ materialy, davky, zbytky, recipes, ted }) {
    Vrací tři různě naléhavé věci: složka došla, složky je míň, než tahle dávka
    spotřebuje, a složka po dávce spadne pod minimum (to zakázku nezastaví, ale
    je čas objednat). */
-function skladProDavku(sklad, comps, tuzidloG, tuzidloNazev, materialy) {
+function skladProDavku(sklad, comps) {
   const out = { chybi: [], nestaci: [], podMinimum: [], zastavi: 0 };
   if (!sklad || !sklad.radky.length) return out;
   const podle = new Map(sklad.radky.map((r) => [r.klic, r]));
@@ -239,11 +239,8 @@ function skladProDavku(sklad, comps, tuzidloG, tuzidloNazev, materialy) {
     if (!k || !(n(g) > 0)) return;
     potreba.set(k, (potreba.get(k) || 0) + n(g));
   };
+  // tužidlo v dávce od váhy není — přidává se až při tisku (deník 10. 9. 2026)
   for (const c of (comps || [])) pridej(c.name, c.g);
-  if (n(tuzidloG) > 0) {
-    const t = jedinyMaterialRole(materialy, "tuzidlo");
-    pridej(tuzidloNazev || (t ? t.nazev : ""), tuzidloG);
-  }
 
   for (const k of potreba.keys()) {
     const r = podle.get(k);

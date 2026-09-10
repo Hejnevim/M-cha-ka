@@ -180,13 +180,31 @@ adresa patří sem. Publikovaná verze má mít snímky zmenšené na 1 067 px
 i nahrávky vložené do jednoho souboru (skript `sestav_manual.py` ve scratchpadu
 sezení, není součást balíčku).
 
-**Kdy na manuál sáhnout:** když se změní obrazovka, o které mluví — přefotit
-snímek (`foto_manualu.py --jen NAZEV`, oba jazyky), pustit
-`prohlidka_manualu.py` a podle archů opravit `zvyr` a `vyrez`, přepsat `rec`
-+ nahrát. Zastaralý snímek s jiným rozvržením než v aplikaci je horší než
-žádný — a souřadnice, které sedí na starý snímek, jsou totéž: 7. 9. 2026
-ukazovala scéna 3 „role" na technologiích a scéna 40 ceník na řádcích
-receptur, protože po přefocení nikdo scény nevykreslil.
+**Kdy na manuál sáhnout:** po každé grafické změně aplikace a každé přidané
+nebo odebrané funkci — přefotit snímek (`foto_manualu.py --jen NAZEV`, oba
+jazyky), pustit `kontrola_manualu.py` (posunuté rámečky najde a s `--oprav`
+přepíše), `prohlidka_manualu.py` a podle archů dorovnat `zvyr` a `vyrez`,
+pak `kontrola_manualu.py --zapis`, přepsat `rec` + nahrát. Zastaralý snímek
+s jiným rozvržením než v aplikaci je horší než žádný — a souřadnice, které
+sedí na starý snímek, jsou totéž: 7. 9. 2026 ukazovala scéna 3 „role" na
+technologiích a scéna 40 ceník na řádcích receptur, protože po přefocení
+nikdo scény nevykreslil; 10. 9. 2026 rámovalo dvanáct scén prázdnou plochu
+o řádek níž. Hook `.claude/hooks/manual_pri_stop.py` pustí kontrolu při
+ukončení relace, jsou-li snímky nebo stránky novější než otisky.
+
+## Kontrola: `kontrola_manualu.py`
+
+    python kontrola_manualu.py                  obě stránky, bez prohlížeče, do dvou minut
+    python kontrola_manualu.py --sceny 17 21    jen vybrané scény
+    python kontrola_manualu.py --oprav          přepíše posunuté rámečky a výřezy v HTML
+    python kontrola_manualu.py --zapis          uloží otisky rámečků bez nálezu (po prohlídce)
+
+Pod každým rámečkem si drží otisk pixelů snímku (`manual/otisky.json`,
+průměry jasu ve čtvercích 4 × 4 px — z rozmazaného složení nic čitelného).
+Když se snímek přefotí a pod rámečkem je něco jiného, hledá otisk až 400 px
+svisle a 60 px vodorovně a hlásí posun; rámeček bez otisku posoudit neumí
+a řekne to. Otisk dokazuje, že rámeček rámuje totéž co dřív — že rámuje
+správnou věc, dokáže jen prohlídka, proto se `--zapis` dělá až po ní.
 
 ## Prohlídka: `prohlidka_manualu.py`
 

@@ -101,12 +101,23 @@ function parseSpec(text) {
   return out;
 }
 
-/* Namapuje přečtené hodnoty na konkrétní produkt / polohu / barvu / recepturu. */
-function resolveSpec(parsed, products, recipes) {
+/* Namapuje přečtené hodnoty na konkrétní produkt / polohu / barvu / recepturu.
+
+   `omezeni` říká, ve kterých recepturách se smí odstín hledat:
+     dbTech      přiřazení databází k technologiím (parametry/databaze.csv),
+     typyPoloh   typy barev přiřazené polohám (parametry/typy_poloh.csv),
+     technologie pracovní režim — platí, jen když spec polohu neurčí,
+     rada        soubor databáze, který si obsluha zvolila v okně „Z jaké
+                 řady vzít odstín“ (část 182).
+   Bez omezení (staré volání, zkoušky) se hledá ve všech recepturách. */
+function resolveSpec(parsed, products, recipes, omezeni) {
   const f = parsed.fields;
+  const o = omezeni || {};
   const r = { parsed: parsed, fields: f, product: null, position: null, colorIdx: -1,
     recipe: null, qty: null, gm2: null, loss: null, minBatch: null,
-    terka: null, naTah: null, warn: [], ok: [] };
+    terka: null, naTah: null, warn: [], ok: [],
+    tech: "", rady: [], radaPrirazena: [], radaZvolena: o.rada || "", nalezenoVRade: {},
+    zeptatNaRadu: false };
   const num = (key, min) => {
     if (f[key] == null || f[key] === "") return null;
     const v = n(f[key], NaN);
@@ -214,34 +225,64 @@ function resolveSpec(parsed, products, recipes) {
      seznam barev zakázky. Nenalezená barva se hlásí každá svým jménem —
      „P. Black C P. 200 C" jako jeden nenalezený název nikomu neřekne,
      která z těch dvou chybí. */
+  /* Odstín se hledá jen v recepturách, které na tuhle polohu smějí — stejné
+     zúžení jako v nabídce Pantone v kalkulaci (podleTechnologie a typy
+     polohy, část 240). Dřív se hledalo ve všech databázích a zakázka FIR
+     dostala PANTONE 485 C z tampontiskové řady: stejný kód je v každé řadě,
+     první nalezený vyhrál. Technologie je ta z polohy; bez polohy ta z kódu
+     nebo pracovní režim. Vlastní receptury (Custom) zůstávají vždy —
+     přiřazení mluví o nakoupených databázích, ne o barvě dílny. */
+  r.tech = r.position ? String(r.position.tech || "") : (techKod || String(o.technologie || ""));
+  const proTech = podleTechnologie(recipes, r.tech, o.dbTech);
+  r.rady = Array.from(new Set(proTech.filter((x) => x.type !== "Custom").map((x) => x.zdroj).filter(Boolean)));
+  r.radaPrirazena = typyProPolohu(o.typyPoloh, r.product, r.position);
+  const vybrane = r.radaZvolena ? [r.radaZvolena] : r.radaPrirazena;
+  const kandidati = !vybrane.length ? proTech
+    : proTech.filter((x) => !x.zdroj || x.type === "Custom" || vybrane.indexOf(x.zdroj) >= 0);
+  /* Technologie s víc řadami a poloha bez přiřazené řady: aplikace nemá
+     podle čeho vybrat, tak se zeptá (část 182). Volba se pak uloží k poloze,
+     takže se ptá jen jednou. Bez polohy není kam volbu uložit — pak se
+     hledá ve všech řadách technologie a hlásí se, ve které se našlo. */
+  r.zeptatNaRadu = !!(omezeni && f.recipe && r.product && r.position && !vybrane.length && r.rady.length > 1);
   r.recipes = [];
   if (f.recipe) {
     // je-li známa řada barvy, hledá se nejdřív v ní — stejný Pantone kód
     // bývá v databázi vícekrát, pokaždé pro jinou řadu
     const rada = (f.series || "").trim().toLowerCase();
-    const vRade = rada ? recipes.filter((x) => String(x.series || "").toLowerCase().includes(rada)) : [];
-    const hledej = (nazev) => {
+    const vRade = rada ? kandidati.filter((x) => String(x.series || "").toLowerCase().includes(rada)) : [];
+    const najdi = (seznam, nazev) => {
       const s = nazev.toLowerCase();
-      const najdi = (seznam) => seznam.find((x) => x.name.toLowerCase() === s)
+      return seznam.find((x) => x.name.toLowerCase() === s)
         || seznam.find((x) => x.name.toLowerCase().includes(s))
         || (/^\d{2,4}\s*[a-z]?$/i.test(nazev)
             ? seznam.find((x) => new RegExp("\\b" + nazev.replace(/\s+/g, "\\s*") + "\\b", "i").test(x.name))
             : null)
         || null;
-      return (vRade.length ? najdi(vRade) : null) || najdi(recipes);
     };
-    for (const nazev of rozdelBarvyPotisku(f.recipe)) {
+    const hledej = (nazev) => (vRade.length ? najdi(vRade, nazev) : null) || najdi(kandidati, nazev);
+    const nazvy = rozdelBarvyPotisku(f.recipe);
+    // kolik barev z listu má která řada technologie — podklad pro okno volby
+    for (const z of r.rady)
+      r.nalezenoVRade[z] = nazvy.filter((nazev) => !!najdi(proTech.filter((x) => x.zdroj === z), nazev)).length;
+    if (vybrane.length && !r.radaZvolena)
+      r.ok.push(preloz("Řada podle polohy: {r}", { r: vybrane.map(nazevDb).join(", ") }));
+    for (const nazev of nazvy) {
       const rec = hledej(nazev);
       r.recipes.push({ nazev: nazev, recipe: rec });
       if (rec) {
         r.ok.push(preloz("Receptura: {r}", { r: rec.name + (rec.series ? " · " + rec.series : "") }));
         if (rada && !String(rec.series || "").toLowerCase().includes(rada))
           r.warn.push(preloz("Typ barvy „{a}“ se neshoduje s typem barvy receptury („{b}“) — ověřte.", { a: f.series, b: rec.series || "—" }));
-      } else if (!(rada && recipes.length && !vRade.length)) {
-        r.warn.push(preloz("Receptura „{r}“ nebyla nalezena — nahrajte databázi v Import / data.", { r: nazev }));
+      } else if (!(rada && kandidati.length && !vRade.length)) {
+        // odstín v povolených řadách není — když je jinde, řekne se kde,
+        // ať je jasné, že chybí řada pro tuhle technologii, ne databáze
+        const jinde = najdi(recipes.filter((x) => kandidati.indexOf(x) < 0), nazev);
+        if (jinde) r.warn.push(preloz("Receptura „{r}“ není v řadách pro {tech} — v databázi je jen jako {j}.",
+          { r: nazev, tech: r.tech || "—", j: jinde.name + (jinde.zdroj ? " · " + nazevDb(jinde.zdroj) : (jinde.series ? " · " + jinde.series : "")) }));
+        else r.warn.push(preloz("Receptura „{r}“ nebyla nalezena — nahrajte databázi v Import / data.", { r: nazev }));
       }
     }
-    if (rada && recipes.length && !vRade.length)
+    if (rada && kandidati.length && !vRade.length)
       r.warn.push(preloz("Typ barvy „{t}“ není v databázi receptur — receptura nenalezena.", { t: f.series }));
     r.recipe = (r.recipes.find((x) => x.recipe) || {}).recipe || null;
     if (r.recipes.length > 1) r.ok.push(preloz("Barev potisku: {n}", { n: r.recipes.length }));

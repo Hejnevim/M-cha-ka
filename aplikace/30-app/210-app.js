@@ -1099,14 +1099,59 @@ function App() {
     return () => clearTimeout(casovac);
   }, [recipes, links, sgps.stav.stav, databaze]);
 
-  const pouzitSpec = (res) => {
-    // Zakázkový list může být z jiné technologie, než ve které se zrovna
-    // pracuje — pak se režim přepne, jinak by poloha z listu nebyla vidět.
+  /* Zúžení, ve kterém se odstín ze zakázky hledá (resolveSpec, část 140):
+     databáze podle technologie polohy a řada přiřazená poloze. Stejné
+     zúžení má nabídka Pantone v kalkulaci — co se nenabídne ručně, nesmí
+     vybrat ani list. */
+  const omezeniSpecu = useMemo(() => ({ dbTech: dbTech, typyPoloh: typyPoloh, technologie: technologie }),
+    [dbTech, typyPoloh, technologie]);
+  /* Převzetí zakázky přes otázku na řadu (část 182): technologie s víc
+     řadami a poloha bez přiřazené řady — aplikace neví, ze které řady
+     odstín vzít, a hádat nesmí. Otázka se ptá před převzetím; odpověď se
+     zapíše k poloze (ulozTypPolohy), takže se ptá jen jednou. */
+  const [volbaRady, setVolbaRady] = useState(null);   // { res, hotovo }
+  const prevzitSpec = (res, hotovo) => {
+    if (res.zeptatNaRadu) setVolbaRady({ res: res, hotovo: hotovo });
+    else hotovo(res);
+  };
+  const odpovedRady = (zdroj) => {
+    if (!volbaRady) return;
+    const v = volbaRady;
+    setVolbaRady(null);
+    if (!zdroj) { v.hotovo(v.res); return; }
+    const res = specSVolbouRady(v.res, products, recipes, Object.assign({}, omezeniSpecu, { rada: zdroj }));
+    const p = res.position;
+    if (p) ulozTypPolohy(res.product.ref || res.product.id, p.tech, p.name, [zdroj]);
+    v.hotovo(res);
+    if (p) setToast({ ok: true, text: preloz("Řada {r} je od teď přiřazená poloze {p}.",
+      { r: nazevDb(zdroj), p: p.tech + " " + p.name }) });
+  };
+
+  /* Zakázka může být z jiné technologie, než ve které se zrovna pracuje —
+     pak se režim přepne, jinak by poloha z listu nebyla vidět: kalkulace
+     zná jen polohy své technologie, sjela by na první z nich a receptura
+     ze zakázky by zůstala u cizí polohy. Platí pro list i pro kód čtečky. */
+  const prepniTechPodleSpecu = (res) => {
     const techSpecu = res.position && res.position.tech;
     if (technologie && techSpecu && techSpecu !== technologie) {
       setTechnologie(techSpecu);
       setToast({ ok: true, text: preloz("Přepnuto na technologii {tech} podle zakázky.", { tech: techSpecu }) });
     }
+  };
+  /* Náhled ze zakázkového listu: kalkulace za otevřeným oknem ukáže produkt
+     a polohu z listu (proč, stojí u useEffect v části 180). Jde mimo
+     prevzitSpec — otázka „z jaké řady vzít odstín“ patří k převzetí
+     zakázky, ne k pohledu na produkt, a ptát se přes otevřené okno by
+     znamenalo dvě okna přes sebe. Technologie se přepíná i tady, jinak by
+     kalkulace polohu z listu neuměla ukázat. Bez toastu — okno je vidět. */
+  const nahlednoutSpec = (res) => {
+    if (!res || !res.product) return;
+    prepniTechPodleSpecu(res);
+    setSpec(Object.assign({}, res, { jenNahled: true, ts: Date.now() }));
+  };
+  const pouzitSpec = (res) => prevzitSpec(res, pouzitSpecHned);
+  const pouzitSpecHned = (res) => {
+    prepniTechPodleSpecu(res);
     setSpec(Object.assign({}, res, { ts: Date.now() }));
     setTab("calc");
     setToast({ ok: true, text: "Zakázka načtena: " + (res.product.ref ? res.product.ref + " · " : "") + res.product.name
@@ -1115,7 +1160,7 @@ function App() {
 
   // handleCode drží aktuální data v ref, aby globální posluchač nepracoval se zastaralým stavem
   const scanCtx = useRef({});
-  scanCtx.current = { products, recipes, tab, zbytky, sgpsOk: sgps.stav.stav === "ok" };
+  scanCtx.current = { products, recipes, tab, zbytky, sgpsOk: sgps.stav.stav === "ok", omezeni: omezeniSpecu };
   const handleCode = useRef(null);
   handleCode.current = async (raw) => {
     const c = scanCtx.current;
@@ -1166,16 +1211,19 @@ function App() {
       parsed = { raw: raw, fields: Object.assign(zeZak.fields, prepis),
                  unknown: parsed.unknown, sgps: zeSgps };
     }
-    const res = resolveSpec(parsed, c.products, c.recipes);
+    const res = resolveSpec(parsed, c.products, c.recipes, c.omezeni);
     if (zeSgps) res.ok.unshift("Zakázka " + (zeSgps.cislo || cislo) + " načtena ze SGPS");
     setScanLog((l) => [{ ts: Date.now(), raw: raw, res: res }].concat(l).slice(0, 25));
     if (res.product) {
-      setSpec(Object.assign({}, res, { ts: Date.now() }));
-      if (c.tab !== "scan") setTab("calc");
-      setToast({ ok: true, text: (zeSgps ? "Zakázka " + (zeSgps.cislo || cislo) + ": " : "Načteno: ")
-        + (res.product.ref ? res.product.ref + " · " : "") + res.product.name
-        + (res.qty != null ? " — " + fmt(res.qty, 0) + " ks" : "")
-        + (res.warn.length ? " (" + res.warn.length + " upozornění)" : "") });
+      prevzitSpec(res, (res) => {
+        prepniTechPodleSpecu(res);
+        setSpec(Object.assign({}, res, { ts: Date.now() }));
+        if (c.tab !== "scan") setTab("calc");
+        setToast({ ok: true, text: (zeSgps ? "Zakázka " + (zeSgps.cislo || cislo) + ": " : "Načteno: ")
+          + (res.product.ref ? res.product.ref + " · " : "") + res.product.name
+          + (res.qty != null ? " — " + fmt(res.qty, 0) + " ks" : "")
+          + (res.warn.length ? " (" + res.warn.length + " upozornění)" : "") });
+      });
     } else {
       if (c.tab !== "scan") setTab("scan");
       setToast({ ok: false, text: res.warn[0] || preloz("Kód se nepodařilo přiřadit.") });
@@ -1197,6 +1245,16 @@ function App() {
     return () => window.removeEventListener("hashchange", naHash);
   }, []);
 
+  /* Namíchání receptury mimo zakázku (volná dávka, část 498). Ze záložky
+     Receptury vede tlačítko „Namíchat" a odtud se přenese do Kalkulace, která
+     jediná umí míchat — má asistenta vážení, váhu, štítek a zápis do evidence.
+     Stavět druhé míchání do záložky Receptury by znamenalo mít dvě místa, kde
+     se počítá navážka, a dřív nebo později by každé ukazovalo něco jiného.
+
+     Nese jen id receptury a množství; Kalkulace si podle id najde recepturu
+     ve svém seznamu — ten je tentýž a nemusí se kopírovat. */
+  const [namichatVolne, setNamichatVolne] = useState(null);   // null | { recId, gramu }
+
   /* Vratka ze stroje (část 638): z dávky v tisku vznikne samostatný kelímek
      se svým kódem a štítkem, původní dávka zůstává v tisku — zakázka jede dál
      a kolik z ní zbude na konci, se pořád neví. */
@@ -1214,7 +1272,7 @@ function App() {
 
   // otevření zakázky vybrané ze seznamu SGPS
   const otevriZakazku = (z) => {
-    const res = resolveSpec(zakazkaNaSpec(z), products, recipes);
+    const res = resolveSpec(zakazkaNaSpec(z), products, recipes, omezeniSpecu);
     if (!res.product) {
       setToast({ ok: false, text: res.warn[0] || preloz("Produkt zakázky není v katalogu.") });
       return;
@@ -1485,14 +1543,14 @@ function App() {
           <${Calc} products=${products} recipes=${recipes} setRecipes=${setRecipes} links=${links} setLinks=${setLinks}
             spec=${spec} onSpecUsed=${() => setSpec(null)}
             onUpravitSpec=${pdfSpec.stav === "hotovo" ? () => setTab("pdf") : null}
-            sgps=${sgps} onPouzitSpec=${pouzitSpec} onPdfNacteno=${setPdfSpec} pdfObrazky=${pdfSpec.obrazky || []} pdfStranky=${pdfSpec.stranky || []} pdfId=${pdfSpec.pdfId || ""}
+            sgps=${sgps} onPouzitSpec=${pouzitSpec} onNahledSpecu=${nahlednoutSpec} onPdfNacteno=${setPdfSpec} pdfObrazky=${pdfSpec.obrazky || []} pdfStranky=${pdfSpec.stranky || []} pdfId=${pdfSpec.pdfId || ""}
             onCode=${onCode} hidOn=${hidOn} setHidOn=${setHidOn} onNastaveniCtecky=${() => setTab("scan")}
             dbFiltr=${dbFiltr} setDbFiltr=${setDbFiltr}
-            zbytky=${zbytky} setZbytky=${setZbytky} davky=${davky} setDavky=${setDavky}
+            zbytky=${zbytky} setZbytky=${setZbytky} davky=${davky}
             sarze=${sarze} setSarze=${setSarze}
             opravy=${opravy} setOpravy=${setOpravy}
             onDoFronty=${doFronty}
-            technologie=${technologie} dbTech=${dbTech} dbMat=${dbMat} typyPoloh=${typyPoloh}
+            technologie=${technologie} dbTech=${dbTech} dbMat=${dbMat} typyPoloh=${typyPoloh} ulozTypPolohy=${ulozTypPolohy}
             sita=${sita} koef=${koef} pigmenty=${pigmenty} sklad=${sklad} guardDelete=${guardDelete}
             upravy=${upravy} setUpravy=${setUpravy}
             pozadavky=${pozadavky} onPozadavek=${zapisPozadavek}
@@ -1501,12 +1559,13 @@ function App() {
             zmenyPodkladu=${zmenyPodkladu} onToast=${setToast}
             role=${role} jmenoRole=${jmenoRole}
             onZbytekUlozen=${(kod) => { setZbytekKod(kod); setTab("zbytky"); }}
+            namichatVolne=${namichatVolne} onNamichanoVolne=${() => setNamichatVolne(null)}
             skryta=${tab !== "calc"} />
         </div>
         ${tab === "scan" && html`<${ScanTab} hidOn=${hidOn} setHidOn=${setHidOn} scanLog=${scanLog}
           onCode=${onCode} onApply=${pouzitSpec} clearLog=${() => setScanLog([])} sgps=${sgps} />`}
         ${tab === "pdf" && html`<${PdfTab} sgps=${sgps} products=${products} recipes=${recipes}
-          ulozeny=${pdfSpec} setUlozeny=${setPdfSpec}
+          omezeni=${omezeniSpecu} ulozeny=${pdfSpec} setUlozeny=${setPdfSpec}
           onApply=${(res) => { setScanLog((l) => [{ ts: Date.now(), raw: res.parsed.raw, res: res }].concat(l).slice(0, 25)); pouzitSpec(res); }} />`}
         ${tab === "zak" && html`<${ZakazkyTab} sgps=${sgps} onOtevri=${otevriZakazku}
           products=${products} techStav=${techStav} technologie=${technologie} />`}
@@ -1569,6 +1628,9 @@ function App() {
           zmeny=${zmenyPodkladu} davky=${davky} opravy=${opravy} upravy=${upravy}
           otevritRecepturu=${otevritRecepturu} onOtevreno=${() => setOtevritRecepturu(null)}
           onToast=${setToast}
+          ${/* Namíchat mimo zakázku: receptura se předá Kalkulaci a přepne se
+                na ni. Míchá se jen na jednom místě, viz namichatVolne výš. */""}
+          onNamichat=${(r, gramu) => { setNamichatVolne({ recId: r.id, gramu: gramu }); setTab("calc"); }}
           mostOk=${sgps.stav.stav === "ok"} />`}
         ${tab === "schval" && html`<${SchvaleniTab} recipes=${recipes} setRecipes=${setRecipes}
           links=${links} role=${role} jmenoRole=${jmenoRole} setJmenoRole=${setJmenoRole}
@@ -1662,6 +1724,8 @@ function App() {
 
       ${/* Vratka ze stroje a štítek k ní — otevírá se ze záložky Zbytky barev
             i po načtení kódu čtečkou, proto stojí tady nad záložkami. */""}
+      ${volbaRady && html`<${VolbaRady} res=${volbaRady.res}
+        onVyber=${odpovedRady} onBezVolby=${() => odpovedRady("")} onZavrit=${() => setVolbaRady(null)} />`}
       ${vratkaZ && html`<${VratkaOkno} zdroj=${vratkaZ} zbytky=${zbytky}
         onUlozit=${zapisVratku} onClose=${() => setVratkaZ(null)} />`}
       ${stitekKod && (zbytky || []).some((z) => z.kod === stitekKod) && html`

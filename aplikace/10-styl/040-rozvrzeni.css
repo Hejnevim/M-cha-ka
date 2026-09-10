@@ -53,6 +53,11 @@
   .karta-produkt .blok-pokryti{margin-top:auto;padding-top:8px}
   .karta-produkt .produkt-nazev{margin-top:auto;padding-top:14px}
   .karta-produkt .rowline{margin-top:10px;margin-bottom:0}
+  /* Karta míchání mimo zakázku (volná dávka, část 498) nemá dlaždice ani
+     fotku — jsou to tři řádky textu. Mřížka pro dlaždice a margin-top:auto
+     výš by je roztáhly ke dnu karty a uprostřed by zůstala díra. */
+  .karta-volna{display:block}
+  .karta-volna .rowline{margin-top:10px}
 }
 .grid.calc>.bigpanel{align-content:stretch}
 .bigpanel>.card{height:100%;display:flex;flex-direction:column}

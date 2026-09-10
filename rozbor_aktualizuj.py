@@ -120,16 +120,29 @@ def zalozky():
 
 
 def endpointy():
-    """Rozhraní mostu — bere se z kódu, ne z hlavy."""
+    """Rozhraní mostu — bere se z kódu, ne z hlavy.
+
+    Metoda se určuje podle toho, ve které obsluze (do_GET / do_POST) cesta
+    stojí — pevný seznam POST cest zaostával (10. 9. 2026 hlásil
+    /api/aktualizace jako GET). Regex nesmí chtít mezeru za u.path:
+    `u.path.startswith("/api/zakazka/")` ji nemá a cesta z tabulky vypadla.
+    """
     src = cti(cesta("most.py"))
+    obsluhy = sorted((m.start(), m.group(1).upper()) for m in re.finditer(r"def do_(GET|POST|OPTIONS)\(", src))
+
+    def metoda(poz):
+        aktualni = "GET"
+        for zacatek, jmeno in obsluhy:
+            if zacatek <= poz:
+                aktualni = jmeno
+        return aktualni
+
     out = []
-    for m in re.finditer(r'u\.path (?:==|\.startswith\()\s*"(/api/[^"]*)"', src):
-        c = m.group(1)
-        if c not in [x[1] for x in out] and c != "/api/":
-            out.append(("POST" if c in ("/api/pdf", "/api/vyrez", "/api/databaze/ulozit") else "GET", c))
-    for c in ("/api/pdf",):
-        if c not in [x[1] for x in out]:
-            out.append(("POST", c))
+    # jednotlivé cesty (==, startswith) i n-tice (`u.path not in ("/api/pdf", …)`)
+    for m in re.finditer(r'u\.path(?: ==|\.startswith\(|(?: not)? in \()\s*((?:"/api/[^"]*"(?:,\s*)?)+)', src):
+        for c in re.findall(r'"(/api/[^"]*)"', m.group(1)):
+            if c not in [x[1] for x in out] and c != "/api/":
+                out.append((metoda(m.start()), c))
     return sorted(out, key=lambda x: (x[0], x[1]))
 
 

@@ -19,10 +19,11 @@ polohy, ne podle pořadí.
 
 Použití:
     python prevod_rucolor.py "C:/Users/ahmik/Downloads/MIXFORM_10KK_B_EN_20250207.pdf"
-    python prevod_rucolor.py "...MIXFORM_10KK...pdf" --rada "RUCOLOR 10KK"
+    python prevod_rucolor.py "...MIXFORM_10KK...pdf" --rada "RUCO 10KK"
+    (bez --vystup vznikne receptury_RUCO_10KK.csv — tak se soubor dílny jmenuje)
 
 Bez --rada se jméno řady odvodí z názvu souboru (MIXFORM_10KK_B_... →
-RUCOLOR 10KK). Bez --vystup se CSV jmenuje receptury_<řada bez mezer>.csv
+RUCO 10KK). Bez --vystup se CSV jmenuje receptury_<řada bez mezer>.csv
 a uloží se do složky "databaze barev".
 
 Odstíny (hex) v PDF nejsou, berou se z tabulky parametry/odstiny_pantone.csv.
@@ -198,9 +199,20 @@ def odstiny_z_databazi():
 
 
 def rada_z_nazvu_souboru(cesta):
+    """Řada se jmenuje RUCO, jak jí říká dílna — podklad od RUCOINX je RUCOLOR.
+
+    Rozlišení drží sloupec pozn, který odkazuje na stránku tištěného
+    bookletu; ten se pořád jmenuje RUCOLOR a technolog podle něj dohledává,
+    odkud receptura je.
+
+    Pozor při převodu do EXISTUJÍCÍ databáze: řadu nelze měnit zároveň
+    s názvem souboru — část 410 podle ní páruje receptury uložené
+    v prohlížeči (klicSirotka = název + řada) a převzetí by se nepovedlo
+    (kap. 264 a 266, postup v irm-databaze-nova, bod 5).
+    """
     zaklad = os.path.splitext(os.path.basename(cesta))[0]
     m = re.search(r"([0-9]+[A-Za-z]{0,3})", zaklad)
-    return "RUCOLOR " + m.group(1) if m else "RUCOLOR " + zaklad
+    return "RUCO " + m.group(1) if m else "RUCO " + zaklad
 
 
 def main():
@@ -216,7 +228,7 @@ def main():
 
     ap = argparse.ArgumentParser()
     ap.add_argument("pdf")
-    ap.add_argument("--rada", default=None, help="jméno řady, např. 'RUCOLOR 10KK'")
+    ap.add_argument("--rada", default=None, help="jméno řady, např. 'RUCO 10KK'")
     ap.add_argument("--vystup", default=None)
     a = ap.parse_args()
 
@@ -255,7 +267,7 @@ def main():
                 "nazev": z["nazev"], "typ": "Pantone", "rada": rada,
                 "hustota": "", "hex": hex_,
                 "komponenta": komponenta, "procento": procento,
-                "pozn": "%s str. %d" % (rada, z["strana"]),
+                "pozn": "%s str. %d" % (rada.replace("RUCO ", "RUCOLOR "), z["strana"]),
             })
 
     vystup = a.vystup or ("receptury_%s.csv" % rada.replace(" ", "_"))

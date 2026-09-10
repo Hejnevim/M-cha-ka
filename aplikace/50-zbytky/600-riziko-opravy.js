@@ -20,7 +20,7 @@
 const RIZIKO_ZADNE = "zadne", RIZIKO_POZOR = "pozor", RIZIKO_VYSOKE = "vysoke";
 
 function rizikoOpravy({ recipe, podklad, zeSita, slozeni, pctSum, pocetSlozek,
-                        vyuziti, redeni, viskozita }) {
+                        vyuziti, viskozita }) {
   const body = [];
   const pridej = (sila, co, coStim) => body.push({ sila: sila, co: co, coStim: coStim });
 
@@ -85,12 +85,6 @@ function rizikoOpravy({ recipe, podklad, zeSita, slozeni, pctSum, pocetSlozek,
       preloz(vyuziti.dvojice
         ? "Dopočet je přesný, ale oba kelímky mohly mezitím zhoustnout — a každý jinak."
         : "Dopočet je přesný, ale starý kelímek mohl mezitím zhoustnout."));
-  }
-
-  if (redeni && redeni.prilisRidke) {
-    pridej(RIZIKO_VYSOKE, preloz("Aditiv je {a} g, strop receptury je {s} g.",
-      { a: fmt(redeni.aditiva), s: fmt(redeni.strop) }),
-      preloz("Nad stropem barva neteče, ale stéká."));
   }
 
   const vysokych = body.filter((b) => b.sila === RIZIKO_VYSOKE).length;

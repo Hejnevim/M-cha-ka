@@ -26,6 +26,7 @@
 20-zaklad/170-pokryti.js
 20-zaklad/175-pokryti-okno.js
 20-zaklad/180-pdf-v-kalkulaci.js
+20-zaklad/182-volba-rady.js
 20-zaklad/185-pripojeni.js
 20-zaklad/190-zakazky.js
 20-zaklad/195-ctecka.js
@@ -40,7 +41,6 @@
 40-kalkulace/240-calc.js
 40-kalkulace/250-vaha.js
 40-kalkulace/260-financni-box.js
-40-kalkulace/270-potlife-pruh.js
 40-kalkulace/280-michaci-rezim.js
 40-kalkulace/290-vazeni.js
 50-zbytky/300-stitek.js
@@ -77,6 +77,7 @@
 70-pravidla/495-naplne-sita.js
 70-pravidla/496-separace-vypocet.js
 70-pravidla/497-barvy-zakazky.js
+70-pravidla/498-volna-davka.js
 50-zbytky/500-evidence.js
 70-pravidla/510-aditiva.js
 80-cena/520-cena-davky.js
@@ -95,6 +96,7 @@
 50-zbytky/636-profily-uprav.js
 50-zbytky/637-pozadavky-odstinu.js
 50-zbytky/638-vratky.js
+50-zbytky/639-doladeni-odstinu.js
 50-zbytky/640-poradi-michani.js
 50-zbytky/650-propad-vypocet.js
 85-sestavy/652-sestavy-vypocet.js

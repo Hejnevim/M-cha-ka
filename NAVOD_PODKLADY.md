@@ -194,34 +194,32 @@ u váhy a na čtečku se nečeká.
 
 ---
 
-## Aditiva — ředidlo a zpomalovač
+## Aditiva — zpomalovač schnutí
 
-> Kolik ředidla se do dávky nalilo — aplikace to neví, protože se ředí až podle
-> naměřené viskozity.
+> Zpomalovač schnutí — kolik ho obsluha nalila, v gramech.
 
-**Stálo u:** políčka *Přidané ředidlo* ve finančním boxu, než se z ředidla stala
-vážená složka dávky.
-**Vysvětluje:** proč aplikace množství ředidla nepředepisuje. Ředí se na
-výtokový čas, ne na procenta — procenta jsou jen doporučení, od kterého se
-začíná.
+**Stálo u:** pole *Aditiva* v míchacím režimu (do 10. 9. 2026 tam bylo i
+ředidlo s doporučením a stropem, ve finančním boxu dřív políčko *Přidané
+ředidlo*).
+**Vysvětluje:** proč aplikace množství zpomalovače nepředepisuje — lije se
+podle síta a podle toho, jak barva zasychá v okách, ne podle procent.
 
 **Co v návodu být musí, protože to z čísel na obrazovce neplyne:**
 
-1. **Tužidlo se počítá z barvy, ne z obsahu nádoby.** Je-li v kelímku 200 g
-   barvy a 18 g ředidla, tužidla se přidá 20 g (10 % z barvy), ne 21,8 g.
-   Aplikace to tak počítá sama, ale kdo si to přepočítává na papíře, musí
-   vědět, ze kterého čísla.
-2. **Kompenzace pigmentace nevrací viskozitu.** Tlačítko zvětší celou dávku
-   i s aditivy, takže barva zůstane stejně řídká, jak si ji tiskař naředil —
-   jen jí je víc. Dorovnat báze zpátky na původní koncentraci by ředění
-   zrušilo, a proto to aplikace nedělá.
-3. **Kompenzace nenahrazuje měření viskozity.** Kolik barvy projde sítem,
-   se počítá z naměřeného výtokového času a z tabulky koeficientů. Po naředění
-   se má viskozita změřit a zapsat; kompenzace řeší jen pigment, ne průchod
-   sítem.
-4. **Strop ředění.** Výchozí je 12 % váhy barvy a každá receptura si ho může
-   přepsat. Nad ním se hlásí varování, ale aplikace v ničem nebrání —
-   rozhodnutí zůstává na tiskaři.
+1. **Ředidlo a tužidlo se do kelímku nemíchají.** Do 10. 9. 2026 aplikace
+   vedla ředidlo jako vážené aditivum (doporučení, strop, kompenzace
+   pigmentace) a tužidlo jako poslední krok vážení s odpočtem pot life.
+   V dílně se ale obojí přidává až při tisku, podle potřeby — proto
+   v kalkulaci, na míchacím lístku, u váhy, v ceně dávky ani ve výkazu
+   těkavých látek nejsou. Kdo si tužidlo počítá u stroje, počítá ho z **váhy
+   barvy** v kelímku (10 % z 200 g je 20 g), ne z obsahu nádoby i se
+   zpomalovačem.
+2. **Zpomalovač pigment neubere, jen ho zředí.** V každém gramu je pak míň
+   barviva; kolik barvy projde sítem, se počítá z naměřeného výtokového času
+   a z tabulky koeficientů — po přilití se má viskozita změřit a zapsat.
+3. **Pot life hlídá jen kelímek, který tužidlo už má** — vrácený od stroje
+   nebo zapsaný ručně v evidenci zbytků s přepínačem *s tužidlem*. Kelímek
+   od váhy ho nemá a štítek nese jen datum spotřeby.
 
 ---
 
@@ -245,6 +243,37 @@ se na ně nechodí z nabídky — a kdo je zná ze starší verze, hledá je mar
 
 V okně *Načíst kód* je jen pole pro kód, přepínač poslechu čtečky a kamera.
 Přepínač je tentýž stav jako v záložce, ne druhé nastavení.
+
+---
+
+## Z jaké řady vzít odstín — otázka po načtení zakázky
+
+> Z jaké řady vzít odstín? · Bez volby — hledat ve všech řadách
+
+**Stálo u:** okno, které se otevře po načtení zakázkového listu nebo kódu.
+**Vysvětluje:** proč se aplikace ptá a co klik na dlaždici udělá.
+
+Zakázkový list nese jen „PANTONE 485 C“, ne řadu barvy — a ten samý kód je
+v každé nakoupené databázi namíchaný z jiných složek. U technologie
+s jedinou řadou (vypalování: Ferro Xpression) není co řešit. U tampontisku
+je řad pět, a když poloha produktu žádnou přiřazenou nemá, aplikace neví,
+kterou vzít, a hádat nesmí. Proto se zeptá.
+
+- Dlaždice je jedna řada; číslo pod ní říká, kolik barev z listu v té řadě
+  je („1 z 2 barev“). Pomlčka = odstín v řadě není; jde ji zvolit i tak,
+  barva pak jede jako rozpracovaná v té řadě.
+- Klik na dlaždici odstín vybere **a řadu zapíše k poloze produktu**
+  (záložka Produkty, štítky typů barev u polohy; soubor
+  `parametry/typy_poloh.csv`). Příště se u téhle polohy už neptá a odstín
+  bere rovnou z ní. Změna řady je pak práce technologa v záložce Produkty.
+- *Bez volby* nechá hledat ve všech řadách technologie a nic nezapisuje —
+  vezme se první nalezená a v pruhu zakázky stojí, ze které řady.
+- Totéž zapamatování udělá první ruční výběr Pantone standardu na poloze
+  bez přiřazené řady: hlášení dole řekne „Řada … je od teď přiřazená
+  poloze …“.
+
+Zakázka bez rozpoznané polohy se na řadu neptá — není kam volbu uložit;
+hledá se ve všech řadách technologie a hlásí se, ze které odstín je.
 
 ---
 
@@ -417,10 +446,22 @@ zdůvodnění dál vrací (pole `duvod` v rozboru nátisku), jen se nezobrazuje.
 > (1 000 ks po 4 = 250 tahů) a to, že širší síto chce širší těrku, tedy
 > větší rezervu. Přesně proto se zadává šířka těrky, ne velikost síta.
 
+> **Šířka těrky se zadává pro celý záběr**, tedy přes všechny motivy, které
+> jdou jedním tahem — ne šířka jednoho motivu. Rezerva roste s ní, a pole
+> *Potisků na tah* do ní proto nesahá; kdyby ji násobilo, houska by se
+> započítala dvakrát.
+
+> **U drobného potisku je v dávce skoro celá rezerva.** Těrka 350 mm dá při
+> hustotě 1,20 g/ml 126 g housky; zakázka, kde na kusy připadá 1,7 g, tak
+> míchá 127,7 g. Snížení krycí plochy na 56 % z toho ubere 0,7 g, protože
+> houska na velikosti loga nezávisí — protahuje se sítem tak jako tak.
+> Není to chyba výpočtu: bez těch 126 g se první tah neudělá.
+
 **Nikdy nestálo na obrazovce** — obě pole vznikla rovnou tichá (rozpis dávky
 v Kolik namíchat byl do kap. 244 jen řádek čísel, teď není ani ten). Vysvětluje, proč rezerva není
-totéž co ztráty (ztráty se nevrátí, rezerva ano) a proč vícenásobný motiv
-na sítě nezvyšuje spotřebu.
+totéž co ztráty (ztráty se nevrátí, rezerva ano), proč vícenásobný motiv
+na sítě nezvyšuje spotřebu a proč krycí plocha z náhledu u malého loga
+dávkou skoro nehne.
 
 ---
 
@@ -491,13 +532,13 @@ Vysvětlivky pokrývaly jen to, u čeho stály. Návod bude potřebovat i:
 - domíchání ze zbytku — proč lze barvu jen přidávat, ne ubírat
 - práci s váhou: připojení, tolerance, co dělat při přelití
 - co aplikace umí bez mostu a co s ním
-- **dvousložkové barvy a namíchané dávky:** že odpočet spouští až tlačítko
-  *Tužidlo přidáno*, ne navážení báze; že dávka má vlastní kód
-  (`DAVKA-20260814-001`) a je to něco jiného než kód kelímku na štítku; že
-  *Nová směs* jen odpojí kalkulaci a dávka běží dál, kdežto *Spotřebováno*
-  a *Vyhozeno* ji uzavřou — a proč se tyhle dvě rozlišují (jen z toho se pozná,
-  kolik barvy dílna vyhodí); a že se po obnovení stránky odpočet napojí zpátky
-  sám, takže druhý spouštět netřeba a nemá
+- **dvousložkové barvy a namíchané dávky:** že se tužidlo do kelímku nemíchá
+  a přidává se až při tisku, takže kalkulace od 10. 9. 2026 dávky nezakládá
+  ani pot life neodpočítává; že evidence dávek (`DAVKA-20260814-001`, kód
+  jiný než kód kelímku na štítku) nese jen dávky z dřívějška — čtou se
+  v historii receptury a v propadu, *Spotřebovaná* a *Vyhozená* je uzavřou
+  a proč se tyhle dvě rozlišují (jen z toho se pozná, kolik barvy dílna
+  vyhodila)
 - **kde se berou peníze:** že ceny materiálů i sazba za likvidaci jsou
   jeden ceník dílny, že se ceny dají schovat přepínačem a schované se
   netisknou ani na míchací lístek
@@ -662,11 +703,10 @@ jedno vážení.
 výrobce předepisuje lak, katalyzátor nebo pevný podíl ředidla do **každé**
 směsi řady. Receptura je poměr pigmentů a bází; tohle je vlastnost celé řady,
 proto se zapisuje k řadě, ne k barvě: `parametry/databaze.csv`, sloupec
-`vynucene`, tvar `Lak PP=10|Verdünner=5`. Podíl je z **váhy barvy**, stejně
-jako u tužidla a ředidla, a 10 i 0,1 znamená totéž. Složka pak stojí na
-lístku jako řádek za barvou, vede ji asistent vážení a počítá se do ceny
-i do skladu. Do procent receptury se **nemíchá** a do rozboru ředění
-nevstupuje — není to ředidlo, takže strop ředění se jí netýká.
+`vynucene`, tvar `Lak PP=10|Verdünner=5`. Podíl je z **váhy barvy**
+a 10 i 0,1 znamená totéž. Složka pak stojí na lístku jako řádek za barvou,
+vede ji asistent vážení a počítá se do ceny i do skladu. Do procent
+receptury se **nemíchá**.
 
 ### Vratka ze stroje uprostřed zakázky
 

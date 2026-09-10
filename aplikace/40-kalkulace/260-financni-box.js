@@ -105,23 +105,3 @@ function FinancniBox({ naklady, ks, uspora, likvidace, usporaKod, videt, onPrepn
         </div>`}
     </div>`;
 }
-
-/* Odpočet pot life musí běžet sám od sebe — bez tikotu by se čas přepsal až
-   při jiné akci a tiskař by u váhy koukal na hodnotu, která už neplatí. */
-function useTikot(bezi, ms) {
-  const [, setTik] = useState(0);
-  useEffect(() => {
-    if (!bezi) return;
-    const id = setInterval(() => setTik((x) => x + 1), ms || 30000);
-    return () => clearInterval(id);
-  }, [bezi, ms]);
-}
-
-/* Řízení doby zpracovatelnosti u dvousložkových barev.
-
-   Pot life neběží od namíchání báze, ale od chvíle, kdy se do ní přidá
-   tužidlo — proto se odpočet spouští tlačítkem, ne sám. Do té doby se
-   ukazuje jen navážka tužidla, aby bylo co odměřit.
-
-   Kolik tužidla: poměr je z VÁHY BÁZE, takže z 628 g báze při 10 %
-   vznikne 690,8 g směsi. Dávka pro zakázku je báze — tužidlo je navíc. */

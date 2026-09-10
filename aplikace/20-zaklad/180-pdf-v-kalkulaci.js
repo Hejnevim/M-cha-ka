@@ -1,5 +1,5 @@
 "use strict";
-function PdfVKalkulaci({ sgps, products, recipes, onApply, onNacteno }) {
+function PdfVKalkulaci({ sgps, products, recipes, omezeni, onApply, onNahled, onNacteno }) {
   const [stav, setStav] = useState("cekam");     // cekam | cte | okno | chyba
   const [data, setData] = useState({ pole: {}, zdroj: {}, text: "", jmeno: "" });
   const [chyba, setChyba] = useState("");
@@ -9,6 +9,9 @@ function PdfVKalkulaci({ sgps, products, recipes, onApply, onNacteno }) {
 
   const posli = async (f) => {
     if (!f) return;
+    // nový soubor je nová zakázka — náhled se musí ohlásit, i kdyby z listu
+    // vyšel tentýž produkt jako minule (obsluha mezitím mohla vybrat jiný)
+    nahlednuto.current = "";
     setStav("cte"); setChyba("");
     try {
       const d = await precistPdf(f);
@@ -32,7 +35,31 @@ function PdfVKalkulaci({ sgps, products, recipes, onApply, onNacteno }) {
       jmeno: nova.jmeno, chyba: "" });
   };
   const res = useMemo(() => Object.keys(data.pole).length
-    ? resolveSpec(poleNaSpec(data.pole), products, recipes) : null, [data.pole, products, recipes]);
+    ? resolveSpec(poleNaSpec(data.pole), products, recipes, omezeni) : null, [data.pole, products, recipes, omezeni]);
+
+  /* Náhled: produkt a poloha z listu se v kalkulaci přepnou hned, jakmile
+     je PDF přečtené — okno rozpoznaných údajů je průhledné a člověk za ním
+     do té doby viděl produkt z minulé zakázky. Nejvíc to mátlo u volby
+     barevné řady, kde se rozhoduje podle toho, co je na obrazovce vidět.
+     Náhled dotáhne jen produkt, polohu a barvu zboží; množství, ztráty a
+     receptura patří k potvrzení tlačítkem, aby se čísla dávky neměnila
+     dřív, než je člověk v okně uvidí. Zrušením se náhled nevrací zpět —
+     ukázaný produkt z listu je pořád bližší pravdě než ten předchozí.
+
+     Hlásí se jen skutečná změna rozpoznaného produktu a polohy, ne každý
+     přepočet `res`: náhled přepne technologii, ta změní `omezeni`,
+     `useMemo` vydá nový objekt a efekt by se spustil znovu — první verze
+     se takhle zacyklila a záložka spadla do tří vteřin. Klíč je proto
+     z hodnot, ne z totožnosti objektu, a drží se v ref, aby se opakované
+     vykreslení nepočítalo za novou zakázku. */
+  const nahlednuto = useRef("");
+  useEffect(() => {
+    if (stav !== "okno" || !onNahled || !res || !res.product) return;
+    const klic = res.product.id + "|" + (res.position ? res.position.id : "") + "|" + res.colorIdx;
+    if (nahlednuto.current === klic) return;
+    nahlednuto.current = klic;
+    onNahled(res);
+  }, [res, stav]);
 
   return html`
     <${React.Fragment}>

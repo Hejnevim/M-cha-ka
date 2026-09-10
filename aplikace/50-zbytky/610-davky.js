@@ -1,5 +1,8 @@
 "use strict";
-/* ==================== AKTIVNÍ NAMÍCHANÉ DÁVKY ====================
+/* ==================== NAMÍCHANÉ DÁVKY ====================
+   Od 10. 9. 2026 se nové dávky nezakládají (tužidlo se přidává až při tisku,
+   viz níž); tenhle záznam vede to, co v evidenci už je.
+
    Dvousložková barva začne tuhnout ve chvíli, kdy se do báze přidá tužidlo.
    Doteď si tenhle čas držela jen kalkulace — jedno číslo v paměti obrazovky.
    Stačilo přepnout recepturu nebo obnovit stránku a odpočet byl pryč, i když
@@ -63,63 +66,12 @@ function novyKodDavky(davky, ted) {
 }
 const jeKodDavky = (s) => /^DAVKA-\d{8}-\d{3}$/.test(String(s || "").trim().toUpperCase());
 
-/* Založení dávky. V životě jedné směsi se volá jednou, ale ve dvou různých
-   chvílích: buď při započetí míchání, kdy tužidlo ještě přidané není
-   (tuzidloKdy = 0, lhůta neběží), nebo rovnou při jeho potvrzení na váze.
-   Kdo míchá ze zvyku, klikne až potom — a dávka nesmí kvůli tomu chybět. */
-function novaDavka({ davky, cfg, recepturaId, nazev, zakazka, produkt, tech,
-                     bazeG, tuzidloKdy, kodKelimku, sarze, kdo, ted }) {
-  const nyni = ted || Date.now();
-  const baze = Math.max(0, n(bazeG));
-  const tuz = davkaTuzidla(cfg, baze);
-  const od = n(tuzidloKdy) > 0 ? n(tuzidloKdy) : 0;
-  const lhuta = (cfg && cfg.tuzidlo) ? n(cfg.minut) * MINUTA : 0;
-  return {
-    id: uid(), kod: novyKodDavky(davky, nyni),
-    recepturaId: recepturaId || "", nazev: nazev || "",
-    zakazka: zakazka || "", produkt: produkt || "", tech: tech || "",
-    kodKelimku: kodKelimku || "",        // doplní se, až se vytiskne štítek
-    zalozeno: nyni,
-    tuzidloKdy: od,                      // 0 = tužidlo ještě není v bázi
-    vyprsi: (od > 0 && lhuta > 0) ? od + lhuta : 0,
-    bazeG: baze, tuzidloG: tuz.tuzidlo,
-    tuzidlo: !!(cfg && cfg.tuzidlo),
-    minut: n(cfg && cfg.minut) || POTLIFE_MIN_VYCHOZI,
-    mez: cfg && cfg.mez != null ? n(cfg.mez) : MEZ_POTLIFE_VYCHOZI,
-    pomerTuzidla: tuz.pomer, hustnuti: kodHustnuti(cfg && cfg.hustnuti),
-    uzavrena: "", uzavrenaKdy: 0, pozn: "",
-    /* Otisk otevřených konví v okamžiku založení. Bere se teď, ne při
-       uzavření dávky: než se dávka uzavře, může konev dojít a nastoupit
-       další — a do tisku šla ta, ze které se vážilo. */
-    sarze: sarze || "",
-    /* Kdo míchal. Zapisuje se při založení, ne při uzavření: dávku uzavírá
-       často někdo jiný — ranní směna dodělá to, co odpolední namíchala — a
-       hledá se ten, kdo vážil. */
-    kdo: String(kdo || "").trim(),
-    zmeneno: nyni,
-  };
-}
-
-/* Potvrzení tužidla na váze — od téhle chvíle běží lhůta a teprve teď se dá
-   spočítat, kdy vyprší. Zapisuje se čas potvrzení, ne čas založení dávky:
-   mezi navážením báze a tužidlem bývá klidně čtvrt hodiny a o tu by se
-   lhůta zkrátila.
-
-   Váha ví, kolik báze je v nádobě doopravdy — po korekci odstínu nebo po
-   domíchání ze zbytku to není číslo z kalkulace. Bere se proto skutečná
-   navážka, protože z ní se počítá i tužidlo. */
-function davkaSTuzidlem(d, kdy, bazeG) {
-  if (!d) return d;
-  const od = n(kdy) > 0 ? n(kdy) : Date.now();
-  const lhuta = n(d.minut) * MINUTA;
-  const baze = n(bazeG) > 0 ? n(bazeG) : n(d.bazeG);
-  return Object.assign({}, d, {
-    tuzidlo: true, tuzidloKdy: od,
-    vyprsi: lhuta > 0 ? od + lhuta : 0,
-    bazeG: baze, tuzidloG: baze * n(d.pomerTuzidla),
-    zmeneno: Date.now(),
-  });
-}
+/* Zakládání dávek tu od 10. 9. 2026 není. Dávku zakládala kalkulace jen
+   u barvy „s tužidlem" — a tužidlo se do kelímku nemíchá, přidává se až
+   při tisku. Evidence dávek zůstává kvůli tomu, co v ní už je: čte se,
+   ukazuje se v historii receptury a v propadu, uzavírá se rukou. Kdyby se
+   dávky měly zakládat znovu (třeba kvůli podpisu a konvím u oprav), vzor
+   novaDavka je v deníku, kap. 57 (14. 8. 2026). */
 
 /* Uzavření dávky. Spotřebovaná = doběhla do tisku, vyhozená = ztuhla nebo se
    nepovedla. Rozdíl je v tom, jestli se za barvu platilo nadarmo — proto se

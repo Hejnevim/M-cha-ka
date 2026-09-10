@@ -37,6 +37,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 
 SLOZKA = os.path.dirname(os.path.abspath(__file__))
 
@@ -50,6 +51,12 @@ STAV = (
     # S PDP zmizí sítotisková poloha a scéna 6 („tři polohy") přestane platit.
     "localStorage.setItem('irm-technologie', JSON.stringify('SCR'));"
     "localStorage.setItem('irm-tema', JSON.stringify('light'));"
+    # Tampontisková poloha pera má přiřazenou řadu PMS 786 (kap. 256): bez ní
+    # by po kódu se dvěma barvami vyskočilo okno „Z jaké řady vzít odstín?"
+    # (PDP má pět řad) a scény 29 a 35 by fotily okno místo barev zakázky.
+    # Klíč je tvar klicTypuPolohy (část 456): ref|TECH|název bez diakritiky.
+    "localStorage.setItem('irm-typy-poloh', JSON.stringify("
+    "{'11152|PDP|propiska / kulovite teleso': ['receptury_PRINTCOLOR_786.csv']}));"
 )
 
 # Rozmazání licencovaných dat. Vkládá se jako <style> a třída na buňky, takže
@@ -97,9 +104,13 @@ VZORY_ROZMAZANI = [
 # Zbytky řádek „Vratka ze stroje" a filtr „v tisku" (10 → 55). Nechat staré
 # nižší číslo by kontrolu obešlo: prošlo by i rozmazání, které polovinu buněk
 # netrefí.
+# 10. 9. 2026 (kap. 256): náhradní receptura kalkulace už není první
+# v databázi (Ferro, 4 složky), ale první z řady technologie polohy — na
+# sítotiskové poloze pera je to Marabu LIP se 3 složkami; tabulka míchání má
+# 3 řádky složek + součet = 4 buňky, v simulaci o dvě víc.
 CEKANE_ROZMAZANI = {
-    "30-mich": 5, "31-mich-zbytek-rucne": 5, "32-mich-simulace": 7,
-    "33-mich-stitek": 5, "34-mich-poznamka": 5, "35-mich-barvy": 7,
+    "30-mich": 4, "31-mich-zbytek-rucne": 4, "32-mich-simulace": 6,
+    "33-mich-stitek": 4, "34-mich-poznamka": 4, "35-mich-barvy": 7,
     "40-receptury": 348, "42-receptura-upravit": 3,
     # 50, ne 55: počet buněk roste s počtem kelímků v evidenci a ta se v dílně
     # mění. Číslo je spodní mez — nesmí být vyšší, než kolik jich je při nejmenším
@@ -255,8 +266,24 @@ SNIMKY = [
     ("22-picker-poloha", 1000, js(VYBER_11152, OTEVRI_PICKER,
                                   "var p=[...document.querySelectorAll('.modalbox .poscard')];"
                                   "if(p[1]){p[1].click(); await cekej(1000);}")),
-    ("23-custom-pick", 1000, js(VYBER_11152, POTVRD_POLOHU,
-                                "var c=tlac(/Pantone custom/i); if(c){c.click(); await cekej(1500);}")),
+    # Scéna 19 mluví o tlačítku „Custom receptura pro tuto kombinaci" v okně
+    # Barva a poloha potisku a o výběru výchozí receptury s náhledem názvu.
+    # Dřív se tu klikalo na Pantone custom na domovské kartě a scéna bez rámečků
+    # ukazovala horní část domovské stránky (10. 9. 2026). Stejná cesta jako
+    # u editoru, jen bez odvození — okno zůstane na volbě základu.
+    ("23-custom-pick", 1000, js(VYBER_11152, POTVRD_POLOHU, OTEVRI_PICKER,
+                                "var v=document.querySelector('.modalbox .varcard,"
+                                " .modalbox .poscard');"
+                                "if(v){v.click(); await cekej(900);}"
+                                "var p=tlac(/(Custom receptura pro tuto|Custom recipe for this)/i);"
+                                "if(p){p.click(); await cekej(1400);}"
+                                "var s=document.querySelector('.pickbox select');"
+                                "if(s && s.options.length>1){"
+                                "var nat=Object.getOwnPropertyDescriptor("
+                                "window.HTMLSelectElement.prototype,'value').set;"
+                                "nat.call(s, s.options[1].value);"
+                                "s.dispatchEvent(new Event('change',{bubbles:true}));"
+                                "await cekej(900);}")),
     # Editor vlastní receptury není na domovské kartě, ale v okně Barva a poloha
     # potisku: tam je pod barevnou variantou tlačítko „＋ Custom receptura pro
     # tuto kombinaci", které otevře .pickbox s výběrem výchozí receptury, a teprve
@@ -298,7 +325,12 @@ SNIMKY = [
                          "var m=tlac(/(Míchací režim|Mixing mode)/i); if(m){m.click(); await cekej(2000);}")),
     ("31-mich-zbytek-rucne", 1500, js(VYBER_11152, POTVRD_POLOHU,
                                       "var m=tlac(/(Míchací režim|Mixing mode)/i); if(m){m.click(); await cekej(2000);}"
-                                      "var z=tlac(/(Znám zbytek|know the leftover)/i); if(z){z.click(); await cekej(1200);}")),
+                                      # Ručně zadaný zbytek, ne „Znám zbytek rovnou": scéna 34 rámuje
+                                      # formulář (co to je, kolik gramů, složení podle receptury), který
+                                      # otevírá tlačítko .mich-tl-rucne. Klik na sousední tlačítko otevřel
+                                      # okno Uložit zbytek do evidence a scéna rámovala prázdnou plochu
+                                      # pod ním (10. 9. 2026).
+                                      "var z=document.querySelector('.mich-tl-rucne'); if(z){z.click(); await cekej(1200);}")),
     ("32-mich-simulace", 1300, js(VYBER_11152, POTVRD_POLOHU,
                                   "var m=tlac(/(Míchací režim|Mixing mode)/i); if(m){m.click(); await cekej(2000);}"
                                   "var s=tlac(/(simulaci|simulation)/i); if(s){s.click(); await cekej(1500);}")),
@@ -365,9 +397,20 @@ def nafot(nazev, vyska, po, jazyk, cil):
         "--tema", "light", "--sirka", "1600", "--vyska", str(vyska),
         "--cekani", "20", "--pred", stav, "--po", po, "--cil", cil,
     ]
-    r = subprocess.run(prikaz, capture_output=True, text=True, encoding="utf-8",
-                       errors="replace")
-    vystup = (r.stdout or "") + (r.stderr or "")
+    # Spojení s bezhlavým Chromem občas spadne uprostřed běhu (10. 9. 2026:
+    # zhruba jeden ze tří běhů, ConnectionResetError nebo „Inspected target
+    # navigated or closed") — Chrome zavře ladicí zásuvku po znovunačtení
+    # stránky. Není to chyba scénáře, proto se běh až dvakrát zopakuje;
+    # teprve třetí pád je chyba snímku.
+    for pokus in range(3):
+        r = subprocess.run(prikaz, capture_output=True, text=True, encoding="utf-8",
+                           errors="replace")
+        vystup = (r.stdout or "") + (r.stderr or "")
+        spadlo = "ConnectionResetError" in vystup or "navigated or closed" in vystup
+        if r.returncode == 0 or not spadlo:
+            break
+        print("      spojení s prohlížečem spadlo — opakuji (%d/3)" % (pokus + 2))
+        time.sleep(3)
     m = re.search(r"rozmazano:(\d+)", vystup)
     return r.returncode, vystup, (int(m.group(1)) if m else None)
 

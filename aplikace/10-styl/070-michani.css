@@ -47,31 +47,14 @@
 /* Štítek na kelímek se mačká s kelímkem v druhé ruce a s odstupem od stolu
    — proto pruh přes celou šířku sloupce, zarovnaný s kartou asistenta nad
    ním: trefí se i bez míření, protože ruka od vážení jen sjede dolů. Výška
-   je trojnásobek písma, aby se do pruhu vešel i přepínač. */
+   je trojnásobek písma. Přepínač „s tužidlem", který na tlačítku seděl,
+   odešel 10. 9. 2026 — tužidlo se přidává až při tisku, ne do kelímku;
+   s ním odešla i nesouměrná rezerva v tlačítku, která mu dělala místo. */
 .michbg .stitekpruh{flex-direction:column;align-items:flex-end;justify-content:flex-start}
-.michbg .stitekpruh .stitekobal{position:relative;width:100%}
-/* Přepínač „s tužidlem" vypadá jako součást tlačítka — sedí absolutně u jeho
-   pravého okraje, svisle na středu. Je to ale sourozenec, ne potomek (proč,
-   říká komentář v JSX). Posun z barvy.html se přičítá k usazení na střed,
-   takže se přepínač dá po tlačítku posouvat jako každý jiný prvek. Velikost
-   řídí --mich-prepinac týmiž poměry jako v základní škále (13px → 38 × 20,
-   posun 18, mezera 8) — tvar se nemění, jen roste nebo zmenšuje celý. */
-.michbg .stitekpruh .tgl{font-size:var(--mich-prepinac);
-  position:absolute;top:50%;right:calc(var(--mich-tl-stitek) * .8);
-  transform:translate(var(--mich-prepinac-posun-x),var(--mich-prepinac-posun-y)) translateY(-50%);
-  gap:calc(var(--mich-prepinac) * .615)}
-.michbg .stitekpruh .tglt{width:calc(var(--mich-prepinac) * 2.923);
-  height:calc(var(--mich-prepinac) * 1.538);
-  border-radius:calc(var(--mich-prepinac) * .846)}
-.michbg .stitekpruh .tglt::after{width:calc(var(--mich-prepinac) * 1.231);
-  height:calc(var(--mich-prepinac) * 1.231);
-  top:calc(var(--mich-prepinac) * .154);left:calc(var(--mich-prepinac) * .154)}
-.michbg .stitekpruh .tgl input:checked + .tglt::after{
-  transform:translateX(calc(var(--mich-prepinac) * 1.385))}
 .michbg .stitekpruh .btn{font-size:var(--mich-tl-stitek);
   transform:translate(var(--mich-tl-stitek-posun-x),var(--mich-tl-stitek-posun-y));
   width:100%;height:calc(var(--mich-tl-stitek) * 3);flex:none;
-  padding:calc(var(--mich-tl-stitek) * .4) calc(var(--mich-tl-stitek) * 4.2);
+  padding:calc(var(--mich-tl-stitek) * .4) calc(var(--mich-tl-stitek) * 1.47);
   white-space:normal;line-height:normal;
   display:inline-flex;align-items:center;justify-content:center;text-align:center}
 /* Tára a Odpojit v pravém horním rohu karty asistenta, pod sebou: Odpojit
@@ -264,24 +247,6 @@ html:not([lang="cs"]) .michbg .card .btn.mich-tl-dalsi{width:auto;height:auto;
      složky se rozláme na čtyři řádky a řádek u váhy přestane být řádkem. */
   .michtab{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
   .michtab td,.michtab th{white-space:nowrap}
-  /* Přepínač „s tužidlem" sedí absolutně u pravého okraje tlačítka Štítek
-     na kelímek a spoléhá na to, že tlačítko je široké: rezerva 4,2 × písma
-     po obou stranách (193 px) mu stačí jen tehdy, když se text vejde do
-     zbytku. Na telefonu (změřeno: 391 px okna, tlačítko 361 px, pro text
-     zbylo 168 px) se „Štítek na kelímek →" zalomí do tří řádků, roztáhne
-     se pod přepínač a ten ho o 22 px překryje — na skutečném telefonu
-     se popisek s přepínačem křížil. Pod zlomem, kde je míchací režim
-     v jednom sloupci, proto přepínač z tlačítka vystoupí do toku pod něj
-     (obal se stane sloupcem zarovnaným doprava, ať sedí u pravé hrany
-     tlačítka) a tlačítko dostane souměrnou rezervu jako ostatní míchací
-     tlačítka, aby se text vrátil na jeden řádek. Posun z barvy.html
-     zůstává, jen bez usazení na střed, které v toku nemá co dělat. */
-  .michbg .stitekpruh .stitekobal{display:flex;flex-direction:column;align-items:flex-end}
-  .michbg .stitekpruh .tgl{position:static;
-    transform:translate(var(--mich-prepinac-posun-x),var(--mich-prepinac-posun-y));
-    margin-top:calc(var(--mich-mezera) * .6)}
-  .michbg .stitekpruh .btn{padding-left:calc(var(--mich-tl-stitek) * 1.47);
-    padding-right:calc(var(--mich-tl-stitek) * 1.47)}
 }
 @media print{.michbg{display:none}}
 

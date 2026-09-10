@@ -1,25 +1,25 @@
 "use strict";
-function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopis, onHotovo,
-                  pigmenty, barvaHex, onStav, potlife, zacatekPotlife, onSpustitPotlife,
-                  sarze, onNovaKonev, onOprava, onProfil, klic, zakazka, onPotvrdit }) {
+function Vazeni({ comps, aditiva, totalG, recipeName, predem, predemPopis, onHotovo,
+                  pigmenty, barvaHex, onStav, sarze, onNovaKonev, onOprava, onProfil, klic, zakazka, onPotvrdit }) {
   const sc = useScale();
   const [baud, setBaud] = useState("9600");
   const [tol, setTol] = useState(0.5);
 
-  /* Ředidlo a zpomalovač se váží jako každá jiná složka — do téže nádoby, na
-     tutéž váhu, kumulativně. Vedou se ale ZA komponentami a odděleně, protože
-     složky odstínu to nejsou: korekce po nátisku se jich netýká a tužidlo se
-     počítá z báze, ne z naředěné směsi. Že jsou v seznamu, má jediný důvod —
-     přelití pak řeší tentýž algoritmus jako u barvy, bez druhé jeho kopie. */
+  /* Zpomalovač se váží jako každá jiná složka — do téže nádoby, na tutéž
+     váhu, kumulativně. Vede se ale ZA komponentami a odděleně, protože složka
+     odstínu to není: korekce po nátisku se ho netýká. Že je v seznamu, má
+     jediný důvod — přelití pak řeší tentýž algoritmus jako u barvy, bez druhé
+     jeho kopie. Ředidlo ani tužidlo se tu neváží: obojí se přidává až při
+     tisku, ne do kelímku (deník 10. 9. 2026). */
   /* Jméno aditiva se překládá hned tady: níž se s ním jen kreslí (řádek
      v tabulce, nadpis kroku) a algoritmus se o název neopírá. Komponenty
      receptury naproti tomu zůstávají, jak jsou — jsou to data dílny. */
   /* Vynucená složka řady (lak, katalyzátor — část 459) se váží stejně jako
-     aditivum, ale do rozboru ředění nepatří (doRedeni: false): není to
-     ředidlo a strop ředění by hlásila naprázdno. */
+     aditivum, jen se jinak označuje (slozkaRady): na řádku tabulky i v nápovědě
+     kroku se říká, že ji předepisuje řada, ne obsluha. */
   const aditivaRadky = (aditiva || []).filter((a) => n(a.g) > 0.005)
     .map((a) => ({ id: "aditivum-" + a.druh, name: preloz(a.popis), g: n(a.g), aditivum: a.druh,
-      doRedeni: a.doRedeni !== false }));
+      slozkaRady: !!a.slozkaRady }));
   const slozky = comps.concat(aditivaRadky);
   const aditivaG = aditivaRadky.reduce((s, a) => s + a.g, 0);
   const davkaCela = totalG + aditivaG;          // co má nakonec být v nádobě
@@ -75,7 +75,7 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
      u nich se objem nehádá a ukáže se pomlčka. */
   const mlZ = (g, i) => (slozky[i] && slozky[i].ml > 0 && slozky[i].g > 0)
     ? g * slozky[i].ml / slozky[i].g : null;
-  // korekce odstínu se počítá z barevné části dávky — přilité ředidlo do ní nepatří
+  // korekce odstínu se počítá z barevné části dávky — aditiva do ní nepatří
   const bazeCil = cil.slice(0, prvniAditivum).reduce((a, b) => a + b, 0);
   const zbyvaVse = cil.map((c, i) => Math.max(0, c - (nalito[i] || 0)));
   // hotovo = na žádné složce už nic nechybí
@@ -85,17 +85,6 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
   // Váha ukazuje obsah celé nádoby. Co je v ní mimo právě váženou složku,
   // je pevné — rozdíl oproti tomu je to, co teď přitéká.
   const vPotu = nalito.reduce((a, b) => a + (b || 0), 0);
-  /* Tužidlo se počítá z BÁZE, ne z toho, co je v nádobě. Kdyby se do základu
-     započítalo ředidlo, vyšlo by tužidla o jeho podíl víc a barva by vytvrdla
-     jinak, než má. */
-  const bazeVPotu = nalito.slice(0, prvniAditivum).reduce((a, b) => a + (b || 0), 0);
-  const aditivaVPotu = nalito.slice(prvniAditivum).reduce((a, b) => a + (b || 0), 0);
-  const rozborVahy = redeni
-    ? rozborNaredeni({ bazeG: bazeVPotu, cfg: redeni,
-        aditiva: aditivaRadky.reduce((o, a, i) => {
-          if (a.doRedeni) o[a.aditivum] = nalito[prvniAditivum + i] || 0; return o;
-        }, {}) })
-    : null;
   const sarzeTed = cur && !cur.aditivum ? otevrenaSarze(sarze, cur.name) : null;
   const potvrdKonev = () => {
     if (!cur || !konevKod.trim()) return;
@@ -254,21 +243,13 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
                 <div className="note" style=${{ marginTop: 6 }}>
                   ${preloz("Váha je pod nulou táry — postavte nový kelímek a stiskněte Tára.")}
                 </div>`}
-              ${cur.aditivum && !cur.doRedeni && html`
+              ${cur.aditivum && cur.slozkaRady && html`
                 <div className="note" style=${{ marginTop: 6 }}>
                   ${preloz("Složka předepsaná řadou barvy — přidává se do každé směsi téhle řady.")}
                 </div>`}
-              ${cur.aditivum && cur.doRedeni && html`
+              ${cur.aditivum && !cur.slozkaRady && html`
                 <div className="note" style=${{ marginTop: 6 }}>
-                  ${preloz(ADITIVA[cur.aditivum].rada)}${rozborVahy
-                    ? preloz(". V nádobě je barvy {b} g, doporučené ředění {d} g, strop {s} g.",
-                        { b: fmt(bazeVPotu), d: fmt(rozborVahy.doporuceno), s: fmt(rozborVahy.strop) })
-                    : "."}
-                </div>`}
-              ${cur.aditivum && cur.doRedeni && rozborVahy && rozborVahy.prilisRidke && html`
-                <div className="warnbox" style=${{ marginTop: 8 }}>
-                  ${preloz("Aditiv je v nádobě {a} g, strop receptury je {s} g — o {n} g víc.",
-                    { a: fmt(rozborVahy.aditiva), s: fmt(rozborVahy.strop), n: fmt(rozborVahy.nadStropem) })}
+                  ${preloz(ADITIVA[cur.aditivum].rada)}.
                 </div>`}
               <div className="rowline" style=${{ marginTop: 10 }}>
                 <button className="btn mich-tl-dalsi" style=${inTol ? { background: "var(--ok)" } : {}}
@@ -333,26 +314,6 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
                 <button className="btn sec sm" onClick=${zacniZnovu}>${preloz("Navážit znovu")}</button>
                 ${onHotovo && html`<button className="btn sm" onClick=${onHotovo}>${preloz("Odepsat zbytek ze skladu")}</button>`}
               </div>
-            </div>`}
-
-          ${/* Tužidlo je poslední krok navážení, ne součást receptury: přidává se
-                až do promíchané báze a od té chvíle běží doba zpracovatelnosti.
-                Váží se na tutéž váhu, proto se rovnou říká i cílová hodnota. */
-            done && potlife && potlife.tuzidlo && !zacatekPotlife && html`
-            <div className="warnbox" style=${{ marginTop: 10 }}>
-              <b>${preloz("Zbývá tužidlo — {t} g", { t: fmtG(davkaTuzidla(potlife, bazeVPotu).tuzidlo) })}</b>
-              ${preloz(" ({p} % z {b} g báze{ad}).", {
-                p: fmt(potlife.pomer * 100, 1), b: fmt(bazeVPotu),
-                ad: aditivaVPotu > 0.05 ? preloz(", aditiva se do základu nepočítají") : "" })}
-              ${" "}${preloz("Na váze {v} g.", { v: fmt(vPotu + davkaTuzidla(potlife, bazeVPotu).tuzidlo) })}
-              <div className="note" style=${{ marginTop: 4 }}>
-                ${preloz("Přidávejte až do promíchané báze. Od té chvíle běží doba zpracovatelnosti {d} — pak už se směs nedá zachránit ředěním.",
-                  { d: dobaText(n(potlife.minut) * MINUTA) })}
-              </div>
-              ${onSpustitPotlife && html`
-                <div className="rowline" style=${{ marginTop: 8, marginBottom: 0 }}>
-                  <button className="btn sm" onClick=${() => onSpustitPotlife(bazeVPotu)}>${preloz("Tužidlo přidáno — spustit odpočet")}</button>
-                </div>`}
             </div>`}
 
           ${done && comps.length > 0 && html`
@@ -491,7 +452,7 @@ function Vazeni({ comps, aditiva, redeni, totalG, recipeName, predem, predemPopi
                   style=${zbyvaVse[i] <= tolerance / 2 ? { opacity: .55 } : {}}>
                   <td>${zbyvaVse[i] <= tolerance / 2 ? "✓" : (i === krok ? "▶" : "")}</td>
                   <td>${c.name}${c.aditivum
-                    ? html`<span className="tag" style=${{ marginLeft: 6 }}>${preloz(c.doRedeni ? "aditivum" : "složka řady")}</span>` : ""}</td>
+                    ? html`<span className="tag" style=${{ marginLeft: 6 }}>${preloz(c.slozkaRady ? "složka řady" : "aditivum")}</span>` : ""}</td>
                   <td className="num">${fmt(podil[i] * 100)}</td>
                   <td className="num">${fmtG(cil[i])}</td>
                   <td className="num">${fmtG(nalito[i] || 0)}</td>
