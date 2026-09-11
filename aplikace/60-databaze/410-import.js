@@ -325,3 +325,88 @@ function sloucReceptury(prev, nove, adopce, zijiciSoubory, ted) {
     prevzato: prevzato };
 }
 
+
+/* Sloučí receptury z přejmenovaného souboru s těmi, které už ze souboru vznikly.
+
+   Sirotčí větev v sloucReceptury tenhle stav nevyřeší: ta páruje jen v běhu,
+   kdy se soubor načítá, a jen dokud je klíč volný. Když vedle sebe stojí obě
+   verze — protože na portu 8765 chvíli odpovídaly dva mosty a každý vydával
+   jinou sadu názvů (kap. 267) —, dvojče klíč drží a sirotek v seznamu zůstane
+   natrvalo. Přitom právě on nese, co k receptuře nastavil technolog: síto,
+   kryvost, tužidlo, pot life i razítko schválení. Ta ze souboru je holá.
+
+   Vrací nový seznam, mapu id (sirotek → receptura ze souboru) pro přepnutí
+   vazeb a počet sloučených. Co protějšek nemá, zůstává beze změny — je to
+   databáze, která ze složky opravdu zmizela, a ta se smí jen odebrat. */
+function sloucSirotky(recipes, zdroj, ziveSoubory) {
+  const klic = (r) => String(r.name || "").toLowerCase()
+    + "|" + String(r.series || "").trim().toLowerCase();
+  const cile = new Map();
+  for (const r of recipes) {
+    if (!r.zdroj || !ziveSoubory.has(r.zdroj)) continue;
+    cile.set(klic(r), r);
+  }
+  const drz = (nova, puvodni) => nova == null ? (puvodni == null ? null : puvodni) : nova;
+  const nahrada = new Map(), zmeneno = new Map();
+  for (const r of recipes) {
+    if (r.zdroj !== zdroj) continue;
+    const cil = cile.get(klic(r));
+    if (!cil) continue;
+    nahrada.set(r.id, cil.id);
+    /* Tytéž zásady jako při obnově v sloucReceptury: co v souboru od
+       dodavatele nebývá, si receptura bere od sirotka. Jinak by sloučení
+       zahodilo víc než odebrání a u váhy by tiše zmizelo síto. */
+    zmeneno.set(cil.id, Object.assign({}, cil, {
+      mesh: cil.mesh || r.mesh || "", opacity: cil.opacity || r.opacity || "",
+      surface: cil.surface || r.surface || "", customer: cil.customer || r.customer || "",
+      tested: cil.tested || !!r.tested, fade: cil.fade || !!r.fade,
+      tuzidlo: cil.tuzidlo || !!r.tuzidlo,
+      pomerTuzidla: drz(cil.pomerTuzidla, r.pomerTuzidla),
+      potlifeMin: drz(cil.potlifeMin, r.potlifeMin),
+      mezPotlife: drz(cil.mezPotlife, r.mezPotlife),
+      hustnuti: drz(cil.hustnuti, r.hustnuti),
+      tuzidloNazev: cil.tuzidloNazev || r.tuzidloNazev || "",
+      pomerRedidla: drz(cil.pomerRedidla, r.pomerRedidla),
+      mezRedidla: drz(cil.mezRedidla, r.mezRedidla),
+      schvaleni: cil.schvaleni || r.schvaleni || "",
+      schvalil: cil.schvalil || r.schvalil || "",
+      schvalenoKdy: n(cil.schvalenoKdy) || n(r.schvalenoKdy) || 0,
+      duvodZamitnuti: cil.duvodZamitnuti || r.duvodZamitnuti || "",
+      zadal: cil.zadal || r.zadal || "",
+      zadanoKdy: n(cil.zadanoKdy) || n(r.zadanoKdy) || 0,
+      poznamka: cil.poznamka || r.poznamka || "",
+      znackaLoga: cil.znackaLoga || r.znackaLoga || "",
+      cu: cil.cu || r.cu || "",
+      objCislo: cil.objCislo || r.objCislo || "",
+      druhyStupen: cil.druhyStupen || r.druhyStupen || "",
+      schvaleni2: cil.schvaleni2 || r.schvaleni2 || "",
+      schvalil2: cil.schvalil2 || r.schvalil2 || "",
+      schvaleno2Kdy: n(cil.schvaleno2Kdy) || n(r.schvaleno2Kdy) || 0,
+      duvodZamitnuti2: cil.duvodZamitnuti2 || r.duvodZamitnuti2 || "",
+      pridanoKdy: n(r.pridanoKdy) || n(cil.pridanoKdy) || 0,
+    }));
+  }
+  const seznam = recipes
+    .filter((r) => !(r.zdroj === zdroj && nahrada.has(r.id)))
+    .map((r) => zmeneno.get(r.id) || r);
+  return { seznam: seznam, nahrada: nahrada, slouceno: nahrada.size };
+}
+
+/* Kolik receptur z osiřelého souboru má protějšek mezi živými — tolik jich
+   půjde sloučit. Počítá se stejným klíčem jako sloučení samo, aby nabídka
+   na obrazovce a výsledek kliknutí nemohly říkat každý něco jiného. */
+function sirotkuKeSlouceni(recipes, zdroj, ziveSoubory) {
+  const klic = (r) => String(r.name || "").toLowerCase()
+    + "|" + String(r.series || "").trim().toLowerCase();
+  const klice = new Set();
+  for (const r of recipes) {
+    if (!r.zdroj || !ziveSoubory.has(r.zdroj)) continue;
+    klice.add(klic(r));
+  }
+  let n = 0;
+  for (const r of recipes) {
+    if (r.zdroj !== zdroj) continue;
+    if (klice.has(klic(r))) n++;
+  }
+  return n;
+}

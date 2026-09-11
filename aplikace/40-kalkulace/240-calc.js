@@ -499,12 +499,19 @@ function Calc({ products, recipes, setRecipes, links, setLinks, spec, onSpecUsed
      výběr místo ručního čísla, ať se nepíše nic z hlavy. Technologie bez
      seznamu má dál ruční pole. */
   const minDavkyTech = (TECHS[tech] && TECHS[tech].minDavky) || [];
-  /* V základu 1 g, tedy prakticky bez podlahy: dávku má zvedat až hodnota
-     ze zakázkového listu nebo obsluha, ne aby každá drobná zakázka mlčky
-     narostla na dřívějších výchozích 50 g. Má-li technologie vlastní řadu
-     (TECHS.minDavky), start je na její nejmenší dávce — 1 g by se v takové
-     nabídce ukázalo jako pátá, matoucí položka navíc. */
-  const [minBatch, setMinBatch] = useState(minDavkyTech.length ? minDavkyTech[0] : 1);
+  /* V základu 50 g — nejmenší dávka, kterou dílna míchá do tisku. Pod ní se
+     nevejde ani rozumné vážení: u složky pod 1 % dělá dílek váhy 0,1 g větší
+     podíl než tolerance odstínu, takže by se navážila barva, jejíž odstín
+     říká víc o váze než o receptuře. Dřív tu byl 1 g, tedy prakticky bez
+     podlahy — to ale spoléhalo na to, že číslo zvedne zakázkový list nebo
+     obsluha, a u drobné zakázky se tak míchalo pod hranicí vážitelnosti
+     (zadání dílny 2026-09-11). Zkušební barva se tím neomezuje: nátisk má
+     vlastní úvahu podle nejmenší složky (část 590) a volná dávka mimo
+     zakázku minimální dávku schválně nemá (část 498).
+     Má-li technologie vlastní řadu (TECHS.minDavky), start je na její
+     nejmenší dávce — jiné číslo by se v takové nabídce ukázalo jako
+     matoucí položka navíc. */
+  const [minBatch, setMinBatch] = useState(minDavkyTech.length ? minDavkyTech[0] : 50);
   /* Těrky, které pro technologii v dílně skutečně visí (TECHS.terky) —
      dlaždice je pak výběr s těmito šířkami v nabídce, ať se nic nepíše
      z hlavy; technologie bez seznamu má dál ruční pole. Drží-li dílna jen

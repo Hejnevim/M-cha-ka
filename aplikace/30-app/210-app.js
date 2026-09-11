@@ -1577,6 +1577,22 @@ function App() {
             delete v[z];
             saveLS("irm-databaze-verze", v);
           }, "odebrání receptur z databáze " + z)}
+          onSloucitSirotky=${(z) => guardDelete(() => {
+            /* Sirotci z přejmenovaného souboru, kterým už dvojče ze souboru
+               vzniklo — sirotčí větev v sloucReceptury je nepřevezme, protože
+               klíč drží to dvojče (kap. 267). Nastavení technologa zůstalo na
+               jejich straně, takže se přenáší; teprve pak sirotek odchází. */
+            const zive = new Set((databaze.soubory || []).map((s) => s.jmeno));
+            const v = sloucSirotky(recipes, z, zive);
+            if (!v.slouceno) return;
+            // vazby na produkt a polohu visí na id sirotka — přepnout dřív, než odejde
+            const nl = {};
+            for (const k of Object.keys(links)) nl[k] = v.nahrada.get(links[k]) || links[k];
+            setLinks(nl);
+            setRecipes(v.seznam);
+            setToast({ ok: true, text: preloz("Sloučeno se souborem: {n} receptur — síto, kryvost i vazby přešly na receptury ze složky.",
+              { n: fmt(v.slouceno, 0) }) });
+          }, "sloučení receptur z databáze " + z)}
           onSloucitKopie=${() => guardDelete(() => {
             /* Kopie receptur po starší verzi aplikace. Nesmí se prostě smazat:
                na jejich id visí vazby na produkt a polohu, a ty by se ztratily.

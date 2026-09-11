@@ -65,6 +65,14 @@ SLOZKA = os.path.dirname(os.path.abspath(__file__))
 # Dosazuje irm_okno.py v zabaleném programu: bez parametrů spustí stažení
 # poslední verze z GitHubu (POST /api/aktualizace). None = umí jen exe.
 AKTUALIZACE = None
+# Rovněž z irm_okno.py: vrátí dict o posledním vydání na GitHubu
+# (GET /api/verze-na-siti). Most sám na síť nesahá — most.py je společný
+# pro běh nad složkou i pro zabalený program a nad složkou se aplikace
+# aktualizuje z repozitáře, ne z vydání.
+VERZE_NA_SITI = None
+# Cesta k aktualizace_stav.json, který píše stahující proces
+# (GET /api/stav-aktualizace). None = běh nad složkou, kde se nestahuje.
+STAV_AKTUALIZACE = None
 
 
 def _verze_balicku():
@@ -641,6 +649,49 @@ class Most(SimpleHTTPRequestHandler):
                     "popis": {"demo": "ukázková data (SGPS není připojeno)",
                               "soubor": "export ze SGPS ze souboru",
                               "rest": "HTTP API systému SGPS"}.get(cfg.get("rezim"), "")})
+            if u.path == "/api/verze-na-siti":
+                # Poslední vydání na GitHubu. Dotaz dělá irm_okno.py, ne most.
+                # Ptá se jen na klik uživatele: dílna běží bez internetu a
+                # GitHub pouští 60 nepřihlášených dotazů za hodinu na adresu,
+                # takže samočinné dotazování by limit vyčerpalo a v dílně bez
+                # sítě by vypadalo jako porucha.
+                if VERZE_NA_SITI is None:
+                    return self._odpoved({"ok": False, "chyba":
+                        "Verzi na GitHubu umí zjistit jen program IRM.exe."}, 400)
+                try:
+                    v = VERZE_NA_SITI()
+                except Exception as e:
+                    return self._odpoved({"ok": False, "chyba": str(e)}, 500)
+                if v.get("chyba"):
+                    # 502: most odpověděl, selhal až GitHub za ním — aplikace
+                    # to musí rozlišit od nefunkčního mostu
+                    return self._odpoved({"ok": False, "chyba": v["chyba"]}, 502)
+                mistni = _verze_balicku()
+                return self._odpoved({
+                    "ok": True, "verze": v.get("verze", ""),
+                    "velikost": int(v.get("velikost") or 0),
+                    "mistni": mistni,
+                    # porovnání textů RRRR.MM.DD, stejně jako v irm_okno.py:
+                    # novější datum je vždy větší řetězec, dokud je tvar pevný
+                    "novejsi": bool(v.get("verze") and mistni and v["verze"] > mistni)})
+
+            if u.path == "/api/stav-aktualizace":
+                # Jak dopadlo stahování spuštěné přes POST /api/aktualizace.
+                # Píše ho druhý proces IRM.exe do aktualizace_stav.json; bez
+                # něj se dílna výsledek dozvěděla jen z okna Windows, které
+                # vyskočilo za zády aplikace.
+                if not STAV_AKTUALIZACE:
+                    return self._odpoved({"ok": True, "faze": ""})
+                try:
+                    with io.open(STAV_AKTUALIZACE, encoding="utf-8-sig") as f:
+                        stav = json.load(f)
+                except (OSError, ValueError):
+                    # soubor ještě není (nikdy se nestahovalo) nebo se do něj
+                    # zrovna zapisuje — prázdná fáze, ne chyba
+                    return self._odpoved({"ok": True, "faze": ""})
+                stav["ok"] = True
+                return self._odpoved(stav)
+
             if u.path == "/api/databaze":
                 nazev = (dotazy.get("slozka") or ["databaze barev"])[0]
                 slozka = _slozka(nazev)

@@ -1,7 +1,7 @@
 # Rejstřík kódu aplikace
 
 > Generuje `mapa.py` ze skutečných souborů — neupravovat ručně.
-> Kód není v `index.html`, leží v `aplikace/` v 106 částech (24842 řádků).
+> Kód není v `index.html`, leží v `aplikace/` v 106 částech (25147 řádků).
 > Čísla u položek jsou `část:řádek` — část podle tabulky níž.
 
 | # | část | řádků |
@@ -20,7 +20,7 @@
 | 12 | `20-zaklad/120-barva-potisku.js` | 99 |
 | 13 | `20-zaklad/125-ulozeni.js` | 53 |
 | 14 | `20-zaklad/126-evidence-soubor.js` | 69 |
-| 15 | `20-zaklad/127-jazyk.js` | 2739 |
+| 15 | `20-zaklad/127-jazyk.js` | 2771 |
 | 16 | `20-zaklad/128-jednotka.js` | 32 |
 | 17 | `20-zaklad/130-ikony.js` | 29 |
 | 18 | `20-zaklad/135-rolovani.js` | 79 |
@@ -29,20 +29,20 @@
 | 21 | `20-zaklad/160-pdf.js` | 244 |
 | 22 | `20-zaklad/170-pokryti.js` | 331 |
 | 23 | `20-zaklad/175-pokryti-okno.js` | 559 |
-| 24 | `20-zaklad/180-pdf-v-kalkulaci.js` | 129 |
+| 24 | `20-zaklad/180-pdf-v-kalkulaci.js` | 133 |
 | 25 | `20-zaklad/182-volba-rady.js` | 63 |
-| 26 | `20-zaklad/185-pripojeni.js` | 268 |
+| 26 | `20-zaklad/185-pripojeni.js` | 429 |
 | 27 | `20-zaklad/190-zakazky.js` | 178 |
 | 28 | `20-zaklad/195-ctecka.js` | 272 |
 | 29 | `30-app/200-zalozky.js` | 62 |
-| 30 | `30-app/210-app.js` | 1747 |
+| 30 | `30-app/210-app.js` | 1763 |
 | 31 | `30-app/215-manual.js` | 47 |
 | 32 | `30-app/220-heslo.js` | 28 |
 | 33 | `30-app/225-role.js` | 223 |
 | 34 | `30-app/226-lide.js` | 34 |
 | 35 | `40-kalkulace/230-odemykani.js` | 71 |
 | 36 | `40-kalkulace/238-barvy-zakazky-pruh.js` | 44 |
-| 37 | `40-kalkulace/240-calc.js` | 3120 |
+| 37 | `40-kalkulace/240-calc.js` | 3127 |
 | 38 | `40-kalkulace/250-vaha.js` | 109 |
 | 39 | `40-kalkulace/260-financni-box.js` | 107 |
 | 40 | `40-kalkulace/280-michaci-rezim.js` | 208 |
@@ -64,7 +64,7 @@
 | 56 | `60-databaze/400-recept-form.js` | 206 |
 | 57 | `60-databaze/405-schvaleni-tab.js` | 238 |
 | 58 | `60-databaze/406-pozadavky-tab.js` | 113 |
-| 59 | `60-databaze/410-import.js` | 327 |
+| 59 | `60-databaze/410-import.js` | 412 |
 | 60 | `60-databaze/420-vlastni-db.js` | 165 |
 | 61 | `60-databaze/430-sita.js` | 195 |
 | 62 | `70-pravidla/440-podklad.js` | 79 |
@@ -313,7 +313,7 @@
 
 `Img` 17:2 · `IkonaZamek` 17:16 · `RolovaniSListou` 18:10 · `SpecPole` 21:107 · `SpecVysledek` 21:134
 `PdfTab` 21:143 · `ZoomLista` 23:27 · `PokrytiModal` 23:44 · `RozpisSeparaci` 23:422 · `PdfVKalkulaci` 24:2
-`VolbaRady` 25:25 · `PripojeniTab` 26:6 · `ZakazkyTab` 27:18 · `ScanTab` 28:97 · `KodVKalkulaci` 28:217
+`VolbaRady` 25:25 · `PripojeniTab` 26:43 · `ZakazkyTab` 27:18 · `ScanTab` 28:97 · `KodVKalkulaci` 28:217
 `App` 30:2 · `ManualOkno` 31:25 · `PwGate` 32:2 · `OdemykaniTab` 35:6 · `BarvyZakazkyPruh` 36:15 · `Calc` 37:2
 `FinancniBox` 39:2 · `MichaciRezim` 40:11 · `Vazeni` 41:2 · `StitekZbytku` 42:68 · `StitkyKelimku` 42:96
 `ZbytkyTab` 43:2 · `VratkaOkno` 44:6 · `FrontaTab` 45:8 · `SarzeTab` 46:2 · `PropadTab` 47:2
@@ -323,14 +323,14 @@
 `SestavyTab` 99:11 · `SkladTab` 101:23 · `ZdraviTab` 103:21 · `PruhSlozeni` 104:28 · `FiltrDatabaze` 104:60
 `Importer` 105:2
 
-## Funkce (628)
+## Funkce (637)
 
 `useMediaQuery` 10:9 · `posluchac` 10:15 · `techMaSito` 10:45 · `produktUmi` 11:13 · `polohyTech` 11:15
 `mapTech` 11:28 · `toLocalImg` 11:36 · `uid` 11:63 · `n` 11:64 · `fmt` 11:65 · `hexNaRgb` 12:8
 `rgbNaCmyk` 12:14 · `cmykText` 12:21 · `rgbNaLab` 12:25 · `t` 12:31 · `deltaE` 12:35 · `pantoneZNazvu` 12:38
 `nejblizsiPantone` 12:48 · `vzornikProHodnotu` 12:63 · `norm` 12:68 · `popisBarvyPotisku` 12:82
 `loadLS` 13:2 · `saveLS` 13:6 · `zapomenLS` 13:10 · `idbOtevri` 13:23 · `useEvidenceSoubor` 14:18
-`nastavJazyk` 15:53 · `jazykProstredi` 15:2720 · `preloz` 15:2730 · `kodJednotky` 16:19 · `hmotnostText` 16:23
+`nastavJazyk` 15:53 · `jazykProstredi` 15:2752 · `preloz` 15:2762 · `kodJednotky` 16:19 · `hmotnostText` 16:23
 `hmotnostNaGramy` 16:30 · `fixTech` 17:26 · `posunJezdce` 18:21 · `srovnej` 18:26 · `dolu` 18:44
 `tahni` 18:55 · `pust` 18:58 · `bezDiakritiky` 19:54 · `rozborKoduPolohy` 19:60 · `polohaDleKodu` 19:66
 `posTokeny` 19:72 · `parseSpec` 19:76 · `put` 19:80 · `resolveSpec` 19:113 · `num` 19:121 · `vyber` 19:158
@@ -342,34 +342,35 @@
 `klicBarvy` 23:42 · `prepniBarvu` 23:73 · `panStart` 23:78 · `panPohyb` 23:84 · `panKonec` 23:90
 `naBod` 23:175 · `tahStart` 23:183 · `tahPohyb` 23:190 · `tahKonec` 23:197 · `ramecek` 23:206
 `zeSouboru` 23:215 · `sitoRadku` 23:450 · `vyberSita` 23:477 · `radek` 23:484 · `setPole` 24:30
-`specSVolbouRady` 25:18 · `vratVychozi` 26:64 · `technologieZakazky` 27:6 · `zapniPort` 27:39
-`useSerialScanner` 28:2 · `useCamScanner` 28:49 · `stop` 28:57 · `podat` 28:103 · `zavri` 28:223
-`podat` 28:228 · `useZalozky` 29:17 · `setTab` 29:24 · `zpet` 29:37 · `naZpet` 29:47 · `naKlavesu` 29:48
-`prepniJazyk` 30:20 · `otevriManual` 30:26 · `onDocClick` 30:42 · `prepniRoli` 30:127 · `provest` 30:129
-`guardDelete` 30:136 · `zapisPozadavek` 30:817 · `doFronty` 30:834 · `prevzitSpec` 30:1113
-`odpovedRady` 30:1117 · `prepniTechPodleSpecu` 30:1134 · `nahlednoutSpec` 30:1147 · `pouzitSpec` 30:1152
-`pouzitSpecHned` 30:1153 · `onCode` 30:1232 · `naHash` 30:1239 · `zapisVratku` 30:1261
-`otevriZakazku` 30:1274 · `obnovPole` 30:1291 · `onKey` 30:1299 · `jm` 30:1592 · `jmRada` 30:1593
-`zapis` 30:1674 · `manualJazykVychozi` 31:23 · `naKlavesu` 31:27 · `submit` 32:5 · `smiRole` 33:60
-`nazevRole` 33:65 · `podpisRole` 33:71 · `stavPrvnihoStupne` 33:88 · `druhyStupen` 33:103
-`stavDruhehoStupne` 33:107 · `stavSchvaleni` 33:116 · `stupenCeka` 33:123 · `cekaNaSchvaleni` 33:129
-`jeZamitnuta` 33:130 · `jeSchvalena` 33:131 · `smiDruhyStupen` 33:136 · `popisStavuSchvaleni` 33:147
-`pocetKeSchvaleni` 33:158 · `razitkoZalozeni` 33:168 · `razitkoSchvaleni` 33:178 · `razitkoZamitnuti` 33:183
-`razitkoDruhehoStupne` 33:191 · `razitkoZamitnuti2` 33:199 · `receptureLzeMichat` 33:209
-`kdySchvalenoText` 33:218 · `csvNaLide` 34:19 · `i` 34:23 · `vyber` 36:22 · `upravBarvu` 37:39
-`pridejBarvu` 37:41 · `odeberBarvu` 37:45 · `oznacNamichano` 37:51 · `setPokrytiJob` 37:54
-`setOdsazeniJob` 37:55 · `zapisPokrytiZakazky` 37:62 · `ulozPokryti` 37:74 · `pickProduct` 37:113
-`klicBarva` 37:118 · `klicUplny` 37:119 · `podleTypuPolohy` 37:155 · `setRecId` 37:165 · `setAdHoc` 37:170
-`novaAdHoc` 37:174 · `setZListu` 37:180 · `vyberPantone` 37:251 · `pantoneList` 37:262 · `ob` 37:266
-`jeOblibena` 37:269 · `odvodit` 37:287 · `ulozOdvozenou` 37:299 · `zrusVazbu` 37:311 · `zapniVolnou` 37:347
-`vypniVolnou` 37:352 · `smazCustom` 37:369 · `provest` 37:371 · `customVybrany` 37:408 · `pokrytiBarvy` 37:570
-`upravRecepturu` 37:614 · `zapsatParametry` 37:641 · `recepturaBarvy` 37:699 · `prevezmiBarvy` 37:715
-`zbytekPodleKodu` 37:768 · `novaKonev` 37:959 · `zapisOpravu` 37:973 · `kombinaceProfilu` 37:989
-`ulozProfilZOpravy` 37:996 · `ulozProfilRucne` 37:1009 · `zrusProfil` 37:1018 · `odepisZbytku` 37:1032
-`zalozKelimek` 37:1053 · `oznacDavku` 37:1105 · `dalsiNenamichana` 37:1115 · `potvrdNavazeni` 37:1122
-`otevriStitkyZakazky` 37:1130 · `ulozZbytekZKalkulace` 37:1135 · `esc` 37:1186 · `tiskLisku` 37:1187
-`nahradaTlacitka` 37:1715 · `nahrad` 37:1719 · `zacniDoladeni` 37:1846 · `zmenPrilitek` 37:1847
-`doladenouDoReceptury` 37:1854 · `rizikoBody` 37:1996 · `kdy` 37:2421 · `useScale` 38:6
+`specSVolbouRady` 25:18 · `jeAndroid` 26:6 · `barvaVerze` 26:10 · `casZjisteni` 26:18 · `popisFaze` 26:26
+`vratVychozi` 26:116 · `technologieZakazky` 27:6 · `zapniPort` 27:39 · `useSerialScanner` 28:2
+`useCamScanner` 28:49 · `stop` 28:57 · `podat` 28:103 · `zavri` 28:223 · `podat` 28:228 · `useZalozky` 29:17
+`setTab` 29:24 · `zpet` 29:37 · `naZpet` 29:47 · `naKlavesu` 29:48 · `prepniJazyk` 30:20
+`otevriManual` 30:26 · `onDocClick` 30:42 · `prepniRoli` 30:127 · `provest` 30:129 · `guardDelete` 30:136
+`zapisPozadavek` 30:817 · `doFronty` 30:834 · `prevzitSpec` 30:1113 · `odpovedRady` 30:1117
+`prepniTechPodleSpecu` 30:1134 · `nahlednoutSpec` 30:1147 · `pouzitSpec` 30:1152 · `pouzitSpecHned` 30:1153
+`onCode` 30:1232 · `naHash` 30:1239 · `zapisVratku` 30:1261 · `otevriZakazku` 30:1274 · `obnovPole` 30:1291
+`onKey` 30:1299 · `jm` 30:1608 · `jmRada` 30:1609 · `zapis` 30:1690 · `manualJazykVychozi` 31:23
+`naKlavesu` 31:27 · `submit` 32:5 · `smiRole` 33:60 · `nazevRole` 33:65 · `podpisRole` 33:71
+`stavPrvnihoStupne` 33:88 · `druhyStupen` 33:103 · `stavDruhehoStupne` 33:107 · `stavSchvaleni` 33:116
+`stupenCeka` 33:123 · `cekaNaSchvaleni` 33:129 · `jeZamitnuta` 33:130 · `jeSchvalena` 33:131
+`smiDruhyStupen` 33:136 · `popisStavuSchvaleni` 33:147 · `pocetKeSchvaleni` 33:158 · `razitkoZalozeni` 33:168
+`razitkoSchvaleni` 33:178 · `razitkoZamitnuti` 33:183 · `razitkoDruhehoStupne` 33:191
+`razitkoZamitnuti2` 33:199 · `receptureLzeMichat` 33:209 · `kdySchvalenoText` 33:218 · `csvNaLide` 34:19
+`i` 34:23 · `vyber` 36:22 · `upravBarvu` 37:39 · `pridejBarvu` 37:41 · `odeberBarvu` 37:45
+`oznacNamichano` 37:51 · `setPokrytiJob` 37:54 · `setOdsazeniJob` 37:55 · `zapisPokrytiZakazky` 37:62
+`ulozPokryti` 37:74 · `pickProduct` 37:113 · `klicBarva` 37:118 · `klicUplny` 37:119
+`podleTypuPolohy` 37:155 · `setRecId` 37:165 · `setAdHoc` 37:170 · `novaAdHoc` 37:174 · `setZListu` 37:180
+`vyberPantone` 37:251 · `pantoneList` 37:262 · `ob` 37:266 · `jeOblibena` 37:269 · `odvodit` 37:287
+`ulozOdvozenou` 37:299 · `zrusVazbu` 37:311 · `zapniVolnou` 37:347 · `vypniVolnou` 37:352
+`smazCustom` 37:369 · `provest` 37:371 · `customVybrany` 37:408 · `pokrytiBarvy` 37:577
+`upravRecepturu` 37:621 · `zapsatParametry` 37:648 · `recepturaBarvy` 37:706 · `prevezmiBarvy` 37:722
+`zbytekPodleKodu` 37:775 · `novaKonev` 37:966 · `zapisOpravu` 37:980 · `kombinaceProfilu` 37:996
+`ulozProfilZOpravy` 37:1003 · `ulozProfilRucne` 37:1016 · `zrusProfil` 37:1025 · `odepisZbytku` 37:1039
+`zalozKelimek` 37:1060 · `oznacDavku` 37:1112 · `dalsiNenamichana` 37:1122 · `potvrdNavazeni` 37:1129
+`otevriStitkyZakazky` 37:1137 · `ulozZbytekZKalkulace` 37:1142 · `esc` 37:1193 · `tiskLisku` 37:1194
+`nahradaTlacitka` 37:1722 · `nahrad` 37:1726 · `zacniDoladeni` 37:1853 · `zmenPrilitek` 37:1854
+`doladenouDoReceptury` 37:1861 · `rizikoBody` 37:2003 · `kdy` 37:2428 · `useScale` 38:6
 `prepocetDavky` 38:81 · `fmtG` 38:99 · `naKlavesu` 40:28 · `ulozPoznamku` 40:68 · `zacatek` 41:31
 `zacniZnovu` 41:52 · `mlZ` 41:76 · `potvrdKonev` 41:89 · `prijmoutPrepocet` 41:109 · `dalsiKrok` 41:117
 `stitekEsc` 42:9 · `stitekHtml` 42:11 · `tiskniStitky` 42:46 · `vytiskni` 42:69 · `uprav` 43:37 · `smaz` 43:39
@@ -385,7 +386,8 @@
 `schval` 57:63 · `schvalDruhy` 57:71 · `zamitni` 57:80 · `vratZpet` 57:92 · `nastavDruhy` 57:102
 `kdyText` 57:104 · `radek` 57:109 · `kdyText` 58:17 · `uprav` 58:23 · `ulozRecepturu` 58:28 · `zamitni` 58:37
 `parseCsv` 59:3 · `rowsToItems` 59:38 · `jsonToItems` 59:59 · `csvToRecipes` 59:90 · `idx` 59:94
-`klicReceptury` 59:216 · `klicSirotka` 59:221 · `sloucReceptury` 59:228 · `drz` 59:280 · `jedenRadek` 60:12
+`klicReceptury` 59:216 · `klicSirotka` 59:221 · `sloucReceptury` 59:228 · `drz` 59:280 · `sloucSirotky` 59:341
+`klic` 59:342 · `drz` 59:349 · `sirotkuKeSlouceni` 59:398 · `klic` 59:399 · `jedenRadek` 60:12
 `vazbyReceptury` 60:15 · `nazevDb` 60:22 · `zdrojOdvozeni` 60:29 · `nazevCustom` 60:40 · `castKlice` 60:57
 `customKProduktu` 60:68 · `jeVlastni` 60:106 · `vlastniDoCsv` 60:108 · `dopocitejSito` 61:35
 `csvNaSita` 61:50 · `i` 61:54 · `koefProHodnotu` 61:105 · `csvNaKoeficienty` 61:124 · `i` 61:128

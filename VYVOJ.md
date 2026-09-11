@@ -418,6 +418,7 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | čas | co |
 |---|---|
 | 09:13 | Firing: min. dávka 50/100/150 g na výběr, těrka pevně 350 mm, síto 100-40 nebo 130-34 |
+| 09:51 | Krycí plocha z náhledu dávku snižuje lineárně (6,5 % → 10,6 g na 0,7 g); u drobného potisku je z dávky 126 z 127,7 g rezerva síta |
 | 11:12 | Odstín ze zakázky jen z řad technologie polohy; u víc řad otázka Z jaké řady vzít odstín?, odpověď i první ruční výběr se zapíší k poloze |
 | 12:34 | Tužidlo a ředidlo odešly z míchací cesty — přidávají se až při tisku, kalkulace vede jen zpomalovač |
 | 12:42 | Produkt ze zakázkového listu se v kalkulaci přepne hned po načtení PDF, ne až po potvrzení |
@@ -429,8 +430,19 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 16:08 | Řada uvnitř CSV se s názvem souboru nepřejmenovává — jinak se receptury zdvojí; přibyla zkouska_prejmenovani.js |
 | 16:09 | Namíchat recepturu i bez zakázky — dávku zadá člověk, ne plocha potisku |
 | 16:41 | Řady přejmenovány na PRINTCOLOR 660/786 a RUCO 10KK — druhý krok po souborech, aby se receptury převzaly |
+| 17:29 | Přejmenované databáze se neukázaly kvůli IRM.exe na portu 8765 — po ukončení sirotčí převzetí proběhlo samo, 15 191 receptur bez duplikátu |
+| 18:06 | Manuál umí celou cestu zakázky — zakázkový list, otázka na řadu odstínu a doladění testovací dávky po nátisku |
+| 18:15 | Zdvojené receptury po souběhu dvou mostů jdou sloučit tlačítkem — síto, kryvost i vazby přejdou na recepturu ze souboru |
+| 18:27 | Manuál dohnal sloučení sirotků v záložce mostu; rámeček technologií posunut o 4 px po přejmenování databází |
 
-| 09:51 | Krycí plocha z náhledu dávku snižuje lineárně (6,5 % → 10,6 g na 0,7 g); u drobného potisku je z dávky 126 z 127,7 g rezerva síta |
+### 11. září — minimální dávka na hranici vážitelnosti
+| čas | co |
+|---|---|
+| 08:42 | Minimální dávka v kalkulaci začíná na 50 g místo 1 g — pod dílkem váhy se odstín složky pod 1 % nedá navážit |
+| 09:15 | Manuál má dvě nové scény: na čem aplikace běží (prohlížeč, Windows, Android) a jak se aktualizuje; 62 scén v obou jazycích |
+| 09:59 | Aktualizace ukazuje verzi v PC i na GitHubu vedle sebe; tlačítko ke stažení jen když je co stahovat, průběh a výsledek v aplikaci |
+
+| 13:44 | Aktualizace umí přejmenovaný soubor — z instalace 8. 9. vyjde 8 databází místo 11; důvod selhání vydání jde do logu |
 ---
 
 ## Co aplikace je
@@ -12539,3 +12551,520 @@ shodné se zálohou.
 vypnutý), dostane nový soubor i novou řadu naráz a receptury si zdvojí —
 sirotčí větev v takovém případě nepomůže. U strojů mimo denní provoz je proto
 potřeba dodržet pořadí, ne udělat obojí najednou.
+
+## 267. Přejmenované databáze se neukázaly — port 8765 držel IRM.exe ze sestaveni/
+
+**Problém.** Po kapitolách 264 a 266 měly být řady přejmenované na
+PRINTCOLOR 660/786 a RUCO 10KK. V aplikaci ale dál svítily staré názvy:
+nabídka *Z jaké řady vzít odstín?* ukazovala „PMS 660 · RUCOLOR 10KK".
+Čtení IndexedDB potvrdilo, že receptury mají u sebe starý `zdroj`
+(`receptury_PMS_660.csv`), a nabízelo se vysvětlení, že úložiště prohlížeče
+má přednost před souborem a zůstal v něm starý stav.
+
+Vysvětlení bylo mylné. Na disku byly soubory přejmenované správně a sirotčí
+mechanismus (část 410, `klicSirotka`) byl v pořádku — jen nikdy nedostal
+šanci se spustit.
+
+**Příčina.** Na portu 8765 poslouchaly **dva procesy**:
+
+| PID | co | složka | start |
+|---|---|---|---|
+| 30132 | `pythonw most.py` — most dílny | `balicek/` | 16:28:59 |
+| 3580 | **`IRM.exe`** — zabalená verze | `sestaveni/IRM-windows/` | 17:08:34 |
+
+Odpovídalo `IRM.exe`, protože nastartovalo později a socket bez výlučného
+vázání si port tiše převzalo. Aplikace tedy četla databáze ze staré složky
+`sestaveni/IRM-windows/databaze barev/`, kde přejmenování neproběhlo.
+
+Tím padá i domněnka o přednosti úložiště: staré názvy chodily z mostu jako
+**živé soubory**, takže se žádná receptura nestala sirotkem a větev pro
+převzetí se neuplatnila. Kód ani data chybu neměly.
+
+**Průkaz příčiny** (než se na cokoli sáhlo):
+
+- soubor vytvořený v `balicek/` most nevidí → 404; týž soubor
+  v `sestaveni/IRM-windows/` vidí okamžitě
+- `/api/databaze` hlásilo `receptury_PMS_660.csv` 346 925 B — přesná
+  velikost v `IRM-windows/databaze barev/`; nový soubor v `balicek/` má
+  336 074 B
+- `receptury_PRINTCOLOR_660.csv` most neznal: „Soubor … ve složce
+  databaze barev není."
+- `index.html` z mostu mělo otisk `8e93732…` (8 128 B), zatímco
+  `balicek/index.html` má `f02e2a9…` (8 254 B)
+
+**Co se změnilo.** Nic v kódu ani v datech. Ukončen proces `IRM.exe`
+(PID 3580); port převzal most z `balicek/`. Jeho evidence byla z 8. 9.,
+dnešní běh do ní nezapsal nic, takže se ukončením neztratil žádný záznam.
+
+**Změřeno.** Po převzetí portu proběhlo sirotčí převzetí samo, bez zásahu
+do prohlížeče:
+
+- zdroje v IndexedDB: `receptury_PRINTCOLOR_660.csv` 778,
+  `receptury_PRINTCOLOR_786.csv` 814, `receptury_RUCO_10KK.csv` 776
+- řady: `PRINTCOLOR 660` 778, `PRINTCOLOR 786` 814, `RUCO 10KK` 776;
+  starý zdroj i stará řada **0×**
+- celkem 15 191 receptur — shodně s kapitolou 266, žádný duplikát
+- `receptury_PMS_786.csv` (814), které při měření v době souběhu z úložiště
+  zmizelo, je zpět
+- `zkouska_prejmenovani.js` kód 0 — u všech tří databází zůstává `id`,
+  síto `150-31` i kryvost `kryci`
+- `kontrola_aplikace.py` 0 chyb, žádné `Uložení selhalo`
+- `evidence/`, `parametry/` i `receptury_vlastni.csv` shodné se zálohou
+
+Sloupec `pozn` v RUCO databázi drží `RUCOLOR 10KK str. N` u všech 3 313
+řádků — schválně, odkazuje na tištěný booklet od RUCOINX, který se pořád
+jmenuje RUCOLOR (kap. 266).
+
+**Poučení.** Když aplikace ukazuje data, která na disku nejsou, patří mezi
+první kroky zjistit, **kdo drží port 8765** — ne hledat chybu v úložišti
+prohlížeče. Balíček ze `sestaveni/` spuštěný na témže počítači obsadí port
+a aplikace pak tiše čte cizí složku. Poznat to jde tak, že `/api/databaze`
+vrací názvy, které v `balicek/databaze barev/` nejsou.
+
+## 268. Manuál umí celou cestu zakázky: list, řada odstínu, doladění po nátisku
+
+**Problém.** Manuál končil u dlaždice, na kterou se přetáhne PDF, a dál mlčel.
+O tom, co se stane po ní, nebyla scéna žádná: okno *Zakázkový list —
+rozpoznané údaje* se čtrnácti poli k přepsání, otázka *Z jaké řady vzít
+odstín?*, která u technologie s víc řadami vyskočí před převzetím zakázky, ani
+doladění testovací dávky přilitím po nátisku (část 639, v aplikaci od
+kap. 251). Tiskař tak z manuálu věděl, že „se to načte samo", ale ne že
+prázdné pole nic nepřepíše, že se volba řady zapíše k poloze a podruhé se
+neptá, a hlavně ne, že po nesedícím nátisku nemusí kelímek vylít — stačí
+zapsat, co do něj přilil, a aplikace dopočítá zbytek dávky podle nového
+složení. Tři funkce, které dílna má zaplacené a nepoužívala je, protože o nich
+nevěděla.
+
+**Co se změnilo.** Tři nové scény v obou jazycích, na třech nových snímcích:
+
+| scéna | snímek | co ukazuje |
+|---|---|---|
+| 16 Rozpoznané údaje z listu | `27-pdf-nahled` | 24 polí okna, pod každým zdroj (popisek v listu / vzor), *Co z toho aplikace poznala*, varování, *Použít v kalkulaci →* |
+| 17 Z jaké řady vzít odstín | `27b-volba-rady` | dlaždice řad technologie s počtem nalezených barev, *Bez volby*; volba se ukládá k poloze |
+| 39 Nátisk nesedl — doladit v kelímku | `36-doladeni` | *Nejdřív nátisk — 20 g*, kolik zbylo, co a kolik se přililo, dopočítané složení, kolik dovážit |
+
+Scény 16 a 17 patří do kapitoly *Produkt a poloha* hned za dlaždici PDF,
+scéna 39 do *Míchacího režimu* za barvy zakázky u váhy.
+
+Zakázkový list se do dlaždice podává skutečným souborem (`fetch` na kopii
+vedle aplikace → `File` → `DataTransfer` → skrytý `<input type=file>`);
+přetažení myší nasimulovat nešlo, ale `change` prochází touž cestou `posli()`.
+Kopie listu se před focením vytvoří a hned po něm maže — jméno souboru je
+číslo zakázky, a to je licencovaný údaj. Ze stejného důvodu přibyly do
+rozmazání tři selektory: `.modalbox .frow input` (pole okna), `.modalbox
+.pdfhint` (jméno souboru) a `.pickbox .okbox .t tbody td:first-child` (složky
+v rozboru doladění). Kvůli poslednímu z nich dostal `<p class="hint">`
+v části 180 druhou třídu `pdfhint` — vzhled nese pořád `hint`, `pdfhint` je
+jen úchyt pro rozmazání.
+
+Otázka na řadu se fotí na produktu 92734 (taška, dvě polohy SCR), ne na peru
+11152: tomu je řada k tampontiskové poloze schválně podstrčena, aby okno
+nevyskakovalo u scén 29 a 35. Scénář na dlaždice neklikne, jen okno vyfotí —
+klik by zapsal řádek do `parametry/typy_poloh.csv`.
+
+**Změřeno:**
+- 60 scén v `manual.html` i `manual_en.html` (bylo 57), 40 snímků (bylo 37)
+- rozmazání: `27-pdf-nahled` 25 buněk (24 polí + jméno souboru), `36-doladeni`
+  8 (3 složky + součet v tabulce míchání, 4 v rozboru kelímku)
+- `kontrola_manualu.py` po zápisu otisků: 500 rámečků, **0 nálezů** —
+  u zbylých 57 scén se neposunulo nic
+- prohlídka archů na šířkách 1 600, 1 280, 1 024 a 768 px: 0 chyb; scéna 16 má
+  7 popisků, 17 pět, 39 osm, žádný nepřetéká plátno ani nekříží sousední
+- souřadnice odečtené z DOM, ne z oka; anglické se u dvou scén liší —
+  nadpis otázky 573 px proti českým 447, *Použít v kalkulaci* 209 proti 180,
+  *Bez volby* 253 proti 295
+- nahrávky: staré 16–36 posunuty o 2, staré 37–57 o 3; nové scény nahrány
+  (35,3 s / 28,5 s / 36,1 s česky, 38,6 / 30,6 / 36,7 anglicky) a `cas`
+  srovnán `--zapis-cas`
+- `kontrola_aplikace.py` po zásahu do části 180: 19 066 znaků DOM, 0 chyb
+
+**Dvě vlastní chyby po cestě.** Posun nahrávek nejdřív začínal od scény 1,
+takže nahrávka scény 14 („Karta Vybraný produkt") skončila jako `scena-16` pod
+novou scénou o rozpoznaných údajích; nové scény sedí až za starou patnáctkou,
+posouvat se má teprve od šestnáctky. Poznat to šlo jen na velikostech souborů
+proti záloze — přehrávání by mlčelo. A vzor názvu se opsal jako `scena-%02d`
+i pro angličtinu, kde se soubory jmenují `scene-`; skript ohlásil „0 souborů"
+a vypadalo to, že anglická složka je hotová. Obojí bere `posun_nahravky.py`
+teď z `VERZE` v `nahraj_ukazku.py`.
+
+**Falešný poplach.** Snímek volby řady napoprvé ukázal staré názvy databází
+(„PMS 660", „RUCOLOR 10KK"), ačkoli soubory v `databaze barev/` byly už
+přejmenované. Z IndexedDB, kde ležel starý `zdroj` u každé receptury, to
+vypadalo na přednost úložiště před souborem — ale příčina byla jinde: na portu
+8765 poslouchaly dva procesy a `IRM.exe` ze `sestaveni/IRM-windows/`, spuštěné
+později, si port převzalo a servírovalo aplikaci starou složku jako živá data
+(našlo to sezení test-db). Po jeho ukončení se převzetí názvů provedlo samo a
+snímek se přefotil. Poučení do příště: když `/api/databaze` vrací názvy, které
+v `balicek/databaze barev/` nejsou, není chyba v datech ani v úložišti — na
+8765 sedí někdo jiný.
+
+## 269. Zdvojené receptury po souběhu dvou mostů jdou sloučit, ne jen smazat
+
+**Problém.** Po kapitole 267 ukazovala aplikace v prohlížeči dílny
+**17 559 receptur** místo 15 191 a v nabídce typů barev stály dvojice:
+`receptury_PMS_660 (778)` vedle `receptury_PRINTCOLOR_660 (778)`, totéž
+u 786 a RUCO/RUCOLOR. Rozdíl 2 368 = 778 + 814 + 776, tedy všechny tři
+přejmenované databáze dvakrát.
+
+Měření v čerstvém profilu to neukázalo — `snimek.py` si pouští vlastní
+`--user-data-dir`, kde je úložiště prázdné a načte se jen to, co vydá most.
+Zdvojení je vidět **jen v prohlížeči, který tím obdobím prošel**.
+
+**Proč vzniklo.** V okně, kdy na portu 8765 odpovídaly dva mosty (kap. 267),
+vydával jeden staré názvy souborů a druhý nové. Staré názvy tedy chodily
+do aplikace jako **živé soubory**, takže se receptury z nich nikdy nestaly
+sirotky a sirotčí větev v `sloucReceptury` se neuplatnila; nové soubory se
+načetly vedle nich jako další databáze.
+
+**Změřeno, že se to samo neopraví.** Jakmile v seznamu leží obě verze
+receptury, sirotčí větev nemá koho párovat — klíč (`klicReceptury`) drží
+dvojče —, takže `prevzato=0` a stará receptura zůstane natrvalo. Horší je,
+že nastavení technologa (síto, kryvost, pot life, vazby na produkt) zůstalo
+na **sirotkovi**, kdežto receptura ze souboru je holá.
+
+Existující tlačítka na to nestačila: *Načíst databáze znovu* jen projede
+soubory, *Sloučit s databázemi* řeší receptury zcela bez `zdroj` (po velmi
+staré verzi). Zbývalo *Odebrat receptury z…*, které nastavení technologa
+zahodí.
+
+**Co se změnilo.** V záložce *Připojení k mostu* přibylo ve warnboxu
+o osiřelém souboru tlačítko **Sloučit s databází ze souboru (N)** vedle
+dosavadního *Odebrat*, s poznámkou, co který krok udělá.
+
+- `sloucSirotky` a `sirotkuKeSlouceni` v části 410 vedle `sloucReceptury`
+  — obojí na nejvyšší úrovni, aby to šlo změřit v Node
+- přenáší se totéž, co drží obnova v `sloucReceptury`: síto, kryvost,
+  povrch, objednavatel, tužidlo a jeho poměr, pot life, ředidlo, poznámka
+  dílny, značka loga, C/U, objednací číslo a obě razítka schválení
+- vazby na produkt a polohu se přepnou z `id` sirotka na `id` receptury
+  ze souboru **dřív**, než sirotek odejde
+- co receptura ze souboru sama nese, si nechá — sloučení nesmí přebít
+  novější složení starým stavem z prohlížeče
+- nabídka i sloučení počítají **stejným klíčem** (název + řada), aby
+  tlačítko a výsledek nemohly říkat každý něco jiného
+- tři texty do slovníku (en, pt)
+
+Sirotek bez protějšku, ruční barvy dílny (`Custom`) i ostatní databáze
+zůstávají nedotčené — smazaná databáze se pořád smí jen odebrat.
+
+**Změřeno.** `node zkouska_slouceni_sirotku.js` — 21 zkoušek, kód 0:
+přenos síta `150-31`, kryvosti `kryci`, pot life 240, tužidla, poznámky
+i razítka schválení; přepnutí vazby; nedotčený sirotek bez protějšku,
+ruční barva i cizí databáze; různá řada se nepáruje (0).
+
+Proklikem v prohlížeči na podstrčeném zdvojení (skutečný klik na tlačítko):
+
+| | před | po |
+|---|---|---|
+| receptur | 15 192 | 15 191 |
+| sirotků | 1 | 0 |
+| vazba na produkt | `sirotek-zk` | `xbh6swn` (ze souboru) |
+| síto | (prázdné) | 150-31 |
+| kryvost | (prázdné) | kryci |
+| pot life | (prázdné) | 240 |
+
+Tlačítko ukázalo `Sloučit s databází ze souboru (1)`.
+`kontrola_aplikace.py` 0 chyb, `sestav.py --kontrola` 0 (106 částí),
+evidence, parametry i `receptury_vlastni.csv` shodné se zálohou.
+
+**Poučení do zkoušek.** Stav prohlížeče dílny se v čerstvém profilu změřit
+nedá — `snimek.py` startuje prázdné úložiště, takže vyjde vždy čisté číslo.
+Když uživatel hlásí něco, co měření neukazuje, je to nejspíš tímhle a musí
+se to zopakovat s podstrčeným stavem.
+
+Druhá past: dvanáct zaseknutých bezhlavých Chromů z předchozích běhů
+(profil `irm-snimek-<pid>`) obsadilo ladicí port a `snimek.py` pak padal na
+`ConnectionResetError` i na úplně holém běhu. Vypadá to jako chyba v kódu
+nebo v `--pred`; není. Po jejich ukončení nástroj hned chodí.
+
+**Zbývá.** Prohlížeče v dílně, které tím obdobím prošly, mají zdvojení
+každý u sebe — v záložce *Připojení k mostu* je čeká warnbox s tlačítkem.
+Sloučit je potřeba na každém stroji zvlášť; úložiště je místní.
+
+## 270. Manuál dohnal sloučení sirotků a rámeček technologií se posunul o 4 px
+
+**Problém.** Předchozí kapitola přidala do záložky *Připojení k mostu* tlačítko
+*Sloučit s databází ze souboru*, o kterém manuál nevěděl — a scéna 58 stála na
+snímku pořízeném ještě před ní. Vedle toho se v té záložce mezitím přejmenovaly
+databáze, takže sloupec dlaždic technologií odjel o pár pixelů a rámeček „platí
+pro technologie" ukazoval o kousek vedle. Ani jedno by na sebe samo neupozornilo:
+snímek by dál vypadal správně a rámeček „uvnitř snímku" je pořád uvnitř.
+
+**Co se změnilo.** Scéna 58 (*Připojení k mostu*, `80-most`) se přefotila
+a dostala v obou jazycích větu navíc: zmizí-li ze složky soubor, ze kterého už
+nějaké receptury v aplikaci jsou, řekne to žlutý rámeček — *Sloučit s databází
+ze souboru* přenese síto, kryvost a vazby na produkt na recepturu ze složky
+a teprve pak tu osiřelou odebere, *Odebrat* je zahodí.
+
+**Rámeček k tomu nepřibyl, schválně.** Warnbox se vykresluje jen tehdy, když
+v úložišti taková receptura doopravdy leží (`osirele` v části 185); snímky se
+fotí v čerstvém profilu, kde jsou všechny zdroje živé, takže by nový rámeček
+ukazoval na prázdné místo. Věta v textu a ve scénáři dílně stačí — funkci si
+najde, až se jí hláška objeví. Podstrkávat sirotka do úložiště kvůli jednomu
+snímku by znamenalo scénář, který zapisuje do IndexedDB a musí se po sobě
+uklidit; na to je ta scéna málo důležitá.
+
+**Změřeno:**
+- `kontrola_manualu.py` nad přefoceným snímkem: nález [5] „platí pro
+  technologie" — pod rámečkem je něco jiného (rozdíl 14,5), otisk sedí
+  o (+4, +0) px (rozdíl 1,5); `--oprav` přepsal na `[230,580,460,500]`
+- výřez nástroj ponechal, protože se rámečky neposunuly stejně — prohlídkou
+  archu ověřeno, že rámuje sloupec dlaždic technologií celý a nic jiného
+- po zápisu otisků: 500 rámečků, **0 nálezů** v obou jazycích
+- nahrávka scény 58 přenahrána, `cas` srovnán: česky 19 → 36,7 s (491 znaků
+  scénáře), anglicky 22 → 39,6 s (589 znaků)
+- snímek zároveň potvrdil, že přejmenování databází z kap. 267 je v aplikaci
+  vidět: ve výpisu složky stojí `receptury_PRINTCOLOR_660.csv`,
+  `receptury_PRINTCOLOR_786.csv` a `receptury_RUCO_10KK.csv`
+
+**Co si z toho odnést.** Nová funkce, která se ukáže jen za určitého stavu dat,
+patří do manuálu textem, ne rámečkem — rámeček bez svého stavu na snímku je
+horší než žádný, protože kontrola otisků ho pak hlídá proti prázdné ploše.
+A přejmenování souborů v `databaze barev/` hýbe rozvržením záložky mostu:
+po každém takovém zásahu se scéna 58 přefotí, i když se v aplikaci nesahalo
+na jediný řádek kódu.
+
+## 271. Minimální dávka začíná na 50 g — pod ní se barva nedá navážit
+
+**Problém.** Minimální dávka v kalkulaci startovala na 1 g, tedy prakticky
+bez podlahy. Spoléhalo se na to, že číslo zvedne zakázkový list nebo obsluha
+— jenže u drobné zakázky nezvedl ani jeden a míchalo se pod hranicí
+vážitelnosti. Dílenská váha má dílek 0,1 g; u složky, které je v receptuře
+pod jedno procento, tak chyba vážení dělá větší podíl než tolerance odstínu.
+Namíchaný odstín pak říká víc o tom, jak přesně se to zrovna povedlo
+navážit, než o receptuře — a to je přesně ta barva, která se v příští dávce
+nezopakuje. Padesát gramů je nejmenší dávka, kterou dílna do tisku míchá.
+
+**Co se změnilo.** Výchozí hodnota dlaždice *Min. dávka (g)* v kalkulaci
+(část 240) je 50 g místo 1 g. Technologie s vlastní řadou dávek
+(`TECHS.minDavky`) dál startuje na své nejmenší hodnotě — u FIR je to týchž
+50 g, řada 50 / 100 / 150 g se nemění. Ruční pole zůstalo ruční: hodnota ze
+zakázkového listu nebo ze staršího souboru dávku dál přepíše oběma směry,
+protože co přišlo z listu, není odhad.
+
+| technologie | dlaždice | po změně |
+|---|---|---|
+| SCR, PDP, TXP, TRS | ruční pole | 50 g (dřív 1 g) |
+| FIR | výběr 50 / 100 / 150 | 50 g (bez změny) |
+
+**Co se schválně nechalo být.** Zkušební barva se tím neomezuje, a byla to
+jediná věc, kde se dvě pravidla potkávala v jednom řádku. Nátisk si nejmenší
+rozumnou velikost počítá z nejmenší složky, ne z velikosti dávky (část 590),
+a volná dávka mimo zakázku minimální dávku nemá vůbec — tam množství zadává
+člověk a ví proč (část 498). Do obou se nesahalo. Má to jeden viditelný
+následek, změřený níž: u malé dávky nátisk vyjde na minimální dávku dílny
+a aplikace ho přestane nabízet, protože míchat 50 g na zkoušku ze
+sedmdesátigramové dávky nemá smysl.
+
+**Změřeno.** `snimek.py`, hodnota dlaždice po vykreslení pro každou
+technologii:
+
+| technologie | typ dlaždice | hodnota | položky nabídky |
+|---|---|---|---|
+| SCR | pole (step 10) | 50 | — |
+| PDP | pole | 50 | — |
+| TXP | pole | 50 | — |
+| TRS | pole | 50 | — |
+| FIR | výběr | 50 | 50 · 100 · 150 |
+
+Zkouška `davkaNaNatisk` v Node, receptura báze 98 % + pigment 2 %, dílek
+váhy 0,1 g:
+
+| dávka | min. dávka 1 g (dřív) | min. dávka 50 g (teď) |
+|---|---|---|
+| 500 g | nátisk 125 g | nátisk 125 g — beze změny, rozhoduje nejmenší složka |
+| 70 g | nátisk 20 g | nenabídne se, důvod „nejmenší dávka dílny je 50 g" |
+
+Ručně zadaný nátisk 20 g z dávky 500 g projde dál (`davka` 20 g) a nese
+příznak `spolehlivy: false` — to je původní varování o přesnosti, ne
+minimální dávka. Volná dávka mimo zakázku na 20 g dá `totalG` 20 g
+a `minApplied: false`.
+
+`kontrola_aplikace.py` 0, `node --check` části 240 bez chyby, `mapa.py`
+a `rozbor_aktualizuj.py` přegenerovány.
+
+## 272. Manuál říká, na čem aplikace běží
+
+**Problém.** Manuál mluvil o aplikaci, jako by existovala jedna jediná
+podoba. Že se dá stáhnout na Windows i na Android, nebo nechat jen
+v prohlížeči, stálo v jediné vedlejší větě první scény — a nikde
+nezaznělo to, na čem u váhy záleží: že je to ve všech třech případech
+tatáž aplikace, co která podoba umí navíc a co v telefonu chybí. Kdo
+manuál dokoukal, nevěděl, jestli si má něco instalovat, ani co tím získá.
+
+**Co se změnilo.** Scéna 1 nově pojmenuje všechny tři podoby a řekne, že
+je to pokaždé tatáž aplikace; podrobnosti odkazuje na závěr. Na konec
+kapitoly 10 přibyly dvě scény:
+
+- **61 Na čem to běží — prohlížeč, Windows, Android.** Jen v prohlížeči:
+  dvojklik, nic se neinstaluje, internet netřeba; bez mostu ale nejde
+  číst zakázkový list z PDF ani zapisovat na disk. Program pro Windows
+  si nese most i prohlížeč s sebou. Aplikace pro Android má most v sobě,
+  umí kameru na čárové kódy a zálohu do Stažené; čtení PDF, zakázky ze
+  SGPS a váha přes USB na telefonu nejsou.
+- **62 Nová verze — na počítači i v telefonu.** Verze balíčku a stažení
+  nové stojí v záložce Připojení k mostu pod stavem mostu. Na Windows se
+  vymění po zavření okna, v telefonu instaluje Android přes stávající
+  aplikaci. Data zůstávají: aktualizace mění jen program. V aplikaci
+  otevřené jen v prohlížeči ten řádek není.
+
+Obě scény vznikly v češtině i angličtině, se šesti novými nahrávkami.
+Stojí na stávajícím snímku `80-most`, nic se nepřefocovalo.
+
+**Změřeno.**
+
+- Scén 62 v obou jazycích (dřív 60); syntaxe skriptu obou stránek
+  prošla v Node.
+- Nahrávky: česky scéna 1 = 29,3 s, 61 = 50,5 s, 62 = 35,8 s; anglicky
+  29,3 s, 52,6 s a 36,9 s. Pole `cas` srovnáno na skutečné délky
+  (`--zapis-cas` zapsal 2 + 2 hodnoty).
+- Souřadnice rámečků změřené z DOM scénářem obrazovky `80-most`: česky
+  stav mostu [62, 273, ·, 38] a pole adresy [62, 349, ·, 39], anglicky
+  [62, 292, ·, 38] a [62, 368, ·, 39] — anglická karta leží **o 19 px
+  níž**, protože její úvodní odstavec je dvouřádkový. Rámeček opsaný
+  z češtiny anglicky protínal text.
+- Rámeček přes celou šířku snímku (1 476 px) nenechal popisku místo
+  po žádné straně a stránka si ho položila přes text karty; zúžení na
+  700 px popisek uvolnilo.
+- `prohlidka_manualu.py` obě stránky, scény 61 a 62, šířky 1 600, 1 280,
+  1 024 a 768 px: **0 chyb** ve všech čtyřech.
+- `kontrola_manualu.py`: 0 nálezů u 60 starých scén, poté `--zapis`
+  uložil otisky 506 rámečků.
+- `kontrola_aplikace.py`: 0 chyb, DOM 19 157 znaků.
+- Počet scén opraven i v `prezentace/README.md` a ve skillu `irm-manual`
+  — obojí zůstalo na 57, ačkoli scén bylo už 60.
+
+**Co se přitom našlo a neopravilo.** Dlaždice *Načíst spec z PDF* se řídí
+jen tím, že most odpověděl (`180-pdf-v-kalkulaci.js:8` testuje
+`stav.stav === "ok"`, ne `stav.pdf`). Na telefonu, kde most PDF neumí a
+hlásí `pdf:false`, je proto dlaždice plně aktivní a chybu ohlásí až po
+přetažení souboru. Manuál to říká správně; opravit patří aplikaci.
+
+## 273. Aktualizace ukazuje obě verze vedle sebe a hlásí, jak stahování dopadlo
+
+**Problém.** V záložce Připojení k mostu stál jeden řádek: *Verze balíčku
+2026.09.07* a vedle něj tlačítko *Stáhnout a nainstalovat novou verzi*.
+Tlačítko viselo v kartě pořád, ať bylo co stahovat, nebo ne — dílna
+klikala naslepo a nevěděla, jestli tím něco získá. Zjistit, jestli je
+balíček starý, šlo jen tak, že se stáhlo 187 MB a program pak oznámil
+„máte nejnovější verzi“.
+
+Druhá polovina problému byla za kliknutím. Stahování běží v druhém procesu
+programu, na který aplikace nečeká, takže hlásila jen „Stahování běží na
+pozadí — výsledek ohlásí okno programu“. To okno vyskočilo za aplikací
+a kdo ho odklikl, neměl už kde zjistit, jestli se něco stalo; zbýval
+`aktualizace.log`, což je text pro techniky, ne údaj pro obrazovku.
+
+**Co se změnilo.** Na místě řádku je pruh se stavem a obě verze vedle
+sebe: *Verze balíčku 2026.09.07 · nejnovější 2026.09.20 (18,4 MB)*.
+
+- **Zjišťuje se až na klik** (*Zjistit novou verzi*). Dílna běží bez
+  internetu a GitHub pouští 60 nepřihlášených dotazů za hodinu na adresu,
+  takže samočinné dotazování by limit vyčerpalo a vypadalo jako porucha.
+  Dokud se nikdo nezeptal, stojí v pruhu *nejnovější nezjištěna* se šedou
+  tečkou — aplikace netvrdí, že je balíček aktuální, když to neměřila.
+- **Tlačítko ke stažení se vykreslí, jen když je co stahovat**, a nese
+  číslo verze: *Stáhnout a nainstalovat 2026.09.20*.
+- **Průběh je vidět v aplikaci.** Stahující proces píše fázi do
+  `aktualizace_stav.json` vedle programu a aplikace se po dvou vteřinách
+  ptá, dokud stahování neskončí: *Hledám vydání na GitHubu…* →
+  *Stahuji verzi 2026.09.20 — 40 %* → *Instaluji verzi 2026.09.20…* →
+  zelené *Verze 2026.09.20 je stažená. Program se vymění po zavření okna
+  aplikace.* Chyba přijde červeně s textem, proč to selhalo.
+
+Dotaz na GitHub se vyřízl ze stahování do vlastní funkce `_zjisti_vydani`,
+takže se na verzi lze zeptat, aniž se tím spustí stažení; z konzole to umí
+`IRM.exe --zjistit-verzi`. Most dostal dva koncové body,
+`GET /api/verze-na-siti` a `GET /api/stav-aktualizace`; oba jsou háky
+dosazované spouštěčem, protože `most.py` je společný i pro běh nad
+složkou, kde se aplikace aktualizuje z repozitáře a blok se neukazuje.
+Vyčerpaný limit GitHubu (403) má vlastní hlášku místo čísla a starší
+balíček, který koncový bod nezná (404), se odliší od chyby sítě — nová
+aplikace nad starým mostem je běžný stav, program a data se aktualizují
+odděleně. Na telefonu zůstává odkaz na APK beze změny; do Javy se
+nesahalo.
+
+**Změřeno.** Pět stavů pruhu proklikem karty Připojení, barvy tečky
+změřené z DOM:
+
+| stav | pruh | tečka | tlačítko ke stažení |
+|---|---|---|---|
+| nikdo se neptal | `nejnovější nezjištěna` | šedá `148, 163, 184` | není |
+| je novější verze | `nejnovější 2026.09.20 (18,4 MB)` | jantarová `245, 158, 11` | `Stáhnout a nainstalovat 2026.09.20` |
+| máte nejnovější | `nejnovější 2026.09.07` | zelená `16, 185, 129` | není |
+| GitHub odmítl (403) | `nejnovější nezjištěna` | jantarová | není, hláška o vyčerpaném limitu |
+| starý balíček (404) | `nejnovější nezjištěna` | jantarová | není, „Tenhle balíček zjištění verze neumí“ |
+
+- Čtyři fáze průběhu doložené proklikem: `ceka`, `stahuje` (40 %),
+  `instaluje`, `hotovo` i chybová větev. Po skončení přišel **jeden**
+  další dotaz a dotazování ustalo — smyčka se zastaví sama a tlačítko se
+  zase zpřístupní.
+- Shoda obou stran smlouvy: šest fází psaných Pythonem (`ceka`,
+  `stahuje`, `instaluje`, `hotovo`, `aktualni`, `chyba`) se přesně kryje
+  se šesti, které čeká aplikace.
+- Koncové body zkoušeny proti běžícímu mostu: bez háku 400, novější
+  vydání 200 s `novejsi: true`, chyba GitHubu 502, výjimka 500, chybějící
+  i rozbitý `aktualizace_stav.json` prázdná fáze místo chyby. Porovnání
+  verzí proti podstrčenému manifestu 2026.09.07: novější → `true`,
+  stejná → `false`, starší → `false`.
+- `IRM.exe --zjistit-verzi` naostro proti GitHubu: `vydání 2026.09.08
+  (187.7 MB)`, návratový kód 0, nic se nestáhlo.
+- `kontrola_aplikace.py` 0, `sestav.py --kontrola` 0 (soupis se neměnil),
+  data dílny po zkouškách bitově shodná se zálohou.
+
+**Co to neumí.** Vydání na GitHubu neříká, co se v nové verzi změnilo —
+verze je datum, takže `2026.09.20` sama o sobě dílně nic neřekne. Telefon
+verzi na síti nezjistí (Java na síť nesahá), takže u něj zůstává slepý
+odkaz. A nic se nekontroluje samo: kdo se nezeptá, o nové verzi se
+nedozví.
+
+## 274. Aktualizace, která dojede — přejmenovaný soubor a viditelný důvod selhání
+
+**Problém.** Dílna hlásila, že se v IRM.exe po nahrání a potvrzení PDF
+zakázky nenabízí výběr z barevných řad. Okno „Z jaké řady vzít odstín?“
+v sestaveném balíčku vůbec nebylo: instalace nesla verzi 2026.09.08,
+zatímco část 182 vznikla 10. 9. Chybělo v ní 4 části a lišilo se 28 souborů.
+Aktualizace to nespravila — na GitHubu leželo pořád vydání z 8. 9., protože
+`vydej.py --automaticky` 10. 9. skončil chybou na chybějících balíčcích
+a `nahraj_na_github.ps1` zachytával jen stdout: v `nahravani.log` zbylo
+„vydani balicku se nezdarilo (viz vyse)“ a nad tím nic.
+
+Druhá, horší věc se ukázala až při zkoušce na kopii instalace. Databáze
+receptur byly ve zdroji přejmenované (PMS → PRINTCOLOR, RUCOLOR → RUCO),
+ale `aktualizuj_data` prochází jen soubory, které balíček přináší, a pojem
+přejmenování nezná: nový název založila jako nový soubor a starý nechala
+ležet. `parametry/databaze.csv` se slučuje po klíči `soubor`, takže vedle
+sebe skončily oba odkazy. Dílna by u každého Pantonu viděla dvě receptury
+a okno volby řady by u PDP nabídlo osm dlaždic místo pěti, dvojmo.
+
+**Co se změnilo.** V `distribuce/aktualizace.py` přibyl soupis `PREJMENOVANE`
+(nový název → starý) a funkce `prejmenuj_stare`: soubor přejmenuje, přenese
+jeho otisk v manifestu pod nový klíč — aby se poznalo, že ho dílna nezměnila,
+a nová verze neskončila jako `.novy` — starý klíč z manifestu vyhodí a přepíše
+odkazy v `parametry/databaze.csv`. Volá se v `irm_okno.py` po záloze a před
+slučováním dat, takže `aktualizuj_data` vidí soubor už pod novým jménem;
+zápis sloučeného manifestu se kvůli tomu odložil za přejmenování. Každý krok
+jde do `zmeny.csv` (kódy A011–A014) a do `aktualizace.log`. Zrcadlově totéž
+v `android/…/Aktualizace.java` (`PREJMENOVANE`, `prejmenujStare`).
+
+V `nahraj_na_github.ps1` má volání `vydej.py` nově `2>&1` a `ToString()` —
+bez toho zůstane příští selhání vydání stejně neviditelné jako to z 10. 9.
+
+**Změřeno.** Zkouška v Node nad skutečnými částmi (7 kontrol, protizkouška
+s vrácenou chybou hlásí nález a vrací 1): PDP nabízí 6 řad, poloha bez
+přiřazení → `zeptatNaRadu` true, s přiřazením → false, produkt bez poloh →
+false. Aktualizace věrné instalace 2026.09.08 na 2026.09.11 na kopii, se
+zásahy dílny (změněné síto FIR 100-40 na hloubku 41, vlastní receptura,
+ručně upravená nakoupená databáze, soubor navíc v evidenci, řada zapsaná
+k poloze): před opravou 11 databází a 11 odkazů v `databaze.csv`, po opravě
+8 a 8, žádný odkaz na neexistující soubor, v manifestu žádný klíč pod starým
+názvem. Všech pět zásahů dílny přežilo, upravená databáze odložena jako
+`.novy`, záloha 28 souborů. Program se vyměnil včetně části 182 a `index.html`
+ji načítá. `kontrola_aplikace.py` 19 157 znaků DOM, bez chyb;
+`sestav.py --kontrola` 106 částí.
+
+**Pozor.** `sestav_exe.py` volá `balik.vyprazdni` — sestavení do
+`sestaveni/IRM-windows/` smaže celou instalaci i s daty a nakopíruje data
+ze zdroje. Při této práci tak z instalace zmizel řádek `92734;SCR;Taška /
+Přední` v `typy_poloh.csv` a vrátil se ze zálohy. Sestavuje-li se vedle
+provozní instalace, patří výstup jinam (`IRM_VYSTUP`).

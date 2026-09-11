@@ -106,7 +106,11 @@ function PdfVKalkulaci({ sgps, products, recipes, omezeni, onApply, onNahled, on
               <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
                 <div>
                   <h2 style=${{ margin: 0 }}>${preloz("Zakázkový list — rozpoznané údaje")} (${Object.keys(data.pole).length})</h2>
-                  <p className="hint" style=${{ margin: "4px 0 0" }}>${data.jmeno}</p>
+                  ${/* pdfhint navíc k hint: jméno souboru je číslo zakázky
+                       (FO138823_2026.pdf) a foto_manualu.py ho podle téhle
+                       třídy rozmazává, než snímek půjde do veřejného
+                       repozitáře. Vzhled nese pořád hint. */""}
+                  <p className="hint pdfhint" style=${{ margin: "4px 0 0" }}>${data.jmeno}</p>
                 </div>
                 <button className="btn sec sm" onClick=${() => setStav("cekam")}>✕</button>
               </div>

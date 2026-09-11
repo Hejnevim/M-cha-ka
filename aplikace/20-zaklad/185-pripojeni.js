@@ -3,8 +3,45 @@
 // tentýž jako ODKAZ_APK v distribuce/balik.py; mění se na obou místech.
 const ODKAZ_VYDANI_APK = "https://github.com/Hejnevim/M-cha-ka/releases/latest/download/IRM-program.apk";
 
+const jeAndroid = () => typeof window !== "undefined" && !!window.IRMAndroid;
+
+/* Tečka u verze. Šedá znamená „nikdo se neptal“ — neznámý stav není dobrý
+   stav a zelená tečka u nezjištěné verze by tvrdila něco, co se neměřilo. */
+function barvaVerze(naSiti) {
+  if (!naSiti || naSiti.stav === "zjistuji") return "var(--ink-2)";
+  if (naSiti.stav === "chyba") return "var(--warn)";
+  return naSiti.novejsi ? "var(--warn)" : "var(--ok)";
+}
+
+/* Kdy se verze zjišťovala. Bez času by údaj po čase mlčky zestárl a dílna
+   by se rozhodovala podle měření, o kterém neví, jak je staré. */
+function casZjisteni(kdy) {
+  const d = new Date(kdy);
+  return d.toLocaleDateString("cs-CZ") + " " +
+    d.toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" });
+}
+
+/* Hlášení o běžícím nebo skončeném stahování. Fáze píše stahující proces
+   do aktualizace_stav.json, most je podává na /api/stav-aktualizace. */
+function popisFaze(stav) {
+  if (!stav || !stav.faze) return null;
+  if (stav.faze === "ceka") return { druh: "note", text: preloz("Hledám vydání na GitHubu…") };
+  if (stav.faze === "stahuje") {
+    return { druh: "note", text: stav.procent
+      ? preloz("Stahuji verzi {v} — {p} %", { v: stav.verze, p: stav.procent })
+      : preloz("Stahuji verzi {v}…", { v: stav.verze }) };
+  }
+  if (stav.faze === "instaluje") return { druh: "note", text: preloz("Instaluji verzi {v}…", { v: stav.verze }) };
+  if (stav.faze === "hotovo") {
+    return { druh: "ok", text: preloz("Verze {v} je stažená. Program se vymění po zavření okna aplikace.", { v: stav.verze }) };
+  }
+  if (stav.faze === "aktualni") return { druh: "note", text: preloz("Máte nejnovější verzi.") };
+  if (stav.faze === "chyba") return { druh: "warn", text: stav.chyba || preloz("Aktualizace se nepodařila.") };
+  return null;
+}
+
 function PripojeniTab({ sgps, databaze, recipes, links, vlastniStav, onOdebratZdroj,
-                        onSloucitKopie, dbTech, setDbTech }) {
+                        onSloucitKopie, onSloucitSirotky, dbTech, setDbTech }) {
   // kolik receptur je v aplikaci z kterého souboru
   const recepturyZdroju = useMemo(() => {
     const m = {};
@@ -29,6 +66,21 @@ function PripojeniTab({ sgps, databaze, recipes, links, vlastniStav, onOdebratZd
      Slučuje se jen to, co kopie doopravdy je: nabízí se počet těch, ke
      kterým se najde receptura téhož jména se zdrojem. Zbytek jsou ruční
      barvy dílny a ty musejí zůstat. */
+  /* Kolik receptur z osiřelého souboru má protějšek mezi těmi ze souborů,
+     které ve složce jsou. Vzniká to souběhem dvou mostů na jednom portu:
+     jeden vydával staré názvy jako živé soubory, druhý nové, a aplikace si
+     stáhla obojí (kap. 267). Sirotčí převzetí v sloucReceptury pak už
+     nepomůže — klíč drží dvojče, takže sirotek zůstane v seznamu navždy
+     i s nastavením technologa, zatímco nabízená receptura ze souboru je
+     bez síta. Slučuje se jen to, co protějšek doopravdy má; zbytek je
+     databáze, která ze složky zmizela, a ta se smí jen odebrat. */
+  const sirotciKeSlouceni = useMemo(() => {
+    const m = {};
+    if (!osirele.length) return m;
+    const zive = new Set((databaze.soubory || []).map((s) => s.jmeno));
+    for (const z of osirele) m[z.zdroj] = sirotkuKeSlouceni(recipes, z.zdroj, zive);
+    return m;
+  }, [recipes, osirele, databaze]);
   const bezDatabaze = useMemo(
     () => recipes.filter((r) => !r.zdroj && r.type !== "Custom"), [recipes]);
   const kopie = useMemo(() => {
@@ -69,8 +121,42 @@ function PripojeniTab({ sgps, databaze, recipes, links, vlastniStav, onOdebratZd
 
   // "" nic, "bezi" stažení spuštěné, jinak text chyby z mostu
   const [stahovani, setStahovani] = useState("");
+  /* Verze zjištěná na GitHubu. null = nikdo se neptal. Aplikace se neptá
+     sama od sebe schválně: dílna běží bez internetu, takže neúspěšný dotaz
+     při každém otevření karty by vypadal jako porucha, a GitHub pouští jen
+     60 nepřihlášených dotazů za hodinu na adresu.
+     { stav: "zjistuji" } | { stav: "ok", verze, velikost, novejsi, kdy }
+     | { stav: "chyba", chyba, kdy } */
+  const [naSiti, setNaSiti] = useState(null);
+  // poslední hlášení stahujícího procesu z /api/stav-aktualizace
+  const [prubeh, setPrubeh] = useState(null);
+
+  const zjistiVerzi = async () => {
+    setNaSiti({ stav: "zjistuji" });
+    try {
+      const r = await fetch(sgpsBase() + "/verze-na-siti");
+      const d = await r.json().catch(() => null);
+      if (r.status === 404) {
+        /* Starší balíček tenhle koncový bod nezná. Program a data se
+           aktualizují odděleně, takže nová aplikace nad starým mostem je
+           běžný stav, ne porucha — musí se poznat od chyby sítě. */
+        setNaSiti({ stav: "chyba", kdy: Date.now(),
+                    chyba: preloz("Tenhle balíček zjištění verze neumí — stáhněte novou verzi ručně.") });
+      } else if (!r.ok || !d || !d.ok) {
+        setNaSiti({ stav: "chyba", kdy: Date.now(),
+                    chyba: (d && d.chyba) || preloz("most odpověděl {n}", { n: r.status }) });
+      } else {
+        setNaSiti({ stav: "ok", kdy: Date.now(), verze: d.verze,
+                    velikost: d.velikost || 0, novejsi: !!d.novejsi });
+      }
+    } catch (e) {
+      setNaSiti({ stav: "chyba", kdy: Date.now(), chyba: String((e && e.message) || e) });
+    }
+  };
+
   const stahniNovou = async () => {
     setStahovani("bezi");
+    setPrubeh(null);
     try {
       const r = await fetch(sgpsBase() + "/aktualizace", { method: "POST" });
       const d = await r.json().catch(() => null);
@@ -79,6 +165,34 @@ function PripojeniTab({ sgps, databaze, recipes, links, vlastniStav, onOdebratZd
       setStahovani(String(e));
     }
   };
+
+  /* Stahování běží v druhém procesu programu, na který aplikace nečeká —
+     POST /api/aktualizace jen řekne „spusť“. Dokud běží, ptá se aplikace
+     po dvou vteřinách, jak to dopadlo; dřív se to dílna dozvěděla jen
+     z okna Windows, které vyskočilo za zády aplikace. Dotazování končí
+     samo po skončení (hotovo / aktualni / chyba). */
+  useEffect(() => {
+    if (stahovani !== "bezi") return undefined;
+    let bezi = true;
+    const zeptej = async () => {
+      try {
+        const r = await fetch(sgpsBase() + "/stav-aktualizace");
+        const d = await r.json().catch(() => null);
+        if (!bezi || !d || !d.ok) return;
+        setPrubeh(d.faze ? d : null);
+        if (d.faze === "hotovo" || d.faze === "chyba" || d.faze === "aktualni") {
+          bezi = false;
+          setStahovani("");
+        }
+      } catch (e) {
+        /* most zrovna neodpovídá (vyměňuje se program) — mlčky dál, stav
+           se dočte při příštím dotazu */
+      }
+    };
+    zeptej();
+    const t = setInterval(zeptej, 2000);
+    return () => { bezi = false; clearInterval(t); };
+  }, [stahovani]);
 
   return html`
     <${React.Fragment}>
@@ -120,26 +234,63 @@ function PripojeniTab({ sgps, databaze, recipes, links, vlastniStav, onOdebratZd
 
         ${/* Jen v zabaleném programu (IRM.exe, APK) — most tam hlásí verzi
              balíčku. Aplikace otevřená ze složky se aktualizuje z repozitáře,
-             u ní se řádek neukazuje. Android stahuje APK odkazem (WebView ho
-             předá prohlížeči a ten instalátoru), Windows si zip stáhne a
-             nainstaluje samo přes most (POST /api/aktualizace) — výsledek
-             ohlásí okno programu, ne aplikace. Odkazy jsou tytéž jako
-             v distribuce/balik.py. */
+             u ní se blok neukazuje.
+
+             Verze na GitHubu se zjišťuje až na klik a tlačítko ke stažení se
+             ukáže, teprve když je opravdu co stahovat. Dřív tu tlačítko
+             viselo pořád a dílna klikala naslepo: nevěděla, jestli tím něco
+             získá, ani jestli je balíček starý.
+
+             Android stahuje APK odkazem (WebView ho předá prohlížeči a ten
+             instalátoru) a verzi na síti zjistit neumí — Java na síť nesahá.
+             Odkazy jsou tytéž jako v distribuce/balik.py. */
           ok && sgps.stav.balicek && html`
-          <div className="rowline" style=${{ marginTop: 14 }}>
-            <span className="note">${preloz("Verze balíčku")} <b>${sgps.stav.balicek}</b></span>
-            ${typeof window !== "undefined" && window.IRMAndroid
+          <div className="specbar" style=${{ marginTop: 14 }}>
+            <span className="dot" style=${{ background: barvaVerze(naSiti) }}></span>
+            <span>${preloz("Verze balíčku")} <b>${sgps.stav.balicek}</b>${
+              jeAndroid() ? "" : html` · ${
+                !naSiti || naSiti.stav === "chyba" ? preloz("nejnovější nezjištěna")
+                : naSiti.stav === "zjistuji" ? preloz("zjišťuji…")
+                : html`${preloz("nejnovější")} <b>${naSiti.verze}</b>${
+                    naSiti.novejsi && naSiti.velikost
+                      ? preloz(" ({mb} MB)", { mb: fmt(naSiti.velikost / 1048576, 1) }) : ""}`
+              }`}</span>
+          </div>
+
+          <div className="rowline">
+            ${jeAndroid()
               ? html`<a className="btn sec" href=${ODKAZ_VYDANI_APK}>${preloz("Stáhnout novou verzi")}</a>`
-              : html`<button className="btn sec" onClick=${stahniNovou} disabled=${stahovani === "bezi"}>${preloz("Stáhnout a nainstalovat novou verzi")}</button>`}
-            ${stahovani === "bezi" && html`<span className="note">${preloz("Stahování běží na pozadí — výsledek ohlásí okno programu.")}</span>`}
-            ${stahovani && stahovani !== "bezi" && html`<span className="note" style=${{ color: "var(--warn)" }}>${stahovani}</span>`}
-          </div>`}
+              : html`<${React.Fragment}>
+                  <button className="btn sec" onClick=${zjistiVerzi}
+                    disabled=${naSiti && naSiti.stav === "zjistuji"}>
+                    ${naSiti && naSiti.stav === "zjistuji" ? preloz("Zjišťuji…")
+                      : naSiti ? preloz("Zjistit znovu") : preloz("Zjistit novou verzi")}
+                  </button>
+                  ${naSiti && naSiti.stav === "ok" && naSiti.novejsi && html`
+                    <button className="btn" onClick=${stahniNovou} disabled=${stahovani === "bezi"}>
+                      ${preloz("Stáhnout a nainstalovat {v}", { v: naSiti.verze })}
+                    </button>`}
+                <//>`}
+          </div>
+
+          ${naSiti && naSiti.stav === "ok" && html`<p className="note">
+            ${preloz("Zjištěno {kdy}.", { kdy: casZjisteni(naSiti.kdy) })}</p>`}
+          ${naSiti && naSiti.stav === "chyba" && html`<div className="warnbox">
+            ${preloz("Verzi na GitHubu se nepodařilo zjistit —")} ${naSiti.chyba}</div>`}
+          ${(() => {
+            const f = popisFaze(prubeh);
+            if (!f) return stahovani && stahovani !== "bezi"
+              ? html`<div className="warnbox">${stahovani}</div>` : "";
+            if (f.druh === "ok") return html`<div className="okbox">${f.text}</div>`;
+            if (f.druh === "warn") return html`<div className="warnbox">${f.text}</div>`;
+            return html`<p className="note">${f.text}</p>`;
+          })()}`}
 
         ${/* Jen v aplikaci pro Android: telefon nemá složku, kterou by šlo
              zkopírovat, takže zálohu (data dílny i úložiště WebView) balí
              aplikace sama do Stažené. Na počítači se zálohuje kopií složky
              a před aktualizací automaticky. */
-          typeof window !== "undefined" && window.IRMAndroid && html`
+          jeAndroid() && html`
           <div className="rowline" style=${{ marginTop: 14 }}>
             <button className="btn sec" onClick=${() => window.IRMAndroid.zaloha()}>${preloz("Záloha dat do Stažené")}</button>
             <span className="note">${preloz("Jeden zip s databázemi, evidencí, parametry i rozdělanou prací.")}</span>
@@ -209,10 +360,20 @@ function PripojeniTab({ sgps, databaze, recipes, links, vlastniStav, onOdebratZd
               ${preloz("Soubor")} <b>${z.zdroj}</b> ${preloz("už ve složce není, ale {n} receptur z něj zůstává v aplikaci. Pokud jste ho přejmenoval, načte se pod novým jménem znovu — tyhle pak zůstanou navíc.",
                 { n: fmt(z.pocet, 0) })}
               <div style=${{ marginTop: 8 }}>
+                ${sirotciKeSlouceni[z.zdroj] > 0 && html`<${React.Fragment}>
+                  <button className="btn sm" onClick=${() => onSloucitSirotky(z.zdroj)}>
+                    ${preloz("Sloučit s databází ze souboru ({n})", { n: fmt(sirotciKeSlouceni[z.zdroj], 0) })}
+                  </button>
+                  ${" "}
+                <//>`}
                 <button className="btn danger sm" onClick=${() => onOdebratZdroj(z.zdroj)}>
                   ${preloz("Odebrat receptury z {n}", { n: z.nazev })}
                 </button>
               </div>
+              ${sirotciKeSlouceni[z.zdroj] > 0 && html`
+                <div className="note" style=${{ marginTop: 6 }}>
+                  ${preloz("Sloučení přenese síto, kryvost a vazby na produkt na recepturu ze souboru a teprve pak tuhle odebere. Odebrání je zahodí.")}
+                </div>`}
             </div>`)}
           ${kopie.length > 0 && html`
             <div className="warnbox">

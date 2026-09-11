@@ -91,6 +91,22 @@ VZORY_ROZMAZANI = [
     ".t tbody td[style*='mono']",       # kódy kelímků a dávek (mají mono písmo)
     ".t tbody td b[style*='mono']",     # šarže z konve — kód je uvnitř <b>
     ".rowline input[style*='3 1 200px']",  # názvy složek v editoru receptury
+    # Pole okna rozpoznaných údajů z listu: nesou číslo zakázky, zákazníka
+    # a poznámku z listu — data konkrétní dílenské zakázky. Nejsou to buňky
+    # tabulky, ale <input> v .frow, takže na ně žádný vzor výše nesedne.
+    ".modalbox .frow input",
+    # Jméno načteného souboru pod nadpisem okna. Zakázkové listy se jmenují
+    # číslem zakázky (FO138823_2026.pdf), takže hlavička prozradí totéž co
+    # rozmazané pole ZAKÁZKA hned pod ní — 10. 9. 2026 šla na první snímek
+    # čitelná. Scopováno na okno listu přes .pdfhint, aby se nerozmazaly
+    # podtitulky ostatních oken (volba řady tam má produkt a polohu, veřejná).
+    ".modalbox .pdfhint",
+    # Rozbor doladění v kelímku (část 639): první sloupec vypisuje složky
+    # receptury jménem (LIP 922 Hellgelb…), tedy licencované složení. Tabulka
+    # má třídu `t` jako ostatní, ale její buňky nenesou .note ani mono písmo,
+    # takže na ni žádný vzor výše nesedne — scopováno na .okbox, aby se
+    # nerozmazaly zelené tabulky jinde v aplikaci.
+    ".pickbox .okbox .t tbody td:first-child",
 ]
 
 # Kolik buněk musí rozmazání na dané obrazovce najít, aby se dalo věřit, že
@@ -116,6 +132,13 @@ CEKANE_ROZMAZANI = {
     # mění. Číslo je spodní mez — nesmí být vyšší, než kolik jich je při nejmenším
     # rozumném stavu, jinak kontrola padá na datech místo na chybě v selektoru.
     "61-zbytky": 50,
+    # Okno listu: 24 polí formuláře (14 rozpoznaných z listu + prázdná)
+    # a jméno souboru v hlavičce = 25. Čeká se 21 jako spodní mez — jiný list
+    # vyplní jiný počet polí, ale klesne-li číslo výrazněji, nesedí selektor.
+    "27-pdf-nahled": 21,
+    # Doladění: tabulka míchání (3 složky + součet) plus rozbor kelímku, kde
+    # jsou tytéž 3 složky receptury a přílitek navíc = 4. Spodní mez 7.
+    "36-doladeni": 7,
 }
 
 
@@ -208,6 +231,55 @@ NACTI_KOD_2_BARVY = (
     "var h=document.querySelector('.modalbox input');"
     "var nat=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set;"
     "nat.call(h,'IRM1|ref=11152|ks=500|poz=2|barva=127|rec=PANTONE 485 C PANTONE 200 C');"
+    "h.dispatchEvent(new Event('input',{bubbles:true})); await cekej(400);"
+    "h.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));"
+    "await cekej(2500);"
+)
+
+# Zakázkový list se do dlaždice PDF podává jako skutečný soubor: `fetch` na
+# kopii listu vedle aplikace (Chrome ji smí číst jen díky
+# --allow-file-access-from-files, které si snimek.py zapíná) → File →
+# DataTransfer → skrytý <input type=file> v dlaždici. Přetažení myší nasimulovat
+# nejde — DataTransfer s vlastním souborem se přes Input.dispatchMouseEvent
+# nepodstrčí, ale `change` na vstupu prochází stejnou cestou `posli()`.
+#
+# Soubor `_docasny_list.pdf` NENÍ v repozitáři: nese číslo skutečné zakázky
+# (licencovaná data, `irm-data`). Vytváří se kopií z dílenské složky před
+# focením a hned po něm se maže — proto je scénář odolný vůči jeho nepřítomnosti
+# a řekne to nahlas místo toho, aby vyfotil prázdnou domovskou stránku.
+VLOZ_LIST = (
+    "var od=await fetch('_docasny_list.pdf');"
+    "if(!od.ok) throw new Error('_docasny_list.pdf chybi — zkopiruj list vedle aplikace');"
+    "var bl=await od.blob();"
+    "var f=new File([bl],'FO138823_2026.pdf',{type:'application/pdf'});"
+    "var inp=document.querySelector('.pdfdrop input[type=file]');"
+    "if(!inp) throw new Error('dlazdice PDF nema vstup souboru — bezi most?');"
+    "var dt=new DataTransfer(); dt.items.add(f); inp.files=dt.files;"
+    "inp.dispatchEvent(new Event('change',{bubbles:true}));"
+    # Most PDF rozebírá na pozadí; okno se otevře až po odpovědi /api/pdf.
+    # Čeká se na nadpis okna ve smyčce, ne pevnou prodlevou — na zaneprázdněném
+    # stroji rozbor listu trval přes tři vteřiny a snímek zastihl dlaždici „Čtu PDF…".
+    "for(var i=0;i<40;i++){"
+    "if([...document.querySelectorAll('.modalbox h2')]"
+    ".some(h=>/(rozpoznan|recognized)/i.test(h.textContent))) break;"
+    "await cekej(400);}"
+    "await cekej(600);"
+)
+
+# Otázka na řadu vyskočí, jen když technologie má víc řad a poloha žádnou
+# přiřazenou (část 182). Produkt 92734 (taška, dvě polohy SCR) v
+# parametry/typy_poloh.csv zapsaný není a SCR má čtyři řady, takže se aplikace
+# zeptá. Pero 11152 se sem nehodí: jeho tampontisková poloha řadu přiřazenou má
+# (viz STAV výše) — právě proto, aby okno nevyskakovalo u scén 29 a 35.
+#
+# POZOR, ODPOVĚĎ ZAPISUJE: klik na dlaždici řady zapíše řádek do
+# parametry/typy_poloh.csv (ulozTypPolohy). Scénář proto na dlaždice neklikne,
+# jen okno vyfotí — kdo sem klik doplní, musí soubor vrátit ze zálohy.
+KOD_ZAKAZKY_92734 = (
+    "var k=tlac(/^(Načíst kód|Read a code)/); if(k){k.click(); await cekej(1200);}"
+    "var h=document.querySelector('.modalbox input');"
+    "var nat=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set;"
+    "nat.call(h,'IRM1|ref=92734|ks=200|poz=1|barva=103|rec=PANTONE 426 C');"
     "h.dispatchEvent(new Event('input',{bubbles:true})); await cekej(400);"
     "h.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));"
     "await cekej(2500);"
@@ -316,6 +388,15 @@ SNIMKY = [
                             "var p=tlac(/(krycí plochu|coverage from)/i); if(p){p.click(); await cekej(1800);}")),
     ("26-nez-michat", 1000, js(VYBER_11152, POTVRD_POLOHU,
                                "var b=tlac(/(Než začnete|Before you start)/i); if(b){b.click(); await cekej(1200);}")),
+    # Okno rozpoznaných údajů z listu. Vlastní list se do repozitáře nekopíruje
+    # (číslo zakázky), fotí se z dočasné kopie vedle aplikace — bez ní scénář
+    # spadne s hláškou, ne s prázdným snímkem. Pole okna nesou číslo zakázky
+    # a zákazníka, takže se rozmazávají: jsou to <input>, ne buňky tabulky,
+    # proto vlastní selektor .modalbox .frow input, ne sdílené vzory.
+    ("27-pdf-nahled", 1700, js(VLOZ_LIST)),
+    # Otázka na řadu odstínu. Kód čtečky, ne PDF: kód nese tutéž cestu
+    # (prevzitSpec) a jde podstrčit bez souboru s číslem zakázky.
+    ("27b-volba-rady", 1200, js(KOD_ZAKAZKY_92734)),
     ("28-pantone-custom", 1400, js(VYBER_11152, POTVRD_POLOHU,
                                    "var c=tlac(/Pantone custom/i); if(c){c.click(); await cekej(1500);}")),
     # Vícebarevná zakázka: pruh dlaždic barev v kartě Receptura a barva
@@ -345,6 +426,59 @@ SNIMKY = [
     ("35-mich-barvy", 1300, js(NACTI_KOD_2_BARVY,
                                "var m=tlac(/(Míchací režim|Mixing mode)/i); if(m){m.click(); await cekej(2000);}"
                                "var s=tlac(/(simulaci|simulation)/i); if(s){s.click(); await cekej(1500);}")),
+    # Doladění odstínu v kelímku (část 639) — okno se otevírá v míchacím režimu
+    # tlačítkem pod tabulkou navážek a je vidět, až když je co dolaďovat:
+    # `blokDoladeni` se vykresluje jen s `calcZbytek`, tedy když kalkulace nějakou
+    # dávku má. Scénář vyplní gramy základu a jeden přílitek nativním setterem —
+    # bez něj si React změny nevšimne a okno zůstane na větě „Napište, kolik
+    # základu v kelímku máte", tedy bez tabulky složení, kterou scéna rámuje.
+    # 1 250, ne 1 600: okno doladění s rozborem složení a tlačítkem Uložit jako
+    # custom recepturu končí zhruba v 1 200 px; při 1 100 px se tlačítko
+    # a věta o dovážení utínaly, při 1 600 px zbývalo přes 400 px prázdna.
+    ("36-doladeni", 1250, js(VYBER_11152, POTVRD_POLOHU,
+                             # Počet kusů nahoru, ještě před vstupem do míchání: motiv pera
+                             # je drobný a při výchozích 500 ks vyjde dávka 3,9 g. Doladění
+                             # by pak hlásilo „na dávku to stačí, zbude 41,1 g" — pravda,
+                             # ale scéna má ukázat opačný a v dílně běžný případ: v kelímku
+                             # je zbytek po nátisku a do plné dávky se musí dovážit.
+                             # Pole je první číselné v kartě Zakázka (.karta-cisla).
+                             "var natS=Object.getOwnPropertyDescriptor("
+                             "window.HTMLInputElement.prototype,'value').set;"
+                             "var vloz=(el,v)=>{natS.call(el,v);"
+                             "el.dispatchEvent(new Event('input',{bubbles:true}));"
+                             "el.dispatchEvent(new Event('change',{bubbles:true}));};"
+                             "var q=document.querySelector('.karta-cisla input[type=number]');"
+                             "if(!q) throw new Error('pole poctu kusu nenalezeno');"
+                             "vloz(q,'40000'); await cekej(1500);"
+                             "var m=tlac(/(Míchací režim|Mixing mode)/i); if(m){m.click(); await cekej(2000);}"
+                             "var d=tlac(/(Doladit odstín v kelímku|Adjust the shade in the cup)/i);"
+                             "if(!d) throw new Error('tlacitko doladeni nenalezeno');"
+                             "d.click(); await cekej(1200);"
+                             # První číselné pole okna je „Kolik základu v kelímku (g)".
+                             "var z=document.querySelector('.pickbox input[type=number]');"
+                             "if(!z) throw new Error('pole zakladu nenalezeno');"
+                             "vloz(z,'45'); await cekej(900);"
+                             # Řádek přílitku vznikne až tlačítkem + přílitek; teprve pak
+                             # existují pole název a gramy.
+                             "var p=tlac(/(\\+ přílitek|\\+ additive|\\+ add)/i);"
+                             "if(!p) throw new Error('tlacitko prilitku nenalezeno');"
+                             "p.click(); await cekej(700);"
+                             # Řádek přílitku poznáme podle pole s datalistem slozky-doladeni,
+                             # ne pořadím v .pickbox .rowline: tam patří i tlačítka a pole
+                             # Aditiv pod oknem, a index od konce zapsal gramy do zpomalovače
+                             # schnutí (10. 9. 2026). Gramy jsou číselné pole v témž řádku.
+                             "var jm=document.querySelector("
+                             "'.pickbox input[list=\"slozky-doladeni\"]');"
+                             "if(!jm) throw new Error('radek prilitku nevznikl');"
+                             "var g=jm.parentElement.querySelector('input[type=number]');"
+                             "if(!g) throw new Error('pole gramu prilitku nenalezeno');"
+                             "vloz(jm,'Base White'); await cekej(500);"
+                             "vloz(g,'3'); await cekej(1600);"
+                             # Důkaz, že se složení doopravdy dopočítalo: bez tabulky
+                             # rozboru scéna rámuje prázdno. Vrací se do výstupu snímku.
+                             "var ok=document.querySelector('.pickbox .okbox');"
+                             "if(!ok || !/přilito 3|added 3/i.test(ok.textContent))"
+                             "throw new Error('rozbor doladeni se nespocital');")),
     ("40-receptury", 1300, js(zalozka("KATALOG|CATALOG", "^(Receptury|Recipes)$"))),
     ("42-receptura-upravit", 1500, js(zalozka("KATALOG|CATALOG", "^(Receptury|Recipes)$"),
                                       "var u=tlac(/^(Upravit|Edit)/); if(u){u.click(); await cekej(1500);}")),

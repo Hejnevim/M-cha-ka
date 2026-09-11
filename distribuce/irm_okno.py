@@ -48,6 +48,32 @@ else:
 # poruše zůstane stopa, píše se do souboru vedle programu.
 LOG = os.path.join(KOREN, "irm_okno.log")
 
+# Jak dopadlo stahování a instalace. Píše ho druhý proces IRM.exe, čte ho
+# most (GET /api/stav-aktualizace) a ukazuje aplikace.
+#
+# Proč soubor a ne návratový kód: stahování běží v samostatném procesu,
+# který aplikace nespouští a nečeká na něj — tlačítko jen řekne mostu
+# „spusť“. Bez tohoto souboru se dílna výsledek dozvěděla jen z okna
+# Windows, které vyskočilo za zády aplikace, a kdo ho odklikl, neměl už
+# kde zjistit, jestli se něco stalo (aktualizace.log je text pro techniky,
+# ne údaj pro obrazovku).
+STAV_SOUBOR = os.path.join(KOREN, "aktualizace_stav.json")
+
+
+def _zapis_stav(faze, **udaje):
+    """
+    Poznamená, jak stahování pokračuje: ceka / stahuje / instaluje /
+    hotovo / aktualni / chyba. Selhání zápisu se schválně přechází —
+    kvůli neúspěšnému zápisu stavu se nesmí zastavit aktualizace sama.
+    """
+    zaznam = {"faze": faze, "kdy": time.time()}
+    zaznam.update(udaje)
+    try:
+        with io.open(STAV_SOUBOR, "w", encoding="utf-8") as f:
+            json.dump(zaznam, f, ensure_ascii=False)
+    except OSError:
+        pass
+
 
 def _otevri_log():
     try:
@@ -153,27 +179,49 @@ def _aktualizuj(zip_cesta):
     stary_manifest = aktualizace.manifest_nacti(os.path.join(KOREN, "manifest.json"))
     log("verze %s → %s%s" % (stary_manifest.get("verze") or "?", novy_manifest.get("verze") or "?",
                               " (balíček jen s programem)" if novy_manifest.get("jen_program") else ""))
-    # manifest, který zůstane vedle programu (kopíruje ho dávka i větev bez
-    # výměny programu): otisky, které balíček nenesl, se přebírají z minulého
-    with io.open(os.path.join(prace, "manifest.json"), "w", encoding="utf-8") as f:
-        json.dump(aktualizace.manifest_sluc(stary_manifest, novy_manifest), f, ensure_ascii=False, indent=1)
-
     # 1. záloha — před čímkoli
     zaloha_slozka = os.path.join(KOREN, "zalohy", time.strftime("%Y-%m-%d_%H%M"))
     aktualizace.zaloha(KOREN, zaloha_slozka, log)
 
-    # 2. data jen dopsat
+    # 2. přejmenované datové soubory dostanou nový název ještě před slučováním,
+    #    aby je aktualizuj_data neviděla jako nové a starý soubor nenechala
+    #    ležet vedle (11. 9. 2026: dílna by měla 11 databází místo 8 a u každého
+    #    odstínu dvě receptury). Otisky se přenesou pod nový název, jinak by se
+    #    nedalo poznat, že soubor dílna nezměnila, a nová verze by šla do .novy.
+    zaznamy_prejmenovani, prenesene_otisky, zrusene_klice = aktualizace.prejmenuj_stare(
+        KOREN, stary_manifest, log)
+    if prenesene_otisky or zrusene_klice:
+        stary_manifest = dict(stary_manifest)
+        soubory = dict(stary_manifest.get("soubory") or {})
+        soubory.update(prenesene_otisky)
+        for k in zrusene_klice:
+            soubory.pop(k, None)
+        stary_manifest["soubory"] = soubory
+
+    # manifest, který zůstane vedle programu (kopíruje ho dávka i větev bez
+    # výměny programu): otisky, které balíček nenesl, se přebírají z minulého —
+    # už i ty přenesené pod nový název
+    with io.open(os.path.join(prace, "manifest.json"), "w", encoding="utf-8") as f:
+        json.dump(aktualizace.manifest_sluc(stary_manifest, novy_manifest), f, ensure_ascii=False, indent=1)
+
+    # 3. data jen dopsat
     zdroj_dat = os.path.join(prace, "data")
-    zaznamy = []
+    zaznamy = list(zaznamy_prejmenovani)
     if os.path.isdir(zdroj_dat):
-        zaznamy = aktualizace.aktualizuj_data(KOREN, zdroj_dat, novy_manifest, stary_manifest, log)
+        zaznamy += aktualizace.aktualizuj_data(KOREN, zdroj_dat, novy_manifest, stary_manifest, log)
         pocet = aktualizace.zapis_zmeny(os.path.join(KOREN, "evidence", "zmeny.csv"), zaznamy,
                                         kdo="aktualizace", pozn="verze " + str(novy_manifest.get("verze", "")))
         log("záznamů do Změn podkladů: %d" % pocet)
     else:
         log("balíček nenese data — jen program")
+        if zaznamy:
+            # přejmenování proběhlo i bez datové části; bez tohohle zápisu by
+            # o něm Změny podkladů nevěděly a dílna by neměla stopu
+            pocet = aktualizace.zapis_zmeny(os.path.join(KOREN, "evidence", "zmeny.csv"), zaznamy,
+                                            kdo="aktualizace", pozn="verze " + str(novy_manifest.get("verze", "")))
+            log("záznamů do Změn podkladů: %d" % pocet)
 
-    # 3. program vyměnit po skončení tohoto procesu
+    # 4. program vyměnit po skončení tohoto procesu
     zdroj_programu = os.path.join(prace, "program")
     ma_program = os.path.isdir(zdroj_programu)
     if ma_program and ZMRAZENO:
@@ -231,6 +279,53 @@ def _aktualizuj(zip_cesta):
     return 0
 
 
+def _zjisti_vydani():
+    """
+    Poslední vydání na GitHubu — pouze dotaz, nic se nestahuje.
+
+    Oddělené od _stahni_aktualizaci proto, aby se aplikace mohla zeptat
+    „je novější verze?“, aniž by tím rozjela stahování dvacetimegového
+    balíčku. Dílna se dřív musela rozhodnout naslepo: jediné tlačítko
+    stahovalo bez ohledu na to, jestli je co stahovat.
+
+    Vrací {"verze", "velikost", "url", "chyba"} a nikdy nevyhodí výjimku —
+    volá ji most v obsluze požadavku, kde by výjimka shodila odpověď.
+    Texty chyb jsou tytéž, jaké dosud ukazovalo okno programu; dílna je zná.
+    """
+    try:
+        import balik
+    except ImportError:
+        return {"chyba": "Tenhle balíček aktualizaci ze sítě neumí."}
+    api = "https://api.github.com/repos/%s/releases/latest" % balik.GITHUB_REPO
+    try:
+        pozadavek = urllib.request.Request(api, headers={
+            "User-Agent": "IRM", "Accept": "application/vnd.github+json"})
+        with urllib.request.urlopen(pozadavek, timeout=20) as r:
+            vydani = json.loads(r.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return {"chyba": "Na GitHubu zatím žádné vydání IRM není."}
+        if e.code == 403:
+            # GitHub pouští 60 nepřihlášených dotazů za hodinu na adresu;
+            # celá dílna za jedním připojením je z jeho pohledu jedna adresa,
+            # takže se to dá vyčerpat. Číslo 403 by dílně neřeklo nic.
+            return {"chyba": "GitHub právě odmítá dotazy (vyčerpaný limit). "
+                             "Zkuste to za hodinu."}
+        return {"chyba": "GitHub odpověděl chybou %s." % e.code}
+    except Exception as e:
+        return {"chyba": "Nepodařilo se spojit s GitHubem — je počítač "
+                         "připojený k internetu? (%s)" % e}
+    verze = str(vydani.get("tag_name", "")).lstrip("v")
+    soubor = None
+    for a in vydani.get("assets") or []:
+        if a.get("name") == balik.VYDANI_ZIP:
+            soubor = a
+    if soubor is None:
+        return {"chyba": "Vydání %s na GitHubu nemá soubor %s." % (verze, balik.VYDANI_ZIP)}
+    return {"verze": verze, "velikost": int(soubor.get("size") or 0),
+            "url": soubor.get("browser_download_url"), "chyba": ""}
+
+
 def _stahni_aktualizaci():
     """
     --stahnout-aktualizaci [--tiche] [--vynutit]: poslední vydání z GitHubu
@@ -238,9 +333,11 @@ def _stahni_aktualizaci():
 
     Verze se srovnávají jako text RRRR.MM.DD — novější je vždy větší. Bez
     --vynutit se stejná nebo starší verze neinstaluje; --vynutit je pro
-    zkoušky a pro opravu poškozeného programu. GitHub bez User-Agent odmítá
-    a vydání hledá podle názvu souboru bez data (balik.VYDANI_ZIP), takže
-    odkaz …/releases/latest/download/… je stálý.
+    zkoušky a pro opravu poškozeného programu. Samotný dotaz na GitHub dělá
+    _zjisti_vydani, aby se na verzi dala zeptat i aplikace bez stahování.
+
+    Průběh se zapisuje do aktualizace_stav.json — aplikace tak ukáže
+    výsledek sama a uživatel nemusí hledat okno, které vyskočilo za ní.
     """
     try:
         import aktualizace
@@ -262,41 +359,28 @@ def _stahni_aktualizaci():
             _hlaska(text)
 
     mistni = aktualizace.manifest_nacti(os.path.join(KOREN, "manifest.json")).get("verze") or ""
-    api = "https://api.github.com/repos/%s/releases/latest" % balik.GITHUB_REPO
-    log("=== hledám vydání: " + api + " (místní verze %s)" % (mistni or "?"))
-    try:
-        pozadavek = urllib.request.Request(api, headers={"User-Agent": "IRM", "Accept": "application/vnd.github+json"})
-        with urllib.request.urlopen(pozadavek, timeout=20) as r:
-            vydani = json.loads(r.read().decode("utf-8"))
-    except urllib.error.HTTPError as e:
-        if e.code == 404:
-            hlas("Na GitHubu zatím žádné vydání IRM není.\n" + balik.ODKAZ_VYDANI)
-        else:
-            hlas("GitHub odpověděl chybou %s.\n%s" % (e.code, api))
+    log("=== hledám vydání na GitHubu (místní verze %s)" % (mistni or "?"))
+    _zapis_stav("ceka", mistni=mistni)
+    vydani = _zjisti_vydani()
+    if vydani.get("chyba"):
+        _zapis_stav("chyba", chyba=vydani["chyba"], mistni=mistni)
+        hlas(vydani["chyba"] + "\n\n" + balik.ODKAZ_VYDANI)
         return 1
-    except Exception as e:
-        hlas("Nepodařilo se spojit s GitHubem — je počítač připojený k internetu?\n\n" + str(e))
-        return 1
-    verze = str(vydani.get("tag_name", "")).lstrip("v")
-    soubor = None
-    for a in vydani.get("assets") or []:
-        if a.get("name") == balik.VYDANI_ZIP:
-            soubor = a
-    if soubor is None:
-        hlas("Vydání %s na GitHubu nemá soubor %s." % (verze, balik.VYDANI_ZIP))
-        return 1
+    verze = vydani["verze"]
     if verze <= mistni and "--vynutit" not in sys.argv[1:]:
+        _zapis_stav("aktualni", verze=verze, mistni=mistni)
         hlas("Máte nejnovější verzi (%s). Na GitHubu je vydání %s." % (mistni, verze))
         return 0
 
     cil_slozka = os.path.join(KOREN, "stazeno")
     os.makedirs(cil_slozka, exist_ok=True)
     cil = os.path.join(cil_slozka, "IRM-aktualizace-%s-program.zip" % verze)
-    velikost = int(soubor.get("size") or 0)
+    velikost = vydani["velikost"]
     log("stahuji verzi %s (%s) → %s" % (verze, "%.1f MB" % (velikost / 1048576.0), cil))
+    _zapis_stav("stahuje", verze=verze, mistni=mistni, velikost=velikost, procent=0)
     zacatek = time.time()
     try:
-        pozadavek = urllib.request.Request(soubor["browser_download_url"], headers={"User-Agent": "IRM"})
+        pozadavek = urllib.request.Request(vydani["url"], headers={"User-Agent": "IRM"})
         with urllib.request.urlopen(pozadavek, timeout=60) as r, io.open(cil + ".tmp", "wb") as f:
             hotovo = 0
             dalsi_hlaseni = 0.1
@@ -308,16 +392,34 @@ def _stahni_aktualizaci():
                 hotovo += len(kus)
                 if velikost and hotovo >= velikost * dalsi_hlaseni:
                     log("  %d %%" % round(100.0 * hotovo / velikost))
+                    # stav se píše po desetinách, ne po každém megabajtu —
+                    # aplikace se ptá jednou za dvě vteřiny, častější zápis
+                    # by jen zbytečně sahal na disk
+                    _zapis_stav("stahuje", verze=verze, mistni=mistni, velikost=velikost,
+                                procent=int(round(100.0 * hotovo / velikost)))
                     dalsi_hlaseni += 0.1
     except Exception as e:
+        _zapis_stav("chyba", verze=verze, mistni=mistni,
+                    chyba="Stažení se nepodařilo — %s" % e)
         hlas("Stažení se nepodařilo — %s\n\nZkuste to znovu, nebo balíček stáhněte ručně:\n%s" % (e, balik.ODKAZ_ZIP))
         return 1
     if velikost and hotovo != velikost:
+        _zapis_stav("chyba", verze=verze, mistni=mistni,
+                    chyba="Stažený soubor je neúplný (%d z %d B)." % (hotovo, velikost))
         hlas("Stažený soubor je neúplný (%d z %d B) — zkuste to znovu." % (hotovo, velikost))
         return 1
     os.replace(cil + ".tmp", cil)
     log("staženo za %.0f s" % (time.time() - zacatek))
-    return _aktualizuj(cil)
+    _zapis_stav("instaluje", verze=verze, mistni=mistni)
+    vysledek = _aktualizuj(cil)
+    if vysledek == 0:
+        # program se vymění až po zavření okna (dávka čeká na konec IRM.exe),
+        # proto „hotovo“ znamená staženo a data doplněna, ne vyměněný program
+        _zapis_stav("hotovo", verze=verze, mistni=mistni)
+    else:
+        _zapis_stav("chyba", verze=verze, mistni=mistni,
+                    chyba="Instalace se nepodařila — podrobnosti v aktualizace.log.")
+    return vysledek
 
 
 def main():
@@ -331,6 +433,13 @@ def main():
             return _aktualizuj(arg.split("=", 1)[1])
         if arg == "--stahnout-aktualizaci":
             return _stahni_aktualizaci()
+        if arg == "--zjistit-verzi":
+            # jen dotaz, nic se nestahuje — pro ruční ověření z konzole
+            # a pro zkoušky, kde se nesmí nic nainstalovat
+            v = _zjisti_vydani()
+            print(v.get("chyba") or ("vydání %s (%.1f MB)"
+                                     % (v["verze"], v["velikost"] / 1048576.0)))
+            return 1 if v.get("chyba") else 0
     try:
         import most
         try:
@@ -346,6 +455,12 @@ def main():
         # tlačítko v aplikaci (POST /api/aktualizace): stažení a sloučení dat
         # běží v druhém IRM.exe, výměnu programu dokončí dávka po zavření okna
         most.AKTUALIZACE = lambda: subprocess.Popen([sys.executable, "--stahnout-aktualizaci"], cwd=KOREN)
+        # dotaz na verzi (GET /api/verze-na-siti) běží rovnou v obsluze
+        # požadavku — nic nestahuje, jen se zeptá GitHubu. Most sám na síť
+        # nesahá: most.py je společný pro běh nad složkou i pro exe.
+        most.VERZE_NA_SITI = _zjisti_vydani
+        # a cesta ke stavu stahování (GET /api/stav-aktualizace)
+        most.STAV_AKTUALIZACE = STAV_SOUBOR
 
     cfg = most.nacti_config()
     port = int(cfg.get("port", 8765))

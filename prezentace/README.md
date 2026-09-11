@@ -53,7 +53,7 @@ pro ilustraci postupu. Ven patří **3,1 → 0,4 g**.
 # Mluvený manuál
 
 `manual.html` je třetí věc v téhle složce: **mluvený manuál k aplikaci**,
-stránka po stránce, funkce po funkci — 57 scén v 10 kapitolách, zhruba
+stránka po stránce, funkce po funkci — 62 scén v 10 kapitolách, zhruba
 jednadvacet minut. Nekreslí scény, ale ukazuje **skutečné snímky obrazovky** ze složky `manual/` (1 600 px široké, `snimek.py` ve
 světlém režimu) a na nich postupně rozsvěcuje očíslovaná zvýraznění, o kterých
 hlas zrovna mluví. Pod přehrávačem je obsah — kdo nechce poslouchat, čte.
@@ -95,7 +95,7 @@ text přes něj projde). Rozmístění se opakuje při změně šířky okna.
 
 Do dat scény se proto sahá jen tehdy, když **není kam** — proužek nižší než
 zhruba 200 px snímku nemá na popisky místo žádnou stranou a musí se zvětšit
-`vyrez` (dnešní scéna 34: 130 → 165). Že se nic nekříží, se měří přes všech 57 scén
+`vyrez` (dnešní scéna 34: 130 → 165). Že se nic nekříží, se měří přes všech 62 scén
 ve víc šířkách, ne pohledem na jednu.
 
 **Licencovaná data na snímcích nejsou.** Složení receptur, kódy kelímků
@@ -109,7 +109,7 @@ titulky. Scénář žije jen v `rec`.
 
 ## Anglická verze
 
-`manual_en.html` je týž manuál anglicky — stejných 57 scén, jiné `nadpis`,
+`manual_en.html` je týž manuál anglicky — stejných 62 scén, jiné `nadpis`,
 `text`, `rec` a popisky. Výřezy a souřadnice zvýraznění jsou shodné jen tam,
 kde je shodné rozvržení; anglická tlačítka a popisky jsou širší, takže scény
 nad domovskou stránkou (14, 17, 18, 21, 22, 24, 27, 28, 29) a scény s novými
@@ -208,7 +208,7 @@ správnou věc, dokáže jen prohlídka, proto se `--zapis` dělá až po ní.
 
 ## Prohlídka: `prohlidka_manualu.py`
 
-    python prohlidka_manualu.py                 obě stránky, 57 scén, archy 2×3
+    python prohlidka_manualu.py                 obě stránky, 62 scén, archy 2×3
     python prohlidka_manualu.py --sceny 3 40    jen vybrané scény
 
 Vyfotí jeviště každé scény se všemi rozsvícenými zvýrazněními a slepí je do

@@ -22,7 +22,11 @@ const KOD = path.join(BALICEK, "aplikace");
 const DB = path.join(BALICEK, "databaze barev");
 
 /* Dvojice "soubor teď" = "jak se jmenoval dřív". Po dalším přejmenování sem
-   přibude řádek — starý název se jinde než tady nedochová, na disku už není. */
+   přibude řádek — a STEJNÝ řádek musí přibýt do PREJMENOVANE v
+   distribuce/aktualizace.py i v android/…/Aktualizace.java (kap. 274).
+   Tenhle soupis řeší receptury už načtené v prohlížeči, ten druhý soubory
+   na disku dílny, která aktualizuje ze starší verze; bez obou zůstane
+   v nabídce tatáž řada dvakrát, pokaždé z jiného důvodu. */
 const VYCHOZI_DVOJICE = [
   ["receptury_PRINTCOLOR_660.csv", "receptury_PMS_660.csv"],
   ["receptury_PRINTCOLOR_786.csv", "receptury_PMS_786.csv"],

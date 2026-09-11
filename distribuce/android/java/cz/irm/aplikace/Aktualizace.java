@@ -59,6 +59,13 @@ public class Aktualizace {
     };
     private static final Map<String, String[]> KLICE = new HashMap<>();
     private static final Map<String, String[]> OBLASTI = new HashMap<>();
+    /** Datové soubory, které v některé verzi změnily název: nový → starý.
+     *  Bez toho by se nový název založil jako nový soubor a starý zůstal
+     *  ležet vedle — dílna by viděla tutéž řadu dvakrát a u každého odstínu
+     *  dvě receptury. Seznam se nikdy nezkracuje (telefon může aktualizovat
+     *  i z verze starší než přejmenování) a je stejný jako PREJMENOVANE
+     *  v distribuce/aktualizace.py. */
+    private static final Map<String, String> PREJMENOVANE = new HashMap<>();
     static {
         KLICE.put("databaze.csv", new String[]{"soubor"});
         KLICE.put("koeficienty.csv", new String[]{"druh", "klic"});
@@ -74,6 +81,9 @@ public class Aktualizace {
         OBLASTI.put("technologie.csv", new String[]{"technologie", "odemčení technologie"});
         OBLASTI.put("typy_poloh.csv", new String[]{"poloha", "typy poloh"});
         OBLASTI.put("receptury_vlastni.csv", new String[]{"receptura", "receptura"});
+        PREJMENOVANE.put("databaze barev/receptury_PRINTCOLOR_786.csv", "databaze barev/receptury_PMS_786.csv");
+        PREJMENOVANE.put("databaze barev/receptury_PRINTCOLOR_660.csv", "databaze barev/receptury_PMS_660.csv");
+        PREJMENOVANE.put("databaze barev/receptury_RUCO_10KK.csv", "databaze barev/receptury_RUCOLOR_10KK.csv");
     }
 
     private final AssetManager assety;
@@ -99,6 +109,11 @@ public class Aktualizace {
         if (!prvni && verzeNova.equals(verzeStara)) return "";
         try {
             if (!prvni) zalohuj();
+            // přejmenování ještě před průchodem složkami, aby projdi() viděla
+            // soubor pod novým jménem a nepovažovala ho za nový; otisk se
+            // přenese pod nový název, jinak by se nepoznalo, že ho dílna
+            // nezměnila (stejné pořadí má aktualizace.py)
+            stary = prejmenujStare(stary);
             for (String[] d : SLOZKY) projdi(d[0], d[1], novy, stary);
             zapisZmeny(verzeNova);
             // otisky, které balíček nenesl (APK „jen program“ z GitHubu nemá
@@ -114,6 +129,59 @@ public class Aktualizace {
         for (String r : log) sb.append(r).append('\n');
         zapisLog(sb.toString());
         return prvni ? "" : sb.toString().trim();
+    }
+
+    /** Přejmenuje datové soubory, které dostaly nový název, přenese jejich
+     *  otisk v manifestu pod nový klíč a přepíše odkazy v parametry/databaze.csv.
+     *  Vrací manifest s přenesenými otisky (původní se nemění). */
+    private JSONObject prejmenujStare(JSONObject stary) throws Exception {
+        JSONObject otisky = stary.optJSONObject("soubory");
+        List<String[]> hotovo = new ArrayList<>();
+        for (Map.Entry<String, String> e : PREJMENOVANE.entrySet()) {
+            String novyRel = e.getKey(), staryRel = e.getValue();
+            File s = new File(koren, staryRel);
+            File n = new File(koren, novyRel);
+            if (!s.isFile() || n.isFile()) continue;   // není co přejmenovat, nebo hotovo
+            if (!s.renameTo(n)) { log.add("nelze přejmenovat " + staryRel); continue; }
+            hotovo.add(new String[]{nazev(staryRel), nazev(novyRel)});
+            if (otisky != null && otisky.has(staryRel)) {
+                otisky.put(novyRel, otisky.get(staryRel));
+                // starý klíč pryč: nic už na něj neukazuje a v manifestu by
+                // zůstal navždy (stejně jako zrusene v aktualizace.py)
+                otisky.remove(staryRel);
+            }
+            log.add("přejmenováno: " + staryRel + " → " + novyRel);
+            zaznamy.add(new String[]{novyRel, "upraveno", nazev(novyRel), "nazev",
+                                     nazev(staryRel), nazev(novyRel)});
+        }
+        if (hotovo.isEmpty()) return stary;
+        // odkaz v databaze.csv drží jméno souboru — bez přepsání by ukazoval
+        // na soubor, který už pod tím jménem není
+        File db = new File(koren, "parametry/databaze.csv");
+        String text = dekoduj(ctiSoubor(db));
+        if (!text.isEmpty()) {
+            String novyText = text;
+            for (String[] p : hotovo) novyText = novyText.replace(p[0], p[1]);
+            if (!novyText.equals(text)) {
+                zapis(db, novyText.getBytes(StandardCharsets.UTF_8), true);
+                log.add("parametry/databaze.csv: odkazy na přejmenované soubory přepsány");
+                StringBuilder pred = new StringBuilder(), po = new StringBuilder();
+                for (String[] p : hotovo) {
+                    if (pred.length() > 0) { pred.append(", "); po.append(", "); }
+                    pred.append(p[0]); po.append(p[1]);
+                }
+                zaznamy.add(new String[]{"parametry/databaze.csv", "upraveno", "databaze.csv",
+                                         "soubor", pred.toString(), po.toString()});
+            }
+        }
+        JSONObject vysledek = new JSONObject(stary.toString());
+        if (otisky != null) vysledek.put("soubory", otisky);
+        return vysledek;
+    }
+
+    private static String nazev(String rel) {
+        int i = rel.lastIndexOf('/');
+        return i < 0 ? rel : rel.substring(i + 1);
     }
 
     // ------------------------------------------------------------ průchod

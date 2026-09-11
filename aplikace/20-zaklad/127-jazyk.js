@@ -1303,10 +1303,33 @@ const SLOVNIK = {
   "Jen vyzkoušet": { en: "Just try it", pt: "Só experimentar" },
   "Verze balíčku": { en: "Package version", pt: "Versão do pacote" },
   "Stáhnout novou verzi": { en: "Download the new version", pt: "Transferir a nova versão" },
-  "Stáhnout a nainstalovat novou verzi": { en: "Download and install the new version", pt: "Transferir e instalar a nova versão" },
   "Stahování běží na pozadí — výsledek ohlásí okno programu.":
     { en: "The download runs in the background — the program window will report the result.",
       pt: "A transferência corre em segundo plano — a janela do programa dará o resultado." },
+  "nejnovější nezjištěna": { en: "latest not checked", pt: "mais recente não verificada" },
+  "nejnovější": { en: "latest", pt: "mais recente" },
+  "zjišťuji…": { en: "checking…", pt: "a verificar…" },
+  " ({mb} MB)": { en: " ({mb} MB)", pt: " ({mb} MB)" },
+  "Zjistit novou verzi": { en: "Check for a new version", pt: "Verificar nova versão" },
+  "Zjistit znovu": { en: "Check again", pt: "Verificar de novo" },
+  "Zjišťuji…": { en: "Checking…", pt: "A verificar…" },
+  "Stáhnout a nainstalovat {v}": { en: "Download and install {v}", pt: "Transferir e instalar {v}" },
+  "Zjištěno {kdy}.": { en: "Checked {kdy}.", pt: "Verificado {kdy}." },
+  "Verzi na GitHubu se nepodařilo zjistit —":
+    { en: "The version on GitHub could not be checked —",
+      pt: "Não foi possível verificar a versão no GitHub —" },
+  "Tenhle balíček zjištění verze neumí — stáhněte novou verzi ručně.":
+    { en: "This package cannot check the version — download the new version manually.",
+      pt: "Este pacote não sabe verificar a versão — transfira a nova versão manualmente." },
+  "Hledám vydání na GitHubu…": { en: "Looking for a release on GitHub…", pt: "A procurar versão no GitHub…" },
+  "Stahuji verzi {v} — {p} %": { en: "Downloading version {v} — {p} %", pt: "A transferir a versão {v} — {p} %" },
+  "Stahuji verzi {v}…": { en: "Downloading version {v}…", pt: "A transferir a versão {v}…" },
+  "Instaluji verzi {v}…": { en: "Installing version {v}…", pt: "A instalar a versão {v}…" },
+  "Verze {v} je stažená. Program se vymění po zavření okna aplikace.":
+    { en: "Version {v} is downloaded. The program will be replaced once you close the application window.",
+      pt: "A versão {v} está transferida. O programa será substituído depois de fechar a janela da aplicação." },
+  "Máte nejnovější verzi.": { en: "You have the latest version.", pt: "Tem a versão mais recente." },
+  "Aktualizace se nepodařila.": { en: "The update failed.", pt: "A atualização falhou." },
   "Výchozí": { en: "Default", pt: "Predefinido" },
   "Obvykle": { en: "Usually", pt: "Normalmente" },
   "Běží-li most na jiném počítači v dílně, zadejte jeho adresu, například":
@@ -1363,6 +1386,15 @@ const SLOVNIK = {
   "Sloučeno s databázemi: {n} — v seznamu zůstaly receptury ze souborů.":
     { en: "Merged with the databases: {n} — the recipes from the files stayed in the list.",
       pt: "Juntas às bases de dados: {n} — na lista ficaram as receitas dos ficheiros." },
+  "Sloučit s databází ze souboru ({n})":
+    { en: "Merge with the database from the file ({n})",
+      pt: "Juntar à base de dados do ficheiro ({n})" },
+  "Sloučení přenese síto, kryvost a vazby na produkt na recepturu ze souboru a teprve pak tuhle odebere. Odebrání je zahodí.":
+    { en: "Merging moves the mesh, opacity and product links onto the recipe from the file and only then removes this one. Removing throws them away.",
+      pt: "Juntar transfere a tela, a opacidade e as ligações ao produto para a receita do ficheiro e só depois remove esta. Remover deita-as fora." },
+  "Sloučeno se souborem: {n} receptur — síto, kryvost i vazby přešly na receptury ze složky.":
+    { en: "Merged with the file: {n} recipes — mesh, opacity and links moved to the recipes from the folder.",
+      pt: "Juntas ao ficheiro: {n} receitas — tela, opacidade e ligações passaram para as receitas da pasta." },
   "Načíst databáze znovu": { en: "Reload the databases", pt: "Recarregar as bases de dados" },
   "projede soubory znovu, i když se od minule nezměnily":
     { en: "goes through the files again even if they have not changed since last time",

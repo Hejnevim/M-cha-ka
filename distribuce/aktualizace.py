@@ -19,6 +19,14 @@ při změně tady se mění i tam):
                             řádky a sloupce přibudou, prázdné buňky se doplní,
                             vyplněná hodnota dílny (cena, zámek technologie)
                             se nikdy nepřepíše
+  přejmenovaný soubor       PREJMENOVANE říká, který starý název je týž soubor
+                            pod novým jménem. Bez toho by se nový název založil
+                            a starý zůstal ležet vedle: dílna by viděla tutéž
+                            řadu dvakrát a u každého odstínu dvě receptury
+                            (naměřeno 11. 9. 2026 — 11 databází místo 8).
+                            Starý soubor se přejmenuje i s otiskem v manifestu,
+                            takže se pozná, jestli ho dílna mezitím měnila,
+                            a odkaz v parametry/databaze.csv se přepíše
   okno/, sgps_config.json   beze změny
 
 Každý zásah se zapíše do evidence/zmeny.csv (záložka Změny podkladů) a do
@@ -62,6 +70,17 @@ OBLASTI = {
 ZMENY_HLAVICKA = ["kod", "kdy", "oblast", "oblast_popis", "soubor", "druh", "polozka",
                   "pole", "pred", "po", "kdo", "pozn", "zmeneno"]
 DATOVE_SLOZKY = ["databaze barev", "evidence", "parametry"]
+
+# Datové soubory, které v některé verzi změnily název. Klíč je nový název,
+# hodnota starý — aktualizace podle toho pozná, že nejde o nový soubor, ale
+# o tentýž pod jiným jménem, a starý přejmenuje místo aby ho nechala ležet.
+# Tenhle seznam se nikdy nezkracuje: dílna může aktualizovat i z verze starší
+# než to přejmenování. Stejný seznam má Aktualizace.java (PREJMENOVANE).
+PREJMENOVANE = {
+    "databaze barev/receptury_PRINTCOLOR_786.csv": "databaze barev/receptury_PMS_786.csv",
+    "databaze barev/receptury_PRINTCOLOR_660.csv": "databaze barev/receptury_PMS_660.csv",
+    "databaze barev/receptury_RUCO_10KK.csv": "databaze barev/receptury_RUCOLOR_10KK.csv",
+}
 
 
 # ----------------------------------------------------------------- pomocné
@@ -329,6 +348,57 @@ def zaloha(koren, cil_slozka, log):
 
 
 # ----------------------------------------------------------------- hlavní krok
+def prejmenuj_stare(koren, stary_manifest, log):
+    """
+    Přejmenuje datové soubory, které od minulé verze dostaly nový název, a
+    přepíše odkazy na ně v parametry/databaze.csv. Vrací (záznamy, otisky,
+    zrušené klíče), kde otisky jsou položky manifestu přenesené pod nový název
+    — jinak by aktualizuj_data soubor považovala za nikdy neviděný a novou
+    verzi by odložila jako .novy, ačkoli ho dílna nikdy nesáhla; zrušené klíče
+    jsou staré názvy, které se z manifestu vyhodí, aby v něm nezůstaly navždy.
+
+    Dělá se to PŘED aktualizuj_data: ta pak vidí soubor už pod novým jménem
+    a rozhodne o něm obvyklým způsobem (otisk sedí → vyměnit, nesedí → .novy).
+    """
+    zaznamy = []
+    otisky = {}
+    zrusene = []
+    prejmenovano = []
+    stare_otisky = (stary_manifest or {}).get("soubory") or {}
+    for novy_rel, stary_rel in sorted(PREJMENOVANE.items()):
+        stary = os.path.join(koren, *stary_rel.split("/"))
+        novy = os.path.join(koren, *novy_rel.split("/"))
+        if not os.path.isfile(stary) or os.path.isfile(novy):
+            continue                      # není co přejmenovat, nebo už je hotovo
+        os.rename(stary, novy)
+        prejmenovano.append((os.path.basename(stary_rel), os.path.basename(novy_rel)))
+        if stary_rel in stare_otisky:
+            otisky[novy_rel] = stare_otisky[stary_rel]
+            # starý klíč se z manifestu odstraní: nic už na něj neukazuje a
+            # při dalším přejmenování téhož souboru by mátl
+            zrusene.append(stary_rel)
+        log("přejmenováno: %s → %s" % (stary_rel, novy_rel))
+        zaznamy.append((novy_rel, "upraveno", os.path.basename(novy_rel), "nazev",
+                        os.path.basename(stary_rel), os.path.basename(novy_rel)))
+    if not prejmenovano:
+        return zaznamy, otisky, zrusene
+    # odkaz v parametry/databaze.csv drží jméno souboru; bez přepsání by na
+    # starý název ukazoval řádek, ke kterému už soubor není, a nový přibyl vedle
+    cesta = os.path.join(koren, "parametry", "databaze.csv")
+    if os.path.isfile(cesta):
+        text = cti_text(cesta)
+        novy_text = text
+        for stare_jmeno, nove_jmeno in prejmenovano:
+            novy_text = novy_text.replace(stare_jmeno, nove_jmeno)
+        if novy_text != text:
+            zapis_text(cesta, novy_text)
+            log("parametry/databaze.csv: odkazy na přejmenované soubory přepsány")
+            zaznamy.append(("parametry/databaze.csv", "upraveno", "databaze.csv", "soubor",
+                            ", ".join(s for s, _ in prejmenovano),
+                            ", ".join(n for _, n in prejmenovano)))
+    return zaznamy, otisky, zrusene
+
+
 def aktualizuj_data(koren, zdroj_dat, novy_manifest, stary_manifest, log):
     """
     Projde datové složky z balíčku aktualizace (zdroj_dat/<složka>/…) a uplatní

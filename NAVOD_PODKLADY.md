@@ -860,3 +860,46 @@ soubor podrobný; když se funkce změní, mění se obojí.
 | vratka ze stroje | 47 |
 | hledání s napovídáním | 10 |
 | objednací číslo · papír C/U v editoru | 39 |
+
+## Cesta zakázky z listu do kalkulace (manuál, 10. 9. 2026)
+
+Do manuálu přibyly tři scény, které dosud chyběly — po dlaždici PDF končil
+a o tom, co následuje, nebylo nic. Do budoucího psaného návodu k nim patří
+tohle podrobnější, než co se vejde do mluvené scény:
+
+**Okno *Zakázkový list — rozpoznané údaje*** (scéna 16, snímek
+`27-pdf-nahled`). Číslo v nadpisu je počet údajů, které z listu vyšly — ne
+počet polí okna; těch je 24 vždycky. Pod každým polem stojí, podle čeho se
+hodnota našla: `popisek „cislo zakazky"` znamená, že v listu stálo návěští,
+`vzor \b(\d{5})\s*-\s*\d{3}\b`, že se hledalo regulárním výrazem z
+`pdf_pravidla.json`. Prázdné pole se do kalkulace nepřenese — co v ní je,
+zůstane. *Zobrazit text z PDF* ukáže surový text listu, když pole nesedí a je
+potřeba zjistit, co v něm most vlastně přečetl.
+
+**Otázka *Z jaké řady vzít odstín?*** (scéna 17, snímek `27b-volba-rady`).
+Vyskočí jen tehdy, když technologie má víc nakoupených řad **a** poloha
+produktu žádnou přiřazenou. U každé dlaždice stojí, kolik barev zakázky se
+v té řadě našlo — „1 z 1 barev" znamená, že řada odstín umí. Odpověď se zapíše
+do `parametry/typy_poloh.csv` k té poloze a podruhé se u ní neptá; přepsat ji
+jde v záložce Produkty. *Bez volby* hledá ve všech řadách technologie a
+nezapisuje nic.
+
+**Doladění po nátisku** (scéna 39, snímek `36-doladeni`). Dvě tlačítka, která
+se pletou: *Nejdřív nátisk — N g* spočítá, jak malá smí zkušební dávka být,
+aby i nejmenší složka receptury ještě vyšla nad rozlišení váhy; *Doladit
+odstín v kelímku* je to, co přijde potom, když nátisk nesedl. Zadá se, kolik
+základu v kelímku zbylo, a po desetinách gramu každý přílitek (složka
+z ceníku, ne hotová receptura). Aplikace dopočítá složení, které v kelímku
+doopravdy je, a řekne, kolik dovážit do plné dávky — podle nového složení, ne
+podle původního pantonu. *Uložit jako custom recepturu* odstín připojí
+k produktu a poloze.
+
+### K opravě jinde, ne v manuálu
+
+Popisky pod poli okna rozpoznaných údajů jsou **i v anglické verzi česky**
+(„popisek „cislo zakazky"", „vzor \b(\d{5})…"). Není to chyba překladu
+obrazovky: text skládá `pdf_spec.py` (řádky 895 a 908) a část 160 ho na řádku
+126 vypisuje přímo, bez `preloz()`. Opravit se to musí na straně mostu nebo
+překladem tvaru v aplikaci — do slovníku v `127-jazyk.js` samotná věta nepatří,
+protože její druhá půlka je název popisku z konkrétního listu. Na snímku
+manuálu to vidět je (`manual/en/27-pdf-nahled.png`).

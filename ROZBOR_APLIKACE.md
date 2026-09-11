@@ -1,23 +1,23 @@
 # Ink Recipe Manager — strukturovaný rozbor aplikace
 
 <!-- AUTO:stav -->
-> **Stav k 10. září 2026.** Čísla v úsecích označených `AUTO` generuje
+> **Stav k 11. září 2026.** Čísla v úsecích označených `AUTO` generuje
 > `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — nepřepisují
 > se ručně a nemohou se rozejít se skutečností. Text mimo ně píše člověk.
 
-> Poslední zapsaná změna ve vývojovém deníku: **10. září 09:51 — Krycí plocha z náhledu dávku snižuje lineárně (6,5 % → 10,6 g na 0,7 g); u drobného potisku je z dávky 126 z 127,7 g rezerva síta**
+> Poslední zapsaná změna ve vývojovém deníku: **11. září 13:44 — Aktualizace umí přejmenovaný soubor — z instalace 8. 9. vyjde 8 databází místo 11; důvod selhání vydání jde do logu**
 
 | soubor | řádků | velikost |
 |---|---:|---:|
-| `aplikace/ (106 souborů)` | 24 842 | 1 509 kB |
+| `aplikace/ (106 souborů)` | 25 147 | 1 525 kB |
 | `index.html` | 140 | 8 kB |
-| `most.py` | 805 | 34 kB |
+| `most.py` | 856 | 36 kB |
 | `pdf_spec.py` | 1 135 | 45 kB |
 | `odemkni.py` | 213 | 8 kB |
 | `prevod_printcolor.py` | 187 | 7 kB |
 | `kontrola_aplikace.py` | 169 | 7 kB |
 | `rozbor_aktualizuj.py` | 372 | 13 kB |
-| **celkem** | **27 863** | |
+| **celkem** | **28 219** | |
 <!-- /AUTO:stav -->
 
 ---
@@ -79,7 +79,7 @@ Systém má tři vrstvy a žádnou z nich nepotřebuje internet.
 | vrstva | soubor | co dělá |
 |---|---|---|
 | **Aplikace** | `index.html` | Celé UI i výpočty. React 18 + htm, **bez build kroku** — soubor se otevře a běží. |
-| **Manuál** | `prezentace/manual.html`, `manual_en.html` | Mluvený manuál se snímky obrazovky. Od 7. 9. 2026 se otevírá i z nabídky aplikace (položka *Manuál* pod jazyky, část `30-app/215-manual.js`): stránka běží v rámu přes celou obrazovku, lišta vpravo nahoře přepíná češtinu a angličtinu a zavírá; režim světlý/tmavý chodí do rámu v hash `#tema=…`. Od 8. 9. 2026 má 57 scén na 37 snímcích: přibyly scény pro vícebarevnou zakázku v kartě i u váhy a nabídka je ve dvou scénách (jazyk, položka Manuál); domovská stránka bez rozpisu výpočtu je přefocená i s osmi okny nad ní. |
+| **Manuál** | `prezentace/manual.html`, `manual_en.html` | Mluvený manuál se snímky obrazovky. Od 7. 9. 2026 se otevírá i z nabídky aplikace (položka *Manuál* pod jazyky, část `30-app/215-manual.js`): stránka běží v rámu přes celou obrazovku, lišta vpravo nahoře přepíná češtinu a angličtinu a zavírá; režim světlý/tmavý chodí do rámu v hash `#tema=…`. Od 10. 9. 2026 má 60 scén na 40 snímcích: k vícebarevné zakázce a dvěma scénám nabídky přibyla cesta zakázky z listu do kalkulace (okno rozpoznaných údajů, otázka na řadu odstínu) a doladění testovací dávky přilitím po nátisku; domovská stránka bez rozpisu výpočtu je přefocená i s osmi okny nad ní. Od 11. 9. 2026 má 62 scén: závěr kapitoly 10 říká, na čem aplikace běží — tatáž aplikace jen v prohlížeči, jako program pro Windows a jako aplikace pro Android — a jak se obě nainstalované podoby aktualizují, aniž přijdou o data. Obě scény stojí na snímku `80-most`. |
 | **Data katalogu** | `data.js` | Produkty, jejich barvy, tiskové polohy, rozměry, materiály. Statické, počty viz tabulka výše. |
 | **Obrázky** | `obrazky/` + `seznam_obrazku.json` | Náhledy produktů a poloh potisku, stažené předem kvůli běhu bez internetu. |
 | **Most** | `most.py` (Python, jen standardní knihovna) | Lokální server na `127.0.0.1:8765`. Dělá to, co prohlížeč sám nesmí: čte disk, rozebírá PDF, vykresluje stránky, volá firemní systém. |
@@ -374,7 +374,13 @@ i proti zakázkovému listu — stejné pravidlo jako u síta podle produktu vý
 FIR navíc drží minimální dávku jen ve třech krocích (50 / 100 / 150 g); to
 je skutečná volba (tiskař mezi nimi vybírá), takže dlaždice zůstává výběr,
 ne pravidlo — na rozdíl od těrky. Technologie bez vlastní řady (SCR, PDP,
-TRS) mají u obou dál ruční číselné pole. Síta pro FIR jsou v
+TRS) mají u obou dál ruční číselné pole a **minimální dávka v něm začíná
+na 50 g** — nejmenší dávce, kterou dílna míchá do tisku. Pod ní dělá dílek
+váhy 0,1 g u složky pod 1 % větší podíl než tolerance odstínu, takže by
+navážený odstín říkal víc o váze než o receptuře. Zkušební barvy se to
+netýká: nátisk si nejmenší rozumnou velikost počítá z nejmenší složky
+(část 590) a volná dávka mimo zakázku minimální dávku schválně nemá
+(část 498). Síta pro FIR jsou v
 `parametry/sita.csv` omezená na dvě, která dílna skutečně používá
 (100-40 a 130-34) — technologie bez takového zápisu nabízí celou
 standardní řadu.
@@ -954,6 +960,8 @@ Lokální HTTP server na `127.0.0.1:8765`, přístupný jen z tohoto počítače
 |---|---|
 | GET | `/api/databaze` |
 | GET | `/api/stav` |
+| GET | `/api/stav-aktualizace` |
+| GET | `/api/verze-na-siti` |
 | GET | `/api/zakazka/` |
 | GET | `/api/zakazky` |
 | POST | `/api/aktualizace` |
@@ -1095,14 +1103,38 @@ nesestavuje ani nenahrává; automatický běh staví do `sestaveni/vydani/`.
 Cesta zpět do dílny: **Windows** `IRM.exe --stahnout-aktualizaci [--tiche]
 [--vynutit]` — `Aktualizovat.bat` bez balíčku ho spustí sám: přečte
 `releases/latest`, srovná verzi s `manifest.json` (text `RRRR.MM.DD`),
-stáhne zip do `stazeno/` a předá ho `_aktualizuj`. V aplikaci totéž
-tlačítko *Stáhnout a nainstalovat novou verzi* v záložce Připojení
-(`POST /api/aktualizace` → most volá `AKTUALIZACE`, kterou v exe dosadil
-`irm_okno.py`; most nad složkou vrací „umí jen IRM.exe“). **Android** —
-odkaz *Stáhnout novou verzi* na APK, WebView ho předá prohlížeči a ten
-instalátoru. Řádek s verzí balíčku se ukazuje jen tam, kde most hlásí
-`balicek` (verze z `manifest.json` vedle programu); aplikace otevřená ze
-složky se aktualizuje z repozitáře a řádek nemá.
+stáhne zip do `stazeno/` a předá ho `_aktualizuj`. Samotný dotaz na GitHub
+dělá `_zjisti_vydani()` odděleně od stahování (`--zjistit-verzi` se jen
+zeptá a nic nenainstaluje), takže se na verzi může zeptat i aplikace.
+
+V záložce Připojení k mostu na to stojí blok se dvěma verzemi vedle sebe:
+*Verze balíčku 2026.09.07 · nejnovější 2026.09.20 (18,4 MB)*. Zjišťuje se
+**až na klik** (`GET /api/verze-na-siti` → most volá `VERZE_NA_SITI`
+dosazenou v exe; nad složkou vrací „umí jen IRM.exe“, starší balíček 404
+a aplikace to odliší od chyby sítě) — dílna běží bez internetu a GitHub
+pouští 60 nepřihlášených dotazů za hodinu na adresu, takže samočinné
+dotazování by vypadalo jako porucha. Dokud se nikdo nezeptal, stojí
+v pruhu *nejnovější nezjištěna* se šedou tečkou: aplikace netvrdí, že je
+balíček aktuální, když to neměřila. Tečka je zelená jen při shodě verzí,
+jantarová při novější verzi i při chybě. **Tlačítko ke stažení se vykreslí
+jen tehdy, když je co stahovat**, a nese číslo verze
+(*Stáhnout a nainstalovat 2026.09.20*) — dřív viselo v kartě pořád a dílna
+klikala naslepo.
+
+Průběh stahování aplikace ukazuje sama: stahující proces píše fázi do
+`aktualizace_stav.json` vedle programu (`ceka`, `stahuje` s procenty,
+`instaluje`, `hotovo`, `aktualni`, `chyba`) a aplikace se po dvou
+vteřinách ptá `GET /api/stav-aktualizace`, dokud stahování neskončí. Do
+té doby se výsledek dozvěděla jen dílna, která si všimla okna Windows
+vyskočivšího za zády aplikace. Stahování samo pořád běží v druhém procesu
+(`POST /api/aktualizace` → `AKTUALIZACE`), na který aplikace nečeká.
+
+**Android** — odkaz *Stáhnout novou verzi* na APK, WebView ho předá
+prohlížeči a ten instalátoru; verzi na síti telefon nezjišťuje (Java na
+síť nesahá), takže se u něj druhá polovina pruhu ani tlačítko *Zjistit*
+neukazuje. Celý blok se ukazuje jen tam, kde most hlásí `balicek` (verze
+z `manifest.json` vedle programu); aplikace otevřená ze složky se
+aktualizuje z repozitáře a blok nemá.
 
 Manifest po aktualizaci balíčkem bez dat přebírá otisky z minulého
 (`aktualizace.manifest_sluc`, v Javě `manifestSluc`) — jinak by příští
@@ -1126,7 +1158,7 @@ Aplikace se neopírá o „vypadá to, že to funguje":
 - **Celé toky se proklikávají v prohlížeči bez okna** a porovnávají s ručním
   výpočtem — například navážky domíchání ze zbytku sedí do gramu.
 - **Mluvený manuál se prohlíží celý, ne po scéně** (`prohlidka_manualu.py`):
-  57 scén × 2 jazyky se vyfotí se všemi zvýrazněními a slepí do archů. Souřadnice
+  60 scén × 2 jazyky se vyfotí se všemi zvýrazněními a slepí do archů. Souřadnice
   zvýraznění platí pro konkrétní snímek — po přefocení obrazovek je zkouška
   „uvnitř snímku" nechytí (rámeček o řádek níž je pořád uvnitř), archy ano.
 - **Rámečky manuálu mají otisky** (`kontrola_manualu.py`, od 10. 9. 2026):

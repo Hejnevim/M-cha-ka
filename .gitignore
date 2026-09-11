@@ -25,6 +25,10 @@ venv/
 # ne součást zdroje; na jiném počítači by jen falešně hlásil ruční zásah
 aplikace/.sestaveno
 
+# výchozí výstup snimek.py — místní důkaz z měření, ne součást zdroje;
+# jméno je default přepínače --cil, takže vzniká při každém snímkování
+snimek.png
+
 # nastavení editoru, běhové logy, výstupy testů
 .vscode/
 *.log
