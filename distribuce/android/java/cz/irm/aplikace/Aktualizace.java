@@ -184,24 +184,52 @@ public class Aktualizace {
         return i < 0 ? rel : rel.substring(i + 1);
     }
 
-    // ------------------------------------------------------------ průchod
-    private void projdi(String slozka, String asset, JSONObject novy, JSONObject stary) throws Exception {
-        String[] soubory;
+    /* Všechna CSV v assetu včetně podsložek, jako cesty s lomítkem
+       ("SCR/SKODA_AUTO/custom_SKODA_AUTO_PRINTCOLOR_660.csv").
+
+       Od 17. 9. 2026 si dílna řadí receptury podle loga zákazníka do podsložek
+       <technologie>/<značka loga>/. Plochý assety.list() by viděl jen kořen
+       a soubory zákazníků by se na telefon nikdy nedostaly. Zrcadlí
+       csv_ve_strome v aktualizace.py — obě pravidla se mění naráz. */
+    private void sesbirejCsv(String assetKoren, String vetev, List<String> out) {
+        String cesta = vetev.isEmpty() ? assetKoren : assetKoren + "/" + vetev;
+        String[] polozky;
         try {
-            soubory = assety.list("data/" + asset);
+            polozky = assety.list(cesta);
         } catch (IOException e) {
             return;
         }
-        if (soubory == null) return;
+        if (polozky == null) return;
+        Arrays.sort(polozky);
+        for (String p : polozky) {
+            String rel = vetev.isEmpty() ? p : vetev + "/" + p;
+            if (p.toLowerCase(Locale.ROOT).endsWith(".csv")) {
+                out.add(rel);
+            } else {
+                // složka se pozná tak, že se dá vypsát; assety jiný způsob nenabízí
+                sesbirejCsv(assetKoren, rel, out);
+            }
+        }
+    }
+
+    // ------------------------------------------------------------ průchod
+    private void projdi(String slozka, String asset, JSONObject novy, JSONObject stary) throws Exception {
+        List<String> soubory = new ArrayList<>();
+        sesbirejCsv("data/" + asset, "", soubory);
+        if (soubory.isEmpty()) return;
         File cilSlozka = new File(koren, slozka);
         cilSlozka.mkdirs();
         JSONObject stareOtisky = stary.optJSONObject("soubory");
-        for (String jmeno : soubory) {
-            if (!jmeno.toLowerCase(Locale.ROOT).endsWith(".csv")) continue;
-            String rel = slozka + "/" + jmeno;
-            byte[] nove = ctiAsset("data/" + asset + "/" + jmeno);
+        for (String vetevJmeno : soubory) {
+            // jméno bez větve: pravidla se řídí názvem souboru, ne tím,
+            // ve které složce zákazníka leží
+            String jmeno = nazev(vetevJmeno);
+            String rel = slozka + "/" + vetevJmeno;
+            byte[] nove = ctiAsset("data/" + asset + "/" + vetevJmeno);
             if (nove == null) continue;
-            File cil = new File(cilSlozka, jmeno);
+            File cil = new File(cilSlozka, vetevJmeno.replace('/', File.separatorChar));
+            File rodic = cil.getParentFile();
+            if (rodic != null) rodic.mkdirs();
             if (!cil.exists()) {
                 zapis(cil, nove, false);
                 log.add("založeno: " + rel);
@@ -229,7 +257,7 @@ public class Aktualizace {
                     zaznamy.add(new String[]{rel, "upraveno", jmeno, "",
                             "verze " + stary.optString("verze", "?"), "verze " + novy.optString("verze", "?")});
                 } else {
-                    zapis(new File(cilSlozka, jmeno + ".novy"), nove, false);
+                    zapis(new File(cil.getParentFile(), jmeno + ".novy"), nove, false);
                     log.add("ponecháno (dílna soubor změnila), nová verze vedle jako .novy: " + rel);
                     zaznamy.add(new String[]{rel, "upraveno", jmeno, "", "", "nová verze odložena jako .novy"});
                 }

@@ -46,9 +46,9 @@ function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr, techno
       podpis: podpis }),
     [recipes, dbFiltr, zuzene, cizi, oblibene, jenOblibene, jenMoje, jenNove, podpis]);
   const filtered = useMemo(() => {
-    const s = q.trim().toLowerCase();
-    if (!s) return zaklad;
-    return zaklad.filter((r) => textHledaniReceptury(r).includes(s));
+    const slova = slovaHledani(q);
+    if (!slova.length) return zaklad;
+    return zaklad.filter((r) => recepturaOdpovida(r, slova));
   }, [q, zaklad]);
   // kolik je čeho — čísla do přepínačů, ať je vidět, jestli je co zapnout
   const pocty = useMemo(() => ({
@@ -157,8 +157,10 @@ function Recipes({ recipes, setRecipes, guardDelete, dbFiltr, setDbFiltr, techno
         onClick=${() => setHistorie(r)}>${preloz("Historie")}</button>
     <//>`;
 
+  /* Značky už použitých log — našeptávač a nabídka srovnat tvar (část 400).
+     Bez nich se tu značka zapisovala naslepo a vznikali překlepoví dvojníci. */
   if (edit) return html`<${RecipeForm} initial=${edit} onSave=${save} onCancel=${() => setEdit(null)}
-    sita=${sita} materialy=${materialy} />`;
+    sita=${sita} materialy=${materialy} znacky=${znackyReceptur(recipes)} />`;
 
   return html`
     <div>

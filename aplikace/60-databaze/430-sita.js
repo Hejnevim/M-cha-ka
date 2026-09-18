@@ -63,6 +63,8 @@ function csvNaSita(text) {
     pozn: i(/^(pozn|note)/),
     // síto podle produktu — oba sloupce jsou nepovinné, viz sitoProProdukt níž
     vychozi: i(/^(vychozi|v.choz|default)/), produkty: i(/^(produkty|produkt|ref)/),
+    // meze nejtenčí čáry motivu, kterou síto ještě pustí — viz sitoProCaru
+    caraOd: i(/^(cara_od|c.ra_od|line_from|stroke_from)/), caraDo: i(/^(cara_do|c.ra_do|line_to|stroke_to)/),
   };
   if (ci.sito < 0) throw new Error(preloz("CSV sít musí mít sloupec sito."));
   return rows.slice(1).map((r) => {
@@ -88,6 +90,10 @@ function csvNaSita(text) {
       vychozi: ci.vychozi >= 0 && /^(ano|a|x|1|yes|true)$/i.test(String(r[ci.vychozi] || "").trim()),
       produkty: ci.produkty >= 0 ? String(r[ci.produkty] || "").split(/[,;\s]+/)
         .map((p) => p.trim()).filter(Boolean) : [],
+      // prázdno = mez není zapsaná; nula by znamenala „od nuly“ a pustila
+      // by sítem každou čáru
+      caraOd: ci.caraOd >= 0 && String(r[ci.caraOd] || "").trim() !== "" ? n(r[ci.caraOd]) : null,
+      caraDo: ci.caraDo >= 0 && String(r[ci.caraDo] || "").trim() !== "" ? n(r[ci.caraDo]) : null,
     };
     if (!zaznam.vth && zaznam.hloubka > 0) { zaznam.vth = zaznam.hloubka; zaznam.klise = true; }
     // "120-34" v názvu síta nese nitky i vlákno, když sloupce chybí
@@ -98,6 +104,38 @@ function csvNaSita(text) {
     }
     return dopocitejSito(zaznam);
   }).filter((s) => s.sito);
+}
+
+/* Síto podle nejtenčí čáry motivu. Řádek síta v parametry/sita.csv smí nést
+   meze cara_od_mm a cara_do_mm: nejtenčí čára, kterou to síto ještě
+   vytiskne čistě (od), a nejtenčí čára, od které už je síto zbytečně jemné
+   a dává málo barvy (do). Pravidlo bydlí v CSV, ne v kódu — technolog meze
+   posune v Excelu podle toho, co mu z tisku vyleze.
+
+   Vrací { sito, radek } nebo null. Null znamená „tabulka o tom nic neříká“:
+   buď meze nikdo nevyplnil, nebo čára padá mimo všechny — a to se řekne,
+   nehádá se nejbližší síto. Padne-li čára do víc řádků (meze se překrývají),
+   bere se hrubší síto (méně nitek): dá víc barvy a detail, který pustí
+   i hrubší síto, se jemnějším nezlepší. */
+function sitoProCaru(sita, tech, caraMm) {
+  const c = n(caraMm);
+  if (!(c > 0)) return null;
+  const T = String(tech || "").toUpperCase();
+  const kandidati = (sita || []).filter((s) => s && s.sito && !s.klise
+    && (!s.tech || s.tech === T) && (s.caraOd != null || s.caraDo != null)
+    && (s.caraOd == null || c >= s.caraOd) && (s.caraDo == null || c < s.caraDo));
+  if (!kandidati.length) return null;
+  kandidati.sort((a, b) => (n(a.nitky) || 1e9) - (n(b.nitky) || 1e9));
+  return { sito: kandidati[0].sito, radek: kandidati[0] };
+}
+
+/* Má technologie v tabulce sít vůbec nějaké meze čáry? Bez nich se místo
+   „síto podle tabulky“ říká, že tabulka je prázdná — ať se to nezamění
+   za „čára mimo meze“. */
+function sitaMajiMezeCary(sita, tech) {
+  const T = String(tech || "").toUpperCase();
+  return (sita || []).some((s) => s && (!s.tech || s.tech === T)
+    && (s.caraOd != null || s.caraDo != null));
 }
 
 /* Klíč koeficientu může být i rozsah — u viskozity se nedá vypsat každá
@@ -155,13 +193,15 @@ function sitaPro(sita, tech, jenKlise) {
   return jenKlise ? [] : SITA.map((m) => ({ sito: m, tech: "", standardni: true }));
 }
 
-/* Síto podle produktu. U textilu má dílna dané, které síto na který produkt
-   patří: skoro všechno jede na 54-64, pár vyjmenovaných produktů na jemnějším
-   90-48. Není to volba obsluhy u stroje, ale rozhodnutí technologa — a kdyby
-   se síto vybíralo ručně, vybral by ho každý podle sebe a spotřeba by u téže
-   zakázky vycházela pokaždé jinak. Pravidlo proto stojí v parametry/sita.csv
-   (sloupce vychozi a produkty), ne v kódu, aby šlo produkt přeřadit bez
-   zásahu do aplikace.
+/* Síto podle produktu. Technolog může mít dané, které síto na který produkt
+   patří — pak to není volba obsluhy u stroje, a kdyby se síto vybíralo ručně,
+   vybral by ho každý podle sebe a spotřeba by u téže zakázky vycházela
+   pokaždé jinak. Pravidlo proto stojí v parametry/sita.csv (sloupce vychozi
+   a produkty), ne v kódu, aby šlo produkt přeřadit bez zásahu do aplikace.
+   U textilu tak od 10. 9. do 16. 9. 2026 jelo devět produktů na 90-48 a
+   zbytek na 54-64; 16. 9. 2026 dílna rozhodla, že síto u textilu je volba
+   mezi 54-64 a 90-40, a sloupce u TXP jsou prázdné. Mechanismus zůstává —
+   stačí sloupce vyplnit.
 
    Řádek s produktem má přednost před výchozím; řádek bez technologie platí
    všude, ale až po řádcích té technologie. Není-li pro technologii pravidlo
@@ -180,10 +220,11 @@ function sitoProProdukt(sita, tech, ref) {
 }
 
 /* Nabídka v dlaždici Síto. Má-li produkt síto dané pravidlem, nabízí se jen
-   ono: dlaždice, která u textilu nabízela obě síta technologie, vypadala jako
-   volba — a kdo nevěděl, že 90-48 patří jen devíti produktům, vybral podle
-   sebe a spotřeba ze síta vyšla u téže zakázky jinak. Bez pravidla (SCR, PDP,
-   TRS, FIR) zůstává celá nabídka technologie. Síto z pravidla, které v řádcích
+   ono: dlaždice, která nabízí obě síta technologie, vypadá jako volba — a kdo
+   neví, že jemnější síto patří jen vyjmenovaným produktům, vybere podle sebe
+   a spotřeba ze síta vyjde u téže zakázky jinak (tak to u textilu bylo do
+   16. 9. 2026). Bez pravidla (dnes všechny technologie) zůstává celá nabídka
+   technologie. Síto z pravidla, které v řádcích
    technologie chybí, se nabídne aspoň názvem, ať dlaždice neukáže prázdno. */
 function sitaKVyberu(sitaTech, sitoPodleProduktu) {
   if (!sitoPodleProduktu) return sitaTech || [];

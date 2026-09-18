@@ -13,8 +13,9 @@ function nabidkaSitEditoru(sita, sitaTech, sitoVychozi) {
 }
 
 /* Síto podle produktu i pro novou custom recepturu. Odvozená barva vzniká bez
-   síta a technolog ho v editoru vybíral z celé řady ručně — přitom u textilu
-   je dané produktem (sitoProProdukt v části 430). Pravidlo má přednost i před
+   síta a technolog ho v editoru vybíral z celé řady ručně — přitom tam, kde
+   je dané produktem (sitoProProdukt v části 430; u textilu do 16. 9. 2026),
+   se vybírat nemá. Pravidlo má přednost i před
    sítem, které receptura už nese (základ z databáze ho může mít z jiné
    technologie); bez pravidla se zapsané síto nechá být. */
 function sPredvyplnenymSitem(initial, sitoVychozi) {
@@ -122,14 +123,37 @@ function RecipeForm({ initial, onSave, onCancel, sita, materialy, sitaTech, sito
             jedna agentura objedná potisk pro tři značky.
             Našeptávač z už použitých značek je tu proti překlepovým dvojníkům —
             „Škoda“ a „Skoda“ by nabídku rozdělily na dvě skupiny. */""}
-      <div className="frow" style=${{ marginTop: 4 }}>
+      <div className="frow c2" style=${{ marginTop: 4 }}>
         <div><label className="f">${preloz("Značka loga")}</label>
           <input value=${r.znackaLoga || ""} list="znacky-loga"
             onChange=${(e) => setR(Object.assign({}, r, { znackaLoga: e.target.value }))}
             placeholder=${preloz("čí logo se tiskne (nepovinné)")} />
           <datalist id="znacky-loga">
             ${(znacky || []).map((z) => html`<option key=${z} value=${z}></option>`)}
-          </datalist></div>
+          </datalist>
+          ${/* Nabídka srovnat tvar s prvním zápisem též značky. Našeptávač nad ní
+                stačit nemusí — kdo píše z paměti, nabídku prohlížeče vůbec
+                nerozbalí. Nevynucuje se: „Skoda Trans" může být jiný zákazník. */""}
+          ${(() => {
+            const kan = kanonickaZnacka(r.znackaLoga, znacky);
+            return kan ? html`<div className="note" style=${{ marginTop: 4 }}>
+              ${preloz("Už se používá jako")} <b>${kan}</b>${" · "}
+              <button type="button" className="btn sec sm" style=${{ marginLeft: 2 }}
+                onClick=${() => setR(Object.assign({}, r, { znackaLoga: kan }))}
+                >${preloz("Zapsat tak")}</button></div>` : null;
+          })()}</div>
+        ${/* Technologie stojí hned vedle značky schválně: teprve obě dohromady
+              určují odstín. Táž značka se tiskne sítotiskem i tampontiskem,
+              pokaždé z jiné barevné řady, a receptura pro jednu technologii
+              na druhé neplatí.
+              Prázdné = neurčeno; taková receptura se nabídne u všech
+              technologií, jako se chovaly receptury před zavedením údaje. */""}
+        <div><label className="f">${preloz("Technologie")}</label>
+          <select value=${String(r.technologie || "").toUpperCase()}
+            onChange=${(e) => setR(Object.assign({}, r, { technologie: e.target.value }))}>
+            <option value="">${preloz("— neurčeno, nabídne se všude —")}</option>
+            ${Object.keys(TECHS).map((k) => html`<option key=${k} value=${k}>${k} — ${preloz(TECHS[k].name)}</option>`)}
+          </select></div>
       </div>
       <div className="frow" style=${{ marginTop: 4 }}>
         <div><label className="f">${preloz("Poznámka k receptuře")}</label>

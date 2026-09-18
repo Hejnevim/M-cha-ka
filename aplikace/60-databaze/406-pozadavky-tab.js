@@ -51,7 +51,7 @@ function PozadavkyOdstinu({ pozadavky, setPozadavky, recipes, setRecipes, role, 
             pomerRedidla: null, mezRedidla: null, poznamka: "",
             components: [{ id: uid(), name: "", pct: 100 }] }}
           onSave=${ulozRecepturu} onCancel=${() => setZaklada(null)}
-          sita=${sita} materialy=${materialy} />
+          sita=${sita} materialy=${materialy} znacky=${znackyReceptur(recipes)} />
       </div>
     </div>`;
 

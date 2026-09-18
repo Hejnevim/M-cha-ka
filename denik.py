@@ -77,7 +77,11 @@ def vloz_radek_osy(text, radek, dnes, den_nadpis, konec):
         tabulka_od = osa.find(konec, i + 1) + len(konec)
         j = osa.find(konec + konec, tabulka_od)
         if j < 0:
-            j = len(osa)
+            # Poslední blok osy (dnešní vždycky) prázdný řádek nemá — končí
+            # odřádkováním před „---“. Vkládat až ZA něj vyrobí prázdný řádek
+            # mezi tabulkou a novým řádkem, a další zápis dne pak skočí před
+            # něj (16. 9. 2026: 09:38 před 09:29). Proto před koncové odřádkování.
+            j = len(osa.rstrip("\r\n"))
         nova_osa = osa[:j] + konec + radek + osa[j:]
         zprava = "řádek osy přidán na konec bloku „%s“" % osa[i + len(konec):osa.find(konec, i + 1)]
     else:

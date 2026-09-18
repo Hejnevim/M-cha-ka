@@ -6,7 +6,7 @@ const ZALOZKY_NAZVY = {
   rec: "Receptury", sito: "Přepočet na síto", propad: "Co propadne", sarze: "Šarže",
   zbytky: "Zbytky barev", fronta: "Fronta míchání", opravy: "Opravy po nátisku",
   sestavy: "Sestavy a trendy", sklad: "Sklad surovin", schval: "Ke schválení",
-  zmeny: "Změny podkladů", zdravi: "Zdraví databáze",
+  zmeny: "Změny podkladů", zdravi: "Zdraví databáze", logasita: "Sběr zakázek k sítům",
   imp: "Import / data",
 };
 

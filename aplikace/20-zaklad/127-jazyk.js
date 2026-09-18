@@ -65,8 +65,22 @@ function nastavJazyk(kod) {
    nepřekládají nikdy — každý si musí najít ten svůj i v cizím rozhraní. */
 const SLOVNIK = {
   /* --- nabídka: sekce a přepínače --- */
+  "Barevná řada k přenesení": { en: "Colour range to transfer", pt: "Gama de cores a transferir" },
   "JAZYK": { en: "LANGUAGE", pt: "IDIOMA" },
   "Manuál": { en: "Manual", pt: "Manual" },
+  "Odstín se vezme z řady {r} — poloha {p} ji už přiřazenou má.": { en: "The shade will be taken from range {r} — position {p} already has it assigned.", pt: "O tom será retirado da gama {r} — a posição {p} já a tem atribuída." },
+  "Odstín se vezme z řady {r}. Přiřazení polohy {p} zůstává beze změny — poloha je uzavřená.": { en: "The shade will be taken from range {r}. The assignment of position {p} stays unchanged — the position is closed.", pt: "O tom será retirado da gama {r}. A atribuição da posição {p} permanece inalterada — a posição está fechada." },
+  "Poloha je uzavřená — další barevné řady se k ní už nenabízejí. Klik ji zase otevře.": { en: "The position is closed — no further colour ranges are offered for it. Click reopens it.", pt: "A posição está fechada — já não são oferecidas mais gamas de cores. Clique para a reabrir." },
+  "Poloha je uzavřená — vybírá se jen z řad, které má přiřazené.": { en: "The position is closed — only its assigned ranges are offered.", pt: "A posição está fechada — só são oferecidas as gamas que tem atribuídas." },
+  "Poloha nemá technologii ani název — bez nich se podobné polohy nedají najít.": { en: "The position has no technology or name — without them similar positions cannot be found.", pt: "A posição não tem tecnologia nem nome — sem eles não é possível encontrar posições semelhantes." },
+  "Produkt {ref} nemá zapsaný materiál — bez něj se podobné polohy nenajdou. Doplňte ho tlačítkem Upravit.": { en: "Product {ref} has no material recorded — without it similar positions cannot be found. Add it with the Edit button.", pt: "O produto {ref} não tem material registado — sem ele não é possível encontrar posições semelhantes. Adicione-o com o botão Editar." },
+  "Přenést barevnou řadu z téhle polohy na podobné produkty": { en: "Transfer the colour range from this position to similar products", pt: "Transferir a gama de cores desta posição para produtos semelhantes" },
+  "Přiřadit řadu {r} této poloze": { en: "Assign range {r} to this position", pt: "Atribuir a gama {r} a esta posição" },
+  "Tahle řada je poloze už přiřazená": { en: "This range is already assigned to the position", pt: "Esta gama já está atribuída à posição" },
+  "Uzavření polohy platí hned, zatím jen v tomhle prohlížeči — most neběží.": { en: "Position closure applies immediately, for now only in this browser — the bridge is not running.", pt: "O fecho da posição aplica-se imediatamente, por agora só neste navegador — a ponte não está em execução." },
+  "Uzavření polohy uloženo do parametry/typy_poloh.csv — platí hned, bez ohledu na tlačítko Uložit produkt.": { en: "Position closure saved to parametry/typy_poloh.csv — applies immediately, regardless of the Save product button.", pt: "Fecho da posição guardado em parametry/typy_poloh.csv — aplica-se imediatamente, independentemente do botão Guardar produto." },
+  "Uzavřít polohu — přestane se nabízet při přenosu barevné řady na podobné produkty.": { en: "Close the position — it will no longer be offered when transferring a colour range to similar products.", pt: "Fechar a posição — deixará de ser oferecida ao transferir uma gama de cores para produtos semelhantes." },
+  "Vyberte řadu — teprve pak jde u poloh zaškrtávat.": { en: "Select a range — only then can positions be ticked.", pt: "Selecione uma gama — só depois é possível marcar as posições." },
   "Zavřít manuál": { en: "Close the manual", pt: "Fechar o manual" },
   "ROLE": { en: "ROLE", pt: "FUNÇÃO" },
   "TECHNOLOGIE": { en: "TECHNOLOGY", pt: "TECNOLOGIA" },
@@ -101,6 +115,7 @@ const SLOVNIK = {
     { en: "Expand the database choice", pt: "Expandir a escolha da base de dados" },
   "Sbalit výběr databáze":
     { en: "Collapse the database choice", pt: "Recolher a escolha da base de dados" },
+  "uzavřeno": { en: "closed", pt: "fechada" },
   "vše": { en: "all", pt: "tudo" },
   "Všechny technologie": { en: "All technologies", pt: "Todas as tecnologias" },
   "Sítotisk (plast, papír) / rotační":
@@ -118,6 +133,7 @@ const SLOVNIK = {
   /* --- názvy záložek (nabídka i tlačítko zpět) --- */
   "Kalkulace": { en: "Calculation", pt: "Cálculo" },
   "Načtení specu z PDF": { en: "Load spec from PDF", pt: "Carregar especificação do PDF" },
+  "{n} podobných poloh": { en: "{n} similar positions", pt: "{n} posições semelhantes" },
   "Čárový kód": { en: "Barcode", pt: "Código de barras" },
   "Zakázky (SGPS)": { en: "Orders (SGPS)", pt: "Encomendas (SGPS)" },
   "Připojení k mostu": { en: "Bridge connection", pt: "Ligação à ponte" },
@@ -125,6 +141,11 @@ const SLOVNIK = {
   "Receptury": { en: "Recipes", pt: "Receitas" },
   "Přepočet na síto": { en: "Mesh conversion", pt: "Conversão de malha" },
   "Co propadne": { en: "What will expire", pt: "O que vai expirar" },
+  "Řada {r} je od teď přiřazená poloze {p}. Přenést ji na podobné produkty jde v Produktech.": { en: "Range {r} is now assigned to position {p}. You can transfer it to similar products in Products.", pt: "A gama {r} está agora atribuída à posição {p}. Pode transferi-la para produtos semelhantes em Produtos." },
+  "Řada {r} je poloze přiřazená — klik ji odebere": { en: "Range {r} is assigned to the position — click removes it", pt: "A gama {r} está atribuída à posição — clique remove-a" },
+  "Řada {r} přibyla k poloze {p} — {n} {s} celkem. Přenést ji na podobné produkty jde v Produktech.": { en: "Range {r} was added to position {p} — {n} {s} in total. You can transfer it to similar products in Products.", pt: "A gama {r} foi adicionada à posição {p} — {n} {s} no total. Pode transferi-la para produtos semelhantes em Produtos." },
+  "řad": { en: "ranges", pt: "gamas" },
+  "řady": { en: "ranges", pt: "gamas" },
   "Šarže": { en: "Batches", pt: "Lotes" },
   "Zbytky barev": { en: "Leftover inks", pt: "Restos de tinta" },
   "Fronta míchání": { en: "Mixing queue", pt: "Fila de mistura" },
@@ -272,6 +293,8 @@ const SLOVNIK = {
   /* --- karta Receptura a barva --- */
   "Receptura a barva": { en: "Recipe and color", pt: "Receita e cor" },
   /* barvy zakázky — vícebarevný potisk */
+  "Žádná další poloha téhož materiálu a technologie nezbývá — všechny už mají své řady přiřazené.": { en: "No other position of the same material and technology remains — they all have their ranges assigned.", pt: "Não resta nenhuma outra posição do mesmo material e tecnologia — todas já têm as suas gamas atribuídas." },
+  "— vyberte řadu —": { en: "— select a range —", pt: "— selecione uma gama —" },
   "＋ Další barva": { en: "＋ Another color", pt: "＋ Outra cor" },
   "Další barva potisku téže zakázky — vlastní receptura, plocha a kelímek":
     { en: "Another print color of the same job — its own recipe, area and cup",
@@ -347,7 +370,6 @@ const SLOVNIK = {
   "— bez receptury —": { en: "— no recipe —", pt: "— sem receita —" },
   "Pantone standard": { en: "Pantone standard", pt: "Padrão Pantone" },
   "· {n} komponent": { en: "· {n} components", pt: "· {n} componentes" },
-  "vázaná na {c}": { en: "linked to {c}", pt: "ligada a {c}" },
   " (všechny polohy)": { en: " (all positions)", pt: " (todas as posições)" },
   "pantone je daný názvem barvy": { en: "the Pantone comes from the color name", pt: "o Pantone vem do nome da cor" },
   "dopočítáno z odstínu vzorníku — orientační, ne změřené":
@@ -451,6 +473,9 @@ const SLOVNIK = {
   "Celá obrazovka jen pro míchání (zavřít klávesou Esc)":
     { en: "Full screen just for mixing (close with Esc)", pt: "Ecrã inteiro só para misturar (fechar com Esc)" },
   "⛶ Míchací režim": { en: "⛶ Mixing mode", pt: "⛶ Modo de mistura" },
+  /* karta Kolik namíchat bez dávky: velké číslo „—" a důvod */
+  "Bez receptury není co míchat.": { en: "Nothing to mix without a recipe.", pt: "Sem receita não há o que misturar." },
+  "Bez polohy potisku se dávka nespočítá.": { en: "Without a print position the batch cannot be calculated.", pt: "Sem posição de impressão a dose não se calcula." },
   "🖨 Míchací lístek": { en: "🖨 Mixing sheet", pt: "🖨 Folha de mistura" },
   "Přidat do fronty míchání — pořadí se pak dá zvolit tak, aby zbytek z jedné zakázky sedl na další":
     { en: "Add to the mixing queue — the order can then be arranged so a leftover from one job fits the next",
@@ -481,8 +506,26 @@ const SLOVNIK = {
   "základ: {z}": { en: "base: {z}", pt: "base: {z}" },
   "nátisk {g} g": { en: "proof {g} g", pt: "prova {g} g" },
   "Kolik základu v kelímku (g)": { en: "How much base in the cup (g)", pt: "Quanto de base no copo (g)" },
-  "Co jsem přilil (složka a gramy)":
-    { en: "What I added (component and grams)", pt: "O que adicionei (componente e gramas)" },
+  /* Řetěz kroků: přílitky a převážení kelímku mezi nimi (kap. 261) */
+  "Co se s kelímkem dělo": { en: "What happened to the cup", pt: "O que se passou com o copo" },
+  "zváženo": { en: "weighed", pt: "pesado" },
+  "+ znovu zvážit kelímek":
+    { en: "+ weigh the cup again", pt: "+ pesar o copo de novo" },
+  "po nátisku z kelímku ubude — zvažte ho, než přilijete dál":
+    { en: "the proof takes some out of the cup — weigh it before adding more",
+      pt: "a prova tira do copo — pese-o antes de adicionar mais" },
+  "ubylo {g} g": { en: "{g} g gone", pt: "menos {g} g" },
+  "o {g} g víc, než se zapsalo":
+    { en: "{g} g more than recorded", pt: "{g} g mais do que ficou registado" },
+  "Při nátiscích ubylo {g} g — složení se tím nemění, dál se počítá od zvážené hmotnosti.":
+    { en: "The proofs took {g} g out — the composition is unchanged, further steps count from the weighed mass.",
+      pt: "As provas tiraram {g} g — a composição não muda, daqui conta-se pela massa pesada." },
+  "Váha ukázala o {g} g víc, než se zapsalo — dopište, co se přililo, jinak složení nesedí.":
+    { en: "The scale shows {g} g more than recorded — add what was poured in, or the composition is wrong.",
+      pt: "A balança mostra {g} g a mais do que foi registado — escreva o que se adicionou, senão a composição não bate." },
+  "mezitím {n}× převáženo, ubylo {g} g":
+    { en: "reweighed {n}× in between, {g} g gone",
+      pt: "pesado de novo {n}× pelo meio, menos {g} g" },
   "název složky": { en: "component name", pt: "nome do componente" },
   "+ přílitek": { en: "+ addition", pt: "+ adição" },
   "nová": { en: "new", pt: "novo" },
@@ -514,6 +557,11 @@ const SLOVNIK = {
   "čí logo se tiskne (nepovinné)":
     { en: "whose logo is printed (optional)", pt: "de quem é o logótipo (opcional)" },
   "bez značky loga": { en: "no logo brand", pt: "sem marca de logótipo" },
+  /* Technologie u vlastní receptury. Prázdná = receptura z dřívějška, o které
+     se neví, pro co byla namíchaná — nabídne se u všech technologií. */
+  "— neurčeno, nabídne se všude —":
+    { en: "— unspecified, offered everywhere —", pt: "— não especificado, oferecido em todo o lado —" },
+  " · bez technologie": { en: " · no technology", pt: " · sem tecnologia" },
   "g z {c} g — doporučeno {d} g": { en: "g of {c} g — recommended {d} g", pt: "g de {c} g — recomendado {d} g" },
   "Takhle malý nátisk neukáže odstín receptury.":
     { en: "A proof this small will not show the recipe's shade.", pt: "Uma prova tão pequena não mostrará o tom da receita." },
@@ -552,13 +600,7 @@ const SLOVNIK = {
   " · tato varianta nemá vlastní fotku, zobrazena společná":
     { en: " · this variant has no photo of its own; the shared one is shown",
       pt: " · esta variante não tem foto própria; mostra-se a comum" },
-  "Vázaná receptura": { en: "Linked recipe", pt: "Receita ligada" },
-  " (pro všechny polohy)": { en: " (for all positions)", pt: " (para todas as posições)" },
-  "Opravdu smazat celou recepturu? Vrátit to nejde.":
-    { en: "Really delete the whole recipe? It cannot be undone.", pt: "Eliminar mesmo a receita inteira? Não é reversível." },
   "Upravit": { en: "Edit", pt: "Editar" },
-  "Zrušit vazbu": { en: "Unlink", pt: "Desligar" },
-  "Smazat recepturu": { en: "Delete recipe", pt: "Eliminar a receita" },
   "＋ Custom receptura pro tuto kombinaci":
     { en: "＋ Custom recipe for this combination", pt: "＋ Receita própria para esta combinação" },
   "uloží se jen k：": { en: "saved only for: ", pt: "guarda-se só para: " },
@@ -1282,6 +1324,19 @@ const SLOVNIK = {
   "heslo": { en: "password", pt: "senha" },
   "Uložit": { en: "Save", pt: "Guardar" },
 
+  /* --- přihlášení účtem (záložka Připojení) --- */
+  "Přihlášení": { en: "Sign in", pt: "Iniciar sessão" },
+  "Odhlásit": { en: "Sign out", pt: "Terminar sessão" },
+  "Přihlásit": { en: "Sign in", pt: "Entrar" },
+  "Přihlašuji…": { en: "Signing in…", pt: "A iniciar sessão…" },
+  "účet": { en: "account", pt: "conta" },
+  "Zápis": { en: "Writing", pt: "Escrita" },
+  "žádné": { en: "none", pt: "nenhuma" },
+  "cizí": { en: "other", pt: "alheia" },
+  "přihlášení se nezdařilo": { en: "sign-in failed", pt: "falha ao iniciar sessão" },
+  "Přihlášený účet nemíchá pro tuhle technologii.": { en: "The signed-in account does not mix for this technology.", pt: "A conta com sessão iniciada não mistura para esta tecnologia." },
+  "V téhle dílně jsou zavedené účty. Přihlaste se — bez přihlášení most nevydá receptury ani nepřijme zápis.": { en: "This workshop has accounts set up. Sign in — without signing in the bridge will not hand out recipes or accept writes.", pt: "Esta oficina tem contas configuradas. Inicie sessão — sem sessão a ponte não fornece receitas nem aceita escritas." },
+
   /* --- záložka Připojení k mostu --- */
   "Most je pomocný program běžící na počítači — čte PDF a vykresluje stránky. Aplikaci můžete otevřít odkudkoli (z disku, z localhostu i ze stránky na internetu), most se ale vždy hledá na počítači, u kterého sedíte.":
     { en: "The bridge is a helper program running on the computer — it reads PDFs and renders pages. You can open the app from anywhere (from disk, from localhost, or from a web page), but the bridge is always looked for on the computer you are sitting at.",
@@ -1359,6 +1414,10 @@ const SLOVNIK = {
   "platí pro:": { en: "applies to:", pt: "aplica-se a:" },
   "typ barvy se nabídne v každé technologii": { en: "the ink type will be offered in every technology", pt: "o tipo de tinta será oferecido em todas as tecnologias" },
   "všechny": { en: "all", pt: "todas" },
+  "Bez loga": { en: "No logo", pt: "Sem logótipo" },
+  "Už se používá jako": { en: "Already used as", pt: "Já usado como" },
+  "Zapsat tak": { en: "Use that form", pt: "Usar essa forma" },
+  "Společné řady": { en: "Shared ink series", pt: "Séries comuns" },
   "Ve složce zatím žádné CSV není. Vložte ho tam a načte se samo.":
     { en: "There is no CSV in the folder yet. Put one there and it loads by itself.",
       pt: "Ainda não há nenhum CSV na pasta. Coloque lá um e carrega-se sozinho." },
@@ -2352,6 +2411,70 @@ const SLOVNIK = {
   "zvyšte, pokud se do barvy počítá i pozadí": { en: "raise it if the background counts as ink too", pt: "suba-o se o fundo também contar como tinta" },
   "Měřit jen uvnitř ohraničení motivu": { en: "Measure only inside the motif's bounds", pt: "Medir só dentro dos limites do motivo" },
   "Použít krycí plochu {p} % →": { en: "Use the covered area {p} % →", pt: "Usar a área coberta {p} % →" },
+  /* --- tloušťka čar a síto k logu (17. 9. 2026) --- */
+  "Nejtenčí čára": { en: "Thinnest line", pt: "Linha mais fina" },
+  "Rozměr loga": { en: "Logo size", pt: "Tamanho do logótipo" },
+  /* --- sběr zakázek k sítům (záložka) --- */
+  "Sběr zakázek k sítům": { en: "Orders collected per mesh", pt: "Encomendas recolhidas por malha" },
+  "Záznam vzniká sám při převzetí krycí plochy do zakázky. Čím víc zakázek u síta je, tím spolehlivěji je aplikace nabídne příště sama.":
+    { en: "A record is created automatically when the covered area is taken into the order. The more orders a mesh has, the more reliably the app will suggest it next time.",
+      pt: "O registo é criado automaticamente ao levar a área coberta para o pedido. Quantos mais pedidos uma malha tiver, mais fiável será a sugestão seguinte." },
+  "Zatím tu nic není. Otevřete u zakázky okno krycí plochy, vyberte síto a dejte Použít krycí plochu.":
+    { en: "Nothing here yet. Open the coverage window on an order, pick a mesh and press Use the covered area.",
+      pt: "Ainda não há nada. Abra a janela de cobertura num pedido, escolha uma malha e prima Usar a área coberta." },
+  "hledat zakázku, tloušťku nebo produkt…": { en: "search order, thickness or product…", pt: "procurar encomenda, espessura ou produto…" },
+  "počet|zakázka": { en: "order", pt: "encomenda" },
+  "počet|zakázky": { en: "orders", pt: "encomendas" },
+  "počet|zakázek": { en: "orders", pt: "encomendas" },
+  "počet|barva": { en: "color", pt: "cor" },
+  "počet|barvy": { en: "colors", pt: "cores" },
+  "počet|barev": { en: "colors", pt: "cores" },
+  "počet|síto": { en: "mesh", pt: "malha" },
+  "počet|síta": { en: "meshes", pt: "malhas" },
+  "počet|sít": { en: "meshes", pt: "malhas" },
+  "nejtenčí čára {r} mm": { en: "thinnest line {r} mm", pt: "linha mais fina {r} mm" },
+  "nejširší místo {r} mm": { en: "widest area {r} mm", pt: "zona mais larga {r} mm" },
+  "všechna síta": { en: "all meshes", pt: "todas as malhas" },
+  "bez síta": { en: "no mesh", pt: "sem malha" },
+  "počet|soubor": { en: "file", pt: "ficheiro" },
+  "počet|soubory": { en: "files", pt: "ficheiros" },
+  "počet|souborů": { en: "files", pt: "ficheiros" },
+  "ve složce": { en: "in the folder", pt: "na pasta" },
+  "Každá zakázka se ukládá i jako soubor do složky svého síta.":
+    { en: "Each order is also saved as a file in its mesh folder.",
+      pt: "Cada encomenda é também guardada como ficheiro na pasta da sua malha." },
+  "Bez mostu se počty souborů ve složkách neukazují — aplikace na disk nevidí.":
+    { en: "Without the bridge the file counts are not shown — the app cannot see the disk.",
+      pt: "Sem a ponte não se mostram as contagens de ficheiros — a aplicação não vê o disco." },
+  "Nejtenčí": { en: "Thinnest", pt: "Mais fina" },
+  "Nejširší": { en: "Widest", pt: "Mais larga" },
+  "Logo (mm)": { en: "Logo (mm)", pt: "Logótipo (mm)" },
+  "Těrka": { en: "Squeegee", pt: "Rodo" },
+  "Produkt a poloha": { en: "Product and position", pt: "Produto e posição" },
+  "Zapsáno": { en: "Recorded", pt: "Registado" },
+  "barva {n}": { en: "color {n}", pt: "cor {n}" },
+  " · těrka {t} mm — nejbližší širší než logo": { en: " · squeegee {t} mm — nearest wider than the logo", pt: " · rodo {t} mm — o mais próximo mais largo que o logótipo" },
+  " · v řadě není širší těrka než logo": { en: " · no squeegee in the range is wider than the logo", pt: " · nenhum rodo da gama é mais largo que o logótipo" },
+  "po barvách v rozpisu níže": { en: "per color in the breakdown below", pt: "por cor na lista abaixo" },
+  "Nejširší místo": { en: "Widest area", pt: "Zona mais larga" },
+  " ± {r} mm — jeden bod předlohy": { en: " ± {r} mm — one pixel of the artwork", pt: " ± {r} mm — um ponto do original" },
+  "{p} bodů — bez rozměru potisku chybí měřítko": { en: "{p} px — no print dimension, no scale", pt: "{p} pontos — sem dimensão de impressão não há escala" },
+  "v motivu není žádná čára": { en: "no line found in the motif", pt: "nenhuma linha no motivo" },
+  "Červený kroužek v náhledu je nejtenčí čára, modrý nejširší místo. Čára tenčí než jeden bod předlohy se nezměří.":
+    { en: "The red circle in the preview marks the thinnest line, the blue one the widest area. A line thinner than one pixel of the artwork cannot be measured.",
+      pt: "O círculo vermelho na pré-visualização marca a linha mais fina, o azul a zona mais larga. Uma linha mais fina do que um ponto do original não se mede." },
+  "% motivu": { en: "% of motif", pt: "% do motivo" },
+  "Čára od–do (mm)": { en: "Line from–to (mm)", pt: "Linha de–até (mm)" },
+  "síto podle tabulky sít": { en: "mesh from the mesh table", pt: "malha da tabela de malhas" },
+  "dílna {n}× u čar {od}–{do} mm": { en: "workshop chose it {n}× for lines {od}–{do} mm", pt: "a oficina escolheu-a {n}× para linhas {od}–{do} mm" },
+  "síto z receptury": { en: "mesh from the recipe", pt: "malha da receita" },
+  "síto z kalkulace": { en: "mesh from the calculation", pt: "malha do cálculo" },
+  "Tabulka sít nemá vyplněné meze čáry (cara_od_mm, cara_do_mm) — síto se předvybírá ze zkušenosti dílny: {n} záznamů měření pro tuto technologii.":
+    { en: "The mesh table has no line limits filled in (cara_od_mm, cara_do_mm) — the mesh is preselected from workshop experience: {n} logo measurements for this technology.",
+      pt: "A tabela de malhas não tem limites de linha preenchidos (cara_od_mm, cara_do_mm) — a malha é pré-selecionada pela experiência da oficina: {n} medições de logótipos para esta tecnologia." },
+  "Měření loga zapsáno ({n} barev) — síto k čáře se dílna učí z evidence.":
+    { en: "Logo measurement recorded ({n} colors) — the mesh-to-line choice is learned from the records.",
+      pt: "Medição do logótipo registada ({n} cores) — a escolha da malha pela linha aprende-se dos registos." },
 
   /* --- zakázkový list v kalkulaci, Zakázky (SGPS), čtečka --- */
   "Zakázkový list (PDF)": { en: "Order sheet (PDF)", pt: "Folha de encomenda (PDF)" },
@@ -2743,6 +2866,108 @@ const SLOVNIK = {
   "Použít": { en: "Use", pt: "Usar" },
   "Požadavek {kod} zapsán — technolog uvidí odstín {o} v záložce Ke schválení.": { en: "Request {kod} recorded — the technologist will see shade {o} in the For approval tab.", pt: "Pedido {kod} registado — o tecnólogo verá a cor {o} no separador Para aprovação." },
   "KDO MÍCHÁ": { en: "WHO IS MIXING", pt: "QUEM MISTURA" },
+  " se nezapsaly: {e}. Na ostatních počítačích zatím neplatí.": { en: " were not written: {e}. They do not apply on the other computers yet.", pt: " não foram gravadas: {e}. Ainda não se aplicam nos outros computadores." },
+  "(receptura chybí)": { en: "(recipe missing)", pt: "(receita em falta)" },
+  "+ Přidat barvu": { en: "+ Add colour", pt: "+ Adicionar cor" },
+  "Barvy zboží": { en: "Goods colours", pt: "Cores do artigo" },
+  "Bez vybrané polohy chybí technologie — podobné produkty se hledají jen v té samé.": { en: "Without a selected position there is no technology — similar products are searched only within the same one.", pt: "Sem posição selecionada falta a tecnologia — os produtos semelhantes procuram-se só na mesma." },
+  "Dalším produktům…": { en: "To other products…", pt: "A outros produtos…" },
+  "Hledat produkt / ref / polohu…": { en: "Search product / ref / position…", pt: "Procurar produto / ref / posição…" },
+  "Hotovo": { en: "Done", pt: "Concluído" },
+  "Jen podobné produkty": { en: "Only similar products", pt: "Só produtos semelhantes" },
+  "Kombinace nemá barvu zboží — bez ní se podobné produkty nedají najít.": { en: "The combination has no goods colour — without it similar products cannot be found.", pt: "A combinação não tem cor do artigo — sem ela não se encontram produtos semelhantes." },
+  "Most neběží — vazby platí zatím jen v tomhle prohlížeči a zapíšou se, až poběží.": { en: "The bridge is not running — the links apply only in this browser for now and will be written once it runs.", pt: "A ponte não está a correr — as ligações valem por agora só neste navegador e serão gravadas quando correr." },
+  "Nic neodpovídá hledání.": { en: "Nothing matches the search.", pt: "Nada corresponde à procura." },
+  "Odebrat": { en: "Remove", pt: "Remover" },
+  "Produkt nemá zapsaný materiál — bez něj se podobné produkty nedají najít. Doplňte ho v záložce Produkty.": { en: "The product has no material recorded — without it similar products cannot be found. Add it in the Products tab.", pt: "O produto não tem material registado — sem ele não se encontram produtos semelhantes. Acrescente-o no separador Produtos." },
+  "Přiřadit k této kombinaci": { en: "Assign to this combination", pt: "Atribuir a esta combinação" },
+  "Přiřadit místo ní": { en: "Assign instead of it", pt: "Atribuir em vez dela" },
+  "Přiřadit {r} této poloze a barvě": { en: "Assign {r} to this position and colour", pt: "Atribuir {r} a esta posição e cor" },
+  "Přiřazená — klik odebere": { en: "Assigned — click removes", pt: "Atribuída — clique remove" },
+  "Recepty k přiřazení": { en: "Recipes to assign", pt: "Receitas a atribuir" },
+  "Stejný materiál a barva": { en: "Same material and colour", pt: "Mesmo material e cor" },
+  "Teď má: {r} — klik ji přepíše": { en: "Currently has: {r} — click overwrites it", pt: "Tem agora: {r} — o clique substitui-a" },
+  "Teď má: {r} — zaškrtnutím se přepíše": { en: "Currently has: {r} — ticking overwrites it", pt: "Tem agora: {r} — ao marcar é substituída" },
+  "Teď ne": { en: "Not now", pt: "Agora não" },
+  "Uložit vazby": { en: "Save links", pt: "Guardar ligações" },
+  "Uložit vazby ({p} přidat, {o} odebrat)": { en: "Save links ({p} to add, {o} to remove)", pt: "Guardar ligações ({p} a adicionar, {o} a remover)" },
+  "Vazby platí v tomhle prohlížeči, ale do souboru": { en: "The links apply in this browser, but the file", pt: "As ligações valem neste navegador, mas o ficheiro" },
+  "Vazby uloženy do parametry/vazby_receptur.csv ({n} řádků) — platí i na ostatních počítačích v dílně.": { en: "Links saved to parametry/vazby_receptur.csv ({n} rows) — they apply on the other workshop computers too.", pt: "Ligações guardadas em parametry/vazby_receptur.csv ({n} linhas) — valem também nos outros computadores da oficina." },
+  "Vazby uloženy: {p} přidáno, {o} odebráno.": { en: "Links saved: {p} added, {o} removed.", pt: "Ligações guardadas: {p} adicionadas, {o} removidas." },
+  "Vybrat vše": { en: "Select all", pt: "Selecionar tudo" },
+  "Všechny produkty": { en: "All products", pt: "Todos os produtos" },
+  "Zrušit výběr": { en: "Clear selection", pt: "Limpar seleção" },
+  "bez barev zboží — doplňte v Upravit": { en: "no goods colours — add them in Edit", pt: "sem cores do artigo — acrescente em Editar" },
+  "kód": { en: "code", pt: "código" },
+  "má": { en: "has", pt: "tem" },
+  "název barvy": { en: "colour name", pt: "nome da cor" },
+  "odstín": { en: "shade", pt: "tom" },
+  "podobné podle vazeb:": { en: "similar by links:", pt: "semelhantes pelas ligações:" },
+  "produkty se stejným materiálem, barvou a technologií": { en: "products with the same material, colour and technology", pt: "produtos com o mesmo material, cor e tecnologia" },
+  "tady je přiřazená {r}": { en: "{r} is assigned here", pt: "aqui está atribuída {r}" },
+  "vázaná na {c} (všechny polohy)": { en: "linked to {c} (all positions)", pt: "ligada a {c} (todas as posições)" },
+  "zatím bez vazby — vyberte produkty ručně": { en: "no links yet — pick the products by hand", pt: "ainda sem ligação — escolha os produtos à mão" },
+  "{n} kombinací · vybráno {v}": { en: "{n} combinations · {v} selected", pt: "{n} combinações · {v} selecionadas" },
+  "{n} receptur přiřazeno": { en: "{n} recipes assigned", pt: "{n} receitas atribuídas" },
+  "{n} vazeb": { en: "{n} links", pt: "{n} ligações" },
+  "Žádný další produkt se stejným materiálem, barvou a technologií v katalogu není.": { en: "There is no other product with the same material, colour and technology in the catalogue.", pt: "Não há outro produto com o mesmo material, cor e tecnologia no catálogo." },
+  "Žádný produkt se stejným materiálem, barvou a technologií — přepněte na Všechny produkty.": { en: "No product with the same material, colour and technology — switch to All products.", pt: "Nenhum produto com o mesmo material, cor e tecnologia — mude para Todos os produtos." },
+  "— vlastní receptury podle značky loga —": { en: "— custom recipes by logo brand —", pt: "— receitas próprias por marca do logótipo —" },
+  "✓ přiřazená k {c}": { en: "✓ assigned to {c}", pt: "✓ atribuída a {c}" },
+  "(bez materiálu)": { en: "(no material)", pt: "(sem material)" },
+  "Produkt {ref} nemá zapsaný materiál — bez něj se podobné produkty nenajdou. Doplňte ho tlačítkem Upravit.": { en: "Product {ref} has no material recorded — without it similar products cannot be found. Add it with the Edit button.", pt: "O produto {ref} não tem material registado — sem ele não se encontram produtos semelhantes. Acrescente-o com o botão Editar." },
+  "Žádný produkt s polohou pro technologie {t}.": { en: "No product with a position for technologies {t}.", pt: "Nenhum produto com posição para as tecnologias {t}." },
+  "custom": { en: "custom", pt: "custom" },
+  "standard": { en: "standard", pt: "padrão" },
+  "bez uložené receptury": { en: "no saved recipe", pt: "sem receita guardada" },
+  "bez receptury": { en: "no recipe", pt: "sem receita" },
+  "Upravit sadu receptur": { en: "Edit recipe set", pt: "Editar conjunto de receitas" },
+  "Uložit barvy zakázky jako sadu": { en: "Save the job colours as a set", pt: "Guardar as cores da encomenda como conjunto" },
+  "čí logo se tiskne": { en: "whose logo is printed", pt: "de quem é o logótipo impresso" },
+  "Název sady": { en: "Set name", pt: "Nome do conjunto" },
+  "{n} barva/barvy bez uložené receptury — do sady se zapíše jen název a odstín. Příště se založí jako rozpracovaná, receptura se doplní až po uložení.": { en: "{n} colour(s) without a saved recipe — only the name and shade go into the set. Next time it starts as a draft; the recipe is added once saved.", pt: "{n} cor(es) sem receita guardada — no conjunto fica só o nome e o tom. Da próxima vez começa como rascunho; a receita junta-se depois de guardada." },
+  "Uložit změny sady": { en: "Save set changes", pt: "Guardar alterações do conjunto" },
+  "Uložit sadu ({n})": { en: "Save set ({n})", pt: "Guardar conjunto ({n})" },
+  "1 barva": { en: "1 colour", pt: "1 cor" },
+  "{n} barvy": { en: "{n} colours", pt: "{n} cores" },
+  "bez značky loga se sada nedá najít": { en: "without a logo brand the set cannot be found", pt: "sem marca de logótipo o conjunto não se encontra" },
+  "{n} barev": { en: "{n} colours", pt: "{n} cores" },
+  "✓ použitá v zakázce": { en: "✓ used in the job", pt: "✓ usado na encomenda" },
+  "Použít sadu": { en: "Use set", pt: "Usar conjunto" },
+  "Smazat sadu i s jejími kombinacemi? Vrátit to nejde.": { en: "Delete the set with its combinations? This cannot be undone.", pt: "Apagar o conjunto com as suas combinações? Não é possível anular." },
+  "Smazat sadu": { en: "Delete set", pt: "Apagar conjunto" },
+  "Sada {s}: {n}, {ch} bez receptury na tomhle počítači — založeny jako rozpracované.": { en: "Set {s}: {n}, {ch} without a recipe on this computer — created as drafts.", pt: "Conjunto {s}: {n}, {ch} sem receita neste computador — criadas como rascunho." },
+  "Sada {s} použita — {n}.": { en: "Set {s} applied — {n}.", pt: "Conjunto {s} aplicado — {n}." },
+  "Sada {s} uložena — {n} na {k}.": { en: "Set {s} saved — {n} on {k}.", pt: "Conjunto {s} guardado — {n} em {k}." },
+  "smazání sady {s}": { en: "deleting set {s}", pt: "apagar o conjunto {s}" },
+  "Sada na další produkty": { en: "Set to other products", pt: "Conjunto para outros produtos" },
+  "Uloží všechny barvy zakázky jako sadu receptur k této kombinaci a značce loga": { en: "Saves all job colours as a recipe set for this combination and logo brand", pt: "Guarda todas as cores da encomenda como conjunto de receitas para esta combinação e marca" },
+  "Uložit změny sady…": { en: "Save set changes…", pt: "Guardar alterações do conjunto…" },
+  "Uložit jako sadu…": { en: "Save as set…", pt: "Guardar como conjunto…" },
+  "Sady receptur": { en: "Recipe sets", pt: "Conjuntos de receitas" },
+  "Sada": { en: "Set", pt: "Conjunto" },
+  "Součást sady:": { en: "Part of set:", pt: "Parte do conjunto:" },
+  "Sada míchá řady {r} — receptury sady mají být z jedné barevné řady.": { en: "The set mixes series {r} — a set's recipes should come from one colour series.", pt: "O conjunto mistura séries {r} — as receitas de um conjunto devem ser de uma só série de cores." },
+  "Receptury sady musí být z jedné barevné řady — standardní z ní, nebo custom z ní odvozené. Tady jsou: {r}. Vyměňte recepturu, pak sadu uložte.": { en: "A set's recipes must come from one colour series — standard ones from it, or custom ones derived from it. Here they are: {r}. Replace the recipe, then save the set.", pt: "As receitas de um conjunto devem ser de uma só série de cores — padrão dessa série, ou personalizadas derivadas dela. Aqui estão: {r}. Troque a receita e depois guarde o conjunto." },
+  "sada míchá barevné řady": { en: "the set mixes colour series", pt: "o conjunto mistura séries de cores" },
+  "1 sada": { en: "1 set", pt: "1 conjunto" },
+  "{n} sady": { en: "{n} sets", pt: "{n} conjuntos" },
+  "{n} sad": { en: "{n} sets", pt: "{n} conjuntos" },
+  "barva zboží": { en: "product colour", pt: "cor do produto" },
+  "Sada je přiřazená — klik ji odebere": { en: "Set is assigned — click removes it", pt: "Conjunto atribuído — clique remove" },
+  "Přiřadit sadu {s} této poloze a barvě": { en: "Assign set {s} to this position and colour", pt: "Atribuir o conjunto {s} a esta posição e cor" },
+  "Hledat recepturu nebo sadu — název, objednací číslo, značka…": { en: "Search recipe or set — name, order number, brand…", pt: "Procurar receita ou conjunto — nome, número de encomenda, marca…" },
+  "Sady receptur — {n} z {celkem}": { en: "Recipe sets — {n} of {celkem}", pt: "Conjuntos de receitas — {n} de {celkem}" },
+  "Všechny řady ({n})": { en: "All series ({n})", pt: "Todas as séries ({n})" },
+  "bez řady": { en: "no series", pt: "sem série" },
+  "Hledat sadu — řada, produkt, poloha, materiál, logo…": { en: "Search set — series, product, position, material, logo…", pt: "Procurar conjunto — série, produto, posição, material, logótipo…" },
+  "Všechny materiály ({n})": { en: "All materials ({n})", pt: "Todos os materiais ({n})" },
+  "bez materiálu": { en: "no material", pt: "sem material" },
+  "— vyberte sadu —": { en: "— choose a set —", pt: "— escolha um conjunto —" },
+  "— žádná sada pro tuto technologii —": { en: "— no set for this technology —", pt: "— nenhum conjunto para esta tecnologia —" },
+  " · tento produkt": { en: " · this product", pt: " · este produto" },
+  "tato kombinace": { en: "this combination", pt: "esta combinação" },
+  "Kombinace sady uloženy: {p} přidáno, {o} odebráno.": { en: "Set combinations saved: {p} added, {o} removed.", pt: "Combinações do conjunto guardadas: {p} adicionadas, {o} removidas." },
 };
 
 /* Národní prostředí pro data psaná slovem (názvy měsíců v sestavách).
@@ -2759,9 +2984,22 @@ function jazykProstredi() {
      preloz("Kelímek {kod} v evidenci není.", { kod: "Z12" })
    Doplňuje se přes split/join, ne regulárním výrazem — v doplňované hodnotě
    se nesmí nic vykládat jako vzor. */
+/* Předpony, které jen upřesňují význam klíče a na obrazovku nepatří. */
+const KLIC_PREDPONY = /^počet\|/;
+
 function preloz(text, dosazeni) {
   const zaznam = SLOVNIK[text];
-  let vysledek = (zaznam && zaznam[jazykAplikace]) || text;
+  /* Klíč tvaru „počet|zakázky“ odlišuje počet od slova v jiném významu
+     („zakázky“ jako tisková barva). Slovník zná celý klíč, čeština ukáže
+     jen část za svislítkem — bez toho se předpona propsala na obrazovku
+     („3 počet|zakázky“, naměřeno 17. 9. 2026).
+
+     Ořezává se JEN předpona „počet|“, ne každé svislítko: text
+     „Např. 11101 nebo IRM1|ref=11101…“ je ukázka kódu čtečky a ořízl by
+     se na „ref=11101|ks=500…“ (chyceno zkouškou hned při zavádění).
+     Kdo přidá další předponu, přidá ji sem i do KLIC_PREDPONY. */
+  const cesky = KLIC_PREDPONY.test(text) ? text.slice(text.indexOf("|") + 1) : text;
+  let vysledek = (zaznam && zaznam[jazykAplikace]) || cesky;
   if (dosazeni) {
     for (const klic in dosazeni) {
       vysledek = vysledek.split("{" + klic + "}").join(String(dosazeni[klic]));

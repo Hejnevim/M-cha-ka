@@ -117,7 +117,9 @@ function resolveSpec(parsed, products, recipes, omezeni) {
     recipe: null, qty: null, gm2: null, loss: null, minBatch: null,
     terka: null, naTah: null, warn: [], ok: [],
     tech: "", rady: [], radaPrirazena: [], radaZvolena: o.rada || "", nalezenoVRade: {},
-    zeptatNaRadu: false };
+    /* radyKVyberu = co se nabídne v okně „Z jaké řady vzít odstín“: u uzavřené
+       polohy jen přiřazené, jinak všechny řady technologie (viz níž). */
+    polohaUzavrena: false, radyKVyberu: [], zeptatNaRadu: false };
   const num = (key, min) => {
     if (f[key] == null || f[key] === "") return null;
     const v = n(f[key], NaN);
@@ -239,11 +241,36 @@ function resolveSpec(parsed, products, recipes, omezeni) {
   const vybrane = r.radaZvolena ? [r.radaZvolena] : r.radaPrirazena;
   const kandidati = !vybrane.length ? proTech
     : proTech.filter((x) => !x.zdroj || x.type === "Custom" || vybrane.indexOf(x.zdroj) >= 0);
-  /* Technologie s víc řadami a poloha bez přiřazené řady: aplikace nemá
-     podle čeho vybrat, tak se zeptá (část 182). Volba se pak uloží k poloze,
-     takže se ptá jen jednou. Bez polohy není kam volbu uložit — pak se
-     hledá ve všech řadách technologie a hlásí se, ve které se našlo. */
-  r.zeptatNaRadu = !!(omezeni && f.recipe && r.product && r.position && !vybrane.length && r.rady.length > 1);
+  /* Ptát se, nebo ne. Rozhoduje o tom, kolik řad přichází v úvahu — a to
+     závisí na tom, jestli je poloha uzavřená (sloupec `uzavreno`, část 456).
+
+     Uzavřená poloha znamená „tady už žádná další řada nepřibude“, takže
+     přiřazené řady jsou úplný seznam: jedna se vezme mlčky, z víc se
+     míchač rozhodne. Dřív se u víc přiřazených řad nabralo obojí jako
+     filtr a vyhrál první nalezený odstín — a protože týž Pantone kód je
+     v každé řadě, rozhodovalo pořadí souborů, ne člověk.
+
+     Odemčená poloha je rozdělaná: přiřazení zatím nemusí být úplné, takže
+     se ptá ze VŠECH řad technologie a přiřazené se v okně jen zvýrazní
+     (radaPrirazena, část 182). */
+  r.polohaUzavrena = polohaUzavrena(o.uzavrenePolohy, r.product, r.position);
+  /* Z čeho se vybírá v okně: u uzavřené polohy jen z přiřazených, jinak ze
+     všech řad technologie. Bez jediné přiřazené řady je i zavřená poloha
+     odkázaná na celou technologii — zamknout prázdnou polohu je omyl
+     obsluhy a aplikace kvůli němu nesmí zůstat bez nabídky. */
+  r.radyKVyberu = (r.polohaUzavrena && r.radaPrirazena.length) ? r.radaPrirazena.slice() : r.rady;
+  /* Kolik řad zbývá rozhodnout. Volba z okna (radaZvolena) je hotové
+     rozhodnutí, u té se už neptáme.
+
+     Zámek je jediné, co otázku umlčí. Odemčená poloha se ptá, i když už
+     nějakou řadu přiřazenou má — přiřazení na ní je rozdělané, ne hotové,
+     a míchač má u zakázky vidět, co dílna zavedla (zelená dlaždice) a smí
+     sáhnout i jinam. Uzavřená poloha se ptá jen tehdy, když jsou přiřazené
+     řady dvě a víc; s jedinou je rozhodnuto a ptát se není na co. */
+  const kRozhodnuti = r.radaZvolena ? 1
+    : (r.polohaUzavrena && r.radaPrirazena.length) ? r.radaPrirazena.length
+    : r.rady.length;
+  r.zeptatNaRadu = !!(omezeni && f.recipe && r.product && r.position && kRozhodnuti > 1);
   r.recipes = [];
   if (f.recipe) {
     // je-li známa řada barvy, hledá se nejdřív v ní — stejný Pantone kód

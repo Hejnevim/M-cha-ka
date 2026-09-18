@@ -1058,7 +1058,7 @@ SABLONA = r"""<!doctype html>
         </div>
       </div>
 
-      <div class="card bigform karta-recept" style="margin:0">
+      <div class="card bigform karta-recept">
         <h2>Receptura a barva</h2>
         <div class="frow c2">
           <div><label class="f">Standardní receptury</label>

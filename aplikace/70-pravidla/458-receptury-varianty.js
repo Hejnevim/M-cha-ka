@@ -131,19 +131,53 @@ function filtrReceptur(recipes, { oblibene, jenOblibene, jenMoje, jenNove, podpi
 }
 
 /* ---- hledání s napovídáním ----
-   Hledá se v názvu, řadě, typu, objednacím čísle a ve jménech složek —
-   objednací číslo proto, že dodavatel na faktuře uvádí jen to, a jméno
-   složky proto, že se často ví „něco s Warm Red", ne číslo pantonu. */
-const textHledaniReceptury = (r) => [r.name, r.series, r.type, r.objCislo,
-  (r.components || []).map((c) => c.name).join(" ")].filter(Boolean).join(" ").toLowerCase();
+   Hledá se v názvu, řadě, typu, objednacím čísle, ve jménech složek, ve
+   značce loga, v poznámce a v názvu databáze — objednací číslo proto, že
+   dodavatel na faktuře uvádí jen to, jméno složky proto, že se často ví
+   „něco s Warm Red", ne číslo pantonu, a značka s poznámkou proto, že
+   vlastní receptura se v dílně pamatuje podle zakázky, ne podle názvu.
+
+   Dotaz se bere po slovech: každé slovo se musí najít, v libovolném pořadí
+   a v libovolném poli. „hrnek zkouška" dřív nenašlo nic, protože se hledal
+   celý řetězec i s mezerou a ten v žádném poli nestojí; receptura se přitom
+   jmenovala „Zkouška" a v poznámce měla „hrnek". Diakritika se nebere —
+   u váhy se píše jednou rukou a „zkouska" má najít „Zkouška". */
+const slovaHledani = (dotaz) => bezDiakritiky(dotaz).split(/\s+/).filter(Boolean);
+const shodaHledani = (text, slova) => {
+  const t = bezDiakritiky(text);
+  return slova.every((w) => t.indexOf(w) >= 0);
+};
+/* Text receptury se skládá jednou a drží se v mezipaměti: receptur je přes
+   patnáct tisíc, hledá se při každém stisku klávesy a rozklad diakritiky
+   (normalize) nad každou z nich by u delšího seznamu psaní brzdil. Klíčem je
+   objekt receptury, takže po novém načtení databáze se text složí znovu. */
+const _textyHledani = new WeakMap();
+const textHledaniReceptury = (r) => {
+  if (!r || typeof r !== "object") return "";
+  let t = _textyHledani.get(r);
+  if (t == null) {
+    t = bezDiakritiky([r.name, r.series, r.type, r.objCislo, r.znackaLoga, r.poznamka,
+      r.zdroj ? nazevDb(r.zdroj) : "",
+      (r.components || []).map((c) => c.name).join(" ")].filter(Boolean).join(" "));
+    _textyHledani.set(r, t);
+  }
+  return t;
+};
+/* Shoda receptury s dotazem — jediné místo pro kalkulaci, záložku Receptury
+   i našeptávač v katalogu, aby všude našly totéž. */
+const recepturaOdpovida = (r, dotaz) => {
+  const slova = Array.isArray(dotaz) ? dotaz : slovaHledani(dotaz);
+  return !slova.length || shodaHledani(textHledaniReceptury(r), slova);
+};
 function napovedaReceptur(recipes, dotaz, strop) {
-  const q = String(dotaz || "").trim().toLowerCase();
-  if (!q) return [];
+  const slova = slovaHledani(dotaz);
+  if (!slova.length) return [];
+  // celý dotaz od začátku názvu jde první („485" napřed „485 C", až pak „Warm Red 485")
+  const cely = slova.join(" ");
   const zac = [], uvnitr = [];
   for (const r of (recipes || [])) {
-    const nazev = String(r.name || "").toLowerCase();
-    if (nazev.indexOf(q) === 0) zac.push(r);
-    else if (textHledaniReceptury(r).indexOf(q) >= 0) uvnitr.push(r);
+    if (!recepturaOdpovida(r, slova)) continue;
+    if (bezDiakritiky(r.name).indexOf(cely) === 0) zac.push(r); else uvnitr.push(r);
     if (zac.length >= (strop || 12)) break;
   }
   return zac.concat(uvnitr).slice(0, strop || 12);

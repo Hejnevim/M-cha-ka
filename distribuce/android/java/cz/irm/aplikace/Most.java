@@ -24,9 +24,12 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
@@ -42,6 +45,8 @@ import java.util.TreeSet;
  * POST /api/databaze/ulozit (přes dočasný soubor, předchozí verze jako .bak),
  * statické soubory aplikace z assetů. Co na telefonu není: čtení PDF a SGPS —
  * server to poctivě hlásí, aplikace o tom ví z /api/stav (pdf:false).
+ * Přihlášení účtem tu také není (ucty:false): most poslouchá jen na
+ * 127.0.0.1 a data má ve vlastním filesDir, takže není komu se prokazovat.
  */
 public class Most implements Runnable {
     public static final int PORT = 8765;
@@ -295,6 +300,15 @@ public class Most implements Runnable {
             json(out, 200, new JSONObject()
                     .put("ok", true).put("rezim", "telefon").put("pocet", 0).put("chyba", "")
                     .put("verze", "1.1").put("pdf", false)
+                    /* Telefon se nepřihlašuje. Most tu poslouchá jen na
+                       127.0.0.1 a data má ve svém filesDir, takže není komu
+                       se prokazovat — účet hlídá data sdílená mezi zařízeními,
+                       a ta na telefonu nejsou. Klíč se přesto posílá: aplikace
+                       podle něj schová přihlašovací kartu, a kdyby chyběl
+                       úplně, musela by hádat, jestli je most starý, nebo
+                       jestli dílna účty nemá. */
+                    .put("ucty", false)
+                    .put("prihlasen", JSONObject.NULL)
                     // verze balíčku z dilna/manifest.json — aplikace ji ukáže v Připojení
                     .put("balicek", verzeBalicku())
                     .put("popis", "telefon — SGPS a čtení PDF jsou jen na počítači"));
@@ -330,14 +344,57 @@ public class Most implements Runnable {
         return f.length() + "-" + (f.lastModified() / 1000);
     }
 
+    /* Složky podle loga zákazníka (17. 9. 2026): CSV smí ležet v podsložkách
+       <technologie>/<značka loga>/. Most celý podstrom projde a nabídne soubory
+       podle holého jména — jméno zůstává klíčem, na kterém visí sady a vazby.
+       Zrcadlí _projdi_csv a _najdi_csv v most.py; mění se naráz.
+
+       Dva soubory téhož jména ve dvou větvích by klíč rozdvojily, proto se
+       druhý přeskočí: vyhrává vždy první v abecedním pořadí, aby aplikace
+       po restartu četla tutéž databázi. */
+    private static void sesbirej(File dir, String vetev, TreeMap<String, File> out) {
+        File[] polozky = dir.listFiles();
+        if (polozky == null) return;
+        Arrays.sort(polozky, new Comparator<File>() {
+            public int compare(File a, File b) { return a.getName().compareTo(b.getName()); }
+        });
+        for (File p : polozky) {
+            if (p.isDirectory()) {
+                sesbirej(p, vetev.isEmpty() ? p.getName() : vetev + "/" + p.getName(), out);
+            } else if (p.getName().toLowerCase(Locale.ROOT).endsWith(".csv")) {
+                String klic = p.getName().toLowerCase(Locale.ROOT);
+                if (!out.containsKey(klic)) out.put(klic, p);
+            }
+        }
+    }
+
+    /** Větev souboru pod kořenem složky: "" v kořeni, jinak "SCR/SKODA_AUTO". */
+    private static String vetevSouboru(File f, File koren) {
+        String cesta = f.getParentFile() == null ? "" : f.getParentFile().getAbsolutePath();
+        String zaklad = koren.getAbsolutePath();
+        if (!cesta.startsWith(zaklad)) return "";
+        String rel = cesta.substring(zaklad.length()).replace(File.separatorChar, '/');
+        while (rel.startsWith("/")) rel = rel.substring(1);
+        return rel;
+    }
+
+    /** Cesta k CSV podle holého jména kdekoli v podstromu, nebo null. */
+    private static File najdiCsv(String jmeno, File dir) {
+        if (!jmenoJeCsv(jmeno)) return null;
+        File primo = new File(dir, jmeno);        // v kořeni napřed: běžný případ
+        if (primo.isFile()) return primo;
+        TreeMap<String, File> vse = new TreeMap<>();
+        sesbirej(dir, "", vse);
+        return vse.get(jmeno.toLowerCase(Locale.ROOT));
+    }
+
     private JSONArray seznam(File dir) throws Exception {
         JSONArray out = new JSONArray();
         if (!dir.isDirectory()) return out;
-        TreeSet<String> jmena = new TreeSet<>();
-        String[] vsechna = dir.list();
-        if (vsechna != null) for (String j : vsechna) if (j.toLowerCase(Locale.ROOT).endsWith(".csv")) jmena.add(j);
-        for (String jmeno : jmena) {
-            File f = new File(dir, jmeno);
+        TreeMap<String, File> vse = new TreeMap<>();
+        sesbirej(dir, "", vse);
+        for (File f : vse.values()) {
+            String jmeno = f.getName();
             if (!f.isFile()) continue;
             String text = ctiCsv(f);
             String[] radky = text.split("\r\n|\n|\r", -1);
@@ -346,7 +403,8 @@ public class Most implements Runnable {
             String hlavicka = pocet > 0 ? radky[0] : "";
             String druh = druhCsv(hlavicka);
             JSONObject z = new JSONObject()
-                    .put("jmeno", jmeno).put("velikost", f.length())
+                    .put("jmeno", jmeno).put("vetev", vetevSouboru(f, dir))
+                    .put("velikost", f.length())
                     .put("zmeneno", f.lastModified() / 1000).put("verze", verze(f))
                     .put("druh", druh).put("radku", Math.max(0, pocet - 1));
             if (druh.equals("material")) z.put("ceny", maCeny(hlavicka));
@@ -356,10 +414,41 @@ public class Most implements Runnable {
     }
 
     private JSONObject soubor(String jmeno, File dir) throws Exception {
-        if (!jmenoJeCsv(jmeno)) return null;
-        File f = new File(dir, jmeno);
-        if (!f.isFile()) return null;
-        return new JSONObject().put("jmeno", jmeno).put("verze", verze(f)).put("text", ctiCsv(f));
+        File f = najdiCsv(jmeno, dir);
+        if (f == null || !f.isFile()) return null;
+        return new JSONObject().put("jmeno", jmeno).put("vetev", vetevSouboru(f, dir))
+                .put("verze", verze(f)).put("text", ctiCsv(f));
+    }
+
+    /* Podsložka pro nový soubor: jen "<technologie>/<značka loga>" bez skoku ven.
+       Aplikace ji skládá z údajů dílny — značka loga bývá přečtená ze
+       zakázkového listu —, takže se do ní může dostat cokoli. Cokoli
+       podezřelého se zahodí a soubor spadne do kořene. Zrcadlí
+       _bezpecna_vetev v most.py. */
+    private static String bezpecnaVetev(String vetev) {
+        if (vetev == null || vetev.isEmpty()) return "";
+        StringBuilder sb = new StringBuilder();
+        int urovni = 0;
+        for (String cast : vetev.replace('\\', '/').split("/")) {
+            cast = cast.trim();
+            // tečka na kraji dělá skrytou nebo neotevřitelnou složku
+            while (cast.startsWith(".")) cast = cast.substring(1);
+            while (cast.endsWith(".")) cast = cast.substring(0, cast.length() - 1);
+            if (cast.isEmpty()) continue;
+            for (int i = 0; i < cast.length(); i++) {
+                char z = cast.charAt(i);
+                if (z < ' ' || "<>:\"|?*".indexOf(z) >= 0) return "";
+            }
+            if (urovni > 0) sb.append('/');
+            sb.append(cast);
+            // Hloubka tři úrovně — mění se naráz s most.py (irm-most):
+            //   "<technologie>/<značka loga>"   receptury zákazníka
+            //   "mereni_loga/<TECH>/<síto>"     sběr zakázek k sítům
+            // Na dvou se složka síta tiše ztrácela a zakázky padaly do
+            // složky technologie (17. 9. 2026).
+            if (++urovni == 3) break;
+        }
+        return sb.toString();
     }
 
     private static boolean jmenoJeCsv(String jmeno) {
@@ -394,14 +483,28 @@ public class Most implements Runnable {
             return;
         }
         dir.mkdirs();
-        File cil = new File(dir, jmeno);
-        File docasny = new File(dir, jmeno + ".tmp");
+        /* Soubor, který už ve stromu leží, se přepíše TAM, kde je — jinak by
+           vedle sebe vznikly dvě kopie téhož jména a jedna by se přestala
+           nabízet. `vetev` rozhoduje jen u nového souboru. Zrcadlí
+           _uloz_databazi v most.py. */
+        File cil = najdiCsv(jmeno, dir);
+        if (cil == null) {
+            String vetev = bezpecnaVetev(zadani.optString("vetev", ""));
+            File cilSlozka = dir;
+            if (!vetev.isEmpty()) {
+                cilSlozka = new File(dir, vetev.replace('/', File.separatorChar));
+                cilSlozka.mkdirs();
+            }
+            cil = new File(cilSlozka, jmeno);
+        }
+        File rodic = cil.getParentFile();
+        File docasny = new File(rodic, jmeno + ".tmp");
         try (OutputStream f = new FileOutputStream(docasny)) {
             f.write(new byte[]{(byte) 0xEF, (byte) 0xBB, (byte) 0xBF});
             f.write(text.getBytes(StandardCharsets.UTF_8));
         }
         if (cil.exists()) {
-            File zaloha = new File(dir, jmeno + ".bak");
+            File zaloha = new File(rodic, jmeno + ".bak");
             if (zaloha.exists()) zaloha.delete();
             cil.renameTo(zaloha);
         }
@@ -410,6 +513,7 @@ public class Most implements Runnable {
             return;
         }
         json(out, 200, new JSONObject().put("ok", true).put("jmeno", jmeno).put("slozka", nazev)
+                .put("vetev", vetevSouboru(cil, dir))
                 .put("verze", verze(cil)).put("velikost", cil.length()));
     }
 
@@ -442,6 +546,7 @@ public class Most implements Runnable {
         if (h.contains("komponent") && (h.contains("procent") || h.contains("pct"))) return "receptury";
         if (h.contains("material") && (h.contains("otevreno") || h.contains("dojeto") || h.contains("sarze"))) return "sarze";
         if (h.contains("duvod") && (h.contains("kroky") || h.contains("pridano_g"))) return "opravy";
+        if (h.contains("sada") && h.contains("receptura")) return "sady";
         if (h.contains("druh") && (h.contains("nazev") || h.contains("název"))) return "material";
         if (h.contains("ref") && (h.contains("nazev") || h.contains("název") || h.contains("name"))) return "produkty";
         return "?";

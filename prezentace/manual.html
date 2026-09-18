@@ -96,8 +96,8 @@
   .zvyr.bok .p{left:100%; top:-3px; margin:0 0 0 8px}
   .zvyr.bok.vlevo .p{left:auto; right:100%; margin:0 8px 0 0}
   /* Zarovnání na spodní hranu rámečku: u dvou zvýraznění těsně nad sebou míří
-     „bok" obou popisků na tutéž výšku a jeden druhý překryje (scéna 3 —
-     „zakázky ze SGPS" a „KATALOG" dělí 6 px). Spodní hrana je rozestrčí. */
+     „bok“ obou popisků na tutéž výšku a jeden druhý překryje (scéna 3 —
+     „zakázky ze SGPS“ a „KATALOG“ dělí 6 px). Spodní hrana je rozestrčí. */
   .zvyr.bok.dole .p{top:auto; bottom:-3px}
   /* Popisek dovnitř rámečku: poslední možnost pro zvýraznění, kolem kterého
      už není volné místo ani nad, ani pod, ani po stranách. Velké rámečky mají
@@ -105,7 +105,7 @@
   .zvyr.uvnitr .p{top:0; left:0; margin:3px 0 0 3px}
   .zvyr.uvnitr.vpravo .p{left:auto; right:0; margin:3px 3px 0 0}
   /* Popisek dovnitř, ale u spodní hrany. Zvýraznění bývají vnořená (scéna 26 —
-     „note" leží uvnitř „shade and combination") a číslo toho vnitřního sedí
+     „note“ leží uvnitř „shade and combination“) a číslo toho vnitřního sedí
      u horní hrany toho vnějšího; popisek zarovnaný nahoru na něj najede. */
   .zvyr.uvnitr.dole .p{top:auto; bottom:0; margin:0 0 3px 3px}
   .zvyr.uvnitr.dole.vpravo .p{margin:0 3px 3px 0}
@@ -308,32 +308,32 @@
     /* ===== 2. Katalog produktů ===== */
     { nadpis:"Katalog produktů", kap:1,
       obr:"10-produkty", roz:[1600,1000],
-      zvyr:[[58,258,348,46,"hledání"],[1160,206,96,44,"tabulka / mřížka","nahoru"],[1258,204,120,50,"export CSV","nahoru"],[1382,204,160,50,"nový produkt","nahoru"],[954,316,390,26,"tiskové polohy"]],
+      zvyr:[[58,366,348,46,"hledání"],[1160,206,96,44,"tabulka / mřížka","nahoru"],[1258,204,120,50,"export CSV","nahoru"],[1382,204,160,50,"nový produkt","nahoru"],[919,424,390,26,"tiskové polohy"]],
       text:"Nabídka → Katalog → Produkty. Je tu celý katalog, <b>1 320 produktů</b>. Hledá se podle názvu nebo referenčního čísla, tabulku jde přepnout na mřížku s fotkami, katalog vyexportovat do CSV nebo založit nový produkt. Sloupec Tiskové polohy je to, kolem čeho se točí všechno ostatní.",
       rec:"V nabídce Katalog, Produkty. Je tu celý katalog, tisíc tři sta dvacet produktů. Hledá se podle názvu nebo referenčního čísla. Tabulku jde přepnout na mřížku s fotkami, katalog vyexportovat do cé es véčka, nebo založit nový produkt. Sloupec Tiskové polohy je to, kolem čeho se točí všechno ostatní.",
       cas:22 },
     { nadpis:"Produkt s více polohami", kap:1,
-      obr:"11-produkt-11152", roz:[1600,1000], vyrez:[0,180,1600,360],
-      zvyr:[[128,356,380,60,"produkt 11152"],[682,356,600,46,"poloha 1 · sítotisk"],[682,402,600,46,"poloha 2 · tampontisk"],[682,448,600,46,"poloha 3 · tampontisk"]],
+      obr:"11-produkt-11152", roz:[1600,1000], vyrez:[0,420,1600,300],
+      zvyr:[[124,456,396,60,"produkt 11152"],[628,465,736,47,"poloha 1 · sítotisk"],[628,512,736,95,"poloha 2 · tampontisk"],[628,607,736,96,"poloha 3 · tampontisk"]],
       text:"Vezměme hliníkové pero 11152. Má <b>tři tiskové polohy</b> a každá nese vlastní rozměr, pokrytí a hlavně technologii: kulovité těleso se tiskne sítotiskem i tampontiskem, lepší tampontiskem. Technologii tedy neurčuje žádné nastavení — <b>určuje ji poloha</b>.",
       rec:"Vezměme hliníkové pero jedna jedna jedna pět dva. Má tři tiskové polohy a každá nese vlastní rozměr, pokrytí a hlavně technologii. Kulovité těleso se tiskne sítotiskem i tampontiskem, poloha lepší jen tampontiskem. Technologii tedy neurčuje žádné nastavení. Určuje ji poloha.",
       cas:20 },
     { nadpis:"Paleta barev patří poloze", kap:1,
-      obr:"11-produkt-11152", roz:[1600,1000], vyrez:[600, 330, 760, 190],
-      zvyr:[[688, 378, 452, 30, "palety pro sítotisk", "bok"], [688, 424, 540, 30, "palety pro tampontisk"], [1036,358,48,26, "technologie polohy", "nahoru"]],
+      obr:"11-produkt-11152", roz:[1600,1000], vyrez:[600, 440, 760, 200],
+      zvyr:[[636, 491, 650, 21, "palety pro sítotisk", "bok"], [636, 535, 719, 21, "palety pro tampontisk"], [968, 465, 40, 24, "technologie polohy", "nahoru"], [1292, 489, 32, 22, "přenést řadu na podobné polohy", "vpravo"]],
 
-      text:"U každé polohy jsou štítky <b>typů barev</b>, tedy palet receptur. Nabízejí se jen palety, které k technologii polohy patří — tampontiskovou barvu na textilní síto přiřadit nejde ani omylem. Klik paletu poloze přiřadí nebo odebere a v kalkulaci se pak u té polohy nabídnou <b>jen její receptury</b>. Hledání barvy se tím zkrátí na pár položek.",
-      rec:"U každé polohy jsou štítky typů barev, tedy palet receptur. Nabízejí se jen palety, které k technologii polohy patří. Tampontiskovou barvu na textilní síto přiřadit nejde ani omylem. Klik paletu poloze přiřadí nebo odebere, a v kalkulaci se pak u té polohy nabídnou jen její receptury. Hledání barvy se tím zkrátí na pár položek. S běžícím mostem se přiřazení zapíše do souboru pro celou dílnu, bez něj platí jen v tomhle prohlížeči.",
-      cas:30 },
+      text:"U každé polohy jsou štítky <b>typů barev</b>, tedy palet receptur. Nabízejí se jen palety, které k technologii polohy patří — tampontiskovou barvu na textilní síto přiřadit nejde ani omylem. Klik paletu poloze přiřadí nebo odebere a v kalkulaci se pak u té polohy nabídnou <b>jen její receptury</b>. Hledání barvy se tím zkrátí na pár položek. Tlačítko <b>⇉</b> za štítky řeší druhou stranu téhož: rozhodnutí „na bavlnu se v textilním tisku tiskne tahle řada“ platí na stovky triček, ne na jedno. Otevře pruh <b>Barevná řada k přenesení</b>, zúží katalog na polohy stejného materiálu, technologie a názvu, a po výběru řady se zaškrtají hromadně. Produkt bez zapsaného materiálu kandidáty nedostane a pruh řekne proč — neúplný podklad se za shodu nevydává.",
+      rec:"U každé polohy jsou štítky typů barev, tedy palet receptur. Nabízejí se jen palety, které k technologii polohy patří. Tampontiskovou barvu na textilní síto přiřadit nejde ani omylem. Klik paletu poloze přiřadí nebo odebere, a v kalkulaci se pak u té polohy nabídnou jen její receptury. Hledání barvy se tím zkrátí na pár položek. Tlačítko s dvojitou šipkou za štítky řeší druhou stranu téhož: rozhodnutí, že na bavlnu se v textilním tisku tiskne tahle řada, platí na stovky triček, ne na jedno. Otevře pruh Barevná řada k přenesení, zúží katalog na polohy stejného materiálu, technologie a názvu, a po výběru řady se zaškrtají hromadně. Produkt bez zapsaného materiálu kandidáty nedostane a pruh řekne proč. Neúplný podklad se za shodu nevydává. S běžícím mostem se přiřazení zapíše do souboru pro celou dílnu, bez něj platí jen v tomhle prohlížeči.",
+      cas:58 },
     { nadpis:"Upravit produkt", kap:1,
-      obr:"12-produkt-upravit", roz:[1600,1000], vyrez:[0,180,1600,620],
-      zvyr:[[58,286,1484,62,"ref. číslo · název · materiál"],[70,392,966,44,"název polohy"],[1040,392,306,44,"šířka × výška mm · pokrytí %"],[1350,392,132,44,"technologie","nahoru"],[70,436,540,32,"palety — ukládají se hned"],[58,678,140,38,"přidat polohu"],[58,726,240,50,"uložit / zrušit"]],
-      text:"<b>Upravit</b> otevře kartu produktu: referenční číslo, název, materiál a řádek pro každou polohu — název, šířka a výška v milimetrech, pokrytí v procentech a technologie. Polohu jde přidat i odebrat. Palety se ukládají hned kliknutím, ostatní až tlačítkem <b>Uložit produkt</b>.",
-      rec:"Tlačítko Upravit otevře kartu produktu: referenční číslo, název, materiál a řádek pro každou polohu. Název, šířka a výška v milimetrech, pokrytí v procentech a technologie. Polohu jde přidat i odebrat. Palety se ukládají hned kliknutím, všechno ostatní až tlačítkem Uložit produkt.",
-      cas:21 },
+      obr:"12-produkt-upravit", roz:[1600,1000], vyrez:[0,180,1600,730],
+      zvyr:[[58,286,1484,62,"ref. číslo · název · materiál"],[70,500,966,44,"název polohy"],[1040,500,306,44,"šířka × výška mm · pokrytí %"],[1350,500,132,44,"technologie","nahoru"],[148,548,650,21,"palety — ukládají se hned"],[806,548,95,21,"zámek polohy — ukládá se taky hned"],[58,786,140,38,"přidat polohu"],[58,834,240,50,"uložit / zrušit"]],
+      text:"<b>Upravit</b> otevře kartu produktu: referenční číslo, název, materiál a řádek pro každou polohu — název, šířka a výška v milimetrech, pokrytí v procentech a technologie. Polohu jde přidat i odebrat. Za štítky palet stojí u každé polohy přepínač <b>🔓 / 🔒 uzavřeno</b>: uzavřít polohu znamená říct „tady další barevná řada nepřijde“. Uzavírá se po jedné komponentě a nic jiného to neomezuje — na poloze se dál míchá, jen se přestane nabízet při přenosu řady na podobné produkty. Palety i zámek se ukládají hned kliknutím, ostatní až tlačítkem <b>Uložit produkt</b>.",
+      rec:"Tlačítko Upravit otevře kartu produktu: referenční číslo, název, materiál a řádek pro každou polohu. Název, šířka a výška v milimetrech, pokrytí v procentech a technologie. Polohu jde přidat i odebrat. Za štítky palet stojí u každé polohy přepínač uzavřeno. Uzavřít polohu znamená říct: tady další barevná řada nepřijde. Uzavírá se po jedné komponentě a nic jiného to neomezuje. Na poloze se dál míchá, jen se přestane nabízet při přenosu řady na podobné produkty. Palety i zámek se ukládají hned kliknutím, všechno ostatní až tlačítkem Uložit produkt.",
+      cas:40 },
     { nadpis:"Mřížka s fotkami", kap:1,
-      obr:"13-produkty-mrizka", roz:[1600,1000], vyrez:[0,180,1600,620],
-      zvyr:[[1160,206,96,44,"přepínač zobrazení","nahoru"],[70,666,60,26,"barevné varianty"],[668,664,120,24,"počet poloh"]],
+      obr:"13-produkty-mrizka", roz:[1600,1000], vyrez:[0,180,1600,730],
+      zvyr:[[1160,206,96,44,"přepínač zobrazení","nahoru"],[70,773,60,26,"barevné varianty"],[668,772,120,24,"počet poloh"]],
       text:"Mřížka ukazuje fotky, <b>barevné varianty</b> produktu jako tečky a počet poloh. Zobrazuje se nejvýš 300 produktů naráz — když hledaný chybí, upřesněte hledání.",
       rec:"Mřížka ukazuje fotky, barevné varianty produktu jako tečky, a počet poloh. Zobrazuje se nejvýš tři sta produktů naráz. Když hledaný chybí, upřesněte hledání.",
       cas:12 },
@@ -359,7 +359,7 @@
       cas:15 },
     { nadpis:"Karta Vybraný produkt", kap:2,
       obr:"01-domov", roz:[1600,1520], vyrez:[30,270,770,645],
-      zvyr:[[58,326,230,232,"fotka produktu"],[294,326,230,232,"poloha s vyznačeným potiskem"],[58,722,400,34,"technologie · rozměr · barva"],[58,754,200,39,"změnit barvu a polohu"]],
+      zvyr:[[58,326,230,232,"fotka produktu"],[294,326,230,232,"poloha s vyznačeným potiskem"],[58,816,400,34,"technologie · rozměr · barva"],[58,847,200,39,"změnit barvu a polohu"]],
       text:"Karta <b>Vybraný produkt</b> shrnuje volbu: fotka, náhled polohy s vyznačeným místem potisku a štítky technologie, rozměru a barvy produktu. Tlačítko Barva a poloha potisku otevře výběr znovu.",
       rec:"Karta Vybraný produkt shrnuje volbu: fotka, náhled polohy s vyznačeným místem potisku a štítky technologie, rozměru a barvy produktu. Tlačítko Barva a poloha potisku otevře výběr znovu.",
       cas:13 },
@@ -377,21 +377,27 @@
       cas:35 },
     { nadpis:"Z jaké řady vzít odstín", kap:2,
       obr:"27b-volba-rady", roz:[1600,1200], vyrez:[440,30,720,230],
-      zvyr:[[462,50,447,27,"otázka místo dohadu"],[462,81,447,20,"produkt a poloha, které se to týká"],[462,103,447,20,"odstín ze zakázky"],[462,130,676,55,"řady technologie · kolik barev v které je"],[462,198,295,41,"hledat všude a nic si nepamatovat"]],
-      text:"Tentýž Pantone je v každé nakoupené řadě, pokaždé namíchaný z jiných složek — a list řadu neuvádí. Má-li technologie řad víc, aplikace <b>nehádá a zeptá se</b>: dlaždice ukazují řady technologie a u každé, kolik barev zakázky v ní našla. Odpověď se <b>uloží k poloze produktu</b>, takže se u ní příště neptá; změnit ji jde v záložce Produkty. <b>Bez volby</b> hledá ve všech řadách a nic si nezapamatuje.",
-      rec:"Tentýž Pantone je v každé nakoupené řadě, pokaždé namíchaný z jiných složek, a list řadu neuvádí. Má-li technologie řad víc, aplikace nehádá a zeptá se. Dlaždice ukazují řady technologie a u každé, kolik barev zakázky v ní našla. Odpověď se uloží k poloze produktu, takže se u ní příště neptá. Změnit ji jde v záložce Produkty. Bez volby hledá ve všech řadách a nic si nezapamatuje.",
-      cas:29 },
+      zvyr:[[462,50,447,27,"otázka místo dohadu"],[462,81,447,20,"produkt a poloha, které se to týká"],[462,103,447,20,"odstín ze zakázky"],[462,130,676,55,"řady technologie · kolik barev v které je"],[977,130,162,55,"zeleně to, co už poloha má","nahoru"],[462,198,295,41,"hledat všude a nic si nepamatovat"]],
+      text:"Tentýž Pantone je v každé nakoupené řadě, pokaždé namíchaný z jiných složek — a list řadu neuvádí. Má-li technologie řad víc, aplikace <b>nehádá a zeptá se</b>: dlaždice ukazují řady technologie a u každé, kolik barev zakázky v ní našla. Řady, které poloha <b>už přiřazené má</b>, svítí zeleně s fajfkou — nápověda, ne zákaz. Zvolená řada se k poloze <b>přidá</b>, nepřepíše tu dosavadní: volba druhé řady je důkaz, že se na tu komponentu tiskne i z ní. <b>Bez volby</b> hledá ve všech řadách a nic si nezapamatuje. U <b>uzavřené polohy</b> (Produkty → Upravit) se vybírá jen z řad, které má přiřazené, tlačítko Bez volby tam není a s jedinou řadou se aplikace vůbec nezeptá.",
+      rec:"Tentýž Pantone je v každé nakoupené řadě, pokaždé namíchaný z jiných složek, a list řadu neuvádí. Má-li technologie řad víc, aplikace nehádá a zeptá se. Dlaždice ukazují řady technologie a u každé, kolik barev zakázky v ní našla. Řady, které poloha už přiřazené má, svítí zeleně s fajfkou. Nápověda, ne zákaz. Zvolená řada se k poloze přidá, nepřepíše tu dosavadní: volba druhé řady je důkaz, že se na tu komponentu tiskne i z ní. Bez volby hledá ve všech řadách a nic si nezapamatuje. U uzavřené polohy, kterou technolog zamkl v Produktech, se vybírá jen z řad, které má přiřazené, tlačítko Bez volby tam není, a s jedinou řadou se aplikace vůbec nezeptá.",
+      cas:45 },
     { nadpis:"Krycí plocha z náhledu", kap:2,
-      obr:"25-pokryti", roz:[1600,1300], vyrez:[340,20,930,250],
-      zvyr:[[368,150,866,84,"přetáhnout tiskový podklad — PNG, JPG nebo strana zakázkového listu"],[1192,48,40,40,"zavřít","vpravo"]],
+      obr:"25-pokryti", roz:[1600,1600], vyrez:[350,20,910,600],
+      zvyr:[[372,150,856,90,"přetáhnout tiskový podklad — PNG, JPG nebo strana zakázkového listu"],[372,320,422,127,"náhled — modře to, co se počítá jako barva"],[806,255,422,80,"krycí plocha z rozměru potisku","vpravo"],[806,342,422,42,"kolik plochy a kolik barvy na zakázku","vpravo"],[1192,48,40,40,"zavřít","vpravo"]],
       text:"<b>Spočítat krycí plochu z náhledu</b> otevře okno Skutečné pokrytí motivu. Přetáhnete tiskový podklad — PNG, JPG nebo stranu ze zakázkového listu — a v náhledu označíte výřez. Aplikace spočítá, jakou část plochy barva doopravdy pokryje: z bodů, kde barva je, ne z obdélníku kolem motivu. Na zakázce, kde se to měřilo, klesla spotřeba z <b>3,1 na 0,4 g</b> na kus.",
       rec:"Spočítat krycí plochu z náhledu otevře okno Skutečné pokrytí motivu. Přetáhnete tiskový podklad, pé en gé, jé pé gé nebo stranu ze zakázkového listu, a v náhledu označíte výřez. Aplikace spočítá, jakou část plochy barva doopravdy pokryje. Z bodů, kde barva je, ne z obdélníku kolem motivu. Na zakázce, kde se to měřilo, klesla spotřeba z tří celých jedné na čtyři desetiny gramu na kus.",
       cas:28 },
+    { nadpis:"Tloušťka čar a síto k nim", kap:2,
+      obr:"25-pokryti", roz:[1600,1600], vyrez:[240,290,1140,1010],
+      zvyr:[[806,437,422,20,"nejtenčí čára — a rozlišení předlohy","vpravo"],[806,460,422,19,"nejširší místo","vpravo"],[906,483,322,39,"síto se předvybere","vpravo"],[906,522,322,20,"odkud návrh je","vpravo"],[372,320,422,127,"červený kroužek na nejtenčí čáře, modrý na nejširším místě"],[372,1080,856,190,"rozpis po barvách — % motivu a čára od–do"]],
+      text:"Z téže masky, ze které se počítá krycí plocha, aplikace změří i <b>nejtenčí čáru a nejširší místo motivu</b> v milimetrech. Každá sítovina pustí jen určitou jemnost kresby, takže podle nejtenčí čáry se <b>síto předvybere</b> — a pod výběrem stojí, odkud návrh je: z mezí čáry v tabulce sít, nebo ze zkušenosti dílny, tedy z toho, co se u podobně tenké čáry volilo dřív. V náhledu je <b>červený kroužek na nejtenčí čáře a modrý na nejširším místě</b>: musíte vidět, kde se měřilo. Vedle čísla stojí rozlišení předlohy — čára tenčí než jeden bod se nezměří a okno to řekne. U vícebarevného potisku má každá barva své síto, protože jde na své síto i ve skutečnosti.",
+      rec:"Z téže masky, ze které se počítá krycí plocha, aplikace změří i nejtenčí čáru a nejširší místo motivu v milimetrech. Každá sítovina pustí jen určitou jemnost kresby, takže podle nejtenčí čáry se síto předvybere. Pod výběrem stojí, odkud návrh je: z mezí čáry v tabulce sít, nebo ze zkušenosti dílny, tedy z toho, co se u podobně tenké čáry volilo dřív. V náhledu je červený kroužek na nejtenčí čáře a modrý na nejširším místě. Musíte vidět, kde se měřilo. Vedle čísla stojí rozlišení předlohy: čára tenčí než jeden bod se nezměří a okno to řekne. U vícebarevného potisku má každá barva své síto, protože jde na své síto i ve skutečnosti.",
+      cas:44 },
 
     /* ===== 4. Receptura a parametry ===== */
     { nadpis:"Receptura a barva — Pantone standard", kap:3,
       obr:"01-domov", roz:[1600,1520], vyrez:[30,830,520,480],
-      zvyr:[[58,882,226,57, "Pantone standard"], [58,947,460,39, "receptura a databáze"], [58,987,460,38, "složení", "uvnitr vpravo"], [58,1056,460,32, "odstín — CMYK / hex"]],
+      zvyr:[[58,975,148,78, "Pantone standard"], [58,1061,460,39, "receptura a databáze"], [58,1139,460,38, "složení", "uvnitr vpravo"], [58,1208,460,32, "odstín — CMYK / hex"]],
 
       text:"Karta <b>Receptura a barva</b> má dvě cesty. <b>Pantone standard</b> je receptura z nakoupené databáze: vybírá se databáze a odstín, protože tentýž Pantone má v každé databázi jiné složení. Nabízejí se jen databáze přiřazené technologii a paletě polohy. Nabídka ukáže nejvýš 400 receptur — když barva chybí, zúžte filtr.",
       rec:"Karta Receptura a barva má dvě cesty. Pantone standard je receptura z nakoupené databáze. Vybírá se databáze a odstín, protože tentýž Pantone má v každé databázi jiné složení. Nabízejí se jen databáze přiřazené technologii a paletě polohy. Nabídka ukáže nejvýš čtyři sta receptur. Když barva chybí, zúžte filtr databáze nebo hledejte.",
@@ -410,42 +416,42 @@
       rec:"Vlastní receptura nikdy nevzniká od nuly. V okně Barva a poloha potisku je tlačítko Custom receptura pro tuto kombinaci. Vyberete výchozí recepturu z databáze technologie a aplikace ukáže, pod jakým názvem se uloží. Název nese celou adresu kombinace.",
       cas:19 },
     { nadpis:"Úprava custom receptury", kap:3,
-      obr:"24-custom-editor", roz:[1600,1500], vyrez:[360,20,880,850],
-      zvyr:[[392,120,392,36,"název nese celou adresu kombinace"],[392,290,814,132,"objednavatel · objednací číslo · papír C / U · ještě schvaluje"],[388,587,824,200,"složky a procenta — součet 100"],[388,797,250,49,"uložit / zrušit"]],
-      text:"<b>Odvodit a upravit</b> otevře editor. Tady se mění složky a jejich procenta — součet musí dát sto. K receptuře patří i síto nebo klišé, kryvost, povrch, poznámka a u dvousložkových barev tužidlo s dobou zpracovatelnosti. Dál <b>objednavatel</b> a <b>objednací číslo</b> u dodavatele, <b>papír C / U</b> a <b>kdo ji ještě schvaluje</b>. Uloží se tlačítkem Uložit recepturu. Od tiskaře vzniká jako <b>čekající</b>, dokud ji technolog neschválí.",
-      rec:"Odvodit a upravit otevře editor. Tady se mění složky a jejich procenta, součet musí dát sto. K receptuře patří i síto nebo klišé, kryvost, povrch, poznámka, a u dvousložkových barev tužidlo s dobou zpracovatelnosti. Dál objednavatel a objednací číslo u dodavatele, papír cé nebo ú, a kdo ji ještě schvaluje. Uloží se tlačítkem Uložit recepturu. Od tiskaře vzniká jako čekající, dokud ji technolog neschválí.",
-      cas:30 },
+      obr:"24-custom-editor", roz:[1600,1500], vyrez:[360,20,880,940],
+      zvyr:[[392,120,392,36,"název nese celou adresu kombinace"],[392,290,814,132,"objednavatel · objednací číslo · papír C / U · ještě schvaluje"],[806,430,402,76,"technologie receptury","vpravo"],[388,674,824,200,"složky a procenta — součet 100"],[392,888,242,41,"uložit / zrušit"]],
+      text:"<b>Odvodit a upravit</b> otevře editor. Tady se mění složky a jejich procenta — součet musí dát sto. K receptuře patří i síto nebo klišé, kryvost, povrch, poznámka a u dvousložkových barev tužidlo s dobou zpracovatelnosti. Dál <b>objednavatel</b> a <b>objednací číslo</b> u dodavatele, <b>papír C / U</b> a <b>kdo ji ještě schvaluje</b>. Vedle značky loga stojí <b>technologie</b>: značka se tiskne napříč technologiemi a každá má jiné barevné řady, takže modrá pro sítotisk a modrá pro tampontisk téže značky jsou dva různé odstíny. Vyplňuje se sama podle toho, na čem odstín vznikl, a receptura se pak nabízí jen tam. Uloží se tlačítkem Uložit recepturu. Od tiskaře vzniká jako <b>čekající</b>, dokud ji technolog neschválí.",
+      rec:"Odvodit a upravit otevře editor. Tady se mění složky a jejich procenta, součet musí dát sto. K receptuře patří i síto nebo klišé, kryvost, povrch, poznámka, a u dvousložkových barev tužidlo s dobou zpracovatelnosti. Dál objednavatel a objednací číslo u dodavatele, papír cé nebo ú, a kdo ji ještě schvaluje. Vedle značky loga stojí technologie. Značka se tiskne napříč technologiemi a každá má jiné barevné řady, takže modrá pro sítotisk a modrá pro tampontisk téže značky jsou dva různé odstíny. Vyplňuje se sama podle toho, na čem odstín vznikl, a receptura se pak nabízí jen tam. Uloží se tlačítkem Uložit recepturu. Od tiskaře vzniká jako čekající, dokud ji technolog neschválí.",
+      cas:48 },
     { nadpis:"Parametry tisku", kap:3,
-      obr:"01-domov", roz:[1600,1520], vyrez:[540,830,520,480],
-      zvyr:[[567,947,150,213, "síto / klišé"], [725,947,150,213, "kryvost"], [883,947,150,213, "povrch"], [567,1178,148,35, "otestovaný"], [567,1221,466,82, "poznámka k receptuře"]],
+      obr:"01-domov", roz:[1600,1520], vyrez:[540,920,520,500],
+      zvyr:[[567, 1040, 150, 213, "síto / klišé"], [725, 1040, 150, 213, "kryvost"], [883, 1040, 150, 213, "povrch"], [567,1271,148,35, "otestovaný"], [567,1314,466,82, "poznámka k receptuře"]],
 
       text:"<b>Parametry tisku</b>: síto, u tampontisku klišé s hloubkou leptu, kryvost a povrch. Ukládají se <b>k receptuře</b>, ne k zakázce — příště se u téže barvy nabídnou samy. U textilu se síto doplní podle produktu a není na výběr. Poznámka k receptuře je jeden řádek pro znalost dílny: třeba dva průchody a sušení dvě minuty.",
       rec:"Parametry tisku: síto, u tampontisku klišé s hloubkou leptu, kryvost a povrch. Ukládají se k receptuře, ne k zakázce. Příště se u téže barvy nabídnou samy. U textilu se síto doplní podle produktu a není na výběr. Poznámka k receptuře je jeden řádek pro znalost dílny, třeba dva průchody a sušení dvě minuty.",
       cas:23 },
     { nadpis:"Zakázka — čtyři čísla", kap:3,
-      obr:"01-domov", roz:[1600,1520], vyrez:[1050,830,520,480],
-      zvyr:[[1081,882,148,165, "počet kusů"], [1237,882,148,165, "spotřeba g/m²"], [1394,882,148,165, "ztráty %"], [1081,1055,148,165, "minimální dávka"]],
+      obr:"01-domov", roz:[1600,1520], vyrez:[1050,924,520,480],
+      zvyr:[[1081,976,148,165, "počet kusů"], [1237,975,148,165, "spotřeba g/m²"], [1394,976,148,165, "ztráty %"], [1081,1148,148,165, "minimální dávka"]],
 
       text:"<b>Zakázka</b> jsou čtyři čísla: počet kusů, spotřeba v gramech na metr čtvereční, ztráty v procentech a minimální dávka. Spotřeba se předvyplní paušálem podle technologie, přesná vyjde ze síta. <b>Ručně zadanou spotřebu aplikace nikdy sama nepřepíše.</b>",
       rec:"Zakázka jsou čtyři čísla: počet kusů, spotřeba v gramech na metr čtvereční, ztráty v procentech a minimální dávka. Spotřeba se předvyplní paušálem podle technologie, přesná vyjde ze síta. Ručně zadanou spotřebu aplikace nikdy sama nepřepíše.",
       cas:18 },
     { nadpis:"Vícebarevná zakázka", kap:3,
       obr:"29-barvy-zakazky", roz:[1600,1700], vyrez:[30,841,1540,640],
-      zvyr:[[398,993,120,39,"další barva","nahoru"],[58,1037,460,70,"dlaždice barev — klik přepne kalkulaci"],[844,881,306,56,"do fronty všechny barvy"]],
-      text:"Zakázka s dvoubarevným logem jsou dvě receptury a dva kelímky. <b>Další barva</b> přidá do karty dlaždici; každá barva zakázky nese vlastní recepturu, dávku a krycí plochu. Klepnutí přepne celou kalkulaci na tu barvu, křížek ji odebere. Zakázkový list nebo kód čtečky s více odstíny v poli Barva potisku založí barvy sám a z okna krycí plochy jde převzít rozpis separací. <b>Do fronty všechny barvy</b> zařadí každou jako vlastní položku — jeden kelímek na barvu.",
-      rec:"Zakázka s dvoubarevným logem jsou dvě receptury a dva kelímky. Další barva přidá do karty dlaždici. Každá barva zakázky nese vlastní recepturu, dávku a krycí plochu. Klepnutí přepne celou kalkulaci na tu barvu, křížek ji odebere. Zakázkový list nebo kód čtečky s více odstíny v poli Barva potisku založí barvy sám, a z okna krycí plochy jde převzít rozpis separací. Do fronty všechny barvy zařadí každou jako vlastní položku, jeden kelímek na barvu.",
-      cas:32 },
+      zvyr:[[398,993,120,39,"další barva","nahoru"],[58,1078,460,70,"dlaždice barev — klik přepne kalkulaci"],[844,881,306,56,"do fronty všechny barvy"],[58,1037,145,39,"uložit jako sadu"]],
+      text:"Zakázka s dvoubarevným logem jsou dvě receptury a dva kelímky. <b>Další barva</b> přidá do karty dlaždici; každá barva zakázky nese vlastní recepturu, dávku a krycí plochu. Klepnutí přepne celou kalkulaci na tu barvu, křížek ji odebere. Zakázkový list nebo kód čtečky s více odstíny v poli Barva potisku založí barvy sám a z okna krycí plochy jde převzít rozpis separací. <b>Do fronty všechny barvy</b> zařadí každou jako vlastní položku — jeden kelímek na barvu. <b>Uložit jako sadu</b> zapíše všechny barvy loga ke značce, produktu, barvě zboží a poloze; u opakované zakázky se sada nabídne nad dlaždicemi, u každé barvy je vidět, jestli je custom nebo standard.",
+      rec:"Zakázka s dvoubarevným logem jsou dvě receptury a dva kelímky. Další barva přidá do karty dlaždici. Každá barva zakázky nese vlastní recepturu, dávku a krycí plochu. Klepnutí přepne celou kalkulaci na tu barvu, křížek ji odebere. Zakázkový list nebo kód čtečky s více odstíny v poli Barva potisku založí barvy sám, a z okna krycí plochy jde převzít rozpis separací. Do fronty všechny barvy zařadí každou jako vlastní položku, jeden kelímek na barvu. Uložit jako sadu zapíše všechny barvy loga ke značce, produktu, barvě zboží a poloze. U opakované zakázky se sada nabídne nad dlaždicemi, a u každé barvy je vidět, jestli je custom, nebo standard.",
+      cas:45 },
 
     /* ===== 5. Kolik namíchat ===== */
     { nadpis:"Výsledek: dávka", kap:4,
       obr:"01-domov", roz:[1600,1520], vyrez:[810,270,770,646],
-      zvyr:[[844,340,540,60,"receptura a kombinace"],[844,420,300,96,"dávka"],[844,536,690,36,"složení receptury"],[1510,532,32,42,"minimální dávka"]],
+      zvyr:[[844,340,540,60,"receptura a kombinace"],[846,401,209,101,"dávka"],[844,536,690,36,"složení receptury"],[1510,532,32,42,"minimální dávka"]],
       text:"<b>Kolik namíchat</b> je výsledek: dávka v gramech a přepočet na mililitry podle hustoty. Pod nejmenší dávku se nejde: menší množství se nedá poctivě promíchat. Pruh ukazuje složení receptury. Rozpis výpočtu — plocha × krycí plocha × kusy × spotřeba, plus ztráty — na obrazovce není: u váhy se čte dávka, ne vzorec. Vstupy nese míchací lístek.",
       rec:"Kolik namíchat je výsledek. Dávka v gramech a přepočet na mililitry podle hustoty. Pod nejmenší dávku se nejde, menší množství se nedá poctivě promíchat. Pruh ukazuje složení receptury. Rozpis výpočtu, plocha krát krycí plocha krát kusy krát spotřeba plus ztráty, na obrazovce není. U váhy se čte dávka, ne vzorec. Vstupy nese míchací lístek.",
       cas:27 },
     { nadpis:"Jednotka dávky — gramy, kilogramy, libry", kap:4,
       obr:"01-domov", roz:[1600,1520], vyrez:[820,290,760,300],
-      zvyr:[[848,432,300,80,"dávka v zvolené jednotce"],[1420,462,120,32,"g · kg · lb","vpravo"],[848,505,460,26,"objem a hustota"]],
+      zvyr:[[846,401,209,101,"dávka v zvolené jednotce"],[1419,462,115,29,"g · kg · lb","vpravo"],[846,498,460,30,"objem a hustota"]],
       text:"Hlavní číslo jde přepnout na <b>kilogramy nebo libry</b>. Přepínač mění <b>jen zobrazení</b>: uvnitř se počítá v gramech, tabulka navážek zůstává v gramech a na váhu jdou gramy — tak to ukazuje displej. Kilogramy jsou pro velké sítotiskové dávky, libry pro zahraniční zadání. Libra je přesně <b>453,592 37 g</b>, ne zaokrouhlených 454. Volbu si prohlížeč pamatuje, takže se u téhle míchačky nastaví jednou.",
       rec:"Hlavní číslo jde přepnout na kilogramy nebo libry. Přepínač mění jen zobrazení. Uvnitř se počítá v gramech, tabulka navážek zůstává v gramech a na váhu jdou gramy, tak to ukazuje displej. Kilogramy jsou pro velké sítotiskové dávky, libry pro zahraniční zadání. Libra je přesně čtyři sta padesát tři celých pět devět dva gramu, ne zaokrouhlených čtyři sta padesát čtyři. Volbu si prohlížeč pamatuje, takže se u téhle míchačky nastaví jednou.",
       cas:31 },
@@ -456,20 +462,20 @@
       rec:"Tlačítko Než začnete míchat otevře seznam rizik. Receptura není otestovaná, složka chybí v ceníku, barva prosvítá na podkladu. Je to upozornění, ne zákaz. Rozhodnutí zůstává na vás.",
       cas:16 },
     { nadpis:"Náklady na barvu", kap:4,
-      obr:"01-domov", roz:[1600,1520], vyrez:[810,270,770,646],
-      zvyr:[[844,618,692,103,"náklady a cena na kus"],[1435,618,101,39,"skrýt ceny u váhy","nahoru"]],
+      obr:"01-domov", roz:[1600,1520], vyrez:[810,363,770,646],
+      zvyr:[[844,711,692,103,"náklady a cena na kus"],[1435,711,101,39,"skrýt ceny u váhy","nahoru"]],
       text:"Pod výsledkem jsou <b>náklady na barvu</b> a cena na kus. Počítají se z ceníku materiálů; dokud ceny nejsou zadané, aplikace to řekne. <b>Skrýt ceny</b> je schová u váhy — a schované se netisknou ani na míchací lístek.",
       rec:"Pod výsledkem jsou náklady na barvu a cena na kus. Počítají se z ceníku materiálů. Dokud ceny nejsou zadané, aplikace to řekne. Skrýt ceny je schová u váhy, a schované se netisknou ani na míchací lístek.",
       cas:16 },
     { nadpis:"Profil úpravy — oprava, která platí i příště", kap:4,
       obr:"01-domov", roz:[1600,1520], vyrez:[820,546,760,300],
-      zvyr:[[844,573,135,39,"založit profil"],[844,618,308,39,"náklady na barvu"]],
+      zvyr:[[844,573,135,39,"založit profil"],[844,711,308,39,"náklady na barvu"]],
       text:"Když se odstín při nátisku pokaždé dolaďuje stejně, je to <b>profil úpravy</b>: procentní přídavek uložený <b>mimo</b> základní recepturu. Receptura z databáze je podklad dodavatele a na jiném produktu sedí — proto se nepřepisuje. Profil se váže na kombinaci <b>produkt · barva · technologie · poloha</b>, kvůli které vznikl, a při opakování téže zakázky se uplatní sám. <b>Dávka se profilem nezvětší</b>: složení se přepočítá na sto, takže naroste jen navážka té jedné složky.",
       rec:"Když se odstín při nátisku pokaždé dolaďuje stejně, je to profil úpravy. Procentní přídavek uložený mimo základní recepturu. Receptura z databáze je podklad dodavatele a na jiném produktu sedí, proto se nepřepisuje. Profil se váže na kombinaci produkt, barva, technologie a poloha, kvůli které vznikl, a při opakování téže zakázky se uplatní sám. Dávka se profilem nezvětší. Složení se přepočítá na sto, takže naroste jen navážka té jedné složky.",
       cas:31 },
     { nadpis:"Míchací režim, lístek, fronta", kap:4,
-      obr:"01-domov", roz:[1600,1520], vyrez:[810,270,770,646],
-      zvyr:[[844,729,182,59,"pracoviště u váhy"],[1026,731,187,55,"tisk A4"],[1214,730,155,56,"do plánu míchání"]],
+      obr:"01-domov", roz:[1600,1520], vyrez:[810,363,770,646],
+      zvyr:[[844,822,182,59,"pracoviště u váhy"],[1026,824,187,55,"tisk A4"],[1214,824,155,56,"do plánu míchání"]],
       text:"<b>Míchací režim</b> otevře pracoviště u váhy na celou obrazovku. <b>Míchací lístek</b> vytiskne A4 s navážkami, kumulativním sloupcem a políčky na odškrtnutí. <b>Do fronty</b> zařadí dávku do plánu míchání.",
       rec:"Míchací režim otevře pracoviště u váhy na celou obrazovku. Míchací lístek vytiskne á čtyřku s navážkami, kumulativním sloupcem a políčky na odškrtnutí. Do fronty zařadí dávku do plánu míchání.",
       cas:15 },
@@ -523,11 +529,11 @@
       rec:"Tentýž pruh barev stojí i u váhy nad tabulkou navážek a hlavička říká, která barva zakázky se právě váží. Klepnutí přepne navážky i asistenta. Když asistent doveze poslední složku a zbývá další barva, nabídne Potvrdit, další barva. Založí kelímek do evidence, vytáruje váhu a přepne na další nenamíchanou barvu. Namíchaná barva dostane zelenou konturu a fajfku, jde ji označit i ručně. Štítky na kelímky vytisknou štítky všech barev naráz.",
       cas:32 },
     { nadpis:"Nátisk nesedl — doladit v kelímku", kap:5,
-      obr:"36-doladeni", roz:[1600,1250], vyrez:[0,490,870,660],
-      zvyr:[[15,508,156,34,"nejdřív malá dávka na nátisk"],[179,515,316,20,"co se ušetří, když odstín nesedne"],[23,638,402,42,"kolik zbylo v kelímku"],[23,712,815,42,"co jsem přilil a kolik gramů"],[37,814,321,19,"co je teď v kelímku"],[37,841,787,219,"dopočítané složení"],[37,1067,787,20,"kolik dovážit do plné dávky"],[37,1094,221,38,"uložit jako vlastní recepturu"]],
-      text:"Nátisk se míchá z malé dávky — tlačítko <b>Nejdřív nátisk</b> řekne, kolik jí stačí, aby i nejmenší složka ještě vyšla na váhu. Když odstín nesedne, do kelímku se přilévá: zapíše se, <b>kolik zbylo</b> a <b>co a kolik se přililo</b>, po desetinách gramu. Z toho aplikace dopočítá <b>složení, které v kelímku doopravdy je</b>, a řekne, kolik ještě dovážit do plné dávky — <b>už podle nového složení</b>, ne podle původního pantonu. Tlačítkem <b>Uložit jako custom recepturu</b> se odstín zapíše k produktu a poloze, takže se příště naváží od nuly.",
-      rec:"Nátisk se míchá z malé dávky. Tlačítko Nejdřív nátisk řekne, kolik jí stačí, aby i nejmenší složka ještě vyšla na váhu. Když odstín nesedne, do kelímku se přilévá. Zapíše se, kolik zbylo, a co a kolik se přililo, po desetinách gramu. Z toho aplikace dopočítá složení, které v kelímku doopravdy je, a řekne, kolik ještě dovážit do plné dávky. Už podle nového složení, ne podle původního pantonu. Tlačítkem Uložit jako custom recepturu se odstín zapíše k produktu a poloze, takže se příště naváží od nuly.",
-      cas:36 },
+      obr:"36-doladeni", roz:[1600,1250], vyrez:[0,490,870,725],
+      zvyr:[[15,508,156,34,"nejdřív malá dávka na nátisk"],[179,515,316,20,"co se ušetří, když odstín nesedne"],[23,638,402,42,"kolik zbylo v kelímku"],[23,712,815,42,"co jsem přilil a kolik gramů"],[23,760,815,42,"kelímek se smí znovu zvážit"],[37,859,321,19,"co je teď v kelímku"],[37,911,787,219,"dopočítané složení"],[37,1136,787,20,"kolik dovážit do plné dávky"],[37,1164,221,38,"uložit jako vlastní recepturu"]],
+      text:"Nátisk se míchá z malé dávky — tlačítko <b>Nejdřív nátisk</b> řekne, kolik jí stačí, aby i nejmenší složka ještě vyšla na váhu. Když odstín nesedne, do kelímku se přilévá: zapíše se, <b>kolik zbylo</b> a <b>co a kolik se přililo</b>, po desetinách gramu. Při nátisku z kelímku ubude, proto se smí <b>kdykoli znovu zvážit</b> — od zvážené hmotnosti se počítá dál a složení se tím nemění. Z toho aplikace dopočítá <b>složení, které v kelímku doopravdy je</b>, a řekne, kolik ještě dovážit do plné dávky — <b>už podle nového složení</b>, ne podle původního pantonu. Tlačítkem <b>Uložit jako custom recepturu</b> se odstín zapíše k produktu a poloze, takže se příště naváží od nuly.",
+      rec:"Nátisk se míchá z malé dávky. Tlačítko Nejdřív nátisk řekne, kolik jí stačí, aby i nejmenší složka ještě vyšla na váhu. Když odstín nesedne, do kelímku se přilévá. Zapíše se, kolik zbylo, a co a kolik se přililo, po desetinách gramu. Při nátisku z kelímku ubude, proto se smí kdykoli znovu zvážit. Od zvážené hmotnosti se počítá dál a složení se tím nemění. Z toho aplikace dopočítá složení, které v kelímku doopravdy je, a řekne, kolik ještě dovážit do plné dávky. Už podle nového složení, ne podle původního pantonu. Tlačítkem Uložit jako custom recepturu se odstín zapíše k produktu a poloze, takže se příště naváží od nuly.",
+      cas:45 },
     { nadpis:"Štítek na kelímek", kap:5,
       obr:"33-mich-stitek", roz:[1600,1300], vyrez:[560, 0, 1030, 380],
       zvyr:[[1000, 268, 410, 48, "štítek na kelímek"], [672, 90, 260, 110, "čárový kód"], [680, 296, 158, 44, "vytisknout"]],
@@ -548,9 +554,9 @@
       obr:"40-receptury", roz:[1600,1300], vyrez:[30, 180, 1540, 1120],
       zvyr:[[58, 311, 125, 42, "databáze — štítek, po stisku řady"], [1152, 208, 96, 44, "tabulka / mřížka", "nahoru"], [1374, 206, 166, 46, "nová receptura", "nahoru"], [977,649,170,80, "složení"], [1376, 513, 158, 39, "upravit / smazat"], [1135, 517, 88, 31, "namíchat mimo zakázku"]],
 
-      text:"Nabídka → Katalog → <b>Receptury</b>: všechny receptury, <b>15 191</b> ze sedmi nakoupených databází a vlastní receptury dílny. Štítek nahoře ukazuje zvolenou databázi; po stisku se rozbalí řady, ze kterých se vybírá. U každé receptury je typ, databáze, řada, hustota a složení. Tabulka ukazuje prvních 100 řádků. Tlačítko <b>Namíchat</b> u každé receptury otevře míchání mimo zakázku: zadá se množství a jde se rovnou k váze, bez produktu a bez objednávky — na vzorek odstínu, dolití zásoby nebo zkoušku na materiál.",
-      rec:"V nabídce Katalog, Receptury. Jsou tu všechny receptury, patnáct tisíc sto devadesát jedna ze sedmi nakoupených databází, a vlastní receptury dílny. Štítek nahoře ukazuje zvolenou databázi. Po stisku se rozbalí řady, ze kterých se vybírá. U každé receptury je typ, databáze, řada, hustota a složení. Tabulka ukazuje prvních sto řádků. Tlačítko Namíchat u každé receptury otevře míchání mimo zakázku. Zadá se množství a jde se rovnou k váze, bez produktu a bez objednávky. Na vzorek odstínu, dolití zásoby nebo zkoušku na materiál.",
-      cas:40 },
+      text:"Nabídka → Katalog → <b>Receptury</b>: všechny receptury, <b>15 188</b> ze sedmi nakoupených databází a k tomu vlastní receptury dílny — těch přibývá s každým doladěným odstínem, takže číslo v záhlaví je vždycky o kousek vyšší. Štítek nahoře ukazuje zvolenou databázi; po stisku se rozbalí řady, ze kterých se vybírá. U každé receptury je typ, databáze, řada, hustota a složení. Tabulka ukazuje prvních 100 řádků. Tlačítko <b>Namíchat</b> u každé receptury otevře míchání mimo zakázku: zadá se množství a jde se rovnou k váze, bez produktu a bez objednávky — na vzorek odstínu, dolití zásoby nebo zkoušku na materiál.",
+      rec:"V nabídce Katalog, Receptury. Jsou tu všechny receptury, patnáct tisíc sto osmdesát osm ze sedmi nakoupených databází, a k tomu vlastní receptury dílny. Těch přibývá s každým doladěným odstínem, takže číslo v záhlaví je vždycky o kousek vyšší. Štítek nahoře ukazuje zvolenou databázi. Po stisku se rozbalí řady, ze kterých se vybírá. U každé receptury je typ, databáze, řada, hustota a složení. Tabulka ukazuje prvních sto řádků. Tlačítko Namíchat u každé receptury otevře míchání mimo zakázku. Zadá se množství a jde se rovnou k váze, bez produktu a bez objednávky. Na vzorek odstínu, dolití zásoby nebo zkoušku na materiál.",
+      cas:47 },
     { nadpis:"Oblíbené, jen moje, jen nové", kap:6,
       obr:"40-receptury", roz:[1600,1300], vyrez:[30,348,1540,220],
       zvyr:[[62,357,382,38,"jen oblíbené · jen moje · jen nové"],[58,401,1480,43,"hledání s napovídáním"]],
@@ -564,12 +570,12 @@
       rec:"U každé receptury jsou dvě tlačítka. Odkaz zkopíruje adresu, po jejímž otevření se aplikace rovnou zúží na tuhle recepturu. Dá se poslat druhé míchačce nebo připnout k zakázce. Běží-li most po síti, odkaz nese adresu počítače a otevře ho i telefon. Jinak platí jen na tomto zařízení a aplikace to řekne. Historie neskládá nová data. Sbírá dohromady to, co evidence už má, a páruje to názvem. Kdo recepturu založil a schválil, kdo a kdy do ní sáhl, kdo podle ní míchal a z kterých konví, kdy se opravovala a jaký profil úpravy z toho zůstal.",
       cas:40 },
     { nadpis:"Vlastní receptury a editor", kap:6,
-      obr:"42-receptura-upravit", roz:[1600,1500], vyrez:[30, 180, 1540, 960],
-      zvyr:[[58, 278, 736, 40, "název nese adresu kombinace"], [804, 274, 236, 42, "typ"], [58, 362, 1480, 44, "síto · kryvost · povrch"], [58, 448, 990, 44, "objednavatel a objednací číslo"], [1052, 448, 486, 44, "papír C / U", "vpravo"], [58, 534, 736, 44, "ještě schvaluje — druhý stupeň"], [806, 546, 580, 30, "otestovaný · dvousložková"], [58, 756, 1480, 196, "složky a procenta — součet 100"], [58, 962, 250, 44, "uložit / zrušit"]],
+      obr:"42-receptura-upravit", roz:[1600,1500], vyrez:[30, 180, 1540, 1070],
+      zvyr:[[58, 278, 736, 40, "název nese adresu kombinace"], [804, 274, 236, 42, "typ"], [58, 362, 1480, 44, "síto · kryvost · povrch"], [58, 448, 990, 44, "objednavatel a objednací číslo"], [1052, 448, 486, 44, "papír C / U", "vpravo"], [58, 534, 736, 44, "ještě schvaluje — druhý stupeň"], [806, 546, 580, 30, "otestovaný · dvousložková"], [806, 588, 732, 76, "ke které technologii receptura patří"], [58,984,1480,196, "složky a procenta — součet 100"], [58,1190,250,44, "uložit / zrušit"]],
 
-      text:"Custom receptury mají v názvu produkt, barvu, technologii a polohu. <b>Upravit</b> otevře tentýž editor jako v kalkulaci. Kromě složek a procent se tu zapisuje <b>objednací číslo</b> u dodavatele a to, jestli recepturu <b>ještě někdo schvaluje</b> — mistr, nebo zákazník. <b>Papír C / U</b> je daný názvem a jen se ukazuje. Mazání je ve dvou krocích a jde chránit heslem. Tiskař tu má receptury jen na čtení.",
-      rec:"Vlastní receptury mají v názvu produkt, barvu, technologii a polohu. Upravit otevře tentýž editor jako v kalkulaci. Kromě složek a procent se tu zapisuje objednací číslo u dodavatele a to, jestli recepturu ještě někdo schvaluje: mistr, nebo zákazník. Papír cé nebo ú je daný názvem a jen se ukazuje. Mazání je ve dvou krocích a jde chránit heslem. Tiskař tu má receptury jen na čtení.",
-      cas:28 },
+      text:"Custom receptury mají v názvu produkt, barvu, technologii a polohu. <b>Upravit</b> otevře tentýž editor jako v kalkulaci. Kromě složek a procent se tu zapisuje <b>objednací číslo</b> u dodavatele a to, jestli recepturu <b>ještě někdo schvaluje</b> — mistr, nebo zákazník. <b>Papír C / U</b> je daný názvem a jen se ukazuje. Dlaždice <b>Technologie</b> říká, kde se receptura nabízí: odstín namíchaný pro tampontisk se na sítotiskové zakázce neukáže, i kdyby měl na produkt starou vazbu. Prázdná znamená <b>neurčeno</b> — receptura z dřívějška se nabízí všude a v seznamu nese „bez technologie“, dokud ji technolog nedoplní. Mazání je ve dvou krocích a jde chránit heslem. Tiskař tu má receptury jen na čtení.",
+      rec:"Vlastní receptury mají v názvu produkt, barvu, technologii a polohu. Upravit otevře tentýž editor jako v kalkulaci. Kromě složek a procent se tu zapisuje objednací číslo u dodavatele a to, jestli recepturu ještě někdo schvaluje: mistr, nebo zákazník. Papír cé nebo ú je daný názvem a jen se ukazuje. Dlaždice Technologie říká, kde se receptura nabízí. Odstín namíchaný pro tampontisk se na sítotiskové zakázce neukáže, i kdyby měl na produkt starou vazbu. Prázdná znamená neurčeno. Receptura z dřívějška se nabízí všude a v seznamu nese „bez technologie“, dokud ji technolog nedoplní. Mazání je ve dvou krocích a jde chránit heslem. Tiskař tu má receptury jen na čtení.",
+      cas:49 },
     { nadpis:"Ceny materiálů", kap:6,
       obr:"43-ceny", roz:[1600,1500], vyrez:[30,0,1540,640],
       zvyr:[[58,16,270,38, "ceny materiálů"], [58,86,630,40, "hledání · řada · jen bez ceny"], [876,146,192,94, "cena a jednotka"], [1076,146,96,94, "měna"], [1180,146,84,94, "g/ml"], [1268,146,80,94, "VOC %"], [1354,146,178,94, "bezpečnostní list", "vpravo"]],
@@ -578,8 +584,8 @@
       rec:"Pod recepturami je karta Ceny materiálů. Nákupní cena za kilogram nebo litr, měna, hustota, podíl těkavých látek a odkaz na bezpečnostní list. Jméno složky se musí shodovat se jménem v receptuře, jinak se cena nespáruje. Je tu i sazba za likvidaci odpadu a pravidla, která složka smí zaskočit za kterou.",
       cas:21 },
     { nadpis:"Přepočet na síto", kap:6,
-      obr:"44-sito", roz:[1600,1500], vyrez:[30, 180, 1540, 1120],
-      zvyr:[[62, 270, 1476, 44, "databáze pro technologii"], [62, 384, 484, 44, "síto — teoretický objem"], [558, 384, 980, 44, "materiál · podklad"], [62, 470, 1476, 44, "plocha · kusy · ztráty"], [62, 526, 1476, 36, "přepočteno — rozsah spotřeby"], [62, 730, 1476, 290, "odkud kam se přepočítalo"], [62, 1070, 1476, 220, "receptury na zvolené síto"]],
+      obr:"44-sito", roz:[1600,1500], vyrez:[30, 180, 1540, 1180],
+      zvyr:[[62, 270, 1476, 44, "databáze pro technologii"], [62, 384, 484, 44, "síto — teoretický objem"], [558, 384, 980, 44, "materiál · podklad"], [62, 470, 1476, 44, "plocha · kusy · ztráty"], [62, 526, 1476, 36, "přepočteno — rozsah spotřeby"], [62, 786, 1476, 278, "odkud kam se přepočítalo"], [62,1116,1476,220, "receptury na zvolené síto"]],
 
       text:"<b>Přepočet na síto</b> spočítá spotřebu z geometrie tkaniny: otevřená plocha × tloušťka × přenos × hustota a koeficienty kryvosti, materiálu, podkladu a viskozity. Síta bez údajů výrobce se dopočítají z počtu nití a průměru vlákna a označí jako <b>orientační</b>.",
       rec:"Přepočet na síto spočítá spotřebu z geometrie tkaniny. Otevřená plocha krát tloušťka krát přenos krát hustota, a koeficienty kryvosti, materiálu, podkladu a viskozity. Síta bez údajů výrobce se dopočítají z počtu nití a průměru vlákna a označí jako orientační.",
@@ -660,12 +666,12 @@
       rec:"Zakázky es gé pé es. Seznam otevřených zakázek z firemního systému, otevření přímo do kalkulace. Míchač si dlaždicí zúží seznam na svou technologii; bere se z katalogu podle produktu, protože firemní systém ji vést nemusí. Zatím to běží v ukázkovém režimu, čeká se na rozhraní od ajťáků.",
       cas:21 },
     { nadpis:"Připojení k mostu", kap:9,
-      obr:"80-most", roz:[1600,1300], vyrez:[30, 180, 1540, 1100],
-      zvyr:[[62, 278, 1476, 36, "stav mostu"], [62, 348, 1086, 44, "adresa mostu"], [1160, 346, 380, 48, "připojit · vyzkoušet · výchozí", "vpravo"], [62, 496, 1476, 40, "databáze ze složky — načítají se samy"], [230,580,460,500, "platí pro technologie"], [62, 1094, 1476, 80, "vlastní receptury — ukládají se samy"]],
+      obr:"80-most", roz:[1600,1400], vyrez:[30, 180, 1540, 1160],
+      zvyr:[[62, 278, 1476, 36, "stav mostu"], [62, 348, 1086, 44, "adresa mostu"], [1160, 346, 380, 48, "připojit · vyzkoušet · výchozí", "vpravo"], [62, 496, 1476, 40, "databáze ze složky — načítají se samy"], [230,706,460,500, "platí pro technologie"], [62,1220,1476,80, "vlastní receptury — ukládají se samy"]],
 
-      text:"<b>Most</b> je malý program na tomto počítači. Dělá, co prohlížeč sám nesmí: čte databáze a parametry z disku, rozebírá PDF a zapisuje evidenci. Bez mostu aplikace běží dál, jen v prohlížečovém rozsahu — a tady vidíte, jestli most žije a co umí. Zmizí-li ze složky soubor, ze kterého už nějaké receptury v aplikaci jsou, řekne to tady žlutý rámeček: <b>Sloučit s databází ze souboru</b> přenese síto, kryvost a vazby na produkt na recepturu ze složky a teprve pak tu osiřelou odebere — <b>Odebrat</b> je zahodí.",
-      rec:"Most je malý program na tomto počítači. Dělá, co prohlížeč sám nesmí. Čte databáze a parametry z disku, rozebírá pé dé ef a zapisuje evidenci. Bez mostu aplikace běží dál, jen v prohlížečovém rozsahu. Tady vidíte, jestli most žije a co umí. Zmizí-li ze složky soubor, ze kterého už nějaké receptury v aplikaci jsou, řekne to tady žlutý rámeček. Sloučit s databází ze souboru přenese síto, kryvost a vazby na produkt na recepturu ze složky a teprve pak tu osiřelou odebere. Odebrat je zahodí.",
-      cas:37 },
+      text:"<b>Most</b> je malý program na tomto počítači. Dělá, co prohlížeč sám nesmí: čte databáze a parametry z disku, rozebírá PDF a zapisuje evidenci. Bez mostu aplikace běží dál, jen v prohlížečovém rozsahu — a tady vidíte, jestli most žije a co umí. Zmizí-li ze složky soubor, ze kterého už nějaké receptury v aplikaci jsou, řekne to tady žlutý rámeček: <b>Sloučit s databází ze souboru</b> přenese síto, kryvost a vazby na produkt na recepturu ze složky a teprve pak tu osiřelou odebere — <b>Odebrat</b> je zahodí. Vlastní receptury se ukládají do <b>složek podle technologie a značky loga</b>, takže se dá otevřít složka jednoho zákazníka; klíčem ale zůstává jméno souboru, ne cesta — přesunout soubor v průzkumníku nic nerozpojí.",
+      rec:"Most je malý program na tomto počítači. Dělá, co prohlížeč sám nesmí. Čte databáze a parametry z disku, rozebírá pé dé ef a zapisuje evidenci. Bez mostu aplikace běží dál, jen v prohlížečovém rozsahu. Tady vidíte, jestli most žije a co umí. Zmizí-li ze složky soubor, ze kterého už nějaké receptury v aplikaci jsou, řekne to tady žlutý rámeček. Sloučit s databází ze souboru přenese síto, kryvost a vazby na produkt na recepturu ze složky a teprve pak tu osiřelou odebere. Odebrat je zahodí. Vlastní receptury se ukládají do složek podle technologie a značky loga, takže se dá otevřít složka jednoho zákazníka. Klíčem ale zůstává jméno souboru, ne cesta: přesunout soubor v průzkumníku nic nerozpojí.",
+      cas:50 },
     { nadpis:"Import / data", kap:9,
       obr:"81-import", roz:[1600,1500], vyrez:[30, 180, 1540, 1060],
       zvyr:[[62, 274, 480, 44, "nahrát produkty / receptury"], [62, 322, 1476, 166, "nebo vložit obsah souboru"], [62, 498, 460, 44, "analyzovat"], [62, 612, 1476, 200, "formát receptur CSV"], [62, 890, 460, 46, "obnovit / vymazat katalog"], [62, 1000, 980, 200, "heslo pro mazání"]],
@@ -673,22 +679,28 @@
       text:"<b>Import / data</b>: hromadné nahrání receptur z CSV, export, obnova katalogu a heslo pro mazání. Všechno je CSV čitelné v Excelu. Licencované databáze zůstávají v dílně.",
       rec:"Import a data. Hromadné nahrání receptur z cé es véčka, export, obnova katalogu a heslo pro mazání. Všechno je cé es vé čitelné v Excelu. Licencované databáze zůstávají v dílně.",
       cas:16 },
+    { nadpis:"Sběr zakázek k sítům", kap:9,
+      obr:"90-loga-sita", roz:[1600,1700], vyrez:[30,200,1540,1060],
+      zvyr:[[62,269,727,86,"filtr: technologie a síto, s počtem zakázek","vpravo"],[62,361,529,20,"rozpětí obou tlouštěk","nahoru vpravo"],[62,390,360,39,"hledání i podle tloušťky","vpravo"],[74,536,664,20,"rozbalené síto — složka, soubory, rozpětí","vpravo"],[112,499,186,20,"složka na disku","vpravo"]],
+      text:"<b>Sběr zakázek k sítům</b> ukazuje, co už se naměřilo — technologie po technologii, síto po sítu, seřazeno podle počtu zakázek. Záznam vzniká sám při převzetí krycí plochy do zakázky; nic se nevyplňuje ručně. U každého síta stojí <b>obě rozpětí zvlášť</b>: krajní hodnoty nejtenčích čar říkají, co síto ještě propustí — odtud se jednou opíší meze do tabulky sít — a krajní hodnoty nejširších míst říkají, jak velké plochy na něm jely. Počítají se <b>zakázky, ne řádky</b>: logo o třech barvách dá tři řádky, ale zkušenost je jedna. Každá zakázka se ukládá i jako soubor do složky svého síta, takže se dá otevřít v průzkumníku.",
+      rec:"Sběr zakázek k sítům ukazuje, co už se naměřilo. Technologie po technologii, síto po sítu, seřazeno podle počtu zakázek. Záznam vzniká sám při převzetí krycí plochy do zakázky, nic se nevyplňuje ručně. U každého síta stojí obě rozpětí zvlášť. Krajní hodnoty nejtenčích čar říkají, co síto ještě propustí, a odtud se jednou opíší meze do tabulky sít. Krajní hodnoty nejširších míst říkají, jak velké plochy na něm jely. Počítají se zakázky, ne řádky: logo o třech barvách dá tři řádky, ale zkušenost je jedna. Každá zakázka se ukládá i jako soubor do složky svého síta, takže se dá otevřít v průzkumníku.",
+      cas:44 },
     { nadpis:"Role tiskař", kap:9,
       obr:"83-tiskar", roz:[1600,1000], vyrez:[30, 180, 1540, 440],
       zvyr:[[62, 296, 1476, 40, "role tiskař — jen na čtení"], [1322, 206, 220, 46, "chybí Nová receptura", "vpravo"], [1266,580,274,36, "chybí Upravit / Smazat", "vpravo"]],
 
-      text:"Roli si drží počítač: u váhy se jednou přepne na <b>tiskaře</b>. Tiskaři nechybí nic, čím odesílá zakázku — mizí jen tlačítka, která mění podklady pro celou dílnu: Upravit, Smazat, Nová receptura, ceník, odemykání technologií. Zpět na technologa jde přes heslo dílny.",
-      rec:"Roli si drží počítač. U váhy se jednou přepne na tiskaře. Tiskaři nechybí nic, čím odesílá zakázku. Mizí jen tlačítka, která mění podklady pro celou dílnu: Upravit, Smazat, Nová receptura, ceník a odemykání technologií. Zpět na technologa jde přes heslo dílny.",
-      cas:21 },
+      text:"Roli si drží počítač: u váhy se jednou přepne na <b>tiskaře</b>. Tiskaři nechybí nic, čím odesílá zakázku — mizí jen tlačítka, která mění podklady pro celou dílnu: Upravit, Smazat, Nová receptura, ceník, odemykání technologií. Zpět na technologa jde přes heslo dílny. Kde k týmž datům chodí víc zařízení, je tohle málo — roli v prohlížeči si přepne kdokoli. Pro ten případ umí dílna <b>účty</b>: zavedou se souborem s účty a od té chvíle se každý přihlašuje v záložce <b>Připojení</b>. Účet nese roli, <b>technologie, pro které se v něm míchá</b>, databáze, které vidí, a to, kam smí zapisovat — a rozhoduje o tom most, ne prohlížeč, takže se to obejít nedá. Cizí technologie je v nabídce zamčená a řekne proč. Dílna s jedním počítačem účty zavádět nemusí a běží dál přesně jako dnes.",
+      rec:"Roli si drží počítač. U váhy se jednou přepne na tiskaře. Tiskaři nechybí nic, čím odesílá zakázku. Mizí jen tlačítka, která mění podklady pro celou dílnu: Upravit, Smazat, Nová receptura, ceník a odemykání technologií. Zpět na technologa jde přes heslo dílny. Tam, kde k týmž datům chodí víc zařízení, je tohle málo. Roli v prohlížeči si přepne kdokoli. Pro ten případ umí dílna účty. Zavedou se souborem s účty a od té chvíle se každý přihlašuje v záložce Připojení. Účet nese roli, technologie, pro které se v něm míchá, databáze, které vidí, a to, kam smí zapisovat. Rozhoduje o tom most, ne prohlížeč, takže se to obejít nedá. Cizí technologie je v nabídce zamčená a řekne proč. Dílna s jedním počítačem účty zavádět nemusí a běží dál přesně jako dnes.",
+      cas:57 },
     { nadpis:"Na čem to běží — prohlížeč, Windows, Android", kap:9,
-      obr:"80-most", roz:[1600,1300], vyrez:[30, 180, 1540, 700],
+      obr:"80-most", roz:[1600,1400], vyrez:[30, 180, 1540, 700],
       zvyr:[[62, 273, 700, 38, "stav mostu", "bok"], [62, 349, 700, 39, "adresa mostu", "bok"]],
 
       text:"Nakonec, na čem aplikace běží. Jsou tři podoby a <b>ve všech je to tatáž aplikace</b> — stejné obrazovky, stejné výpočty. <b>Jen v prohlížeči</b>: dvojklik na soubor, nic se neinstaluje, internet není potřeba; bez mostu ale nejde číst zakázkový list z PDF ani zapisovat na disk — data zůstanou v tomhle prohlížeči. <b>Program pro Windows</b> umí všechno: přinese si most i prohlížeč s sebou, spouští se jedním dvojklikem a nic neinstaluje. <b>Aplikace pro Android</b> je pro telefon u váhy — má most v sobě, takže čte a zapisuje databáze i evidenci, umí kameru na čárové kódy a zálohu do Stažené. Čtení PDF, zakázky ze SGPS a váha přes USB na telefonu <b>nejsou</b> — ty zůstávají počítači.",
       rec:"Nakonec, na čem aplikace běží. Jsou tři podoby a ve všech je to tatáž aplikace: stejné obrazovky, stejné výpočty. Jen v prohlížeči: dvojklik na soubor, nic se neinstaluje, internet není potřeba. Bez mostu ale nejde číst zakázkový list z pé dé ef ani zapisovat na disk, a data zůstanou v tomhle prohlížeči. Program pro Windows umí všechno. Přinese si most i prohlížeč s sebou, spouští se jedním dvojklikem a nic neinstaluje. Aplikace pro Android je pro telefon u váhy. Má most v sobě, takže čte a zapisuje databáze i evidenci, umí kameru na čárové kódy a zálohu do složky Stažené. Čtení pé dé ef, zakázky es gé pé es a váha přes u es bé na telefonu nejsou. Ty zůstávají počítači.",
       cas:51 },
     { nadpis:"Nová verze — na počítači i v telefonu", kap:9,
-      obr:"80-most", roz:[1600,1300], vyrez:[30, 180, 1540, 700],
+      obr:"80-most", roz:[1600,1400], vyrez:[30, 180, 1540, 700],
       zvyr:[[62, 273, 700, 38, "verze v počítači i na GitHubu stojí pod stavem mostu", "bok"]],
 
       text:"Novou verzi si obě nainstalované podoby stáhnou samy — v téhle záložce, pod stavem mostu, stojí <b>verze v počítači a vedle ní ta poslední na internetu</b>. Zjistí se až na <b>Zjistit novou verzi</b>: dílna běží bez internetu a ptát se pořád dokola nemá smysl, takže dokud se nikdo nezeptá, stojí tam poctivě <b>nejnovější nezjištěna</b>. Je-li novější verze, teprve pak se objeví tlačítko <b>Stáhnout a nainstalovat</b> i s jejím číslem — a aplikace pak sama hlásí, jak stahování jde a jestli dopadlo. Na Windows se nová verze vymění po zavření okna; v telefonu odkaz stáhne aplikaci a Android se zeptá na instalaci přes tu stávající. <b>Data zůstávají</b>: aktualizace vyměňuje jen program, evidence se nedotkne a vlastní receptury jen doplní. V aplikaci otevřené jen v prohlížeči tenhle blok není — tam se nic neinstaluje, a tedy ani neaktualizuje.",
@@ -751,8 +763,8 @@
        obdélníků, ne podle odhadu. Dřív se počítalo jen to, jestli se popisek
        vejde nad nebo pod rámeček ve výřezu, a to na odhadnutou výšku 32 px.
        Popisek tak sedl přesně na sousední rámeček nebo na cizí popisek — na
-       34 ze 48 scén (4. 9. 2026: „logo = zpět na kalkulaci" leželo přes
-       „hledání produktu" na scéně 2). Šířku popisku dopředu spočítat nejde,
+       34 ze 48 scén (4. 9. 2026: „logo = zpět na kalkulaci“ leželo přes
+       „hledání produktu“ na scéně 2). Šířku popisku dopředu spočítat nejde,
        ta závisí na písmu a délce textu, takže se zvýraznění nejdřív vloží,
        pak změří a teprve potom se každému popisku vybere strana.
 
@@ -826,14 +838,14 @@
         /* Cizí popisek zakryje text — plná váha. Cizí číslo je malé kolečko,
            takže i nepatrný překryv znamená, že z něj zbyla nečitelná výseč;
            váží se proto pětinásobkem, jinak by prohrálo s velkým, ale
-           neškodným překryvem přes rámeček (scéna 5, „export CSV" ležel na
+           neškodným překryvem přes rámeček (scéna 5, „export CSV“ ležel na
            čtyřce). */
         /* Popisek přes cizí popisek nebo číslo je vždycky horší než popisek
            přes rámeček, ať je plocha jakákoli: text přes text se nepřečte,
            text přes průhledný obrys ano. Váhy proto nesmí jít porovnávat jen
            plochou — zakrytí textu dostane pevnou přirážku, aby i pár pixelů
            přebilo velký, ale neškodný překryv rámečku (scéna 26, popisek
-           „shade and combination" seděl na dvojce 58 px²). */
+           „shade and combination“ seděl na dvojce 58 px²). */
         for (var j = 0; j < popisky.length; j++)
           if (prekryv(r, popisky[j]) > 0) cena += 10000 + prekryv(r, popisky[j]);
         for (var j = 0; j < cisla.length; j++)

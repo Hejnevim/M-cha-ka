@@ -1,0 +1,507 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Co to stojí dnes a co se ušetří</title>
+<style>
+  /* Tokeny opsané z prezentace/index.html — obě stránky musí vypadat jako jedna věc. */
+  :root {
+    --paper:      #E6E3DB;
+    --paper-2:    #EFEDE7;
+    --ink:        #17160F;
+    --ink-2:      #6E6C61;
+    --rule:       #CBC8BD;
+    --rule-soft:  #D8D5CC;
+    --key:        #33507A;
+    --key-soft:   #33507A1A;
+    --mag:        #B0603F;
+    --yel:        #C9A43C;
+    --ok:         #2F7D53;
+    --warn:       #A9660F;
+    --shadow:     0 1px 0 #FFFFFF80, 0 12px 32px -20px #17160F40;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #17160F; --paper-2: #1F1E17; --ink: #EDEBE4; --ink-2: #A29F94;
+      --rule: #3A382F; --rule-soft: #2C2B23; --key: #8FB0E0; --key-soft: #8FB0E01A;
+      --mag: #D8886A; --yel: #D9B44A; --ok: #5CB98A; --warn: #D69340;
+      --shadow: 0 1px 0 #FFFFFF08, 0 12px 32px -20px #000000A0;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #17160F; --paper-2: #1F1E17; --ink: #EDEBE4; --ink-2: #A29F94;
+    --rule: #3A382F; --rule-soft: #2C2B23; --key: #8FB0E0; --key-soft: #8FB0E01A;
+    --mag: #D8886A; --yel: #D9B44A; --ok: #5CB98A; --warn: #D69340;
+    --shadow: 0 1px 0 #FFFFFF08, 0 12px 32px -20px #000000A0;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper); color: var(--ink);
+    font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
+    font-size: 17px; line-height: 1.62; margin: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 56px); }
+
+  h1, h2, h3, .lbl, .num, .chip, th, button, label { font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
+  .num, .velke, td.n, th.n { font-family: Consolas, "SF Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+
+  .lbl {
+    font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--ink-2); margin: 0;
+  }
+
+  .mesh {
+    background-image:
+      repeating-linear-gradient(90deg, var(--rule) 0 1px, transparent 1px 7px),
+      repeating-linear-gradient(0deg,  var(--rule) 0 1px, transparent 1px 7px);
+    opacity: .5;
+  }
+
+  header { padding: clamp(40px, 8vw, 92px) 0 clamp(24px, 5vw, 48px); position: relative; overflow: hidden; }
+  header .mesh {
+    position: absolute; inset: 0 0 auto 0; height: 100%;
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 62%);
+    mask-image: linear-gradient(180deg, #000 0%, transparent 62%);
+    opacity: .28; pointer-events: none;
+  }
+  header .wrap { position: relative; }
+  h1 {
+    font-size: clamp(34px, 6.4vw, 74px); font-weight: 700; letter-spacing: -.03em;
+    line-height: 1.02; margin: 14px 0 0; text-wrap: balance; max-width: 15ch;
+  }
+  .podnadpis {
+    font-size: clamp(17px, 2.2vw, 22px); color: var(--ink-2);
+    max-width: 58ch; margin: 20px 0 0; line-height: 1.5;
+  }
+  .rozsah {
+    display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 30px;
+    font-size: 13px; color: var(--ink-2);
+  }
+  .rozsah b { color: var(--ink); font-weight: 600; }
+
+  /* Dnešní stav: jedno velké číslo, protože o jednu otázku tu jde. */
+  .hero-stat {
+    margin-top: clamp(30px, 5vw, 52px);
+    border: 1px solid var(--rule); border-radius: 3px;
+    background: var(--paper-2); box-shadow: var(--shadow);
+    display: grid; grid-template-columns: minmax(0, 1fr); overflow: hidden;
+  }
+  @media (min-width: 760px) { .hero-stat { grid-template-columns: 1.15fr minmax(0, 1fr); } }
+  .hero-stat > div { padding: clamp(20px, 3.4vw, 34px); }
+  .hero-stat > div + div { border-top: 1px solid var(--rule-soft); }
+  @media (min-width: 760px) {
+    .hero-stat > div + div { border-top: 0; border-left: 1px solid var(--rule-soft); }
+  }
+  .velke {
+    font-size: clamp(34px, 6vw, 62px); line-height: 1; letter-spacing: -.02em;
+    display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    color: var(--mag); font-weight: 700; margin-top: 10px;
+  }
+  .velke .jed { font-size: .34em; color: var(--ink-2); font-weight: 400; letter-spacing: 0; }
+  .hero-stat p { margin: 14px 0 0; font-size: 15px; color: var(--ink-2); line-height: 1.55; }
+
+  .cisla {
+    display: grid; gap: 1px; background: var(--rule-soft);
+    border: 1px solid var(--rule); border-radius: 3px; overflow: hidden;
+    grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 20px;
+  }
+  @media (min-width: 700px) { .cisla { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .cisla div { background: var(--paper-2); padding: 18px 20px; }
+  .cisla .num { font-size: clamp(20px, 3vw, 26px); font-weight: 600; letter-spacing: -.01em; display: block; }
+  .cisla .lbl { margin-top: 6px; font-size: 10.5px; }
+
+  section { padding: clamp(36px, 6vw, 72px) 0 0; }
+  h2 {
+    font-size: clamp(22px, 3.2vw, 33px); font-weight: 700; letter-spacing: -.02em;
+    margin: 10px 0 0; text-wrap: balance;
+  }
+  .uvod { color: var(--ink-2); max-width: 62ch; margin: 14px 0 0; }
+
+  .tab-obal { overflow-x: auto; margin: 18px 0 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; min-width: 380px; }
+  th, td { text-align: left; padding: 10px 14px 10px 0; border-bottom: 1px solid var(--rule-soft); }
+  th { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); font-weight: 700; }
+  td.n, th.n { text-align: right; padding-right: 0; }
+  tr:last-child td { border-bottom: 0; }
+  tr.soucet td { border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 700; padding-top: 12px; }
+  tr.soucet td.n { color: var(--mag); }
+
+  /* Posuvník je jediné vstupní pole na stránce — A3 označuje za nepotvrzené
+     právě a jen to, o kolik oprav ubude. */
+  .ladeni {
+    margin-top: 26px; border: 1px solid var(--rule); border-radius: 3px;
+    background: var(--paper-2); padding: clamp(20px, 3vw, 30px); box-shadow: var(--shadow);
+  }
+  .ladeni label { display: block; font-size: 13px; font-weight: 600; color: var(--ink-2); }
+  .ladeni .hodnota {
+    font-family: Consolas, ui-monospace, monospace; font-variant-numeric: tabular-nums;
+    font-size: clamp(30px, 5vw, 44px); font-weight: 700; color: var(--key);
+    line-height: 1; margin: 10px 0 0; letter-spacing: -.02em;
+  }
+  .ladeni input[type=range] { width: 100%; margin: 18px 0 0; accent-color: var(--key); height: 26px; }
+  .stupnice {
+    display: flex; justify-content: space-between; font-size: 11px; color: var(--ink-2);
+    font-family: Consolas, ui-monospace, monospace;
+  }
+  /* Mezera v tisicich: v monospace s tabular-nums je i uzka mezera siroka
+     jako cislice, takze se sazi vlastnim prvkem s pevnou sirkou. */
+  .ms { display: inline-block; width: .26em; }
+  /* U velkych cisel by tataz relativni sirka byla prilis siroka mezera. */
+  .velke .ms, .castka .ms, .hodnota .ms { width: .18em; }
+
+  .znacka { font-size: 12.5px; color: var(--ink-2); margin: 10px 0 0; }
+
+  .dlazdice { display: grid; gap: 16px; margin-top: 22px; grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 700px) { .dlazdice { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .dl {
+    border: 1px solid var(--rule); border-radius: 3px; background: var(--paper-2);
+    padding: 22px; box-shadow: var(--shadow);
+  }
+  .dl.hlavni { border-color: var(--mag); }
+  .dl .castka {
+    font-family: Consolas, ui-monospace, monospace; font-variant-numeric: tabular-nums;
+    font-size: clamp(26px, 4vw, 34px); font-weight: 700; letter-spacing: -.02em;
+    margin: 8px 0 0; line-height: 1.1;
+  }
+  .dl.hlavni .castka { color: var(--mag); }
+  .dl .hodiny { font-size: 14px; color: var(--ink-2); margin: 6px 0 0; font-family: Consolas, ui-monospace, monospace; }
+  .dl .pozn { font-size: 13.5px; color: var(--ink-2); margin: 12px 0 0; line-height: 1.5; }
+
+  /* Podíl výroby je nejdůležitější věta analýzy, tak dostal vlastní pruh. */
+  .podil { margin-top: 22px; border: 1px solid var(--rule); border-radius: 3px; background: var(--paper-2); padding: clamp(20px, 3vw, 28px); }
+  .pruh { display: flex; height: 34px; border-radius: 2px; overflow: hidden; border: 1px solid var(--rule); margin-top: 14px; }
+  .pruh span {
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Segoe UI", system-ui, sans-serif; font-size: 12px; font-weight: 700;
+    color: #FFF; white-space: nowrap; overflow: hidden;
+  }
+  .pruh .p-vyroba { background: var(--mag); }
+  .pruh .p-michar { background: var(--key); }
+
+  .vysledek {
+    background: var(--key-soft); border-left: 3px solid var(--key);
+    padding: 14px 18px; margin: 20px 0 0; font-size: 15.5px; border-radius: 0 3px 3px 0;
+  }
+  .vysledek b { color: var(--key); }
+
+  .vyhrada {
+    background: var(--paper-2); border-left: 3px solid var(--warn);
+    padding: 14px 18px; margin: 18px 0 0; font-size: 15px; border-radius: 0 3px 3px 0;
+    color: var(--ink-2);
+  }
+  .vyhrada b { color: var(--warn); }
+
+  .chip {
+    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; padding: 3px 9px; border-radius: 2px;
+    border: 1px solid var(--rule); color: var(--ink-2); background: var(--paper-2);
+    vertical-align: 2px; margin-left: 8px;
+  }
+  .chip.mereno { border-color: var(--ok); color: var(--ok); }
+  .chip.odhad  { border-color: var(--warn); color: var(--warn); border-style: dashed; }
+
+  .dve { display: grid; gap: 22px; margin-top: 24px; grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 760px) { .dve { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; } }
+  .karta { border: 1px solid var(--rule); border-radius: 3px; padding: 24px; background: var(--paper-2); }
+  .karta h3 { margin: 8px 0 12px; font-size: 19px; font-weight: 700; letter-spacing: -.01em; }
+  .karta ul { margin: 0; padding-left: 18px; }
+  .karta li { margin-bottom: 10px; }
+  .karta li:last-child { margin-bottom: 0; }
+
+  footer {
+    margin-top: clamp(44px, 7vw, 88px); padding: 26px 0 60px;
+    border-top: 1px solid var(--rule); font-size: 13px; color: var(--ink-2);
+  }
+  a { color: var(--key); }
+</style>
+
+<body>
+<header>
+  <div class="mesh"></div>
+  <div class="wrap">
+    <p class="lbl">Ink Recipe Manager &middot; A3 P26-31-01</p>
+    <h1>Co to stojí dnes a co se ušetří</h1>
+    <p class="podnadpis">
+      Opravy odstínu po nátisku stojí ročně bezmála tři sta tisíc korun.
+      Dvě třetiny z toho neplatí míchárna — platí je stojící výroba.
+    </p>
+    <div class="rozsah">
+      <span>Zdroj <b>A3 P26-31-01 INK and DAC improvements</b></span>
+      <span>Data <b>INK repairs.xlsx</b></span>
+      <span>Měřeno <b>2. 4. — 10. 8. 2026</b></span>
+      <span>Sazba MH <b>305 CZK</b> &middot; kurz <b>24,2</b></span>
+    </div>
+
+    <div class="hero-stat">
+      <div>
+        <p class="lbl">Dnešní ztráta za rok</p>
+        <div class="velke"><span>293<span class="ms"></span>482</span> <span class="jed">CZK</span></div>
+        <p>12<span class="ms"></span>127 EUR ročně ve ztraceném čase. 1<span class="ms"></span>209 oprav po 47,8 minutách,
+           dohromady 962 hodin, ve kterých se nic nevyrobí.</p>
+      </div>
+      <div>
+        <p class="lbl">Investice do nápravy</p>
+        <div class="velke" style="color: var(--ok)">0 <span class="jed">CZK</span></div>
+        <p>Žádné licence, žádný přístroj navíc — stávající počítače, už pořízená
+           váha a čtečka. Náklad je interní vývojový čas, návratnost okamžitá.</p>
+      </div>
+    </div>
+
+    <div class="cisla">
+      <div><span class="num">1<span class="ms"></span>209</span><p class="lbl">oprav za rok</p></div>
+      <div><span class="num">47,8</span><p class="lbl">minut na opravu</p></div>
+      <div><span class="num">962</span><p class="lbl">ztracených hodin</p></div>
+      <div><span class="num">67 %</span><p class="lbl">připadá na výrobu</p></div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <p class="lbl">Dnešní stav</p>
+    <h2>Kde se těch 47,8 minuty ztrácí</h2>
+    <p class="uvod">
+      Jedna oprava odstínu po nátisku spotřebuje čtvrthodinu míchárny — a k tomu
+      půl hodiny výroby, která mezitím stojí a čeká na správný odstín. Obě čísla
+      jsou naměřená zvlášť, ne odhad z podílu.
+    </p>
+
+    <div class="tab-obal">
+      <table>
+        <thead>
+          <tr>
+            <th>Položka</th>
+            <th class="n">Na 1 opravu</th>
+            <th class="n">Hodin za rok</th>
+            <th class="n">CZK za rok</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Míchárna — přemíchávání</td>
+            <td class="n">15,9 min</td>
+            <td class="n">320 h</td>
+            <td class="n">97<span class="ms"></span>575</td>
+          </tr>
+          <tr>
+            <td>Výroba — stroj čeká</td>
+            <td class="n">31,9 min</td>
+            <td class="n">642 h</td>
+            <td class="n">195<span class="ms"></span>907</td>
+          </tr>
+          <tr class="soucet">
+            <td>Celkem <span class="chip mereno">naměřeno</span></td>
+            <td class="n">47,8 min</td>
+            <td class="n">962 h</td>
+            <td class="n">293<span class="ms"></span>482</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="vysledek">
+      <b>Nejdůležitější věta celé analýzy není číslo.</b> Dvě třetiny ztraceného
+      času nejsou v míchárně — je to stojící výroba, která čeká na správný odstín.
+      Kdo si přečte jen součet, odnese si, že jde o práci míchárny. Ta je z 33 %.
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="lbl">Dopočet</p>
+    <h2>O kolik oprav ubude</h2>
+    <p class="uvod">
+      Tohle je jediná hodnota, kterou A3 sama vede jako nepotvrzenou — cílové %
+      k potvrzení. Všechno ostatní na téhle stránce je naměřené. Skutečný pokles
+      se změří až po nasazení proti základně 1<span class="ms"></span>209 oprav.
+    </p>
+
+    <div class="ladeni">
+      <label for="pokles">Pokles počtu oprav proti dnešku <span class="chip odhad">k potvrzení</span></label>
+      <p class="hodnota">&minus;<span id="poklesText">30</span> %</p>
+      <input type="range" id="pokles" min="0" max="100" step="5" value="30"
+             aria-label="Pokles počtu oprav v procentech">
+      <div class="stupnice"><span>0 %</span><span>50 %</span><span>100 %</span></div>
+      <p class="znacka">A3 počítá s &minus;30 %. Při 100 % vyjde přesně dnešní ztráta — 293<span class="ms"></span>482 Kč a 962 h.</p>
+    </div>
+
+    <div class="dlazdice">
+      <div class="dl">
+        <p class="lbl">Míchárna</p>
+        <p class="castka"><span id="cMichar">29<span class="ms"></span>273</span> Kč</p>
+        <p class="hodiny"><span id="hMichar">96</span> h vráceného času</p>
+        <p class="pozn">Míň přemíchávání, míň kelímků navíc, míň likvidovaného odpadu.</p>
+      </div>
+      <div class="dl">
+        <p class="lbl">Výroba</p>
+        <p class="castka"><span id="cVyroba">58<span class="ms"></span>772</span> Kč</p>
+        <p class="hodiny"><span id="hVyroba">193</span> h vráceného času</p>
+        <p class="pozn">Stroj nečeká na odstín. Tady jsou dvě třetiny celé úspory.</p>
+      </div>
+      <div class="dl hlavni">
+        <p class="lbl">Dohromady za rok</p>
+        <p class="castka"><span id="cCelkem">88<span class="ms"></span>045</span> Kč</p>
+        <p class="hodiny"><span id="eCelkem">3<span class="ms"></span>638</span> EUR &middot; <span id="hCelkem">289</span> h</p>
+        <p class="pozn">Při nulové investici. Návratnost okamžitá.</p>
+      </div>
+    </div>
+
+    <div class="podil">
+      <p class="lbl">Odkud se úspora vezme</p>
+      <div class="pruh">
+        <span class="p-vyroba" id="pVyroba" style="flex: 0 0 67%">Výroba 67 %</span>
+        <span class="p-michar" id="pMichar" style="flex: 0 0 33%">Míchárna 33 %</span>
+      </div>
+      <p class="znacka">
+        Míchárna i výroba se škálují z vlastní naměřené částky, ne z podílu ze
+        součtu — dopočet přes podíl by dal skoro totéž, ale byl by to odhad tam,
+        kde je měření.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="lbl">Materiál</p>
+    <h2>Úspora barvy se nevyčísluje</h2>
+    <p class="uvod">
+      V A3 je vedená jako zatím nevyčísleno a na téhle stránce to tak zůstává.
+      Naměřená je jediná zakázka — a z jedné zakázky se celý provoz přepočítat nedá.
+    </p>
+
+    <div class="tab-obal">
+      <table>
+        <thead>
+          <tr>
+            <th>Krok</th>
+            <th class="n">Plocha</th>
+            <th class="n">Spotřeba</th>
+            <th>Co to je</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Dnes — obdélník kolem motivu</td>
+            <td class="n">25,71 cm&sup2;</td>
+            <td class="n">3,1 g</td>
+            <td>naměřeno</td>
+          </tr>
+          <tr>
+            <td>Mezikrok — obrys motivu</td>
+            <td class="n">10,94 cm&sup2;</td>
+            <td class="n">1,3 g</td>
+            <td>dopočet pro ilustraci postupu</td>
+          </tr>
+          <tr>
+            <td>Aplikace — skutečné pokrytí</td>
+            <td class="n">3,25 cm&sup2;</td>
+            <td class="n">0,4 g</td>
+            <td>naměřeno, včetně rozpití</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="vyhrada">
+      <b>Pozor na 1,3 g.</b> Prostřední řádek je mezikrok, ne výsledek — A3 ho na
+      straně JAK výslovně označuje za dopočet pro ilustraci postupu. Ven patří
+      <b>3,1 &rarr; 0,4 g</b>, tedy osmkrát menší plocha. Zakázka 138823, potisk
+      63 &times; 40,8 mm, tampontisk.
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="lbl">Čemu těm číslům věřit</p>
+    <h2>Co je měření a co je dopočet</h2>
+    <div class="dve">
+      <div class="karta">
+        <p class="lbl" style="color: var(--ok)">Naměřeno</p>
+        <h3>Stojí to na datech z provozu</h3>
+        <ul>
+          <li><b>1<span class="ms"></span>209 oprav ročně</b> — z 403 oprav za 2. 4. — 10. 8. 2026.</li>
+          <li><b>47,8 min na opravu</b>, rozdělené na 15,9 míchárny a 31,9 čekající výroby.</li>
+          <li><b>293<span class="ms"></span>482 CZK ročně</b> při sazbě MH 305 CZK a kurzu 24,2.</li>
+          <li><b>3,1 &rarr; 0,4 g</b> spotřeby na zakázce 138823.</li>
+        </ul>
+      </div>
+      <div class="karta">
+        <p class="lbl" style="color: var(--warn)">Dopočítáno</p>
+        <h3>Jediná hodnota, která se hádá</h3>
+        <ul>
+          <li><b>O kolik oprav ubude.</b> A3 ji vede jako cílové % k potvrzení a počítá s &minus;30 %.</li>
+          <li>Skutečný pokles se změří až po nasazení proti základně, ne dřív.</li>
+          <li>Aby se dal změřit vlastními daty, musí aplikace <b>zaznamenávat opravy</b> — dnes korekci spočítá, ale nikde nezůstane, že k opravě došlo.</li>
+          <li><b>Úspora materiálu</b> se nevyčísluje vůbec.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>
+      Ink Recipe Manager — analýza úspory podle A3 <b>P26-31-01 INK and DAC
+      improvements</b>, zdroj dat <b>INK repairs.xlsx</b> (problemove_barvy.xlsm),
+      měřeno 2. 4. — 10. 8. 2026. Čísla nejsou z <b>VYVOJ.md</b>; A3 je dokument
+      mimo repozitář.
+    </p>
+    <p>Odhad se na téhle stránce nikde netváří jako měření.</p>
+  </div>
+</footer>
+
+<script>
+  // Základna z A3: každá složka má vlastní naměřenou částku i hodiny, takže se
+  // škáluje zvlášť. Dopočet přes podíl ze součtu by dal skoro totéž, ale byl by
+  // to odhad tam, kde je měření.
+  var MICHARNA_CZK = 97575, MICHARNA_H = 320;
+  var VYROBA_CZK  = 195907, VYROBA_H  = 642;
+  var KURZ = 24.2;
+  // Tataz mezera jako v HTML — viz .ms ve stylu.
+  var MEZERA = '<span class="ms"></span>';
+
+  // Dílna čte čísla s mezerou v tisících; toLocaleString dává úzkou nedělitelnou
+  // mezeru, kterou některá písma nevykreslí, proto se převádí na obyčejnou.
+  function cislo(n) {
+    return Math.round(n).toLocaleString("cs-CZ").replace(/[  ]/g, " ");
+  }
+
+  function prepocti() {
+    var pokles = Number(document.getElementById("pokles").value);
+    var k = pokles / 100;
+
+    var cM = MICHARNA_CZK * k, cV = VYROBA_CZK * k;
+    var hM = MICHARNA_H  * k, hV = VYROBA_H  * k;
+    var cC = cM + cV,         hC = hM + hV;
+
+    document.getElementById("poklesText").textContent = pokles;
+    document.getElementById("cMichar").innerHTML = cislo(cM);
+    document.getElementById("hMichar").innerHTML = cislo(hM);
+    document.getElementById("cVyroba").innerHTML = cislo(cV);
+    document.getElementById("hVyroba").innerHTML = cislo(hV);
+    document.getElementById("cCelkem").innerHTML = cislo(cC);
+    document.getElementById("hCelkem").innerHTML = cislo(hC);
+    document.getElementById("eCelkem").innerHTML = cislo(cC / KURZ);
+  }
+
+  // Podíl je na poklesu nezávislý — obě složky se krátí týmž číslem, takže se
+  // pruh počítá jednou a nehýbe se.
+  (function pruh() {
+    var podilV = Math.round(VYROBA_CZK / (VYROBA_CZK + MICHARNA_CZK) * 100);
+    var pV = document.getElementById("pVyroba"), pM = document.getElementById("pMichar");
+    pV.style.flexBasis = podilV + "%";
+    pM.style.flexBasis = (100 - podilV) + "%";
+    pV.textContent = "Výroba " + podilV + " %";
+    pM.textContent = "Míchárna " + (100 - podilV) + " %";
+  })();
+
+  document.getElementById("pokles").addEventListener("input", prepocti);
+  prepocti();
+</script>
+</body>

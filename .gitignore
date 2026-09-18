@@ -8,6 +8,10 @@ evidence/
 # jen o vzorek nebo o zálohu exportovanou z aplikace
 receptury*.csv
 vzor_receptury.csv
+# účty dílny: otisky hesel a rozdělení práv. Otisk sice heslo neprozradí,
+# ale soubor říká, kdo v dílně je, co míchá a kam smí zapisovat — a to je
+# provozní údaj o zákazníkovi, ne o programu
+parametry/ucty.csv
 *.bak
 *.tmp
 

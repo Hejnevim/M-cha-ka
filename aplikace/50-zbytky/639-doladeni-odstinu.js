@@ -12,11 +12,19 @@
    Aplikace z toho musí dopočítat SLOŽENÍ, aby se týž odstín dal příště
    navážit od nuly, bez dohadování a bez druhého kola nátisků.
 
+   Dolaďuje se v KOLECH a mezi koly se kelímek smí znovu zvážit. Míchač
+   přilije, natiskne, a při tom nátisku z kelímku ubude: zůstane na stěrce,
+   na klišé, na vzorku. Kdyby se druhé kolo počítalo dál od váhy zapsané na
+   začátku, počítalo by se z gramů, které v kelímku už nejsou — a chyba by
+   se s každým dalším kolem nasčítala. Proto je převážení plnohodnotný krok
+   řetězu: od naměřené váhy se počítá dál a co bylo předtím, platí jen
+   poměrem.
+
    Počítá se ve dvou krocích, protože jsou to dvě různé otázky:
 
    1. `doladeniSlozeni` — co je teď v kelímku. Gramy základu se rozpustí na
-      gramy jeho složek, přílitky se k nim přičtou po jménech a z celku se
-      udělají procenta. Přílitek je složka z ceníku (báze, pigment), ne
+      gramy jeho složek, kroky se aplikují v pořadí, jak se staly, a z celku
+      se udělají procenta. Přílitek je složka z ceníku (báze, pigment), ne
       hotová receptura: míchač u váhy sahá po kelímku s bází, ne po
       namíchaném pantonu.
 
@@ -52,16 +60,39 @@ function slucGramy(radky) {
   return Array.from(mapa.values());
 }
 
+/* Rozlišení, pod kterým se rozdíl mezi spočítanou a naváženou hmotností
+   nekomentuje. Váha váží po desetinách gramu, takže 0,05 g rozdílu není
+   úbytek ani přebytek, je to zaokrouhlení poslední číslice. */
+const DOLADENI_TOLERANCE_VAHY = 0.05;
+
 /* Co je v kelímku po doladění.
 
-   `zaklad`   { gramu, slozeni: [{ name, pct }] } — s čím se začalo
-   `prilitky` [{ name, gramu }] — co se do toho přililo, složky z ceníku
+   `zaklad`  { gramu, slozeni: [{ name, pct }] } — s čím se začalo
+   `kroky`   co se s kelímkem dělo, v pořadí, jak se to dělo:
+               { typ: "prilitek", name, gramu }  — přililo se
+               { typ: "vazeni",   gramu }        — kelímek se znovu zvážil
+
+   Kroky se procházejí v pořadí a stav kelímku (gramy jednotlivých složek)
+   se po každém z nich přepočítá. Pořadí je podstatné: 2 g žluté do 40 g
+   kelímku je jiný podíl než 2 g žluté do 12 g, co z kelímku zbylo po
+   nátisku.
+
+   PŘEVÁŽENÍ odebírá nebo přidává POMĚRNĚ. Na stěrce a na klišé ulpí
+   namíchaná barva, ne jedna její složka — úbytek se proto rozdělí mezi
+   všechny složky podle jejich podílu a složení v procentech se převážením
+   nemění. Mění se jen gramy, od kterých se počítá dál.
+
+   Ukáže-li váha VÍC, než kolik má kelímek vážit, poměrné dopočítání by
+   lhalo: přebytek je něco, co někdo přilil a nezapsal, a jeho složení se
+   neví (pravidlo „co se neví, se nehádá"). Přebytek se proto rozdělí taky
+   poměrně — jinak by se na něm zastavil celý výpočet —, ale řekne se
+   nahlas, ať to míchač dopíše.
 
    Vrací složení v procentech ze sta, gramy každé složky a rozpis, kolik
-   z ní přišlo ze základu a kolik z přílitku. Ten rozpis je tu kvůli
+   z ní přišlo ze základu a kolik z přílitků. Ten rozpis je tu kvůli
    míchači: u složky, která byla v základu i v přílitku, jinak není vidět,
    proč jí je najednou tolik. */
-function doladeniSlozeni({ zaklad, prilitky }) {
+function doladeniSlozeni({ zaklad, kroky }) {
   const zakl = n(zaklad && zaklad.gramu);
   const zaklSl = (zaklad && zaklad.slozeni) || [];
   const sumaZakl = zaklSl.reduce((s, c) => s + n(c.pct), 0);
@@ -70,52 +101,105 @@ function doladeniSlozeni({ zaklad, prilitky }) {
   /* Gramy složek základu. Procenta se berou jako poměry — součet 98 % nebo
      101 % z ručního zápisu se přepočítá na sto, jinak by se kelímku ubylo
      nebo přibylo gramů, které na váze nebyly. */
-  const zeZakladu = slucGramy(zaklSl.map((c) => ({ name: c.name, g: zakl * (n(c.pct) / sumaZakl) })));
-
-  const pri = [];
-  for (const p of (prilitky || [])) {
-    const jm = String((p && p.name) || "").trim();
-    const g = n(p && p.gramu);
-    if (!jm || !(g > 0)) continue;
-    pri.push({ name: jm, g: g });
+  const stav = new Map();
+  for (const c of slucGramy(zaklSl.map((c) => ({ name: c.name, g: zakl * (n(c.pct) / sumaZakl) })))) {
+    stav.set(c.k, { name: c.name, k: c.k, zeZakladu: c.g, zPrilitku: 0 });
   }
-  const zPrilitku = slucGramy(pri);
-  const celkemPrilito = zPrilitku.reduce((s, c) => s + c.g, 0);
-  const celkem = zakl + celkemPrilito;
+
+  const gramyStavu = () => {
+    let s = 0;
+    for (const c of stav.values()) s += c.zeZakladu + c.zPrilitku;
+    return s;
+  };
+
+  /* Co se u kterého kroku stalo — pro obrazovku. Míchač potřebuje vidět,
+     že mu při nátisku ubyly 3,8 g, jinak si myslí, že se přepsal. */
+  const prubeh = [];
+  let prilitoCelkem = 0;
+  let ubyloCelkem = 0;
+  let pribyloNezapsane = 0;
+
+  for (const krok of (kroky || [])) {
+    if (!krok) continue;
+
+    if (krok.typ === "vazeni") {
+      const navazeno = n(krok.gramu);
+      const melo = gramyStavu();
+      if (!(navazeno > 0) || !(melo > 0)) continue;
+      const rozdil = navazeno - melo;
+      /* Rozdíl pod rozlišením váhy není úbytek, je to poslední číslice.
+         Přepočítávat kvůli němu složení by jen zaneslo šum. */
+      if (Math.abs(rozdil) <= DOLADENI_TOLERANCE_VAHY) {
+        prubeh.push({ typ: "vazeni", navazeno: navazeno, melo: melo, rozdil: 0, celkem: melo });
+        continue;
+      }
+      /* Poměrné přeškálování: složení v % zůstává, mění se gramy. Škáluje se
+         zvlášť podíl ze základu a podíl z přílitků, aby rozpis „odkud se to
+         v kelímku vzalo" po převážení dál seděl. */
+      const k = navazeno / melo;
+      for (const c of stav.values()) { c.zeZakladu *= k; c.zPrilitku *= k; }
+      if (rozdil < 0) ubyloCelkem += -rozdil;
+      else pribyloNezapsane += rozdil;
+      prubeh.push({ typ: "vazeni", navazeno: navazeno, melo: melo, rozdil: rozdil, celkem: navazeno });
+      continue;
+    }
+
+    // výchozí typ je přílitek — starší zápis bez pole `typ` je taky přílitek
+    const jm = String((krok.name) || "").trim();
+    const g = n(krok.gramu);
+    if (!jm || !(g > 0)) continue;
+    const k = normKomp(jm);
+    if (stav.has(k)) stav.get(k).zPrilitku += g;
+    else stav.set(k, { name: jm, k: k, zeZakladu: 0, zPrilitku: g });
+    prilitoCelkem += g;
+    prubeh.push({ typ: "prilitek", name: jm, gramu: g, celkem: gramyStavu() });
+  }
+
+  const celkem = gramyStavu();
   if (!(celkem > 0)) return null;
 
-  const mapaZakl = new Map(zeZakladu.map((c) => [c.k, c.g]));
-  const mapaPri = new Map(zPrilitku.map((c) => [c.k, c.g]));
-  const klice = [];
-  for (const c of zeZakladu) klice.push(c);
-  for (const c of zPrilitku) if (!mapaZakl.has(c.k)) klice.push(c);
-
-  const radky = klice.map((c) => {
-    const zeZ = mapaZakl.get(c.k) || 0;
-    const zP = mapaPri.get(c.k) || 0;
-    const g = zeZ + zP;
+  const radky = Array.from(stav.values()).map((c) => {
+    const g = c.zeZakladu + c.zPrilitku;
     return {
       name: c.name, k: c.k, gramu: g, pct: g / celkem * 100,
-      zeZakladu: zeZ, zPrilitku: zP,
+      zeZakladu: c.zeZakladu, zPrilitku: c.zPrilitku,
       // složka, která v základu vůbec nebyla — kvůli ní odstín uhnul nejvíc
-      nova: zeZ <= 0 && zP > 0,
+      nova: c.zeZakladu <= 0 && c.zPrilitku > 0,
     };
-  }).sort((a, b) => b.gramu - a.gramu);
+  }).filter((r) => r.gramu > 0).sort((a, b) => b.gramu - a.gramu);
+
+  /* Kolik ze základu v kelímku doopravdy zbylo. Po nátiscích je to míň, než
+     kolik se ho navážilo — a právě proti tomuhle číslu se poměřují přílitky,
+     ne proti tomu, co se do kelímku dalo na začátku. */
+  const zakladVKelimku = radky.reduce((s, r) => s + r.zeZakladu, 0);
+  const prilitoVKelimku = radky.reduce((s, r) => s + r.zPrilitku, 0);
 
   return {
     ok: true,
+    // co se navážilo na začátku (zůstává kvůli zápisu do receptury)
     zaklad: zakl,
-    prilito: celkemPrilito,
+    // co ze základu v kelímku zbylo po případných úbytcích
+    zakladVKelimku: zakladVKelimku,
+    // co se celkem přililo, a co z toho v kelímku zbylo
+    prilito: prilitoCelkem,
+    prilitoVKelimku: prilitoVKelimku,
     celkem: celkem,
     radky: radky,
+    prubeh: prubeh,
+    // kolikrát se kelímek mezi přílitky převážil — obrazovka podle toho mlčí
+    vazeni: prubeh.filter((x) => x.typ === "vazeni").length,
+    // kolik při nátiscích z kelímku ubylo a kolik se objevilo nezapsaného
+    ubylo: ubyloCelkem,
+    pribyloNezapsane: pribyloNezapsane,
     // složení pro recepturu — tvar, který čeká zbytek aplikace
     slozeni: radky.map((r) => ({ name: r.name, pct: r.pct })),
     // o kolik odstín uhnul: jak velkou část kelímku dělají přílitky
-    podilPrilitku: celkemPrilito / celkem,
+    podilPrilitku: prilitoVKelimku / celkem,
     /* Přílitek pod rozlišením váhy. Nepočítá se s ním jinak, jen se to řekne:
        složka, které je 0,05 g, ve výsledku sedí jen náhodou a při navážení
        od nuly se netrefí. */
-    drobne: (prilitky || []).filter((p) => n(p.gramu) > 0 && n(p.gramu) < DOLADENI_MIN_PRILITEK)
+    drobne: (kroky || []).filter((p) => p && p.typ !== "vazeni"
+      && n(p.gramu) > 0 && n(p.gramu) < DOLADENI_MIN_PRILITEK)
       .map((p) => String(p.name || "")),
   };
 }
@@ -237,21 +321,63 @@ function prepocetPoDoladeni({ slozeni, mam, chci }) {
    zakázku, značka loga je to, co je na produktu vytištěné. Jedna agentura
    objedná potisk pro tři různé značky. */
 
-/* Klíč pro sdružování — velikost písmen ani mezery navíc nesmějí značku
-   rozdělit na dvě skupiny („Škoda Auto" a „ŠKODA  AUTO" je táž značka). */
-const normZnacka = (s) => String(s == null ? "" : s).trim().toLowerCase().replace(/\s+/g, " ");
+/* Klíč pro sdružování — velikost písmen, mezery navíc ani diakritika nesmějí
+   značku rozdělit na dvě skupiny: „Škoda Auto", „ŠKODA  AUTO" i „Skoda Auto"
+   je táž značka.
 
-/* Značky, které už dílna použila — pro našeptávač u pole. Bez něj vzniknou
-   překlepové dvojníky a skupiny se rozsypou. */
-function znackyReceptur(recipes) {
+   Diakritika se ignoruje od 17. 9. 2026 (pokyn dílny). Dva důvody: míchač
+   u váhy piše bez háčků rychleji, a složky na disku diakritiku stejně
+   odstraňují (znackaDoJmena → SKODA_AUTO) — kdyby se tu „Skoda" a „Škoda"
+   počítaly zvlášť, dvě skupiny v nabídce by sdílely jedinou složku. */
+const normZnacka = (s) => String(s == null ? "" : s).normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "").trim().toLowerCase().replace(/\s+/g, " ");
+
+/* Kanonický tvar značky: jak si ji dílna napsala POPRVÉ.
+
+   Pokyn dílny (17. 9. 2026): kdo zapisuje druhou recepturu též značky, má
+   dostat nabídku srovnat tvar s prvním zápisem — kvůli přehledu při hledání.
+   Nabízí se, nevynucuje: „Skoda Trans" může být opravdu jiný zákazník než
+   „ŠKODA", a přepisovat text pod rukama by míchači vzalo možnost založit
+   novou značku podobného jména.
+
+   Vrací "" když značka ještě nikde není (první zápis — ten právě určuje
+   tvar) nebo když napsaný tvar už s kanonickým přesně sedí. */
+function kanonickaZnacka(napsana, zname) {
+  const z = String(napsana == null ? "" : napsana).trim();
+  if (!z) return "";
+  const k = normZnacka(z);
+  if (!k) return "";
+  for (const x of (zname || [])) {
+    const t = String(x == null ? "" : x).trim();
+    if (normZnacka(t) !== k) continue;
+    return t === z ? "" : t;      // sedí-li tvar přesně, není co nabízet
+  }
+  return "";
+}
+
+/* Značky, které už dílna použila — pro našeptávač u pole a pro nabídku
+   srovnat tvar (kanonickaZnacka). Bez nich vzniknou překlepové dvojníci
+   a skupiny se rozsypou.
+
+   `dalsi` jsou značky z jiných záznamů než receptur — dnes ze sad. Musejí
+   projít týmž sdružením, ne pouhým `indexOf`: jinak by se „Škoda" ze sady
+   objevila v seznamu vedle „SKODA" z receptury a nabídka by nevěděla, který
+   tvar je ten první.
+
+   Receptury mají přednost před sadami: tvar určuje ten, kdo značku zapsal
+   dřív, a receptura bývá dřív než sada, která ji použije. */
+function znackyReceptur(recipes, dalsi) {
   const mapa = new Map();
-  for (const r of (recipes || [])) {
-    const z = String((r && r.znackaLoga) || "").trim();
-    if (!z) continue;
+  const pridej = (z0) => {
+    const z = String(z0 == null ? "" : z0).trim();
+    if (!z) return;
     const k = normZnacka(z);
+    if (!k) return;
     // drží se první zapsaný tvar — ten, jak si ho dílna napsala poprvé
     if (!mapa.has(k)) mapa.set(k, z);
-  }
+  };
+  for (const r of (recipes || [])) pridej(r && r.znackaLoga);
+  for (const z of (dalsi || [])) pridej(z);
   return Array.from(mapa.values()).sort((a, b) => a.localeCompare(b, "cs"));
 }
 

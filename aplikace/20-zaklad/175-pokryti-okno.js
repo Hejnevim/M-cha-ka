@@ -44,7 +44,7 @@ const klicBarvy = (b) => b.r + "," + b.g + "," + b.b;
 function PokrytiModal({ obrazky, stranky, pdfId, sirka, vyska, gm2, qty, hustota,
                         odsazeniVychozi, onPouzit, onPrevzitBarvy, onClose,
                         sitaTech, tech, koef, material, podkladHex, ztraty, terka,
-                        recipes, sitoVychozi }) {
+                        recipes, sitoVychozi, mereniLoga, onZaznam, terky }) {
   const [zdroj, setZdroj] = useState(null);     // {url, popis, vyrezat}
   const [prah, setPrah] = useState(28);
   const [orezat, setOrezat] = useState(true);
@@ -223,6 +223,93 @@ function PokrytiModal({ obrazky, stranky, pdfId, sirka, vyska, gm2, qty, hustota
     ? preloz(" · motiv v poměru {p} : 1", { p: fmt(vysl.bw / vysl.bh, 2) })
     : "";
 
+  /* ---- síto po barvách ----
+     Stav sít žije tady, ne v rozpisu: potřebuje ho i tlačítko „Použít krycí
+     plochu“, které záznam měření zapisuje u jednobarevné zakázky, a rozpis
+     je jen jednou z obrazovek, které ho ukazují. */
+  const [sitaBarev, setSitaBarev] = useState({});
+  const nabidkaSit = useMemo(() => (sitaTech || []).filter((x) => x.vth > 0), [sitaTech]);
+  /* Ke každé barvě se zkusí přiřadit receptura podle odstínu — stejná mez
+     ΔE 25 jako u barvy potisku ze vzorníku. Z receptury se bere hustota
+     (převod ml na gramy) a zapsané síto jako jedna z předvoleb řádku. */
+  const shody = useMemo(() => (vybrane || []).map((b) => {
+    // nejblizsiPantone bere RGB jako trojici, ne jako objekt barvy z nabídky
+    const sh = nejblizsiPantone([b.r, b.g, b.b], recipes);
+    return sh && sh.dE < 25 ? sh : null;
+  }), [vybrane, recipes]);
+  /* Návrh síta k barvě, v pořadí síly: meze čáry v tabulce sít (pravidlo
+     dílny, sitoProCaru) → co dílna k podobné čáře volila (evidence měření,
+     sitoZeZkusenosti) → síto receptury → síto z kalkulace. Každý návrh nese
+     zdroj, ať je u řádku vidět, PROČ to síto tam stojí. Návrh mimo nabídku
+     technologie se zahodí — síto, které dílna nemá, se nenabízí. */
+  const vNabidce = (s) => !!s && nabidkaSit.some((x) => x.sito === s);
+  const navrhSita = (cary, sh) => {
+    const cara = cary && cary.minMm > 0 ? cary.minMm : null;
+    if (cara) {
+      const zTab = sitoProCaru(nabidkaSit, tech, cara);
+      if (zTab && vNabidce(zTab.sito)) return { sito: zTab.sito, zdroj: "tabulka" };
+      const zkus = sitoZeZkusenosti(mereniLoga, tech, cara);
+      const prvni = zkus.find((z) => vNabidce(z.sito));
+      if (prvni) return { sito: prvni.sito, zdroj: "zkusenost", od: prvni.od, do: prvni.do, pocet: prvni.pocet };
+    }
+    if (sh && vNabidce(sh.recipe.mesh)) return { sito: sh.recipe.mesh, zdroj: "receptura" };
+    if (vNabidce(sitoVychozi)) return { sito: sitoVychozi, zdroj: "kalkulace" };
+    return { sito: "", zdroj: "" };
+  };
+  const navrhySit = useMemo(() => (vybrane || []).map((b, i) =>
+    navrhSita(vysl && vysl.caryPoBarvach ? vysl.caryPoBarvach[i] : null, shody[i])),
+    [vybrane, vysl, nabidkaSit, tech, mereniLoga, shody, sitoVychozi]);
+  const sitaRadku = (vybrane || []).map((b, i) => {
+    const klic = klicBarvy(b);
+    return sitaBarev[klic] != null ? sitaBarev[klic] : navrhySit[i].sito;
+  });
+  /* Síto k celému motivu — režim „vše kromě pozadí“ žádný rozpis po barvách
+     nemá, a přitom právě tam technolog čáry vidí a síto k nim chce přiřadit
+     hned. Táž trojice návrhů (tabulka → zkušenost → receptura/kalkulace),
+     tentýž záznam do evidence; učí se z něj příští podobná zakázka. */
+  const [sitoCelku, setSitoCelku] = useState(null);
+  const navrhCelku = useMemo(() => navrhSita(vysl ? vysl.cary : null, null),
+    [vysl, nabidkaSit, tech, mereniLoga, sitoVychozi]);
+  const sitoCelkuAkt = sitoCelku != null ? sitoCelku : navrhCelku.sito;
+  /* Rozměr loga v mm z masky: šířka motivu je měřítkem rovna rozměru potisku
+     (tak se měřítko odvozuje), výška vyjde z poměru. Z šířky se bere těrka —
+     nejbližší širší z řady technologie, jako v kalkulaci (terkaProSirku). */
+  const logoMm = vysl && vysl.pxNaMm > 0
+    ? { w: vysl.bwMotiv / vysl.pxNaMm, h: vysl.bhMotiv / vysl.pxNaMm } : null;
+  const terkaNavrh = logoMm ? terkaProSirku(terky, logoMm.w) : null;
+  const popisNavrhu = (nv) => {
+    if (!nv || !nv.sito) return "";
+    if (nv.zdroj === "tabulka") return preloz("síto podle tabulky sít");
+    if (nv.zdroj === "zkusenost") return preloz("dílna {n}× u čar {od}–{do} mm",
+      { n: fmt(nv.pocet, 0), od: fmt(nv.od, 2), do: fmt(nv.do, 2) });
+    if (nv.zdroj === "receptura") return preloz("síto z receptury");
+    if (nv.zdroj === "kalkulace") return preloz("síto z kalkulace");
+    return "";
+  };
+  const hexZ = (b) => ((1 << 24) | (b.r << 16) | (b.g << 8) | b.b).toString(16).slice(1);
+  /* Záznamy měření pro evidenci (část 641): řádek na barvu s jejími čárami,
+     podílem a sítem z řádku rozpisu. Bez vybraných barev (počítá se vše
+     kromě pozadí) jde jeden řádek za celý motiv se sítem z kalkulace. */
+  const zaznamyMereni = () => {
+    if (!vysl || !onZaznam) return;
+    const k = vysl.pxNaMm > 0 ? 1 / vysl.pxNaMm : 0;
+    const spolecne = { pokrytiPct: vysl.pct, pxNaMm: vysl.pxNaMm,
+      motivW: k ? vysl.bwMotiv * k : null, motivH: k ? vysl.bhMotiv * k : null };
+    /* Barva bez jediného bodu v motivu (přechodový odstín z hrany, který
+       volba „všechny“ přibere) žádnou čáru nemá a nic by neučila — do
+       evidence nejde; zkouška 17. 9. 2026 jich zapsala pět prázdných. */
+    const polozky = (vybrane && vybrane.length && vysl.caryPoBarvach)
+      ? vybrane.map((b, i) => Object.assign({}, spolecne, {
+          barvaPoradi: i + 1, hex: hexZ(b), cary: vysl.caryPoBarvach[i],
+          podilPct: vysl.poBarvach && vysl.poBarvach[i] ? vysl.poBarvach[i].podil : null,
+          sito: sitaRadku[i] || "" }))
+        .filter((z) => z.cary || z.podilPct > 0)
+      : [Object.assign({}, spolecne, { barvaPoradi: 1, hex: "", cary: vysl.cary, podilPct: 100,
+          sito: sitoCelkuAkt || "" })];
+    if (!polozky.length) return;
+    onZaznam(polozky);
+  };
+
   return html`
     <div className="modalbg" onClick=${(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="modalbox" style=${{ width: "min(900px,100%)" }}>
@@ -341,6 +428,51 @@ function PokrytiModal({ obrazky, stranky, pdfId, sirka, vyska, gm2, qty, hustota
                             <span className="note">${preloz(" netto při {g} g/m² a {n} ks", { g: fmt(gm2, 1), n: fmt(qty, 0) })}</span></div>
                         <//>`}
                     </div>`}
+                  ${/* Tloušťky čar — z nich se vybírá síto. Bez rozměru potisku
+                        není měřítko, tak se řeknou body a to, že mm chybí;
+                        číslo v mm z hádaného měřítka by vypadalo jako změřené. */""}
+                  <div className="kv" style=${{ marginTop: 10 }}>
+                    <div className="k">${preloz("Rozměr loga")}</div>
+                    <div className="v">${logoMm ? html`<${React.Fragment}>${fmt(logoMm.w, 1)} × ${fmt(logoMm.h, 1)} mm
+                        <span className="note">${terkaNavrh != null
+                          ? preloz(" · těrka {t} mm — nejbližší širší než logo", { t: fmt(terkaNavrh, 0) })
+                          : (terky && terky.length ? preloz(" · v řadě není širší těrka než logo") : "")}</span><//>`
+                      : preloz("{p} bodů — bez rozměru potisku chybí měřítko", { p: fmt(vysl.bwMotiv, 0) + " × " + fmt(vysl.bhMotiv, 0) })}</div>
+                    <div className="k">${preloz("Nejtenčí čára")}</div>
+                    <div className="v">${!vysl.cary ? preloz("v motivu není žádná čára")
+                      : vysl.cary.minMm != null ? html`<${React.Fragment}>${fmt(vysl.cary.minMm, 2)} mm
+                          <span className="note">${preloz(" ± {r} mm — jeden bod předlohy", { r: fmt(vysl.cary.rozliseniMm, 3) })}</span><//>`
+                      : preloz("{p} bodů — bez rozměru potisku chybí měřítko", { p: fmt(vysl.cary.minPx, 1) })}</div>
+                    <div className="k">${preloz("Nejširší místo")}</div>
+                    <div className="v">${!vysl.cary ? "—"
+                      : vysl.cary.maxMm != null ? fmt(vysl.cary.maxMm, 2) + " mm"
+                      : preloz("{p} bodů — bez rozměru potisku chybí měřítko", { p: fmt(vysl.cary.maxPx, 1) })}</div>
+                    ${/* Síto k naměřeným čarám: jedno pro celý motiv (vše kromě pozadí)
+                          nebo pro jedinou vybranou barvu; víc barev má každá své
+                          v rozpisu níže. Zapisuje se do evidence spolu s čarami. */""}
+                    <div className="k">${preloz("Síto")}</div>
+                    <div className="v">${vybrane.length > 1
+                      ? html`<span className="note">${preloz("po barvách v rozpisu níže")}</span>`
+                      : html`<${React.Fragment}>
+                          <select value=${vybrane.length === 1 ? (sitaRadku[0] || "") : (sitoCelkuAkt || "")}
+                            style=${{ minWidth: 150 }}
+                            onChange=${(e) => vybrane.length === 1
+                              ? setSitaBarev(Object.assign({}, sitaBarev,
+                                  (function (o) { o[klicBarvy(vybrane[0])] = e.target.value; return o; })({})))
+                              : setSitoCelku(e.target.value)}>
+                            <option value="">${preloz("— vyberte —")}</option>
+                            ${nabidkaSit.map((x) => html`<option key=${x.sito} value=${x.sito}>${x.sito}
+                              ${" · " + fmt(x.vth, 1) + " cm³/m²"}</option>`)}
+                          </select>
+                          ${(vybrane.length === 1
+                              ? (sitaBarev[klicBarvy(vybrane[0])] == null ? popisNavrhu(navrhySit[0]) : "")
+                              : (sitoCelku == null ? popisNavrhu(navrhCelku) : "")) && html`
+                            <div className="note">${vybrane.length === 1 ? popisNavrhu(navrhySit[0]) : popisNavrhu(navrhCelku)}</div>`}
+                        <//>`}</div>
+                  </div>
+                  ${vysl.cary && html`<p className="note" style=${{ marginTop: 4 }}>
+                    ${preloz("Červený kroužek v náhledu je nejtenčí čára, modrý nejširší místo. Čára tenčí než jeden bod předlohy se nezměří.")}
+                  </p>`}
 
                   <label className="f" style=${{ marginTop: 14 }}>${preloz("Vnější odsazení kolem objektů (mm)")}</label>
                   <div className="rowline" style=${{ marginBottom: 4 }}>
@@ -395,13 +527,16 @@ function PokrytiModal({ obrazky, stranky, pdfId, sirka, vyska, gm2, qty, hustota
               </div>
               ${vybrane.length > 0 && vysl.poBarvach && html`
                 <${RozpisSeparaci} vybrane=${vybrane} poBarvach=${vysl.poBarvach}
+                  caryPoBarvach=${vysl.caryPoBarvach}
                   pxNaMm=${vysl.pxNaMm} qty=${qty} ztraty=${ztraty} terka=${terka}
                   sitaTech=${sitaTech} tech=${tech} koef=${koef} material=${material}
-                  podkladHex=${podkladHex} recipes=${recipes} sitoVychozi=${sitoVychozi}
-                  sirka=${sirka} vyska=${vyska}
-                  onPrevzit=${onPrevzitBarvy ? (seznam) => onPrevzitBarvy(seznam, n(odsazeni, 0)) : null} />`}
+                  podkladHex=${podkladHex} sirka=${sirka} vyska=${vyska}
+                  shody=${shody} nabidka=${nabidkaSit} sitaRadku=${sitaRadku} navrhySit=${navrhySit}
+                  sitaBarev=${sitaBarev} setSitaBarev=${setSitaBarev} popisNavrhu=${popisNavrhu}
+                  mereniPocet=${(mereniLoga || []).filter((m) => m && String(m.tech || "").toUpperCase() === String(tech || "").toUpperCase()).length}
+                  onPrevzit=${onPrevzitBarvy ? (seznam) => { zaznamyMereni(); onPrevzitBarvy(seznam, n(odsazeni, 0)); } : null} />`}
               <div className="rowline" style=${{ marginTop: 16, marginBottom: 0 }}>
-                <button className="btn" onClick=${() => { onPouzit(vysl.pct, n(odsazeni, 0)); onClose(); }}>
+                <button className="btn" onClick=${() => { zaznamyMereni(); onPouzit(vysl.pct, n(odsazeni, 0)); onClose(); }}>
                   ${preloz("Použít krycí plochu {p} % →", { p: fmt(vysl.pct, 1) })}
                 </button>
                 <button className="btn sec" onClick=${onClose}>${preloz("Zrušit")}</button>
@@ -419,20 +554,13 @@ function PokrytiModal({ obrazky, stranky, pdfId, sirka, vyska, gm2, qty, hustota
    barva potisku dostane řádek se svou plochou, sítem a spotřebou, k tomu
    volitelný bílý podtisk pro tmavý textil. Síta se nabízejí z parametrů
    technologie — táž nabídka jako v kalkulaci, žádný druhý seznam. */
-function RozpisSeparaci({ vybrane, poBarvach, pxNaMm, qty, ztraty, terka, sitaTech,
-                          tech, koef, material, podkladHex, recipes, sitoVychozi,
-                          sirka, vyska, onPrevzit }) {
-  const nabidka = useMemo(() => (sitaTech || []).filter((x) => x.vth > 0), [sitaTech]);
-  /* Ke každé barvě se zkusí přiřadit receptura podle odstínu — stejná mez
-     ΔE 25 jako u barvy potisku ze vzorníku. Z receptury se bere hustota
-     (převod ml na gramy) a zapsané síto jako předvolba řádku. */
-  const shody = useMemo(() => (vybrane || []).map((b) => {
-    // nejblizsiPantone bere RGB jako trojici, ne jako objekt barvy z nabídky
-    const sh = nejblizsiPantone([b.r, b.g, b.b], recipes);
-    return sh && sh.dE < 25 ? sh : null;
-  }), [vybrane, recipes]);
-
-  const [sitaBarev, setSitaBarev] = useState({});
+function RozpisSeparaci({ vybrane, poBarvach, caryPoBarvach, pxNaMm, qty, ztraty, terka, sitaTech,
+                          tech, koef, material, podkladHex, sirka, vyska,
+                          shody, nabidka, sitaRadku, navrhySit, sitaBarev, setSitaBarev,
+                          popisNavrhu, mereniPocet, onPrevzit }) {
+  /* Síta po barvách, shody s recepturami i návrhy sít přicházejí z okna
+     (PokrytiModal) — tam je potřebuje i zápis měření loga u jednobarevné
+     zakázky, a dva stavy téže věci by se rozešly. */
   const [motivu, setMotivu] = useState(1);
   const [podtiskZap, setPodtiskZap] = useState(false);
   const [podtiskSito, setPodtiskSito] = useState("");
@@ -447,13 +575,16 @@ function RozpisSeparaci({ vybrane, poBarvach, pxNaMm, qty, ztraty, terka, sitaTe
     return nej ? nej.sito : "";
   }, [nabidka]);
 
-  const sitoRadku = (b, i) => {
-    const klic = klicBarvy(b);
-    if (sitaBarev[klic] != null) return sitaBarev[klic];
-    const sh = shody[i];
-    if (sh && sh.recipe.mesh && nabidka.some((x) => x.sito === sh.recipe.mesh)) return sh.recipe.mesh;
-    if (sitoVychozi && nabidka.some((x) => x.sito === sitoVychozi)) return sitoVychozi;
-    return "";
+  const sitoRadku = (b, i) => sitaRadku[i] || "";
+  /* Odkud je předvolené síto — řádek to řekne pod výběrem, ať technolog ví,
+     jestli hledí na pravidlo z tabulky, na zkušenost dílny, nebo jen na to,
+     co bylo v receptuře. Ruční volba žádný popisek nemá: je to jeho volba. */
+  const puvodSita = (b, i) => (sitaBarev[klicBarvy(b)] != null ? "" : popisNavrhu(navrhySit[i]));
+  const caraText = (i) => {
+    const c = caryPoBarvach ? caryPoBarvach[i] : null;
+    if (!c) return "—";
+    if (c.minMm == null) return fmt(c.minPx, 1) + "–" + fmt(c.maxPx, 1) + " px";
+    return fmt(c.minMm, 2) + "–" + fmt(c.maxMm, 2);
   };
 
   const rozbor = useMemo(() => rozborSeparaci({
@@ -466,8 +597,8 @@ function RozpisSeparaci({ vybrane, poBarvach, pxNaMm, qty, ztraty, terka, sitaTe
     kusu: qty, ztraty: ztraty, sita: sitaTech, tech: tech, koef: koef,
     material: material, podkladHex: podkladHex, sirkaTerkyMm: terka, motivu: motivu,
     podtisk: { zapnut: podtiskZap, sito: podtiskSito || hrube, dvojity: podtiskDvojity },
-  }), [vybrane, poBarvach, sitaBarev, motivu, podtiskZap, podtiskSito, podtiskDvojity,
-       qty, ztraty, terka, sitaTech, tech, koef, material, podkladHex, shody, hrube, sitoVychozi]);
+  }), [vybrane, poBarvach, sitaRadku.join("|"), motivu, podtiskZap, podtiskSito, podtiskDvojity,
+       qty, ztraty, terka, sitaTech, tech, koef, material, podkladHex, shody, hrube]);
 
   if (!(pxNaMm > 0)) return html`
     <div className="note" style=${{ marginTop: 14 }}>
@@ -489,10 +620,14 @@ function RozpisSeparaci({ vybrane, poBarvach, pxNaMm, qty, ztraty, terka, sitaTe
           ${sh && html`<div className="note">≈ ${sh.recipe.name}
             ${preloz(" · odchylka ΔE {d} · {h} g/ml", { d: fmt(sh.dE, 1), h: fmt(n(sh.recipe.density, 1.2), 2) })}</div>`}
         </span></span></td>
+      <td className="num">${r.podtisk ? "—" : (poBarvach && poBarvach[i] && poBarvach[i].podil != null
+        ? fmt(poBarvach[i].podil, 1) : "—")}</td>
+      <td className="num">${r.podtisk ? "—" : caraText(i)}</td>
       <td>${r.podtisk
         ? vyberSita(podtiskSito || hrube, (e) => setPodtiskSito(e.target.value))
-        : vyberSita(r.sito, (e) => setSitaBarev(Object.assign({}, sitaBarev,
-            (function (o) { o[klicBarvy(r)] = e.target.value; return o; })({}))))}</td>
+        : html`<${React.Fragment}>${vyberSita(r.sito, (e) => setSitaBarev(Object.assign({}, sitaBarev,
+            (function (o) { o[klicBarvy(r)] = e.target.value; return o; })({}))))}
+            ${puvodSita(r, i) && html`<div className="note">${puvodSita(r, i)}</div>`}<//>`}</td>
       <td className="num">${fmt(r.mm2Kus / 100, 2)}</td>
       <td className="num">${r.mlM2 != null ? fmt(r.mlM2, 1) : "—"}</td>
       <td className="num">${r.mlCelkem != null ? fmt(r.mlCelkem, 0) + " ml" : "—"}</td>
@@ -521,7 +656,9 @@ function RozpisSeparaci({ vybrane, poBarvach, pxNaMm, qty, ztraty, terka, sitaTe
       </div>
       <div style=${{ overflowX: "auto" }}>
         <table className="t">
-          <thead><tr><th>${preloz("Barva")}</th><th>${preloz("Síto")}</th>
+          <thead><tr><th>${preloz("Barva")}</th>
+            <th className="num">${preloz("% motivu")}</th><th className="num">${preloz("Čára od–do (mm)")}</th>
+            <th>${preloz("Síto")}</th>
             <th className="num">${preloz("cm² na kus")}</th><th className="num">ml/m²</th>
             <th className="num">${preloz("Na zakázku")}</th><th className="num">${preloz("Na zakázku (g)")}</th></tr></thead>
           <tbody>
@@ -542,6 +679,9 @@ function RozpisSeparaci({ vybrane, poBarvach, pxNaMm, qty, ztraty, terka, sitaTe
       ${rozbor.bezSita > 0 && html`
         <p className="note" style=${{ marginTop: 6 }}>
           ${preloz("U {n} vrstev není vybrané síto — bez něj se nános nepočítá a v součtu chybí.", { n: fmt(rozbor.bezSita, 0) })}</p>`}
+      ${!sitaMajiMezeCary(nabidka, tech) && html`
+        <p className="note" style=${{ marginTop: 6 }}>
+          ${preloz("Tabulka sít nemá vyplněné meze čáry (cara_od_mm, cara_do_mm) — síto se předvybírá ze zkušenosti dílny: {n} záznamů měření pro tuto technologii.", { n: fmt(n(mereniPocet), 0) })}</p>`}
       <p className="note" style=${{ marginTop: 6 }}>
         ${preloz("Na zakázku = nános × {k} ks × (1 + ztráty {z} %) + rezerva síta. Gramy jen u barev s přiřazenou recepturou — bez hustoty se ml na gramy nepřevádí.",
           { k: fmt(n(qty), 0), z: fmt(n(ztraty), 0) })}</p>

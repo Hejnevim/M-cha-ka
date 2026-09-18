@@ -39,6 +39,9 @@ import io
 import json
 import collections
 import hashlib
+# porovnání otisků, které netrvá různě dlouho podle toho, kde se liší —
+# z rozdílu v čase by šlo heslo hádat po znacích
+import hmac
 import os
 import ssl
 import sys
@@ -96,6 +99,195 @@ SLOZKY = {
 def _slozka(nazev):
     return SLOZKY.get((nazev or "databaze barev").strip(), None)
 
+# ======================= ÚČTY A PŘIHLÁŠENÍ =======================
+# Dokud u aplikace stál jeden člověk u jednoho počítače, žádné přihlášení
+# nebylo potřeba: role se držela v prohlížeči a most poslouchal jen na
+# 127.0.0.1. Jakmile k týmž datům chodí víc zařízení, přestávají obě věci
+# platit — `smiRole()` v prohlížeči přepíše kdokoli, kdo umí otevřít konzoli,
+# a most bez ověření vydá licencované receptury komukoli v síti.
+#
+# Účet proto drží most, ne prohlížeč. Prohlížeč si po přihlášení nese jen
+# lístek (token) a most u každého požadavku znovu zjistí, co ten lístek smí.
+# Rozhodnutí tak padá tam, kde na něj uživatel nedosáhne.
+#
+# Soubor `parametry/ucty.csv` je součást dat dílny — tedy licencovaný a mimo
+# repozitář, stejně jako evidence. Heslo v něm nikdy nestojí čitelně: ukládá
+# se otisk (PBKDF2-HMAC-SHA256 ze standardní knihovny, sůl na účet). Otisk
+# nejde otočit zpátky na heslo, takže ani kopie souboru hesla neprozradí.
+UCTY_SOUBOR = "ucty.csv"
+# Kolik opakování PBKDF2. Vyšší číslo = pomalejší hádání hesla útočníkem.
+# 200 000 trvá na dílenském počítači kolem čtvrt sekundy, což je u přihlášení
+# neznatelné, ale hrubou silou to zdraží o pět řádů.
+UCTY_OPAKOVANI = 200000
+# Přihlášení platí den. Míchačka se ráno přihlásí a do večera nic neřeší;
+# ukradený lístek přitom nepřežije do dalšího dne.
+LISTEK_PLATNOST = 24 * 3600
+
+# Vydané lístky: token -> {"ucet", "do"}. Drží se jen v paměti mostu, takže
+# restart mostu všechny odhlásí. To je schválně — most se restartuje zřídka
+# a lístky na disku by byly další soubor, který může uniknout.
+_LISTKY = {}
+_LISTKY_ZAMEK = threading.Lock()
+
+
+def _otisk_hesla(heslo, sul):
+    """Otisk hesla. Stejné heslo a sůl dají vždy tentýž výsledek."""
+    return hashlib.pbkdf2_hmac("sha256", (heslo or "").encode("utf-8"),
+                               (sul or "").encode("utf-8"), UCTY_OPAKOVANI).hex()
+
+
+def _nacti_ucty():
+    """Přečte parametry/ucty.csv. Chybí-li soubor, vrátí prázdno — dílna,
+       která přihlášení nezavedla, musí běžet dál přesně jako dřív."""
+    cesta = os.path.join(SLOZKY["parametry"], UCTY_SOUBOR)
+    ucty = {}
+    try:
+        # newline="" je povinné: v textovém režimu by Python přeložil konce
+        # řádků podruhé a celý soubor by se rozpadl na jeden řádek
+        with io.open(cesta, encoding="utf-8-sig", newline="") as f:
+            for r in csv.DictReader(f, delimiter=";"):
+                jmeno = str((r.get("ucet") or "")).strip()
+                # řádky s prázdným účtem jsou vysvětlivky v hlavičce souboru
+                if not jmeno:
+                    continue
+                ucty[jmeno.lower()] = {
+                    "ucet": jmeno,
+                    "jmeno": str(r.get("jmeno") or "").strip(),
+                    "role": str(r.get("role") or "tiskar").strip().lower(),
+                    "sul": str(r.get("sul") or "").strip(),
+                    "otisk": str(r.get("otisk") or "").strip(),
+                    "technologie": _seznam_pole(r.get("technologie")),
+                    "databaze": _seznam_pole(r.get("databaze")),
+                    "zapis": _seznam_pole(r.get("zapis")),
+                }
+    except (OSError, ValueError):
+        return {}
+    return ucty
+
+
+def _seznam_pole(text):
+    """Sloupec typu „SCR|PDP" na seznam. Hvězdička znamená „všechno" a nechává
+       se jako hvězdička — účet dílny, kde se nic neomezuje, tak nemusí
+       vypisovat technologie, které teprve přibudou."""
+    t = str(text or "").strip()
+    if not t:
+        return []
+    if t == "*":
+        return ["*"]
+    return [k.strip() for k in t.replace(",", "|").split("|") if k.strip()]
+
+
+def ucty_zavedeny():
+    """Má dílna vůbec účty? Bez souboru se most chová jako dřív — bez
+       přihlášení. Jinak by zavedení přihlášení znamenalo, že starší aplikace
+       přestane fungovat ze dne na den."""
+    return bool(_nacti_ucty())
+
+
+def _prihlas(ucet, heslo):
+    """Ověří heslo a vydá lístek. Vrací (lístek, účet) nebo (None, None)."""
+    u = _nacti_ucty().get(str(ucet or "").strip().lower())
+    # Neexistující účet i špatné heslo dávají tutéž odpověď. Rozdíl by
+    # prozradil, která jména v dílně existují.
+    if not u or not u.get("otisk"):
+        return None, None
+    if not hmac.compare_digest(_otisk_hesla(heslo, u.get("sul")), u["otisk"]):
+        return None, None
+    listek = hashlib.sha256(os.urandom(32)).hexdigest()
+    with _LISTKY_ZAMEK:
+        _LISTKY[listek] = {"ucet": u["ucet"], "do": _ted() + LISTEK_PLATNOST}
+    return listek, u
+
+
+def _ted():
+    import time
+    return time.time()
+
+
+def _ucet_listku(listek):
+    """Účet za lístkem, nebo None. Prošlý lístek rovnou zahodí."""
+    if not listek:
+        return None
+    with _LISTKY_ZAMEK:
+        z = _LISTKY.get(listek)
+        if not z:
+            return None
+        if z["do"] < _ted():
+            del _LISTKY[listek]
+            return None
+        jmeno = z["ucet"]
+    # Oprávnění se čtou ze souboru pokaždé znovu, ne z lístku: technolog,
+    # kterému se právě odebrala technologie, ji nesmí míchat do zítřka jen
+    # proto, že se přihlásil dřív.
+    return _nacti_ucty().get(jmeno.lower())
+
+
+def _odhlas(listek):
+    with _LISTKY_ZAMEK:
+        _LISTKY.pop(listek, None)
+
+
+def _puvod_je_mistni(puvod):
+    """Je tenhle Origin z místní sítě? Pouští se jen adresy, které dílna
+       opravdu může mít: localhost, 127.x, 10.x, 192.168.x a 172.16–31.x.
+       Stránka z internetu se tak k mostu nedostane ani tehdy, když ji někdo
+       v dílně otevře."""
+    try:
+        h = (urlparse(puvod).hostname or "").lower()
+    except ValueError:
+        return False
+    if h in ("localhost", "127.0.0.1", "::1"):
+        return True
+    casti = h.split(".")
+    if len(casti) != 4 or not all(k.isdigit() for k in casti):
+        return False
+    a, b = int(casti[0]), int(casti[1])
+    return a == 10 or a == 127 or (a == 192 and b == 168) or (a == 172 and 16 <= b <= 31)
+
+
+def _ucet_smi_databazi(ucet, slozka, jmeno):
+    """Smí účet na tenhle soubor? Omezení se týká jen složky `databaze barev`
+       — tam leží licencované receptury. `parametry` a `evidence` jsou provozní
+       podklady, které potřebuje každý, kdo u váhy stojí: bez sít, koeficientů
+       a ceníku by aplikace nespočítala dávku ani tomu, kdo ji míchat smí."""
+    if not ucet:
+        return True
+    if (slozka or "").strip() != "databaze barev":
+        return True
+    seznam = ucet.get("databaze") or []
+    if not seznam or "*" in seznam:
+        # prázdný sloupec = neomezeno; omezuje se výslovným výčtem, ne mlčením
+        return True
+    j = str(jmeno or "").lower()
+    # Porovnává se na část jména, ne na shodu: v dílně přibývají soubory jako
+    # custom_SKODA_AUTO_PRINTCOLOR_660.csv a účet má v seznamu řadu
+    # (PRINTCOLOR_660), ne výčet všech souborů, které z ní teprve vzniknou.
+    return any(str(k).lower() in j for k in seznam)
+
+
+def _ucet_ven(ucet):
+    """Co se o účtu smí poslat do prohlížeče. Otisk ani sůl nikdy — aplikace
+       je nepotřebuje a v prohlížeči by z nich šlo hádat heslo offline."""
+    if not ucet:
+        return None
+    return {"ucet": ucet.get("ucet", ""), "jmeno": ucet.get("jmeno", ""),
+            "role": ucet.get("role", "tiskar"),
+            "technologie": ucet.get("technologie") or [],
+            "databaze": ucet.get("databaze") or [],
+            "zapis": ucet.get("zapis") or []}
+
+
+def ucet_smi(ucet, co, hodnota=""):
+    """Smí účet tuhle věc? `co` je „zapis" (oblast v hodnotě), „technologie"
+       nebo „databaze". Bez účtů zavedených v dílně smí všechno — viz
+       ucty_zavedeny()."""
+    if not ucet:
+        return True
+    seznam = ucet.get(co) or []
+    if "*" in seznam:
+        return True
+    return str(hodnota or "") in seznam
+
 # Poslední přečtená PDF si most chvíli podrží, aby šlo dodatečně vykreslit
 # ostrý výřez, aniž by prohlížeč soubor posílal znovu. Drží se jen pár
 # posledních, ať to nenaroste do paměti.
@@ -139,6 +331,11 @@ def _druh_csv(hlavicka):
     # Tabulka materiálů dílny s nákupními cenami (pigmenty, báze, tužidla,
     # ředidla). Pozná se podle dvojice druh + nazev; cena je nepovinná,
     # protože soubor může existovat dřív, než dílna ceny doplní.
+    # Sady receptur na logo (parametry/sady_receptur.csv): sloupec `sada`
+    # a `receptura`. Musí stát před materiálem i produkty — hlavička má
+    # i `druh`, `nazev` a `ref`.
+    if "sada" in h and "receptura" in h:
+        return "sady"
     if "druh" in h and ("nazev" in h or "název" in h):
         return "material"
     if "ref" in h and ("nazev" in h or "název" in h or "name" in h):
@@ -170,17 +367,79 @@ def _cti_csv(cesta):
     return syrove.decode("utf-8", "replace")
 
 
+# ------------------------------------------- strom složek podle loga -----
+# Receptury jednoho zákazníka patří k sobě: dílna hledá „co se tisklo Škodovce
+# sítotiskem“, ne „který soubor to byl“. Proto smí CSV ležet v podsložkách
+# <technologie>/<značka loga>/ — most celý podstrom projde a nabidne soubory
+# jako dosud, podle holého jména. Jméno souboru zůstává klíčem, na kterém visí
+# sady, vazby i historie (sloupec `databaze`), takže rozdělení do složek
+# nerozbije nic z toho, co už je zapsané.
+#
+# Složka je tedy úložiště, ne identita. Dva soubory téhož jména ve dvou
+# větvích by klíč rozdvojily, a proto se druhý z nich přeskočí a nahlásí —
+# tiše přepsat jeden druhým by dílně smazalo receptury.
+SLOZKA_BEZ_LOGA = "_bez_loga"     # custom receptury, u kterých značka loga není
+SLOZKA_SPOLECNE = "_spolecne"     # katalogové řady výrobců — k zákazníkovi nepatří
+# poslední zjištěné srážky jmen; čte je /api/stav, aby je aplikace ukázala
+_SRAZKY_CSV = []
+
+
+def _projdi_csv(slozka):
+    """
+    Všechna CSV v podstromu složky: [(jméno, cesta, větev)].
+    `větev` je cesta od kořene složky bez jména souboru ("" přímo v kořeni,
+    "FIR/SKODA_AUTO" v podsložce) — aplikace z ní skládá strom.
+    První nalezené jméno vyhrává; další se stejným jménem se přeskočí.
+    """
+    videna, out, srazky = {}, [], []
+    for koren, adresare, soubory in os.walk(slozka):
+        # pořadí je určující: při srážce jmen musí vyhrát vždy týž soubor,
+        # jinak by aplikace po restartu mostu četla jinou databázi
+        adresare.sort()
+        vetev = os.path.relpath(koren, slozka).replace(os.sep, "/")
+        if vetev == ".":
+            vetev = ""
+        for jmeno in sorted(soubory):
+            if not jmeno.lower().endswith(".csv"):
+                continue
+            cesta = os.path.join(koren, jmeno)
+            if not os.path.isfile(cesta):
+                continue
+            klic = jmeno.lower()
+            if klic in videna:
+                srazky.append((jmeno, vetev, videna[klic]))
+                continue
+            videna[klic] = vetev
+            out.append((jmeno, cesta, vetev))
+    # srážka jmen se hlásí do konzole i dál do aplikace (_SRAZKY_CSV):
+    # dílna jinak není schopná poznat, že část receptur zmizela z nabídky
+    _SRAZKY_CSV[:] = [{"jmeno": j, "preskoceno": kde, "plati": prvni} for j, kde, prvni in srazky]
+    for jmeno, kde, prvni in srazky:
+        print(u"  POZOR:    soubor „%s“ je ve dvou větvích („%s“ i „%s“) — "
+              u"platí ten první." % (jmeno, prvni or u"kořen", kde or u"kořen"))
+    return out
+
+
+def _najdi_csv(jmeno, slozka):
+    """Cesta k CSV podle holého jména kdekoli v podstromu, nebo None."""
+    if not jmeno or jmeno != os.path.basename(jmeno) or not jmeno.lower().endswith(".csv"):
+        return None
+    # v kořeni napřed: běžný případ a nemusí se kvůli němu procházet strom
+    primo = os.path.join(slozka, jmeno)
+    if os.path.isfile(primo):
+        return primo
+    for j, cesta, _ in _projdi_csv(slozka):
+        if j.lower() == jmeno.lower():
+            return cesta
+    return None
+
+
 def _seznam_databazi(slozka=None):
     out = []
     slozka = slozka or DATABAZE
     if not os.path.isdir(slozka):
         return out
-    for jmeno in sorted(os.listdir(slozka)):
-        if not jmeno.lower().endswith(".csv"):
-            continue
-        cesta = os.path.join(slozka, jmeno)
-        if not os.path.isfile(cesta):
-            continue
+    for jmeno, cesta, vetev in _projdi_csv(slozka):
         st = os.stat(cesta)
         try:
             text = _cti_csv(cesta)
@@ -191,6 +450,9 @@ def _seznam_databazi(slozka=None):
         druh = _druh_csv(hlavicka)
         zaznam = {
             "jmeno": jmeno,
+            # kde soubor leží: "" v kořeni, jinak "<technologie>/<značka loga>".
+            # Aplikace z toho skládá strom; klíčem zůstává `jmeno`.
+            "vetev": vetev,
             "velikost": st.st_size,
             "zmeneno": int(st.st_mtime),
             # verze se mění s obsahem — aplikace podle ní pozná, že má načíst znovu
@@ -206,19 +468,61 @@ def _seznam_databazi(slozka=None):
     return out
 
 
-def _uloz_databazi(jmeno, text, slozka=None):
+def _bezpecna_vetev(vetev):
+    """
+    Podsložka pro nový soubor bez skoku ven z kořene složky. Dvě podoby:
+
+      "<technologie>/<značka loga>"          receptury zákazníka
+      "mereni_loga/<TECH>/<síto>"            sběr zakázek k sítům
+
+    Aplikace ji skládá z údajů dílny — značka loga bývá přečtená ze
+    zakázkového listu v PDF, takže se do ní může dostat cokoli: lomítko,
+    ".." i dvojtečka z "S:\\". Cokoli podezřelého se zahodí a soubor spadne
+    do kořene, kde byl doted — raději špatně zařazený soubor než zápis mimo
+    složku databází.
+
+    Hloubka je tři úrovně, ne dvě: sběr k sítům potřebuje o patro víc
+    (17. 9. 2026 se na dvou úrovních ztrácela složka síta a všechny zakázky
+    padaly přímo do složky technologie). Víc než tři se pořád ořezává —
+    každé patro navíc je další místo, kde se soubor může „ztratit".
+    """
+    if not vetev:
+        return ""
+    casti = []
+    for cast in str(vetev).replace(chr(92), "/").split("/"):
+        # tečka na kraji dělá na Windows skrytou nebo neotevřitelná složku
+        cast = cast.strip().strip(".")
+        if not cast:
+            continue
+        # znaky, které Windows v názvu složky neunese, a řídicí znaky
+        if any(z in cast for z in '<>:"|?*') or min(cast) < " ":
+            return ""
+        casti.append(cast)
+    return "/".join(casti[:3])
+
+
+def _uloz_databazi(jmeno, text, slozka=None, vetev=""):
     """
     Zapíše CSV do některé ze složek, se kterými most pracuje — vlastní
     receptury a evidence zbytků, aby nezůstaly jen v prohlížeči.
 
     Zapisuje se přes dočasný soubor a předchozí verze se odloží jako .bak,
     aby výpadek uprostřed zápisu nepřipravil nikoho o data.
+
+    Soubor, který už ve stromu leží, se přepíše TAM, kde je — jinak by
+    vedle sebe vznikly dvě kopie téhož jména a jedna z nich by se přestala
+    nabízet (viz _projdi_csv). `vetev` rozhoduje jen u nového souboru.
     """
     slozka = slozka or DATABAZE
     if not jmeno or jmeno != os.path.basename(jmeno) or not jmeno.lower().endswith(".csv"):
         raise ValueError("Zapisovat lze jen CSV přímo do složky.")
     os.makedirs(slozka, exist_ok=True)
-    cesta = os.path.join(slozka, jmeno)
+    cesta = _najdi_csv(jmeno, slozka)
+    if not cesta:
+        v = _bezpecna_vetev(vetev)
+        cil = os.path.join(slozka, *v.split("/")) if v else slozka
+        os.makedirs(cil, exist_ok=True)
+        cesta = os.path.join(cil, jmeno)
     docasny = cesta + ".tmp"
     # newline="" — konce řádků si určuje ten, kdo obsah posílá; jinak by se
     # jeho \r\n přeložilo znovu a mezi řádky by zůstávaly prázdné mezery
@@ -234,20 +538,22 @@ def _uloz_databazi(jmeno, text, slozka=None):
             pass
     os.replace(docasny, cesta)
     st = os.stat(cesta)
+    vetev_ulozeno = os.path.relpath(os.path.dirname(cesta), slozka).replace(os.sep, "/")
     return {"jmeno": jmeno, "verze": "%d-%d" % (st.st_size, int(st.st_mtime)),
+            "vetev": "" if vetev_ulozeno == "." else vetev_ulozeno,
             "velikost": st.st_size}
 
 
 def _databaze_soubor(jmeno, slozka=None):
     """Vrátí obsah CSV ze složky. Jen holé jméno souboru, nic jiného."""
     slozka = slozka or DATABAZE
-    if not jmeno or jmeno != os.path.basename(jmeno) or not jmeno.lower().endswith(".csv"):
-        return None
-    cesta = os.path.join(slozka, jmeno)
-    if not os.path.isfile(cesta):
+    cesta = _najdi_csv(jmeno, slozka)
+    if not cesta:
         return None
     st = os.stat(cesta)
-    return {"jmeno": jmeno, "verze": "%d-%d" % (st.st_size, int(st.st_mtime)),
+    vetev = os.path.relpath(os.path.dirname(cesta), slozka).replace(os.sep, "/")
+    return {"jmeno": jmeno, "vetev": "" if vetev == "." else vetev,
+            "verze": "%d-%d" % (st.st_size, int(st.st_mtime)),
             "text": _cti_csv(cesta)}
 
 VYCHOZI_CONFIG = {
@@ -514,19 +820,54 @@ class Most(SimpleHTTPRequestHandler):
         return typ
 
     def end_headers(self):
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Private-Network", "true")
+        """Hlavičky CORS. Dokud most poslouchal jen na 127.0.0.1, byla
+           hvězdička neškodná — nikdo cizí se k němu nedostal. S `--sit` ale
+           znamená, že libovolná stránka otevřená v prohlížeči v téže síti
+           smí číst licencované receptury. Proto se po síti vrací konkrétní
+           původ, ne hvězdička, a hlavička Allow-Private-Network (tu prohlížeče
+           zavedly právě proti sahání z internetu do místní sítě) se posílá
+           jen v místním režimu."""
+        puvod = self.headers.get("Origin") or ""
+        if ADRESA_SITE and puvod:
+            # Po síti: vrací se původ, který se ptal, a jen když je to místní
+            # adresa. Prohlížeč pak cizí stránce odpověď nevydá.
+            if _puvod_je_mistni(puvod):
+                self.send_header("Access-Control-Allow-Origin", puvod)
+                self.send_header("Vary", "Origin")
+        else:
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Private-Network", "true")
         self.send_header("Cache-Control", "no-store")
         SimpleHTTPRequestHandler.end_headers(self)
 
     def do_OPTIONS(self):
         self.send_response(204)
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "*")
+        # Lístek chodí v hlavičce X-IRM-Listek, a tu musí prohlížeč napřed
+        # dostat povolenou v předletu, jinak požadavek vůbec neodešle.
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, X-IRM-Listek")
         self.end_headers()
+
+    def _ucet(self):
+        """Účet za lístkem z hlavičky. None = nepřihlášen (nebo dílna účty nemá)."""
+        h = self.headers.get("X-IRM-Listek") or ""
+        return _ucet_listku(h.strip())
+
+    def _vyzaduj_ucet(self):
+        """Vrátí (účet, chyba). Dílna bez účtů projde vždy — přihlášení se
+           zapíná zavedením souboru, ne přepínačem, aby starší instalace
+           nepřestala fungovat."""
+        if not ucty_zavedeny():
+            return None, None
+        ucet = self._ucet()
+        if not ucet:
+            return None, "Nepřihlášeno. Přihlaste se v záložce Připojení."
+        return ucet, None
 
     def do_POST(self):
         u = urlparse(self.path)
+        if u.path in ("/api/prihlaseni", "/api/odhlaseni"):
+            return self._prihlaseni(u.path)
         if u.path == "/api/aktualizace":
             # stažení poslední verze ze sítě umí jen zabalený program — tam
             # irm_okno.py dosadí AKTUALIZACE; most nad složkou se aktualizuje
@@ -562,8 +903,40 @@ class Most(SimpleHTTPRequestHandler):
         except Exception as e:
             return self._odpoved({"ok": False, "chyba": str(e)}, 400)
 
+    def _prihlaseni(self, cesta):
+        """Přihlášení a odhlášení. Účet se ověřuje tady, ne v prohlížeči —
+           kdyby rozhodoval prohlížeč, přepsal by si oprávnění kdokoli."""
+        try:
+            delka = int(self.headers.get("Content-Length") or 0)
+            telo = self.rfile.read(delka) if delka > 0 else b"{}"
+            zadani = json.loads(telo.decode("utf-8") or "{}")
+        except (ValueError, OSError):
+            return self._odpoved({"ok": False, "chyba": "Nesrozumitelný požadavek."}, 400)
+
+        if cesta == "/api/odhlaseni":
+            _odhlas(str(zadani.get("listek") or "").strip())
+            return self._odpoved({"ok": True})
+
+        if not ucty_zavedeny():
+            # Dílna bez souboru účtů se nepřihlašuje. Říct to nahlas je
+            # poctivější než vrátit „špatné heslo" na účet, který nemůže být.
+            return self._odpoved({"ok": False, "ucty": False,
+                                  "chyba": "V téhle dílně nejsou zavedené účty."}, 400)
+
+        listek, ucet = _prihlas(zadani.get("ucet"), zadani.get("heslo"))
+        if not listek:
+            return self._odpoved({"ok": False, "chyba": "Účet nebo heslo nesouhlasí."}, 401)
+        return self._odpoved({"ok": True, "listek": listek, "ucet": _ucet_ven(ucet),
+                              "platnost": LISTEK_PLATNOST})
+
     def _uloz_databazi(self, telo):
         """Uloží CSV, které aplikace posílá — vlastní receptury a jejich vazby."""
+        # Zápis je jediné místo, kudy se data dílny mění. Kontrola stojí tady,
+        # a ne v prohlížeči, protože `smiRole()` v prohlížeči si přepíše
+        # kdokoli, kdo umí otevřít vývojářskou konzoli.
+        ucet, chyba = self._vyzaduj_ucet()
+        if chyba:
+            return self._odpoved({"ok": False, "chyba": chyba, "prihlasit": True}, 401)
         try:
             zadani = json.loads(telo.decode("utf-8"))
             jmeno = str(zadani.get("jmeno") or "")
@@ -571,10 +944,18 @@ class Most(SimpleHTTPRequestHandler):
             slozka = _slozka(nazev)
             if slozka is None:
                 raise ValueError("Neznámá složka „" + nazev + "“.")
+            # Oblast se bere ze složky, ne z hlavičky souboru: hlavička je
+            # obsah, který posílá prohlížeč, kdežto složka je rozhodnutí
+            # mostu. Účet bez oblasti v `zapis` do ní nesmí.
+            if not ucet_smi(ucet, "zapis", nazev):
+                return self._odpoved({"ok": False, "chyba":
+                    "Účet nemá právo zapisovat do složky " + nazev + "."}, 403)
             text = zadani.get("text")
             if not isinstance(text, str):
                 raise ValueError("Chybí obsah souboru.")
-            vysledek = _uloz_databazi(jmeno, text, slozka)
+            # větev se uplatní jen u nového souboru — ten, který už ve stromu
+            # leží, se přepisuje tam, kde je (viz _uloz_databazi)
+            vysledek = _uloz_databazi(jmeno, text, slozka, str(zadani.get("vetev") or ""))
             vysledek["slozka"] = nazev
         except ValueError as e:
             return self._odpoved({"ok": False, "chyba": str(e)}, 400)
@@ -638,14 +1019,29 @@ class Most(SimpleHTTPRequestHandler):
                     chyba = ""
                 except Exception as e:
                     pocet, chyba = 0, str(e)
+                # srážky jmen CSV ve stromu složek: dvě větve se stejným jménem
+                # souboru znamenají, že se jedna z nich nenabízí — dílna to musí
+                # vědět, jinak hledá receptury, které „tam přece byly“
+                try:
+                    _seznam_databazi()
+                except OSError:
+                    pass
                 return self._odpoved({
                     "ok": not chyba, "rezim": cfg.get("rezim"), "pocet": pocet,
+                    "srazky": list(_SRAZKY_CSV),
                     "chyba": chyba, "verze": "1.1", "pdf": pdf_spec is not None,
                     # verze balíčku (IRM.exe, APK) z manifest.json vedle programu;
                     # prázdná = aplikace otevřená ze složky, ta se aktualizuje z repozitáře
                     "balicek": _verze_balicku(),
                     # adresa pro odkazy mezi zařízeními; prázdná = most jen místní
                     "po_siti": bool(ADRESA_SITE), "adresa_site": ADRESA_SITE,
+                    # Má dílna zavedené účty? Aplikace podle toho ukáže nebo
+                    # schová přihlášení — dílna s jedním počítačem se nikam
+                    # hlásit nemusí a přihlašovací obrazovka by ji jen zdržovala.
+                    "ucty": ucty_zavedeny(),
+                    # Kdo je přihlášený na tomhle lístku. None = nikdo; aplikace
+                    # si tím po načtení ověří, že lístek z minule ještě platí.
+                    "prihlasen": _ucet_ven(self._ucet()),
                     "popis": {"demo": "ukázková data (SGPS není připojeno)",
                               "soubor": "export ze SGPS ze souboru",
                               "rest": "HTTP API systému SGPS"}.get(cfg.get("rezim"), "")})
@@ -698,8 +1094,17 @@ class Most(SimpleHTTPRequestHandler):
                 if slozka is None:
                     return self._odpoved({"ok": False,
                                           "chyba": "Neznámá složka „" + nazev + "“."}, 400)
+                # Receptury jsou licencovaná data. Dokud most poslouchal jen
+                # na 127.0.0.1, stačilo, že se k němu nikdo cizí nedostal;
+                # po síti to musí rozhodnout účet.
+                ucet, chyba = self._vyzaduj_ucet()
+                if chyba:
+                    return self._odpoved({"ok": False, "chyba": chyba, "prihlasit": True}, 401)
                 soubor = (dotazy.get("soubor") or [""])[0]
                 if soubor:
+                    if not _ucet_smi_databazi(ucet, nazev, soubor):
+                        return self._odpoved({"ok": False, "chyba":
+                            "Účet nemá přístup k databázi „" + soubor + "“."}, 403)
                     d = _databaze_soubor(soubor, slozka)
                     if not d:
                         return self._odpoved({"ok": False,
@@ -707,9 +1112,15 @@ class Most(SimpleHTTPRequestHandler):
                                                        + nazev + " není."}, 404)
                     d["ok"] = True
                     return self._odpoved(d)
+                soubory = _seznam_databazi(slozka)
+                # Účet omezený na některé databáze ostatní ani nevidí ve
+                # výpisu — jinak by aplikace nabízela receptury, které pak
+                # při stažení spadnou na 403, a dílna by to četla jako poruchu.
+                soubory = [s for s in soubory
+                           if _ucet_smi_databazi(ucet, nazev, s.get("jmeno", ""))]
                 return self._odpoved({"ok": True, "slozka": nazev,
                                       "je": os.path.isdir(slozka),
-                                      "soubory": _seznam_databazi(slozka)})
+                                      "soubory": soubory})
             if u.path == "/api/zakazky":
                 q = (dotazy.get("q") or [""])[0]
                 limit = int((dotazy.get("limit") or ["200"])[0])

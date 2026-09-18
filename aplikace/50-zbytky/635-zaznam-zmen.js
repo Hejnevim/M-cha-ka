@@ -45,6 +45,8 @@ const ZMENA_OBLASTI = {
   technologie: { popis: "odemčení technologie", soubor: "parametry/technologie.csv" },
   poloha: { popis: "typy poloh", soubor: "parametry/typy_poloh.csv" },
   schvaleni: { popis: "schválení receptury", soubor: "receptury_vlastni.csv" },
+  vazba: { popis: "vazba receptury na produkt", soubor: "parametry/vazby_receptur.csv" },
+  sada: { popis: "sada receptur na logo", soubor: "parametry/sady_receptur.csv" },
 };
 
 /* Druh zásahu. Přepis je něco jiného než založení a smazání je něco jiného

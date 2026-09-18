@@ -245,7 +245,7 @@ function analyzujPokryti(img, prah, orezat, vyrez, odsazeniMm, rozmerMm, barvaPo
   }
   if (x1 < 0) return { pct: 0, barvy: 0, kryciPocet: 0, mm2: 0, pxNaMm: 0,
     w: w, h: h, bw: 0, bh: 0, bwMotiv: 0, bhMotiv: 0, prazdne: true, poBarvach: null,
-    nahled: c.toDataURL() };
+    cary: null, caryPoBarvach: null, nahled: c.toDataURL() };
 
   const bw = x1 - x0 + 1, bh = y1 - y0 + 1;
 
@@ -301,6 +301,29 @@ function analyzujPokryti(img, prah, orezat, vyrez, odsazeniMm, rozmerMm, barvaPo
       for (let k = 0; k < w * h; k++) if (patri[k]) poBarvach[patri[k] - 1].pocet++;
     }
     for (const b of poBarvach) b.mm2 = pxNaMm > 0 ? b.pocet / (pxNaMm * pxNaMm) : 0;
+    /* Podíl barvy na motivu (bez odsazení, ať dá součet 100 %) — u vícebarevné
+       zakázky říká, kolik procent tisku která barva nese, a z toho se pak
+       dělí dávky mezi kelímky. */
+    let bodyBarev = 0;
+    for (let k = 0; k < w * h; k++) if (patri[k]) bodyBarev++;
+    const poctyBarev = cile.map(() => 0);
+    for (let k = 0; k < w * h; k++) if (patri[k]) poctyBarev[patri[k] - 1]++;
+    poBarvach.forEach((b, q) => { b.podil = bodyBarev ? poctyBarev[q] / bodyBarev * 100 : 0; });
+  }
+
+  /* Tloušťky čar — z masky motivu BEZ odsazení: odsazení je rozpitá barva
+     kolem čáry, ne čára sama. Po barvách zvlášť, protože každá barva jde
+     na své síto a rozhoduje o něm její nejtenčí čára, ne nejtenčí čára
+     celého loga. */
+  const cary = tloustkyVMm(tloustkyCar(maska, w, h), pxNaMm);
+  let caryPoBarvach = null;
+  if (patri) {
+    const mb = new Uint8Array(w * h);
+    caryPoBarvach = cile.map((_, q) => {
+      mb.fill(0);
+      for (let k = 0; k < w * h; k++) if (patri[k] === q + 1) mb[k] = 1;
+      return tloustkyVMm(tloustkyCar(mb, w, h), pxNaMm);
+    });
   }
 
   // náhled: motiv tmavě, přidané odsazení světleji, ohraničení oranžově
@@ -319,9 +342,199 @@ function analyzujPokryti(img, prah, orezat, vyrez, odsazeniMm, rozmerMm, barvaPo
   nctx.putImageData(obr, 0, 0);
   nctx.strokeStyle = "#C97B63"; nctx.lineWidth = Math.max(1, Math.round(w / 300));
   nctx.strokeRect(kx0 + .5, ky0 + .5, kbw, kbh);
+  /* Kroužek kolem nejtenčí čáry (červeně) a nejširšího místa (modře) —
+     technolog musí vidět, KDE aplikace měřila, jinak číslu nemá proč věřit:
+     když kroužek sedí na drobném ™ pod logem, číslo platí; když sedí na
+     zubu prahování, je třeba zvýšit citlivost. */
+  const krouzek = (bod, barva, polomer) => {
+    if (!bod) return;
+    nctx.strokeStyle = barva; nctx.lineWidth = Math.max(1.5, w / 400);
+    nctx.beginPath(); nctx.arc(bod.x + .5, bod.y + .5, polomer, 0, Math.PI * 2); nctx.stroke();
+  };
+  if (cary) {
+    krouzek(cary.minBod, "#D0342C", Math.max(6, w / 60));
+    krouzek(cary.maxBod, "#2F6FB7", Math.max(6, cary.maxPx / 2 + 3));
+  }
   return { pct: pct, barvy: barvy, kryciPocet: kryciPocet, mm2: mm2, pxNaMm: pxNaMm,
     w: w, h: h, bw: kbw, bh: kbh, bwMotiv: bw, bhMotiv: bh, poBarvach: poBarvach,
-    nahled: nc.toDataURL() };
+    cary: cary, caryPoBarvach: caryPoBarvach, nahled: nc.toDataURL() };
+}
+
+/* ==================== TLOUŠŤKA ČAR V MOTIVU ====================
+   Každá sítovina pustí jen určitou jemnost kresby: hrubé síto 54-64 rozmaže
+   drobný ™ pod logem, jemné 130-34 zase nedá dost barvy do velké plochy.
+   Technolog síto dosud volil od oka podle toho, jak logo vypadá. Tenhle
+   rozbor změří, jak tenká je nejtenčí čára a jak široké je nejširší místo
+   motivu — podle toho se pak síto vybírá z tabulky, nebo se dílna z uložených
+   zakázek naučí, které síto na jakou čáru volí.
+
+   Princip: pro každý bod motivu se spočítá vzdálenost k nejbližšímu pozadí
+   (týž chamfer 3/4 jako u odsazení, jen obráceně — motiv a pozadí si vymění
+   role). Hřeben té vzdálenosti je střednice čáry a dvojnásobek vzdálenosti
+   na hřebeni je tloušťka čáry v tom místě. Nejmenší hodnota na hřebeni je
+   nejtenčí čára, největší je nejširší plocha (průměr největší kružnice,
+   která se do motivu vejde).
+
+   Co měření neumí a říká to nahlas: čára tenčí než jeden bod předlohy se
+   po prahování ztratí, takže pod rozlišením předlohy nic nevidí. Proto se
+   spolu s výsledkem vrací i to, kolik milimetrů má jeden bod. */
+
+/* maska: Uint8Array w×h, 1 = motiv. Vrací { minPx, maxPx, minBod, maxBod,
+   bodu } v bodech předlohy, nebo null, když v masce žádná čára není. */
+function tloustkyCar(maska0, w0, h0) {
+  if (!maska0 || !(w0 > 0) || !(h0 > 0)) return null;
+  /* Maska se olemuje jedním bodem pozadí: motiv doražený až ke kraji výřezu
+     nemá být nekonečně tlustý, ale tak tlustý, jak je ho vidět — a lem
+     namísto přepsání krajní řady na pozadí ho neubere o bod (blok 30 × 30
+     v rohu vycházel 29, zkouška 17. 9. 2026). */
+  const w = w0 + 2, h = h0 + 2, N = w * h;
+  const maska = new Uint8Array(N);
+  for (let y = 0; y < h0; y++) for (let x = 0; x < w0; x++) maska[(y + 1) * w + x + 1] = maska0[y * w0 + x];
+  // vzdálenost od pozadí: pozadí je „barva“ pro chamfer
+  const pozadi = new Uint8Array(N);
+  for (let i = 0; i < N; i++) pozadi[i] = maska[i] ? 0 : 1;
+  const d = vzdalenostOdBarvy(pozadi, w, h);
+
+  /* Hřeben: bod motivu, jehož vzdálenost není menší než u žádného z osmi
+     sousedů. Rovina (dva stejné body vedle sebe) je hřeben čáry sudé
+     tloušťky — obě prostřední řady mají tutéž vzdálenost. */
+  const hreben = new Uint8Array(N);
+  const sirky = new Float32Array(N);
+  let bodu = 0;
+  for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+    const i = y * w + x, v = d[i];
+    if (!v) continue;
+    if (d[i - 1] > v || d[i + 1] > v || d[i - w] > v || d[i + w] > v
+      || d[i - w - 1] > v || d[i - w + 1] > v || d[i + w - 1] > v || d[i + w + 1] > v) continue;
+    /* Vzdálenost středu bodu k pozadí je v/3 bodů; skutečná hrana leží
+       v půli mezi středy, proto tloušťka = 2·(v/3) − 1. Čára sudé
+       tloušťky má napříč dva body téže vzdálenosti (jeden soused napříč
+       stejný, druhý nižší) — ta dostane bod navíc. Sousedé PODÉL čáry mají
+       stejnou vzdálenost oba, a to se za rovinu nepočítá. Past: na KONCI
+       čáry liché tloušťky vypadá dvojice podél čáry stejně (jeden soused
+       stejný, druhý za koncem nižší) — pozná se podle druhé osy, kde jsou
+       oba sousedé nižší; tam bod navíc nepatří (čára 3 px vycházela na
+       konci 4, zkouška 17. 9. 2026). */
+    const L = d[i - 1], R = d[i + 1], U = d[i - w], D = d[i + w];
+    const vodorovne = (L === v && R < v) || (R === v && L < v);
+    const svisle = (U === v && D < v) || (D === v && U < v);
+    const suda = (vodorovne && !(U < v && D < v)) || (svisle && !(L < v && R < v));
+    sirky[i] = 2 * (v / 3) - 1 + (suda ? 1 : 0);
+    hreben[i] = 1; bodu++;
+  }
+  if (!bodu) return null;
+
+  /* ---- co je čára a co je jen zaostřený roh ----
+     Tohle je jádro celého měření. Hřeben vzdálenosti vede i do KAŽDÉ
+     ostré špičky: hrot písmene Á, roh šestiúhelníkového rámu, konec
+     tahu. Ve špičce vzdálenost k pozadí plynule klesá k nule, takže
+     poslední bod před koncem má tloušťku jednoho bodu předlohy — a ta
+     vyhrála nad vším ostatním. Logo KÁMEN BRNO tak hlásilo 0,04 mm
+     (přesně jeden bod při 819 DPI), ačkoli nejtenčí skutečná linka v něm
+     měří desetiny milimetru. Grafik měří totéž, co má měřit aplikace:
+     tloušťku TAHU, k němuž přikládá vlasovou linku — ne to, do jak
+     ostrého bodu se tah na konci sbíhá.
+
+     Tah se od hrotu pozná tím, že si tloušťku drží po své délce. Z bodu
+     hřebene se jde po hřebeni tam i zpět a počítá se uražená vzdálenost,
+     dokud tloušťka neopustí pásmo 75–150 % výchozí. Horní mez je tam
+     kvůli klínu: jeho hřeben plynule roste (1, 1, 1, 2, 3, 5…), takže
+     bez ní by chůze pokračovala do tlusté části a krátký hrot by prošel
+     jako dlouhý tah.
+
+     Dvě podmínky, obě nutné:
+       · délka aspoň DELKA_TAHU násobku vlastní tloušťky — tím vypadne
+         hrot, který se do pár bodů ztenčí,
+       · délka aspoň DELKA_MIN bodů — tím vypadne špička, která je sama
+         o sobě tak tenká, že by jí i krátký úsek stačil na poměr.
+
+     Naměřené poměry délky hřebene k tloušťce:
+
+         klín se strmou špičkou          4,0
+         klín s mělkou špičkou          10,4
+         krátký úsek linky 2 × 20 px    39,3
+         linka 3 px přes celý motiv     65,7
+
+     Slepé uličky, které stojí za to nezkoušet znovu: lokální okolí
+     5 × 5 nestačí (špička klínu a konec tenké čáry mají obojí 2 sousedy
+     z 8 a chamfer 3 kolem dokola — jsou to lokálně TÍŽ tvary), a záplava
+     po hřebeni „kam až doroste tloušťka“ taky ne (hřeben klínu je mezi
+     špičkou a tělem přerušený, takže záplava do tlusté části vůbec
+     nedoteče a vrátí poměr 1,0 stejně jako čára). */
+  const DELKA_TAHU = 12;
+  const DELKA_MIN = 10;
+  /* Chůze po hřebeni: z bodu se jde na souseda, který je taky na hřebeni
+     a jehož tloušťka je nejblíž výchozí. Vrací součet uražených
+     vzdáleností oběma směry. Osmiokolí, úhlopříčka za 1,41 bodu. */
+  const delkaTahu = (start, tloustka) => {
+    const dolni = tloustka * 0.75, horni = tloustka * 1.5 + 1;
+    let celkem = 0, prvniKrok = -1;
+    for (let smer = 0; smer < 2; smer++) {
+      let i = start, usel = 0;
+      const zakaz = smer === 1 ? prvniKrok : -1;
+      const navstiveno = new Set([i]);
+      for (let krok = 0; krok < 4000; krok++) {
+        let nej = -1, nejRozdil = Infinity, nejCena = 1;
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          if (!dx && !dy) continue;
+          const k = i + dy * w + dx;
+          if (k < 0 || k >= N || !hreben[k] || navstiveno.has(k) || k === zakaz) continue;
+          if (sirky[k] < dolni || sirky[k] > horni) continue;
+          const rozdil = Math.abs(sirky[k] - tloustka);
+          if (rozdil < nejRozdil) { nejRozdil = rozdil; nej = k; nejCena = (dx && dy) ? 1.41421 : 1; }
+        }
+        if (nej < 0) break;
+        if (krok === 0 && smer === 0) prvniKrok = nej;
+        navstiveno.add(nej);
+        usel += nejCena;
+        i = nej;
+      }
+      celkem += usel;
+    }
+    return celkem;
+  };
+
+  let minPx = Infinity, maxPx = 0, minBod = null, maxBod = null;
+  for (let y = 2; y < h - 2; y++) for (let x = 2; x < w - 2; x++) {
+    const i = y * w + x;
+    if (!hreben[i]) continue;
+    const s = sirky[i];
+    if (s > maxPx) { maxPx = s; maxBod = { x: x, y: y }; }
+    if (s >= minPx) continue;
+    const dl = delkaTahu(i, s);
+    if (dl < s * DELKA_TAHU || dl < DELKA_MIN) continue;   // hrot, ne čára
+    minPx = s; minBod = { x: x, y: y };
+  }
+  // Motiv, v němž není jediný tah (samé hroty a body) — nejtenčí se rovná
+  // nejširšímu a okno o čáře mlčí, místo aby hlásilo tloušťku hrotu.
+  if (!(minPx < Infinity)) { minPx = maxPx; minBod = maxBod; }
+  // souřadnice zpět bez lemu
+  const bezLemu = (b) => (b ? { x: b.x - 1, y: b.y - 1 } : null);
+  return { minPx: minPx, maxPx: maxPx, minBod: bezLemu(minBod), maxBod: bezLemu(maxBod), bodu: bodu };
+}
+
+/* Tloušťky v milimetrech podle měřítka předlohy. Bez měřítka (chybí rozměr
+   potisku) zůstávají body — milimetr by byl hádaný. rozliseniMm je jeden
+   bod předlohy: pod něj měření nevidí. */
+function tloustkyVMm(cary, pxNaMm) {
+  if (!cary) return null;
+  const k = pxNaMm > 0 ? 1 / pxNaMm : 0;
+  return Object.assign({}, cary, {
+    minMm: k ? cary.minPx * k : null, maxMm: k ? cary.maxPx * k : null,
+    rozliseniMm: k || null,
+  });
+}
+
+/* Šířka těrky k logu: nejbližší z řady, která je ŠIRŠÍ než motiv — těrka
+   stejně široká jako logo by kraj motivu nedotiskla. Není-li v řadě žádná
+   širší, vrací null a dlaždice zůstává na obsluze: hádat největší by
+   vypadalo jako pravidlo. */
+function terkaProSirku(terky, sirkaMm) {
+  const s = n(sirkaMm);
+  if (!(s > 0) || !terky || !terky.length) return null;
+  let nej = null;
+  for (const t of terky) { const v = n(t); if (v > s && (nej == null || v < nej)) nej = v; }
+  return nej;
 }
 
 /* ---- přiblížení náhledů ----

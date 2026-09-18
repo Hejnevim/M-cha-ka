@@ -51,12 +51,22 @@ STAV = (
     # S PDP zmizí sítotisková poloha a scéna 6 („tři polohy") přestane platit.
     "localStorage.setItem('irm-technologie', JSON.stringify('SCR'));"
     "localStorage.setItem('irm-tema', JSON.stringify('light'));"
-    # Tampontisková poloha pera má přiřazenou řadu PMS 786 (kap. 256): bez ní
-    # by po kódu se dvěma barvami vyskočilo okno „Z jaké řady vzít odstín?"
-    # (PDP má pět řad) a scény 29 a 35 by fotily okno místo barev zakázky.
+    # Tampontisková poloha pera má přiřazenou řadu PMS 786 (kap. 256). Od
+    # kap. 283 se okno „Z jaké řady vzít odstín?" na odemčené poloze ptá
+    # stejně, přiřazená řada v něm jen svítí zeleně — NACTI_KOD_2_BARVY ji
+    # proto po kódu klikne, jinak by scény 29 a 35 fotily okno místo barev.
     # Klíč je tvar klicTypuPolohy (část 456): ref|TECH|název bez diakritiky.
+    #
+    # Přední poloha tašky 92734 má přiřazenou jednu řadu ze pěti, které SCR
+    # nabízí. Je to kvůli scéně 17: od kap. 283 se přiřazená řada v okně
+    # „Z jaké řady vzít odstín?" pozná zeleným lemem a fajfkou, a to je právě
+    # to, o čem scéna mluví. Bez zápisu by okno ukázalo pět stejně vypadajících
+    # dlaždic a zvýraznění by rámovalo něco, co na snímku není. Poloha zůstává
+    # odemčená — se zámkem by z okna zmizelo tlačítko „Bez volby", které scéna
+    # taky ukazuje.
     "localStorage.setItem('irm-typy-poloh', JSON.stringify("
-    "{'11152|PDP|propiska / kulovite teleso': ['receptury_PRINTCOLOR_786.csv']}));"
+    "{'11152|PDP|propiska / kulovite teleso': ['receptury_PRINTCOLOR_786.csv'],"
+    " '92734|SCR|taska / predni': ['receptury_RUCO_10KK.csv']}));"
 )
 
 # Rozmazání licencovaných dat. Vkládá se jako <style> a třída na buňky, takže
@@ -126,7 +136,10 @@ VZORY_ROZMAZANI = [
 # 3 řádky složek + součet = 4 buňky, v simulaci o dvě víc.
 CEKANE_ROZMAZANI = {
     "30-mich": 4, "31-mich-zbytek-rucne": 4, "32-mich-simulace": 6,
-    "33-mich-stitek": 4, "34-mich-poznamka": 4, "35-mich-barvy": 7,
+    "33-mich-stitek": 4, "34-mich-poznamka": 4,
+    # 35: od kap. 283 se po kódu volí řada PRINTCOLOR 786 a její PANTONE 485 C
+    # má 4 složky (dřívější receptura ze všech řad měla 7)
+    "35-mich-barvy": 4,
     "40-receptury": 348, "42-receptura-upravit": 3,
     # 50, ne 55: počet buněk roste s počtem kelímků v evidenci a ta se v dílně
     # mění. Číslo je spodní mez — nesmí být vyšší, než kolik jich je při nejmenším
@@ -139,6 +152,11 @@ CEKANE_ROZMAZANI = {
     # Doladění: tabulka míchání (3 složky + součet) plus rozbor kelímku, kde
     # jsou tytéž 3 složky receptury a přílitek navíc = 4. Spodní mez 7.
     "36-doladeni": 7,
+    # Sběr zakázek k sítům: jméno záznamu nese číslo zakázky (13901_0.18_1.49)
+    # a stojí v <b style=mono>, takže na ně sedne vzor šarží. Rozbalené síto má
+    # tolik řádků, kolik má zakázek — spodní mez 4, ať kontrola padá na
+    # selektoru, ne na tom, kolik toho dílna zrovna naměřila.
+    "90-loga-sita": 4,
 }
 
 
@@ -234,6 +252,12 @@ NACTI_KOD_2_BARVY = (
     "h.dispatchEvent(new Event('input',{bubbles:true})); await cekej(400);"
     "h.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));"
     "await cekej(2500);"
+    # Od kap. 283 se okno „Z jaké řady vzít odstín?" ptá i na poloze
+    # s přiřazenou řadou, dokud není uzamčená (PDP má pět řad). Přiřazená
+    # PRINTCOLOR 786 svítí zeleně — klik na ni nic nezapisuje (řada už
+    # u polohy je) a okno zavře; bez toho by scény 29 a 35 fotily okno.
+    "var rada=[...document.querySelectorAll('.modalbox .volba-rady .poscard')].find(b=>/PRINTCOLOR 786/.test(b.textContent));"
+    "if(rada){rada.click(); await cekej(1800);}"
 )
 
 # Zakázkový list se do dlaždice PDF podává jako skutečný soubor: `fetch` na
@@ -266,11 +290,12 @@ VLOZ_LIST = (
     "await cekej(600);"
 )
 
-# Otázka na řadu vyskočí, jen když technologie má víc řad a poloha žádnou
-# přiřazenou (část 182). Produkt 92734 (taška, dvě polohy SCR) v
-# parametry/typy_poloh.csv zapsaný není a SCR má čtyři řady, takže se aplikace
-# zeptá. Pero 11152 se sem nehodí: jeho tampontisková poloha řadu přiřazenou má
-# (viz STAV výše) — právě proto, aby okno nevyskakovalo u scén 29 a 35.
+# Otázka na řadu vyskočí u odemčené polohy, jen když technologie má víc řad
+# (část 182). Produkt 92734 (taška, dvě polohy SCR) má přiřazenou jednu z pěti
+# řad SCR, a to přes STAV, ne v souboru — na odemčené poloze se aplikace zeptá
+# dál a přiřazená řada svítí zeleně (kap. 283). Pero 11152 se sem nehodí: jeho
+# tampontisková poloha řadu přiřazenou má taky, ale kvůli scénám 29 a 35 se u ní
+# okno vůbec otevírat nemá.
 #
 # POZOR, ODPOVĚĎ ZAPISUJE: klik na dlaždici řady zapíše řádek do
 # parametry/typy_poloh.csv (ulozTypPolohy). Scénář proto na dlaždice neklikne,
@@ -384,8 +409,23 @@ SNIMKY = [
                                   "await cekej(900);}"
                                   "var o=tlac(/^(Odvodit a upravit|Derive and edit)/);"
                                   "if(o && !o.disabled){o.click(); await cekej(2000);}")),
-    ("25-pokryti", 1300, js(VYBER_11152, POTVRD_POLOHU,
-                            "var p=tlac(/(krycí plochu|coverage from)/i); if(p){p.click(); await cekej(1800);}")),
+    # Okno krycí plochy se od kap. 305 nefotí prázdné: bez nahraného
+    # podkladu se neukáže nic z toho, o čem scéna mluví — ani náhled
+    # s kroužky na nejtenčí čáře a nejširším místě, ani návrh síta.
+    # Podklad je vyrobený pruhovaný motiv (_motiv_ukazka.png), ne logo
+    # zákazníka: licencovaná data na snímky manuálu nepatří. Podává se
+    # přes DataTransfer do skrytého <input type=file>, protože přetažení
+    # myší se ze scénáře nasimulovat nedá.
+    ("25-pokryti", 1600, js(VYBER_11152, POTVRD_POLOHU,
+                            "var p=tlac(/(krycí plochu|coverage from)/i); if(p){p.click(); await cekej(1800);}",
+                            "var r=await fetch('prezentace/manual/_motiv_ukazka.png');"
+                            "var bl=await r.blob();"
+                            "var f=new File([bl],'motiv.png',{type:'image/png'});"
+                            "var dt=new DataTransfer(); dt.items.add(f);"
+                            "var vst=document.querySelector('.modalbox input[type=file]');"
+                            "if(vst){vst.files=dt.files;"
+                            "vst.dispatchEvent(new Event('change',{bubbles:true}));"
+                            "await cekej(3000);}")),
     ("26-nez-michat", 1000, js(VYBER_11152, POTVRD_POLOHU,
                                "var b=tlac(/(Než začnete|Before you start)/i); if(b){b.click(); await cekej(1200);}")),
     # Okno rozpoznaných údajů z listu. Vlastní list se do repozitáře nekopíruje
@@ -474,11 +514,27 @@ SNIMKY = [
                              "if(!g) throw new Error('pole gramu prilitku nenalezeno');"
                              "vloz(jm,'Base White'); await cekej(500);"
                              "vloz(g,'3'); await cekej(1600);"
-                             # Důkaz, že se složení doopravdy dopočítalo: bez tabulky
-                             # rozboru scéna rámuje prázdno. Vrací se do výstupu snímku.
+                             # Převážení kelímku (kap. 285) — druhé kolo dolaďování, kvůli
+                             # kterému scéna vůbec je: po nátisku z kelímku ubude a dál se
+                             # počítá od zvážené hmotnosti. Tlačítko předvyplní 48 g (45+3),
+                             # scéna to přepíše na 39 — úbytek 9 g při nátisku.
+                             "var v=tlac(/(\\+ znovu zvážit kelímek|\\+ weigh the cup again)/i);"
+                             "if(!v) throw new Error('tlacitko prevazeni nenalezeno');"
+                             "v.click(); await cekej(900);"
+                             # Řádek převážení poznáme podle odznaku .tag — na rozdíl od
+                             # přílitku nemá pole s datalistem.
+                             "var vr=[...document.querySelectorAll('.pickbox .rowline')]"
+                             ".find(r=>r.querySelector('.tag'));"
+                             "if(!vr) throw new Error('radek prevazeni nevznikl');"
+                             "var vg=vr.querySelector('input[type=number]');"
+                             "vloz(vg,'39'); await cekej(1600);"
+                             # Důkaz, že se složení doopravdy dopočítalo a že převážení
+                             # zabralo: bez toho scéna rámuje prázdno nebo starý stav.
                              "var ok=document.querySelector('.pickbox .okbox');"
-                             "if(!ok || !/přilito 3|added 3/i.test(ok.textContent))"
-                             "throw new Error('rozbor doladeni se nespocital');")),
+                             "if(!ok || !/V kelímku je 39|The cup holds 39/i.test(ok.textContent))"
+                             "throw new Error('prevazeni se nepromitlo do rozboru');"
+                             "if(!/ubylo 9|took 9/i.test(ok.textContent))"
+                             "throw new Error('hlaska o ubytku chybi');")),
     ("40-receptury", 1300, js(zalozka("KATALOG|CATALOG", "^(Receptury|Recipes)$"))),
     ("42-receptura-upravit", 1500, js(zalozka("KATALOG|CATALOG", "^(Receptury|Recipes)$"),
                                       "var u=tlac(/^(Upravit|Edit)/); if(u){u.click(); await cekej(1500);}")),
@@ -507,7 +563,17 @@ SNIMKY = [
     ("62-propad", 1300, js(zalozka("SKLAD|STOCK", "^(Co propadne|What will expire)"))),
     ("63-sarze", 1300, js(zalozka("SKLAD|STOCK", "^(.ar.e|Batches)"))),
     ("70-sestavy", 1800, js(zalozka(None, "^(Sestavy a trendy|Reports and trends)"))),
-    ("80-most", 1300, js(zalozka("DATA", "^(P.ipojen. k mostu|Bridge connection)"))),
+    # Sběr zakázek k sítům (kap. 308–310). Síto se rozbaluje klikem na řádek
+    # skupiny — bez něj zůstane na snímku jen lišta rozpětí a tabulka, na
+    # kterou scéna ukazuje popisky, se nevykreslí vůbec. Bere se první řádek
+    # ve výpisu, tedy síto s nejvíc zakázkami: právě to, u kterého pravidlo
+    # v sita.csv vznikne první, a o kterém scéna mluví.
+    ("90-loga-sita", 1700, js(zalozka("DATA", "^(Sb.r zak.zek k s.t.m|Orders collected per mesh)"),
+                              "var g=[...document.querySelectorAll('.card .btn.sec.sm')]"
+                              r".find(b=>/^\s*[▸▾]/.test(b.textContent));"
+                              "if(g){g.click(); await cekej(900);}",
+                              vynechat_rozmazani=(".t tbody td .note",))),
+    ("80-most", 1400, js(zalozka("DATA", "^(P.ipojen. k mostu|Bridge connection)"))),
     ("81-import", 1500, js(zalozka("DATA", "^(Import)"))),
     # Filtr technologie je předvolený na tu, ve které se pracuje (SCR), takže by
     # na snímku zbyla jediná zakázka. Manuál ukazuje celý seznam i s dlaždicemi,

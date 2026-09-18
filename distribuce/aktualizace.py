@@ -140,6 +140,28 @@ def _klic(radek, indexy):
     return "|".join((radek[i] if i < len(radek) else "").strip().lower() for i in indexy)
 
 
+def csv_ve_strome(cesta):
+    """
+    Všechna CSV ve složce včetně podsložek, jako relativní cesty s lomítkem
+    ("SCR/SKODA_AUTO/custom_SKODA_AUTO_PRINTCOLOR_660.csv").
+
+    Od 17. 9. 2026 si dílna řadí receptury podle loga zákazníka do podsložek
+    <technologie>/<značka loga>/. Kdyby se tu četl jen plochý listdir, soubory
+    zákazníků by v manifestu chyběly a aktualizace by je nesloučila: zůstaly
+    by v dílně ležet, ale už by se nikdy neaktualizovaly. Pořadí je určující,
+    aby otisky vycházely stejně při každém sestavení.
+    """
+    out = []
+    for koren, slozky, soubory in os.walk(cesta):
+        slozky.sort()
+        vetev = os.path.relpath(koren, cesta).replace(os.sep, "/")
+        for jmeno in sorted(soubory):
+            if not jmeno.lower().endswith(".csv"):
+                continue
+            out.append(jmeno if vetev == "." else vetev + "/" + jmeno)
+    return out
+
+
 # ----------------------------------------------------------------- manifest
 def manifest_vytvor(koren_dat, verze):
     """Otisky datových souborů, jak je balíček přináší (bez evidence — ta se
@@ -149,9 +171,8 @@ def manifest_vytvor(koren_dat, verze):
         cesta = os.path.join(koren_dat, slozka)
         if not os.path.isdir(cesta):
             continue
-        for jmeno in sorted(os.listdir(cesta)):
-            if jmeno.lower().endswith(".csv"):
-                soubory[slozka + "/" + jmeno] = otisk(os.path.join(cesta, jmeno))
+        for rel in csv_ve_strome(cesta):
+            soubory[slozka + "/" + rel] = otisk(os.path.join(cesta, *rel.split("/")))
     return {"verze": verze, "sestaveno": time.strftime("%Y-%m-%d %H:%M"), "soubory": soubory}
 
 
@@ -412,12 +433,14 @@ def aktualizuj_data(koren, zdroj_dat, novy_manifest, stary_manifest, log):
             continue
         cil_slozka = os.path.join(koren, slozka)
         os.makedirs(cil_slozka, exist_ok=True)
-        for jmeno in sorted(os.listdir(zdroj)):
-            if not jmeno.lower().endswith(".csv"):
-                continue
-            z = os.path.join(zdroj, jmeno)
-            c = os.path.join(cil_slozka, jmeno)
-            rel = slozka + "/" + jmeno
+        for vetev_jmeno in csv_ve_strome(zdroj):
+            # jméno bez větve: pravidla se řídí názvem souboru, ne tím,
+            # ve které složce zákazníka leží
+            jmeno = vetev_jmeno.split("/")[-1]
+            z = os.path.join(zdroj, *vetev_jmeno.split("/"))
+            c = os.path.join(cil_slozka, *vetev_jmeno.split("/"))
+            os.makedirs(os.path.dirname(c), exist_ok=True)
+            rel = slozka + "/" + vetev_jmeno
             if not os.path.isfile(c):
                 shutil.copy2(z, c)
                 log("založeno: " + rel)

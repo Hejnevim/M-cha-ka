@@ -76,13 +76,20 @@ SÍTO — kam to zapsat už existuje, zbývá to naplnit:
                 bez vlastního řádku
     produkty    ref. čísla produktů oddělená čárkou, které jedou na tomto
                 sítu (ref je číslo produktu z katalogu)
-    Kalkulace pak síto doplní sama, jakmile je vybraný produkt. TXP už tak
-    zapsané je (výchozí 54-64, jemnější 90-48 pro vyjmenované produkty);
-    projít zbývá produkty SCR, PDP (klišé) a TRS.
+    Kalkulace pak síto doplní sama, jakmile je vybraný produkt. TXP tak
+    bylo zapsané 10.–16. 9. 2026 (výchozí 54-64, jemnější 90-48 pro devět
+    produktů); 16. 9. 2026 dílna rozhodla, že u textilu je síto na výběr
+    (54-64 nebo 90-40), sloupce jsou u TXP záměrně prázdné. Transfer (TRS)
+    má od 16. 9. 2026 stejně na výběr čtyři síta (54-64, 68-55, 90-40,
+    120-34) a těrky 410 a 510 mm. Sítotisk na plast a papír (SCR) dostal
+    17. 9. 2026 pět sít (54-64, 77-55, 100-40, 120-34, 130-34) a šest šířek
+    těrky (40, 50, 130, 150, 180, 220 mm) — do té doby mu padala celá
+    standardní řada 26 sít a šířka se psala ručně. Projít zbývá
+    produkty SCR, PDP (klišé) a TRS — tam, kde síto podle produktu dané je.
 
 ŠÍŘKA TĚRKY — kam to zapsat zatím NENÍ:
-    dnes je to ruční pole v kalkulaci (s rychlou volbou stěrek, které pro
-    technologii v dílně visí) a umí ji přinést i naskenovaný kód zakázky.
+    dnes je to výběr z šířek, které pro technologii v dílně visí (SCR, TXP,
+    TRS, FIR), u ostatních ruční pole; umí ji přinést i naskenovaný kód zakázky.
     K produktu ji ale aplikace uložit neumí — místo pro ni se musí nejdřív
     postavit. Mezitím sepište seznam produkt → šířka těrky v mm; přepíše
     se tam, jakmile bude kam.

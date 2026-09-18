@@ -41,13 +41,19 @@ function VolbaRady({ res, onVyber, onBezVolby, onZavrit }) {
             <button className="btn sec sm" onClick=${onZavrit}>✕</button>
           </div>
           <div className="poscards volba-rady">
-            ${res.rady.map((z) => {
+            ${(res.radyKVyberu && res.radyKVyberu.length ? res.radyKVyberu : res.rady).map((z) => {
               const n = (res.nalezenoVRade || {})[z] || 0;
+              /* Řada, kterou už poloha má. U odemčené polohy se nabízejí
+                 všechny řady technologie a tohle je jediné, podle čeho
+                 míchač pozná, co dílna na tuhle polohu zavedla — bez značky
+                 vybírá z pěti stejně vypadajících dlaždic naslepo. */
+              const prirazena = (res.radaPrirazena || []).indexOf(z) >= 0;
               return html`
-                <div key=${z} className="poscard" role="button" tabIndex="0"
+                <div key=${z} className=${"poscard" + (prirazena ? " prirazena" : "")} role="button" tabIndex="0"
                   onClick=${() => onVyber(z)}
                   onKeyDown=${(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onVyber(z); } }}>
-                  <div className="nm">${nazevDb(z)}</div>
+                  <div className="nm">${nazevDb(z)}${prirazena
+                    ? html`<span className="rada-znacka" title=${preloz("Tahle řada je poloze už přiřazená")}>✓</span>` : ""}</div>
                   <div className="dm">${barvy.length
                     ? (n ? preloz("{n} z {celkem} barev", { n: fmt(n, 0), celkem: fmt(barvy.length, 0) }) : "—")
                     : ""}</div>
@@ -55,7 +61,13 @@ function VolbaRady({ res, onVyber, onBezVolby, onZavrit }) {
             })}
           </div>
           <div className="rowline" style=${{ marginTop: 12, marginBottom: 0 }}>
-            <button className="btn sec" onClick=${onBezVolby}>${preloz("Bez volby — hledat ve všech řadách")}</button>
+            ${/* U uzavřené polohy se nabízejí jen řady, které dílna na tuhle
+                 komponentu zavedla, a hledat mimo ně by zámek popíralo —
+                 tlačítko se proto neukazuje. U odemčené polohy zůstává:
+                 přiřazení zatím nemusí být úplné. */
+              res.polohaUzavrena
+              ? html`<span className="note">${preloz("Poloha je uzavřená — vybírá se jen z řad, které má přiřazené.")}</span>`
+              : html`<button className="btn sec" onClick=${onBezVolby}>${preloz("Bez volby — hledat ve všech řadách")}</button>`}
           </div>
         </div>
       </div>

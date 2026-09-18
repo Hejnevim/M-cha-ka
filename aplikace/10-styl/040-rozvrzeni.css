@@ -2,8 +2,23 @@
 .grid{display:grid;gap:var(--mezera-karet)}
 /* Kalkulace stojí na dvou stejných polovinách: vlevo zadání, vpravo výsledek.
    Obě okna mají tutéž šířku a potkávají se přesně uprostřed stránky. */
+/* Řádky: pod řádkem Receptury je ještě jeden pružný řádek (1fr), do kterého
+   Receptura přesahuje (span 2 níž). Je to jediný způsob, jak v jedné mřížce
+   nechat Parametry tisku a Zakázku dorovnávat výšku SPOLU, ale ne podle
+   Receptury: položka zasahující do pružného řádku se do výšky obyčejných
+   (auto) řádků nepočítá, takže výšku řádku určí jen ty dvě karty, a co
+   Receptura přečnívá, vezme si pružný řádek pod nimi. Dřív byly všechny tři
+   v jednom řádku a Receptura, která s každou barvou zakázky a vybranou
+   recepturou roste, tahala obě sousedky s sebou — dílna chce, aby si Parametry
+   a Zakázka drželi svou velikost, ať se v Receptuře děje cokoli. Počet auto
+   řádků se bere z čísla řádku Receptury, aby přestavba v barvy.html
+   (Rozvržení) pružný řádek posunula s ní. */
 @media(min-width:960px){.grid.calc{grid-template-columns:minmax(0,var(--sloupec-1)) minmax(0,var(--sloupec-2));
+  grid-template-rows:repeat(var(--recept-radek),auto) minmax(0,1fr);
   column-gap:var(--mezera-sloupcu);align-items:stretch}}
+/* Okraj karty pod zlomem řeší mřížka mezerou; pevný margin:0 tu byl dřív
+   vložený v JSX, ale na širokém okně ho pravidlo níž potřebuje přepsat. */
+.card.karta-recept{margin:0}
 /* Obě okna končí ve stejné výšce: levý sloupec je sloupec pružný, poslední
    karta v něm dorovná zbytek místa, a karta výsledku vyplní svůj sloupec celý.
    Tlačítka se v obou drží u dolního okraje. */
@@ -24,13 +39,23 @@
     width:var(--produkt-sirka);justify-self:var(--produkt-zarovnani);min-height:var(--produkt-vyska)}
   .grid.calc>.bigpanel{grid-column:var(--vysledek-sloupec);grid-row:var(--vysledek-radek);
     width:var(--vysledek-sirka);justify-self:var(--vysledek-zarovnani);min-height:var(--vysledek-vyska)}
-  .grid.calc>.karta-recept{grid-column:var(--recept-sloupec);grid-row:var(--recept-radek);
+  /* Receptura přesahuje do pružného řádku (viz .grid.calc výš). Dolní okraj
+     rovný mezeře mřížky vyrovnává mezeru mezi oběma řádky, které karta
+     zabírá: bez něj by byla ve výchozím stavu o mezeru (16 px) vyšší než
+     Parametry tisku vedle ní (změřeno 506,69 proti 490,69 px). S ním končí
+     s nimi na jedné lince, a když naroste, pružný řádek jí dá přesně tolik,
+     kolik obsah potřebuje (1 045,78 px bez přetoku). */
+  .grid.calc>.karta-recept{grid-column:var(--recept-sloupec);grid-row:var(--recept-radek) / span 2;
     width:var(--recept-sirka);justify-self:var(--recept-zarovnani);min-height:var(--recept-vyska)}
   .grid.calc>.karta-cisla{grid-column:var(--zakazka-sloupec);grid-row:var(--zakazka-radek);
     width:var(--zakazka-sirka);justify-self:var(--zakazka-zarovnani);min-height:var(--zakazka-vyska)}
   .grid.calc>.karta-tisk{grid-column:var(--tisk-sloupec);grid-row:var(--tisk-radek);
     width:var(--tisk-sirka);justify-self:var(--tisk-zarovnani);min-height:var(--tisk-vyska)}
   .grid.calc>.card{margin-bottom:0}
+  /* Okraj Receptury musí stát až za nulováním okraje karet výš — obě
+     pravidla mají tři třídy a rozhoduje pořadí (bez toho zůstal okraj 0 px
+     a Receptura o mezeru přečnívala). */
+  .grid.calc>.card.karta-recept{margin-bottom:var(--mezera-karet)}
   /* Karta produktu je na široké obrazovce mřížka o třech sloupcích stejných
      jako dlaždice: nadpis přes všechny, pod ním řádek dlaždic, který dorovná
      zbytek výšky karty (karta je stejně vysoká jako Kolik namíchat vedle),

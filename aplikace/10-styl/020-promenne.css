@@ -16,7 +16,14 @@
   --ink:#2D2D2D; --ink-2:#757575; --line:#d4d4d4; --line-2:#c6c6c6;
   --cyan:#2D2D2D; --magenta:#C97B63; --yellow:#D9B44A; --key:#2D2D2D;
   --btn-ink:#FFFFFF; --focus:rgba(45,45,45,.20); --danger:#b31919;
-  --ok:#3dc760; --warn:#e8c545;
+  /* Upozornění je oranžové, ne žluté. Žlutá #e8c545 měla proti kartě
+     (#ededed) kontrast 1,43:1 a proti ploše (#c9c9c9) 1,01:1 — text
+     upozornění se na podkladu ztrácel a bílý počet ve žlutém štítku
+     taky (1,68:1). Oranžová #B45309 dává 4,29:1 na kartě a 5,02:1 pro
+     bílý text ve štítku. Odstín je záměrně držený dál od chybové
+     červené (--danger má odstín 8°) — u váhy se upozornění nesmí
+     splést s chybou; 26° je pořád zřetelně oranžová, ne rezavě rudá. */
+  --ok:#3dc760; --warn:#B45309;
   /* Čára přes plochu. Barvy jsou zadané v CMYK, protože tak se v dílně
      barva popisuje; do RGB se přepočítaly stejnou úvahou, jakou má
      aplikace v rgbNaCmyk (120-barva-potisku.js) — jen obráceně, tedy
@@ -178,16 +185,19 @@
   /* Stíny v rgba kvůli barvy.html — viz poznámka u světlých stínů. Od
      2. září (kap. 197): černá 40–50 %, bílá 16–17 % — dvojnásobek proti
      dřívějším 7,6–8 %, protože slabší „osvícení" na zesvětlené ploše
-     zanikalo. Rozmazání karet je 12 px (dřív 20) a od 3. září je odsazení
-     stínu karty 6 px (dřív 10): při rozmazání 12 px se stín s odsazením
-     10 px táhl za kartou jako druhá hrana, s 6 px sedí těsně u ní a karta
-     se od plochy odděluje ostřeji než ve dne. Stín okna je z téhož
-     důvodu nižší (9 px místo 14). */
-  --neu:-6px -6px 12px rgba(255,255,255,0.17), 6px 6px 12px rgba(0,0,0,0.45);
+     zanikalo. Stín karty se od 16. září stáhl ještě těsněji k hraně:
+     rozmazání 8 px (dřív 12) při odsazení 5 px (dřív 6). Posloupnost
+     20 → 12 → 8 px má jeden důvod — na tmavé ploše je rozdíl mezi kartou
+     a podkladem malý, takže široký stín se místo hloubky čte jako mlha
+     kolem karty. Užší stín drží hranu ostrou a karta vystoupí líp než
+     s rozmazáním dvojnásobným. Stín okna jde stejným směrem: 7 px posun
+     a 16 px rozmazání (dřív 9 a 24), aby okno nad ztmavlou plochou
+     nemělo kolem sebe širokou aureolu. */
+  --neu:-5px -5px 8px rgba(255,255,255,0.17), 5px 5px 8px rgba(0,0,0,0.45);
   --neu-sm:-5px -5px 12px rgba(255,255,255,0.162), 5px 5px 12px rgba(0,0,0,0.495);
   --neu-in:inset 4px 4px 6px rgba(0,0,0,0.405), inset -4px -4px 6px rgba(255,255,255,0.162);
   --neu-in-lg:inset 6px 6px 9px rgba(0,0,0,0.45), inset -6px -6px 9px rgba(255,255,255,0.17);
-  --modal-shadow:0 9px 24px rgba(0,0,0,0.9);
+  --modal-shadow:0 7px 16px rgba(0,0,0,0.9);
   --logo-stin:drop-shadow(0px 0px 8px rgba(255,255,255,1)) drop-shadow(0px 0px 8px rgba(0,0,0,1));
 }
 /* ZACATEK BAREV STRANEK */

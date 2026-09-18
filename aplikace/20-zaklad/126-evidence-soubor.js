@@ -51,11 +51,7 @@ function useEvidenceSoubor({ mostOk, klicLS, jmeno, naCsv, doCsv, slouc }) {
     if (text === zapsano.current) return;
     const casovac = setTimeout(async () => {
       try {
-        const r = await fetch(sgpsBase() + "/databaze/ulozit", { method: "POST",
-          body: new Blob([JSON.stringify({ slozka: SLOZKA_EVIDENCE, jmeno: jmeno, text: text })],
-            { type: "text/plain" }) });
-        const d = await r.json();
-        if (!d.ok) throw new Error(d.chyba || "zápis se nezdařil");
+        const d = await mostPost("/databaze/ulozit", { slozka: SLOZKA_EVIDENCE, jmeno: jmeno, text: text });
         zapsano.current = text;
         setStav({ stav: "ulozeno", chyba: "", kdy: Date.now() });
       } catch (e) {

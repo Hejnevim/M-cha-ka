@@ -73,6 +73,31 @@ function App() {
   }, []);
   const [links, setLinks] = useState(() => loadLS("irm-links", {}));
   useEffect(() => { saveLS("irm-links", links); }, [links]);
+  /* Vazby v souboru parametry/vazby_receptur.csv (část 422). Řádky ze
+     souboru se na id receptur převádějí až po načtení databází (efekt u
+     zápisu níž); co se nepřevede — databáze na tomhle počítači zamčená —
+     se při zápisu opíše zpátky, aby vazba nezmizela ostatním. Změny udělané
+     bez mostu čekají ve `vazbyCekajici` a po připojení se položí přes
+     soubor; jinak by je soubor při načtení přepsal. */
+  const [vazbyRadky, setVazbyRadky] = useState(null);      // null = soubor se ještě nečetl
+  const vazbyRadkyRef = useRef(null);
+  vazbyRadkyRef.current = vazbyRadky;
+  const [vazbyNerozlisene, setVazbyNerozlisene] = useState([]);
+  const [vazbyZapis, setVazbyZapis] = useState({ stav: "", chyba: "", kdy: 0, pocet: 0 });
+  const vazbyCekajici = useRef({});
+  const vazbyZapsano = useRef("");
+  const vazbySrovnano = useRef(false);
+  /* Sady receptur — víc barev jednoho loga na kombinaci (část 423). Řádky
+     jako v souboru parametry/sady_receptur.csv; sady s id receptur se z nich
+     skládají až po načtení databází (sady níž). Prohlížeč drží kopii, aby
+     sada šla založit i bez mostu; po přečtení souboru platí soubor a sady
+     založené bez mostu (id, které v souboru není) se k němu přidají. */
+  const [sadyRadky, setSadyRadky] = useState(() => loadLS("irm-sady", []));
+  useEffect(() => { saveLS("irm-sady", sadyRadky); }, [sadyRadky]);
+  const [sadySoubor, setSadySoubor] = useState(null);     // null = soubor se ještě nečetl
+  const sadySrovnano = useRef(false);
+  const sadyZapsano = useRef("");
+  const [sadyZapis, setSadyZapis] = useState({ stav: "", chyba: "", kdy: 0, pocet: 0 });
   const [deletePw, setDeletePw] = useState(() => loadLS("irm-delete-pw", ""));
   useEffect(() => { saveLS("irm-delete-pw", deletePw); }, [deletePw]);
   const [pwGate, setPwGate] = useState(null);
@@ -80,7 +105,7 @@ function App() {
   /* Role tohohle počítače. U váhy stojí tiskař pořád a v kanceláři technolog
      pořád — přepínat to při každém spuštění by nikdo nedělal, proto si roli
      drží prohlížeč, ne soubor. Jméno je nepovinné; podepisuje schválení. */
-  const [role, setRole] = useState(() => {
+  const [role, setRoleStav] = useState(() => {
     const ulozena = loadLS("irm-role", ROLE_VYCHOZI);
     return ROLE[ulozena] ? ulozena : ROLE_VYCHOZI;
   });
@@ -126,6 +151,8 @@ function App() {
      to bez ptaní. Role je dělba práce, ne zámek, a aplikace to říká nahlas. */
   const prepniRoli = (nova) => {
     if (nova === role || !ROLE[nova]) return;
+    // Přihlášený účet má roli ze souboru dílny — v prohlížeči se nepřepíná.
+    if (ucetPrihlasen) return;
     const provest = () => { setRole(nova); setMenuOpen(false); };
     if (!smiRole(nova, "receptury") || !deletePw) { provest(); return; }
     setPwGate({ onConfirm: provest,
@@ -153,11 +180,8 @@ function App() {
     try {
       const zaklad = techStavText || vychoziTechCsv(technologie || "FIR");
       const text = zmenStavVCsv(zaklad, tech, novyStav);
-      const r = await fetch(sgpsBase() + "/databaze/ulozit", { method: "POST",
-        body: new Blob([JSON.stringify({ slozka: SLOZKA_PARAMETRY,
-          jmeno: SOUBOR_TECHNOLOGIE, text: text })], { type: "text/plain" }) });
-      const d = await r.json();
-      if (!d.ok) throw new Error(d.chyba || "zápis se nezdařil");
+      const d = await mostPost("/databaze/ulozit", { slozka: SLOZKA_PARAMETRY,
+          jmeno: SOUBOR_TECHNOLOGIE, text: text });
       setTechStavText(text);
       const noveStavy = csvNaTechStav(text);
       setTechStav(noveStavy);
@@ -181,28 +205,56 @@ function App() {
     const klic = klicTypuPolohy(ref, tech, poloha);
     setTypyPoloh((prev) => Object.assign({}, prev, { [klic]: typy }));
     if (sgps.stav.stav !== "ok") {
-      setTypyZapis({ stav: "prohlizec", chyba: "" });
+      setTypyZapis({ stav: "prohlizec", chyba: "", co: "typy" });
       return;
     }
-    setTypyZapis({ stav: "uklada", chyba: "" });
+    setTypyZapis({ stav: "uklada", chyba: "", co: "typy" });
     try {
       const zaklad = typyPolohText || vychoziTypyPolohCsv();
       const text = zapisTypPolohyDoCsv(zaklad, ref, tech, poloha, typy);
-      const r = await fetch(sgpsBase() + "/databaze/ulozit", { method: "POST",
-        body: new Blob([JSON.stringify({ slozka: SLOZKA_PARAMETRY,
-          jmeno: SOUBOR_TYPY_POLOH, text: text })], { type: "text/plain" }) });
-      const d = await r.json();
-      if (!d.ok) throw new Error(d.chyba || "zápis se nezdařil");
+      const d = await mostPost("/databaze/ulozit", { slozka: SLOZKA_PARAMETRY,
+          jmeno: SOUBOR_TYPY_POLOH, text: text });
       setTypyPolohText(text);
       // soubor je pravda pro polohy, které nese; místní přiřazení zůstávají
       setTypyPoloh((prev) => Object.assign({}, prev, csvNaTypyPoloh(text)));
       zapisZmenu({ oblast: "poloha", polozka: klic, pole: "typy",
         pred: (typyPoloh || {})[klic] || "", po: typy });
-      setTypyZapis({ stav: "ulozeno", chyba: "" });
+      setTypyZapis({ stav: "ulozeno", chyba: "", co: "typy" });
     } catch (e) {
       // do souboru se to nezapsalo, ale v prohlížeči změna platí — hlášení
       // musí říct obojí, jinak by vypadala ztracená
-      setTypyZapis({ stav: "chyba", chyba: String((e && e.message) || e) });
+      setTypyZapis({ stav: "chyba", chyba: String((e && e.message) || e), co: "typy" });
+    }
+  };
+  /* Uzavření polohy — „tady už žádnou další barevnou řadu nečekej“. Jede
+     stejnou cestou jako přiřazení typů (týž soubor, týž řádek, sloupec
+     `uzavreno`): nejdřív prohlížeč, ať to platí i bez mostu, pak soubor pro
+     celou dílnu. Typy se přitom nepřepisují — zápis posílá `typy: null`,
+     takže sloupec zůstane, jak byl. */
+  const ulozUzavreniPolohy = async (ref, tech, poloha, uzavreno) => {
+    const klic = klicTypuPolohy(ref, tech, poloha);
+    setUzavrenePolohy((prev) => {
+      const c = Object.assign({}, prev);
+      if (uzavreno) c[klic] = true; else delete c[klic];
+      return c;
+    });
+    if (sgps.stav.stav !== "ok") {
+      setTypyZapis({ stav: "prohlizec", chyba: "", co: "uzavreni" });
+      return;
+    }
+    setTypyZapis({ stav: "uklada", chyba: "", co: "uzavreni" });
+    try {
+      const zaklad = typyPolohText || vychoziTypyPolohCsv();
+      const text = zapisTypPolohyDoCsv(zaklad, ref, tech, poloha, null, !!uzavreno);
+      const d = await mostPost("/databaze/ulozit", { slozka: SLOZKA_PARAMETRY,
+          jmeno: SOUBOR_TYPY_POLOH, text: text });
+      setTypyPolohText(text);
+      setUzavrenePolohy(csvNaUzavrenePolohy(text));
+      zapisZmenu({ oblast: "poloha", polozka: klic, pole: "uzavreno",
+        pred: (uzavrenePolohy || {})[klic] ? "ano" : "", po: uzavreno ? "ano" : "" });
+      setTypyZapis({ stav: "ulozeno", chyba: "", co: "uzavreni" });
+    } catch (e) {
+      setTypyZapis({ stav: "chyba", chyba: String((e && e.message) || e), co: "uzavreni" });
     }
   };
   /* Ceny materiálů se zapisují do téhož souboru, ze kterého se čtou odstíny
@@ -215,11 +267,8 @@ function App() {
     try {
       const zaklad = pigmentyText || "druh;nazev;hex;maxpodil;pozn;cena;mena;jednotka\r\n";
       const text = zapisCenyDoCsv(zaklad, zmeny);
-      const r = await fetch(sgpsBase() + "/databaze/ulozit", { method: "POST",
-        body: new Blob([JSON.stringify({ slozka: SLOZKA_PARAMETRY,
-          jmeno: SOUBOR_PIGMENTY, text: text })], { type: "text/plain" }) });
-      const d = await r.json();
-      if (!d.ok) throw new Error(d.chyba || "zápis se nezdařil");
+      const d = await mostPost("/databaze/ulozit", { slozka: SLOZKA_PARAMETRY,
+          jmeno: SOUBOR_PIGMENTY, text: text });
       setPigmentyText(text);
       const nove = csvNaPigmenty(text);
       setPigmenty(nove);
@@ -250,11 +299,8 @@ function App() {
     try {
       const zaklad = pigmentyText || "druh;nazev;hex;maxpodil;pozn;cena;mena;jednotka\r\n";
       const text = zapisSkladDoCsv(zaklad, zmeny);
-      const r = await fetch(sgpsBase() + "/databaze/ulozit", { method: "POST",
-        body: new Blob([JSON.stringify({ slozka: SLOZKA_PARAMETRY,
-          jmeno: SOUBOR_PIGMENTY, text: text })], { type: "text/plain" }) });
-      const d = await r.json();
-      if (!d.ok) throw new Error(d.chyba || "zápis se nezdařil");
+      const d = await mostPost("/databaze/ulozit", { slozka: SLOZKA_PARAMETRY,
+          jmeno: SOUBOR_PIGMENTY, text: text });
       setPigmentyText(text);
       const nove = csvNaPigmenty(text);
       setPigmenty(nove);
@@ -322,6 +368,29 @@ function App() {
 
   // ---- napojení na SGPS + čtečka čárových kódů: spec zakázky -> kalkulace ----
   const sgps = useSgps();
+
+  /* ---- role z přihlášeného účtu ----
+     Přihlášený účet roli určuje, nikoli nabízí. Dokud si roli držel jen
+     prohlížeč, byla to dělba práce — tiskař si ji mohl přepnout sám a
+     bylo to tak správně, protože u jednoho počítače stál jeden člověk.
+     S účty je role vlastnost účtu: přepnutím v prohlížeči by tiskař obešel
+     to, co dílna zavedla v souboru, a podpis technologa pod schválením by
+     přestal cokoli dokazovat.
+
+     Dílna bez účtů se nemění: tam role zůstává přepínatelná jako dřív.
+
+     Stojí to až tady, a ne u stavu role výš, protože `sgps` vzniká teprve
+     na tomhle řádku. */
+  const ucetPrihlasen = (sgps.stav && sgps.stav.prihlasen) || null;
+  const setRole = (nova) => { if (!ucetPrihlasen) setRoleStav(nova); };
+  useEffect(() => {
+    if (!ucetPrihlasen) return;
+    if (ROLE[ucetPrihlasen.role] && ucetPrihlasen.role !== role) setRoleStav(ucetPrihlasen.role);
+    /* Jméno do podpisu se z účtu doplní jen tehdy, když ho účet má a v poli
+       zatím nic není — přepsat jméno, které si někdo napsal ručně, by
+       znamenalo podepsat schválení někým jiným, než kdo u váhy stál. */
+    if (ucetPrihlasen.jmeno && !jmenoRole) setJmenoRole(ucetPrihlasen.jmeno);
+  }, [ucetPrihlasen]);
   const [hidOn, setHidOn] = useState(() => { const v = loadLS("irm-scan-hid", true); return v !== false; });
   useEffect(() => { saveLS("irm-scan-hid", hidOn); }, [hidOn]);
   const [scanLog, setScanLog] = useState([]);
@@ -409,14 +478,29 @@ function App() {
           + "&soubor=" + encodeURIComponent(SOUBOR_PLAN_DB));
         novyPlanDb = csvNaPlanDb(d.text);
       } catch (e) { if (!/není/.test(String(e.message || e))) chyby.push(SOUBOR_PLAN_DB + ": " + e.message); }
-      let noveTypyPoloh = null, novyTypyText = "";
+      let noveTypyPoloh = null, noveUzavrene = null, novyTypyText = "";
       try {
         const d = await sgpsGet("/databaze?slozka=" + SLOZKA_PARAMETRY
           + "&soubor=" + encodeURIComponent(SOUBOR_TYPY_POLOH));
         noveTypyPoloh = csvNaTypyPoloh(d.text);
+        noveUzavrene = csvNaUzavrenePolohy(d.text);
         novyTypyText = d.text;
       } catch (e) { if (!/není/.test(String(e.message || e))) chyby.push(SOUBOR_TYPY_POLOH + ": " + e.message); }
+      let noveVazby = null;
+      try {
+        const d = await sgpsGet("/databaze?slozka=" + SLOZKA_PARAMETRY
+          + "&soubor=" + encodeURIComponent(SOUBOR_VAZBY));
+        noveVazby = csvNaVazby(d.text);
+      } catch (e) { if (!/není/.test(String(e.message || e))) chyby.push(SOUBOR_VAZBY + ": " + e.message); }
+      let noveSady = null;
+      try {
+        const d = await sgpsGet("/databaze?slozka=" + SLOZKA_PARAMETRY
+          + "&soubor=" + encodeURIComponent(SOUBOR_SADY));
+        noveSady = csvNaSady(d.text);
+      } catch (e) { if (!/není/.test(String(e.message || e))) chyby.push(SOUBOR_SADY + ": " + e.message); }
       if (zrusen) return;
+      setVazbyRadky(noveVazby || []);
+      setSadySoubor(noveSady || []);
       setTechStav(novyTechStav);
       setTechStavText(novyTechText);
       // soubor přebíjí nastavení v prohlížeči, ale jen u souborů, které v něm
@@ -428,6 +512,17 @@ function App() {
       // soubor přebíjí prohlížeč, ale jen u poloh, které v něm opravdu jsou —
       // přiřazení udělaná bez mostu na tomhle počítači zůstanou
       if (noveTypyPoloh) { setTypyPoloh((prev) => Object.assign({}, prev, noveTypyPoloh)); setTypyPolohText(novyTypyText); }
+      /* Zámky ze souboru platí pro celou dílnu, ale jen tehdy, když soubor
+         sloupec `uzavreno` vůbec má. Bez něj (soubor z dřívějška, dokud do
+         něj někdo poprvé nezapíše zámek) vrací čtečka prázdno — a tím by se
+         smazalo, co se zamklo bez mostu na tomhle počítači. Prázdný výsledek
+         se proto bere jako „soubor o zámcích nic neříká“, ne jako „nikde
+         žádný není“.
+
+         Jakmile sloupec v souboru je, přebíjí prohlížeč celý, i otevřením:
+         kdyby se jen slučovalo `true`, zůstala by poloha odemknutá jinde
+         v dílně tady zamčená navždy. */
+      if (noveUzavrene && maSloupecUzavreno(novyTypyText)) setUzavrenePolohy(noveUzavrene);
       setSita(novaSita);
       setKoef(novyKoef);
       setPlanDb(novyPlanDb);
@@ -491,11 +586,7 @@ function App() {
     if (text === zbytkyZapsano.current) return;
     const casovac = setTimeout(async () => {
       try {
-        const r = await fetch(sgpsBase() + "/databaze/ulozit", { method: "POST",
-          body: new Blob([JSON.stringify({ slozka: SLOZKA_EVIDENCE, jmeno: SOUBOR_ZBYTKY, text: text })],
-            { type: "text/plain" }) });
-        const d = await r.json();
-        if (!d.ok) throw new Error(d.chyba || "zápis se nezdařil");
+        const d = await mostPost("/databaze/ulozit", { slozka: SLOZKA_EVIDENCE, jmeno: SOUBOR_ZBYTKY, text: text });
         zbytkyZapsano.current = text;
         setZbytkyStav({ stav: "ulozeno", chyba: "", kdy: Date.now() });
       } catch (e) {
@@ -546,11 +637,7 @@ function App() {
     if (text === davkyZapsano.current) return;
     const casovac = setTimeout(async () => {
       try {
-        const r = await fetch(sgpsBase() + "/databaze/ulozit", { method: "POST",
-          body: new Blob([JSON.stringify({ slozka: SLOZKA_EVIDENCE, jmeno: SOUBOR_DAVKY, text: text })],
-            { type: "text/plain" }) });
-        const d = await r.json();
-        if (!d.ok) throw new Error(d.chyba || "zápis se nezdařil");
+        const d = await mostPost("/databaze/ulozit", { slozka: SLOZKA_EVIDENCE, jmeno: SOUBOR_DAVKY, text: text });
         davkyZapsano.current = text;
         setDavkyStav({ stav: "ulozeno", chyba: "", kdy: Date.now() });
       } catch (e) {
@@ -599,11 +686,7 @@ function App() {
     if (text === sarzeZapsano.current) return;
     const casovac = setTimeout(async () => {
       try {
-        const r = await fetch(sgpsBase() + "/databaze/ulozit", { method: "POST",
-          body: new Blob([JSON.stringify({ slozka: SLOZKA_EVIDENCE, jmeno: SOUBOR_SARZE, text: text })],
-            { type: "text/plain" }) });
-        const d = await r.json();
-        if (!d.ok) throw new Error(d.chyba || "zápis se nezdařil");
+        const d = await mostPost("/databaze/ulozit", { slozka: SLOZKA_EVIDENCE, jmeno: SOUBOR_SARZE, text: text });
         sarzeZapsano.current = text;
         setSarzeStav({ stav: "ulozeno", chyba: "", kdy: Date.now() });
       } catch (e) {
@@ -653,11 +736,7 @@ function App() {
     if (text === opravyZapsano.current) return;
     const casovac = setTimeout(async () => {
       try {
-        const r = await fetch(sgpsBase() + "/databaze/ulozit", { method: "POST",
-          body: new Blob([JSON.stringify({ slozka: SLOZKA_EVIDENCE, jmeno: SOUBOR_OPRAVY, text: text })],
-            { type: "text/plain" }) });
-        const d = await r.json();
-        if (!d.ok) throw new Error(d.chyba || "zápis se nezdařil");
+        const d = await mostPost("/databaze/ulozit", { slozka: SLOZKA_EVIDENCE, jmeno: SOUBOR_OPRAVY, text: text });
         opravyZapsano.current = text;
         setOpravyStav({ stav: "ulozeno", chyba: "", kdy: Date.now() });
       } catch (e) {
@@ -712,11 +791,7 @@ function App() {
     if (text === zmenyZapsano.current) return;
     const casovac = setTimeout(async () => {
       try {
-        const r = await fetch(sgpsBase() + "/databaze/ulozit", { method: "POST",
-          body: new Blob([JSON.stringify({ slozka: SLOZKA_EVIDENCE, jmeno: SOUBOR_ZMENY, text: text })],
-            { type: "text/plain" }) });
-        const d = await r.json();
-        if (!d.ok) throw new Error(d.chyba || "zápis se nezdařil");
+        const d = await mostPost("/databaze/ulozit", { slozka: SLOZKA_EVIDENCE, jmeno: SOUBOR_ZMENY, text: text });
         zmenyZapsano.current = text;
         setZmenyStav({ stav: "ulozeno", chyba: "", kdy: Date.now() });
       } catch (e) {
@@ -742,6 +817,51 @@ function App() {
       return nove.length ? nove.concat(prev) : prev;
     });
   }, []);
+
+  /* Jediné hrdlo pro změnu vazeb receptur na kombinace — kalkulace, okno
+     Stejný materiál a barva i záložka Produkty. `zmeny` je { klíč: id | null }.
+     Do záznamu změn jde jeden řádek na recepturu se seznamem kombinací před
+     a po: technolog se ptá „kam všude jsem tu růžovou dal", ne co se stalo
+     s klíčem 11155|152|TXP|Přední. */
+  const upravVazby = (zmeny) => {
+    const klice = Object.keys(zmeny || {}).filter((k) => k && (links[k] || "") !== (zmeny[k] || ""));
+    if (!klice.length) return;
+    const nl = Object.assign({}, links);
+    const dotcene = new Set();
+    for (const k of klice) {
+      const bylo = links[k] || "", bude = zmeny[k] || "";
+      if (bude) nl[k] = bude; else delete nl[k];
+      if (bylo) dotcene.add(bylo);
+      if (bude) dotcene.add(bude);
+    }
+    setLinks(nl);
+    for (const id of dotcene) {
+      const r = recipes.find((x) => x.id === id);
+      const pred = Object.keys(links).filter((k) => links[k] === id).sort().map(popisKlice).join(" · ");
+      const po = Object.keys(nl).filter((k) => nl[k] === id).sort().map(popisKlice).join(" · ");
+      zapisZmenu({ oblast: "vazba", polozka: r ? r.name : id,
+        pred: { kombinace: pred }, po: { kombinace: po } });
+    }
+    // bez mostu změna čeká — po připojení se položí přes to, co je v souboru
+    if (sgps.stav.stav !== "ok") for (const k of klice) vazbyCekajici.current[k] = zmeny[k] || null;
+  };
+
+  /* Sady receptur (část 423) — skládají se z řádků až tady, kde jsou
+     receptury s id; kalkulace dostane hotové sady. */
+  const sady = useMemo(() => sadyZRadku(sadyRadky, recipes), [sadyRadky, recipes]);
+  /* Jediné hrdlo pro změnu sad: { uloz: sada } | { smaz: id } | { id, klice }.
+     Do Změn podkladů jde řádek na sadu: co bylo a co je (barvy, kombinace). */
+  const upravSady = (zmena) => {
+    const pred = zmena.uloz ? sady.find((s) => s.id === zmena.uloz.id)
+      : sady.find((s) => s.id === (zmena.smaz || zmena.id)) || null;
+    const nove = upravRadkySad(sadyRadky, zmena, recipes);
+    setSadyRadky(nove);
+    const po = zmena.smaz ? null : sadyZRadku(nove, recipes).find((s) => s.id === (zmena.uloz ? zmena.uloz.id : zmena.id)) || null;
+    const popis = (s) => s ? { "značka": s.znacka, "barvy": s.barvy.map((b) => b.poradi + ". " + b.receptura + " (" + b.druh + ")").join(" · "),
+      "kombinace": (s.klice || []).map(popisKlice).join(" · ") } : null;
+    zapisZmenu({ oblast: "sada", druh: zmena.smaz ? "smazano" : (pred ? "upraveno" : "zalozeno"),
+      polozka: (po || pred || {}).nazev || (zmena.smaz || zmena.id || ""), pred: popis(pred), po: popis(po) });
+  };
 
 
   /* ---- fronta míchání ----
@@ -786,11 +906,7 @@ function App() {
     if (text === frontaZapsano.current) return;
     const casovac = setTimeout(async () => {
       try {
-        const r = await fetch(sgpsBase() + "/databaze/ulozit", { method: "POST",
-          body: new Blob([JSON.stringify({ slozka: SLOZKA_EVIDENCE, jmeno: SOUBOR_FRONTA, text: text })],
-            { type: "text/plain" }) });
-        const d = await r.json();
-        if (!d.ok) throw new Error(d.chyba || "zápis se nezdařil");
+        const d = await mostPost("/databaze/ulozit", { slozka: SLOZKA_EVIDENCE, jmeno: SOUBOR_FRONTA, text: text });
         frontaZapsano.current = text;
         setFrontaStav({ stav: "ulozeno", chyba: "", kdy: Date.now() });
       } catch (e) {
@@ -811,6 +927,64 @@ function App() {
   const [pozadavky, setPozadavky, pozadavkyStav] = useEvidenceSoubor({ mostOk: mostOk,
     klicLS: "irm-pozadavky", jmeno: SOUBOR_POZADAVKY,
     naCsv: csvNaPozadavky, doCsv: pozadavkyDoCsv, slouc: sloucPozadavky });
+  /* Měření loga (část 641): nejtenčí a nejširší čára motivu po barvách
+     a síto, které k nim dílna zvolila. Z toho se síto k čáře učí. */
+  const [mereniLoga, setMereniLoga] = useEvidenceSoubor({ mostOk: mostOk,
+    klicLS: "irm-mereni-loga", jmeno: SOUBOR_MERENI_LOGA,
+    naCsv: csvNaMereniLoga, doCsv: mereniLogaDoCsv, slouc: sloucMereniLoga });
+  /* Seznam složek se sběrem: čte se ze stromu evidence, ne z paměti —
+     dílna smí do složek sáhnout i v průzkumníku a aplikace má ukazovat,
+     co tam doopravdy leží. Načte se po připojení mostu a po každém zápisu
+     zakázky; bez mostu zůstane prázdný a obrazovka si vystačí se
+     souhrnným souborem. */
+  const [slozkySita, setSlozkySita] = useState([]);
+  const nactiSlozkySita = async () => {
+    if (!mostOk) return;
+    try {
+      const d = await sgpsGet("/databaze?slozka=" + SLOZKA_EVIDENCE);
+      setSlozkySita((d.soubory || []).filter((s) =>
+        String(s.vetev || "").indexOf(SLOZKA_MERENI_LOGA + "/") === 0));
+    } catch (e) { /* bez mostu se strom neukazuje, není to chyba */ }
+  };
+  useEffect(() => { nactiSlozkySita(); }, [mostOk]);
+
+  const zapisMereniLoga = (seznam) => {
+    if (!seznam || !seznam.length) return;
+    const kdo = podpisRole(roleRef.current, jmenoRoleRef.current);
+    setMereniLoga((prev) => {
+      // kódy se číslují nad rostoucím seznamem, ať dvě barvy téže zakázky
+      // nedostanou totéž číslo dne
+      let vsechny = prev || [];
+      const nove = [];
+      for (const z of seznam) {
+        const m = novyZaznamMereniLoga(Object.assign({ mereni: vsechny, kdo: kdo }, z));
+        nove.push(m); vsechny = [m].concat(vsechny);
+      }
+      // zápis do složek běží vedle souhrnu, s hotovými kódy záznamů
+      zapisSlozkuMereni(nove);
+      return nove.concat(prev || []);
+    });
+    setToast({ ok: true, text: preloz("Měření loga zapsáno ({n} barev) — síto k čáře se dílna učí z evidence.",
+      { n: seznam.length }) });
+  };
+
+  /* Zápis zakázky do složky svého síta. Běží vedle souhrnného souboru
+     a jeho selhání nesmí nic shodit — složky jsou pohled pro člověka,
+     pravdu drží mereni_loga.csv. Proto se chyba jen vypíše do konzole
+     a záznam v aplikaci zůstává. */
+  const zapisSlozkuMereni = async (zaznamy) => {
+    if (!mostOk || !zaznamy || !zaznamy.length) return;
+    for (const m of zaznamy) {
+      try {
+        const d = await mostPost("/databaze/ulozit", { slozka: SLOZKA_EVIDENCE,
+            jmeno: souborMereniLoga(m), vetev: vetevMereniLoga(m),
+            text: zaznamMereniDoCsv(m) });
+      } catch (e) {
+        console.error("složka zakázky " + souborMereniLoga(m) + ": " + String((e && e.message) || e));
+      }
+    }
+    nactiSlozkySita();
+  };
 
   /* Požadavek na chybějící odstín z kalkulace (část 637). Zapisuje ho tiskař
      u váhy; technolog ho vidí v Ke schválení s odznakem v nabídce. */
@@ -938,6 +1112,15 @@ function App() {
   // které technologie patří ke kterému souboru databáze receptur
   const [dbTech, setDbTech] = useState(() => loadLS("irm-databaze-tech", {}));
   useEffect(() => { saveLS("irm-databaze-tech", dbTech); }, [dbTech]);
+  /* Přiřazení i pro custom databáze (custom_X dědí X, část 420). Jde všude —
+     i do Připojení k mostu, kde technolog vidí zděděné FIR u custom_Ferro a
+     kliknutím ho přepíše výslovnou hodnotou do surového `dbTech` (ta má
+     přednost před děděním). Surové `dbTech` se drží jen jako stav. */
+  const dbTechUplne = useMemo(() => {
+    const soubory = new Set(Object.keys(dbTech || {}));
+    for (const r of recipes) if (r.zdroj) soubory.add(r.zdroj);
+    return dbTechSCustom(dbTech, Array.from(soubory));
+  }, [dbTech, recipes]);
 
   /* Zdraví databáze. Počítá se v App ze stejného důvodu jako sklad: číslo nese
      odznak v nabídce, aby se na mezery přišlo dřív, než po nich někdo sáhne
@@ -948,7 +1131,7 @@ function App() {
      se nález odvozuje, a nic z toho se během běžné práce nemění. Zaplatí se
      to jednou po načtení databází z mostu, ne při každém překreslení. */
   const zdravi = useMemo(() => zdraviDatabazi({ recipes: recipes, materialy: pigmenty,
-    sita: sita, dbTech: dbTech }), [recipes, pigmenty, sita, dbTech]);
+    sita: sita, dbTech: dbTechUplne }), [recipes, pigmenty, sita, dbTechUplne]);
   // Na jaké materiály jde který typ barvy. Jen ze souboru parametrů, bez kopie
   // v prohlížeči: je to údaj od výrobce barvy, ne nastavení uživatele, a dvě
   // různě staré kopie na dvou počítačích by tiskaři tvrdily každá něco jiného.
@@ -964,6 +1147,12 @@ function App() {
   // načtení přednost, takže rozhodnutí technologa nakonec platí všude stejně.
   const [typyPoloh, setTypyPoloh] = useState(() => loadLS("irm-typy-poloh", {}));
   useEffect(() => { saveLS("irm-typy-poloh", typyPoloh); }, [typyPoloh]);
+  /* Uzavřené polohy — „tady už žádnou další barevnou řadu nečekej“. Leží
+     v témže souboru a v témže řádku jako typy (sloupec `uzavreno`), ale drží
+     se zvlášť: typy jsou seznam, uzavření je jedno ano/ne, a míchat je do
+     jednoho slovníku by znamenalo přepisovat jedno druhým. */
+  const [uzavrenePolohy, setUzavrenePolohy] = useState(() => loadLS("irm-uzavrene-polohy", {}));
+  useEffect(() => { saveLS("irm-uzavrene-polohy", uzavrenePolohy); }, [uzavrenePolohy]);
   const [typyPolohText, setTypyPolohText] = useState("");
   const [typyZapis, setTypyZapis] = useState({ stav: "", chyba: "" });
 
@@ -1019,7 +1208,10 @@ function App() {
                 const ulozena = podleKlice.get(klicReceptury(r));
                 if (ulozena) for (const k of r.vazby) vazby[k] = ulozena.id;
               }
-              if (Object.keys(vazby).length) setLinks((p) => Object.assign({}, p, vazby));
+              /* Jen dokud soubor vazeb neexistuje: jakmile je, platí on —
+                 vazba smazaná na jiném počítači by tudy zase ožila. */
+              if (Object.keys(vazby).length && !(vazbyRadkyRef.current && vazbyRadkyRef.current.length))
+                setLinks((p) => Object.assign({}, p, vazby));
               return v.seznam;
             });
             souboru++;
@@ -1031,7 +1223,11 @@ function App() {
           }
         }
         if (zrusen) return;
-        setDatabaze({ stav: "hotovo", soubory: soubory, chyby: chyby, chyba: "" });
+        /* `nacteno` říká, že smyčka doběhla. „hotovo" je už od výpisu souborů
+           (nabídka se plní průběžně), ale zapisovat vlastní receptury a vazby
+           se smí až teď — jinak by se soubor přepsal z prohlížeče dřív, než
+           z něj most stihl přečíst receptury, a chvíli by na disku chyběly. */
+        setDatabaze({ stav: "hotovo", nacteno: true, soubory: soubory, chyby: chyby, chyba: "" });
         if (souboru) {
           setToast({ ok: true, text: "Databáze barev: " + fmt(celkemNovych, 0) + " nových receptur"
             + (celkemObnovenych ? ", " + fmt(celkemObnovenych, 0) + " obnovených" : "")
@@ -1054,57 +1250,166 @@ function App() {
      v prohlížeči. Ukládá se se zpožděním, ať psaní v editoru nezapisuje
      soubor po každém písmenu. */
   const [vlastniStav, setVlastniStav] = useState({ stav: "cekam", kdy: 0, chyba: "", pocet: 0, vazeb: 0 });
-  const zapsanoRef = useRef("");
+  const zapsanoRef = useRef({});
   useEffect(() => {
-    if (sgps.stav.stav !== "ok" || databaze.stav !== "hotovo") return;
+    if (sgps.stav.stav !== "ok" || !databaze.nacteno) return;
     const vlastni = recipes.filter(jeVlastni);
-    // Soubor se zakládá i prázdný — jen s hlavičkou. Ať je ve složce vidět
-    // od začátku a je poznat, kam se vlastní receptury ukládají.
-    const text = vlastniDoCsv(recipes, links);
-    if (text === zapsanoRef.current) return;
+    /* Vlastní receptury se ukládají po řadách a podle značky loga (část 420):
+       odvozená z PRINTCOLOR 786 pro Škodovku jde do
+       custom_SKODA_AUTO_PRINTCOLOR_786.csv ve složce TXP/SKODA_AUTO, ručně
+       zadaná bez podkladu do receptury_vlastni.csv. Základní soubor se
+       zakládá i prázdný — jen s hlavičkou —, ať je ve složce od začátku
+       vidět, kam vlastní receptury patří. Zapisuje se jen soubor, jehož text
+       se změnil.
+
+       Větev se posílá s každým zápisem, ale most ji použije jen u souboru,
+       který na disku ještě není — soubor, který dílna v průzkumníku přesunula
+       jinam, tam zůstane. */
+    const texty = souboryVlastnich(recipes).map((soubor) => [soubor, vlastniDoCsv(recipes, links, soubor),
+      vetevVlastniho(soubor, recipes.find((x) => jeVlastni(x) && cilovySouborVlastni(x) === soubor),
+        dbTechUplne, (databaze.soubory || []).map((x) => x.jmeno))]);
+    const kZapisu = texty.filter(([soubor, text]) => text !== zapsanoRef.current[soubor]);
+    if (!kZapisu.length) return;
     const casovac = setTimeout(async () => {
-      try {
-        const r = await fetch(sgpsBase() + "/databaze/ulozit", { method: "POST",
-          body: new Blob([JSON.stringify({ jmeno: SOUBOR_VLASTNI, text: text })], { type: "text/plain" }) });
-        const d = await r.json();
-        if (!d.ok) throw new Error(d.chyba || "zápis se nezdařil");
-        zapsanoRef.current = text;
-        // ať si most uložený soubor hned nenačítá zpátky jako změněnou databázi
-        const v = loadLS("irm-databaze-verze", {});
-        v[SOUBOR_VLASTNI] = d.verze;
-        saveLS("irm-databaze-verze", v);
-        // receptury označíme za pocházející z tohoto souboru, aby se při
-        // příštím načtení spárovaly a nevznikly z nich duplikáty
-        setRecipes((prev) => prev.some((x) => jeVlastni(x) && !x.zdroj)
-          ? prev.map((x) => (jeVlastni(x) && !x.zdroj) ? Object.assign({}, x, { zdroj: SOUBOR_VLASTNI }) : x)
-          : prev);
-        // ať je soubor v seznamu databází vidět hned, ne až po dalším načtení
-        setDatabaze((p) => {
-          const soubory = (p.soubory || []).slice();
-          const zaznam = { jmeno: SOUBOR_VLASTNI, verze: d.verze, velikost: d.velikost || 0,
-            druh: "receptury", radku: Math.max(0, text.split(/\r?\n/).filter(Boolean).length - 1) };
-          const i = soubory.findIndex((s) => s.jmeno === SOUBOR_VLASTNI);
-          if (i >= 0) soubory[i] = Object.assign({}, soubory[i], zaznam); else soubory.push(zaznam);
-          soubory.sort((a, b) => a.jmeno.localeCompare(b.jmeno, "cs"));
-          return Object.assign({}, p, { soubory: soubory });
-        });
-        setVlastniStav({ stav: "ulozeno", kdy: Date.now(), chyba: "",
-          pocet: vlastni.length,
-          vazeb: vlastni.reduce((s, x) => s + vazbyReceptury(links, x.id).length, 0) });
-      } catch (e) {
-        setVlastniStav((p) => Object.assign({}, p, { stav: "chyba",
-          chyba: String((e && e.message) || e) }));
+      let chyba = "";
+      for (const [soubor, text, vetev] of kZapisu) {
+        try {
+          const d = await mostPost("/databaze/ulozit", { jmeno: soubor, text: text, vetev: vetev || "" });
+          zapsanoRef.current[soubor] = text;
+          // ať si most uložený soubor hned nenačítá zpátky jako změněnou databázi
+          const v = loadLS("irm-databaze-verze", {});
+          v[soubor] = d.verze;
+          saveLS("irm-databaze-verze", v);
+          /* Receptury, které do souboru patří, se na něj přeznačí, aby se při
+             příštím načtení spárovaly a nevznikly duplikáty: nové bez zdroje
+             i ty ze staršího receptury_vlastni.csv, které mají podklad v řadě
+             (přechod na custom databáze — starý soubor se zapíše bez nich). */
+          setRecipes((prev) => prev.some((x) => jeVlastni(x) && x.zdroj !== soubor && cilovySouborVlastni(x) === soubor)
+            ? prev.map((x) => (jeVlastni(x) && x.zdroj !== soubor && cilovySouborVlastni(x) === soubor)
+              ? Object.assign({}, x, { zdroj: soubor }) : x)
+            : prev);
+          // ať je soubor v seznamu databází vidět hned, ne až po dalším načtení
+          setDatabaze((p) => {
+            const soubory = (p.soubory || []).slice();
+            const zaznam = { jmeno: soubor, verze: d.verze, velikost: d.velikost || 0,
+              druh: "receptury", radku: Math.max(0, text.split(/\r?\n/).filter(Boolean).length - 1) };
+            const i = soubory.findIndex((x) => x.jmeno === soubor);
+            if (i >= 0) soubory[i] = Object.assign({}, soubory[i], zaznam); else soubory.push(zaznam);
+            soubory.sort((a, b) => a.jmeno.localeCompare(b.jmeno, "cs"));
+            return Object.assign({}, p, { soubory: soubory });
+          });
+        } catch (e) {
+          chyba = soubor + ": " + String((e && e.message) || e);
+        }
       }
+      if (chyba) setVlastniStav((p) => Object.assign({}, p, { stav: "chyba", chyba: chyba }));
+      else setVlastniStav({ stav: "ulozeno", kdy: Date.now(), chyba: "",
+        pocet: vlastni.length,
+        vazeb: vlastni.reduce((s, x) => s + vazbyReceptury(links, x.id).length, 0) });
     }, 1500);
     return () => clearTimeout(casovac);
   }, [recipes, links, sgps.stav.stav, databaze]);
+
+  /* Srovnání vazeb se souborem. Poprvé platí soubor: co v něm není, tenhle
+     prohlížeč zahodí — kromě případu, kdy soubor ještě neexistuje (přechod
+     ze starší verze: vazby ze sloupce `vazby` a vazby na standard jen
+     z prohlížeče se převezmou a při prvním zápisu do něj dostanou).
+     Potom už se ze souboru jen doplňuje, co se nově rozlišilo (databáze
+     načtená později) — odebírá se výhradně přes upravVazby. */
+  useEffect(() => {
+    if (vazbyRadky === null || !recepturyNacteny || !databaze.nacteno) return;
+    const v = vazbyZeSouboru(vazbyRadky, recipes);
+    setVazbyNerozlisene(v.nerozlisene);
+    setLinks((prev) => {
+      let nl;
+      if (!vazbySrovnano.current) {
+        vazbySrovnano.current = true;
+        nl = Object.assign({}, v.links);
+        if (!vazbyRadky.length) for (const k of Object.keys(prev)) if (!nl[k]) nl[k] = prev[k];
+      } else {
+        nl = Object.assign({}, prev);
+        for (const k of Object.keys(v.links)) if (!nl[k]) nl[k] = v.links[k];
+      }
+      for (const k of Object.keys(vazbyCekajici.current)) {
+        const id = vazbyCekajici.current[k];
+        if (id) nl[k] = id; else delete nl[k];
+      }
+      const stejne = Object.keys(nl).length === Object.keys(prev).length
+        && Object.keys(nl).every((k) => prev[k] === nl[k]);
+      return stejne ? prev : nl;
+    });
+  }, [vazbyRadky, recipes, recepturyNacteny, databaze.nacteno]);
+
+  /* Zápis vazeb do parametry/vazby_receptur.csv — celý soubor, jako u
+     vlastních receptur, s odkladem, ať se nepíše po každém kliknutí. Až po
+     prvním srovnání se souborem, jinak by se do něj zapsal stav z
+     prohlížeče dřív, než se přečetl. */
+  useEffect(() => {
+    if (sgps.stav.stav !== "ok" || !databaze.nacteno || !vazbySrovnano.current) return;
+    const text = vazbyDoCsv(links, recipes, vazbyNerozlisene);
+    if (text === vazbyZapsano.current) return;
+    const casovac = setTimeout(async () => {
+      try {
+        const d = await mostPost("/databaze/ulozit", { slozka: SLOZKA_PARAMETRY, jmeno: SOUBOR_VAZBY, text: text });
+        vazbyZapsano.current = text;
+        vazbyCekajici.current = {};
+        // soubor je teď to, co se zapsalo — ať se odebraná vazba nevrátí z řádků načtených při startu
+        setVazbyRadky(csvNaVazby(text));
+        setVazbyZapis({ stav: "ulozeno", chyba: "", kdy: Date.now(),
+          pocet: Math.max(0, text.split(/\r?\n/).filter(Boolean).length - 1) });
+      } catch (e) {
+        setVazbyZapis((p) => Object.assign({}, p, { stav: "chyba", chyba: String((e && e.message) || e) }));
+      }
+    }, 1500);
+    return () => clearTimeout(casovac);
+  }, [links, recipes, vazbyNerozlisene, sgps.stav.stav, databaze.nacteno]);
+
+  /* Srovnání sad se souborem: soubor platí, sady založené bez mostu (id,
+     které v souboru není) se přidají. Sada smazaná bez mostu se ze souboru
+     vrátí — mazání se šíří jen přes soubor a bez mostu není kam. */
+  useEffect(() => {
+    if (sadySoubor === null || sadySrovnano.current) return;
+    sadySrovnano.current = true;
+    setSadyRadky((prev) => {
+      const vSouboru = new Set(sadySoubor.map((v) => v.sada));
+      const nove = sadySoubor.concat(prev.filter((v) => !vSouboru.has(v.sada)));
+      const stejne = nove.length === prev.length && nove.every((v, i) => JSON.stringify(v) === JSON.stringify(prev[i]));
+      return stejne ? prev : nove;
+    });
+  }, [sadySoubor]);
+  /* Zápis sad do parametry/sady_receptur.csv — celý soubor s odkladem,
+     jako vazby, a až po srovnání se souborem. `sadySoubor` je v závislostech
+     schválně: most se připojí dřív, než se soubor přečte, a sada založená
+     bez mostu by jinak čekala na další změnu — srovnání řádky nemění,
+     když soubor neexistuje, a efekt by se sám znovu nespustil. */
+  useEffect(() => {
+    if (sgps.stav.stav !== "ok" || !sadySrovnano.current) return;
+    const text = sadyDoCsv(sadyRadky);
+    if (text === sadyZapsano.current) return;
+    if (!sadyRadky.length && sadyZapsano.current === "" && !(sadySoubor && sadySoubor.length)) return;   // prázdný soubor se nezakládá
+    const casovac = setTimeout(async () => {
+      try {
+        const d = await mostPost("/databaze/ulozit", { slozka: SLOZKA_PARAMETRY, jmeno: SOUBOR_SADY, text: text });
+        sadyZapsano.current = text;
+        setSadyZapis({ stav: "ulozeno", chyba: "", kdy: Date.now(),
+          pocet: Math.max(0, text.split(/\r?\n/).filter(Boolean).length - 1) });
+      } catch (e) {
+        setSadyZapis((p) => Object.assign({}, p, { stav: "chyba", chyba: String((e && e.message) || e) }));
+      }
+    }, 1500);
+    return () => clearTimeout(casovac);
+  }, [sadyRadky, sadySoubor, sgps.stav.stav]);
 
   /* Zúžení, ve kterém se odstín ze zakázky hledá (resolveSpec, část 140):
      databáze podle technologie polohy a řada přiřazená poloze. Stejné
      zúžení má nabídka Pantone v kalkulaci — co se nenabídne ručně, nesmí
      vybrat ani list. */
-  const omezeniSpecu = useMemo(() => ({ dbTech: dbTech, typyPoloh: typyPoloh, technologie: technologie }),
-    [dbTech, typyPoloh, technologie]);
+  const omezeniSpecu = useMemo(() => ({ dbTech: dbTechUplne, typyPoloh: typyPoloh,
+    /* Uzamčení polohy mění, z čeho se v okně vybírá: u uzavřené polohy jen
+       z přiřazených řad (je jich tam všechno, co kdy bude), u odemčené ze
+       všech řad technologie s přiřazenými zvýrazněnými. */
+    uzavrenePolohy: uzavrenePolohy, technologie: technologie }),
+    [dbTechUplne, typyPoloh, uzavrenePolohy, technologie]);
   /* Převzetí zakázky přes otázku na řadu (část 182): technologie s víc
      řadami a poloha bez přiřazené řady — aplikace neví, ze které řady
      odstín vzít, a hádat nesmí. Otázka se ptá před převzetím; odpověď se
@@ -1121,11 +1426,51 @@ function App() {
     if (!zdroj) { v.hotovo(v.res); return; }
     const res = specSVolbouRady(v.res, products, recipes, Object.assign({}, omezeniSpecu, { rada: zdroj }));
     const p = res.position;
-    if (p) ulozTypPolohy(res.product.ref || res.product.id, p.tech, p.name, [zdroj]);
+    /* Volba se k poloze PŘIDÁ, nikdy nenahradí. Poloha smí mít řad víc (tak
+       to funguje i ve formuláři produktu) a volba řady B na poloze, která
+       má A, je důkaz, že se na tu komponentu tiskne i z B — ne pokyn, aby
+       A zmizela. Dřív se zapisovalo `[zdroj]`, takže jeden klik u zakázky
+       smazal přiřazení, které dílna zavedla, a nikde to nebylo vidět.
+
+       Na uzavřené poloze s víc řadami se nezapisuje nic: seznam je tam
+       úplný a míchač si z něj právě jen vybral pro tuhle zakázku. */
+    const jizPrirazena = (res.radaPrirazena || []).indexOf(zdroj) >= 0;
+    const zapsat = p && !(res.polohaUzavrena && (res.radaPrirazena || []).length > 1) && !jizPrirazena;
+    if (zapsat)
+      ulozTypPolohy(res.product.ref || res.product.id, p.tech, p.name,
+        (res.radaPrirazena || []).concat([zdroj]));
     v.hotovo(res);
-    if (p) setToast({ ok: true, text: preloz("Řada {r} je od teď přiřazená poloze {p}.",
-      { r: nazevDb(zdroj), p: p.tech + " " + p.name }) });
+    /* Tatáž řada padne na celou skupinu zboží — bavlněné tričko má v TXP
+       stejnou řadu jako dalších dvě stě bavlněných triček. Volba se proto
+       odloží pro záložku Produkty, kde se dá zaškrtat na podobné polohy
+       (část 457). Nepřepíná se tam samo: zakázka, kvůli které se sem
+       kliklo, se má dopočítat, ne opustit. Toast nabídne odskok. */
+    /* Hlášení musí sedět na to, co se doopravdy stalo — jinak si dílna
+       myslí, že se přiřazení změnilo (nebo nezměnilo), a nekontroluje to. */
+    if (!p) {
+      // bez polohy není kam volbu uložit, hlásit se nemá co
+    } else if (!zapsat) {
+      setToast({ ok: true, text: jizPrirazena
+        ? preloz("Odstín se vezme z řady {r} — poloha {p} ji už přiřazenou má.",
+            { r: nazevDb(zdroj), p: p.tech + " " + p.name })
+        : preloz("Odstín se vezme z řady {r}. Přiřazení polohy {p} zůstává beze změny — poloha je uzavřená.",
+            { r: nazevDb(zdroj), p: p.tech + " " + p.name }) });
+    } else {
+      setPrenosRady({ ref: res.product.ref || res.product.id, tech: p.tech, poloha: p.name, rada: zdroj });
+      // počet řad se skloňuje jako jinde v aplikaci (2–4 „řady", 5+ „řad")
+      const pocetRad = (res.radaPrirazena || []).length + 1;
+      setToast({ ok: true, text: (res.radaPrirazena || []).length
+        ? preloz("Řada {r} přibyla k poloze {p} — {n} {s} celkem. Přenést ji na podobné produkty jde v Produktech.",
+            { r: nazevDb(zdroj), p: p.tech + " " + p.name, n: fmt(pocetRad, 0),
+              s: pocetRad < 5 ? preloz("řady") : preloz("řad") })
+        : preloz("Řada {r} je od teď přiřazená poloze {p}. Přenést ji na podobné produkty jde v Produktech.",
+            { r: nazevDb(zdroj), p: p.tech + " " + p.name }) });
+    }
   };
+  /* Řada čekající na přenos v záložce Produkty: { ref, tech, poloha, rada }.
+     Drží se v app, ne v Products — vzniká při převzetí zakázky v kalkulaci
+     a Products se vytvoří, až se na záložku přepne. */
+  const [prenosRady, setPrenosRady] = useState(null);
 
   /* Zakázka může být z jiné technologie, než ve které se zrovna pracuje —
      pak se režim přepne, jinak by poloha z listu nebyla vidět: kalkulace
@@ -1379,19 +1724,27 @@ function App() {
                 ${TECH_PORADI.filter((t) => TECHS[t]).map((t) => {
                   const kolik = products.filter((p) => produktUmi(p, t)).length;
                   if (!kolik) return null;
-                  const ostra = techOstra(t, techStav);
-                  const pr = pripravenostTech(t, { sita, koef, pigmenty, recipes, dbTech, techStav, planDb });
+                  /* Dva nezávislé důvody, proč technologie nejde vybrat:
+                     dílně k ní chybí data (odemykací seznam), nebo na ni
+                     nemá právo přihlášený účet. Rozlišují se schválně —
+                     hláška „chybí data“ u cizí technologie by posílala
+                     tiskaře shánět koeficienty, které jsou v pořádku. */
+                  const duvod = duvodZamku(t, techStav);
+                  const ostra = !duvod;
+                  const pr = pripravenostTech(t, { sita, koef, pigmenty, recipes, dbTech: dbTechUplne, techStav, planDb });
                   return html`
                     <button key=${t} className=${technologie === t ? "on" : ""}
                       disabled=${!ostra}
                       style=${ostra ? {} : { opacity: .55, cursor: "not-allowed" }}
                       onClick=${() => { if (ostra) { setTechnologie(t); setMenuOpen(false); } }}
                       title=${ostra ? preloz(TECHS[t].name)
-                        : preloz("Zamčeno: {duvod} — hotovo {hotovo} ze {celkem}",
-                            { duvod: pr.pozn || preloz("chybí data"), hotovo: pr.hotovo, celkem: pr.celkem })}>
+                        : duvod === "ucet"
+                          ? preloz("Přihlášený účet nemíchá pro tuhle technologii.")
+                          : preloz("Zamčeno: {duvod} — hotovo {hotovo} ze {celkem}",
+                              { duvod: pr.pozn || preloz("chybí data"), hotovo: pr.hotovo, celkem: pr.celkem })}>
                       ${!ostra && html`<${IkonaZamek} />`}${t} — ${preloz(TECHS[t].name).replace(/\s*\(.*/, "")}
                       <span className="note" style=${{ float: "right" }}>
-                        ${ostra ? fmt(kolik, 0) : pr.hotovo + "/" + pr.celkem}
+                        ${ostra ? fmt(kolik, 0) : duvod === "ucet" ? preloz("cizí") : pr.hotovo + "/" + pr.celkem}
                       </span>
                     </button>`;
                   })}
@@ -1486,6 +1839,7 @@ function App() {
               ${otevreneSkupiny.data && html`<${React.Fragment}>
                 <button className=${tab === "most" ? "on" : ""} onClick=${() => { setTab("most"); setMenuOpen(false); }}>${preloz("Připojení k mostu")}</button>
                 <button className=${tab === "zmeny" ? "on" : ""} onClick=${() => { setTab("zmeny"); setMenuOpen(false); }}>${preloz("Změny podkladů")}</button>
+                <button className=${tab === "logasita" ? "on" : ""} onClick=${() => { setTab("logasita"); setMenuOpen(false); }}>${preloz("Sběr zakázek k sítům")}</button>
                 <button className=${tab === "zdravi" ? "on" : ""} onClick=${() => { setTab("zdravi"); setMenuOpen(false); }}>
                   ${preloz("Zdraví databáze")}
                   ${zdravi.sNalezem > 0 && html`<span className="tag"
@@ -1540,7 +1894,7 @@ function App() {
             <b> ${preloz("Rozbalte celý ZIP do jedné složky a otevřete index.html z ní.")}</b>
           </div>`}
         <div style=${{ display: tab === "calc" ? "" : "none" }}>
-          <${Calc} products=${products} recipes=${recipes} setRecipes=${setRecipes} links=${links} setLinks=${setLinks}
+          <${Calc} products=${products} recipes=${recipes} setRecipes=${setRecipes} links=${links} setLinks=${setLinks} upravVazby=${upravVazby}
             spec=${spec} onSpecUsed=${() => setSpec(null)}
             onUpravitSpec=${pdfSpec.stav === "hotovo" ? () => setTab("pdf") : null}
             sgps=${sgps} onPouzitSpec=${pouzitSpec} onNahledSpecu=${nahlednoutSpec} onPdfNacteno=${setPdfSpec} pdfObrazky=${pdfSpec.obrazky || []} pdfStranky=${pdfSpec.stranky || []} pdfId=${pdfSpec.pdfId || ""}
@@ -1550,14 +1904,16 @@ function App() {
             sarze=${sarze} setSarze=${setSarze}
             opravy=${opravy} setOpravy=${setOpravy}
             onDoFronty=${doFronty}
-            technologie=${technologie} dbTech=${dbTech} dbMat=${dbMat} typyPoloh=${typyPoloh} ulozTypPolohy=${ulozTypPolohy}
+            technologie=${technologie} dbTech=${dbTechUplne} dbMat=${dbMat} typyPoloh=${typyPoloh} ulozTypPolohy=${ulozTypPolohy}
             sita=${sita} koef=${koef} pigmenty=${pigmenty} sklad=${sklad} guardDelete=${guardDelete}
             upravy=${upravy} setUpravy=${setUpravy}
             pozadavky=${pozadavky} onPozadavek=${zapisPozadavek}
+            mereniLoga=${mereniLoga} onMereniLoga=${zapisMereniLoga}
             dbVynucene=${dbVynucene} oblibene=${oblibene} prepniOblibenou=${prepniOblibenou}
             jednotka=${jednotka} setJednotka=${setJednotka}
             zmenyPodkladu=${zmenyPodkladu} onToast=${setToast}
             role=${role} jmenoRole=${jmenoRole}
+            sady=${sady} upravSady=${upravSady} sadyZapis=${sadyZapis}
             onZbytekUlozen=${(kod) => { setZbytekKod(kod); setTab("zbytky"); }}
             namichatVolne=${namichatVolne} onNamichanoVolne=${() => setNamichatVolne(null)}
             skryta=${tab !== "calc"} />
@@ -1570,7 +1926,7 @@ function App() {
         ${tab === "zak" && html`<${ZakazkyTab} sgps=${sgps} onOtevri=${otevriZakazku}
           products=${products} techStav=${techStav} technologie=${technologie} />`}
         ${tab === "most" && html`<${PripojeniTab} sgps=${sgps} databaze=${databaze} recipes=${recipes}
-          links=${links} vlastniStav=${vlastniStav} dbTech=${dbTech} setDbTech=${setDbTech}
+          links=${links} vlastniStav=${vlastniStav} dbTech=${dbTechUplne} setDbTech=${setDbTech}
           onOdebratZdroj=${(z) => guardDelete(() => {
             setRecipes((prev) => prev.filter((r) => r.zdroj !== z));
             const v = loadLS("irm-databaze-verze", {});
@@ -1630,15 +1986,18 @@ function App() {
               { n: fmt(nahrada.size, 0) }) });
           }, "sloučení receptur bez databáze")} />`}
         ${tab === "odemykani" && html`<${OdemykaniTab} techStav=${techStav} products=${products}
-          sita=${sita} koef=${koef} pigmenty=${pigmenty} recipes=${recipes} dbTech=${dbTech} planDb=${planDb}
+          sita=${sita} koef=${koef} pigmenty=${pigmenty} recipes=${recipes} dbTech=${dbTechUplne} planDb=${planDb}
           technologie=${technologie} setTechnologie=${setTechnologie}
           prepniTech=${prepniTech} techZapis=${techZapis} guard=${guardDelete}
           mostOk=${sgps.stav.stav === "ok"} />`}
         ${tab === "prod" && html`<${Products} zapisZmenu=${zapisZmenu} products=${products} setProducts=${setProducts} guardDelete=${guardDelete}
-          recipes=${recipes} dbTech=${dbTech} typyPoloh=${typyPoloh} ulozTypPolohy=${ulozTypPolohy}
-          typyZapis=${typyZapis} mostOk=${sgps.stav.stav === "ok"} />`}
+          recipes=${recipes} dbTech=${dbTechUplne} typyPoloh=${typyPoloh} ulozTypPolohy=${ulozTypPolohy}
+          typyZapis=${typyZapis} mostOk=${sgps.stav.stav === "ok"}
+          links=${links} upravVazby=${upravVazby} oblibene=${oblibene} vazbyZapis=${vazbyZapis}
+          prenosRady=${prenosRady} onPrenosRadyHotov=${() => setPrenosRady(null)}
+          uzavrenePolohy=${uzavrenePolohy} ulozUzavreniPolohy=${ulozUzavreniPolohy} sady=${sady} upravSady=${upravSady} />`}
         ${tab === "rec" && html`<${Recipes} recipes=${recipes} setRecipes=${setRecipes} guardDelete=${guardDelete} role=${role} jmenoRole=${jmenoRole} zapisZmenu=${zapisZmenu}
-          dbFiltr=${dbFiltr} setDbFiltr=${setDbFiltr} technologie=${technologie} dbTech=${dbTech} sita=${sita}
+          dbFiltr=${dbFiltr} setDbFiltr=${setDbFiltr} technologie=${technologie} dbTech=${dbTechUplne} sita=${sita}
           materialy=${pigmenty} onUlozitCeny=${ulozCeny} cenyStav=${cenyZapis}
           oblibene=${oblibene} prepniOblibenou=${prepniOblibenou}
           zmeny=${zmenyPodkladu} davky=${davky} opravy=${opravy} upravy=${upravy}
@@ -1654,7 +2013,7 @@ function App() {
           sita=${sita} materialy=${pigmenty} zapisZmenu=${zapisZmenu}
           onToast=${setToast} />`}
         ${tab === "sito" && html`<${SitoTab} recipes=${recipes} sita=${sita}
-          koef=${koef} materialy=${pigmenty} technologie=${technologie} dbTech=${dbTech}
+          koef=${koef} materialy=${pigmenty} technologie=${technologie} dbTech=${dbTechUplne}
           dbFiltr=${dbFiltr} setDbFiltr=${setDbFiltr} />`}
         ${tab === "sarze" && html`<${SarzeTab} sarze=${sarze} setSarze=${setSarze}
           davky=${davky} materialy=${pigmenty} />`}
@@ -1671,10 +2030,12 @@ function App() {
           zbytky=${zbytky} materialy=${pigmenty} />`}
         ${tab === "opravy" && html`<${OpravyTab} opravy=${opravy} davky=${davky} />`}
         ${tab === "zmeny" && html`<${ZmenyTab} zmeny=${zmenyPodkladu} />`}
+        ${tab === "logasita" && html`<${MereniLogaTab} mereni=${mereniLoga}
+          slozky=${slozkySita} mostOk=${mostOk} />`}
         ${tab === "sestavy" && html`<${SestavyTab} davky=${davky} zbytky=${zbytky}
           materialy=${pigmenty} />`}
         ${tab === "zdravi" && html`<${ZdraviTab} recipes=${recipes} materialy=${pigmenty}
-          sita=${sita} dbTech=${dbTech} technologie=${technologie} setTab=${setTab} />`}
+          sita=${sita} dbTech=${dbTechUplne} technologie=${technologie} setTab=${setTab} />`}
         ${tab === "sklad" && html`<${SkladTab} sklad=${sklad} sarze=${sarze}
           onUlozit=${ulozZasoby} stav=${skladZapis} mostOk=${sgps.stav.stav === "ok"}
           smiMenit=${smiRole(role, "cenik")} />`}

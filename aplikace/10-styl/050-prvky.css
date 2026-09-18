@@ -137,6 +137,37 @@ pre.tpl{background:var(--paper);border-radius:10px;padding:12px;font-size:12px;o
 .barva-zakazky.hotova{box-shadow:var(--neu-sm),0 0 0 3px var(--ok)}
 .barva-zakazky .bz-hotovo{border:none;background:transparent;color:inherit;cursor:pointer;padding:0 2px;font-weight:800;font-size:var(--pismo-popisek);opacity:.35;line-height:normal}
 .barva-zakazky .bz-hotovo.on{opacity:1;color:var(--ok)}
+/* Sady receptur na kombinaci (část 296): jedna dlaždice na sadu, v ní
+   čipy barev s druhem. Druh nese barvu písma, ne podbarvení — čip už
+   nese odstín receptury a dvě barvy vedle sebe by se pletly. */
+.sady-kombinace{display:grid;gap:8px;margin:10px 0 12px}
+.sada-dlazdice{min-width:0;background:var(--paper);color:var(--ink);border-radius:var(--radius-dlazdice);box-shadow:var(--neu-sm);padding:10px 12px}
+.sada-dlazdice.on{box-shadow:var(--neu-sm),0 0 0 3px var(--ok)}
+.sada-hlava{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}
+.sada-nazev{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sada-hlava .sada-nazev{flex:1;font-size:calc(var(--pismo) - 1px)}
+.sada-chipy{margin-top:6px}
+.sada-chip{gap:6px;max-width:100%;cursor:default}
+.sada-chip .sada-nazev{max-width:min(28ch,60vw)}
+.sada-chip .bz-cislo{font-family:var(--mono);font-weight:800}
+/* Sada v katalogu produktů: štítek u polohy, rozbalené složení pod ním */
+.sada-v-katalogu{display:inline}
+.sada-stitek{margin-left:8px;vertical-align:middle}
+.sada-rozbal{margin:6px 0 4px;padding:8px 10px;border-radius:var(--radius-btn);box-shadow:var(--neu-in);max-width:560px}
+/* v kartě mřížky stojí štítek na vlastním řádku, levé odsazení z tabulky by ho vychýlilo */
+.pgcard-sady{margin-top:4px}
+.pgcard-sady .sada-stitek{margin-left:0;margin-top:4px;max-width:100%}
+.sada-druh{font-family:var(--mono);font-size:calc(var(--pismo-poznamka) - 1px);text-transform:uppercase;letter-spacing:.04em}
+.sada-druh.custom{color:var(--key)}
+.sada-druh.standard{color:var(--ink-2)}
+.sada-druh.rozpracovana{color:var(--warn)}
+/* Seznam barev v okně uložení sady: řádek na barvu, stejná čísla a vzorky
+   jako v pruhu barev zakázky. */
+.sada-barvy{display:grid;gap:6px}
+.sada-barva{display:flex;align-items:center;gap:8px;min-width:0;padding:6px 10px;border-radius:var(--radius-btn);box-shadow:var(--neu-in)}
+.sada-barva .bz-cislo{font-family:var(--mono);font-weight:800}
+.sada-barva .sada-nazev{flex:1;font-weight:600;font-size:calc(var(--pismo) - 1px)}
+.sada-barva .tag.sada-druh{text-transform:none;letter-spacing:normal}
 /* Čísla zakázky jako čtyři velké dlaždice vyplňující celou kartu — stejný
    vzor jako síto/kryvost/povrch v Parametrech tisku (`.karta-tisk`), aby se
    tentýž typ pole choval na obou kartách stejně. Bez viskozity pod nimi

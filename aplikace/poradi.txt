@@ -43,6 +43,8 @@
 40-kalkulace/260-financni-box.js
 40-kalkulace/280-michaci-rezim.js
 40-kalkulace/290-vazeni.js
+40-kalkulace/295-vazby-okno.js
+40-kalkulace/296-sada-okno.js
 50-zbytky/300-stitek.js
 50-zbytky/310-zbytky-tab.js
 50-zbytky/311-vratka-okno.js
@@ -51,6 +53,7 @@
 50-zbytky/340-propad-tab.js
 50-zbytky/350-opravy-tab.js
 50-zbytky/355-zmeny-tab.js
+50-zbytky/356-mereni-loga-tab.js
 60-databaze/360-sito-tab.js
 60-databaze/370-produkty.js
 60-databaze/380-receptury.js
@@ -62,11 +65,14 @@
 60-databaze/406-pozadavky-tab.js
 60-databaze/410-import.js
 60-databaze/420-vlastni-db.js
+60-databaze/422-vazby-receptur.js
+60-databaze/423-sady-receptur.js
 60-databaze/430-sita.js
 70-pravidla/440-podklad.js
 70-pravidla/450-zamek.js
 70-pravidla/455-material.js
 70-pravidla/456-typ-polohy.js
+70-pravidla/457-rady-podobne.js
 70-pravidla/458-receptury-varianty.js
 70-pravidla/459-vynucene-slozky.js
 70-pravidla/460-pigment-baze.js
@@ -98,6 +104,7 @@
 50-zbytky/638-vratky.js
 50-zbytky/639-doladeni-odstinu.js
 50-zbytky/640-poradi-michani.js
+50-zbytky/641-mereni-loga.js
 50-zbytky/650-propad-vypocet.js
 85-sestavy/652-sestavy-vypocet.js
 85-sestavy/654-sestavy-tab.js

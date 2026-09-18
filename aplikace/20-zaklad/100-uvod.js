@@ -34,10 +34,17 @@ function useMediaQuery(dotaz) {
    totéž jako terky, jen pro minimální dávku. Technologie bez seznamu má dál
    ruční číselné pole. */
 const TECHS = {
-  SCR: { name: "Sítotisk (plast, papír) / rotační", gm2: 6.0 },
+  // sítotisk na plast a papír drží šest šířek těrky, od 40 mm pro rotační
+  // tisk drobných dílů po 220 mm (zadání dílny 17. 9. 2026; do té doby ruční
+  // pole) — řada na výběr s „—" jako u textilu, síta k ní jsou v parametry/sita.csv
+  SCR: { name: "Sítotisk (plast, papír) / rotační", gm2: 6.0, terky: [40, 50, 130, 150, 180, 220] },
   PDP: { name: "Tampontisk", gm2: 2.5, sito: false },
-  TXP: { name: "Sítotisk (textil)", gm2: 14.0, terky: [250, 420] },
-  TRS: { name: "Transfer", gm2: 18.0 },
+  // textilní dílna drží těrky 300 a 350 mm (zadání dílny 16. 9. 2026;
+  // do té doby 250 a 420) — řada, ne co napsat z hlavy
+  TXP: { name: "Sítotisk (textil)", gm2: 14.0, terky: [300, 350] },
+  // transferová dílna drží těrky 410 a 510 mm (zadání dílny 16. 9. 2026) —
+  // řada na výběr jako u textilu, síta k ní jsou v parametry/sita.csv
+  TRS: { name: "Transfer", gm2: 18.0, terky: [410, 510] },
   // vypalovací dílna drží těrky jen v 350 mm a míchá po 50 / 100 / 150 g —
   // obě čísla dané provozem, ne k vymýšlení (zadání dílny 2026-09-10)
   FIR: { name: "Firing — Low Temperature", gm2: 8.0, terky: [350], minDavky: [50, 100, 150] },

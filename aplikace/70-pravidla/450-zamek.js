@@ -381,13 +381,18 @@ function pripravenostTech(tech, { sita, koef, pigmenty, recipes, dbTech, techSta
           : preloz("výchozí pro všechny")) : refuSitem + " " + preloz("produktů"))
         : preloz("vybírá se ručně") },
     // šířka těrky k produktu se zatím nemá kam zapsat — v kalkulaci je to
-    // u TXP výběr z TECHS.terky, jinde ruční pole. Bod je schválně
+    // u SCR, TXP a TRS výběr z TECHS.terky, jinde ruční pole. Bod je schválně
     // trvale neodškrtnutý: říká, že tohle přiřazení dílně pořád chybí,
     // a odškrtávat se začne, až pro něj v datech vznikne místo.
+    // Šířky se vypisují „40, 50, 130, 150, 180 a 220", ne „40 a 50 a 130…":
+    // se šesti šířkami SCR (17. 9. 2026) by spojka mezi každou dvojicí
+    // nebyla čeština; u dvou hodnot (TXP, TRS) vyjde „300 a 350" jako dřív.
     ...(maSito ? [{ klic: "terka", popis: preloz("šířka těrky k produktům"),
       hotovo: false,
       detail: (TECHS[tech].terky || []).length
-        ? preloz("zatím jen rychlé volby {v} mm", { v: TECHS[tech].terky.join(" a ") })
+        ? preloz("zatím jen rychlé volby {v} mm", { v: (TECHS[tech].terky.length > 1
+            ? TECHS[tech].terky.slice(0, -1).join(", ") + preloz(" a ") + TECHS[tech].terky[TECHS[tech].terky.length - 1]
+            : String(TECHS[tech].terky[0])) })
         : preloz("zatím ruční pole v kalkulaci") }] : []),
     { klic: "koeficienty", popis: preloz("koeficienty spotřeby"),
       hotovo: koefu > 0, detail: koefu > 0 ? koefu + " " + preloz("hodnot") : preloz("nejsou") },
@@ -408,4 +413,24 @@ function pripravenostTech(tech, { sita, koef, pigmenty, recipes, dbTech, techSta
 
 const techOstra = (tech, techStav) =>
   !tech || !techStav || !techStav[tech] || techStav[tech].stav === "ostra";
+
+/* Technologie zamčená účtem — druhý, nezávislý důvod vedle chybějících dat.
+   Dílna je smí mít odemčené obě a přesto na ně jeden účet nedosáhne: míchačka
+   pro sítotisk nemá co dělat ve vypalovací peci, i když jsou v technologie.csv
+   ostré obě.
+
+   Rozhodnutí tady je pro rozhraní — aby aplikace nenabízela, na co stejně
+   nedosáhne. Skutečné vynucení dělá most u každého požadavku znovu
+   (`ucet_smi` v most.py); tady se nic nechrání. */
+const techSmiUcet = (tech) => !tech || uceSmi("technologie", tech);
+
+/* Proč je technologie zamčená. Dílna musí poznat, jestli chybí data, nebo
+   jestli na ni nemá právo účet — každé se řeší někde jinde a hláška
+   „chybí data“ u cizí technologie by posílala tiskaře shánět koeficienty,
+   které jsou dávno v pořádku. */
+const duvodZamku = (tech, techStav) => {
+  if (!techSmiUcet(tech)) return "ucet";
+  if (!techOstra(tech, techStav)) return "data";
+  return "";
+};
 

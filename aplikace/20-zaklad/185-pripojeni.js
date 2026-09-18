@@ -88,6 +88,38 @@ function PripojeniTab({ sgps, databaze, recipes, links, vlastniStav, onOdebratZd
       .map((r) => String(r.name || "").toLowerCase()));
     return bezDatabaze.filter((r) => jmena.has(String(r.name || "").toLowerCase()));
   }, [recipes, bezDatabaze]);
+  /* ---- přihlášení ----
+     Dílna, která nemá parametry/ucty.csv, se nepřihlašuje a celá karta se
+     neukáže. Jednomu počítači v dílně by přihlašovací okno jen překáželo;
+     účty se zavádějí až tam, kde k týmž datům chodí víc zařízení. */
+  const uctyJsou = !!(sgps.stav && sgps.stav.ucty);
+  const prihlasen = (sgps.stav && sgps.stav.prihlasen) || null;
+  const [ucetPole, setUcetPole] = useState("");
+  const [hesloPole, setHesloPole] = useState("");
+  const [prihlasovani, setPrihlasovani] = useState({ stav: "", chyba: "" });
+
+  const provedPrihlaseni = async () => {
+    if (!ucetPole.trim() || !hesloPole) return;
+    setPrihlasovani({ stav: "prihlasuji", chyba: "" });
+    try {
+      await prihlasSe(ucetPole.trim(), hesloPole);
+      /* Heslo z paměti hned po přihlášení. Zůstat v poli by nemělo důvod —
+         zpátky se dostane jen lístek a heslo už nikdo nepotřebuje. */
+      setHesloPole("");
+      setPrihlasovani({ stav: "", chyba: "" });
+      sgps.zjisti();
+    } catch (e) {
+      setPrihlasovani({ stav: "", chyba: String((e && e.message) || e) });
+    }
+  };
+
+  const provedOdhlaseni = async () => {
+    await odhlasSe();
+    setUcetPole("");
+    setHesloPole("");
+    sgps.zjisti();
+  };
+
   const [adresa, setAdresa] = useState(() =>
     String(loadLS("irm-most-adresa", "") || "").trim() || sgpsAdresa() || MOST_VYCHOZI);
   const [zkouska, setZkouska] = useState(null);
@@ -194,8 +226,60 @@ function PripojeniTab({ sgps, databaze, recipes, links, vlastniStav, onOdebratZd
     return () => { bezi = false; clearInterval(t); };
   }, [stahovani]);
 
+  /* Co přihlášený účet smí. Vypisuje se proto, že omezení je jinak
+     neviditelné: tiskař, kterému aplikace nenabízí technologii, musí vidět
+     proč — jinak to vypadá jako porucha a dílna volá, že „zmizely barvy“. */
+  const seznamNeboVse = (pole) => {
+    const s = (prihlasen && prihlasen[pole]) || [];
+    if (!s.length) return pole === "databaze" ? preloz("všechny") : preloz("žádné");
+    if (s.indexOf("*") >= 0) return preloz("všechny");
+    return s.join(", ");
+  };
+
   return html`
     <${React.Fragment}>
+      ${uctyJsou && html`
+      <div className="card">
+        <h2>${preloz("Přihlášení")}</h2>
+        ${prihlasen
+          ? html`
+            <div className="specbar" style=${{ marginTop: 4 }}>
+              <span className="dot" style=${{ background: "var(--ok)" }}></span>
+              <span>${preloz("Přihlášen jako")} <b>${prihlasen.jmeno || prihlasen.ucet}</b>
+                ${" — "}${nazevRole(prihlasen.role)}.</span>
+            </div>
+            <div className="kv" style=${{ marginTop: 10 }}>
+              <div className="k">${preloz("Technologie")}</div>
+              <div className="v">${seznamNeboVse("technologie")}</div>
+              <div className="k">${preloz("Databáze receptur")}</div>
+              <div className="v">${seznamNeboVse("databaze")}</div>
+              <div className="k">${preloz("Zápis")}</div>
+              <div className="v">${seznamNeboVse("zapis")}</div>
+            </div>
+            <div className="rowline" style=${{ marginTop: 14 }}>
+              <button className="btn sec" onClick=${provedOdhlaseni}>${preloz("Odhlásit")}</button>
+            </div>`
+          : html`
+            <p className="hint">
+              ${preloz("V téhle dílně jsou zavedené účty. Přihlaste se — bez přihlášení most nevydá receptury ani nepřijme zápis.")}
+            </p>
+            <div className="rowline" style=${{ marginTop: 10 }}>
+              <input style=${{ flex: "1 1 180px" }} value=${ucetPole}
+                onChange=${(e) => setUcetPole(e.target.value)}
+                onKeyDown=${(e) => { if (e.key === "Enter") provedPrihlaseni(); }}
+                placeholder=${preloz("účet")} />
+              <input type="password" style=${{ flex: "1 1 180px" }} value=${hesloPole}
+                onChange=${(e) => setHesloPole(e.target.value)}
+                onKeyDown=${(e) => { if (e.key === "Enter") provedPrihlaseni(); }}
+                placeholder=${preloz("heslo")} />
+              <button className="btn" onClick=${provedPrihlaseni}
+                disabled=${prihlasovani.stav === "prihlasuji" || !ucetPole.trim() || !hesloPole}>
+                ${prihlasovani.stav === "prihlasuji" ? preloz("Přihlašuji…") : preloz("Přihlásit")}
+              </button>
+            </div>
+            ${prihlasovani.chyba && html`<div className="warnbox" style=${{ marginTop: 10 }}>${prihlasovani.chyba}</div>`}`}
+      </div>`}
+
       <div className="card">
         <h2>${preloz("Připojení k mostu")}</h2>
         <p className="hint">
@@ -308,7 +392,16 @@ function PripojeniTab({ sgps, databaze, recipes, links, vlastniStav, onOdebratZd
         ${ok && databaze && databaze.stav === "hotovo" && html`
           ${databaze.soubory.length
             ? html`<div className="kv">
-                ${databaze.soubory.map((s) => html`
+                ${stromDatabazi(databaze.soubory).map(({ tech, znacky }) => html`
+                  <${React.Fragment} key=${tech || "_koren"}>
+                    ${tech && html`<div className="dbstrom-tech">
+                      ${TECHS[tech] ? TECHS[tech].name : tech}</div>`}
+                    ${znacky.map(({ znacka, soubory }) => html`
+                      <${React.Fragment} key=${(tech || "") + "|" + znacka}>
+                        ${znacka && html`<div className="dbstrom-znacka">
+                          ${znacka === SLOZKA_BEZ_LOGA ? preloz("Bez loga")
+                            : znacka === SLOZKA_SPOLECNE ? preloz("Společné řady") : znacka}</div>`}
+                        ${soubory.map((s) => html`
                   <${React.Fragment} key=${s.jmeno}>
                     <div className="k" style=${{ textTransform: "none", letterSpacing: 0 }}>${s.jmeno}</div>
                     <div className="v">
@@ -336,6 +429,8 @@ function PripojeniTab({ sgps, databaze, recipes, links, vlastniStav, onOdebratZd
                           })}
                         </div>`}
                     </div>
+                  <//>`)}
+                      <//>`)}
                   <//>`)}
               </div>`
             : html`<div className="note">${preloz("Ve složce zatím žádné CSV není. Vložte ho tam a načte se samo.")}</div>`}

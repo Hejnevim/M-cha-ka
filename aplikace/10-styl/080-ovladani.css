@@ -112,6 +112,14 @@
 .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:13px;margin-top:8px}
 .kv .k{color:var(--ink-2);font-size:11px;text-transform:uppercase;letter-spacing:.06em;align-self:center}
 .kv .v{font-weight:700}
+/* Strom složek databází (technologie → značka loga → soubory) v kartě
+   Připojení. Nadpisy jdou přes oba sloupce mřížky .kv, jinak by si každá
+   větev určila vlastní šířku prvního sloupce a jména souborů by se
+   nezarovnala pod sebe. Odsazení nese hierarchii — značka patří pod
+   technologii, soubor pod značku. */
+.dbstrom-tech{grid-column:1 / -1;font-weight:700;letter-spacing:var(--prostrkani);text-transform:uppercase;font-size:var(--pismo-popisek);margin:14px 0 2px}
+.dbstrom-tech:first-child{margin-top:4px}
+.dbstrom-znacka{grid-column:1 / -1;color:var(--ink-2);font-weight:600;margin:6px 0 0 14px}
 /* Manuál otevřený z nabídky: stránka manuálu v rámu přes celou obrazovku,
    nad ní lišta s jazykem manuálu a zavřením v pravém horním rohu (215-manual.js).
    Leží nad okny (.modalbg má 90), aby ho nepřekrylo nic z rozdělané práce. */
@@ -120,3 +128,13 @@
 .manualokno-lista b{font-size:calc(var(--pismo) + 2px);letter-spacing:var(--prostrkani);text-transform:uppercase}
 .manualokno-zavrit{font-weight:800}
 .manualokno-ram{flex:1 1 auto;width:100%;min-height:0;border:none;background:var(--bg)}
+/* Okno „Stejný materiál a barva" (část 295): seznam produktů s polohami
+   k zaškrtnutí. Rolovaný uvnitř okna, aby 130 kandidátů neodsunulo tlačítko
+   Uložit pod okraj obrazovky. */
+.vazby-seznam{max-height:min(52vh,560px);overflow-y:auto;padding:4px 2px}
+.vazby-produkt{padding:8px 0;border-bottom:1px solid var(--line)}
+.vazby-produkt:last-child{border-bottom:none}
+.vazby-hlava{display:flex;gap:10px;align-items:center;min-width:0}
+.vazby-jina{color:var(--warn);font-weight:400}
+/* Přiřazené receptury u polohy v katalogu produktů (část 370). */
+.vazba-polohy{display:inline-flex;align-items:center;gap:4px;margin-left:8px;font-size:calc(var(--pismo-poznamka) - 1px);color:var(--ink-2)}

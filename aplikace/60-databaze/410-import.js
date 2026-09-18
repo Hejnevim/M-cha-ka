@@ -124,6 +124,10 @@ function csvToRecipes(text, zdroj) {
        jedna agentura objedná potisk pro tři značky a míchač hledá vlastní
        odstín podle toho, co je na tričku vidět. */
     znackaLoga: idx(/^(znacka.loga|zna.ka.loga|logo_brand|brand)/),
+    /* Technologie, pro kterou byla vlastní receptura namíchaná. Táž značka
+       se tiskne sítotiskem i tampontiskem, pokaždé z jiné barevné řady —
+       bez tohoto údaje se odstín ze SCR nabídne na zakázce PDP. */
+    technologie: idx(/^(technologie|technolog|tech$|technology|print.?tech)/),
     // C / U (coated / uncoated) — výslovně zapsané; jinak se čte z názvu
     cu: idx(/^(cu$|c.u$|coated|nat.ran)/),
     // objednací číslo u dodavatele — hledá se podle něj
@@ -185,6 +189,8 @@ function csvToRecipes(text, zdroj) {
         // poznámka k receptuře („na tomhle materiálu dva průchody“) — jeden řádek textu
         poznamka: ci.poznamka >= 0 ? String(r[ci.poznamka] || "").trim() : "",
         znackaLoga: ci.znackaLoga >= 0 ? String(r[ci.znackaLoga] || "").trim() : "",
+        // víc technologií se píše přes ~ (tak to zapisuje i vlastniDoCsv)
+        technologie: ci.technologie >= 0 ? String(r[ci.technologie] || "").trim().toUpperCase() : "",
         // C / U jen tam, kde to soubor výslovně říká; z názvu se dočte při čtení
         cu: ci.cu >= 0 && /^[cu]$/i.test(String(r[ci.cu] || "").trim()) ? String(r[ci.cu]).trim().toUpperCase() : "",
         objCislo: ci.objCislo >= 0 ? String(r[ci.objCislo] || "").trim() : "",
@@ -304,6 +310,8 @@ function sloucReceptury(prev, nove, adopce, zijiciSoubory, ted) {
         poznamka: r.poznamka || stary.poznamka || "",
         // značka loga je taky znalost dílny — obnova ze souboru bez sloupce ji nesmí smazat
         znackaLoga: r.znackaLoga || stary.znackaLoga || "",
+        // totéž pro technologii: soubor bez sloupce nesmí recepturu „odemknout“ do všech
+        technologie: r.technologie || stary.technologie || "",
         /* C / U, objednací číslo a druhý stupeň schválení jsou taky údaje
            dílny — databáze od dodavatele je nenese a nesmí je přepsat prázdnem. */
         cu: r.cu || stary.cu || "",
@@ -376,6 +384,7 @@ function sloucSirotky(recipes, zdroj, ziveSoubory) {
       zadanoKdy: n(cil.zadanoKdy) || n(r.zadanoKdy) || 0,
       poznamka: cil.poznamka || r.poznamka || "",
       znackaLoga: cil.znackaLoga || r.znackaLoga || "",
+      technologie: cil.technologie || r.technologie || "",
       cu: cil.cu || r.cu || "",
       objCislo: cil.objCislo || r.objCislo || "",
       druhyStupen: cil.druhyStupen || r.druhyStupen || "",

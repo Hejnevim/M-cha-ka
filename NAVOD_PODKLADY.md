@@ -110,7 +110,7 @@ tedy síto a jeho teoretický objem barvy; vzorec se na obrazovce neukazuje.
 s dosazenými čísly, aby se to dalo přepočítat od ruky. Do návodu patří i to,
 co teď z obrazovky nejde poznat vůbec: „dopočteno z geometrie tkaniny —
 orientační" znamená síto bez údaje výrobce, jehož objem se spočítal z otevřené
-plochy a tloušťky tkaniny (u TXP síta 54-64 a 90-48) — číslo je odhad, ne
+plochy a tloušťky tkaniny (u TXP síta 54-64 a 90-40, u TRS všechna čtyři) — číslo je odhad, ne
 měření, a do `parametry/sita.csv` se má doplnit údaj z listu výrobce.
 
 ---
@@ -132,16 +132,27 @@ jen kvůli starším souborům).
 se **nezapisují k zakázce, ale k receptuře** — příště se u téže barvy nabídnou
 samy. Platí to i pro nakoupené Pantone standardy, ne jen pro vlastní barvy.
 
-> U textilu (TXP) se síto doplní samo podle produktu: 54-64 pro všechny
-> produkty, 90-48 pro produkty vyjmenované v `parametry/sita.csv`. Síto
-> tu není na výběr — dlaždice ukazuje jen to jedno, které produktu patří.
+> Síto se doplní samo podle produktu, má-li technologie pravidlo
+> v `parametry/sita.csv` (sloupce `vychozi` a `produkty`). Síto pak není
+> na výběr — dlaždice ukazuje jen to jedno, které produktu patří.
 
 **Stálo u:** nikde — síto se doplňuje tiše, v aplikaci o tom hláška není.
+**Kde platí:** od 16. 9. 2026 u žádné technologie. Textil (TXP) tak jel od
+10. 9. 2026 (54-64 pro všechny produkty, 90-48 pro devět vyjmenovaných);
+16. 9. 2026 dílna rozhodla, že síto u textilu je volba mezi 54-64 a 90-40,
+sloupce u TXP jsou prázdné a dlaždice Síto nabízí „—" a obě síta stejně
+jako dlaždice Šířka těrky (300 a 350 mm). Transfer (TRS) dostal 16. 9. 2026
+stejný tvar: síta 54-64, 68-55, 90-40 a 120-34 a těrky 410 a 510 mm, obojí
+na výběr s „—". Sítotisk na plast a papír (SCR) dostal 17. 9. 2026 pět sít
+(54-64, 77-55, 100-40, 120-34, 130-34) a šest šířek těrky (40, 50, 130, 150,
+180 a 220 mm) — do té doby nabízel celou standardní řadu 26 sít a šířka se
+psala ručně. Vyplněním sloupců pravidlo znovu
+ožije.
 **Vysvětluje:** proč je síto vyplněné dřív, než ho někdo vybral, a kde se
 pravidlo mění: sloupce `vychozi` (ano = výchozí síto technologie) a
 `produkty` (ref oddělené čárkou) v `parametry/sita.csv`. Bez mostu se soubor
 nenačte a síto se nedoplní; technologie bez řádku s těmito sloupci se chová
-jako dřív. Síta 54-64 a 90-48 mají u TXP zatím jen název, spotřeba z nich je
+jako dřív. Síta 54-64 a 90-40 mají u TXP zatím jen název, spotřeba z nich je
 dopočet z geometrie tkaniny — orientační, dokud se nedoplní údaje výrobce.
 Kdo chce u produktu jiné síto, přepíše řádek v `parametry/sita.csv`
 (ref do sloupce `produkty` u jiného síta), ne dlaždici — dřív šlo síto
@@ -493,6 +504,141 @@ gramy a kdy jen ml, a proč podtisk nevzniká pod černou.
 
 ---
 
+## Okno krycí plochy — nejtenčí čára, nejširší místo a síto k logu (17. 9. 2026)
+
+> Každá sítovina pustí jen určitou jemnost kresby: hrubé síto rozmaže drobný
+> ™ pod nápisem, jemné síto dá do velké plochy málo barvy. Okno proto z téže
+> masky, ze které počítá krycí plochu, změří **nejtenčí čáru** a **nejširší
+> místo** motivu v milimetrech — u vícebarevného potisku pro každou barvu
+> zvlášť, protože každá jde na své síto. Červený kroužek v náhledu ukazuje,
+> kde nejtenčí čára leží; modrý nejširší místo. Když kroužek sedí na drobné
+> značce pod logem, číslo platí; když sedí na zubu okraje písma, je třeba
+> zvýšit citlivost.
+
+> **Měří se tah, ne zaostřený roh.** Grafik přikládá vlasovou linku
+> k tahu kresby; aplikace dělá totéž. Špička písmene a roh rámu se do
+> ztracena zužují až na jeden bod, ale čára to není — aplikace je proto
+> přeskakuje. Za čáru se bere prvek, který si tloušťku drží po své délce:
+> aspoň dvanáctkrát delší, než je široký, a aspoň deset bodů dlouhý.
+> Vlasová linka 0,2 mm tak musí měřit aspoň 2,4 mm, což každá skutečná
+> linka splňuje. Kdyby logo mělo samé hroty a žádný tah, okno o nejtenčí
+> čáře mlčí místo aby hlásilo tloušťku hrotu.
+
+> **Přesnost:** vedle čísla stojí „± jeden bod předlohy“. U ostrého výřezu
+> z PDF je to kolem 0,04 mm; u vloženého PNG podle jeho rozlišení. Čára tenčí
+> než jeden bod se po prahování ztratí a změřit nejde — okno o ní mlčí, ne
+> hádá. Bez rozměru potisku není měřítko a hodnoty jsou v bodech.
+
+> **Rozměr loga a síto přímo u čar.** Panel výsledku ukazuje rozměr loga
+> v mm (šířka motivu je měřítkem rovna rozměru potisku, výška plyne
+> z poměru) a za ním těrku — nejbližší širší z řady technologie, tutéž,
+> kterou předvyplní kalkulace. Pod čarami stojí výběr **Síto**: v režimu
+> „vše kromě pozadí“ k celému motivu, u jediné vybrané barvy k ní; u víc
+> barev odkazuje do rozpisu, kde má každá barva svůj. Předvolba je táž
+> trojice návrhů jako v rozpisu a pod výběrem stojí, odkud je. Zvolené síto
+> jde s čarami do evidence, takže příští zakázka s podobně tenkou čárou ho
+> dostane nabídnuté („dílna 2× u čar 0,11–0,11 mm“).
+
+> **Síto podle čáry** se v rozpisu separací předvybírá, ne vynucuje. Pořadí:
+> 1) meze `cara_od_mm` a `cara_do_mm` u řádku síta v `parametry/sita.csv` —
+> nejtenčí čára, kterou to síto ještě čistě vytiskne (od, včetně) a od které
+> je už zbytečně jemné (do, bez); technolog je posune v Excelu; 2) co dílna
+> k podobně tenké čáře volila — z evidence měření, nejmíň dvě zakázky, jinak
+> je to náhoda a ne zkušenost; 3) síto receptury; 4) síto z kalkulace. Pod
+> výběrem stojí, odkud návrh je. Dokud v tabulce sít meze nejsou, okno to
+> řekne a uvede, z kolika záznamů se učí.
+
+> **Záznam měření** (`evidence/mereni_loga.csv`, kód `LOGO-<den>-NNN`) vzniká
+> sám tlačítkem *Použít krycí plochu* i *Převzít N barev*: jeden řádek na
+> barvu — čáry, podíl barvy na motivu, síto z řádku rozpisu, těrka, zakázka,
+> produkt, poloha. Barva bez jediného bodu v motivu (přechodový odstín
+> z hrany, který přibere volba „všechny“) se nezapisuje. Síto zapsané do
+> záznamu je to, které stálo v řádku při převzetí — pozdější změna dlaždice
+> v kalkulaci se do záznamu nepromítá.
+
+> **Těrka podle šířky loga:** dlaždice *Šířka těrky* se předvyplní nejbližší
+> šířkou z řady technologie, která je **širší** než motiv (55 mm → 130 u SCR;
+> stejně široká nestačí, kraj by se nedotiskl). Sáhne se jen na prázdnou
+> dlaždici nebo na hodnotu, kterou tam dřív dosadilo totéž pravidlo — volbu
+> tiskaře ani údaj ze zakázkového listu nepřepíše. Není-li v řadě žádná
+> širší, dlaždice zůstane prázdná.
+
+**Nikdy nestálo na obrazovce** — okno ukazuje dvě čísla s kroužky a řádek
+rozpisu nese sloupce *% motivu* a *Čára od–do*. Proč se nejtenčí čára bere
+z hřebene vzdálenosti, proč se filtrují osamocené body a proč se síto jen
+předvybírá, patří sem.
+
+---
+
+## Sběr zakázek k sítům — záložka (17. 9. 2026)
+
+> Než začne aplikace síto vybírat sama, musí dílna nasbírat zakázky,
+> u kterých je vidět, jakou kresbu které síto zvládlo. Sběr běží sám:
+> záznam vzniká při převzetí krycí plochy do zakázky. Záložka *Sběr
+> zakázek k sítům* (skupina DATA) ho ukazuje technologie po technologii
+> a síto po sítu, seřazené podle počtu zakázek — síto, na kterém dílna
+> odjela nejvíc podobných zakázek, je to, u kterého pravidlo vznikne
+> první.
+
+> **Jméno záznamu je `13883_0.21_1.49`:** číslo zakázky, nejtenčí
+> a nejširší čára v milimetrech. V tomhle tvaru se zakázka hledá očima
+> i opisuje. Tečka jako desetinná značka je tu schválně, ne opomenutí:
+> jméno jde do CSV, kde je čárka oddělovačem, a dá se z něj udělat název
+> souboru. Je to strojový klíč jako kód kelímku, ne text na obrazovce.
+> Chybí-li rozměr potisku, není měřítko a zůstane jen číslo zakázky —
+> nula by vypadala jako naměřená. Bez čísla zakázky nastoupí kód
+> záznamu, aby jméno nikdy nebylo prázdné.
+
+> **Počítají se zakázky, ne řádky.** Logo o třech barvách dá tři řádky,
+> ale zkušenost je jedna — proto hlavička říká „3 zakázky · 5 barev“
+> a ne pětkrát totéž. Rozpětí u síta („čáry 0,55–0,60 mm“) je z nejtenčích
+> čar, se kterými dílna to síto použila; přesně z něj se pak počítá návrh
+> v okně krycí plochy.
+
+> **Hledání bere i tloušťky**, protože jsou v jméně: kdo si pamatuje
+> „to logo, co mělo dvě desetiny“, napíše 0.2. Hledá se i podle produktu
+> a polohy.
+
+> **Složky na disku.** Vedle souhrnného `mereni_loga.csv` se každá
+> zakázka ukládá i jako vlastní soubor do složky svého síta:
+> `evidence/mereni_loga/SCR/120-34/13883_0.21_1.49.csv`. Dílna tak sběr
+> vidí i v průzkumníku, aniž by otevírala aplikaci. Složka síta v aplikaci
+> ukazuje svůj název a počet souborů v ní; cesta stojí pod tabulkou, aby
+> se dala opsat.
+
+> **Souhrnný soubor zůstává zdrojem pravdy.** Z jednoho CSV se slévá mezi
+> počítači a čte se rychleji než stovky drobných souborů — složky jsou
+> pohled pro člověka, ne druhá evidence. Proto se počet souborů může lišit
+> od počtu zakázek: vícebarevné logo dá soubor na každou barvu, ale
+> zkušenost je jedna. Obojí je vidět vedle sebe.
+
+> **Bez mostu se počty souborů neukazují**, protože aplikace na disk
+> nevidí; tabulka ze souhrnného souboru funguje dál.
+
+> **Filtr sítem a rozpětí tlouštěk.** Druhá řada čipů vybírá síto; lišta
+> pod ní pak říká, na jakou kresbu se to síto u dílny doopravdy
+> používalo — *nejtenčí čára 0,20–0,40 mm · nejširší místo 1,49–3,10 mm*.
+> Jsou to dvě různá rozpětí, ne jedno: krajní hodnoty **nejtenčích** čar
+> říkají, co síto ještě propustí (odtud se opisují meze do `sita.csv`),
+> krajní hodnoty **nejširších** míst říkají, jak velké plochy na něm
+> jely. Sloučit je do jednoho rozpětí 0,20–3,10 mm by tu první otázku
+> zahladilo.
+
+> **Jedna zakázka = jedno číslo, ne rozpětí.** „0,90–0,90 mm" vypadá jako
+> chyba výpočtu, proto se u jediné naměřené hodnoty píše jen ona.
+
+> **Nabídka sít se skládá z toho, co je vidět** (tedy po filtru
+> technologie), ne ze všech sít v evidenci — jinak by šlo vybrat síto,
+> po kterém zůstane obrazovka prázdná. Přepnutí technologie proto výběr
+> síta ruší.
+
+**Nikdy nestálo na obrazovce** — záložka ukazuje jen čísla a jména.
+Proč tečka místo čárky, proč se počítají zakázky a ne řádky, proč je
+souhrn zdrojem pravdy, proč jsou rozpětí dvě a k čemu se sběr chystá,
+patří sem.
+
+---
+
 ## Odkaz na recepturu mezi zařízeními
 
 > Odkaz na recepturu je ve schránce: … — platí jen na tomto zařízení, most
@@ -655,12 +801,18 @@ zapnuté, hledal by zítra recepturu, která „v aplikaci není".
 
 ### Hledání s napovídáním a objednací číslo
 
-**Stojí u:** vyhledávacího pole v kalkulaci i v záložce Receptury.
-**Vysvětluje:** že se hledá v **názvu, řadě, objednacím čísle a ve jménech
-složek** — dodavatel na faktuře uvádí jen objednací číslo a v dílně se často
-ví „něco s Warm Red", ne číslo pantonu. Shody od začátku názvu jdou první.
-Ukáže se nejvýš dvanáct položek; šipky posouvají, Enter vybere, Esc zavře.
-Objednací číslo se zapisuje v editoru receptury.
+**Stojí u:** vyhledávacího pole v kalkulaci, v záložce Receptury a u pole
+*Recepty k přiřazení* v Katalogu produktů.
+**Vysvětluje:** že se hledá v **názvu, řadě, objednacím čísle, ve jménech
+složek, ve značce loga, v poznámce a v názvu databáze** — dodavatel na faktuře
+uvádí jen objednací číslo a v dílně se často ví „něco s Warm Red", ne číslo
+pantonu; vlastní barva se pamatuje podle zakázky („ta na hrnek"), ne podle
+názvu. **Dotaz se bere po slovech:** každé slovo se musí najít, ale v libovolném
+pořadí a v libovolném z těch polí — „hrnek zkouška" najde recepturu *Zkouška*
+s poznámkou „hrnek", „pp 485" pantone 485 z řady PP. Diakritika a velikost
+písmen nehrají roli. Shody od začátku názvu jdou první. Ukáže se nejvýš
+dvanáct položek; šipky posouvají, Enter vybere, Esc zavře. Objednací číslo
+a poznámka se zapisují v editoru receptury.
 
 ### Profil úpravy receptury
 
@@ -903,3 +1055,142 @@ obrazovky: text skládá `pdf_spec.py` (řádky 895 a 908) a část 160 ho na ř
 překladem tvaru v aplikaci — do slovníku v `127-jazyk.js` samotná věta nepatří,
 protože její druhá půlka je název popisku z konkrétního listu. Na snímku
 manuálu to vidět je (`manual/en/27-pdf-nahled.png`).
+
+---
+
+## Táž receptura na další produkty — okno „Stejný materiál a barva" a Recepty k přiřazení (15. 9. 2026)
+
+> Aplikace nabídla kombinace se stejným materiálem, stejnou barvou zboží
+> a polohami téže technologie. Nic není zaškrtnuté předem: že jde o stejný
+> materiál, ví aplikace; jestli se tam bude tisknout tímhle odstínem, víte
+> vy. Zaškrtnuté kombinace dostanou recepturu, odškrtnuté ji ztratí; kde už
+> je jiná receptura, stojí to u položky a zaškrtnutím se přepíše.
+
+**Stálo by u:** okna *Stejný materiál a barva* (otevře se samo po označení
+custom barvy za namíchanou — fajfka v dlaždici, štítek na kelímek,
+dovážení v asistentu; tlačítkem *Dalším produktům…* u vybrané receptury
+kdykoli, i pro standardní pantone) a u kolonky *Recepty k přiřazení*
+v záložce Produkty. V aplikaci nestojí — rozhraní je tiché.
+**Vysvětluje:** podle čeho se kandidáti hledají. Materiál se bere
+z katalogu (produkt bez materiálu kandidáty nedostane, okno to řekne
+a v Produktech je u receptury poznámka *(bez materiálu)*). Barva zboží se
+porovnává kódem; když kód nemá jedna ze stran, názvem bez ohledu na
+velikost písmen a diakritiku. Technologie musí být stejná — jiná
+technologie je jiná barevná řada. Nabídka po namíchání se pro touž
+recepturu a kombinaci v jednom sezení neopakuje.
+
+**Recepty k přiřazení** (Produkty): po výběru receptury se katalog zúží
+na produkty podobné jejím dosavadním vazbám; *Všechny produkty* zúžení
+vypne, u receptury bez vazby se nezužuje vůbec. U produktu se vybere
+barva zboží (štítky místo teček) a u polohy se klikne ☐ → ☑. Štítek
+s „· má …" znamená, že tam je jiná receptura a klik ji nahradí. Mimo
+režim přiřazování je u každé polohy vidět, co je k ní přiřazené.
+
+**Kde to leží:** `parametry/vazby_receptur.csv` — jeden řádek na
+kombinaci (ref, barva, technologie, poloha, receptura, databáze). Platí
+pro celou dílnu; bez mostu změna platí jen v tomhle prohlížeči a zapíše
+se, až most poběží. Vazba na recepturu z databáze, která je na tomhle
+počítači zamčená, v souboru zůstává.
+
+**Custom databáze po řadách.** Vlastní receptura odvozená z řady se ukládá
+do `databaze barev/custom_<řada>.csv` (např. `custom_PRINTCOLOR_786.csv`)
+a dědí technologie té řady z `parametry/databaze.csv`; proto se odstín
+odvozený z Ferro Xpression (FIR) nenabídne na sítotiskové poloze a v okně
+i v Produktech se objeví jen polohy technologií, kam řada patří. Ručně
+zadaná barva bez podkladu zůstává v `receptury_vlastni.csv`. Název
+odvozené receptury je předvyplněný adresou kombinace a číslem zakázky —
+ve formuláři se přepisuje, aby se poznalo, na co odstín vznikl.
+
+
+## Táž barevná řada na další polohy — pruh „Barevná řada k přenesení" (15. 9. 2026)
+
+Řada barvy se přiřazuje poloze produktu, ale rozhodnutí bývá jedno na
+celou skupinu zboží: na bavlnu se v TXP tiskne tahle řada, a bavlněných
+triček je v katalogu stovky se stejnou polohou. Přenos je proto stejná
+cesta, jakou už mají receptury — jen se podobnost měří jinak.
+
+**Jak se to spustí.** Dvojí cestou:
+
+- tlačítkem **⇉** u polohy v záložce Produkty (běžné zobrazení i mřížka);
+- samo po zakázkovém listu — když se v okně *Z jaké řady vzít odstín?*
+  klikne na dlaždici, řada se přiřadí poloze jako dřív a navíc se odloží
+  pro Produkty. Po přepnutí do Produktů je pruh otevřený a předvyplněný.
+  Aplikace tam sama nepřepíná: zakázka, kvůli které se klikalo, se má
+  dopočítat, ne opustit.
+
+**Co se nabídne.** Polohy **stejného názvu, v téže technologii, na
+produktech ze stejného materiálu**. Barva zboží se — na rozdíl od
+receptur — neřeší: bílé i černé tričko mají od téhož výrobce tutéž
+barevnou řadu, liší se navážka, ne typ barvy. Katalog se na ně zúží
+(dá se vypnout tlačítkem *Všechny produkty*) a u každé polohy se klikne
+☐ → ☑. Nic není zaškrtnuté předem — že sedí materiál a poloha, ví
+aplikace; jestli se tam bude tisknout touhle řadou, ví technolog.
+Štítek s „· má …" znamená, že poloha už nějakou řadu má; řady se
+nevylučují, poloha jich smí mít víc.
+
+Nejdřív se vybírá řada, teprve pak jde zaškrtávat — do výběru řady pruh
+řekne, že se čeká. Nabízejí se jen řady přiřazené technologii té polohy.
+
+**Uzavřená poloha.** Uzavření je ruční a dělá se ve formuláři *Upravit
+produkt*: u každé polohy je vedle štítků typů barvy přepínač 🔓 / 🔒
+*uzavřeno*. Uzavřená poloha se přestane nabízet při přenosu barevné řady
+— na té už se žádná další řada nečeká.
+
+Schválně se to nepočítá samo z toho, kolik řad poloha má. Dílna často ví,
+že na téhle komponentě zůstane jediná řada a zbylé na ni nikdy nepřijdou;
+a naopak poloha se všemi řadami může pořád čekat na tu, která se teprve
+nakoupí. Uzavření platí na technologii, ne napříč — táž poloha v jiné
+technologii se nabízí dál.
+
+Klik platí hned, bez ohledu na tlačítko *Uložit produkt*, stejně jako
+štítky typů.
+
+**Produkt bez zapsaného materiálu** kandidáty nedostane a pruh to řekne
+i s číslem produktu — materiál se doplní tlačítkem *Upravit*.
+
+**Kde to leží:** `parametry/typy_poloh.csv` — jeden řádek na polohu
+(ref, technologie, poloha, typy, uzavreno). Platí pro celou dílnu; bez
+mostu změna platí jen v tomhle prohlížeči a zapíše se, až most poběží.
+Sloupec `uzavreno` (`ano` = uzavřená, prázdné = otevřená) se do souboru
+doplní, teprve když se první zámek zapíše — do té doby má soubor tvar
+jako dřív. Přiřazení typů a uzavření se navzájem nepřepisují, dají se
+měnit nezávisle i ručně v Excelu.
+
+## Kdy se aplikace ptá „Z jaké řady vzít odstín?" (15. 9. 2026)
+
+Po načtení zakázky se odstín hledá v řadách přiřazených poloze. Jestli se
+aplikace zeptá, nebo rozhodne sama, závisí na tom, jestli je poloha
+uzavřená (🔒 ve formuláři produktu):
+
+| poloha | přiřazené řady | co se stane |
+|---|---|---|
+| uzavřená 🔒 | jedna | nezeptá se, odstín se vezme z ní |
+| uzavřená 🔒 | dvě a víc | zeptá se, ale nabídne **jen ty přiřazené** |
+| odemčená 🔓 | libovolné | zeptá se ze **všech řad technologie**, přiřazené zeleně |
+
+**Proč to tak je.** Zámek říká „tady už žádná další řada nepřibude", takže
+přiřazené řady jsou úplný seznam: z jedné se vybírat nemá co, ze dvou si
+míchač u zakázky vybere. Odemčená poloha je rozdělaná — přiřazení zatím
+nemusí být hotové —, proto se ptá ze všech řad technologie a to, co už
+dílna zavedla, se jen zvýrazní.
+
+**Zelený lem a fajfka ✓** u dlaždice znamenají: tuhle řadu už poloha má.
+Je to jediné, podle čeho míchač pozná stav, když se nabízí pět stejně
+vypadajících dlaždic. Vybrat jde i jinou — zelená je nápověda, ne zákaz.
+
+**Co se po volbě uloží.** Zvolená řada se k poloze **přidá** — nepřepíše
+to, co tam už je. Má-li poloha řadu A a míchač zvolí B, bude mít A i B
+(poloha smí mít řad víc, stejně jako ve formuláři produktu). Volba řady,
+kterou poloha už má, nezmění nic.
+
+Výjimka je uzavřená poloha s víc řadami: tam se nepřidává nic, volba platí
+jen pro tuhle zakázku — seznam je uzavřený a míchač si z něj jen vybral.
+Hlášení pokaždé řekne, co se stalo: „přibyla", „už ji přiřazenou má", nebo
+„přiřazení zůstává beze změny — poloha je uzavřená".
+
+**Bez volby — hledat ve všech řadách** je jen u odemčené polohy. Na
+uzavřené by hledání mimo přiřazené řady popíralo smysl zámku.
+
+**Zamčená prázdná poloha** (zámek bez jediné přiřazené řady) je omyl
+obsluhy; aplikace kvůli němu nezůstane bez nabídky a nabídne celou
+technologii.
