@@ -5,7 +5,7 @@
 > `rozbor_aktualizuj.py` přímo ze zdrojových a datových souborů — nepřepisují
 > se ručně a nemohou se rozejít se skutečností. Text mimo ně píše člověk.
 
-> Poslední zapsaná změna ve vývojovém deníku: **18. září 14:34 — Účty a přihlášení — most vydá receptury jen na lístek, účet omezený technologiemi, databázemi a zápisem**
+> Poslední zapsaná změna ve vývojovém deníku: **18. září 15:52 — Dílna začíná od nuly — provozní záznamy vyprázdněny na hlavičky, vedle balíčku složka cloud/ (34 souborů, 9,3 MB) jako simulovaný server**
 
 | soubor | řádků | velikost |
 |---|---:|---:|
@@ -1404,6 +1404,13 @@ nahrání na GitHub. Chybí-li obrázek, aplikace to řekne a funguje dál.
   přepínačem `--port`.
 - Mazání produktů, receptur a zbytků jde chránit heslem.
 - Zámek technologií je v souboru, aby platil na všech počítačích dílny stejně.
+- **`cloud/` je simulovaný server dílny**, ne součást aplikace. Drží tentýž
+  strom, jaký obsluhuje most (`databaze barev/`, `evidence/`, `parametry/`)
+  plus `katalog/data.js`, aby se při přechodu na opravdový server měnila
+  cesta, ne tvar dat. Aplikace z něj zatím nečte a most do něj nezapisuje —
+  `cloud` záměrně **není** v `SLOZKY` v `most.py` ani v `DATOVE_SLOZKY`
+  v `distribuce/aktualizace.py`. Celá složka je v `.gitignore`: nese
+  licencovaná data a vzor `databaze barev/` by chytil jen část.
 
 ## 3.7 Známá omezení
 

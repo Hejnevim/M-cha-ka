@@ -506,6 +506,7 @@ Období **20. 7. — 10. 8. 2026**, 7 pracovních dnů, 105 zadání.
 | 13:43 | Upozornění je oranžové #B45309 místo žluté — kontrast na kartě 4,29:1 proti dřívějším 1,43:1 |
 | 13:48 | Dva nové postupy — irm-motiv (měření masky, tah proti hrotu) a irm-sady-receptur; irm-most dostal oddíl o víc zařízeních |
 | 14:34 | Účty a přihlášení — most vydá receptury jen na lístek, účet omezený technologiemi, databázemi a zápisem |
+| 15:52 | Dílna začíná od nuly — provozní záznamy vyprázdněny na hlavičky, vedle balíčku složka cloud/ (34 souborů, 9,3 MB) jako simulovaný server |
 
 ---
 
@@ -15572,3 +15573,94 @@ složku — schválení tedy zůstává evidencí záměru.
 druhý tiše přebije první. U `"složka"` na tom nezáleží, u `"nová"` ano —
 neopraveno, protože který z portugalských tvarů platí, je rozhodnutí
 o jazyce, ne o kódu.
+
+## 315. Dílna začíná od nuly a vedle ní stojí složka, která hraje server
+
+**Problém.** Aplikace nesla stopu půl roku zkoušení: 7 vymyšlených custom
+receptur, 88 řádků zbytků z testů, frontu s jednou dávkou, 21 změřených log,
+19 záznamů o změnách vazeb. Dokud se zkoušelo, byla to užitečná kulisa. Jakmile
+má do aplikace přijít první skutečná zakázka, překáží — mezi zkušební
+sadou „ZKOUŠKA" a opravdovou zakázkou by se nedalo poznat, co je co, a první
+zakázka by nebyla první.
+
+Druhá věc: uvažuje se o serveru dílny, aby k týmž datům chodilo víc zařízení
+(kap. 313, 314 a `PODKLAD_SERVER_DILNY.md`). Než se rozhodne, jak bude vypadat,
+je potřeba místo, kde se to dá zkoušet nanečisto — bez sítě, bez druhého
+počítače a bez rizika, že se zkouškou přepíšou data dílny.
+
+**Co se změnilo.** Provozní záznamy se vyprázdnily na holé hlavičky a vedle
+balíčku vznikla složka `cloud/`, která drží tentýž strom, jaký obsluhuje most.
+
+Vyprázdnit, ne smazat — a to je celý rozdíl:
+
+| stav souboru | co z toho aplikace usoudí |
+|---|---|
+| soubor chybí | databáze chybí, něco je rozbité |
+| hlavička bez řádků | ještě nic nevzniklo, začínáme |
+
+Čištění se tedy dotklo obsahu, ne existence souborů. Zálohy `.bak`
+a `.pred-*` šly pryč taky — nesly tytéž údaje ve starších verzích, takže
+vyprázdnit soubor a nechat vedle něj zálohu s daty by byl jen přesun.
+
+Cloud drží `databaze barev/`, `evidence/`, `parametry/` a `katalog/data.js`.
+Tvar je schválně stejný jako u mostu: až se místo složky postaví server, mění
+se cesta, ne tvar dat.
+
+Dvě věci se **vědomě neudělaly** a je to zapsané v `cloud/README.md`, aby to
+za měsíc nevypadalo jako opomenutí:
+
+- `cloud` není v `SLOZKY` v `most.py` — most do něj nečte ani nezapisuje.
+  Dokud není rozhodnuté, jak se data mezi dílnou a serverem slučují, nemá tam
+  nic zapisovat samo od sebe.
+- `cloud` není v `DATOVE_SLOZKY` v `distribuce/aktualizace.py`. Ten seznam
+  říká, které složky aktualizace balíčku *chrání* před přepsáním; cloud je
+  simulace, ne data dílny. Kdyby se tam přidal, musí se stejná změna napsat
+  i do `Aktualizace.java` — pravidlo se píše dvakrát.
+
+**Číslování zakázek se nastavovat nemuselo.** Kód se skládá z data a z pořadí
+mezi existujícími záznamy (`novyKodFronty`, část 640), žádný uložený čítač
+neexistuje. Prázdný soubor tedy sám o sobě znamená, že další zakázka dostane
+`-001`.
+
+**Díra v `.gitignore`, kterou to vytáhlo.** Při kontrole před nahráním se
+ukázalo, že `parametry/databaze.csv.pred-vynucenymi` je sledovaný gitem —
+dostal se tam 4. 9. 2026, protože vzor `*.bak` chytá jen soubory končící na
+`.bak`, a tenhle končí na `.pred-vynucenymi`. Obsah se prověřil: přiřazení
+databází k technologiím ve verzi před sloupcem `vynucene`, žádné receptury.
+Není to únik licencovaných dat, přepis historie tedy nebyl potřeba. Vzor
+`*.pred-*` tu cestu zavírá.
+
+**Změřeno:**
+
+- vyprázdněno 14 souborů: 7 custom receptur (55 + 6 + 8 řádků), 88 řádků
+  zbytků, 21 měření loga, 19 záznamů změn, 4 řádky fronty, 1 požadavek,
+  7 vazeb, 3 řádky sady
+- smazáno 21 souborů podstromu `evidence/mereni_loga/` a 26 záloh
+- katalogové řady nedotčené: 56 665 řádků receptur (Marabu PP 17 355,
+  TPR 17 610, LIP 7 685, Ferro 3 986, Printcolor 660 3 617 a 786 3 092,
+  RUCO 3 313), parametry 179 pigmentů a 2 070 odstínů Pantone
+- most po vyčištění přečte všech 30 souborů a druh určí správně
+  (`custom_Ferro_Xpresssion.csv` → `receptury`, `radku: 0`;
+  `sady_receptur.csv` → `sady`, `radku: 0`)
+- `cloud/` má 34 souborů, 9,3 MB
+- `git check-ignore` potvrdil všechny čtyři podsložky cloudu jako ignorované;
+  ze 6 107 sledovaných souborů není v repozitáři ani jeden z rizikových cest
+- kontrola vykreslení po vyčištění: kořenový prvek 1 potomek, 9 783 znaků,
+  bez chyb
+
+**Falešný poplach.** Úložiště prohlížeče vypadalo jako další místo, které bude
+potřeba vyčistit — aplikace při startu s mostem přepisuje
+`receptury_vlastni.csv` ze svého stavu v IndexedDB, takže staré custom
+receptury by se do vyprázdněného souboru vrátily. Měření ukázalo, že tam nic
+není: 25 klíčů `localStorage`, ale všechny provozní mají délku 2 (prázdné pole
+`[]`), a v IndexedDB jsou 2 receptury — obě ukázkové PANTONE z kódu, typ
+`Pantone`, který most nezapisuje. Soubor po spuštění aplikace zůstal na jedné
+hlavičce a žádný `.bak` nevznikl. Čistit nebylo co.
+
+**Dvě vlastní chyby po cestě.** Komentář do `.gitignore` se nejdřív psal jako
+`bytes` literál s pomlčkou „—", což Python odmítne (`bytes can only contain
+ASCII literal characters`); musel se zapsat jako text s explicitním
+`.encode("utf-8")`. A commit se poprvé uložil s `@` v titulku, protože heredoc
+`@'…'@` je PowerShell, ne Bash — opravilo se `--amend -F -`. Obojí je varianta
+téhož, co už v deníku stojí u konců řádků na Windows: zápis souboru z Pythonu
+na tomhle stroji chce pokaždé rozmyslet, v jakém režimu se píše.
