@@ -12,8 +12,17 @@ vzor_receptury.csv
 # ale soubor říká, kdo v dílně je, co míchá a kam smí zapisovat — a to je
 # provozní údaj o zákazníkovi, ne o programu
 parametry/ucty.csv
+# simulovaný server dílny (cloud/) je zrcadlo všech dat dílny naráz:
+# receptury, evidence i parametry. Vzor `databaze barev/` chytne jen část,
+# proto se ignoruje celá složka. Jeden vzor navíc je levnější než
+# licencovaná data v historii veřejného repozitáře.
+cloud/
 *.bak
 *.tmp
+# ruční zálohy před zásahem (`.pred-odstiny.bak`, `.pred-vynucenymi`).
+# Vzor `*.bak` chytne jen ty, které na .bak končí — `databaze.csv.pred-vynucenymi`
+# se tak 4. 9. 2026 dostal do repozitáře. Záloha je místní stav, ne zdroj.
+*.pred-*
 
 # sestavené a stažené závislosti — v tomhle projektu zatím nevznikají
 # (aplikace běží bez build kroku), ať se sem nedostanou omylem
